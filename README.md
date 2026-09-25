@@ -34,6 +34,21 @@ Execucao direta, na pasta deste repo:
 powershell.exe -NoProfile -File .\scripts\executar-mta.ps1
 ```
 
+## Planejar lotes de correcao com Copilot
+
+Depois do MTA, use o [prompt planejar-lotes](.github/prompts/planejar-lotes.prompt.md). Ele orienta a leitura das evidencias e a proposta no chat; a implementacao depende da revisao e autorizacao do desenvolvedor.
+
+1. Identifique a pasta da rodada mostrada no terminal: `.harness/runs/<projeto>/<id>/`. Nao misture rodadas ou baselines diferentes.
+2. Abra e anexe ao chat versoes revisadas de `manifest.json`, `result.json`, `output/output.yaml` e `output/dependencies.yaml`, com POMs, fontes/testes e regras dos achados relevantes. Os arquivos locais podem ser abertos pelo caminho completo mesmo quando `.harness` estiver oculto no Explorer. Arvore Maven, conteudo do WAR, modulos EAP e Sonar ANTES entram quando disponiveis; sua ausencia deve constar como pendencia. Nao anexar credenciais, settings privados ou logs brutos.
+3. No Copilot Local, use `/planejar-lotes` e informe projeto e rodada. Se o cliente/DevSquad nao reconhecer prompts, cole o corpo do arquivo no chat em modo de leitura e anexe as mesmas evidencias. A descoberta automatica depende da versao/cliente; esse fallback mantem o processo utilizavel. [Formato de prompts do VS Code](https://code.visualstudio.com/docs/agent-customization/prompt-files).
+4. Revise a triagem, a matriz de dependencias e a tabela de lotes. Escolha apenas o primeiro lote para detalhar e decidir a rota. A proposta pode ser feita por humano usando os mesmos criterios.
+
+**Lote de correcao** e uma convencao deste projeto: ocorrencias correlacionadas com objetivo, solucao, aceite e reversao comuns. Mesma regra MTA nao basta para agrupar. Nao ha relacao obrigatoria de um apontamento = um lote = uma receita; preservar IDs e evidencias historicas chamados de "fatia".
+
+O agente avalia receita OpenRewrite existente, composicao YAML/Refaster, receita Java propria ou ajuste especifico/combinado. Ausencia de receita pronta nao prova impossibilidade: considerar tipos/classpath, viabilidade, custo e reuso. Receita candidata precisa de testes, `dryRun`, revisao do patch e GO antes do `run`. Essa etapa prepara somente o plano; nao instala ou executa OpenRewrite. [Receitas](https://docs.openrewrite.org/concepts-and-explanations/recipes) e [dryRun/run](https://docs.openrewrite.org/reference/rewrite-maven-plugin).
+
+Preservar Java 8, `javax.*`, arquitetura, contratos e baselines. **O corrigido sera testado somente no EAP 7.4; EAP 7.1 e referencia historica, sem exigir retrocompatibilidade.** Sonar e criterios de qualidade permanecem no plano de validacao; ausencia de Sonar nao bloqueia a proposta preliminar nem equivale a conformidade. Nao ha aceite, alteracao de codigo, commit/push ou proximo lote automaticos. Este prompt nao implementa Start/Stop/Deploy nem comprova o ciclo integrado.
+
 ## Configuracao da maquina
 
 O exemplo versionado e `config/harness.example.json`; a tarefa cria dele o seu `config/harness.local.json`. Use caminhos reais com `/` ou `\\`, sem variaveis como `%JAVA_HOME%`. Caminhos relativos partem da pasta deste repo.
