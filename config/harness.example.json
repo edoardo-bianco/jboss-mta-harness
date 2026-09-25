@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "activeProject": null,
+  "repositories": [],
+  "tools": {
+    "mtaExecutable": null,
+    "mtaJdkHome": null,
+    "mavenHome": null,
+    "mavenSettingsPath": null,
+    "applicationJdk8Home": null,
+    "eap71Home": null,
+    "eap74Home": null
+  },
+  "mta": {
+    "rulesPath": null,
+    "targets": ["eap7"],
+    "mode": "full"
+  }
+}

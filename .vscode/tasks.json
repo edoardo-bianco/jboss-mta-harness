@@ -1,0 +1,52 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Workspace: configurar caminhos",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/configurar-caminhos.ps1", "-EditorPath", "${execPath}"],
+      "problemMatcher": [],
+      "runOptions": {"instanceLimit": 1}
+    },
+    {
+      "label": "Workspace: gerar workspace",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerar-workspace.ps1"],
+      "problemMatcher": []
+    },
+    {
+      "label": "MTA: conferir ambiente",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/conferir-ambiente.ps1"],
+      "problemMatcher": []
+    },
+    {
+      "label": "MTA: executar analise",
+      "detail": "Executa o MTA no activeProject do JSON e salva um novo relatorio.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/executar-mta.ps1"],
+      "problemMatcher": [],
+      "runOptions": {"instanceLimit": 1},
+      "presentation": {"reveal": "always", "panel": "dedicated", "clear": false}
+    },
+    {
+      "label": "MTA: abrir ultimo relatorio",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/abrir-relatorio-mta.ps1"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Workspace: conferir configuracao ao abrir",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/conferir-ambiente.ps1", "-AoAbrir", "-EditorPath", "${execPath}"],
+      "problemMatcher": [],
+      "runOptions": {"runOn": "folderOpen", "instanceLimit": 1}
+    }
+  ]
+}
