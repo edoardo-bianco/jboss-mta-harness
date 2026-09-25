@@ -9,7 +9,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
-    <hibernate.version>5.1.10.Final</hibernate.version>
+    <hibernate.version>5.3.20.Final-redhat-00001</hibernate.version>
     <project.build.outputTimestamp>2026-09-24T00:00:00Z</project.build.outputTimestamp>
   </properties>
   <dependencies>
@@ -34,6 +34,14 @@
       <version>4.13.2</version><scope>test</scope>
     </dependency>
   </dependencies>
+  <repositories>
+    <repository>
+      <id>redhat-ga</id>
+      <url>https://maven.repository.redhat.com/ga/</url>
+      <releases><enabled>true</enabled></releases>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+  </repositories>
   <build>
     <finalName>migracao-cache</finalName>
     <plugins>
