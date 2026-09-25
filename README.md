@@ -31,9 +31,9 @@ Nos proximos dias, abra diretamente o `.local.code-workspace` gerado. O `.code-w
 | Projeto incluido | Conteudo e resultado esperado com MTA 8.2.1/regras ensaiadas |
 | --- | --- |
 | `migracao-cache-antes` | Codigo original, proveniente do commit `1bfbae96ebd39a3e996d07682ad88cd7af603cbf` da demo local. Regras `hibernate51-53-00400` e `00401` apontam a mesma chamada `getQueryCache()` em `LimpezaCache.java`; triagem precisa distinguir o overload e evitar dupla contagem. |
-| `migracao-cache-depois` | Mesma aplicacao com a correcao minima `factory.getCache().evictDefaultQueryRegion()`. Nos ensaios anteriores, esse apontamento deixou de ocorrer. Nao e comprovacao de homologacao no EAP 7.4. |
+| `migracao-cache-depois` | Mesma aplicacao com a correcao minima `factory.getCache().evictDefaultQueryRegion()` e POM alinhado ao Hibernate `5.3.20.Final-redhat-00001` do EAP 7.4 local. O resultado MTA anterior precede esse alinhamento do POM; a nova combinacao requer sua propria rodada. Nao e comprovacao de homologacao no EAP 7.4. |
 
-As duas pastas incluem POM, fontes e testes Java 8; diferem somente em `LimpezaCache.java`. Sao projetos independentes para selecionar um por vez, nao modulos de um reactor comum. Foram preservados `javax.*`, POMs e contratos; a distribuicao MTA, caches Maven e resultados antigos nao sao publicados aqui.
+As duas pastas incluem POM, fontes e testes Java 8. Sao projetos independentes para selecionar um por vez, nao modulos de um reactor comum. Foram preservados `javax.*`, WAR e contratos. No exemplo DEPOIS, `hibernate-core` permanece `provided` e `hibernate-ehcache` fica em `test`, ambos na versao do destino local; o POM declara o repositorio Red Hat GA. Na empresa, o repositorio Maven aprovado deve disponibilizar esses artefatos; confira a versao do EAP instalado. Ao corrigir ANTES numa branch, seu conteudo deixa de ser o baseline original: compare pelos snapshots das rodadas. A distribuicao MTA, caches Maven e resultados antigos nao sao publicados aqui.
 
 Comece pelo `migracao-cache-antes`, abra o relatorio e use `/planejar-lotes`. Para comparar com o exemplo ja corrigido, mude `activeProject` para `migracao-cache-depois` e execute MTA novamente; cada projeto recebe suas proprias rodadas. Para um ensaio independente, peca ao Copilot que se limite ao projeto selecionado, sem consultar a solucao do outro exemplo.
 
