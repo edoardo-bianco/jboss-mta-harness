@@ -34,6 +34,26 @@
       "presentation": {"reveal": "always", "panel": "dedicated", "clear": false}
     },
     {
+      "label": "MTA: acompanhar log da analise",
+      "detail": "Mostra as ultimas linhas e acompanha o console.log da rodada mais recente do projeto ativo. Ctrl+C encerra somente o leitor.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/acompanhar-log-mta.ps1"],
+      "problemMatcher": [],
+      "runOptions": {"instanceLimit": 1},
+      "presentation": {"reveal": "always", "panel": "dedicated", "clear": false}
+    },
+    {
+      "label": "MTA: acompanhar atividade interna",
+      "detail": "Mostra a ultima gravacao e uma amostra curta do log interno Java a cada 5 segundos. Nao inicia nem interrompe MTA.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/acompanhar-log-mta.ps1", "-Detalhado"],
+      "problemMatcher": [],
+      "runOptions": {"instanceLimit": 1},
+      "presentation": {"reveal": "always", "panel": "dedicated", "clear": false}
+    },
+    {
       "label": "MTA: abrir ultimo relatorio",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",

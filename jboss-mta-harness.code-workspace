@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {"name": "harness", "path": "."},
+    {"name": "migracao-cache-antes", "path": "exemplos/migracao-cache-antes"},
+    {"name": "migracao-cache-depois", "path": "exemplos/migracao-cache-depois"}
+  ],
+  "settings": {
+    "java.autobuild.enabled": false,
+    "java.configuration.updateBuildConfiguration": "disabled",
+    "java.import.generatesMetadataFilesAtProjectRoot": false,
+    "files.exclude": {"**/.harness": true}
+  }
+}

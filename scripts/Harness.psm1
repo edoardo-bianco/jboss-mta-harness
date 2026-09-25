@@ -41,7 +41,8 @@ function Read-HarnessConfig {
         $names[$repo.name] = $true
         $repo.path = Resolve-HarnessPath $repo.path $Root
         if (-not $repo.path -or -not (Test-Path -LiteralPath $repo.path -PathType Container)) { throw "Pasta ausente para o repositorio $($repo.name). Ajuste config/harness.local.json." }
-        if ($repo.path -ieq $Root -or $Root.StartsWith($repo.path + '\', [StringComparison]::OrdinalIgnoreCase) -or $repo.path.StartsWith($Root + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Mantenha os repositorios de aplicacao fora da pasta do harness.' }
+        $bundledExamples = @((Join-Path $Root 'exemplos/migracao-cache-antes'), (Join-Path $Root 'exemplos/migracao-cache-depois')) | ForEach-Object { [IO.Path]::GetFullPath($_) }
+        if ($repo.path -ieq $Root -or $Root.StartsWith($repo.path + '\', [StringComparison]::OrdinalIgnoreCase) -or ($repo.path.StartsWith($Root + '\', [StringComparison]::OrdinalIgnoreCase) -and $repo.path -notin $bundledExamples)) { throw 'Use os dois exemplos incluidos ou mantenha os repositorios de aplicacao fora da pasta do harness.' }
     }
     $active = $null
     if ($config.activeProject) {
@@ -53,9 +54,13 @@ function Read-HarnessConfig {
         $config.tools.$field = Resolve-HarnessPath $config.tools.$field $Root
     }
     $config.mta.rulesPath = Resolve-HarnessPath $config.mta.rulesPath $Root
-    if ($config.mta.mode -cnotin @('full','source-only')) { throw 'mta.mode deve ser full ou source-only.' }
-    if (@($config.mta.targets).Count -eq 0) { throw 'Informe pelo menos um target MTA.' }
-    foreach ($target in $config.mta.targets) { if ($target -notmatch '^[A-Za-z0-9_.-]+$') { throw 'Target MTA invalido.' } }
+    # Compatibilidade com o JSON local anterior, sem reescrever o arquivo.
+    if (-not $config.mta.PSObject.Properties['profile']) { $config.mta | Add-Member NoteProperty profile 'eap71-to-eap74-java8' }
+    if (-not $config.mta.PSObject.Properties['sources']) { $config.mta | Add-Member NoteProperty sources @() }
+    if ($config.mta.profile -cne 'eap71-to-eap74-java8') { throw 'Perfil suportado: mta.profile = eap71-to-eap74-java8.' }
+    if ($config.mta.sources -isnot [Array] -or $config.mta.sources.Count -ne 0) { throw 'Use mta.sources = []. Filtrar source=eap7.1 exclui regras Hibernate do perfil ensaiado.' }
+    if ($config.mta.targets -isnot [Array] -or $config.mta.targets.Count -ne 1 -or $config.mta.targets[0] -cne 'eap7') { throw 'Use mta.targets = ["eap7"]. EAP 7.4 e o destino de runtime; nao um target desta CLI ensaiada. Nao usar eap8.' }
+    if ($config.mta.mode -cne 'full') { throw 'Use mta.mode = full para preservar a analise de fontes e dependencias do perfil ensaiado.' }
     [pscustomobject]@{ Root=$Root; ConfigPath=$Path; Config=$config; Active=$active }
 }
 
@@ -93,12 +98,16 @@ function Get-MtaRequirements {
         if (-not $tool.$name) { throw "Preencha tools.$name no JSON local." }
     }
     if ([IO.Path]::GetExtension($tool.mtaExecutable) -ine '.exe') { throw 'mtaExecutable deve apontar para a CLI .exe do ZIP Windows.' }
-    foreach ($file in @($tool.mtaExecutable, (Join-Path $tool.mtaJdkHome 'bin/java.exe'), (Join-Path $tool.mtaJdkHome 'bin/javac.exe'), (Join-Path $tool.mavenHome 'bin/mvn.cmd'), (Join-Path $Context.Active.path 'pom.xml'))) {
+    $mtaHome = Split-Path -Parent $tool.mtaExecutable
+    foreach ($file in @($tool.mtaExecutable, (Join-Path $tool.mtaJdkHome 'bin/java.exe'), (Join-Path $tool.mtaJdkHome 'bin/javac.exe'), (Join-Path $tool.mavenHome 'bin/mvn.cmd'), (Join-Path $Context.Active.path 'pom.xml'), (Join-Path $mtaHome 'java-external-provider.exe'), (Join-Path $mtaHome 'fernflower.jar'), (Join-Path $mtaHome 'static-report/index.html'))) {
         if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Arquivo ausente: $file" }
+    }
+    foreach ($directory in @('jdtls/config_win','jdtls/plugins')) {
+        if (-not (Test-Path -LiteralPath (Join-Path $mtaHome $directory) -PathType Container)) { throw "Instalacao MTA incompleta: $directory ausente em $mtaHome. Extraia a distribuicao completa nessa pasta." }
     }
     if ($tool.mavenSettingsPath -and -not (Test-Path -LiteralPath $tool.mavenSettingsPath -PathType Leaf)) { throw 'mavenSettingsPath nao existe.' }
     $rules = $Context.Config.mta.rulesPath
-    if (-not $rules) { $rules = Join-Path (Split-Path -Parent $tool.mtaExecutable) 'rulesets/java' }
+    if (-not $rules) { $rules = Join-Path $mtaHome 'rulesets/java' }
     $rules = Resolve-HarnessPath $rules $Context.Root
     if (-not (Test-Path -LiteralPath $rules -PathType Container)) { throw 'Regras Java nao encontradas. Preencha mta.rulesPath com a pasta Java da distribuicao MTA.' }
     return $rules
@@ -152,6 +161,9 @@ function New-MtaSnapshot {
     $manifest = [ordered]@{
         RunId=$id; Project=$Context.Active.name; Source=$Context.Active.path; CreatedAtUtc=[DateTime]::UtcNow.ToString('o')
         Executable=$Context.Config.tools.mtaExecutable; ExecutableSha256=(Get-FileHash -LiteralPath $Context.Config.tools.mtaExecutable).Hash
+        MtaHome=(Split-Path -Parent $Context.Config.tools.mtaExecutable)
+        MtaProfile=$Context.Config.mta.profile; MtaSources=@($Context.Config.mta.sources)
+        Migration=[ordered]@{Source='EAP 7.1'; Target='EAP 7.4'; Java=8; Namespace='javax'; CorrectedArtifactRuntime='EAP 7.4'}
         MtaJdkHome=$Context.Config.tools.mtaJdkHome; MavenHome=$Context.Config.tools.mavenHome
         Arguments=$arguments; SourceFiles=$sourceFiles; RuleFiles=$ruleFiles
     }
@@ -180,7 +192,7 @@ function Invoke-MtaAnalysis {
     catch { throw 'Ja existe uma analise MTA em execucao neste harness.' }
     $snapshot = $null
     $previous = @{}
-    foreach ($name in @('JAVA_HOME','PATH','JVM_MAX_MEM','SONAR_TOKEN','MAVEN_HOME','M2_HOME','JAVA_OPTS','MAVEN_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS')) { $previous[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
+    foreach ($name in @('JAVA_HOME','PATH','JVM_MAX_MEM','SONAR_TOKEN','MAVEN_HOME','M2_HOME','JAVA_OPTS','MAVEN_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','KANTRA_DIR')) { $previous[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
     $result = [ordered]@{Status='FAILED'; ExitCode=$null; Project=$Context.Config.activeProject; RunId=$null; ReportPath=$null; ResultPath=$null; SourceUnchanged=$null; SnapshotOriginalFilesUnchanged=$null; UnexpectedAddedFiles=@(); RulesUnchanged=$null; Version=$null; Error=$null}
     $pushed = $false
     try {
@@ -189,6 +201,7 @@ function Invoke-MtaAnalysis {
         $result.ReportPath = Join-Path $snapshot.Output 'static-report/index.html'
         $result.ResultPath = Join-Path $snapshot.Run 'result.json'
         $tool = $Context.Config.tools
+        $env:KANTRA_DIR = Split-Path -Parent $tool.mtaExecutable
         $env:JAVA_HOME = $tool.mtaJdkHome
         $env:MAVEN_HOME = $tool.mavenHome
         $env:M2_HOME = $tool.mavenHome
@@ -199,6 +212,9 @@ function Invoke-MtaAnalysis {
         Push-Location -LiteralPath $snapshot.Run
         $pushed = $true
         Write-Host "Projeto: $($Context.Active.name) | Fonte: $($Context.Active.path)"
+        Write-Host "Instalacao MTA (KANTRA_DIR): $env:KANTRA_DIR"
+        Write-Host "Perfil: $($snapshot.Manifest.MtaProfile) | EAP 7.1 -> EAP 7.4 | Java 8 / javax"
+        Write-Host 'Filtros MTA: target=eap7; source=nenhum (preserva regras Hibernate).'
         Write-Host "Rodada: $($snapshot.Run) | Modo: $($Context.Config.mta.mode)"
         $version = Invoke-HarnessMtaTool $tool.mtaExecutable @('version')
         $result.Version = $version.Output

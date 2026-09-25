@@ -12,9 +12,11 @@ try {
     Write-Host "OK: caminhos e arquivos obrigatorios encontrados. Projeto: $($context.Active.name)"
     Write-Host "Fonte: $($context.Active.path)"
     Write-Host "MTA: $($context.Config.tools.mtaExecutable)"
+    Write-Host "Instalacao MTA (KANTRA_DIR): $(Split-Path -Parent $context.Config.tools.mtaExecutable)"
     Write-Host "JDK do MTA: $($context.Config.tools.mtaJdkHome)"
     Write-Host "Maven: $($context.Config.tools.mavenHome)"
     Write-Host "Regras: $rules"
+    Write-Host "Perfil: $($context.Config.mta.profile) | Origem: EAP 7.1 | Destino: EAP 7.4 | Java 8 / javax"
     Write-Host "Targets: $($context.Config.mta.targets -join ', ') | Modo: $($context.Config.mta.mode) | Regras padrao: desativadas | Filtro source: nenhum"
     Write-Host 'Esta conferencia valida os caminhos; a execucao MTA confirma o funcionamento.'
     Write-Host 'Para executar: Terminal > Run Task > MTA: executar analise.'

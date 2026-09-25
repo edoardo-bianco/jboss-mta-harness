@@ -1,7 +1,10 @@
 {
   "schemaVersion": 1,
-  "activeProject": null,
-  "repositories": [],
+  "activeProject": "migracao-cache-antes",
+  "repositories": [
+    {"name": "migracao-cache-antes", "path": "exemplos/migracao-cache-antes"},
+    {"name": "migracao-cache-depois", "path": "exemplos/migracao-cache-depois"}
+  ],
   "tools": {
     "mtaExecutable": null,
     "mtaJdkHome": null,
@@ -12,7 +15,9 @@
     "eap74Home": null
   },
   "mta": {
+    "profile": "eap71-to-eap74-java8",
     "rulesPath": null,
+    "sources": [],
     "targets": ["eap7"],
     "mode": "full"
   }
