@@ -391,10 +391,41 @@ nao precisa repetir manualmente os quatro comandos Git a cada planejamento.
 | Checkout e modulo | Pasta de trabalho e caminho do projeto dentro da raiz Git | Um modulo pode compartilhar o repositorio com outros modulos |
 
 No exemplo `migracao-cache-antes`, a raiz Git e o proprio repositorio do harness.
-Assim, `feat/application-maven-build` e a branch atual desse checkout inteiro;
-o nome nao a torna automaticamente a branch autorizada da migracao. Escolher nomes
-no menu nao separa o exemplo do harness. Em projetos corporativos, selecione o
-checkout real da aplicacao; nao copie a branch observada no harness.
+As branches abrangem esse checkout inteiro, incluindo o harness e os exemplos.
+Escolher nomes no menu nao isola o exemplo em outro repositorio. Em projetos
+corporativos, selecione o checkout real da aplicacao; nao copie a branch observada
+no harness.
+
+### Exemplo do ensaio: principal, migracao e lote
+
+```text
+main
+  └─ main_jboss_eap74
+       └─ lote/cache-hib-001
+```
+
+| Papel no cadastro | Nome neste ensaio | Uso |
+| --- | --- | --- |
+| Principal | `main` | Base consolidada e publicada; recebe as evolutivas normais. |
+| Migracao | `main_jboss_eap74` | Integra os lotes de corretivas EAP 7.4 e acompanha a principal. |
+| Trabalho autorizada | `lote/cache-hib-001` | Checkout do lote CACHE-HIB-001; alteracoes somente apos revisao e GO humano. |
+
+Primeiro consolide e publique a base limpa na `main`. Crie a branch de migracao
+a partir dela e a branch do lote a partir da migracao. No cadastro, digite os
+nomes acima ou escolha os numeros correspondentes na lista atual; os numeros
+podem mudar. Informe tambem o responsavel e a referencia de coordenacao do lote.
+O checkout atual deve estar na branch de trabalho autorizada.
+
+Apos a corretiva, verificacoes e revisao humana, integre o lote na branch de
+migracao e revalide o estado integrado. Novas evolutivas da principal precisam
+ser conciliadas com a migracao. Somente depois do aceite e da reconciliacao com
+novo MTA, mediante pedido, prepare outro lote em sua propria branch. A integracao
+final na principal segue a politica de entrega da equipe; o harness nao faz merge.
+
+As branches antigas `feat/application-maven-build` e
+`fix/mta-hibernate-query-cache` foram removidas apos confirmar a integracao de seus
+commits na `main`. Em qualquer limpeza futura, confira integracao local/remota e
+ausencia de commits exclusivos ou checkout em uso antes de excluir uma branch.
 
 ### Cadastrar as escolhas
 
