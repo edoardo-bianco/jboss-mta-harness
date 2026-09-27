@@ -59,6 +59,31 @@ Exemplos de principal -> migracao: develop -> develop_jboss_eap74 ou
 main -> main_jboss_eap74. Os nomes sao definidos pelo desenvolvedor, nao inferidos
 da branch do harness. Um modulo pode compartilhar a raiz Git com outros projetos.
 
+O diagnostico e a proposta preliminar podem comecar na branch de migracao, antes
+de existir uma branch de lote. Depois de delimitar o lote e gravar plan.md/todo.md,
+se sua branch ainda nao estiver definida/criada, solicite ao desenvolvedor a
+criacao de uma branch a partir da base integrada analisada. Sugira um nome ligado
+ao ID do lote, deixando nome e criacao PENDENTES de confirmacao; nao execute Git
+nem presuma que sugerir um nome autoriza trabalhar nele. Inclua essa pendencia no
+to-do e na resposta final, indicando projeto, branch de migracao e commit de base
+quando comprovados. Nao bloqueie a gravacao da proposta por faltar essa branch.
+Se ja houver branch de lote declarada e comprovada para a mesma frente, confira
+sua identidade e reutilize-a, sem pedir outra. Politica de um lote anterior nao
+autoriza automaticamente o novo lote.
+
+Apos a criacao, oriente cadastrar a frente em Planejamento: conferir Git do lote
+(opcao c) e preparar novo contexto vinculado a esta proposta, preservando o ID do
+lote. Exija nova conferencia Git e GO humano antes da execucao separada. Este
+prompt continua limitado a escrever PlanPath/TodoPath.
+
+Para identificar o proximo lote, use nova rodada MTA completa da branch EAP 7.4
+integrada e validada, apos incorporar as corretivas aceitas. Relatorios de branches
+ou commits individuais servem como historico, nao substituem a analise do commit
+integrado. Confira essa origem nas evidencias autorizadas; se estiver pendente,
+registre a lacuna e solicite a rodada/contexto da integracao antes de propor outro
+lote. Nao execute MTA, nao combine relatorios como se fossem uma rodada e nao
+altere recibos historicos para atribuir-lhes a branch/HEAD atual.
+
 Este prompt nao executa Git nem le metadados/credenciais em .git. Use apenas
 evidencias Git com caminhos explicitamente fornecidos ou informacoes do operador,
 distinguindo declarado, verificado em evidencia e PENDENTE, com data/commit.

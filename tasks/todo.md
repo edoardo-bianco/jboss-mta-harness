@@ -1,5 +1,18 @@
 # To-do do agente: evolucao do harness
 
+- [ ] Validar e publicar guia/prompt nas branches main e main_jboss_eap74;
+  remover a branch antecipada lote/cache-hib-001 e deixar checkout na integracao.
+- [x] Orientar o planejador a solicitar a branch apos persistir a proposta,
+  sem executar Git; exigir novo contexto/conferencia e GO para a corretiva.
+- [x] Adaptar o guia fornecido de Git/TortoiseGit e vincular ao fluxo principal ->
+  EAP 7.4, lote -> EAP 7.4 e migracao validada -> principal/release/PRD.
+
+- [x] Esclarecer no guia a ordem MTA -> proposta -> branch do lote -> GO,
+  as escolhas no menu e o retorno a base EAP 7.4 integrada para novo MTA antes
+  do proximo lote. Registrar limites diante de commits concorrentes.
+- [x] Explicitar nova analise completa da base integrada apos commits de colegas,
+  sem combinar relatorios individuais nem apagar o historico para reanalisar.
+
 ## Concluido: consolidacao Git do harness
 
 - [x] Revisar entrega, executar 11 testes e conferir remoto/arquivos ignorados.

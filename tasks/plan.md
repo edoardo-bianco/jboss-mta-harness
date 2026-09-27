@@ -1,6 +1,27 @@
 # Plano do agente: evolucao do harness
 
-## Entrega atual: consolidar main e preparar branches do ensaio
+## Entrega atual: iniciar pela base de integracao
+
+Consolidar guia e prompt em main e main_jboss_eap74, publicar e remover a branch
+lote/cache-hib-001 local/remota somente apos confirmar ausencia de commits
+exclusivos e de outro checkout em uso. Deixar checkout limpo em main_jboss_eap74.
+O planejador solicita a criacao da branch depois de definir e gravar a proposta;
+nao cria branches nem aplica corretivas. Validar geracao pelo Test-Planning.ps1.
+Esta decisao substitui a criacao antecipada da branch registrada no historico abaixo.
+Incorporar o guia fornecido de Git/TortoiseGit como referencia adaptada em doc/guias,
+ligada ao guia do desenvolvedor nos tres sentidos de integracao. Preservar o
+original externo e distinguir diagnostico, integracao, validacao e deploy em PRD.
+
+## Esclarecimento do fluxo de branches no guia
+
+Documentar diagnostico inicial na base de migracao antes de conhecer o lote,
+criacao da branch apos a proposta e retorno a integracao EAP 7.4 entre lotes.
+O MTA do estado integrado orienta o proximo lote; preservar identidade historica,
+conferencia Git, coordenacao paralela e revisoes humanas. Alteracao documental.
+Exigir nova rodada completa no commit integrado para o proximo lote; relatorios
+de commits individuais nao substituem essa evidencia. Preservar historicos.
+
+## Historico: consolidar main e preparar branches do ensaio
 
 Pedido do desenvolvedor: main limpa, commit/push das evolucoes do harness e branches
 separadas para integracao EAP 7.4 e lote. Revisar alteracoes, executar os 11 testes,

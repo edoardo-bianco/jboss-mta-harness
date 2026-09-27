@@ -396,6 +396,92 @@ Escolher nomes no menu nao isola o exemplo em outro repositorio. Em projetos
 corporativos, selecione o checkout real da aplicacao; nao copie a branch observada
 no harness.
 
+### Em qual branch rodar o primeiro MTA, se o lote ainda nao existe?
+
+Nao e preciso conhecer o lote nem criar sua branch antes do diagnostico. O fluxo
+recomendado comeca com build e MTA sobre a branch de migracao, em um checkout
+local proprio, limpo e alinhado com a referencia acordada pela equipe.
+Estar localmente em `main_jboss_eap74` para analisar nao publica alteracoes nessa
+branch. Checkout proprio e a pasta de trabalho de cada desenvolvedor; branch e
+a linha de historico selecionada nessa pasta. Nao compartilhe a mesma pasta de
+trabalho com outro desenvolvedor ou agente que possa alterar seu estado.
+
+| Etapa | Branch do checkout | Acao e resultado esperado |
+| --- | --- | --- |
+| Preparar a base | `main` -> `main_jboss_eap74` | Consolidar a principal e criar a linha de migracao a partir dela, mantendo o alinhamento acordado pela equipe. |
+| Diagnosticar | `main_jboss_eap74` | Executar build e MTA; registrar o commit e preservar essa rodada como baseline. |
+| Propor um lote | `main_jboss_eap74` | Planejar um unico lote a partir do MTA; a branch de trabalho pode continuar pendente. |
+| Isolar o trabalho | `lote/cache-hib-001` | Depois de identificar o lote, criar sua branch a partir da base analisada e cadastrar a frente. |
+| Autorizar e corrigir | `lote/cache-hib-001` | Reconciliar o contexto, conferir Git, obter GO humano e executar somente o escopo aprovado. |
+| Verificar e integrar | Lote -> `main_jboss_eap74` | Verificar a corretiva, obter revisao humana, integrar e repetir as verificacoes e o MTA no estado integrado. |
+| Continuar | `main_jboss_eap74` -> nova branch de lote | Voltar a base integrada e atualizada, usar o MTA desse estado e, apos aceite e pedido de continuidade, identificar o proximo lote. |
+
+**Ao terminar um lote, retorne a base de integracao EAP 7.4 antes de planejar o
+seguinte.** O MTA executado na branch do lote serve para verificar aquela
+corretiva. A referencia para escolher o proximo lote e o MTA da branch de migracao
+integrada (`main_jboss_eap74` ou `develop_jboss_eap74`), incluindo as corretivas
+aceitas dos colegas e as evolutivas incorporadas da principal.
+
+**Relatorios de commits diferentes nao formam um diagnostico da integracao.**
+Por exemplo, o MTA do commit do desenvolvedor A e o MTA do commit do desenvolvedor
+B verificam suas respectivas bases. Depois de integrar ambos, execute uma nova
+analise completa no commit resultante da branch EAP 7.4. Nao some os relatorios
+nem escolha simplesmente o mais recente entre as branches dos desenvolvedores.
+O proximo lote usa essa nova rodada integrada, com Project/Source, branch, HEAD
+e RunId identificados e perfil/regras comparaveis.
+
+Neste fluxo, "MTA limpo na base" significa checkout sem alteracoes locais,
+build `clean install` e nova rodada MTA em sua propria pasta de saida. Preserve
+as rodadas anteriores e os planejamentos como historico para reconciliacao;
+nao e necessario apagar `.harness`, caches ou relatorios para reanalisar.
+Se novos commits forem incorporados a base antes de iniciar o proximo lote,
+atualize o checkout e repita build/MTA nessa base antes de fechar sua proposta.
+
+1. Conclua as verificacoes da branch do lote e obtenha revisao/aceite humano para
+   integrar, conforme o fluxo da equipe.
+2. Integre o lote na branch de migracao. Resolva conflitos com revisao e preserve
+   o trabalho existente; o harness nao executa essa integracao automaticamente.
+3. No seu checkout, retorne a branch de migracao e atualize-a para a referencia
+   compartilhada acordada. Nao troque de branch carregando alteracoes pendentes
+   do lote; conclua sua preservacao pelo fluxo Git da equipe primeiro.
+4. Execute build, testes e demais verificacoes do estado integrado, incluindo
+   novo MTA. Registre o commit analisado e obtenha o aceite humano desse estado.
+5. Prepare contexto selecionando esse MTA e vinculando o planejamento anterior.
+   Peca reconciliar o lote concluido e identificar somente o proximo lote.
+6. Crie a nova branch do lote a partir dessa base analisada e repita cadastro,
+   conferencia Git, revisao e GO antes de aplicar a nova corretiva.
+
+Esse retorno reduz retrabalho e evita usar como base apenas o resultado isolado
+de uma branch de lote. Nao elimina conflitos: se a integracao avancar depois do
+MTA, confira os commits novos e as sobreposicoes antes de iniciar/retomar.
+Reconcile o plano e atualize as evidencias necessarias. Coordenar responsavel,
+arquivos e dependencias continua obrigatorio para frentes paralelas.
+
+**No menu, quando ainda nao sabe qual sera o lote:** em **Planejamento: preparar
+contexto para Copilot**, pressione **Enter** na pergunta sobre branches ainda nao
+declaradas. Isso permite uma proposta preliminar com a politica Git pendente.
+Execute o prompt para identificar e planejar o lote; essa etapa nao aplica corretivas.
+
+Ao entregar a proposta, o agente de planejamento deve solicitar a criacao da
+branch do lote, sugerindo um nome associado ao ID e identificando a base analisada.
+O desenvolvedor confirma o nome e cria a branch pelo fluxo Git da equipe. O agente
+nao cria/troca branches nem concede GO. Uma branch ja comprovada para o mesmo lote
+pode ser reutilizada; o cadastro do lote anterior nao autoriza o seguinte.
+
+Depois de definir o lote e criar sua branch pelo fluxo Git da equipe, use
+**Planejamento: conferir Git do lote**, escolha o projeto e **c** para cadastrar
+principal, migracao, trabalho, responsavel e coordenacao. Prepare um **novo contexto**
+e selecione o planejamento anterior para continuar o mesmo lote. Assim o novo
+recibo registra a branch de trabalho e preserva a proposta anterior. Confira Git
+novamente nesse contexto antes do GO e da execucao.
+
+A rodada MTA continua vinculada ao commit e a branch em que foi produzida. Criar
+a branch do lote no mesmo commit nao exige outro MTA apenas pela troca de nome,
+mas exige conferir a equivalencia dos fontes e registrar o novo contexto. Se a
+base avancou, inclusive com commits de colegas ou da principal, revise o diff e
+reconcilie a proposta; gere novo MTA quando necessario para representar o codigo
+que sera corrigido. Nunca atribua a branch/HEAD atual a uma rodada historica.
+
 ### Exemplo do ensaio: principal, migracao e lote
 
 ```text
@@ -410,11 +496,14 @@ main
 | Migracao | `main_jboss_eap74` | Integra os lotes de corretivas EAP 7.4 e acompanha a principal. |
 | Trabalho autorizada | `lote/cache-hib-001` | Checkout do lote CACHE-HIB-001; alteracoes somente apos revisao e GO humano. |
 
-Primeiro consolide e publique a base limpa na `main`. Crie a branch de migracao
-a partir dela e a branch do lote a partir da migracao. No cadastro, digite os
+Os nomes acima ilustram o cadastro depois que o lote estiver definido. Para
+reiniciar o ensaio, mantenha somente `main` e `main_jboss_eap74`; a branch de lote
+sera criada quando o planejador solicitar, apos a nova proposta. Siga a sequencia:
+base limpa na `main`, branch de migracao, build/MTA, proposta e so entao branch do
+lote a partir da base analisada. No cadastro, digite os
 nomes acima ou escolha os numeros correspondentes na lista atual; os numeros
 podem mudar. Informe tambem o responsavel e a referencia de coordenacao do lote.
-O checkout atual deve estar na branch de trabalho autorizada.
+O checkout deve estar na branch de trabalho autorizada antes de aplicar a corretiva.
 
 Apos a corretiva, verificacoes e revisao humana, integre o lote na branch de
 migracao e revalide o estado integrado. Novas evolutivas da principal precisam
@@ -426,6 +515,20 @@ As branches antigas `feat/application-maven-build` e
 `fix/mta-hibernate-query-cache` foram removidas apos confirmar a integracao de seus
 commits na `main`. Em qualquer limpeza futura, confira integracao local/remota e
 ausencia de commits exclusivos ou checkout em uso antes de excluir uma branch.
+
+### Comparar antes de alinhar ou integrar branches
+
+Use o [guia de diagnostico com Git e TortoiseGit](diagnostico-branches-git-tortoisegit.md)
+para conferir conteudo e historico nos tres sentidos do fluxo:
+
+- **Principal -> EAP 7.4:** incorporar evolutivas e revalidar os lotes afetados.
+- **Lote -> EAP 7.4:** revisar a corretiva aprovada e verificar o estado integrado.
+- **EAP 7.4 -> principal:** entregar a migracao testada, com aceite final e
+  validacao do commit resultante, antes da release e implantacao autorizadas em PRD.
+
+O guia explica como escolher origem/destino, comparar pelo ancestral comum ou
+pelos estados atuais e investigar no TortoiseGit. Diagnostico nao executa integracao;
+merge nao publica a aplicacao em producao. Release/deploy seguem o processo da equipe.
 
 ### Cadastrar as escolhas
 
