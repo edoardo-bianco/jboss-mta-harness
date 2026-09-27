@@ -28,29 +28,90 @@ function Write-HarnessJson {
     [IO.File]::WriteAllText($Path, ($Value | ConvertTo-Json -Depth 12), (New-Object Text.UTF8Encoding($false)))
 }
 
+function Read-HarnessWorkspaceProjects {
+    param([string]$WorkspacePath, [string]$Root)
+    $WorkspacePath = Resolve-HarnessPath $WorkspacePath $Root
+    $json = Get-Content -LiteralPath $WorkspacePath -Raw -Encoding UTF8
+    # JSONC: preservar strings (inclusive URLs), remover comentarios e virgulas finais.
+    $json = [regex]::Replace($json, '"(?:\\.|[^"\\])*"|//[^\r\n]*|/\*[\s\S]*?\*/', {
+        param($match)
+        if ($match.Value.StartsWith('"')) { $match.Value } else { ' ' }
+    })
+    $json = [regex]::Replace($json, '"(?:\\.|[^"\\])*"|,\s*(?=[}\]])', {
+        param($match)
+        if ($match.Value.StartsWith('"')) { $match.Value } else { '' }
+    })
+    $workspace = $json | ConvertFrom-Json
+    $seen = @{}
+    foreach ($folder in $workspace.folders) {
+        if (-not $folder.PSObject.Properties['path']) { continue }
+        $projectPath = Resolve-HarnessPath $folder.path (Split-Path -Parent $WorkspacePath)
+        if (-not $projectPath -or $projectPath -ieq $Root -or $seen.ContainsKey($projectPath)) { continue }
+        if (-not (Test-Path -LiteralPath (Join-Path $projectPath 'pom.xml') -PathType Leaf)) { continue }
+        $seen[$projectPath] = $true
+        $label = Split-Path $projectPath -Leaf
+        if ($folder.PSObject.Properties['name'] -and $folder.name) { $label = $folder.name }
+        # Identidade pelo caminho: renomear no Explorer nao perde o historico.
+        $sha = [Security.Cryptography.SHA256]::Create()
+        try { $hash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($projectPath.ToLowerInvariant()))).Replace('-', '').ToLowerInvariant() }
+        finally { $sha.Dispose() }
+        [pscustomobject]@{name=('_workspace-' + $hash.Substring(0,24)); label=$label; path=$projectPath}
+    }
+}
+
+function Select-HarnessProject {
+    param([object[]]$Projects, [string]$Default, [string]$Target, [switch]$Interactive)
+    $defaultProjects = @($Projects | Where-Object { $_.label -ieq $Default -or $_.name -ieq $Default -or $_.path -ieq $Default })
+    if ($Interactive -and -not $Target) {
+        if (-not $Projects.Count) { throw 'Nenhum projeto com pom.xml no workspace. Use File > Add Folder to Workspace e salve o workspace.' }
+        Write-Host 'Escolha o projeto Maven desta execucao (inclui agregadores e packaging pom):'
+        for ($index = 0; $index -lt $Projects.Count; $index++) {
+            $mark = ''
+            if ($defaultProjects.Count -eq 1 -and $Projects[$index].name -eq $defaultProjects[0].name) { $mark = ' [padrao: Enter]' }
+            Write-Host ("{0}. {1} | {2}{3}" -f ($index + 1), $Projects[$index].label, $Projects[$index].path, $mark)
+        }
+        $answer = Read-Host 'Numero do projeto (q cancela)'
+        if ([string]::IsNullOrWhiteSpace($answer) -and $defaultProjects.Count -eq 1) { return $defaultProjects[0] }
+        $choice = 0
+        if (-not [int]::TryParse($answer, [ref]$choice) -or $choice -lt 1 -or $choice -gt $Projects.Count) { throw 'Selecao cancelada ou invalida; nenhuma operacao iniciada.' }
+        return $Projects[$choice - 1]
+    }
+    if ($Target) {
+        $selected = @($Projects | Where-Object { $_.label -ieq $Target -or $_.name -ieq $Target -or $_.path -ieq $Target })
+        if ($selected.Count -ne 1) { throw 'Target ausente ou ambiguo. Escolha um projeto da lista ou informe seu caminho completo.' }
+        return $selected[0]
+    }
+    if ($defaultProjects.Count -eq 1) { return $defaultProjects[0] }
+    return $null
+}
+
 function Read-HarnessConfig {
-    param([string]$Path, [string]$Root = (Split-Path -Parent $PSScriptRoot))
+    param([string]$Path, [string]$Root = (Split-Path -Parent $PSScriptRoot), [string]$WorkspacePath, [string]$Target, [switch]$SelectTarget)
     $Root = Resolve-HarnessPath $Root $Root
     $Path = Resolve-HarnessPath $Path $Root
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'Configure primeiro: Terminal > Run Task > Workspace: configurar caminhos.' }
     $config = Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($config.schemaVersion -ne 1) { throw 'schemaVersion deve ser 1.' }
+    if (-not $config.PSObject.Properties['repositories']) { $config | Add-Member NoteProperty repositories @() }
+    if (-not $config.PSObject.Properties['activeProject']) { $config | Add-Member NoteProperty activeProject $null }
+    $projects = @($config.repositories)
+    if ($WorkspacePath) { $projects = @(Read-HarnessWorkspaceProjects $WorkspacePath $Root) }
     $names = @{}
-    foreach ($repo in $config.repositories) {
-        if ($repo.name -notmatch '^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$' -or $repo.name -ieq 'harness' -or $names.ContainsKey($repo.name)) { throw 'Nome de repositorio invalido ou duplicado.' }
+    foreach ($repo in $projects) {
+        if ((-not $WorkspacePath -and ($repo.name -notmatch '^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$' -or $repo.name -ieq 'harness')) -or $names.ContainsKey($repo.name)) { throw 'Nome de repositorio invalido ou duplicado.' }
+        if (-not $repo.PSObject.Properties['label']) { $repo | Add-Member NoteProperty label $repo.name }
         $names[$repo.name] = $true
         $repo.path = Resolve-HarnessPath $repo.path $Root
         if (-not $repo.path -or -not (Test-Path -LiteralPath $repo.path -PathType Container)) { throw "Pasta ausente para o repositorio $($repo.name). Ajuste config/harness.local.json." }
         $bundledExamples = @((Join-Path $Root 'exemplos/migracao-cache-antes'), (Join-Path $Root 'exemplos/migracao-cache-depois')) | ForEach-Object { [IO.Path]::GetFullPath($_) }
         if ($repo.path -ieq $Root -or $Root.StartsWith($repo.path + '\', [StringComparison]::OrdinalIgnoreCase) -or ($repo.path.StartsWith($Root + '\', [StringComparison]::OrdinalIgnoreCase) -and $repo.path -notin $bundledExamples)) { throw 'Use os dois exemplos incluidos ou mantenha os repositorios de aplicacao fora da pasta do harness.' }
     }
-    $active = $null
-    if ($config.activeProject) {
-        $selected = @($config.repositories | Where-Object name -eq $config.activeProject)
-        if ($selected.Count -ne 1) { throw 'activeProject deve corresponder ao name de um repositorio.' }
-        $active = $selected[0]
+    $active = Select-HarnessProject $projects $config.activeProject $Target -Interactive:$SelectTarget
+    if (-not $WorkspacePath -and -not $Target -and -not $SelectTarget -and $config.activeProject -and -not $active) { throw 'activeProject deve corresponder ao name de um repositorio.' }
+    foreach ($field in @('applicationMavenHome','applicationMavenSettingsPath')) {
+        if (-not $config.tools.PSObject.Properties[$field]) { $config.tools | Add-Member NoteProperty $field $null }
     }
-    foreach ($field in @('mtaExecutable','mtaJdkHome','mavenHome','mavenSettingsPath','applicationJdk8Home','eap71Home','eap74Home')) {
+    foreach ($field in @('mtaExecutable','mtaJdkHome','mavenHome','mavenSettingsPath','applicationMavenHome','applicationMavenSettingsPath','applicationJdk8Home','eap71Home','eap74Home')) {
         $config.tools.$field = Resolve-HarnessPath $config.tools.$field $Root
     }
     $config.mta.rulesPath = Resolve-HarnessPath $config.mta.rulesPath $Root
@@ -61,7 +122,7 @@ function Read-HarnessConfig {
     if ($config.mta.sources -isnot [Array] -or $config.mta.sources.Count -ne 0) { throw 'Use mta.sources = []. Filtrar source=eap7.1 exclui regras Hibernate do perfil ensaiado.' }
     if ($config.mta.targets -isnot [Array] -or $config.mta.targets.Count -ne 1 -or $config.mta.targets[0] -cne 'eap7') { throw 'Use mta.targets = ["eap7"]. EAP 7.4 e o destino de runtime; nao um target desta CLI ensaiada. Nao usar eap8.' }
     if ($config.mta.mode -cne 'full') { throw 'Use mta.mode = full para preservar a analise de fontes e dependencias do perfil ensaiado.' }
-    [pscustomobject]@{ Root=$Root; ConfigPath=$Path; Config=$config; Active=$active }
+    [pscustomobject]@{ Root=$Root; ConfigPath=$Path; Config=$config; Active=$active; Projects=$projects; WorkspacePath=$WorkspacePath }
 }
 
 function New-HarnessWorkspace {
@@ -76,10 +137,15 @@ function New-HarnessWorkspace {
     }
     if ($Context.Config.tools.applicationJdk8Home) {
         $settings['java.configuration.runtimes'] = @(@{name='JavaSE-1.8'; path=$Context.Config.tools.applicationJdk8Home; default=$true})
+        $settings['maven.terminal.useJavaHome'] = $false
+        $settings['maven.terminal.customEnv'] = @(@{environmentVariable='JAVA_HOME'; value=$Context.Config.tools.applicationJdk8Home})
     }
     if ($Context.Config.tools.mtaJdkHome) { $settings['java.jdt.ls.java.home'] = $Context.Config.tools.mtaJdkHome }
-    if ($Context.Config.tools.mavenHome) { $settings['maven.executable.path'] = Join-Path $Context.Config.tools.mavenHome 'bin/mvn.cmd' }
-    if ($Context.Config.tools.mavenSettingsPath) { $settings['java.configuration.maven.userSettings'] = $Context.Config.tools.mavenSettingsPath }
+    if ($Context.Config.tools.applicationMavenHome) { $settings['maven.executable.path'] = Join-Path $Context.Config.tools.applicationMavenHome 'bin/mvn.cmd' }
+    if ($Context.Config.tools.applicationMavenSettingsPath) {
+        $settings['java.configuration.maven.userSettings'] = $Context.Config.tools.applicationMavenSettingsPath
+        $settings['maven.settingsFile'] = $Context.Config.tools.applicationMavenSettingsPath
+    }
     $path = Join-Path $Context.Root 'jboss-mta-harness.local.code-workspace'
     if (Test-Path -LiteralPath $path) {
         $backup = Join-Path $Context.Root ('.harness/workspace-backups/' + [guid]::NewGuid().ToString('N') + '.code-workspace')
@@ -93,7 +159,7 @@ function New-HarnessWorkspace {
 function Get-MtaRequirements {
     param($Context)
     $tool = $Context.Config.tools
-    if (-not $Context.Active) { throw 'Preencha repositories e activeProject no JSON local.' }
+    if (-not $Context.Active) { throw 'Escolha um projeto com -SelectTarget ou -Target; activeProject e o padrao opcional.' }
     foreach ($name in @('mtaExecutable','mtaJdkHome','mavenHome')) {
         if (-not $tool.$name) { throw "Preencha tools.$name no JSON local." }
     }
@@ -143,11 +209,88 @@ function Copy-HarnessFiles {
     }
 }
 
+function Format-HarnessDate {
+    param([string]$Value, [switch]$ForPath)
+    $date = ([DateTimeOffset]::Parse($Value)).ToLocalTime()
+    if ($ForPath) { return $date.ToString('yyyy-MM-dd_HH-mm-sszzz', [Globalization.CultureInfo]::InvariantCulture).Replace(':','') }
+    $date.ToString('yyyy-MM-dd HH:mm:ss zzz', [Globalization.CultureInfo]::InvariantCulture)
+}
+
+function Test-HarnessRunFolder {
+    param([string]$Name, [string]$Id, [string]$Prefix)
+    if ($Id -cnotmatch '^[a-f0-9]{32}$') { return $false }
+    if ($Name -ceq $Id) { return $true }
+    $Name -cmatch ('^' + [regex]::Escape($Prefix) + '_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}[+-]\d{4}__' + $Id.Substring(0,12) + '$')
+}
+
+function Get-HarnessProjectKey {
+    param([string]$Project)
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { ([BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($Project)))).Replace('-','').Substring(0,12).ToLowerInvariant() }
+    finally { $sha.Dispose() }
+}
+
+function Get-HarnessProjectFolder {
+    param($Project)
+    $label = ([regex]::Replace($Project.label, '[^A-Za-z0-9_-]', '-')).Trim('-','_')
+    if (-not $label) { $label = 'projeto' }
+    if ($label.Length -gt 24) { $label = $label.Substring(0,24) }
+    $label + '__' + (Get-HarnessProjectKey $Project.name)
+}
+
+function Get-HarnessMtaRuns {
+    param([string]$Root, [string]$Project, [string]$Source)
+    if ($Project -cnotmatch '^(?:[A-Za-z0-9][A-Za-z0-9_.-]{0,63}|_workspace-[a-f0-9]{24})$') { throw 'Identidade de projeto invalida.' }
+    $base = Resolve-HarnessPath (Join-Path $Root '.harness/runs') $Root
+    if (-not (Test-Path -LiteralPath $base -PathType Container)) { return }
+    $key = Get-HarnessProjectKey $Project
+    $projects = @(Get-ChildItem -LiteralPath $base -Directory | Where-Object {
+        $_.Name -ceq $Project -or $_.Name.EndsWith(('__' + $key), [StringComparison]::Ordinal)
+    })
+    $records = @(foreach ($directory in $projects) {
+        $projectPath = Resolve-HarnessPath $directory.FullName $Root
+        foreach ($folder in Get-ChildItem -LiteralPath $projectPath -Directory) {
+            if ($folder.Name -cnotmatch '^(?:[a-f0-9]{32}|mta_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}[+-]\d{4}__[a-f0-9]{12})$') { continue }
+            $record = [pscustomobject]@{Run=$folder.FullName; RunId=$null; CreatedAtUtc=$folder.CreationTimeUtc; Manifest=$null; Problem=$null}
+            try {
+                $record.Run = Resolve-HarnessPath $folder.FullName $Root
+                $path = Resolve-HarnessPath (Join-Path $record.Run 'manifest.json') $Root
+                $manifest = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
+                $record.RunId = $manifest.RunId
+                $record.CreatedAtUtc = ([DateTimeOffset]::Parse($manifest.CreatedAtUtc)).UtcDateTime
+                if ($manifest.Project -cne $Project -or -not (Test-HarnessRunFolder $folder.Name $manifest.RunId 'mta')) { throw 'Manifesto nao corresponde ao projeto/rodada.' }
+                $manifestSource = Resolve-HarnessPath $manifest.Source $Root
+                if (-not $manifestSource -or ($Source -and $manifestSource -ine (Resolve-HarnessPath $Source $Root))) { throw 'Fonte do manifesto diverge do projeto selecionado.' }
+                $record.Manifest = $manifest
+            } catch { $record.Problem = $_.Exception.Message }
+            $record
+        }
+    })
+    $duplicates = @($records | Where-Object { $_.RunId } | Group-Object RunId | Where-Object Count -gt 1)
+    if ($duplicates.Count) { throw 'RunId ambiguo: mais de uma pasta encontrada para a mesma rodada/projeto.' }
+    $records | Sort-Object -Property @{Expression='CreatedAtUtc';Descending=$true}, RunId
+}
+
+function Find-HarnessMtaRun {
+    param([string]$Root, [string]$Project, [string]$RunId, [string]$Source)
+    if ($RunId -cnotmatch '^[a-f0-9]{32}$') { throw 'RunId invalido.' }
+    $matches = @(Get-HarnessMtaRuns $Root $Project $Source | Where-Object RunId -CEQ $RunId)
+    if ($matches.Count -ne 1) { throw 'Rodada ausente ou ambigua para o projeto selecionado.' }
+    if ($matches[0].Problem) { throw $matches[0].Problem }
+    $matches[0]
+}
+
 function New-MtaSnapshot {
     param($Context)
     $rules = Get-MtaRequirements $Context
-    $id = [guid]::NewGuid().ToString('N')
-    $run = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/runs/' + $Context.Active.name + '/' + $id)) $Context.Root
+    Import-Module (Join-Path $PSScriptRoot 'HarnessGit.psm1') -DisableNameChecking
+    $createdAt = [DateTime]::UtcNow.ToString('o')
+    $projectFolder = Get-HarnessProjectFolder $Context.Active
+    do {
+        $id = [guid]::NewGuid().ToString('N')
+        $runFolder = 'mta_' + (Format-HarnessDate $createdAt -ForPath) + '__' + $id.Substring(0,12)
+        $run = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/runs/' + $projectFolder + '/' + $runFolder)) $Context.Root
+    } while (Test-Path -LiteralPath $run)
     $inputPath = Join-Path $run 'input'
     $outputPath = Join-Path $run 'output'
     $sourceFiles = @(Get-HarnessFiles $Context.Active.path)
@@ -159,7 +302,8 @@ function New-MtaSnapshot {
     foreach ($target in $Context.Config.mta.targets) { $arguments += @('--target',$target) }
     if ($Context.Config.tools.mavenSettingsPath) { $arguments += @('--maven-settings',$Context.Config.tools.mavenSettingsPath) }
     $manifest = [ordered]@{
-        RunId=$id; Project=$Context.Active.name; Source=$Context.Active.path; CreatedAtUtc=[DateTime]::UtcNow.ToString('o')
+        RunId=$id; Project=$Context.Active.name; Source=$Context.Active.path; CreatedAtUtc=$createdAt
+        Git=(Get-HarnessGitState $Context)
         Executable=$Context.Config.tools.mtaExecutable; ExecutableSha256=(Get-FileHash -LiteralPath $Context.Config.tools.mtaExecutable).Hash
         MtaHome=(Split-Path -Parent $Context.Config.tools.mtaExecutable)
         MtaProfile=$Context.Config.mta.profile; MtaSources=@($Context.Config.mta.sources)
@@ -186,20 +330,26 @@ function Invoke-HarnessMtaTool {
 
 function Invoke-MtaAnalysis {
     param($Context)
+    if (-not $Context.Active) { throw 'Escolha um projeto com -SelectTarget ou -Target; activeProject e o padrao opcional.' }
     $stateRoot = Resolve-HarnessPath (Join-Path $Context.Root '.harness') $Context.Root
     $null = [IO.Directory]::CreateDirectory($stateRoot)
     try { $lock = [IO.File]::Open((Join-Path $stateRoot 'mta.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
     catch { throw 'Ja existe uma analise MTA em execucao neste harness.' }
     $snapshot = $null
+    $activeLease = $null
     $previous = @{}
     foreach ($name in @('JAVA_HOME','PATH','JVM_MAX_MEM','SONAR_TOKEN','MAVEN_HOME','M2_HOME','JAVA_OPTS','MAVEN_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','KANTRA_DIR')) { $previous[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
-    $result = [ordered]@{Status='FAILED'; ExitCode=$null; Project=$Context.Config.activeProject; RunId=$null; ReportPath=$null; ResultPath=$null; SourceUnchanged=$null; SnapshotOriginalFilesUnchanged=$null; UnexpectedAddedFiles=@(); RulesUnchanged=$null; Version=$null; Error=$null}
+    $result = [ordered]@{Status='FAILED'; ExitCode=$null; Project=$Context.Active.name; RunId=$null; ReportPath=$null; ResultPath=$null; SourceUnchanged=$null; SnapshotOriginalFilesUnchanged=$null; UnexpectedAddedFiles=@(); RulesUnchanged=$null; Version=$null; Error=$null}
     $pushed = $false
     try {
         $snapshot = New-MtaSnapshot $Context
         $result.RunId = $snapshot.Manifest.RunId
         $result.ReportPath = Join-Path $snapshot.Output 'static-report/index.html'
         $result.ResultPath = Join-Path $snapshot.Run 'result.json'
+        # O arquivo permanece, mas o handle so fica aberto durante esta analise.
+        # Um registro antigo apos encerramento abrupto nao deve apontar para um build.
+        $activeLease = [IO.File]::Open((Join-Path $snapshot.Run 'active.lock'), 'OpenOrCreate', 'ReadWrite', 'Read')
+        Write-HarnessJson (Join-Path $stateRoot 'active-mta.json') @{RunId=$result.RunId; Project=$Context.Active.name; Label=$Context.Active.label}
         $tool = $Context.Config.tools
         $env:KANTRA_DIR = Split-Path -Parent $tool.mtaExecutable
         $env:JAVA_HOME = $tool.mtaJdkHome
@@ -211,7 +361,7 @@ function Invoke-MtaAnalysis {
         $env:SONAR_TOKEN = $null
         Push-Location -LiteralPath $snapshot.Run
         $pushed = $true
-        Write-Host "Projeto: $($Context.Active.name) | Fonte: $($Context.Active.path)"
+        Write-Host "Projeto: $($Context.Active.label) | Fonte: $($Context.Active.path)"
         Write-Host "Instalacao MTA (KANTRA_DIR): $env:KANTRA_DIR"
         Write-Host "Perfil: $($snapshot.Manifest.MtaProfile) | EAP 7.1 -> EAP 7.4 | Java 8 / javax"
         Write-Host 'Filtros MTA: target=eap7; source=nenhum (preserva regras Hibernate).'
@@ -243,23 +393,51 @@ function Invoke-MtaAnalysis {
     finally {
         if ($pushed) { Pop-Location }
         foreach ($name in $previous.Keys) { [Environment]::SetEnvironmentVariable($name,$previous[$name],'Process') }
-        try { if ($result.ResultPath) { Write-HarnessJson $result.ResultPath $result } } finally { $lock.Dispose() }
+        try { if ($result.ResultPath) { Write-HarnessJson $result.ResultPath $result } }
+        finally {
+            if ($activeLease) { $activeLease.Dispose() }
+            $lock.Dispose()
+        }
     }
     [pscustomobject]$result
 }
 
+function Get-ActiveMtaRun {
+    param([string]$Root)
+    $pointer = Resolve-HarnessPath (Join-Path $Root '.harness/active-mta.json') $Root
+    $notRunning = 'Nenhuma analise MTA em execucao. Inicie MTA: executar analise e aguarde a mensagem Rodada.'
+    if (-not (Test-Path -LiteralPath $pointer -PathType Leaf)) { throw $notRunning }
+    try { $active = Get-Content -LiteralPath $pointer -Raw -Encoding UTF8 | ConvertFrom-Json }
+    catch { throw 'Registro da analise ainda indisponivel. Aguarde a mensagem Rodada e tente novamente.' }
+    if ($active.RunId -cnotmatch '^[a-f0-9]{32}$' -or $active.Project -cnotmatch '^(?:[A-Za-z0-9][A-Za-z0-9_.-]{0,63}|_workspace-[a-f0-9]{24})$') { throw 'Registro da analise ativa invalido.' }
+    $selected = Find-HarnessMtaRun $Root $active.Project $active.RunId
+    $run = $selected.Run
+    $leasePath = Join-Path $run 'active.lock'
+    if (-not (Test-Path -LiteralPath $leasePath -PathType Leaf)) { throw $notRunning }
+    $running = $false
+    try {
+        $probe = [IO.File]::Open($leasePath, 'Open', 'ReadWrite', 'None')
+        $probe.Dispose()
+    } catch [IO.IOException] { $running = $true }
+    if (-not $running) { throw $notRunning }
+    $manifest = $selected.Manifest
+    [pscustomobject]@{Run=$run; Manifest=$manifest; Label=$active.Label}
+}
+
 function Get-LastMtaReport {
     param($Context)
-    if (-not $Context.Active) { throw 'Selecione activeProject no JSON.' }
+    if (-not $Context.Active) { throw 'Escolha um projeto com -SelectTarget ou -Target; activeProject e o padrao opcional.' }
     $state = Join-Path $Context.Root ('.harness/last-' + $Context.Active.name + '.json')
     if (-not (Test-Path -LiteralPath $state)) { throw 'Nao ha analise concluida para o projeto ativo.' }
     $last = Get-Content -LiteralPath $state -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($last.RunId -cnotmatch '^[a-f0-9]{32}$') { throw 'Referencia de relatorio invalida.' }
-    $run = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/runs/' + $Context.Active.name + '/' + $last.RunId)) $Context.Root
+    $selected = Find-HarnessMtaRun $Context.Root $Context.Active.name $last.RunId $Context.Active.path
+    $run = $selected.Run
     $result = Get-Content -LiteralPath (Join-Path $run 'result.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($result.Project -cne $Context.Active.name -or $result.RunId -cne $last.RunId) { throw 'Resultado nao corresponde ao projeto/rodada.' }
     $path = Join-Path $run 'output/static-report/index.html'
     if ($result.Status -cne 'SUCCEEDED' -or -not (Test-Path -LiteralPath $path -PathType Leaf)) { throw 'Relatorio ausente ou rodada nao concluida.' }
     return $path
 }
 
-Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, New-MtaSnapshot, Invoke-MtaAnalysis, Get-LastMtaReport
+Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, New-MtaSnapshot, Invoke-MtaAnalysis, Get-ActiveMtaRun, Get-LastMtaReport, Format-HarnessDate, Test-HarnessRunFolder, Get-HarnessProjectKey, Get-HarnessProjectFolder, Get-HarnessMtaRuns, Find-HarnessMtaRun

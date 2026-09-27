@@ -2,71 +2,264 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Planejamento: conferir Git do lote",
+      "detail": "Configure as funcoes das branches ou confira o checkout atual contra o contexto do lote, sem alterar Git.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/conferir-git-planejamento.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Workspace: limpar execucoes",
+      "detail": "Escolha um projeto ou todos; confira os caminhos e confirme a remocao de MTA, builds e planejamentos.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/limpar-execucoes.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Aplicacao: build Maven (Java 8)",
+      "detail": "Escolha no terminal um projeto Maven do workspace e execute as fases com Java e Maven da aplicacao.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/construir-aplicacao.ps1",
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget",
+        "-Goals",
+        "${input:applicationBuildGoals}"
+      ],
+      "problemMatcher": [],
+      "group": "build",
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
+    },
+    {
       "label": "Workspace: configurar caminhos",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/configurar-caminhos.ps1", "-EditorPath", "${execPath}"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/configurar-caminhos.ps1",
+        "-EditorPath",
+        "${execPath}"
+      ],
       "problemMatcher": [],
-      "runOptions": {"instanceLimit": 1}
+      "runOptions": {
+        "instanceLimit": 1
+      }
     },
     {
       "label": "Workspace: gerar workspace",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerar-workspace.ps1"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/gerar-workspace.ps1"
+      ],
       "problemMatcher": []
     },
     {
       "label": "MTA: conferir ambiente",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/conferir-ambiente.ps1"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/conferir-ambiente.ps1",
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget"
+      ],
       "problemMatcher": []
     },
     {
       "label": "MTA: executar analise",
-      "detail": "Executa o MTA no activeProject do JSON e salva um novo relatorio.",
+      "detail": "Escolha no terminal o projeto Maven do workspace ja construido e execute MTA.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/executar-mta.ps1"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/executar-mta.ps1",
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget"
+      ],
       "problemMatcher": [],
-      "runOptions": {"instanceLimit": 1},
-      "presentation": {"reveal": "always", "panel": "dedicated", "clear": false}
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
     },
     {
       "label": "MTA: acompanhar log da analise",
-      "detail": "Mostra as ultimas linhas e acompanha o console.log da rodada mais recente do projeto ativo. Ctrl+C encerra somente o leitor.",
+      "detail": "Acompanha o console.log da analise MTA em execucao, sem selecionar projeto. Ctrl+C encerra somente o leitor.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/acompanhar-log-mta.ps1"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/acompanhar-log-mta.ps1",
+        "-Active"
+      ],
       "problemMatcher": [],
-      "runOptions": {"instanceLimit": 1},
-      "presentation": {"reveal": "always", "panel": "dedicated", "clear": false}
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
     },
     {
       "label": "MTA: acompanhar atividade interna",
-      "detail": "Mostra a ultima gravacao e uma amostra curta do log interno Java a cada 5 segundos. Nao inicia nem interrompe MTA.",
+      "detail": "Acompanha automaticamente o log interno da analise MTA em execucao a cada 5 segundos. Nao inicia nem interrompe MTA.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/acompanhar-log-mta.ps1", "-Detalhado"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/acompanhar-log-mta.ps1",
+        "-Active",
+        "-Detalhado"
+      ],
       "problemMatcher": [],
-      "runOptions": {"instanceLimit": 1},
-      "presentation": {"reveal": "always", "panel": "dedicated", "clear": false}
+      "runOptions": {
+        "instanceLimit": 1
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
+    },
+    {
+      "label": "MTA: consultar log de execucao anterior",
+      "detail": "Escolha o projeto e a rodada por data/resultado para ler o log salvo, sem executar MTA.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/acompanhar-log-mta.ps1",
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget",
+        "-SelectRun",
+        "-Once"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": false
+      }
+    },
+    {
+      "label": "Planejamento: preparar contexto para Copilot",
+      "detail": "Escolha projeto e rodada MTA; abra o prompt preenchido e acione o Copilot pelo editor.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/preparar-planejamento.ps1",
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget",
+        "-EditorPath",
+        "${execPath}"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Planejamento: abrir plano e to-do",
+      "detail": "Escolha projeto e planejamento por data; abra os dois documentos existentes no VS Code.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/abrir-planejamento.ps1",
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget",
+        "-EditorPath",
+        "${execPath}"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
       "label": "MTA: abrir ultimo relatorio",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/abrir-relatorio-mta.ps1"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/abrir-relatorio-mta.ps1",
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget"
+      ],
       "problemMatcher": []
     },
     {
       "label": "Workspace: conferir configuracao ao abrir",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/conferir-ambiente.ps1", "-AoAbrir", "-EditorPath", "${execPath}"],
+      "args": [
+        "-NoProfile",
+        "-File",
+        "${workspaceFolder}/scripts/conferir-ambiente.ps1",
+        "-AoAbrir",
+        "-EditorPath",
+        "${execPath}"
+      ],
       "problemMatcher": [],
-      "runOptions": {"runOn": "folderOpen", "instanceLimit": 1}
+      "runOptions": {
+        "runOn": "folderOpen",
+        "instanceLimit": 1
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "harnessWorkspacePath",
+      "type": "promptString",
+      "description": "Arquivo .code-workspace em uso (caminho completo ou relativo ao harness; sem aspas)",
+      "default": "jboss-mta-harness.local.code-workspace"
+    },
+    {
+      "id": "applicationBuildGoals",
+      "type": "pickString",
+      "description": "Fases Maven; depois escolha o projeto no terminal (install grava no repositorio local)",
+      "options": ["clean verify", "clean install", "clean package", "test", "package", "verify", "install", "clean"],
+      "default": "clean verify"
     }
   ]
 }

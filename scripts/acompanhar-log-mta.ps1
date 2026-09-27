@@ -5,33 +5,69 @@ param(
     [ValidatePattern('^[a-f0-9]{32}$')][string]$RunId,
     [ValidateRange(1,1000)][int]$Tail = 40,
     [switch]$Once,
-    [switch]$Detalhado
+    [switch]$Detalhado,
+    [string]$WorkspacePath,
+    [string]$Target,
+    [switch]$SelectTarget,
+    [switch]$Active,
+    [switch]$SelectRun
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 try {
     Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -Force -DisableNameChecking
     $harnessRoot = Split-Path -Parent $PSScriptRoot
-    if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
-    $context = Read-HarnessConfig $ConfigPath $harnessRoot
-    if (-not $context.Active) { throw 'Selecione activeProject no JSON local.' }
-    $runs = Join-Path $harnessRoot ('.harness/runs/' + $context.Active.name)
-    if (-not $RunId) {
-        if (-not (Test-Path -LiteralPath $runs -PathType Container)) { throw 'Nenhuma rodada encontrada. Execute MTA: executar analise primeiro.' }
-        # O manifesto nasce depois do snapshot. Nao usar last-*.json: aponta apenas ao ultimo sucesso.
-        $manifests = @(Get-ChildItem -LiteralPath $runs -Directory | Where-Object Name -cmatch '^[a-f0-9]{32}$' | ForEach-Object {
-            $path = Join-Path $_.FullName 'manifest.json'
-            if (Test-Path -LiteralPath $path -PathType Leaf) { Get-Item -LiteralPath $path }
-        } | Sort-Object CreationTimeUtc -Descending)
-        if (-not $manifests.Count) { throw 'Manifesto ainda nao disponivel. Aguarde a mensagem Rodada no terminal da analise e tente novamente.' }
-        $RunId = Split-Path (Split-Path $manifests[0].FullName -Parent) -Leaf
+    if ($Active) {
+        if ($ConfigPath -or $WorkspacePath -or $Target -or $SelectTarget -or $RunId -or $SelectRun) { throw 'Use -Active sozinho para selecionar a analise em execucao; nao combine com selecao de projeto/rodada.' }
+        $activeRun = Get-ActiveMtaRun $harnessRoot
+        $run = $activeRun.Run
+        $manifest = $activeRun.Manifest
+        $RunId = $manifest.RunId
+        $projectLabel = $activeRun.Label
+        $source = $manifest.Source
+    } else {
+        if ($SelectRun -and $RunId) { throw 'Escolha -SelectRun ou -RunId, sem combinar os dois.' }
+        if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
+        $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
+        if (-not $context.Active) { throw 'Escolha um projeto com -SelectTarget ou -Target; activeProject e o padrao opcional.' }
+        $runs = @(Get-HarnessMtaRuns $harnessRoot $context.Active.name $context.Active.path)
+        if (-not $RunId) {
+            if (-not $runs.Count) { throw 'Nenhuma rodada encontrada. Execute MTA: executar analise primeiro.' }
+            # O manifesto nasce depois do snapshot. Nao usar last-*.json: aponta apenas ao ultimo sucesso.
+            $selected = $runs[0]
+            if ($SelectRun) {
+                Write-Host "Rodadas MTA de $($context.Active.label), da mais recente para a mais antiga:"
+                for ($index = 0; $index -lt $runs.Count; $index++) {
+                    $item = $runs[$index]
+                    $status = 'SEM RESULTADO'
+                    $savedResult = Join-Path $item.Run 'result.json'
+                    if (Test-Path -LiteralPath $savedResult -PathType Leaf) {
+                        try { $status = (Get-Content -LiteralPath $savedResult -Raw -Encoding UTF8 | ConvertFrom-Json).Status }
+                        catch { $status = 'RESULTADO INDISPONIVEL' }
+                    }
+                    if ($item.Problem) { $status = 'INDISPONIVEL: ' + $item.Problem }
+                    Write-Host ("{0}. {1} | {2} | RunId: {3}" -f ($index + 1), (Format-HarnessDate $item.CreatedAtUtc.ToString('o')), $status, $item.RunId)
+                }
+                $answer = Read-Host 'Numero da rodada (q cancela)'
+                $choice = 0
+                if (-not [int]::TryParse($answer, [ref]$choice) -or $choice -lt 1 -or $choice -gt $runs.Count) { throw 'Selecao de rodada cancelada ou invalida; nenhum log aberto.' }
+                $selected = $runs[$choice - 1]
+            }
+        } else {
+            $matches = @($runs | Where-Object RunId -CEQ $RunId)
+            if ($matches.Count -ne 1) { throw 'Rodada ausente ou ambigua para o projeto selecionado.' }
+            $selected = $matches[0]
+        }
+        if ($selected.Problem) { throw $selected.Problem }
+        $RunId = $selected.RunId
+        $run = $selected.Run
+        $manifest = $selected.Manifest
+        $projectLabel = $context.Active.label
+        $source = $context.Active.path
     }
-    $run = Resolve-HarnessPath (Join-Path $runs $RunId) $harnessRoot
-    $manifest = Get-Content -LiteralPath (Join-Path $run 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($manifest.RunId -cne $RunId -or $manifest.Project -cne $context.Active.name) { throw 'Manifesto nao corresponde ao projeto/rodada.' }
     $log = Join-Path $run 'console.log'
     $resultPath = Join-Path $run 'result.json'
-    Write-Host "Projeto: $($context.Active.name) | Rodada: $RunId"
+    Write-Host "Projeto: $projectLabel | Fonte: $source | Rodada: $RunId"
     if ($Detalhado) {
         $internalLog = Resolve-HarnessPath (Join-Path $run '.metadata/.log') $harnessRoot
         Write-Host "Log interno: $internalLog"

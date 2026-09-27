@@ -11,7 +11,8 @@ try {
         Copy-Item -LiteralPath (Join-Path $harnessRoot 'config/harness.example.json') -Destination $ConfigPath
     }
     Write-Host "Configuracao: $ConfigPath"
-    Write-Host 'Preencha os caminhos, repositories e activeProject; salve e execute Workspace: gerar workspace.'
+    Write-Host 'Preencha os caminhos em tools e salve. Os projetos das tarefas vem do workspace aberto; activeProject e um padrao opcional.'
+    Write-Host 'Para criar um workspace pelo JSON, preencha repositories e execute Workspace: gerar workspace. Para adicionar projetos no workspace existente, use Add Folder to Workspace.'
     if ($EditorPath) {
         if (-not (Test-Path -LiteralPath $EditorPath -PathType Leaf)) { throw 'Executavel do editor nao encontrado.' }
         & $EditorPath --reuse-window $ConfigPath

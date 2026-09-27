@@ -1,6 +1,7 @@
 #requires -Version 5.1
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
+Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force -DisableNameChecking
 $area = Join-Path $root ('.harness/tests/log-' + [guid]::NewGuid().ToString('N'))
 $fixture = Join-Path $area 'harness'
 $app = Join-Path $area 'aplicacao com espaco'
@@ -18,12 +19,18 @@ $oldId = '11111111111111111111111111111111'
 $newId = '22222222222222222222222222222222'
 foreach ($id in @($oldId,$newId)) {
     $run = Join-Path $fixture ".harness/runs/api/$id"
+    $date = '2026-09-24T10:00:00Z'
+    if ($id -eq $newId) {
+        $date = '2026-09-25T10:00:00Z'
+        $run = Join-Path $fixture ('.harness/runs/Rotulo-anterior__' + (Get-HarnessProjectKey 'api') + '/mta_' + (Format-HarnessDate $date -ForPath) + '__' + $id.Substring(0,12))
+        $current = $run
+    }
     $null = New-Item -ItemType Directory -Path $run -Force
-    @{RunId=$id; Project='api'} | ConvertTo-Json | Set-Content "$run/manifest.json" -Encoding UTF8
+    @{RunId=$id; Project='api'; Source=$app; CreatedAtUtc=$date} | ConvertTo-Json | Set-Content "$run/manifest.json" -Encoding UTF8
 }
 $old = Join-Path $fixture ".harness/runs/api/$oldId"
-$current = Join-Path $fixture ".harness/runs/api/$newId"
-(Get-Item "$old/manifest.json").CreationTimeUtc = [DateTime]::UtcNow.AddHours(-1)
+# Data do arquivo nao deve inverter a ordem das datas registradas nos manifestos.
+(Get-Item "$old/manifest.json").CreationTimeUtc = [DateTime]::UtcNow.AddHours(1)
 Set-Content "$old/console.log" 'LOG-ANTIGO' -Encoding Unicode
 @{Status='SUCCEEDED'; ExitCode=0} | ConvertTo-Json | Set-Content "$old/result.json"
 @{RunId=$oldId} | ConvertTo-Json | Set-Content "$fixture/.harness/last-api.json"
@@ -106,4 +113,30 @@ Assert ($LASTEXITCODE -eq 0 -and $output.Contains('FAILED') -and $output.Contain
 Assert ((Get-FileHash "$current/console.log").Hash -eq $hash) 'Leitor alterou o log.'
 $output = & powershell.exe -NoProfile -File $script -RunId $oldId -Once 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $output.Contains('LOG-ANTIGO') -and -not $output.Contains('NOVA-MENSAGEM')) 'Selecao explicita deve respeitar RunId.'
-Write-Output 'PASS: selecao, tail/append, amostra interna limitada, log ausente, rotacao, encerramento pelo resultado e leitura sem alteracao.'
+# Historico: escolher a segunda rodada (mais antiga) sem executar MTA novamente.
+$output = '2' | & powershell.exe -NoProfile -File $script -SelectRun -Once 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains($oldId) -and $output.Contains('SUCCEEDED') -and $output.Contains('FAILED') -and $output.Contains('LOG-ANTIGO') -and -not $output.Contains('NOVA-MENSAGEM')) 'Menu de historico nao abriu a rodada antiga escolhida.'
+$output = 'q' | & powershell.exe -NoProfile -File $script -SelectRun -Once 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao de rodada cancelada') -and -not $output.Contains('LOG-ANTIGO')) 'Cancelar historico abriu um log.'
+# A entrada CLI tambem deve selecionar projetos do workspace, sem cadastro no JSON.
+Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force
+Set-Content -LiteralPath (Join-Path $app 'pom.xml') '<project/>'
+$workspacePath = Join-Path $fixture 'logs.code-workspace'
+Write-HarnessJson $workspacePath @{folders=@(@{name='api'; path=$app})}
+$context = Read-HarnessConfig "$fixture/config/harness.local.json" $fixture -WorkspacePath $workspacePath -Target 'api'
+$workspaceRun = Join-Path $fixture ('.harness/runs/' + $context.Active.name + '/' + $newId)
+Write-HarnessJson (Join-Path $workspaceRun 'manifest.json') @{RunId=$newId; Project=$context.Active.name; Source=$app; CreatedAtUtc='2026-09-25T10:00:00Z'}
+Write-HarnessJson (Join-Path $workspaceRun 'result.json') @{Status='SUCCEEDED'; ExitCode=0}
+Set-Content -LiteralPath (Join-Path $workspaceRun 'console.log') 'LOG-DO-WORKSPACE'
+$output = & powershell.exe -NoProfile -File $script -WorkspacePath $workspacePath -Target 'api' -Once 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains('LOG-DO-WORKSPACE') -and -not $output.Contains('NOVA-MENSAGEM')) 'CLI nao respeitou o alvo escolhido no workspace.'
+$output = '1' | & powershell.exe -NoProfile -File $script -WorkspacePath $workspacePath -SelectTarget -Once 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains('LOG-DO-WORKSPACE')) 'Selecao pelo terminal nao chegou ao leitor de logs.'
+$output = & powershell.exe -NoProfile -File $script -RunId $newId -Once 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains('NOVA-MENSAGEM')) 'ID completo nao resolveu pasta nova com ID curto.'
+$invalid = Get-Content -LiteralPath "$current/manifest.json" -Raw | ConvertFrom-Json
+$invalid.Source = $fixture
+Write-HarnessJson "$current/manifest.json" $invalid
+$output = & powershell.exe -NoProfile -File $script -RunId $newId -Once 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and -not $output.Contains('NOVA-MENSAGEM')) 'Leitor aceitou fonte divergente.'
+Write-Output 'PASS: formatos antigo/novo, fonte, ID completo, tail/append, rotacao, encerramento e leitura sem alteracao.'

@@ -2,8 +2,8 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force
-$area = Join-Path $root ('.harness/tests/' + [guid]::NewGuid().ToString('N'))
-$fixture = Join-Path $area 'harness'
+$area = Join-Path $root ('.harness/tests/m' + [guid]::NewGuid().ToString('N').Substring(0,8))
+$fixture = Join-Path $area 'h'
 $app = Join-Path $area 'reactor com espaco'
 $toolsRoot = Join-Path $area 'ferramentas'
 $mtaHome = Join-Path $toolsRoot 'MTA em pasta permitida'
@@ -25,14 +25,19 @@ foreach ($file in @('windows-mta-cli.exe','java-external-provider.exe','fernflow
 Set-Content -LiteralPath (Join-Path $mtaHome 'rulesets/java/default.yaml') '- ruleID: default-fixture'
 # Arquivos .exe sao marcadores; a fronteira nativa e simulada em memoria.
 & (Get-Module Harness) {
+    param($FixtureRoot)
+    $script:FixtureRoot = $FixtureRoot
     function script:Invoke-HarnessMtaTool {
         param([string]$Executable, [string[]]$Arguments, [string]$LogPath)
         if ($Arguments[0] -eq 'version') { return [pscustomobject]@{ExitCode=0; Output='fixture-mta'} }
+        $active = Get-ActiveMtaRun $script:FixtureRoot
+        if ($active.Run -ne (Split-Path -Parent $LogPath)) { throw 'Registro ativo nao aponta para a analise em execucao.' }
         $inputRoot = $Arguments[[Array]::IndexOf($Arguments, '--input') + 1]
         $outputRoot = $Arguments[[Array]::IndexOf($Arguments, '--output') + 1]
         if (-not (Test-Path (Join-Path $inputRoot 'modulo/pom.xml'))) { return [pscustomobject]@{ExitCode=8; Output=''} }
         $null = New-Item -ItemType Directory -Path (Join-Path $outputRoot 'static-report') -Force
         [IO.File]::WriteAllText((Join-Path $outputRoot 'environment.txt'), $env:JAVA_HOME)
+        [IO.File]::WriteAllText((Join-Path $outputRoot 'maven-home.txt'), $env:MAVEN_HOME)
         [IO.File]::WriteAllText((Join-Path $outputRoot 'kantra-dir.txt'), [string]$env:KANTRA_DIR)
         Set-Content (Join-Path $outputRoot 'static-report/index.html') '<html>fixture only</html>'
         Set-Content (Join-Path $outputRoot 'output.yaml') '[]'
@@ -41,13 +46,14 @@ Set-Content -LiteralPath (Join-Path $mtaHome 'rulesets/java/default.yaml') '- ru
         if (Test-Path (Join-Path $inputRoot 'fail.flag')) { $exitCode = 7 }
         [pscustomobject]@{ExitCode=$exitCode; Output=''}
     }
-}
+} $fixture
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.activeProject = 'api'
 $config.repositories = @(@{name='api'; path=$app})
 $config.tools.mtaExecutable = Join-Path $mtaHome 'windows-mta-cli.exe'
 $config.tools.mtaJdkHome = "$toolsRoot/jdk"
 $config.tools.mavenHome = "$toolsRoot/maven"
+$config.tools.applicationMavenHome = "$toolsRoot/outro-maven-aplicacao"
 $config.mta.rulesPath = "$toolsRoot/rulesets/java"
 $configPath = Join-Path $fixture 'config.json'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
@@ -81,6 +87,9 @@ $context.Config.mta.rulesPath = $null
 Assert ((Get-MtaRequirements $context) -eq (Join-Path $mtaHome 'rulesets/java')) 'Regras devem vir da pasta configurada, nao do perfil do usuario.'
 $context.Config.mta.rulesPath = "$toolsRoot/rulesets/java"
 $snapshot = New-MtaSnapshot $context
+Assert ((Split-Path -Leaf (Split-Path -Parent $snapshot.Run)) -match '^api__[a-f0-9]{12}$') 'Snapshot deve usar nome e chave do projeto.'
+$runName = 'mta_' + ([DateTimeOffset]::Parse($snapshot.Manifest.CreatedAtUtc)).ToLocalTime().ToString('yyyy-MM-dd_HH-mm-sszzz').Replace(':','') + '__' + $snapshot.Manifest.RunId.Substring(0,12)
+Assert ((Split-Path -Leaf $snapshot.Run) -ceq $runName) 'Pasta MTA deve usar a data do manifesto e o ID curto.'
 Assert (Test-Path (Join-Path $snapshot.Input 'modulo/pom.xml')) 'Reactor nao preservado.'
 Assert (Test-Path (Join-Path $snapshot.Input '.mvn/maven.config')) 'Arquivos auxiliares nao preservados.'
 Assert (-not (Test-Path (Join-Path $snapshot.Input '.git'))) 'Git nao deve ser copiado.'
@@ -101,15 +110,29 @@ try {
 $original = (Get-FileHash "$app/pom.xml").Hash
 $result = Invoke-MtaAnalysis $context
 Assert ($result.Status -eq 'SUCCEEDED') 'Analise valida nao concluiu.'
+$rejected = $false
+try { Get-ActiveMtaRun $fixture | Out-Null } catch { $rejected = $true }
+Assert $rejected 'Analise concluida permaneceu ativa.'
 Assert ($result.Project -eq 'api') 'Projeto incorreto.'
+Assert ((Get-Content (Join-Path (Split-Path $result.ReportPath -Parent) '../maven-home.txt') -Raw) -eq $context.Config.tools.mavenHome) 'MTA deve manter seu Maven independente.'
 Assert ((Get-Content -LiteralPath (Join-Path (Split-Path $result.ReportPath -Parent) '../kantra-dir.txt') -Raw) -eq $mtaHome) 'KANTRA_DIR deve apontar para a instalacao configurada.'
 Assert ($env:KANTRA_DIR -eq 'C:\caminho-herdado-que-nao-deve-ser-usado') 'KANTRA_DIR herdado nao foi restaurado apos sucesso.'
 Assert ((Get-Content (Join-Path (Split-Path $result.ReportPath -Parent) '../environment.txt') -Raw) -eq $context.Config.tools.mtaJdkHome) 'JDK nao foi isolado.'
 Assert ($env:JAVA_HOME -ceq $javaBefore -and $env:PATH -ceq $pathBefore) 'Ambiente do pai alterado.'
 $lastBefore = Get-Content (Join-Path $fixture '.harness/last-api.json') -Raw
+$workspacePath = Join-Path $fixture 'mta.code-workspace'
+Write-HarnessJson $workspacePath @{folders=@(@{name='api do workspace'; path=$app})}
+$workspaceContext = Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target 'api do workspace'
+$workspaceResult = Invoke-MtaAnalysis $workspaceContext
+Assert ($workspaceResult.Status -eq 'SUCCEEDED' -and $workspaceResult.Project -eq $workspaceContext.Active.name) 'MTA nao registrou o projeto escolhido no workspace.'
+Assert ((Get-LastMtaReport $workspaceContext) -eq $workspaceResult.ReportPath) 'Relatorio nao respeitou o alvo do workspace.'
+Assert ((Get-Content (Join-Path $fixture '.harness/last-api.json') -Raw) -ceq $lastBefore) 'Alvo do workspace sobrescreveu historico legado.'
 Set-Content "$app/fail.flag" '1'
 $failed = Invoke-MtaAnalysis $context
 Assert ($failed.Status -eq 'FAILED' -and $failed.ExitCode -eq 7) 'Falha MTA foi ocultada.'
+$rejected = $false
+try { Get-ActiveMtaRun $fixture | Out-Null } catch { $rejected = $true }
+Assert $rejected 'Analise que falhou permaneceu ativa.'
 Assert ($env:KANTRA_DIR -eq 'C:\caminho-herdado-que-nao-deve-ser-usado') 'KANTRA_DIR herdado nao foi restaurado apos falha.'
 Assert ((Get-Content (Join-Path $fixture '.harness/last-api.json') -Raw) -ceq $lastBefore) 'Falha nao pode substituir ultimo sucesso.'
 Remove-Item -LiteralPath "$app/fail.flag"
