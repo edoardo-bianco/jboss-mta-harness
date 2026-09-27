@@ -11,6 +11,12 @@ As branches pertencem ao repositorio inteiro; neste ensaio os exemplos compartil
 o Git do harness. Configuracao local, workspace local e .harness ficam fora do Git.
 O cadastro de papeis/responsavel continua no menu do desenvolvedor, depois da criacao.
 
+Concluido em 2026-09-27: 11 testes passaram, revisao estatica independente sem
+bloqueantes e links locais conferidos. Commits ee1f199 (implementacao) e 48cd359
+(documentacao) integrados por fast-forward e publicados na main. Branches
+main_jboss_eap74 e lote/cache-hib-001 criadas e publicadas a partir dessa base.
+Seis pastas antigas de rodadas vazias removidas; MTA atual preservado.
+
 ## Ajuste atual: respeitar configuracao padrao das ferramentas
 
 Pedido: manter somente os complementos necessarios ao harness, sem reinventar
@@ -22,7 +28,8 @@ O cache antigo nao deve ser confundido com a configuracao ativa apos a troca.
 Concluido: JSON/workspace sem overrides de settings; configuracao da maquina
 conferida. Test-BuildConfig passou. Cache antigo movido para backups-temporarios,
 sem copiar/mesclar com .m2. Test-Cleanup validou tambem caminhos >260 caracteres.
-Novo build/MTA real fica para a retomada do ensaio pelo desenvolvedor.
+Novo ensaio real confirmado: build 4f313156cb544767bce0e1410dfe15b3 e MTA
+5cc84cfbfee345d1a1ae043ebdfec115 concluidos com sucesso, com relatorio aberto.
 
 ## Ajuste atual: reunir backups temporarios
 

@@ -1,12 +1,14 @@
 # To-do do agente: evolucao do harness
 
-## Em andamento: consolidacao Git do harness
+## Concluido: consolidacao Git do harness
 
 - [x] Revisar entrega, executar 11 testes e conferir remoto/arquivos ignorados.
   Revisao estatica independente sem bloqueantes; 56 links locais conferidos.
   Configuracao local, workspace local e .harness ignorados; exemplos sem alteracoes.
-- [ ] Consolidar commits na main e fazer push; criar/publicar main_jboss_eap74
+- [x] Consolidar commits na main e fazer push; criar/publicar main_jboss_eap74
   e lote/cache-hib-001, mantendo o checkout do lote limpo.
+  Implementacao ee1f199 e documentacao 48cd359 integradas por fast-forward;
+  main e ambas as branches publicadas em origin, sem force. Corretivas nao aplicadas.
 - [x] Ensaio real apos defaults Maven: build 4f313156cb544767bce0e1410dfe15b3
   e MTA 5cc84cfbfee345d1a1ae043ebdfec115 bem-sucedidos; relatorio aberto pelo usuario.
 
