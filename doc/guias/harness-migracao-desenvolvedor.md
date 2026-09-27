@@ -396,6 +396,31 @@ Escolher nomes no menu nao isola o exemplo em outro repositorio. Em projetos
 corporativos, selecione o checkout real da aplicacao; nao copie a branch observada
 no harness.
 
+### Branch exclusiva para alterar o harness
+
+Antes de mudar scripts, prompts, Run Tasks, testes ou documentacao, crie uma
+branch `harness/<objetivo>` a partir da `main` do harness. Exemplo:
+`harness/ajustar-planejamento`. Retome uma branch existente somente se for a
+mesma frente de trabalho e sua base estiver conferida.
+
+| Trabalho | Branch | Destino da entrega revisada |
+| --- | --- | --- |
+| Evoluir o harness | `harness/<objetivo>` | `main` do harness |
+| Analisar a base integrada EAP 7.4 | `main_jboss_eap74` | Novo build/MTA e proposta |
+| Aplicar corretiva autorizada | `lote/<id>` | `main_jboss_eap74` |
+
+Nao desenvolva o harness diretamente na principal ou nas branches da migracao.
+Confira e preserve alteracoes locais antes de trocar de branch. Se uma migracao
+estiver em andamento, use outro checkout/worktree para o harness, sem alterar a
+branch da pasta usada pelo agente de migracao.
+
+No ensaio, ambos compartilham o repositorio: revise/teste a mudanca do harness,
+integre na `main` e depois alinhe `main_jboss_eap74` explicitamente. Retorne ao
+checkout da migracao, confira o novo HEAD e atualize o contexto e as evidencias
+afetadas antes de continuar. Em repositorios separados, essa integracao ocorre
+somente no repositorio do harness. A branch do lote so e criada quando o
+planejador solicitar apos definir a proposta.
+
 ### Em qual branch rodar o primeiro MTA, se o lote ainda nao existe?
 
 Nao e preciso conhecer o lote nem criar sua branch antes do diagnostico. O fluxo

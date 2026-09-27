@@ -24,6 +24,20 @@ como plan.md e todo.md nao tornam os arquivos intercambiaveis. Uma melhoria do
 harness descoberta durante a migracao deve ser relatada como demanda separada;
 nao entra no lote da aplicacao nem autoriza editar prompts ou tarefas do harness.
 
+### Separacao das branches de desenvolvimento do harness
+
+Complemento confirmado pelo desenvolvedor em 2026-09-27: toda alteracao do
+harness, incluindo documentacao, prompts e tasks, deve comecar em branch propria
+`harness/<objetivo>`, derivada da principal do seu repositorio. Integrar na principal
+somente apos revisao e validacao. Branches de integracao EAP 7.4 e de lote pertencem
+ao fluxo da aplicacao e nao recebem desenvolvimento direto do harness.
+
+Nos exemplos deste repositorio, harness e aplicacao compartilham a raiz Git.
+Depois de integrar a evolucao do harness na principal, alinhar explicitamente
+a branch EAP 7.4; qualquer mudanca de HEAD exige reconciliar contextos/evidencias.
+Com frentes simultaneas, usar checkouts isolados. Em aplicacoes com repositorio
+proprio, a entrega do harness nao autoriza alterar as branches da aplicacao.
+
 ### Ciclo progressivo da migracao
 
 O ciclo pertence ao projeto/repositorio e a frente de trabalho identificados.

@@ -1,7 +1,14 @@
 # To-do do agente: evolucao do harness
 
-- [ ] Validar e publicar guia/prompt nas branches main e main_jboss_eap74;
+- [x] Criar harness/separacao-branches a partir da main antes de registrar a
+  regra de branch exclusiva para alteracoes do harness, preservando o trabalho local.
+- [x] Alinhar AGENTS.md, Copilot, ADR-0002 e guia com a separacao de branches.
+
+- [x] Validar e publicar guia/prompt nas branches main e main_jboss_eap74;
   remover a branch antecipada lote/cache-hib-001 e deixar checkout na integracao.
+  Commit 74fca9b publicado nas duas branches por fast-forward; lote local/remoto
+  removido sem commits exclusivos. Test-Planning.ps1 passou, 14 links locais
+  conferidos e revisao estatica independente sem correcoes requeridas.
 - [x] Orientar o planejador a solicitar a branch apos persistir a proposta,
   sem executar Git; exigir novo contexto/conferencia e GO para a corretiva.
 - [x] Adaptar o guia fornecido de Git/TortoiseGit e vincular ao fluxo principal ->

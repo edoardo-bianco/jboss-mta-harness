@@ -1,5 +1,13 @@
 # Plano do agente: evolucao do harness
 
+## Regra de trabalho: branch exclusiva do harness
+
+Por solicitacao do desenvolvedor, novas alteracoes do harness usam
+`harness/<objetivo>` a partir da principal, com revisao/validacao antes de integrar.
+Registrar em AGENTS.md, instrucoes do Copilot, ADR-0002 e guia. Este complemento
+foi iniciado em `harness/separacao-branches`, preservando os registros locais
+da entrega anterior; depois sera integrado e alinhado a EAP 7.4 explicitamente.
+
 ## Entrega atual: iniciar pela base de integracao
 
 Consolidar guia e prompt em main e main_jboss_eap74, publicar e remover a branch
@@ -11,6 +19,11 @@ Esta decisao substitui a criacao antecipada da branch registrada no historico ab
 Incorporar o guia fornecido de Git/TortoiseGit como referencia adaptada em doc/guias,
 ligada ao guia do desenvolvedor nos tres sentidos de integracao. Preservar o
 original externo e distinguir diagnostico, integracao, validacao e deploy em PRD.
+
+Concluido em 2026-09-27: entrega 74fca9b publicada nas duas branches, branch de
+lote removida local/remotamente sem commits exclusivos, checkout na integracao.
+Test-Planning.ps1 passou; links e diff conferidos, revisao estatica aprovada.
+Proxima atividade do desenvolvedor: novo build/MTA da base integrada e proposta.
 
 ## Esclarecimento do fluxo de branches no guia
 

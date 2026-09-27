@@ -8,6 +8,14 @@ Para projeto, branch e trabalho paralelo, siga tambem a
 
 - Evolucao do harness inclui scripts, prompts, preparacao de contexto, Run Tasks,
   configuracao, testes e documentacao. Use `tasks/plan.md` e `tasks/todo.md`.
+- Antes de alterar o harness, crie ou retome uma branch `harness/<objetivo>`
+  derivada da principal do repositorio do harness. Nao implemente essas mudancas
+  diretamente em main/develop, na integracao EAP 7.4 ou em branches de lote.
+  Confira raiz, branch, HEAD e estado local; preserve trabalho pendente.
+  Revise e valide antes de integrar na principal. No ensaio em repositorio unico,
+  leve a evolucao aceita da principal para a integracao EAP 7.4 em etapa explicita
+  e atualize as evidencias afetadas. Prefira checkout/worktree separado se houver
+  migracao em andamento; nao troque a branch de um checkout usado por outro agente.
 - Preserve os padroes das ferramentas. O harness adiciona somente configuracao
   necessaria ao fluxo; nao crie repositorio Maven, mirrors ou settings proprios
   por conveniencia do ensaio. Por padrao, settings opcionais ficam null e o Maven

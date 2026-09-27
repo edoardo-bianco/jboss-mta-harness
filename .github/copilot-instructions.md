@@ -7,6 +7,12 @@ Evolucao do harness (incluindo prompts e Run Tasks) usa `tasks/plan.md` e
 `tasks/todo.md`. Migracao da aplicacao usa exclusivamente os destinos PlanPath e
 TodoPath do contexto para seus planos/tarefas. Nao misture esses trabalhos.
 
+Para alterar o harness, use branch propria `harness/<objetivo>` a partir da sua
+principal. Nao escreva evolucoes do harness diretamente na principal, na branch
+EAP 7.4 ou na branch do lote. Confira o checkout antes de editar; com migracao
+em andamento, use checkout isolado. Integre mudancas revisadas/validadas na
+principal e alinhe a migracao separadamente, conforme AGENTS.md.
+
 Planeje somente um lote consistente por vez. O ciclo e proposta, revisao/GO humano,
 execucao autorizada, verificacoes automaticas e revisao/aceite humano do resultado.
 Depois, com pedido de continuidade, reconcilie o novo MTA com o historico antes de
