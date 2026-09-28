@@ -1,5 +1,12 @@
 # To-do do agente: evolucao do harness
 
+## Roteiro resumido no README - 2026-09-28
+
+- [x] Acrescentar sequencia curta das Run Tasks e links para os detalhes do guia.
+- [x] Conferir nomes de tarefas, links/ancoras e diff antes da integracao.
+  14 links locais (incluindo ancoras) e 8 referencias a tarefas validados;
+  git diff --check sem erros. Alteracao somente documental.
+
 ## Git informativo, sem controle de branches — 2026-09-28
 
 - [x] Conferir checkout e criar harness/git-informativo em worktree isolado.

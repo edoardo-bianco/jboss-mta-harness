@@ -1,5 +1,14 @@
 # Plano do agente: evolucao do harness
 
+## Roteiro resumido no README - 2026-09-28
+
+Pedido: apresentar o caminho operacional no README e remeter aos detalhes do guia.
+Escopo documental: limpeza opcional, clean install, MTA, preparo de contexto,
+execucao do prompt e revisao. Distinguir inicio independente de continuidade e
+preparo de execucao do agente; preservar GO separado. Branch harness/readme-roteiro
+derivada de main af79b9f, sem novo worktree. Conferir tarefas e links/ancoras antes
+de integrar na principal e retornar a main_jboss_eap74.
+
 ## Simplificacao Git solicitada — 2026-09-28
 
 Pedido: eliminar o controle de branches do harness e deixar a escolha/gestao
