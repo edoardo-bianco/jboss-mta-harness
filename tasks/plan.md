@@ -1,5 +1,16 @@
 # Plano do agente: evolucao do harness
 
+## Consistencia da revisao de planos - 2026-09-28
+
+Pedido: evitar que revisoes acrescentem orientacoes novas e preservem contradicoes
+ativas em outras secoes. Evolucao do harness na branch harness/consistencia-planejamento,
+derivada de main d8bce9a. Atualizar o template e o guia: substituir orientacoes
+incompativeis, conferir documentos completos e distinguir precondicoes/GO de
+verificacoes posteriores/aceite, incluindo baseline antes de qualquer alteracao.
+Validar propagacao pelo teste existente de planejamento, revisar o diff e integrar.
+Nao alterar o plano da aplicacao nem prompts/recibos ja preparados. O operador
+gerara novo contexto vinculado ao atual para ensaiar o contrato no DevSquad.
+
 ## Roteiro resumido no README - 2026-09-28
 
 Pedido: apresentar o caminho operacional no README e remeter aos detalhes do guia.

@@ -476,6 +476,15 @@ Se o botao de executar nao aparecer, abra uma nova conversa Local e use a linha 
 
 **Planejamento progressivo e continuidade:** com milhares de ocorrencias, o agente registra apenas a cobertura realmente analisada e candidatas ainda nao detalhadas. O `plan.md` contem o objetivo e o escopo do lote ativo, dependencias, riscos, criterios e historico resumido. O `todo.md` contem as tarefas desse lote; nao e um checklist de todo o relatorio.
 
+**Revisar sem deixar instrucoes contraditorias:** o planejador deve substituir as
+orientacoes antigas incompativeis nos documentos atuais e o condutor deve conferir
+o plano e o to-do completos, incluindo resumo, riscos e tarefas. Precondicoes e GO
+antecedem a implementacao; verificacoes do artefato corrigido antecedem o aceite.
+Adicionar uma secao nova nao encerra a revisao se outra ainda exigir o contrario.
+Para adotar essa instrucao em uma proposta existente, prepare novo contexto com a
+mesma rodada e selecione o planejamento anterior. Preserve o ID do lote e os
+documentos anteriores; nao e necessario repetir MTA apenas por atualizar o prompt.
+
 **Encontrar e abrir os documentos:** execute **Terminal > Run Task > Planejamento:
 abrir plano e to-do**, confirme o workspace e escolha o projeto. Selecione o
 planejamento pela data de preparacao e pela data MTA; os dois arquivos existentes

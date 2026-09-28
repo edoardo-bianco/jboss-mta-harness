@@ -80,7 +80,8 @@ executar essas acoes de persistencia. Nao encerre apenas com uma analise no chat
    Recuse acoes para qualquer outro caminho e solicite retorno corrigido ao
    planejador. Nao execute [BOARD] nem handoffs para outra fase. A autorizacao
    deste pedido cobre gravar esses dois rascunhos; nao e aceite do seu conteudo.
-   Persistir segue a secao 5 abaixo, inclusive releitura e relato de falha parcial.
+   Persistir segue a secao 5 abaixo, inclusive conferencia de consistencia entre
+   todos os trechos dos dois documentos, releitura e relato de falha parcial.
    Se houver lacunas no retorno, nova invocacao deve levar contexto e lacunas;
    nao reinicie a triagem nem repita indefinidamente uma chamada que falhou.
 
@@ -425,8 +426,12 @@ checklists detalhados para todas as familias ou duplicar a analise do plan.md.
 No plano do lote, preservar baselines MTA/Sonar e prever build Maven Java 8 com
 POMs/dependencias alinhados ao destino, testes da aplicacao/consumidores,
 reanalise MTA comparavel, Sonar DEPOIS e validacao funcional do artefato identificado
-somente no EAP 7.4. Sonar ausente nao impede uma proposta preliminar: e pendencia antes
-da execucao/aceite. Politica preservada: zero issues novas, zero HIGH/BLOCKER/CRITICAL,
+somente no EAP 7.4. Planejar o baseline Sonar antes de qualquer alteracao em codigo,
+POM ou testes. Sua ausencia permite proposta preliminar, mas deve ser apresentada
+na revisao/GO e impede comprovar zero issues novas sem evidencia comparavel.
+Resultados do artefato corrigido sao condicoes de aceite posteriores a implementacao,
+nao precondicoes para inicia-la. Manter precondicoes tecnicas e GO explicitos.
+Politica preservada: zero issues novas, zero HIGH/BLOCKER/CRITICAL,
 cobertura >=85%, duplicacao <=5%, Quality Gate separado; UNVERIFIED nao e conformidade.
 
 Se houver OpenRewrite, planejar testes da receita -> dryRun -> revisao do patch -> GO
@@ -434,8 +439,27 @@ humano do escopo -> run -> verificacoes da aplicacao. Ajuste especifico requer d
 revisavel, autorizacao delimitada e validacao equivalente. Operacao EAP/controle integrado
 nao deve ser apresentado como implementado neste harness minimo sem evidencia.
 
-Releia os dois arquivos apos gravar e confira identidade, vinculos, lote ativo,
-estados e pendencias. So entao informe no chat os links, um resumo curto do objetivo
+Ao revisar documentos existentes ou continuar via Previous, substitua nos documentos
+atuais as orientacoes antigas incompativeis; nao apenas acrescente secoes corretas.
+Preserve decisoes/historico com sua origem e estado, marcando orientacoes superadas
+como historicas, sem mante-las como exigencias ativas nem alterar documentos anteriores.
+O planejador deve harmonizar o conteudo completo; o condutor confere essa consistencia
+antes de persistir. Se houver contradicao semantica, devolva ao planejador os trechos
+conflitantes para correcao, respeitando o contrato de delegacao e os mesmos destinos.
+
+Releia integralmente os dois arquivos apos gravar, em trechos se necessario, e confira
+identidade, vinculos, lote ativo, estados e pendencias. Compare resumo, escopo, riscos,
+precondicoes, perguntas em aberto, decisoes, tarefas, reversao e criterios de aceite.
+Busque referencias a bloqueio, prontidao, GO, execucao e aceite e confira seu significado
+no contexto; encontrar palavras ou o novo paragrafo nao comprova consistencia.
+Todas as secoes devem distinguir: definicao tecnica/baseline -> revisao/GO ->
+implementacao -> verificacoes do artefato corrigido -> revisao/aceite humano.
+Confira tambem se cada ajuste solicitado foi refletido em todos os trechos afetados
+do plano e do to-do. Se um patch falhar, releia o arquivo atual e refaca a alteracao;
+apos qualquer nova edicao, confira novamente os trechos afetados e suas dependencias.
+Nao declare a revisao concluida com contradicoes ativas ou releitura incompleta;
+informe precisamente os trechos pendentes e a limitacao encontrada.
+So entao informe no chat os links, um resumo curto do objetivo
 e o que precisa de decisao. Se a escrita falhar ou as ferramentas nao estiverem
 disponiveis, informe precisamente o que foi salvo/pendente; nao alegue persistencia
 nem use terminal como alternativa. Se faltarem ferramentas, orientar a configuracao

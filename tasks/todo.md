@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Consistencia da revisao de planos - 2026-09-28
+
+- [x] Ajustar template e guia para substituir instrucoes incompativeis e conferir
+  consistencia integral, com precondicoes/GO separados de verificacoes/aceite.
+- [x] Validar geracao do prompt e preservacao do historico; revisar antes de integrar.
+  Test-Planning passou em Windows PowerShell 5.1: template propagado, destinos e
+  historico preservados. Diff revisado e sem erros de whitespace. A consistencia
+  semantica do texto produzido pelo modelo depende do ensaio do operador abaixo.
+- [ ] Operador: preparar contexto vinculado a ddd2954b81a3 e conferir no DevSquad
+  a correcao do paragrafo antigo, preservando o lote RC-MTA-f1f0d80b-001.
+
 ## Roteiro resumido no README - 2026-09-28
 
 - [x] Acrescentar sequencia curta das Run Tasks e links para os detalhes do guia.
