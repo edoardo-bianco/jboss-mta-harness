@@ -1,12 +1,53 @@
 # Plano do agente: evolucao do harness
 
+## Ponto de retomada — 2026-09-27
+
+Sessao encerrada a pedido do desenvolvedor. Antes deste registro, main e
+main_jboss_eap74 estavam limpas, publicadas e alinhadas em f61798d. As branches
+lote/cache-hib-001 e harness/separacao-branches foram removidas local/remotamente
+apos confirmar integracao completa. Este registro usa harness/ponto-retomada
+e deve ser integrado/publicado nas duas bases, retornando o checkout a EAP 7.4.
+
+Entregue: fluxo progressivo na base integrada, solicitacao da branch de lote pelo
+planejador depois da proposta, branch propria para evoluir o harness, guia Git/
+TortoiseGit adaptado e ligado ao guia do desenvolvedor. Validacoes: Test-Planning.ps1,
+14 links locais, diff --check e revisao estatica independente aprovados na entrega.
+Nenhuma corretiva da aplicacao foi aplicada nesta etapa; nao houve GO de execucao.
+
+Retomar com o desenvolvedor, passo a passo, aguardando o resultado de cada etapa:
+
+1. Conferir checkout limpo em main_jboss_eap74 e referencias atualizadas. Abrir
+   jboss-mta-harness.local.code-workspace; projeto migracao-cache-antes.
+2. Executar Aplicacao: build Maven (Java 8), escolhendo clean install.
+3. Executar novo MTA completo dessa base e conferir SUCCEEDED/integridade/relatorio.
+4. Preparar contexto com essa rodada. Sem lote definido, Enter deixa a politica
+   Git pendente para proposta preliminar; nao inventar branch de trabalho.
+5. Executar o prompt atualizado no Copilot/devsquad. O agente grava somente
+   plan.md/todo.md e solicita a criacao da branch apos delimitar o lote.
+6. Depois da criacao confirmada pelo desenvolvedor, cadastrar a frente, preparar
+   contexto vinculado, conferir Git e obter GO antes de executar a corretiva.
+
+O build 4f313156cb544767bce0e1410dfe15b3 e MTA 5cc84cfbfee345d1a1ae043ebdfec115
+sao historicos anteriores a essa base; nao atribuir a eles o HEAD/branch atual.
+Solicitacoes antigas citadas abaixo podem ter sido apagadas pela limpeza autorizada;
+nao reutilizar seus caminhos sem verificar existencia e identidade.
+Configuracao local, workspace e .harness sao ignorados pelo Git: o commit deste
+ponto preserva documentacao/codigo versionados, nao e backup desses dados locais.
+Java/Maven continuam separados entre MTA e build, com settings opcionais null
+e repositorio Maven padrao da maquina. Sonar/deploy/servidor continuam backlog.
+
+Qualquer nova evolucao do harness deve comecar em harness/<objetivo> a partir
+da main, preservando o checkout da migracao. Apos cada lote aceito e integrado,
+novo build/MTA da base EAP 7.4 orienta a proposta seguinte.
+
 ## Regra de trabalho: branch exclusiva do harness
 
 Por solicitacao do desenvolvedor, novas alteracoes do harness usam
 `harness/<objetivo>` a partir da principal, com revisao/validacao antes de integrar.
 Registrar em AGENTS.md, instrucoes do Copilot, ADR-0002 e guia. Este complemento
 foi iniciado em `harness/separacao-branches`, preservando os registros locais
-da entrega anterior; depois sera integrado e alinhado a EAP 7.4 explicitamente.
+da entrega anterior, integrado/publicado em f61798d e alinhado a EAP 7.4.
+A branch temporaria foi removida apos confirmar sua integracao.
 
 ## Entrega atual: iniciar pela base de integracao
 

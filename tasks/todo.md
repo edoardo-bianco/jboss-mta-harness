@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Retomada da sessao — 2026-09-27
+
+Ponto atual em [tasks/plan.md](plan.md#ponto-de-retomada--2026-09-27).
+Proximo passo do desenvolvedor: build clean install na main_jboss_eap74, depois
+novo MTA e proposta, compartilhando cada resultado. Corretivas ainda sem GO.
+Os checklists historicos abaixo nao substituem esse ponto de retomada nem
+autorizam reutilizar solicitacoes apagadas. Tarefas da aplicacao serao registradas
+somente nos PlanPath/TodoPath do novo contexto.
+
+## Entregas concluidas
+
 - [x] Criar harness/separacao-branches a partir da main antes de registrar a
   regra de branch exclusiva para alteracoes do harness, preservando o trabalho local.
 - [x] Alinhar AGENTS.md, Copilot, ADR-0002 e guia com a separacao de branches.
