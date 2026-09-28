@@ -9,7 +9,12 @@
   Os 11 testes Test-*.ps1 passaram em PowerShell 5.1; 52 links/ancoras locais
   conferidos e git diff --check sem erros. Test-Git falhou antes da remocao
   da politica e passou depois. Revisao confirmou ausencia de consumidores do gate.
-- [ ] Integrar a entrega e preparar contexto vinculado sem modificar o plano antigo.
+- [x] Integrar a entrega e preparar contexto vinculado sem modificar o plano antigo.
+  Implementacao 101c57b nas mains, apoio e branch atual corretiva/cache-hib-001.
+  Nova solicitacao e450f0ea38ec vinculada a 31a8ff4cb385, mesmo MTA.
+  Hashes dos 14 arquivos protegidos preservados; exemplos sem alteracoes.
+- [ ] Operador: executar o novo prompt no Copilot e conferir continuidade de
+  CACHE-HIB-001 sem cadastro/bloqueio Git, com pendencias tecnicas preservadas.
 
 
 ## Delegacao delimitada no DevSquad — 2026-09-28

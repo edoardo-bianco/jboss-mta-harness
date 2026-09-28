@@ -27,6 +27,16 @@ sem consumidores remanescentes das funcoes removidas. A configuracao local nao
 precisa ser limpa: a politica antiga e ignorada. Copilot ainda requer ensaio
 do contrato atualizado; testes nao comprovam comportamento do modelo.
 
+Entrega implementada em 101c57b e integrada por fast-forward em main,
+main_jboss_eap74, harness/devsquad-planejamento e corretiva/cache-hib-001.
+Contexto e450f0ea38ec440f84e6daf001be1051 preparado com o prompt atualizado,
+mesmo MTA 391c4a60505440fdb26d4b6419bfa643 e Previous 31a8ff4cb3854db18ed3c67452d667e6.
+O Copilot deve continuar CACHE-HIB-001 nos novos destinos, preservando o historico
+e marcando exigencias Git antigas como superadas. Conferidos os hashes dos 14
+arquivos locais protegidos, todos preservados; nenhum diff nos exemplos.
+O ensaio do prompt novo no Copilot permanece com o operador. Avancos de HEAD
+apenas para registrar esta entrega nao exigem outro contexto.
+
 
 ## Delegacao de planejamento DevSquad — 2026-09-28
 
