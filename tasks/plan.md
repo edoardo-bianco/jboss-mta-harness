@@ -34,6 +34,14 @@ Foram encontrados plan.md/todo.md na solicitacao 8288c85ebd61476381fa7dfbcb7fe84
 preserva-los e vincular a nova solicitacao a ela, mantendo o lote existente.
 Esses arquivos nao comprovam o ensaio da nova delegacao.
 
+Integracao local concluida: ajuste 7851782 levado por fast-forward a main e
+depois a main_jboss_eap74. Checkout da migracao mantido limpo nessa branch.
+O desenvolvedor repetira a tarefa de preparar contexto no VS Code, selecionando
+o MTA 391c4a605054 e a proposta anterior 8288c85ebd61. O novo contexto registrara
+o HEAD atual e preservara MtaGit da rodada; nao reutilizar o prompt antigo para
+testar a delegacao nova. Encerrar o ensaio apos persistir e conferir os dois
+documentos; branch de lote, conferencia Git e GO continuam etapas posteriores.
+
 ## Ponto de retomada — 2026-09-27
 
 Sessao encerrada a pedido do desenvolvedor. Antes deste registro, main e

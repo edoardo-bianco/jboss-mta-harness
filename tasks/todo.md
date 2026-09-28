@@ -9,7 +9,10 @@
 - [x] Validar preparacao, historico e tarefas; revisar antes da integracao.
   Test-Planning e Test-TaskInputs passaram em Windows PowerShell 5.1. Contrato
   revisado; ensaio de subagentes no cliente continua separado e pendente.
-- [ ] Integrar nas duas bases e preparar o ensaio sem alterar solicitacoes antigas.
+- [x] Integrar o ajuste 7851782 por fast-forward na main e depois na
+  main_jboss_eap74, preservando o checkout da migracao e as solicitacoes antigas.
+- [ ] No VS Code, preparar novo contexto com o MTA 391c4a605054 e vincular a
+  proposta anterior 8288c85ebd61; executar o novo prompt em conversa Local.
 - [ ] Ensaio no Copilot: invocar devsquad.plan, usar skills, gravar/reler somente
   PlanPath/TodoPath e encerrar em PROPOSTA - NAO APROVADA, sem corretivas.
 
