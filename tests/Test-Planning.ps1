@@ -57,6 +57,8 @@ Assert ($runs.Count -eq 3 -and $runs[0].RunId -eq $failedId) 'Historico deve ser
 $messages = Select-MtaPlanningRun $context -Interactive 6>&1
 $selected = @($messages | Where-Object { $_ -isnot [System.Management.Automation.InformationRecord] })[-1]
 Assert ($selected.RunId -eq $newId) 'Enter deve escolher a ultima rodada elegivel.'
+$localNew = ([DateTimeOffset]::Parse('2026-09-25T10:00:00Z')).ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz')
+Assert (($messages | Out-String).Contains("Ultima elegivel: $localNew |")) 'Ultima elegivel deve mostrar horario local com fuso.'
 Assert (($messages | Out-String).Contains($failedId)) 'Tentativa mais recente com falha ficou oculta.'
 Assert ((Select-MtaPlanningRun $context -RunId $oldId).RunId -eq $oldId) 'Selecao explicita perdeu rodada antiga.'
 & (Get-Module HarnessPlanning) {
@@ -64,7 +66,11 @@ Assert ((Select-MtaPlanningRun $context -RunId $oldId).RunId -eq $oldId) 'Seleca
     $script:answers.Enqueue('h'); $script:answers.Enqueue('3')
     function script:Read-Host { param($Prompt) $script:answers.Dequeue() }
 }
-Assert ((Select-MtaPlanningRun $context -Interactive).RunId -eq $oldId) 'Historico nao respeitou selecao por numero.'
+$historyMessages = Select-MtaPlanningRun $context -Interactive 6>&1
+$historySelected = @($historyMessages | Where-Object { $_ -isnot [System.Management.Automation.InformationRecord] })[-1]
+Assert ($historySelected.RunId -eq $oldId) 'Historico nao respeitou selecao por numero.'
+$localOld = ([DateTimeOffset]::Parse('2026-09-24T10:00:00Z')).ToLocalTime().ToString('yyyy-MM-dd HH:mm:ss zzz')
+Assert (($historyMessages | Out-String).Contains("3. $localOld |")) 'Historico deve mostrar horario local com fuso.'
 & (Get-Module HarnessPlanning) { function script:Read-Host { param($Prompt) 'q' } }
 Reject { Select-MtaPlanningRun $context -Interactive } 'Cancelamento aceito.'
 Reject { Select-MtaPlanningRun $context -RunId $failedId } 'Rodada com falha aceita.'

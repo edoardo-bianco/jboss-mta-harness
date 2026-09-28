@@ -1,5 +1,13 @@
 # Plano do agente: evolucao do harness
 
+## Horario local no menu de planejamento - 2026-09-28
+
+Bug observado: ultima elegivel e historico MTA exibem UTC, enquanto pastas e
+historico de planos usam horario local com fuso. Branch harness/horario-planejamento
+a partir de main 78235c3. Reutilizar Format-HarnessDate nas duas mensagens;
+manter datas/ordenacao/recibos em UTC. Testar exibicao e selecao no Test-Planning.
+
+
 ## Tarefa de evidencias e percurso de feedback - 2026-09-28
 
 Pedido: criar estrutura por projeto via Run Task e explicar feedback -> build/MTA

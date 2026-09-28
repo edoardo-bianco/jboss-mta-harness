@@ -1,5 +1,12 @@
 # To-do do agente: evolucao do harness
 
+## Horario local no menu de planejamento - 2026-09-28
+
+- [x] Corrigir ultima elegivel/historico, atualizar guia e validar Test-Planning.
+  Regressao reproduzida antes da correcao; suite passou em PowerShell 5.1 apos
+  reutilizar Format-HarnessDate. Recibos e ordem das rodadas preservados.
+
+
 ## Tarefa de evidencias e percurso de feedback - 2026-09-28
 
 - [x] Criar tarefa por projeto e LEIA-ME com identidade e instrucoes.

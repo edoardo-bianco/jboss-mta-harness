@@ -54,7 +54,7 @@ function Select-MtaPlanningRun {
             Write-Host "Tentativa mais recente indisponivel para planejamento: $($runs[0].RunId) | $($runs[0].Status) | $($runs[0].Problem)"
         }
         if ($selected) {
-            Write-Host "Ultima elegivel: $($selected.CreatedAtUtc.ToString('yyyy-MM-dd HH:mm:ss')) UTC | $($selected.Status) | RunId: $($selected.RunId)"
+            Write-Host "Ultima elegivel: $(Format-HarnessDate $selected.CreatedAtUtc.ToString('o')) | $($selected.Status) | RunId: $($selected.RunId)"
         }
         if ($Interactive) {
             $answer = Read-Host 'Enter usa a ultima elegivel; h mostra historico; q cancela'
@@ -62,7 +62,7 @@ function Select-MtaPlanningRun {
                 for ($i = 0; $i -lt $runs.Count; $i++) {
                     $item = $runs[$i]
                     $detail = if ($item.Eligible) { 'disponivel' } else { $item.Problem }
-                    Write-Host ("{0}. {1} UTC | {2} | RunId: {3} | {4}" -f ($i+1), $item.CreatedAtUtc.ToString('yyyy-MM-dd HH:mm:ss'), $item.Status, $item.RunId, $detail)
+                    Write-Host ("{0}. {1} | {2} | RunId: {3} | {4}" -f ($i+1), (Format-HarnessDate $item.CreatedAtUtc.ToString('o')), $item.Status, $item.RunId, $detail)
                 }
                 $answer = Read-Host 'Numero da rodada (q cancela)'
                 $choice = 0
