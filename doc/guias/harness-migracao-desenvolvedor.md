@@ -603,9 +603,18 @@ respeitar o resultado da conferencia antes de editar e antes de validar/integrar
 
 ## Planejar lotes de correcao com Copilot
 
-O [prompt planejar-lotes](../../.github/prompts/planejar-lotes.prompt.md) ja acompanha o clone. **Voce o aciona; ele nao executa automaticamente depois do MTA.** Seleciona o agente **devsquad** com leitura/busca (`read/readFile`, `search/listDirectory`, `search/fileSearch`, `search/textSearch`) e gravacao (`edit/createFile`, `edit/editFiles`). A escrita autorizada pelo prompt limita-se ao `plan.md` e `todo.md` de corretivas da solicitacao atual; fontes, POMs, evidencias e documentos do harness ficam fora desse escopo. Essa delimitacao vem das instrucoes, nao de uma restricao tecnica de pasta nas ferramentas: confira os destinos das edicoes. Nao ha ferramentas de terminal, tarefas, web ou delegacao. [Ferramentas do VS Code](https://code.visualstudio.com/docs/agents/reference/tools-reference).
+O [prompt planejar-lotes](../../.github/prompts/planejar-lotes.prompt.md) ja acompanha o clone. **Voce o aciona; ele nao executa automaticamente depois do MTA.** Seleciona o condutor **devsquad** com delegacao (`agent`), leitura/busca (`read/readFile`, `search/listDirectory`, `search/fileSearch`, `search/textSearch`) e gravacao (`edit/createFile`, `edit/editFiles`). O condutor delega a elaboracao a **devsquad.plan**, que usa as skills e devolve os textos; o condutor confere, grava e rele somente `plan.md` e `todo.md` da solicitacao. [Ferramentas do VS Code](https://code.visualstudio.com/docs/agents/reference/tools-reference).
 
-O plugin DevSquad deve disponibilizar o agente `devsquad` no seletor e as skills
+O contrato do prompt adapta o fluxo generico do plugin ao lote MTA: nao gera
+specs, ADRs, diagramas ou board. O planejador trabalha por leitura/busca e nao
+grava nem subdelega; nao e necessario habilitar subdelegacoes no VS Code.
+Fontes, POMs, evidencias e documentos do harness ficam fora do escopo de escrita.
+Terminal, tarefas, web, Git e implementacao permanecem proibidos para ambos.
+Agentes personalizados podem expor ferramentas proprias; esses limites sao
+instrucoes, nao uma sandbox tecnica herdada: confira chamadas e destinos das edicoes.
+Veja o [contrato de subagentes Local](https://code.visualstudio.com/docs/agents/run/subagents).
+
+O plugin DevSquad deve disponibilizar `devsquad`, `devsquad.plan` e as skills
 pertinentes ao planejamento. O prompt pede a leitura dessas skills e o relato das
 que foram usadas, sem executar automaticamente implementacao, testes ou commits.
 Confira agente e skills em **Chat: Open Customizations**; se nao estiverem disponiveis,
@@ -620,8 +629,19 @@ O nome do agente no cabecalho e a prioridade das ferramentas do prompt seguem o
 3. Se ainda nao houver politica Git, escolha **c** para cadastrar as branches, **Enter** para deixa-las pendentes na proposta preliminar ou **q** para cancelar. Veja [branches e conferencia Git](#branches-e-conferencia-git).
 4. Se houver propostas salvas desse projeto, escolha o planejamento anterior para continuar/comparar ou pressione **Enter** para iniciar um independente. A lista mostra o projeto, a data local de preparacao e a data do MTA, ambas com fuso, alem dos IDs; ter arquivos nao significa que a proposta foi aprovada.
 5. A tarefa abre `planejar-lotes.prompt.md`. Confira o **Contexto selecionado pelo desenvolvedor**, ao final. Cada solicitacao fica sob `.harness/planning/`, organizada pelo nome do projeto e pelas datas do MTA e da preparacao, conforme abaixo. O `context.json` registra identidades completas, hashes das quatro evidencias principais e o vinculo anterior escolhido. Preparar contexto nao envia mensagens nem executa MTA.
-6. Use o botao de executar o prompt no editor e escolha uma **nova conversa Copilot Local**, com modelo que ofereca ferramentas. Confira **devsquad**, as ferramentas de leitura/busca e `edit/createFile` / `edit/editFiles` em **Configure Tools**. Pode informar o objetivo na mensagem, por exemplo: "Planeje somente o lote para corrigir a limpeza do cache de consultas".
-7. O Copilot deve planejar **um lote ativo por objetivo**, conferir seus POMs/dependencias e gravar **plan.md** e **todo.md** nos dois caminhos indicados pelo contexto. O chat apresenta os links e um resumo. Revise a proposta e as pendencias; grava-la nao autoriza implementar corretivas.
+6. Use o botao de executar o prompt no editor e escolha uma **nova conversa Copilot Local**, com modelo que ofereca ferramentas. Confira **devsquad**, **Run Subagent (`agent/runSubagent`)**, leitura/busca e `edit/createFile` / `edit/editFiles` em **Configure Tools**. Pode informar o objetivo: "Planeje somente o lote para corrigir a limpeza do cache de consultas".
+7. Confira no chat a chamada a **devsquad.plan** e o relato das skills utilizadas. O especialista deve elaborar **um lote ativo por objetivo**, conferir POMs/dependencias e devolver os dois textos. O condutor grava e rele **plan.md** e **todo.md** nos caminhos do contexto e apresenta os links. Revise a proposta e as pendencias; grava-la nao autoriza implementar corretivas.
+
+**Se o DevSquad disser que nao pode gravar por ser condutor:** confira se o prompt
+preparado tem a secao **Delegacao delimitada ao planejador DevSquad** e `agent`
+na lista de ferramentas. Prompts antigos sao copias historicas e nao se atualizam
+com o template. Prepare uma nova solicitacao para testar uma versao nova; preserve
+a anterior e vincule-a se ja contiver proposta. Nao repetir build/MTA somente para
+trocar o prompt: confira a integridade e a diferenca de codigo/HEAD antes de reutilizar
+a rodada como evidencia historica. Nunca atribua ao MTA antigo o novo HEAD.
+Se a ferramenta ou especialista faltar, ajuste a sessao/plugin antes da triagem.
+Uma resposta so no chat nao conclui a persistencia; use **abrir plano e to-do**
+para conferir os dois documentos depois. Relate qualquer acao fora do contrato.
 
 Se o botao de executar nao aparecer, abra uma nova conversa Local e use a linha `/planejar-lotes ...` exibida no terminal. Ela referencia o arquivo preparado, sem preencher varios caminhos manualmente. Contextos antigos sem destinos de escrita devem ser preparados novamente. Nunca use `input` como checkout de trabalho.
 

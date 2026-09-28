@@ -31,9 +31,27 @@ contexto e o prompt de planejamento nao automatizam a execucao desse ciclo.
 
 O template seleciona `agent: devsquad`, disponibilizado pelo plugin DevSquad no
 Copilot do desenvolvedor. Usar skills de SDLC pertinentes ao planejamento e relatar
-as efetivamente lidas; indisponibilidade deve ser explicita. As ferramentas e saidas
-continuam limitadas pelo prompt, sem terminal, delegacao ou implementacao automatica.
+as efetivamente lidas; indisponibilidade deve ser explicita. O prompt habilita
+`agent` para uma delegacao a `devsquad.plan`, alem de leitura/busca e edicao.
 Preparar contexto copia essa configuracao; nao instala nem verifica o plugin no cliente.
+
+O condutor valida o recibo e repassa ao especialista identidade, caminhos literais,
+evidencias autorizadas e contrato completo do prompt. O planejador usa as skills
+para elaborar os dois documentos em memoria e retorna `[CREATE]`/`[EDIT]`;
+somente o condutor grava e rele PlanPath/TodoPath apos conferir o retorno.
+O pedido de planejamento ja autoriza essa persistencia, nunca a implementacao.
+Dados Git/runtime ausentes ficam PENDENTES na proposta; identidade/destinos
+divergentes impedem escrita. Retorno incompleto ou falha parcial deve ser explicito.
+
+Esse modo adapta os defaults do plugin: contexto MTA substitui descoberta de
+spec/envisioning, destinos do recibo substituem docs/ e tasks.md, e o planejador
+analisa diretamente sem subdelegacao. Nao criar ADRs/diagramas/board, executar
+terminal/web/Git/testes ou avancar para outras fases. Os especialistas podem ter
+ferramentas proprias: esses limites sao comportamentais, nao isolamento tecnico.
+Ausencia de agent/devsquad.plan deve ser detectada antes da triagem; nao simular
+delegacao ou persistencia. O ensaio Local deve comprovar invocacao do especialista,
+skills relatadas, somente dois documentos escritos e releitura antes de concluir.
+Testes de preparacao nao comprovam obediencia do modelo ou integracao do plugin.
 
 O contrato de projeto/branch e concorrencia esta na
 [ADR-0003](../adr/0003-projeto-branch-e-concorrencia-da-migracao.md). O prompt exige

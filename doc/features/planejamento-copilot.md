@@ -10,6 +10,13 @@ Retomada em nova conversa e reconciliacao apos novo MTA continuam pendentes.
 A primeira tentativa parou por falta de delegacao; a segunda concluiu sem ela,
 com indisponibilidade de uma skill relatada. Nao comprova estabilidade entre tentativas.
 
+Em 2026-09-28, novo ensaio na rodada 391c4a60505440fdb26d4b6419bfa643
+terminou sem gravacao: o condutor recusou autoria direta e o prompt proibia
+delegacao. Ajuste: habilitar agent, delegar a elaboracao a devsquad.plan com
+skills e contrato MTA explicito, e centralizar a persistencia no condutor.
+Nao altera o plugin; evita subdelegacao e artefatos do fluxo generico em docs/.
+Validacao do comportamento desse ajuste no Copilot: PENDENTE do novo ensaio.
+
 Problema: escolher entre varios projetos e rodadas exige preencher caminhos
 manualmente antes de pedir uma proposta ao Copilot.
 

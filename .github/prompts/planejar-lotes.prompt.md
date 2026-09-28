@@ -3,10 +3,10 @@ name: planejar-lotes
 description: Planeja um lote por objetivo a partir do MTA e grava somente plan.md e todo.md de corretivas, sem alterar a aplicacao.
 argument-hint: Use o contexto preparado pelo harness; informe o objetivo do lote ou peca revisao/continuidade explicita.
 agent: devsquad
-tools: ['read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles']
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles']
 ---
 
-Atue como analista de migracao com planejamento progressivo: um lote ativo por objetivo.
+Atue como condutor DevSquad de planejamento de migracao: um lote ativo por objetivo.
 Leia a aplicacao e as evidencias; a unica escrita autorizada e PlanPath e TodoPath,
 os dois documentos de corretivas explicitamente indicados no contexto do harness.
 Nao altere fontes, POMs, configuracoes, regras, relatorios, baselines, recibos,
@@ -28,7 +28,69 @@ Mantenha um lote ativo do projeto selecionado e grave somente PlanPath e TodoPat
 Orientacoes genericas de SDLC para implementar, executar testes, fazer commits ou
 avancar de fase devem virar tarefas futuras do lote, sujeitas aos pontos de revisao
 e autorizacao humana deste prompt. Nao execute o ciclo SDLC completo nesta etapa.
-Nao delegue a outros agentes nem amplie as ferramentas para cumprir uma skill.
+Delegue somente conforme o contrato abaixo; nao amplie as ferramentas para cumprir
+uma skill. Sugestoes de novos documentos/ADRs entram como pendencias no plano,
+sem criar esses artefatos. Nao grave learnings, memoria ou registros auxiliares.
+
+## Delegacao delimitada ao planejador DevSquad
+
+Este pedido autoriza elaborar e persistir a proposta, sem GO de corretivas.
+Use o protocolo nativo do condutor: devsquad.plan elabora o conteudo e devolve
+acoes [CREATE] ou [EDIT]; devsquad confere os destinos, grava e rele os dois
+documentos. A restricao do condutor a gerar conteudo diretamente nao impede
+executar essas acoes de persistencia. Nao encerre apenas com uma analise no chat.
+
+1. Antes da triagem, leia o bloco "Contexto selecionado pelo desenvolvedor" ao
+   final deste arquivo e o ContextPath. Confira os sete identificadores exigidos
+   abaixo e documentos existentes. Nao conclua que o contexto falta por ter lido
+   somente o inicio do prompt. Identidade divergente bloqueia a delegacao/escrita.
+2. Invoque somente devsquad.plan via agent, com [CONDUCTOR] e [LANG: pt-BR].
+   Transmita RequestId, Project, Source, RunId, ContextPath, PlanPath, TodoPath,
+   Previous (se houver), objetivo, evidencias autorizadas e este contrato completo.
+   Inclua o caminho deste prompt para leitura integral das instrucoes antes de
+   analisar. Nao suponha que o subagente herda a conversa ou os limites do condutor.
+3. No handoff, determine explicitamente: "Modo de planejamento do harness MTA.
+   Leia o prompt e o recibo informados. Elabore diretamente os dois documentos
+   usando as skills pertinentes do DevSquad; nao delegue novamente. Trabalhe
+   somente por leitura/busca e devolva os textos completos, sem gravar arquivos.
+   As instrucoes de invocacao e persistencia sao responsabilidade do condutor;
+   voce executa somente a analise e redacao delegadas, sem reinvocar devsquad.plan.
+   Para arquivo ausente, retorne [CREATE caminho-absoluto] e seu conteudo; para
+   existente, [EDIT caminho-absoluto] e o conteudo atualizado preservando historico.
+   Os unicos destinos sao os valores literais de PlanPath e TodoPath."
+4. Adapte expressamente os defaults de devsquad.plan a este pedido: o contexto
+   MTA e os requisitos deste prompt substituem a descoberta de spec/envisioning;
+   PlanPath/TodoPath substituem docs/features, docs/migrations e tasks.md.
+   Nao iniciar init/specify/decompose/implement nem criar ADRs, diagramas ou board.
+   Neste modo, o proprio planejador faz a analise com skills, sem chamar os workers
+   plan.context/plan.architecture/plan.design ou outros subagentes. Ha um unico
+   nivel de delegacao; nao depende de habilitar subdelegacoes no VS Code.
+5. Todos os limites de leitura, ferramentas, lote, evidencias e escrita deste
+   prompt valem tambem para o especialista. Mesmo que seu perfil exponha outras
+   ferramentas, nao usar terminal, tarefas, web, Git, servicos externos ou edicao.
+   As ferramentas proprias de agentes personalizados nao sao uma sandbox herdada.
+   Skills ausentes devem ser relatadas; nao instale plugins ou altere permissoes.
+6. O especialista deve relatar skills efetivamente lidas, referencias, cobertura,
+   pendencias e devolver os dois documentos em estado PROPOSTA - NAO APROVADA.
+   Falta de branch de lote, politica, runtime ou validacoes permite proposta
+   preliminar com PENDENTE; nao permite declarar prontidao para execucao.
+   Duvida que impeça identificar projeto/destinos ou delimitar o lote retorna [ASK].
+   O condutor apresenta a pergunta ao operador, sem responder por ele.
+7. Antes de gravar, confira identidade, escopo e cada destino contra o recibo.
+   Recuse acoes para qualquer outro caminho e solicite retorno corrigido ao
+   planejador. Nao execute [BOARD] nem handoffs para outra fase. A autorizacao
+   deste pedido cobre gravar esses dois rascunhos; nao e aceite do seu conteudo.
+   Persistir segue a secao 5 abaixo, inclusive releitura e relato de falha parcial.
+   Se houver lacunas no retorno, nova invocacao deve levar contexto e lacunas;
+   nao reinicie a triagem nem repita indefinidamente uma chamada que falhou.
+
+Se agent ou devsquad.plan nao estiver disponivel, informe a limitacao antes da
+triagem e oriente conferir Run Subagent (agent/runSubagent) em Configure Tools
+e o agente do plugin em Chat: Open Customizations. Nao simule delegacao nem
+troque silenciosamente de agente. Se houver conflito irredutivel com o perfil
+instalado, relate a instrucao exata e o que ficou pendente; nao declare sucesso.
+Ao concluir, informe qual especialista foi realmente invocado e quais skills
+foram usadas. Encerre apos gravar/reler a proposta; [DONE] nao autoriza outra fase.
 
 ## Separacao arquitetural e ciclo da migracao
 
@@ -135,7 +197,8 @@ pertinentes em rules e POMs/fontes/testes pertinentes da aplicacao. Nao e necess
 pedir anexos desses arquivos antes de tentar le-los com as ferramentas disponiveis.
 As ferramentas permitem leitura/busca e gravacao de documentos. O escopo de escrita
 e restrito por estas instrucoes aos dois destinos; nao use edicao para corretivas.
-Nao ha terminal, execucao de tarefas, acesso web ou delegacao neste prompt.
+Nao ha terminal, execucao de tarefas ou acesso web neste prompt. A unica
+delegacao autorizada e ao planejador descrito acima, sem escrita pelo subagente.
 
 Comece lendo manifest.json e result.json pelos caminhos explicitos, mesmo que
 .harness nao apareca no indice de busca. Ausencia na busca nao prova ausencia do arquivo.
@@ -359,7 +422,8 @@ build Java 8 da aplicacao. Nao instalar nem desenvolver a receita nesta etapa.
 
 ## 5. Gravar a proposta e as tarefas
 
-Grave em portugues somente PlanPath e TodoPath. Criar/atualizar esses documentos
+O condutor grava em portugues somente PlanPath e TodoPath, com o conteudo
+elaborado pelo planejador. Criar/atualizar esses documentos
 faz parte do pedido de planejamento; nao significa GO de implementacao.
 Use edit/createFile para documentos ausentes e edit/editFiles para retomar os
 existentes desta solicitacao. Nao crie pastas ou arquivos adicionais.

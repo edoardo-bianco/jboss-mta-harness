@@ -91,6 +91,13 @@ Copy-Item -LiteralPath (Join-Path $root '.github/prompts/planejar-lotes.prompt.m
 $before = @(Get-ChildItem -LiteralPath $area -Recurse -File | Get-FileHash)
 $prepared = New-MtaPlanningContext $context -RunId $oldId
 $promptText = Get-Content -LiteralPath $prepared.PromptPath -Raw -Encoding UTF8
+# O prompt sobrescreve as ferramentas do condutor: delegacao precisa chegar ao cliente.
+$frontmatter = [regex]::Match($promptText, '(?s)\A---\s*\r?\n(.*?)\r?\n---').Groups[1].Value
+Assert ($frontmatter -match '(?m)^agent: devsquad\s*$') 'Planejamento perdeu o condutor DevSquad.'
+$toolLine = [regex]::Match($frontmatter, '(?m)^tools: \[(.*?)\]').Groups[1].Value
+$toolNames = @([regex]::Matches($toolLine, "'([^']+)'") | ForEach-Object { $_.Groups[1].Value })
+$allowedTools = @('agent','read/readFile','search/listDirectory','search/fileSearch','search/textSearch','edit/createFile','edit/editFiles')
+Assert (@(Compare-Object $allowedTools $toolNames).Count -eq 0) 'Prompt deve permitir delegacao, leitura e edicao, sem terminal ou outras ferramentas.'
 $requestFolder = Split-Path -Parent $prepared.PromptPath
 $runFolder = Split-Path -Parent $requestFolder
 $projectFolder = Split-Path -Parent $runFolder

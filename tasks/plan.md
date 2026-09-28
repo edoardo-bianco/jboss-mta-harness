@@ -1,5 +1,39 @@
 # Plano do agente: evolucao do harness
 
+## Delegacao de planejamento DevSquad — 2026-09-28
+
+Pedido autorizado: corrigir o conflito entre o condutor devsquad e o prompt que
+proibia delegacao, preservando skills e escrita exclusiva de PlanPath/TodoPath.
+Base: main em d8b4b04, checkout limpo; branch harness/devsquad-planejamento em
+worktree isolado. Checkout da migracao permanece em main_jboss_eap74.
+
+Usar o condutor nativo devsquad e uma delegacao delimitada a devsquad.plan.
+O especialista devolve os dois documentos em memoria; o condutor valida destinos,
+grava e rele os arquivos. Adaptar explicitamente o fluxo generico do plugin:
+sem docs/, ADRs adicionais, board, terminal, implementacao ou subdelegacao.
+As skills pertinentes continuam disponiveis por leitura, com relato de uso.
+Nao modificar o plugin instalado nem as solicitacoes historicas.
+
+Validar ferramentas no prompt gerado, identidade e preservacao dos documentos
+anteriores em Test-Planning; conferir catalogo em Test-TaskInputs e revisar diff.
+Depois de revisado, integrar explicitamente main -> main_jboss_eap74 e preparar
+nova solicitacao com o template atualizado para o ensaio do desenvolvedor.
+O MTA 391c4a60505440fdb26d4b6419bfa643 continua historico de d8b4b04;
+mudanca apenas no harness exige registrar a diferenca de HEAD, sem reatribuir a rodada.
+Aceite do comportamento no Copilot: PENDENTE do ensaio; testes locais validam
+preparacao/contrato, nao execucao de subagentes ou obediencia ao escopo.
+
+Verificado: Test-Planning.ps1 e Test-TaskInputs.ps1 passaram em Windows
+PowerShell 5.1, sem alterar ExecutionPolicy. O teste de ferramentas falhou antes
+do ajuste e passou com agent habilitado. Worktree movido para temporario curto
+por limite de caminhos do PowerShell 5.1; checkout de migracao preservado.
+Revisao do contrato/diff: delegacao de um nivel, perfis proprios tratados como
+limites comportamentais, defaults do plugin adaptados explicitamente.
+Os nove arquivos da aplicacao registrados no manifesto MTA mantem os hashes.
+Foram encontrados plan.md/todo.md na solicitacao 8288c85ebd61476381fa7dfbcb7fe841;
+preserva-los e vincular a nova solicitacao a ela, mantendo o lote existente.
+Esses arquivos nao comprovam o ensaio da nova delegacao.
+
 ## Ponto de retomada — 2026-09-27
 
 Sessao encerrada a pedido do desenvolvedor. Antes deste registro, main e

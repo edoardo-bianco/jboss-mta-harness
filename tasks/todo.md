@@ -1,5 +1,18 @@
 # To-do do agente: evolucao do harness
 
+## Delegacao delimitada no DevSquad — 2026-09-28
+
+- [x] Conferir Git e criar harness/devsquad-planejamento a partir da main em
+  worktree separado, preservando o checkout da migracao.
+- [x] Habilitar delegacao ao planejador e definir contrato de retorno/gravacao.
+- [x] Atualizar guia e especificacao, incluindo ferramentas proprias dos subagentes.
+- [x] Validar preparacao, historico e tarefas; revisar antes da integracao.
+  Test-Planning e Test-TaskInputs passaram em Windows PowerShell 5.1. Contrato
+  revisado; ensaio de subagentes no cliente continua separado e pendente.
+- [ ] Integrar nas duas bases e preparar o ensaio sem alterar solicitacoes antigas.
+- [ ] Ensaio no Copilot: invocar devsquad.plan, usar skills, gravar/reler somente
+  PlanPath/TodoPath e encerrar em PROPOSTA - NAO APROVADA, sem corretivas.
+
 ## Retomada da sessao — 2026-09-27
 
 Ponto atual em [tasks/plan.md](plan.md#ponto-de-retomada--2026-09-27).
