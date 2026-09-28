@@ -25,6 +25,11 @@ documentos da aplicacao, separados deste plano do harness.
 Escopo recente implementado ate 6fa8b2b: planejamento/delegacao, Git informativo,
 feedback e revisao, tarefa de evidencias, guia e horario local. Pendencias atuais
 e backlog Sonar/deploy/servidor estao consolidados no inicio de [todo.md](todo.md).
+Destinos de deploy confirmados pelo desenvolvedor em 2026-09-28: JBoss EAP 7.1
+e 7.4, conforme tools.eap71Home/tools.eap74Home no JSON local (campos conferidos).
+O planejamento futuro reutiliza essa configuracao para selecao do servidor e
+controle de estado/start/stop; nao reabre escolha de versoes nem inclui EAP 7.0.
+Isso nao exige que o artefato corrigido para EAP 7.4 funcione tambem no EAP 7.1.
 Validacao desta limpeza concluida: diff sem erros, links locais existentes e seis
 itens abertos somente nas secoes atuais/backlog, sem checkboxes pendentes no
 historico. Build/MTA e testes de scripts nao repetidos por ser ajuste documental.
@@ -531,9 +536,11 @@ Depois de concluir e validar a reestruturacao, planejar as etapas nesta ordem:
    dos outros projetos quando essas referencias forem disponibilizadas; definir
    configuracao, credenciais, resultados e criterio de qualidade no plano futuro.
 2. **Deploy / release:** preparar e implantar a release da aplicacao no JBoss
-   EAP 7.1 ou EAP 7.0, conforme destino selecionado. Confirmar versoes e ambientes
-   ao detalhar esta etapa, sem substituir o destino EAP 7.4 do fluxo de migracao
-   existente. Planejar rastreabilidade do artefato, verificacao e rollback.
+   EAP 7.1 ou EAP 7.4, conforme destino selecionado, usando tools.eap71Home e
+   tools.eap74Home do JSON local. Correcao confirmada pelo desenvolvedor em
+   2026-09-28: a referencia anterior a EAP 7.0 estava incorreta. Detalhar selecao,
+   rastreabilidade do artefato, verificacao e rollback; a migracao tem EAP 7.4
+   como destino, sem exigir o mesmo WAR nos dois servidores.
 3. **Servidor:** planejar start, stop e consulta de estado do JBoss no ambiente
    selecionado, incluindo a ordem necessaria para o deploy e sua verificacao.
 

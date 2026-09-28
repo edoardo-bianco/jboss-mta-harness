@@ -22,8 +22,10 @@ Ponto atual e evidencias declaradas pelo operador em [plan.md](plan.md#ponto-atu
 
 - [ ] Planejar qualidade com scanner Maven local e selecao de Sonar corporativo
   ou Sonar em Docker, considerando referencias fornecidas pelo desenvolvedor.
-- [ ] Planejar release/deploy, confirmando ambientes e versoes. As mencoes antigas
-  a EAP 7.1/7.0 nao substituem o destino EAP 7.4 confirmado para esta migracao.
+- [ ] Planejar release/deploy para JBoss EAP 7.1 e 7.4, destinos confirmados pelo
+  desenvolvedor em 2026-09-28 e configurados em tools.eap71Home/tools.eap74Home
+  no JSON local. Detalhar selecao do servidor, artefato, implantacao e rollback;
+  as corretivas de migracao continuam destinadas ao EAP 7.4.
 - [ ] Planejar start/stop e consulta de estado do JBoss, coordenados com o deploy.
 
 Categorias futuras: Qualidade:, Deploy: e Servidor:. Detalhar contratos e criterios
