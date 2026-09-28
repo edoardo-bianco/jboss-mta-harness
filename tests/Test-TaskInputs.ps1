@@ -4,7 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 13 -and @($labels | Sort-Object -Unique).Count -eq 13) 'Manter 13 tarefas distintas apos remover o controle Git.'
+Assert ($labels.Count -eq 14 -and @($labels | Sort-Object -Unique).Count -eq 14) 'Manter 14 tarefas distintas, incluindo criacao de evidencias.'
 Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -notcontains 'Planejamento: conferir Git do lote') 'Limpeza deve permanecer; controle Git deve sair do catalogo.'
 Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|MTA|Planejamento): ' }).Count -eq 0) 'Run Tasks devem ser classificadas pelo prefixo da etapa.'
 $projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' })
@@ -23,6 +23,8 @@ $automatic = @($tasks.tasks | Where-Object label -eq 'Workspace: conferir config
 $planning = @($tasks.tasks | Where-Object label -eq 'Planejamento: preparar contexto para Copilot')
 Assert ($planning.Count -eq 1 -and $planning[0].args -contains '-EditorPath' -and $planning[0].args -contains '${execPath}') 'Planejamento deve abrir o prompt no editor da tarefa.'
 $openPlanning = @($tasks.tasks | Where-Object label -eq 'Planejamento: abrir plano e to-do')
+$evidenceTask = @($tasks.tasks | Where-Object label -eq 'Planejamento: criar pasta de evidencias')
+Assert ($evidenceTask.Count -eq 1 -and $evidenceTask[0].args -contains '${workspaceFolder}/scripts/criar-pasta-evidencias.ps1' -and $evidenceTask[0].args -contains '${execPath}') 'Falta tarefa para criar evidencias e abrir indice.'
 Assert ($openPlanning.Count -eq 1 -and $openPlanning[0].args -contains '${workspaceFolder}/scripts/abrir-planejamento.ps1' -and $openPlanning[0].args -contains '${execPath}') 'Falta tarefa para abrir plano e to-do no editor.'
 Assert (-not ($automatic.args | Where-Object { $_ -like '${input:*}' })) 'Tarefa automatica nao deve abrir prompts de entrada.'
 

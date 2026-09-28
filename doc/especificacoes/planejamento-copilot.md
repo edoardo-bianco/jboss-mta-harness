@@ -141,9 +141,18 @@ Pedido do desenvolvedor em 2026-09-28: manter planejamento inicial simples e
 oferecer revisao documental do mesmo lote com MTA e outros resultados fornecidos.
 O prompt separado `revisar-lote` recebe o caminho do prompt preparado e o de um
 indice de evidencias; reutiliza o contrato desse contexto e exige Previous com
-plano/to-do do lote existente. Nao altera o gerador nem adiciona Run Task.
+plano/to-do do lote existente. Nao altera o gerador de contexto.
 
-O operador guarda arquivos em `.harness/evidencias/<nome>__<chave12>/evidencias_<data-fuso>/`
+A tarefa Planejamento: criar pasta de evidencias reutiliza selecao de projeto
+do workspace, identidade, chave de pasta e data do harness. Cria somente pasta
+nova e LEIA-ME.md baseado no modelo do guia, com Project/Label/Source/data e
+instrucoes de feedback, build/MTA, Previous e revisar-lote. ID do lote e objetivo
+ficam para o desenvolvedor; nao selecionar plano/MTA por recencia. Nao exigir
+rodada previa para criar a pasta. Cancelar selecao nao cria arquivos. Repeticao
+preserva pastas existentes; sufixo aleatorio evita colisoes, sem hashes de arquivos.
+Abertura no editor e opcional; falha de abertura informa o indice salvo.
+
+O operador guarda arquivos em `.harness/evidencias/<nome>__<chave12>/evidencias_<data-fuso>__<id12>/`
 e descreve projeto/fonte, data, ambiente, artefato/versao e finalidade em LEIA-ME.md.
 O indice delimita os arquivos autorizados para leitura. Metadados desconhecidos
 sao lacunas, nao valores inventados. O agente nao coleta nem edita essas evidencias.
@@ -176,6 +185,7 @@ Nao alterar ExecutionPolicy nem adicionar dependencias.
 ```powershell
 powershell.exe -NoProfile -File .\tests\Test-Planning.ps1
 powershell.exe -NoProfile -File .\tests\Test-TaskInputs.ps1
+powershell.exe -NoProfile -File .\tests\Test-EvidenceFolder.ps1
 git diff --check
 ```
 

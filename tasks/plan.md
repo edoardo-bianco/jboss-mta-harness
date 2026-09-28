@@ -1,5 +1,23 @@
 # Plano do agente: evolucao do harness
 
+## Tarefa de evidencias e percurso de feedback - 2026-09-28
+
+Pedido: criar estrutura por projeto via Run Task e explicar feedback -> build/MTA
+novo -> evidencias -> contexto com Previous -> revisar-lote -> revisao humana.
+Branch harness/tarefa-evidencias derivada de main 5f27366. Reutilizar selecao de
+projeto, chave de pasta e formatacao de data. Criar somente pasta nova e LEIA-ME
+com identidade/instrucoes, sem hashes de arquivos, MTA ou lote escolhido sozinho.
+Atualizar modelo, guia, catalogo de tarefas e especificacao. Testar entrada real,
+isolamento, repeticao sem sobrescrita, cancelamento e abertura do indice.
+
+Implementado com entrada criar-pasta-evidencias.ps1 e modelo reutilizavel do guia.
+Test-EvidenceFolder passou em PowerShell 5.1: selecao/cancelamento reais, caminhos
+com espacos, homonimos isolados, repeticao preservada e editor simulado.
+Test-TaskInputs passou com 14 tarefas. Guia e indice explicam o ciclo completo,
+incluindo feedback documental sem novo MTA, Previous e GO/aceite separados.
+Nenhum MTA, corretiva ou revisao Copilot foi executado nesta entrega.
+
+
 ## Evidencias complementares e revisao de lote - 2026-09-28
 
 Pedido autorizado: guia, pasta por projeto/data e prompt separado de revisao;

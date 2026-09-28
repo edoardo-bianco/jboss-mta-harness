@@ -186,6 +186,20 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
+      "label": "Planejamento: criar pasta de evidencias",
+      "detail": "Escolha o projeto; crie pasta datada e abra o LEIA-ME com instrucoes para adicionar evidencias manualmente.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": [
+        "-NoProfile", "-File", "${workspaceFolder}/scripts/criar-pasta-evidencias.ps1",
+        "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget",
+        "-EditorPath", "${execPath}"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Planejamento: abrir plano e to-do",
       "detail": "Escolha projeto e planejamento por data; abra os dois documentos existentes no VS Code.",
       "type": "process",

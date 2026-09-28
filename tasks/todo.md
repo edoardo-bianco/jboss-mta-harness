@@ -1,5 +1,13 @@
 # To-do do agente: evolucao do harness
 
+## Tarefa de evidencias e percurso de feedback - 2026-09-28
+
+- [x] Criar tarefa por projeto e LEIA-ME com identidade e instrucoes.
+- [x] Documentar percurso completo de feedback com MTA novo e Previous.
+- [x] Validar criacao, isolamento, cancelamento, repeticao e catalogo; revisar.
+  Test-EvidenceFolder e Test-TaskInputs passaram em PowerShell 5.1; editor simulado.
+
+
 ## Evidencias complementares e revisao de lote - 2026-09-28
 
 - [x] Registrar contrato: prompt separado, indice e area local, sem hashes adicionais.
