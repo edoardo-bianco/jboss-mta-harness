@@ -135,6 +135,37 @@ por trocar de branch; o desenvolvedor informa sua escolha ao agente.
   separados. Ajustes de POM ja demonstrados devem ser explicitos. Buscas em output
   limitam-se a output.yaml/dependencies.yaml; nao abrangem logs.
 
+## Revisao com evidencias complementares
+
+Pedido do desenvolvedor em 2026-09-28: manter planejamento inicial simples e
+oferecer revisao documental do mesmo lote com MTA e outros resultados fornecidos.
+O prompt separado `revisar-lote` recebe o caminho do prompt preparado e o de um
+indice de evidencias; reutiliza o contrato desse contexto e exige Previous com
+plano/to-do do lote existente. Nao altera o gerador nem adiciona Run Task.
+
+O operador guarda arquivos em `.harness/evidencias/<nome>__<chave12>/evidencias_<data-fuso>/`
+e descreve projeto/fonte, data, ambiente, artefato/versao e finalidade em LEIA-ME.md.
+O indice delimita os arquivos autorizados para leitura. Metadados desconhecidos
+sao lacunas, nao valores inventados. O agente nao coleta nem edita essas evidencias.
+Esses arquivos nao recebem hashes, assinatura ou verificacao automatica de
+integridade. Nao integram o snapshot MTA nem EvidenceHashes; identidade, hashes MTA,
+hashes dos documentos anteriores e destinos do contexto continuam como existentes.
+Limpeza de execucoes preserva evidencias complementares. A pasta e local/ignorada
+pelo Git, nao e criada pelo clone e nao e backup temporario.
+
+DevSquad repassa ao devsquad.plan os caminhos, limites e pedido de revisao.
+O planejador compara novas evidencias com o MTA e a proposta, distingue dados
+observados/declarados/pendentes e retorna apenas PlanPath/TodoPath atualizados.
+Preservar ID do lote e historico; manter alteracoes de proposta nao aprovadas.
+Mudanca de escopo/abordagem exige nova revisao/GO. Evidencia conflitante nao
+autoriza reescrever MTA nem descartar premissas sem esclarecimento.
+
+Aceite desta entrega: guia com estrutura e exemplo, modelo reutilizavel de indice,
+pasta local do ensaio, prompt separado com as mesmas ferramentas/limites, leitura
+dos contratos e links verificados. O ensaio DevSquad deve demonstrar leitura
+delimitada e revisao consistente, sem escrita fora dos dois destinos. Testes
+estruturais nao comprovam comportamento do modelo. Nenhuma corretiva nesta entrega.
+
 ## Implementacao e verificacao
 
 PowerShell 5.1 em `scripts/`, tarefa em `.vscode/tasks.json`, testes com fixtures em

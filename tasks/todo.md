@@ -1,5 +1,13 @@
 # To-do do agente: evolucao do harness
 
+## Evidencias complementares e revisao de lote - 2026-09-28
+
+- [x] Registrar contrato: prompt separado, indice e area local, sem hashes adicionais.
+- [x] Criar prompt de revisao, modelo de indice, pasta do ensaio e guia operacional.
+- [x] Verificar ferramentas, 23 links locais e preview de limpeza -All; revisar.
+- [ ] Operador: fornecer evidencias e ensaiar revisar-lote com Previous no Copilot,
+  conferindo ID do lote, consistencia e escrita exclusiva dos dois documentos.
+
 ## Revisao manual documentada - 2026-09-28
 
 - [x] Documentar observacoes manuais, salvamento, Previous, revisao e GO no guia;

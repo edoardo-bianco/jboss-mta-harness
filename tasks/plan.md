@@ -1,5 +1,26 @@
 # Plano do agente: evolucao do harness
 
+## Evidencias complementares e revisao de lote - 2026-09-28
+
+Pedido autorizado: guia, pasta por projeto/data e prompt separado de revisao;
+sem hashes de arquivos adicionais. Branch harness/evidencias-revisao a partir
+de main 46ce43c. Contrato em doc/especificacoes/planejamento-copilot.md.
+Manter planejar-lotes e preparacao existentes; revisar-lote usa prompt preparado
+com Previous e indice LEIA-ME das evidencias. Criar modelo de indice e pasta
+local para migracao-cache-antes, sem inventar resultados. Validar ferramentas,
+links, contrato de caminhos e limpeza preservando a nova area. Ensaio Copilot
+fica com o operador; nao alterar plano/to-do da aplicacao nesta entrega.
+
+Entrega implementada: revisar-lote, modelo do indice e secao operacional no guia.
+Pasta local criada em .harness/evidencias/migracao-cache-antes__97a5fc995901/
+evidencias_2026-09-28_16-10-43-0300/, somente LEIA-ME.md sem resultados inventados.
+Verificado: ferramentas iguais ao prompt inicial, 23 links locais existentes,
+git diff --check e preview real de limpeza -All sem a area evidencias.
+Git confirma indice local ignorado. Template inicial, gerador e limpeza sem diff.
+Revisao documental conferiu Previous, destinos, ausencia de hashes adicionais,
+delegacao unica, limites e separacao entre precondicoes e validacoes posteriores.
+Ensaio no Copilot permanece pendente; nao houve execucao de corretivas nesta entrega.
+
 ## Revisao manual documentada - 2026-09-28
 
 Detalhar no guia o ciclo do desenvolvedor: abrir proposta, registrar observacoes,

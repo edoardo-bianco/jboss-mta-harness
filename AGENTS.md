@@ -49,8 +49,8 @@ o controle de branches da ADR-0003.
 - Separe proposta, revisao/GO humano, execucao autorizada, verificacoes automaticas
   e revisao/aceite humano do resultado. Use a nova rodada MTA e o historico para
   reconciliar resultados antes do proximo lote; nunca trate pendencia como sucesso.
-- O prompt `planejar-lotes` so grava os dois documentos de corretivas. Aplicar o
-  lote exige etapa autorizada separadamente. Nao infira permissao de execucao ou
+- Os prompts `planejar-lotes` e `revisar-lote` so gravam os dois documentos de
+  corretivas. Aplicar o lote exige etapa autorizada separadamente. Nao infira permissao de execucao ou
   aceite a partir da existencia de arquivos, ferramentas ou resultados de testes.
 - Gestao de branches, integracao e coordenacao de frentes pertencem ao desenvolvedor.
   .harness e local: nao e lock compartilhado. Politicas Git antigas sao historicas,

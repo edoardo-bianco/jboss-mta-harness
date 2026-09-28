@@ -622,6 +622,79 @@ salvos naquele momento. Depois de vincula-los, preserve essa versao anterior;
 novas observacoes entram na proxima revisao. Nao edite `context.json`, hashes ou
 evidencias MTA para registrar comentarios. Nao use `tasks/` do harness para isso.
 
+### Revisar um lote com evidencias complementares
+
+Use o prompt [revisar-lote](../../.github/prompts/revisar-lote.prompt.md) quando
+ja existir plano/to-do e voce quiser considerar, junto ao MTA, outras evidencias:
+arvore Maven, resultados de testes, exportacao Sonar, informacoes do EAP ou
+observacoes tecnicas. O planejamento inicial continua com `planejar-lotes`.
+A revisao mantem o mesmo lote; nao aplica corretivas nem concede GO.
+
+**Organize os arquivos manualmente**, pelo Explorer do VS Code ou do Windows:
+
+```text
+.harness/evidencias/
+  migracao-cache-antes__97a5fc995901/
+    evidencias_2026-09-28_16-10-00-0300/
+      LEIA-ME.md
+      runtime.md
+      arvore-maven.txt
+      testes.xml
+      sonar.json
+```
+
+Os nomes de arquivos acima sao exemplos, nao resultados fornecidos pelo harness.
+Reutilize o nome da pasta do projeto visto em `.harness/planning/` ou `runs/`;
+o sufixo e a chave existente do projeto, nao um hash das novas evidencias.
+Use `evidencias_AAAA-MM-DD_HH-mm-ss-fuso` com a data/hora de organizacao e o fuso
+sem dois-pontos (por exemplo, `-0300`). Nao e necessario criar subpastas vazias.
+
+1. Copie o [modelo de indice](modelo-evidencias-complementares.md) para `LEIA-ME.md`
+   nessa pasta. Preencha Project, Source e ID do lote a partir do contexto/plano.
+2. Coloque ali somente os arquivos pertinentes. Liste cada caminho relativo no
+   indice, origem, data real de coleta, ambiente, artefato/versao e o que pretende
+   verificar. Use PENDENTE para dados desconhecidos. Forneca exportacoes e trechos
+   sem segredos, nao logs brutos ou settings privados. Salve tudo antes de iniciar.
+3. Se quiser, registre tambem observacoes manuais no plano/to-do conforme a secao
+   anterior. Execute **Planejamento: preparar contexto para Copilot**, escolha o
+   projeto e a rodada MTA pertinente e **selecione o planejamento anterior**.
+   Nao pressione Enter para iniciar independente: `Previous` deve apontar para o
+   plano/to-do que quer revisar. Novas evidencias por si so nao exigem novo MTA;
+   mudancas relevantes no codigo podem exigir uma nova analise.
+4. Em nova conversa Copilot Local com `devsquad`, invoque `/revisar-lote` com os
+   caminhos absolutos do prompt preparado e do indice, usando o texto abaixo.
+   Nesta etapa, execute `revisar-lote`; o prompt preparado e sua base de contexto.
+   Nao e preciso executar os dois prompts nem existe uma nova Run Task de revisao.
+5. O condutor delega a `devsquad.plan`, que le o MTA, o plano/to-do anteriores e os
+   arquivos listados. O condutor grava somente os novos PlanPath/TodoPath e rele
+   ambos. Confira o que mudou, evidencias consideradas, lacunas, criterios e ordem
+   das tarefas. A revisao continua **PROPOSTA - NAO APROVADA**, aguardando seu GO.
+
+Substitua os dois caminhos do exemplo pelos arquivos reais; nao envie placeholders:
+
+```text
+/revisar-lote Use o contexto do arquivo "CAMINHO_ABSOLUTO/planejar-lotes.prompt.md"
+e as evidencias listadas em "CAMINHO_ABSOLUTO/LEIA-ME.md".
+Revise o mesmo lote considerando o objetivo descrito no indice e minhas observacoes
+nos documentos anteriores. Preserve o historico e informe como cada evidencia
+afeta o plano e o to-do. Nao aplique corretivas.
+```
+
+Se o comando nao aparecer, abra `.github/prompts/revisar-lote.prompt.md` pelo
+**Ctrl+P** e use **Executar Prompt**, informando esses mesmos caminhos no chat.
+
+**Nao ha hashes dos arquivos adicionais**, cadastro em JSON nem alteracao de
+`EvidenceHashes`. O agente registra origem e limites, sem afirmar integridade
+automatica. Os hashes MTA e dos documentos anteriores continuam no fluxo existente.
+Preserve a pasta depois de usada; para novos resultados, crie outra pasta datada.
+Se precisar comparar arquivos antigos e novos, copie os pertinentes para a nova
+pasta e identifique suas origens no indice; o agente nao varre outras pastas.
+
+`.harness/evidencias/` e local, ignorada pelo Git e preservada pelas tres opcoes
+de **Workspace: limpar execucoes**. Ela nao acompanha o clone: recrie a estrutura
+e copie o modelo na outra maquina. Essa preservacao nao protege os planos/MTA
+referenciados: as opcoes 1/2 continuam apagando as respectivas areas de execucao.
+
 ## Limpar execucoes para repetir o ensaio
 
 1. Termine build/MTA e preparacao de contexto. Encerre a conversa Copilot que usa
@@ -640,7 +713,7 @@ evidencias MTA para registrar comentarios. Nao use `tasks/` do harness para isso
    nao ha proposta anterior para selecionar.
 
 A limpeza preserva configuracao, workspace, fontes, Git, template versionado do
-prompt, cache Maven e backups. Nao apaga `target/` da aplicacao nem copias externas
+prompt, cache Maven, backups e `.harness/evidencias/`. Nao apaga `target/` da aplicacao nem copias externas
 de relatorios. No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
 pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
 recibo identificavel permanecem. A opcao todos remove as tres areas por inteiro.
@@ -669,6 +742,7 @@ conforme a arvore mostrada na secao de planejamento.
 | `.harness/runs/` | Rodadas MTA: `manifest.json` identifica entrada, argumentos, hashes e estado Git; `result.json` registra resultado/integridade; `console.log` guarda a saida. Cada rodada possui `input/` (copia dos fontes analisados), `rules/` (regras usadas) e `output/` (achados, dependencias e relatorio HTML com seus arquivos). A copia `input/` e evidencia, nao checkout para corretivas. |
 | `.harness/planning/` | Solicitacoes de planejamento ligadas a uma rodada MTA: `context.json` com identidades, caminhos, hashes e vinculo anterior; `planejar-lotes.prompt.md` preparado; `plan.md` e `todo.md` gravados posteriormente pelo Copilot. Preparar contexto sozinho nao cria o plano/to-do nem aprova o lote. |
 | `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
+| `.harness/evidencias/` | Arquivos complementares organizados manualmente por projeto/data, com indice LEIA-ME.md. Sem hashes adicionais; usados pelo prompt revisar-lote. Preservados pela limpeza, locais e ausentes no clone. |
 | `.harness/workspace-backups/` | Copia automatica do workspace anterior quando o gerador o substitui; permite recuperar pastas e ajustes manuais. Preservada pela tarefa de limpeza. |
 | `.harness/tests/` | Fixtures e resultados dos testes dos scripts; descartaveis quando nenhum teste estiver rodando. Recriada nos proximos testes. |
 | `%USERPROFILE%\.m2\repository` | Repositorio local padrao do Maven, fora do harness; compartilhado com os demais projetos da maquina, salvo configuracao propria do Maven. |
