@@ -72,8 +72,8 @@ executar essas acoes de persistencia. Nao encerre apenas com uma analise no chat
    Skills ausentes devem ser relatadas; nao instale plugins ou altere permissoes.
 6. O especialista deve relatar skills efetivamente lidas, referencias, cobertura,
    pendencias e devolver os dois documentos em estado PROPOSTA - NAO APROVADA.
-   Falta de branch de lote, politica, runtime ou validacoes permite proposta
-   preliminar com PENDENTE; nao permite declarar prontidao para execucao.
+   Falta de runtime ou validacoes permite proposta preliminar com PENDENTE;
+   nao permite declarar prontidao para execucao. Cadastro de branches nao e exigido.
    Duvida que impeça identificar projeto/destinos ou delimitar o lote retorna [ASK].
    O condutor apresenta a pergunta ao operador, sem responder por ele.
 7. Antes de gravar, confira identidade, escopo e cada destino contra o recibo.
@@ -111,71 +111,40 @@ conclusao global com cobertura acumulada reconciliada com a rodada final compara
 sem ocorrencias/verificacoes pendentes e com aceite humano final. Itens nao aplicaveis
 e falsos positivos exigem justificativa e revisao; nao sao corretivas aplicadas.
 
-## Projeto, branch e trabalho paralelo
+## Projeto e branch escolhida pelo desenvolvedor
 
-O ciclo pertence exclusivamente a Project/Source do contexto. Registre em plan.md
-e todo.md a raiz/identidade do repositorio, modulo, branch principal, branch de
-migracao, branch de trabalho autorizada, checkout, HEAD/base observados, alteracoes
-locais, responsavel e referencia compartilhada de coordenacao do lote.
-Exemplos de principal -> migracao: develop -> develop_jboss_eap74 ou
-main -> main_jboss_eap74. Os nomes sao definidos pelo desenvolvedor, nao inferidos
-da branch do harness. Um modulo pode compartilhar a raiz Git com outros projetos.
+O ciclo pertence exclusivamente a Project/Source do contexto. Preserve identidade,
+evidencias, destinos, um lote ativo e separacao entre proposta, GO e aceite.
+O desenvolvedor escolhe e informa a branch de trabalho. Registre sua declaracao,
+se fornecida, separada da branch/commit observados no recibo. Nao exigir nomes
+principal/migracao, responsavel, ticket ou referencia de coordenacao para prosseguir.
+Nao criar/trocar branches nem executar Git neste prompt.
 
-O diagnostico e a proposta preliminar podem comecar na branch de migracao, antes
-de existir uma branch de lote. Depois de delimitar o lote e gravar plan.md/todo.md,
-se sua branch ainda nao estiver definida/criada, solicite ao desenvolvedor a
-criacao de uma branch a partir da base integrada analisada. Sugira um nome ligado
-ao ID do lote, deixando nome e criacao PENDENTES de confirmacao; nao execute Git
-nem presuma que sugerir um nome autoriza trabalhar nele. Inclua essa pendencia no
-to-do e na resposta final, indicando projeto, branch de migracao e commit de base
-quando comprovados. Nao bloqueie a gravacao da proposta por faltar essa branch.
-Se ja houver branch de lote declarada e comprovada para a mesma frente, confira
-sua identidade e reutilize-a, sem pedir outra. Politica de um lote anterior nao
-autoriza automaticamente o novo lote.
+Git e MtaGit sao referencias informativas, nao gates. Git descreve o checkout na
+preparacao; MtaGit descreve a origem historica da rodada. VERIFIED significa coleta,
+nao GO. Nao atribua o commit atual ao MTA antigo. Git ausente, branch/HEAD diferentes,
+HEAD destacado ou alteracoes locais nao exigem cadastro, reconciliacao Git formal
+ou novo contexto. A gestao do checkout e responsabilidade do desenvolvedor.
+Nao invente nomes/papeis nem copie a branch do harness para outro projeto.
 
-Apos a criacao, oriente cadastrar a frente em Planejamento: conferir Git do lote
-(opcao c) e preparar novo contexto vinculado a esta proposta, preservando o ID do
-lote. Exija nova conferencia Git e GO humano antes da execucao separada. Este
-prompt continua limitado a escrever PlanPath/TodoPath.
+A validade da evidencia depende de Project/Source, integridade e conteudo relevante
+para o lote. Compare fontes/POMs/configuracoes pertinentes com o snapshot MTA.
+Mudanca tecnica relevante pode exigir revisar a proposta e obter nova evidencia;
+diferenca de commit isolada nao comprova mudanca na aplicacao nem risco tecnico.
+Preserve trabalho local. Nao descartar arquivos ou aplicar patches ja incorporados.
 
-Para identificar o proximo lote, use nova rodada MTA completa da branch EAP 7.4
-integrada e validada, apos incorporar as corretivas aceitas. Relatorios de branches
-ou commits individuais servem como historico, nao substituem a analise do commit
-integrado. Confira essa origem nas evidencias autorizadas; se estiver pendente,
-registre a lacuna e solicite a rodada/contexto da integracao antes de propor outro
-lote. Nao execute MTA, nao combine relatorios como se fossem uma rodada e nao
-altere recibos historicos para atribuir-lhes a branch/HEAD atual.
+Este fluxo substitui os controles da ADR-0003 conforme ADR-0004 do harness.
+Policy, MainHead, MigrationHead, MainInMigration, MigrationInWork, owner e
+coordination de recibos antigos sao historicos; campos ausentes nao sao pendencias.
+Ao continuar uma proposta anterior, marque exigencias de cadastro/conferencia Git
+como SUPERADAS pela ADR-0004 nos documentos atuais, sem marcar como verificacoes
+executadas. Preserve documentos anteriores, IDs, pendencias tecnicas e revisoes
+humanas. Nao mandar cadastrar branches ou executar a tarefa Git removida.
 
-Este prompt nao executa Git nem le metadados/credenciais em .git. Use apenas
-evidencias Git com caminhos explicitamente fornecidos ou informacoes do operador,
-distinguindo declarado, verificado em evidencia e PENDENTE, com data/commit.
-Nos novos contextos, Git contem a observacao automatica datada do checkout na
-preparacao; use RepositoryRoot, Module, Branch, Head, Changes e Policy, distinguindo
-observado de declarado pelo operador. Status VERIFIED confirma a coleta, nao GO
-nem prontidao. MtaGit registra a observacao da rodada MTA, se disponivel. Contextos
-antigos sem esses campos nao comprovam branch/HEAD. Dados ausentes permitem proposta
-preliminar, mas impedem declarar prontidao para executar. Nao atribua o HEAD atual
-a rodada MTA antiga; registre sua origem como pendente se nao houver evidencia.
-Ao retomar, exigir a conferencia atual pela tarefa Planejamento: conferir Git do
-lote. Um resultado anterior nao comprova que a branch/HEAD ainda sejam os mesmos.
-O agente deste prompt continua sem executar Git; o harness faz a coleta e compara.
-
-Inclua no to-do a conferencia atual de repositorio, branch, HEAD, estado local,
-conflitos e alinhamento antes de executar/retomar e antes de validar/integrar.
-Branch diferente da autorizada ou HEAD destacado bloqueia a execucao; HEAD
-alterado na mesma branch exige revisar o diff e reconciliar o lote. Alteracoes
-locais devem ter autoria/escopo esclarecidos e ser preservadas. Mudancas de escopo,
-risco ou criterios exigem nova revisao humana. Nao prescreva troca de branch,
-limpeza ou integracao automatica para contornar divergencias.
-
-Um lote ativo e por frente de trabalho, identificada por projeto, branch, checkout
-e responsavel. Outras frentes usam branches de lote e checkouts isolados, integram
-na branch de migracao e coordenam sobreposicoes; .harness local nao e lock da equipe.
-Cada frente tem solicitacao/plan/todo proprios. Antes de retomar, considerar commits
-da principal e corretivas de colegas: nao reaplicar algo ja resolvido. Registrar
-integracao e repetir verificacoes/MTA do estado integrado antes de aceita-lo.
-Conclusao global se refere a branch de migracao integrada e alinhada a referencia
-acordada da principal, nao apenas ao sucesso de uma branch de lote.
+O desenvolvedor coordena frentes e integra seu trabalho. Para propor o proximo
+lote apos aceite e pedido de continuidade, usar novo MTA do codigo integrado e
+reconciliar achados/resultados, sem combinar relatorios individuais. Essa e uma
+verificacao tecnica do codigo e das evidencias, nao um controle de nomes de branches.
 
 ## Leitura direta do workspace
 

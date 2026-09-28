@@ -17,6 +17,8 @@ foreach ($path in @($app,$other)) { Set-Content -LiteralPath (Join-Path $path 'p
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @()
 $config.activeProject = $null
+# Campo legado deliberadamente invalido: nao pode criar menus ou bloquear preparacao.
+$config | Add-Member NoteProperty gitPolicies @(@{source=$null;workBranch='antiga'},@{source=$null;workBranch='duplicada'})
 $configPath = Join-Path $fixture 'config.json'
 $workspacePath = Join-Path $area 'projetos.code-workspace'
 Write-HarnessJson $configPath $config
@@ -170,8 +172,9 @@ $count = @(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness/planning') -
 $output = @('1','q') | & powershell.exe @cliArgs 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada')) 'Entrada real nao respeitou cancelamento.'
 Assert (@(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness/planning') -Recurse -Filter '*.prompt.md' -File).Count -eq $count) 'Cancelamento gerou contexto.'
-$output = @('1','h','4','') | & powershell.exe @cliArgs 2>&1 | Out-String
+$output = @('1','h','4') | & powershell.exe @cliArgs 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $output.Contains($oldId) -and $output.Contains('Prompt preparado:')) 'Entrada real nao preparou a rodada escolhida no historico.'
+Assert (-not $output.Contains('Branches ainda nao declaradas') -and -not $output.Contains('conferir Git do lote')) 'Preparacao ainda exige cadastro/conferencia Git.'
 Assert (@(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness/planning') -Recurse -Filter '*.prompt.md' -File).Count -eq ($count+1)) 'Entrada real nao gerou uma unica solicitacao.'
 # Continuidade pela entrada real: cancelar nao grava; escolher fixa ambas as rodadas.
 $continuationArgs = @('-NoProfile','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-Target',$app,'-RunId',$newId,'-NoOpen')
@@ -200,6 +203,7 @@ Write-Output 'PASS: contexto unico e fixo, preservacao de evidencias/fontes, rev
 # Historico antigo continua acessivel sem mover documentos ou reescrever recibos.
 $legacy = $receipt | ConvertTo-Json -Depth 12 | ConvertFrom-Json
 $legacy.RequestId = '66666666666666666666666666666666'
+$legacy | Add-Member NoteProperty Git ([pscustomobject]@{Status='VERIFIED';Branch='branch-antiga';Head='historico';Policy=@{workBranch='inexistente'}}) -Force
 $legacy.PreparedAtUtc = '2026-09-23T10:00:00Z'
 $legacyFolder = Join-Path $fixture ('.harness/planning/' + $context.Active.name + '/' + $oldId + '/' + $legacy.RequestId)
 foreach ($pair in @(@('ContextPath','context.json'),@('PlanPath','plan.md'),@('TodoPath','todo.md'))) {
@@ -245,6 +249,7 @@ Assert ($LASTEXITCODE -eq 1 -and $output.Contains('cancelada')) 'Abertura nao re
 Assert ((Get-FileHash -LiteralPath (Join-Path $scripts 'editor-args.json')).Hash -eq $editorHash) 'Cancelar acionou o editor.'
 $output = & powershell.exe -NoProfile -File $openEntry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -RequestId $prepared.RequestId -EditorPath $editorPath 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0) 'Abertura por RequestId do formato novo falhou.'
+Assert (-not $output.Contains('Git antes de retomar') -and -not $output.Contains('conferir Git do lote')) 'Abertura ainda exige gate Git.'
 $editorArgs = Get-Content -LiteralPath (Join-Path $scripts 'editor-args.json') -Raw | ConvertFrom-Json
 Assert ($editorArgs[1] -eq $receipt.PlanPath -and $editorArgs[2] -eq $receipt.TodoPath) 'Abertura do formato novo escolheu outro planejamento.'
 foreach ($file in @($documentsBefore) + @($legacyBefore)) {

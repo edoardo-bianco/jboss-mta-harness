@@ -3,8 +3,9 @@
 Antes de planejar ou editar, identifique se o pedido e **evolucao do harness** ou
 **migracao de uma aplicacao**. Siga a
 [ADR-0002](doc/adr/0002-separacao-harness-e-migracao-progressiva.md).
-Para projeto, branch e trabalho paralelo, siga tambem a
-[ADR-0003](doc/adr/0003-projeto-branch-e-concorrencia-da-migracao.md).
+Para identidade do projeto e Git informativo, siga a
+[ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-branches.md), que substitui
+o controle de branches da ADR-0003.
 
 - Evolucao do harness inclui scripts, prompts, preparacao de contexto, Run Tasks,
   configuracao, testes e documentacao. Use `tasks/plan.md` e `tasks/todo.md`.
@@ -36,11 +37,12 @@ Para projeto, branch e trabalho paralelo, siga tambem a
 - Migracao usa `PlanPath` e `TodoPath` do contexto selecionado, sob
   `.harness/planning/`, na pasta da solicitacao identificada pelo recibo. Nunca use `tasks/` do harness
   para corretivas da aplicacao, nem altere o harness como parte de um lote.
-- Vincule cada ciclo a Project/Source, repositorio/modulo, branch principal,
-  branch de migracao, branch de trabalho autorizada, HEAD, estado local e responsavel.
-  Antes de executar/retomar, confira esses dados no repositorio da aplicacao.
-  Branch divergente bloqueia a execucao; HEAD alterado exige reconciliar o plano.
-  Nao use a branch do harness como identidade de outro projeto do workspace.
+- Vincule cada ciclo a Project/Source e as evidencias/saidas da solicitacao.
+  Git e informativo: registre branch/commit observados quando disponiveis.
+  O desenvolvedor escolhe e informa a branch de trabalho; o harness nao cadastra
+  papeis, responsavel ou coordenacao, nem bloqueia por branch/HEAD/estado local.
+  Nao exigir novo contexto ou reconciliacao Git apenas por essas diferencas.
+  Confira conteudo relevante da aplicacao para avaliar se o MTA ainda se aplica.
 - Planeje um unico lote consistente por frente de trabalho, mesmo com milhares de achados MTA.
   Registre cobertura parcial; deixe a identificacao do proximo lote para depois
   da corretiva, verificacoes e aceite humano do atual, mediante continuidade pedida.
@@ -50,12 +52,10 @@ Para projeto, branch e trabalho paralelo, siga tambem a
 - O prompt `planejar-lotes` so grava os dois documentos de corretivas. Aplicar o
   lote exige etapa autorizada separadamente. Nao infira permissao de execucao ou
   aceite a partir da existencia de arquivos, ferramentas ou resultados de testes.
-- Corretivas paralelas usam frentes isoladas e coordenadas, integradas na branch
-  de migracao. Registre alinhamento com a principal e revalide o estado integrado.
-  .harness e local: nao e lock compartilhado. Sem evidencia Git, registre PENDENTE.
-  O harness coleta Git nos novos recibos; `Planejamento: conferir Git do lote`
-  compara o checkout atual com o planejamento e a politica declarada. Exige
-  conferencia antes da execucao; resultado Git nao substitui GO nem aceite.
+- Gestao de branches, integracao e coordenacao de frentes pertencem ao desenvolvedor.
+  .harness e local: nao e lock compartilhado. Politicas Git antigas sao historicas,
+  nao pendencias a renovar. Preserve trabalho local e revalide o codigo integrado
+  conforme os criterios do lote. GO e aceite humano continuam separados.
 
 Consulte o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md)
 para uso e os documentos de `doc/` para contratos

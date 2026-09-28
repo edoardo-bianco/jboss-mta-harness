@@ -19,10 +19,11 @@ Depois, com pedido de continuidade, reconcilie o novo MTA com o historico antes 
 identificar o proximo lote. Mantenha cobertura pendente ate a conclusao verificada
 de todo o escopo. O prompt de planejamento nao autoriza executar corretivas.
 
-Siga a [ADR-0003](../doc/adr/0003-projeto-branch-e-concorrencia-da-migracao.md):
-o ciclo pertence ao projeto/repositorio selecionado e a branch de trabalho
-autorizada para sua migracao. Confira branch, HEAD e alteracoes locais antes de
-executar/retomar; mudancas exigem reconciliacao. Um lote ativo por frente permite
-outras frentes coordenadas, com integracao na branch de migracao e alinhamento
-com a principal. Revalide o resultado integrado. O prompt sem terminal registra
-dados Git fornecidos ou PENDENTE; nao pode afirmar uma verificacao nao realizada.
+Siga a [ADR-0004](../doc/adr/0004-git-informativo-sem-controle-de-branches.md):
+o desenvolvedor escolhe a branch. Git e informativo, sem cadastro de politica,
+responsavel ou coordenacao e sem bloqueio automatico por branch/HEAD/estado local.
+Nao exigir novo contexto apenas por essas diferencas. Preserve identidade do
+projeto, hashes MTA e destinos; avalie conteudo relevante para aplicar os achados.
+Os controles Git antigos da ADR-0003 foram substituidos. Nao renovar suas
+pendencias em propostas novas. Gestao de branches fica com o desenvolvedor;
+GO de corretivas, verificacoes tecnicas e aceite humano permanecem separados.

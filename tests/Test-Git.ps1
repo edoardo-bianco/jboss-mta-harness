@@ -16,50 +16,30 @@ if ($LASTEXITCODE) { throw 'Falha ao criar commit somente da fixture.' }
 $context = [pscustomobject]@{Root="$fixture/h"; Active=[pscustomobject]@{name='app';label='App';path="$app/modulo"};Config=[pscustomobject]@{}}
 $observed = Get-HarnessGitState $context
 Assert ($observed.Status -eq 'VERIFIED' -and $observed.RepositoryRoot -eq $app -and $observed.Branch -eq 'lote_cache' -and $observed.Module -eq 'modulo') 'Coleta deve partir do modulo, nao da raiz do harness.'
-$guard = Test-HarnessGitState $context $observed
-Assert (-not $guard.Ready) 'Branch observada nao pode ser autorizada implicitamente.'
-$policy = [pscustomobject]@{source="$app/modulo";repositoryRoot=$app;mainBranch='main';migrationBranch='main_jboss_eap74';workBranch='lote_cache';owner='Fixture';coordination='lote_cache'}
-$context.Config | Add-Member NoteProperty gitPolicies @($policy)
+Assert (-not $observed.PSObject.Properties['Policy']) 'Coleta informativa nao deve carregar politica de branches.'
+# Politicas antigas incompletas/duplicadas nao participam da coleta.
+$legacy = [pscustomobject]@{source=$null;mainBranch='inexistente';workBranch='outra'}
+$context.Config | Add-Member NoteProperty gitPolicies @($legacy,$legacy)
 $configPath = Join-Path $fixture 'config.json'
-$context | Add-Member NoteProperty ConfigPath $configPath
-[IO.File]::WriteAllText($configPath, '{"tools":{"preserve":true},"gitPolicies":[{"source":"C:/other/app","owner":"Other"}]}')
-$global:harnessGitTestAnswers = New-Object 'Collections.Generic.Queue[string]'
-function global:Read-Host { param($Prompt) $global:harnessGitTestAnswers.Dequeue() }
-try {
-    foreach ($answer in @('main','main_jboss_eap74','lote_cache','Fixture','lote_cache','')) { $global:harnessGitTestAnswers.Enqueue($answer) }
-    Set-HarnessGitPolicyInteractive $context
-    $saved = Get-Content -LiteralPath $configPath -Raw | ConvertFrom-Json
-    Assert ($saved.tools.preserve -and $saved.gitPolicies.Count -eq 2) 'Cadastro deve preservar ferramentas e politicas de outros projetos.'
-    Assert ((Get-HarnessGitState $context).Branch -eq 'lote_cache') 'Cadastro trocou branch.'
-    $configHash = (Get-FileHash $configPath).Hash
-    $global:harnessGitTestAnswers.Enqueue('q')
-    $cancelled=$false
-    try { Set-HarnessGitPolicyInteractive $context } catch { $cancelled=$true }
-    Assert ($cancelled -and (Get-FileHash $configPath).Hash -eq $configHash) 'Cancelamento alterou configuracao.'
-} finally {
-    Remove-Item Function:\Read-Host
-    Remove-Variable harnessGitTestAnswers -Scope Global
-}
-$observed = Get-HarnessGitState $context
-Assert ((Test-HarnessGitState $context $observed).Ready) 'Estado limpo e declarado deveria passar pela conferencia Git.'
+$context.Config | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $configPath
+$configHash = (Get-FileHash $configPath).Hash
+Assert ((Get-HarnessGitState $context).Status -eq 'VERIFIED') 'Politica antiga interferiu na coleta.'
+Assert ((Get-FileHash $configPath).Hash -eq $configHash) 'Coleta alterou configuracao legada.'
 Set-Content "$app/modulo/pom.xml" '<project>changed</project>'
-Assert (-not (Test-HarnessGitState $context $observed).Ready) 'Alteracao local apos planejamento nao bloqueou.'
 $dirty = Get-HarnessGitState $context
-Assert ($dirty.HasChanges -and -not (Test-HarnessGitState $context $dirty).Ready) 'Arvore suja nao deve ser aprovada implicitamente.'
-& git -C $app checkout -- modulo/pom.xml
+Assert ($dirty.Status -eq 'VERIFIED' -and $dirty.HasChanges -and $dirty.Changes.Count -gt 0) 'Alteracoes locais devem ser informativas.'
+Assert ($dirty.Head -eq $observed.Head -and $dirty.Branch -eq $observed.Branch) 'Coleta modificou HEAD/branch.'
+Assert ((Get-Content "$app/modulo/pom.xml" -Raw).Contains('changed')) 'Coleta descartou alteracao local.'
 & git -C $app checkout -q main
-Assert (-not (Test-HarnessGitState $context $observed).Ready) 'Branch divergente nao bloqueou.'
+Assert ((Get-HarnessGitState $context).Branch -eq 'main') 'Qualquer branch escolhida pelo desenvolvedor deve ser observada.'
 & git -C $app checkout -q --detach $observed.Head
-Assert ((Get-HarnessGitState $context).Detached) 'HEAD destacado nao detectado.'
-Assert (-not (Test-HarnessGitState $context $observed).Ready) 'HEAD destacado aceito.'
+$detached = Get-HarnessGitState $context
+Assert ($detached.Status -eq 'VERIFIED' -and $detached.Detached -and -not $detached.Branch) 'HEAD destacado deve ser observado sem gate.'
 & git -C $app checkout -q lote_cache
-Set-Content "$app/modulo/untracked.txt" 'first'
-$untracked = Get-HarnessGitState $context
-Set-Content "$app/modulo/untracked.txt" 'second'
-Assert ((Get-HarnessGitState $context).StateSha256 -ne $untracked.StateSha256) 'Edicao de arquivo nao rastreado deve alterar digest.'
 & git -C $app add .
 & git -C $app -c user.name=HarnessFixture -c user.email=fixture@example.invalid commit -qm segundo
-Assert (-not (Test-HarnessGitState $context $observed).Ready) 'Novo HEAD na mesma branch nao bloqueou.'
+$advanced = Get-HarnessGitState $context
+Assert ($advanced.Status -eq 'VERIFIED' -and $advanced.Head -ne $observed.Head) 'Novo commit deve ser observado sem politica.'
 $context.Active.path = "$fixture/ausente"
-Assert ((Get-HarnessGitState $context).Status -eq 'UNAVAILABLE') 'Fonte ausente deveria deixar Git pendente.'
-Write-Output 'PASS: raiz/modulo reais, politica explicita, branch divergente, alteracoes locais e HEAD destacado.'
+Assert ((Get-HarnessGitState $context).Status -eq 'UNAVAILABLE') 'Fonte ausente deve deixar somente a observacao Git indisponivel.'
+Write-Output 'PASS: coleta informativa por modulo, politicas antigas ignoradas, branch/HEAD/estado local sem gate e sem mutacao.'

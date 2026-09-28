@@ -40,7 +40,7 @@ evidencias autorizadas e contrato completo do prompt. O planejador usa as skills
 para elaborar os dois documentos em memoria e retorna `[CREATE]`/`[EDIT]`;
 somente o condutor grava e rele PlanPath/TodoPath apos conferir o retorno.
 O pedido de planejamento ja autoriza essa persistencia, nunca a implementacao.
-Dados Git/runtime ausentes ficam PENDENTES na proposta; identidade/destinos
+Dados de runtime ausentes ficam PENDENTES na proposta; identidade/destinos
 divergentes impedem escrita. Retorno incompleto ou falha parcial deve ser explicito.
 
 Esse modo adapta os defaults do plugin: contexto MTA substitui descoberta de
@@ -53,19 +53,18 @@ delegacao ou persistencia. O ensaio Local deve comprovar invocacao do especialis
 skills relatadas, somente dois documentos escritos e releitura antes de concluir.
 Testes de preparacao nao comprovam obediencia do modelo ou integracao do plugin.
 
-O contrato de projeto/branch e concorrencia esta na
-[ADR-0003](../adr/0003-projeto-branch-e-concorrencia-da-migracao.md). O prompt exige
-identidade Git e responsavel nos documentos, com origem/estado da evidencia,
-conferencia atual antes de executar/retomar e reconciliacao apos mudancas de HEAD
-ou integracao. Lote ativo e por frente; outras frentes sao isoladas e coordenadas.
-Os novos contextos registram `Git` coletado na preparacao e `MtaGit` opcional,
-proveniente do manifesto historico. `Policy` e declarada pelo operador; `VERIFIED`
-indica coleta, nao GO. Contextos antigos sem Git permanecem consultaveis.
-A tarefa `Planejamento: conferir Git do lote` compara estado atual com a baseline
-do contexto e a politica por Source; divergencias, referencias ausentes, conflitos,
-HEAD destacado e alteracoes locais resultam em exit 1. Nao ha fetch nem alteracao
-de branches. Abertura dos documentos mostra pendencias sem impedir consulta.
-Conferencia e pontual e nao substitui aceite humano ou coordenacao da equipe.
+A [ADR-0004](../adr/0004-git-informativo-sem-controle-de-branches.md) substitui
+os gates Git da ADR-0003. O desenvolvedor escolhe a branch; o harness apenas coleta
+Git informativo. Nao ha cadastro de politica, responsavel ou coordenacao, tarefa
+de conferencia ou bloqueio por ausencia/diferenca de branch/HEAD/estado local.
+`gitPolicies` legadas sao ignoradas sem reescrever configuracoes ou recibos.
+Novos contextos mantem Git/MtaGit distintos e deixam de gerar Policy e alinhamentos.
+Contextos antigos com/sem esses campos continuam validos para consulta/continuidade.
+`VERIFIED` confirma coleta, nao GO; `UNAVAILABLE` nao bloqueia a preparacao.
+Abertura de planos nao consulta um gate Git. Projeto, integridade MTA e destinos
+permanecem verificados. A aplicabilidade depende do conteudo tecnico relevante,
+nao da igualdade do nome da branch ou do commit. Nao exigir novo contexto apenas
+por trocar de branch; o desenvolvedor informa sua escolha ao agente.
 
 - Projetos vem do workspace salvo, inclusive agregadores Maven; nenhum cadastro
   adicional e necessario. Reutilizar identidade e validacao do harness.

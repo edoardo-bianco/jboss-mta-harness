@@ -13,12 +13,7 @@ try {
     if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
     $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
     $selected = Select-MtaPreviousPlanning $context -ForOpen -RequestId $RequestId
-    Import-Module (Join-Path $PSScriptRoot 'HarnessGit.psm1') -DisableNameChecking
-    $baseline = $null
-    if ($selected.PSObject.Properties['Git']) { $baseline = $selected.Git }
-    $gitCheck = Test-HarnessGitState $context $baseline
-    foreach ($reason in $gitCheck.Reasons) { Write-Warning ('Git antes de retomar: ' + $reason) }
-    Write-Host 'Abrir documentos permite revisao; nao autoriza executar corretivas. Use Planejamento: conferir Git do lote antes de executar.'
+    Write-Host 'Abrir documentos permite revisao; executar corretivas continua dependendo de GO humano. A gestao de branches e do desenvolvedor.'
     Write-Host "Projeto: $($context.Active.label) | Solicitacao: $($selected.RequestId)"
     Write-Host "Plano: $($selected.PlanPath)"
     Write-Host "To-do: $($selected.TodoPath)"

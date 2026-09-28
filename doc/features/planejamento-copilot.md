@@ -17,6 +17,11 @@ skills e contrato MTA explicito, e centralizar a persistencia no condutor.
 Nao altera o plugin; evita subdelegacao e artefatos do fluxo generico em docs/.
 Validacao do comportamento desse ajuste no Copilot: PENDENTE do novo ensaio.
 
+Em 2026-09-28, o desenvolvedor solicitou remover o controle de branches.
+Cadastro, gate e tarefa de conferencia foram retirados. Git permanece informativo;
+identidade do projeto e integridade MTA continuam verificadas. A ADR-0004 define
+a transicao, preservando propostas/recibos antigos e GO separado.
+
 Problema: escolher entre varios projetos e rodadas exige preencher caminhos
 manualmente antes de pedir uma proposta ao Copilot.
 

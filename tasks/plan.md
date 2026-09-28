@@ -1,5 +1,33 @@
 # Plano do agente: evolucao do harness
 
+## Simplificacao Git solicitada — 2026-09-28
+
+Pedido: eliminar o controle de branches do harness e deixar a escolha/gestao
+com o desenvolvedor. Branch harness/git-informativo derivada da main 71a3918,
+em worktree isolado; checkout do operador em corretiva/cache-hib-001 preservado.
+
+Remover cadastro gitPolicies, gate de prontidao Git e Run Task de conferencia.
+Manter coleta informativa de repositorio/modulo, branch, commit e estado local,
+sem exigir responsavel, coordenacao, branch principal/migracao ou novo contexto
+apenas por trocar branch/HEAD. Politicas antigas ficam ignoradas; recibos e
+planos historicos permanecem intactos. Manter integridade/identidade MTA, escopo
+de escrita, GO separado e verificacoes tecnicas. Mudanca de codigo relevante
+exige avaliar aplicabilidade dos achados; diferenca Git isolada nao bloqueia.
+
+Atualizar scripts, prompt, instrucoes, ADR e guia, com testes para ausencia de
+menu/gate, coleta sem politica e compatibilidade com historico. Integrar a
+mudanca validada nas mains e na branch limpa do ensaio, sem mudar sua selecao.
+Preparar contexto atualizado vinculado ao plano atual para destravar o ensaio.
+
+Validacao concluida: 11 testes Test-*.ps1 em Windows PowerShell 5.1, incluindo
+configuracao gitPolicies invalida/duplicada ignorada, preparo sem menu Git,
+abertura/continuidade de recibo com politica antiga e preservacao do historico.
+52 links/ancoras locais conferidos; diff sem erros. Revisao de codigo/contrato
+sem consumidores remanescentes das funcoes removidas. A configuracao local nao
+precisa ser limpa: a politica antiga e ignorada. Copilot ainda requer ensaio
+do contrato atualizado; testes nao comprovam comportamento do modelo.
+
+
 ## Delegacao de planejamento DevSquad — 2026-09-28
 
 Pedido autorizado: corrigir o conflito entre o condutor devsquad e o prompt que

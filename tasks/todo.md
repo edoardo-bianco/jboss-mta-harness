@@ -1,5 +1,17 @@
 # To-do do agente: evolucao do harness
 
+## Git informativo, sem controle de branches — 2026-09-28
+
+- [x] Conferir checkout e criar harness/git-informativo em worktree isolado.
+- [x] Remover cadastro/gate e tarefa Git; preservar coleta informativa.
+- [x] Alinhar prompt, instrucoes, ADR e guia ao fluxo decidido pelo desenvolvedor.
+- [x] Testar ausencia de menus/bloqueios, historico e integridade MTA; revisar.
+  Os 11 testes Test-*.ps1 passaram em PowerShell 5.1; 52 links/ancoras locais
+  conferidos e git diff --check sem erros. Test-Git falhou antes da remocao
+  da politica e passou depois. Revisao confirmou ausencia de consumidores do gate.
+- [ ] Integrar a entrega e preparar contexto vinculado sem modificar o plano antigo.
+
+
 ## Delegacao delimitada no DevSquad — 2026-09-28
 
 - [x] Conferir Git e criar harness/devsquad-planejamento a partir da main em

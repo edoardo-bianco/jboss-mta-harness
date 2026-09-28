@@ -2,6 +2,11 @@
 
 Status: aceita pelo desenvolvedor em 2026-09-27.
 
+Atualizacao em 2026-09-28: os requisitos de cadastro, papeis, coordenacao obrigatoria
+e bloqueios por Git deste texto foram substituidos pela
+[ADR-0004](0004-git-informativo-sem-controle-de-branches.md). O texto abaixo
+preserva a decisao historica; nao usar seus gates no fluxo atual.
+
 ## Contexto
 
 Um workspace pode conter varios projetos e repositorios. A selecao de uma pasta

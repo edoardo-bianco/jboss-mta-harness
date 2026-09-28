@@ -2,16 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Planejamento: conferir Git do lote",
-      "detail": "Configure as funcoes das branches ou confira o checkout atual contra o contexto do lote, sem alterar Git.",
-      "type": "process",
-      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/conferir-git-planejamento.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],
-      "problemMatcher": [],
-      "runOptions": { "instanceLimit": 1 },
-      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
-    },
-    {
       "label": "Workspace: limpar execucoes",
       "detail": "Escolha um projeto ou todos; confira os caminhos e confirme a remocao de MTA, builds e planejamentos.",
       "type": "process",

@@ -4,8 +4,8 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 14 -and @($labels | Sort-Object -Unique).Count -eq 14) 'Manter as 12 tarefas anteriores e as duas novas operacoes, sem duplicar labels.'
-Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -contains 'Planejamento: conferir Git do lote') 'Faltam as tarefas de limpeza/conferencia Git.'
+Assert ($labels.Count -eq 13 -and @($labels | Sort-Object -Unique).Count -eq 13) 'Manter 13 tarefas distintas apos remover o controle Git.'
+Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -notcontains 'Planejamento: conferir Git do lote') 'Limpeza deve permanecer; controle Git deve sair do catalogo.'
 Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|MTA|Planejamento): ' }).Count -eq 0) 'Run Tasks devem ser classificadas pelo prefixo da etapa.'
 $projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' })
 foreach ($monitor in @($tasks.tasks | Where-Object label -like 'MTA: acompanhar*')) {

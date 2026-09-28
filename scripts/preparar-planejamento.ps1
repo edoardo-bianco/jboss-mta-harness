@@ -15,13 +15,6 @@ try {
     if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
     $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
     $selected = Select-MtaPlanningRun $context -RunId $RunId -Interactive:(-not $RunId)
-    Import-Module (Join-Path $PSScriptRoot 'HarnessGit.psm1') -DisableNameChecking
-    if ($SelectTarget -and -not (Get-HarnessGitPolicy $context)) {
-        Write-Host 'Branches ainda nao declaradas para este projeto. A branch atual nao sera assumida como autorizada.'
-        $gitChoice = Read-Host 'c configura principal/migracao/trabalho; Enter prepara proposta com essa pendencia; q cancela'
-        if ($gitChoice -eq 'c') { Set-HarnessGitPolicyInteractive $context }
-        elseif ($gitChoice -ne '') { throw 'Preparacao cancelada.' }
-    }
     if (-not $PreviousRequestId -and -not $NewPlan) {
         $previous = Select-MtaPreviousPlanning $context
         if ($previous) { $PreviousRequestId = $previous.RequestId }
@@ -32,7 +25,7 @@ try {
     Write-Host "Plano de corretivas (a ser escrito pelo Copilot): $($prepared.PlanPath)"
     Write-Host "To-do de corretivas (a ser escrito pelo Copilot): $($prepared.TodoPath)"
     Write-Host "Recibo de contexto e hashes: $($prepared.ContextPath)"
-    Write-Host 'Git foi coletado automaticamente quando disponivel. Antes de executar/retomar corretivas, use Planejamento: conferir Git do lote.'
+    Write-Host 'Branch e commit foram registrados como referencia quando disponiveis. A escolha da branch e do desenvolvedor; nao ha cadastro ou bloqueio Git no harness.'
     if ($PreviousRequestId) { Write-Host "Planejamento anterior vinculado: $PreviousRequestId" }
     Write-Host 'Para continuar o mesmo planejamento, reabra este prompt; uma nova preparacao cria outra solicitacao.'
     Write-Host 'Confira o contexto e use Executar Prompt em uma nova conversa Copilot Local. Preparar o arquivo nao aciona o agente.'

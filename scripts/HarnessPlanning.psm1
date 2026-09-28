@@ -236,10 +236,12 @@ PlanPath e TodoPath sao as unicas saidas autorizadas; nao sao evidencias de anal
 ContextPath e o recibo de preparacao, com hashes SHA-256 das evidencias naquele momento.
 Previous, quando preenchido, identifica a proposta anterior escolhida para comparacao.
 Leia seu recibo/plano/tarefas como evidencia historica do mesmo projeto, sem altera-los.
-Git registra a coleta automatica no checkout na preparacao, com data, estado e
-politica declarada. MtaGit identifica a coleta da rodada MTA quando disponivel;
-se nulo, a origem Git historica e PENDENTE. Nao atribua Git atual ao MTA antigo.
-VERIFIED significa coleta realizada, nao branch autorizada, GO ou prontidao.
+Git registra a observacao informativa do checkout na preparacao, com data,
+branch, commit e estado local. MtaGit registra a origem historica da rodada.
+Nao atribua Git atual ao MTA antigo. Ausencia ou diferenca de branch/HEAD nao
+bloqueia o fluxo nem exige cadastro/reconciliacao Git ou novo contexto.
+Campos antigos de Policy/alinhamento sao historicos e nao geram pendencias.
+VERIFIED significa coleta realizada, nao GO ou validacao tecnica da aplicacao.
 
 ```json
 {CONTEXT}

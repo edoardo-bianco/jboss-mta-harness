@@ -2,6 +2,10 @@
 
 Status: aceita pelo desenvolvedor em 2026-09-27.
 
+Atualizacao em 2026-09-28: para identidade e Git, a
+[ADR-0004](0004-git-informativo-sem-controle-de-branches.md) substitui os controles
+de branches da ADR-0003. Mantidos os escopos, integridade MTA e GO/aceite separados.
+
 ## Contexto
 
 O mesmo workspace pode ser usado por agentes, incluindo o Copilot, para evoluir
