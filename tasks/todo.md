@@ -1,5 +1,13 @@
 # To-do do agente: evolucao do harness
 
+## Revisao manual documentada - 2026-09-28
+
+- [x] Documentar observacoes manuais, salvamento, Previous, revisao e GO no guia;
+  manter o README resumido com link direto para a nova secao.
+- [x] Conferir contrato de selecao/hashes, links e diff antes da integracao.
+  Fluxo conferido com o script; 14 links/ancoras do README validos e diff sem
+  erros de whitespace. Apenas documentacao; nenhum script ou plano local alterado.
+
 ## Consistencia da revisao de planos - 2026-09-28
 
 - [x] Ajustar template e guia para substituir instrucoes incompativeis e conferir

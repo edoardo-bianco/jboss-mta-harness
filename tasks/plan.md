@@ -1,5 +1,14 @@
 # Plano do agente: evolucao do harness
 
+## Revisao manual documentada - 2026-09-28
+
+Detalhar no guia o ciclo do desenvolvedor: abrir proposta, registrar observacoes,
+salvar antes do novo contexto, selecionar Previous e revisar os novos documentos
+do mesmo lote antes do GO. README mantem resumo e apenas aponta para essa secao.
+Retomada de harness/consistencia-planejamento, alinhada a main 9a4ddce; escopo
+somente documental, sem editar planos locais da aplicacao. Conferir o fluxo com
+Select-MtaPreviousPlanning/New-MtaPlanningContextCore e validar links/ancoras.
+
 ## Consistencia da revisao de planos - 2026-09-28
 
 Pedido: evitar que revisoes acrescentem orientacoes novas e preservem contradicoes

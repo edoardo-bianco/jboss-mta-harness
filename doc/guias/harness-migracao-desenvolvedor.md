@@ -575,6 +575,53 @@ da aplicacao para avaliar se os achados ainda se aplicam. A coordenacao de frent
 fica com a equipe; revalide tecnicamente o codigo integrado antes de aceita-lo.
 Veja a [ADR-0004](../adr/0004-git-informativo-sem-controle-de-branches.md).
 
+### Revisao manual do plano e do to-do
+
+O desenvolvedor revisa a proposta antes de autorizar corretivas. Para registrar
+suas observacoes e receber uma nova versao com historico preservado:
+
+1. Execute **Planejamento: abrir plano e to-do** e escolha a solicitacao a revisar
+   pela data e pelo RequestId. Confira objetivo, escopo, dependencias, riscos,
+   criterios de aceite e ordem das tarefas nos dois arquivos.
+2. Edite manualmente o `plan.md` e/ou `todo.md` dessa solicitacao, em uma secao
+   **Observacoes do desenvolvedor - revisao pendente**. Registre data, trecho a
+   corrigir e resultado esperado. Use o plano para decisoes/escopo e o to-do para
+   tarefas/ordem; nao e necessario duplicar a mesma observacao nos dois arquivos.
+   Preserve identidade, ID do lote e evidencias. Uma observacao nao significa GO
+   nem tarefa executada: mantenha a proposta nao aprovada e nao marque `[x]` sem evidencia.
+3. Salve os arquivos **antes** de executar **Planejamento: preparar contexto para
+   Copilot**. Escolha o mesmo projeto e, para uma revisao apenas documental, a mesma
+   rodada MTA. Nao e necessario repetir build/MTA so para revisar o plano.
+4. Na pergunta do planejamento anterior, digite o numero da solicitacao que acabou
+   de editar. **Enter inicia independente** e nao vincula suas observacoes.
+   No novo prompt, confira se `Previous.RequestId` aponta para a solicitacao correta.
+5. Execute o novo prompt em uma **nova conversa Copilot Local**, com `devsquad`,
+   informando que suas observacoes sao o pedido de revisao. Pode usar o texto abaixo.
+6. O agente le os documentos selecionados como `Previous`, mantem o mesmo lote e
+   grava a versao revisada nos novos `PlanPath`/`TodoPath`. Reabra esses documentos,
+   confira se cada observacao foi atendida ou justificada e se plano e to-do estao
+   consistentes. Os anteriores permanecem preservados. Se precisar de outra revisao,
+   repita o ciclo sobre a versao mais recente que deseja continuar.
+7. Quando estiver satisfeito e as precondicoes tecnicas estiverem resolvidas,
+   registre GO explicito para o lote e escopo. Aplicar corretivas e uma etapa
+   separada; o agente de planejamento continua limitado aos dois documentos.
+
+Texto para acompanhar a execucao do novo prompt:
+
+```text
+Revise o mesmo lote considerando minhas observacoes de revisao pendente nos
+documentos selecionados em Previous. Trate essas observacoes como meu pedido de
+revisao dentro do escopo do prompt. Atualize plano e to-do de forma consistente,
+preserve o historico e mantenha PROPOSTA - NAO APROVADA. Informe o atendimento ou
+a justificativa para cada observacao. Nao aplique corretivas.
+```
+
+O prompt referencia os arquivos anteriores; nao incorpora automaticamente suas
+observacoes como texto. Na preparacao, o recibo registra os hashes dos documentos
+salvos naquele momento. Depois de vincula-los, preserve essa versao anterior;
+novas observacoes entram na proxima revisao. Nao edite `context.json`, hashes ou
+evidencias MTA para registrar comentarios. Nao use `tasks/` do harness para isso.
+
 ## Limpar execucoes para repetir o ensaio
 
 1. Termine build/MTA e preparacao de contexto. Encerre a conversa Copilot que usa

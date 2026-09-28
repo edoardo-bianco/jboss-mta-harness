@@ -41,7 +41,7 @@ nao ha cadastro ou bloqueio Git no harness.
 6. **Revisar:** aguarde a gravacao e releitura de `plan.md` e `todo.md`; use
    **Planejamento: abrir plano e to-do**. Confira o unico lote proposto e suas
    pendencias. A proposta nao autoriza aplicar corretivas: essa etapa exige seu GO.
-   [Revisao e documentos](doc/guias/harness-migracao-desenvolvedor.md#planejar-lotes-de-correcao-com-copilot).
+   [Como registrar observacoes e pedir revisao](doc/guias/harness-migracao-desenvolvedor.md#revisao-manual-do-plano-e-do-to-do).
 
 ## Fluxo
 
