@@ -1,5 +1,42 @@
 # To-do do agente: evolucao do harness
 
+## Pendencias atuais - 2026-09-28
+
+Implementacoes recentes concluidas ate 6fa8b2b. O ensaio foi reiniciado apos
+limpeza autorizada; referencias antigas abaixo sao historicas, nao destinos para
+retomada. A limpeza das pendencias documentais nao exclui arquivos do ensaio.
+Ponto atual e evidencias declaradas pelo operador em [plan.md](plan.md#ponto-atual-do-ensaio---2026-09-28).
+
+- [ ] Operador: concluir preparo com MTA 13e178eb9c804e5e97a9190dbdd36816 e iniciar
+  planejamento independente. Conferir no Copilot a delegacao a devsquad.plan,
+  skills, persistencia/releitura dos dois destinos e estado PROPOSTA - NAO APROVADA.
+- [ ] Operador: usar a tarefa de evidencias e ensaiar revisar-lote com feedback
+  e Previous apontando para a proposta deste novo ciclo. Conferir mesmo ID do
+  lote, atendimento das observacoes, ausencia de contradicoes/gates Git e escrita
+  somente nos novos PlanPath/TodoPath, preservando os documentos anteriores.
+- [ ] Operador: ensaiar continuidade com novo MTA e Previous do ciclo atual;
+  conferir reconciliacao tecnica e pendencias. Outro lote somente apos aceite
+  do atual e pedido explicito. Corretivas e seus testes pertencem ao plano da aplicacao.
+
+## Backlog futuro - ainda requer planejamento
+
+- [ ] Planejar qualidade com scanner Maven local e selecao de Sonar corporativo
+  ou Sonar em Docker, considerando referencias fornecidas pelo desenvolvedor.
+- [ ] Planejar release/deploy, confirmando ambientes e versoes. As mencoes antigas
+  a EAP 7.1/7.0 nao substituem o destino EAP 7.4 confirmado para esta migracao.
+- [ ] Planejar start/stop e consulta de estado do JBoss, coordenados com o deploy.
+
+Categorias futuras: Qualidade:, Deploy: e Servidor:. Detalhar contratos e criterios
+quando cada etapa for solicitada; este backlog nao autoriza execucao dessas operacoes.
+
+## Historico de entregas e ensaios
+
+Os registros seguintes preservam o que foi pedido/feito em cada data. Controles
+Git da ADR-0003 e tarefas de retomada de solicitacoes anteriores ao reinicio estao
+SUPERADOS, sem serem contabilizados como testes executados. Quantidades antigas
+de Run Tasks e instrucoes de entregas passadas nao substituem o catalogo atual.
+As pendencias vigentes estao exclusivamente nas duas secoes acima.
+
 ## Horario local no menu de planejamento - 2026-09-28
 
 - [x] Corrigir ultima elegivel/historico, atualizar guia e validar Test-Planning.
@@ -20,8 +57,8 @@
 - [x] Registrar contrato: prompt separado, indice e area local, sem hashes adicionais.
 - [x] Criar prompt de revisao, modelo de indice, pasta do ensaio e guia operacional.
 - [x] Verificar ferramentas, 23 links locais e preview de limpeza -All; revisar.
-- [ ] Operador: fornecer evidencias e ensaiar revisar-lote com Previous no Copilot,
-  conferindo ID do lote, consistencia e escrita exclusiva dos dois documentos.
+- Ensaio com evidencias consolidado em Pendencias atuais; implementacao concluida,
+  validacao no Copilot ainda nao declarada concluida.
 
 ## Revisao manual documentada - 2026-09-28
 
@@ -39,8 +76,8 @@
   Test-Planning passou em Windows PowerShell 5.1: template propagado, destinos e
   historico preservados. Diff revisado e sem erros de whitespace. A consistencia
   semantica do texto produzido pelo modelo depende do ensaio do operador abaixo.
-- [ ] Operador: preparar contexto vinculado a ddd2954b81a3 e conferir no DevSquad
-  a correcao do paragrafo antigo, preservando o lote RC-MTA-f1f0d80b-001.
+- SUPERADO pelo reinicio: retomada de ddd2954b81a3 / RC-MTA-f1f0d80b-001.
+  A verificacao de consistencia permanece no ensaio atual, sem exigir esses arquivos.
 
 ## Roteiro resumido no README - 2026-09-28
 
@@ -62,8 +99,8 @@
   Implementacao 101c57b nas mains, apoio e branch atual corretiva/cache-hib-001.
   Nova solicitacao e450f0ea38ec vinculada a 31a8ff4cb385, mesmo MTA.
   Hashes dos 14 arquivos protegidos preservados; exemplos sem alteracoes.
-- [ ] Operador: executar o novo prompt no Copilot e conferir continuidade de
-  CACHE-HIB-001 sem cadastro/bloqueio Git, com pendencias tecnicas preservadas.
+- SUPERADO pelo reinicio: continuidade da solicitacao antiga CACHE-HIB-001.
+  Ausencia de gates Git e preservacao de pendencias sao verificadas no ciclo atual.
 
 
 ## Delegacao delimitada no DevSquad — 2026-09-28
@@ -77,19 +114,14 @@
   revisado; ensaio de subagentes no cliente continua separado e pendente.
 - [x] Integrar o ajuste 7851782 por fast-forward na main e depois na
   main_jboss_eap74, preservando o checkout da migracao e as solicitacoes antigas.
-- [ ] No VS Code, preparar novo contexto com o MTA 391c4a605054 e vincular a
-  proposta anterior 8288c85ebd61; executar o novo prompt em conversa Local.
-- [ ] Ensaio no Copilot: invocar devsquad.plan, usar skills, gravar/reler somente
-  PlanPath/TodoPath e encerrar em PROPOSTA - NAO APROVADA, sem corretivas.
+- SUPERADO pelo reinicio: pedido de vincular MTA 391c4a605054 a 8288c85ebd61.
+  Verificacao de delegacao e persistencia consolidada em Pendencias atuais.
 
 ## Retomada da sessao — 2026-09-27
 
-Ponto atual em [tasks/plan.md](plan.md#ponto-de-retomada--2026-09-27).
-Proximo passo do desenvolvedor: build clean install na main_jboss_eap74, depois
-novo MTA e proposta, compartilhando cada resultado. Corretivas ainda sem GO.
-Os checklists historicos abaixo nao substituem esse ponto de retomada nem
-autorizam reutilizar solicitacoes apagadas. Tarefas da aplicacao serao registradas
-somente nos PlanPath/TodoPath do novo contexto.
+Registro historico, substituido pelo ponto atual de 2026-09-28 no inicio deste
+documento e do plano. Nao repetir o roteiro antigo nem reutilizar seus contextos.
+Tarefas da aplicacao continuam somente nos PlanPath/TodoPath do contexto selecionado.
 
 ## Entregas concluidas
 
@@ -161,7 +193,8 @@ somente nos PlanPath/TodoPath do novo contexto.
   incluindo branches, decisoes dos menus, consulta e limpeza. Atualizar ADR/contrato.
 - [x] Verificar Test-Git, Test-Cleanup, Test-Planning, Test-Mta, Test-Build e
   Test-TaskInputs; sintaxe PowerShell, 56 links/ancoras e diff sem erros.
-- [ ] Ensaio do desenvolvedor no VS Code: escolhas de branches e conferencia Git.
+- SUPERADO pela ADR-0004: ensaio de cadastro de branches/conferencia Git removido
+  do escopo; nao reimplementar nem marcar como verificacao executada.
 - [x] Ensaio de limpeza real pelo menu confirmado pelo desenvolvedor: opcao 2,
   confirmacao LIMPAR e oito caminhos removidos. Novos testes usaram fixtures.
 
@@ -217,21 +250,11 @@ em result.json, opcoes equivalentes com caminhos diferentes e dependencias MTA
 sem alegar resolucao Maven atual validada. Abertura dos dois documentos pela
 tarefa confirmada pelo operador para a solicitacao das 15:34:11.
 
-## Backlog: planejar somente depois da reestruturacao
+## Historico: backlog registrado durante a reestruturacao
 
-Dependencia: concluir e validar as etapas 1 a 5 do plano atual. Estes itens sao
-pedidos de planejamento futuro, nao tarefas de implementacao ou execucao agora.
-
-- [ ] Planejar qualidade com scanner Maven local e selecao de Sonar corporativo
-  ou Sonar em Docker, considerando referencias dos outros projetos quando disponiveis.
-- [ ] Depois, planejar release/deploy da aplicacao em JBoss EAP 7.1 ou 7.0;
-  confirmar destinos ao detalhar, preservando o fluxo de migracao para EAP 7.4.
-- [ ] Planejar start/stop e consulta de estado do servidor JBoss, coordenados com o deploy.
-
-Categorias futuras: Qualidade:, Deploy: e Servidor:. Aplicar a convencao
-de artefatos por projeto/data/hora/ID e selecoes por ambiente, sem proliferar
-Run Tasks por servidor ou projeto. Detalhes e criterios de aceite serao definidos
-nos respectivos planos futuros.
+Sonar, deploy/release e operacao do servidor foram mantidos no Backlog futuro
+no inicio deste arquivo, sem duplicar tarefas abertas. A convencao continua por
+projeto/data/hora/ID, com selecoes de ambiente e sem tarefas por servidor/projeto.
 
 ## Historico e pendencias anteriores
 
@@ -321,8 +344,6 @@ nos respectivos planos futuros.
   parou por falta de delegacao; a segunda concluiu sem delegar. Skill
   planning-and-task-breakdown indisponivel no caminho tentado. Busca em rules/**
   deve ser restringida aos YAML pertinentes nos proximos ensaios.
-- [ ] Ensaio de retomada no Copilot com devsquad em nova conversa: usar a mesma
-  solicitacao 6901b92111044988ad778f7411c1dba7, preservar CACHE-HIB-001 e os dois
-  destinos, completar apenas lacunas sem delegar ou aplicar corretivas.
-- [ ] Ensaio no Copilot apos novo MTA: escolher proposta anterior, reconciliar
-  resultados/validacoes e propor proximo lote somente por pedido explicito.
+- SUPERADO pelo reinicio: retomada de 6901b92111044988ad778f7411c1dba7.
+  A orientacao antiga "sem delegar" foi substituida pelo contrato devsquad.plan.
+  Retomada e reconciliacao com novo MTA estao consolidadas em Pendencias atuais.

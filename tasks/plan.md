@@ -1,5 +1,42 @@
 # Plano do agente: evolucao do harness
 
+## Ponto atual do ensaio - 2026-09-28
+
+Manutencao documental autorizada: consolidar pendencias, preservar historico e
+marcar controles removidos/retomadas antigas como SUPERADOS. Branch
+harness/atualizar-pendencias a partir de main 6fa8b2b. Nenhuma alteracao em
+.harness, fontes, prompts ou configuracao faz parte desta manutencao.
+
+O desenvolvedor reiniciou o ciclo e informou limpeza concluida (5 caminhos).
+Resultados compartilhados nesta conversa, sem nova execucao nesta manutencao:
+
+- Build clean install Java 8 SUCCEEDED: 3b692d6e86fa48a4a817dcbdfdc7efa1.
+- MTA 8.2.1 SUCCEEDED, integridade registrada: 13e178eb9c804e5e97a9190dbdd36816,
+  de 2026-09-28 17:05:53 -03:00 (20:05:53 UTC), projeto migracao-cache-antes.
+
+Proximo passo: concluir preparacao com essa rodada e iniciar planejamento
+independente (Previous null); o novo RequestId ainda nao foi informado.
+Conferir no Copilot delegacao a devsquad.plan, plan/todo e proposta nao aprovada.
+Depois, ensaiar feedback/evidencias via revisar-lote e continuidade com novo MTA,
+sempre escolhendo a proposta do ciclo atual em Previous. Nao buscar nem exigir
+solicitacoes antigas citadas abaixo. GO/aceite e tarefas de corretivas ficam nos
+documentos da aplicacao, separados deste plano do harness.
+
+Escopo recente implementado ate 6fa8b2b: planejamento/delegacao, Git informativo,
+feedback e revisao, tarefa de evidencias, guia e horario local. Pendencias atuais
+e backlog Sonar/deploy/servidor estao consolidados no inicio de [todo.md](todo.md).
+Validacao desta limpeza concluida: diff sem erros, links locais existentes e seis
+itens abertos somente nas secoes atuais/backlog, sem checkboxes pendentes no
+historico. Build/MTA e testes de scripts nao repetidos por ser ajuste documental.
+
+## Historico de evolucao do harness
+
+As secoes abaixo registram decisoes e entregas nas respectivas datas; titulos
+antigos como "atual", "ajuste" ou "retomada" pertencem aquele momento. A ADR-0004
+supera o controle de branches da ADR-0003. Cadastro, conferencia Git obrigatoria,
+quantidades antigas de tarefas e IDs de contextos anteriores nao sao requisitos
+do ensaio atual. Preservar esse historico nao significa renovar tarefas removidas.
+
 ## Horario local no menu de planejamento - 2026-09-28
 
 Bug observado: ultima elegivel e historico MTA exibem UTC, enquanto pastas e
@@ -154,9 +191,13 @@ O desenvolvedor repetira a tarefa de preparar contexto no VS Code, selecionando
 o MTA 391c4a605054 e a proposta anterior 8288c85ebd61. O novo contexto registrara
 o HEAD atual e preservara MtaGit da rodada; nao reutilizar o prompt antigo para
 testar a delegacao nova. Encerrar o ensaio apos persistir e conferir os dois
-documentos; branch de lote, conferencia Git e GO continuam etapas posteriores.
+documentos. Atualizacao: cadastro/conferencia Git foram SUPERADOS pela ADR-0004;
+GO humano continua necessario. A retomada especifica acima foi superada pelo
+reinicio do ensaio e nao deve ser executada com os antigos IDs.
 
 ## Ponto de retomada — 2026-09-27
+
+SUPERADO pelo ponto atual de 2026-09-28 no inicio deste arquivo. Registro historico.
 
 Sessao encerrada a pedido do desenvolvedor. Antes deste registro, main e
 main_jboss_eap74 estavam limpas, publicadas e alinhadas em f61798d. As branches
@@ -170,18 +211,9 @@ TortoiseGit adaptado e ligado ao guia do desenvolvedor. Validacoes: Test-Plannin
 14 links locais, diff --check e revisao estatica independente aprovados na entrega.
 Nenhuma corretiva da aplicacao foi aplicada nesta etapa; nao houve GO de execucao.
 
-Retomar com o desenvolvedor, passo a passo, aguardando o resultado de cada etapa:
-
-1. Conferir checkout limpo em main_jboss_eap74 e referencias atualizadas. Abrir
-   jboss-mta-harness.local.code-workspace; projeto migracao-cache-antes.
-2. Executar Aplicacao: build Maven (Java 8), escolhendo clean install.
-3. Executar novo MTA completo dessa base e conferir SUCCEEDED/integridade/relatorio.
-4. Preparar contexto com essa rodada. Sem lote definido, Enter deixa a politica
-   Git pendente para proposta preliminar; nao inventar branch de trabalho.
-5. Executar o prompt atualizado no Copilot/devsquad. O agente grava somente
-   plan.md/todo.md e solicita a criacao da branch apos delimitar o lote.
-6. Depois da criacao confirmada pelo desenvolvedor, cadastrar a frente, preparar
-   contexto vinculado, conferir Git e obter GO antes de executar a corretiva.
+O roteiro daquela data previa build, MTA, proposta e cadastro/conferencia Git
+antes da corretiva. As etapas de controle Git foram removidas pela ADR-0004;
+seguir agora o ponto atual e o guia, mantendo somente GO e validacoes tecnicas.
 
 O build 4f313156cb544767bce0e1410dfe15b3 e MTA 5cc84cfbfee345d1a1ae043ebdfec115
 sao historicos anteriores a essa base; nao atribuir a eles o HEAD/branch atual.
