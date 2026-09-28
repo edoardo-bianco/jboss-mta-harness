@@ -2,6 +2,13 @@
 
 ## Ponto atual do ensaio - 2026-09-28
 
+Coleta unica autorizada pelo desenvolvedor em 2026-09-28: consultar/atualizar
+`.harness/ensaios/migracao-cache-antes__97a5fc995901/ensaio_2026-09-28_20-31-22-0300/TRACE-ENSAIO.md`
+a cada marco. O trace local reune resultados relatados/conferidos, decisoes,
+dificuldades e aprendizados para consolidacao posterior no guia. Nao acompanha
+o clone; nao duplicar a narrativa em outros documentos. Planos de corretivas e
+recibos continuam em seus destinos proprios. Proxima acao segue abaixo.
+
 Manutencao documental autorizada: consolidar pendencias, preservar historico e
 marcar controles removidos/retomadas antigas como SUPERADOS. Branch
 harness/atualizar-pendencias a partir de main 6fa8b2b. Nenhuma alteracao em
@@ -30,9 +37,10 @@ e 7.4, conforme tools.eap71Home/tools.eap74Home no JSON local (campos conferidos
 O planejamento futuro reutiliza essa configuracao para selecao do servidor e
 controle de estado/start/stop; nao reabre escolha de versoes nem inclui EAP 7.0.
 Isso nao exige que o artefato corrigido para EAP 7.4 funcione tambem no EAP 7.1.
-Validacao desta limpeza concluida: diff sem erros, links locais existentes e seis
-itens abertos somente nas secoes atuais/backlog, sem checkboxes pendentes no
-historico. Build/MTA e testes de scripts nao repetidos por ser ajuste documental.
+Validacao da limpeza concluida: diff sem erros, links locais existentes e itens
+abertos somente nas secoes atuais/backlog, sem checkboxes pendentes no historico.
+A coleta do ensaio acrescentou a consolidacao posterior no guia como pendencia.
+Build/MTA e testes de scripts nao repetidos por ser ajuste documental.
 
 ## Historico de evolucao do harness
 

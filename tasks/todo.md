@@ -17,6 +17,9 @@ Ponto atual e evidencias declaradas pelo operador em [plan.md](plan.md#ponto-atu
 - [ ] Operador: ensaiar continuidade com novo MTA e Previous do ciclo atual;
   conferir reconciliacao tecnica e pendencias. Outro lote somente apos aceite
   do atual e pedido explicito. Corretivas e seus testes pertencem ao plano da aplicacao.
+- [ ] Ao concluir o ensaio, consolidar aprendizados confirmados no guia usando
+  somente o TRACE-ENSAIO.md local referenciado no plan.md; registrar ali o que foi
+  incorporado e preservar limitacoes, sem criar documentos narrativos paralelos.
 
 ## Backlog futuro - ainda requer planejamento
 
