@@ -1,5 +1,28 @@
 # Plano do agente: evolucao do harness
 
+## Consolidacao do guia para demonstracao - 2026-09-29
+
+Pedido do desenvolvedor: consolidar o ensaio documental e explicar a continuidade
+ate GO, execucao, verificacoes e aceite para demonstracao em outra maquina.
+Branch harness/guia-revisao-demonstracao a partir de main 51bb8bb, no worktree
+isolado existente; checkout do ensaio preservado em main_jboss_eap74.
+
+Fonte da consolidacao: TRACE-ENSAIO.md local indicado abaixo, eventos 01 a 24.
+Publicar instrucoes reutilizaveis no guia e exemplo limpo, sem copiar o diario
+ou evidencias locais para o Git. Distinguir as duas opcoes de preparo, Previous,
+preenchimento do LEIA-ME e correcao documental na mesma solicitacao. Explicar
+maquina com historico versus clone sem .harness e os limites de Sonar/deploy.
+
+Proposta inicial e revisao com mesma rodada foram produzidas e conferidas; os
+ajustes documentais solicitados foram atendidos. Leitura de memoria permanece
+nao verificada. Revisao com MTA novo, implementacao, verificacoes e GO/aceite nao
+foram realizados no ensaio. Pendencias tecnicas ficam nos documentos da aplicacao.
+Validar links/ancoras, tarefas citadas e diff; integrar e disponibilizar a
+documentacao para a maquina da apresentacao, sem repetir build/MTA.
+Conferencia documental concluida: 55 links/ancoras locais, catalogo de tarefas,
+prompts existentes e diff sem erros. Mudanca somente de documentacao; suites
+PowerShell e build/MTA nao repetidos. Integracao/publicacao registradas no trace.
+
 ## Preparo explicito de revisao - 2026-09-29
 
 O ensaio mostrou que o terminal recomenda /planejar-lotes mesmo quando o operador
@@ -33,6 +56,9 @@ exemplos. Sem publicacao remota nesta entrega. O trace local registra o aprendiz
 incorporado e a continuidade da revisao da aplicacao, ainda sem GO.
 
 ## Ponto atual do ensaio - 2026-09-28
+
+Registro historico do ponto de 28/09. A consolidacao de 29/09 acima e o trace
+local registram o estado posterior; nao repetir a preparacao inicial abaixo.
 
 Coleta unica autorizada pelo desenvolvedor em 2026-09-28: consultar/atualizar
 `.harness/ensaios/migracao-cache-antes__97a5fc995901/ensaio_2026-09-28_20-31-22-0300/TRACE-ENSAIO.md`

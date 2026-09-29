@@ -28,6 +28,8 @@ Navegacao: [configuracao](#comecar-na-maquina-de-trabalho) ·
 [build](#build-maven-da-aplicacao-com-java-8) ·
 [MTA](#analise-e-resultados) ·
 [Copilot e documentos](#planejar-lotes-de-correcao-com-copilot) ·
+[exemplo de revisao](exemplo-revisao-lote.md) ·
+[depois da revisao: GO, execucao e aceite](#da-proposta-revisada-a-execucao-e-ao-aceite) ·
 [limpeza](#limpar-execucoes-para-repetir-o-ensaio).
 
 ## Comecar na maquina de trabalho
@@ -578,6 +580,25 @@ Veja a [ADR-0004](../adr/0004-git-informativo-sem-controle-de-branches.md).
 
 ### Revisao manual do plano e do to-do
 
+**Qual opcao usar?** Ambas ficam na task **Planejamento: preparar contexto para
+Copilot**. A opcao 1 tambem permite revisar documentos anteriores; a diferenca
+da opcao 2 e receber explicitamente o indice das evidencias complementares.
+
+| Necessidade | Opcao | Previous | Prompt a executar |
+| --- | --- | --- | --- |
+| Criar uma proposta independente | 1. Planejar lote | Sem anterior; Enter inicia independente | planejar-lotes.prompt.md |
+| Revisar/continuar com MTA e observacoes salvas no plano/to-do | 1. Planejar lote | Selecionar a proposta com o feedback salvo | planejar-lotes.prompt.md |
+| Revisar o lote com plano/to-do e arquivos listados no LEIA-ME | 2. Revisar lote | Obrigatorio, junto com o caminho do indice | revisar-lote.prompt.md |
+
+No modo 1, o indice complementar nao e solicitado. No modo 2, a proposta anterior
+e obrigatoria mesmo que o indice contenha somente observacoes. Em ambos, uma nova
+preparacao cria outra solicitacao e preserva os documentos anteriores. Nenhuma
+opcao concede GO nem executa corretivas. Se mudou somente o feedback, reutilize
+a rodada MTA pertinente. Para retomar um contexto ja preparado, reabra o prompt.
+
+Para apresentar o fluxo, siga o [exemplo limpo de revisao de lote](exemplo-revisao-lote.md),
+com feedback para os dois documentos, tabela preenchida do LEIA-ME e pontos de conferencia.
+
 O desenvolvedor revisa a proposta antes de autorizar corretivas. Para registrar
 suas observacoes e receber uma nova versao com historico preservado:
 
@@ -643,6 +664,24 @@ valor aparece na opcao **1**, digite **1**. A task preenche `Previous.RequestId`
 com esse identificador completo. `581722d0364f` e apenas sua abreviacao na pasta.
 Use o RequestId do plano, mesmo que o Previous dele seja null. Nao edite
 `context.json` manualmente para preencher Previous.
+
+**Conferir e corrigir o resultado da revisao:** releia ambos os documentos,
+incluindo resumo, pendencias e criterios de aceite. Confirme que cada observacao
+foi atendida ou justificada e que requisitos anteriores nao foram enfraquecidos.
+No exemplo do cache, foi necessario restaurar a aprovacao do Quality Gate e
+uniformizar o baseline Sonar antes de alteracoes; somente registrar o gate ou
+tratar a falta do baseline como observacao no GO nao atendia ao criterio do lote.
+
+Para corrigir omissao/contradicao na entrega recem-gerada, ainda nao vinculada
+como Previous de outra solicitacao, peca na mesma conversa uma correcao documental
+somente nos PlanPath/TodoPath atuais e nova releitura integral. Nao e necessario
+repetir a task, o build ou o MTA por esse ajuste. Para uma nova rodada de revisao
+com historico separado, salve o feedback na proposta escolhida e prepare outro
+contexto com ela em Previous. Preserve sempre as versoes ja vinculadas.
+
+O relato do agente nao substitui a conferencia dos arquivos. Se uma chamada
+exibida no chat nao puder ser inspecionada, registre o que nao foi verificado,
+sem presumir conformidade ou falha. Isso nao comprova testes nem concede GO.
 
 ### Revisar um lote com evidencias complementares
 
@@ -764,6 +803,95 @@ pasta e identifique suas origens no indice; o agente nao varre outras pastas.
 de **Workspace: limpar execucoes**. Ela nao acompanha o clone: execute a tarefa
 na outra maquina e forneca os arquivos pertinentes. Essa preservacao nao protege os planos/MTA
 referenciados: as opcoes 1/2 continuam apagando as respectivas areas de execucao.
+
+### Da proposta revisada a execucao e ao aceite
+
+Uma revisao documental consistente ainda pode ter precondicoes tecnicas abertas.
+No exemplo HIB-CACHE-001, a implementacao depende das evidencias abaixo e do GO
+humano. A conclusao da revisao nao autoriza editar codigo, POM ou testes.
+
+**1. Reunir as precondicoes sem aplicar a corretiva.** Use o plano/to-do vigente
+como lista do que falta; registre resultados reais, origem e limites.
+
+| Evidencia anterior a implementacao | O que registrar | Como entra na revisao |
+| --- | --- | --- |
+| Hibernate do EAP 7.4 de destino | Ambiente/instalacao e atualizacao do EAP, existencia do modulo org.hibernate, versao exata e evidencia da API disponivel. A linha 5.3 do perfil nao confirma esses detalhes. | Exportacao ou trecho pertinente dos metadados do ambiente; nao inferir runtime a partir do POM. |
+| Dependencias e classpath Maven | Effective POM/arvore pertinentes, perfil e JDK usados, versoes/escopos de Hibernate Core e Hibernate Ehcache e suas dependencias relevantes. | Saidas identificadas do Maven; nao tratar dependencies.yaml do MTA como resolucao atual completa. |
+| Baseline Sonar ANTES | Projeto analisado, data/fuso, identificacao da analise, estado dos fontes, configuracao/perfil e metricas necessarias a comparacao posterior. | Exportacao do resultado obtido antes de alterar codigo, POM ou testes; resultado ausente permanece pendente. |
+| Decisao de API e criterio de teste | Comparacao das candidatas com as versoes confirmadas e como os testes demonstrarao limpeza padrao, preservacao da regiao nomeada, cache desativado e HTTP. | Evidencias tecnicas e justificativa no plano; comportamento da corretiva sera comprovado depois da implementacao. |
+
+Essas coletas sao uma atividade tecnica separada dos prompts de planejamento.
+`planejar-lotes` e `revisar-lote` leem os resultados fornecidos; nao executam Maven,
+Sonar ou EAP para produzi-los. O harness oferece build/MTA pelas Run Tasks, mas
+**ainda nao oferece Run Tasks de Sonar, deploy ou controle do servidor**. A coleta
+de Sonar e a inspecao do EAP usam as ferramentas/configuracoes autorizadas da equipe,
+fora desses prompts. Nao existe um comando `/aplicar-lote` entregue por este fluxo.
+Nao gravar credenciais, settings privados ou logs brutos na pasta de evidencias.
+
+**2. Incorporar as novas evidencias ao mesmo lote.** Crie outra pasta datada pela
+task de evidencias para resultados novos, preservando a ja usada. Liste no LEIA-ME
+os arquivos pertinentes, incluindo copias de evidencias anteriores que ainda sejam
+necessarias, com suas origens. Salve observacoes no plano/to-do vigente e prepare
+**2. Revisar lote**, selecionando essa proposta como Previous e o novo indice.
+Reutilize o MTA se o conteudo pertinente da aplicacao continuar aplicavel; nova
+evidencia de ambiente ou mudanca documental, isoladamente, nao exige reanalise.
+Mudanca tecnica relevante exige avaliar nova rodada. Confira se a revisao fecha
+as precondicoes com evidencia, sem marcar o artefato corrigido como validado.
+
+**3. Registrar o GO humano para uma versao e escopo concretos.** O desenvolvedor
+confere as precondicoes e registra a decisao no plano/to-do vigente, identificando
+RequestId, ID do lote, escopo/API e evidencias. Exemplo de registro, a preencher
+somente apos a decisao real; nao copie campos genericos como se fossem autorizacao:
+
+```text
+Data e responsavel pela decisao: preencher.
+Lote e RequestId da proposta aprovada: preencher.
+Precondicoes conferidas e respectivas evidencias: preencher.
+Escopo/API e limites aprovados: preencher.
+Decisao humana: GO para implementar este lote conforme esta proposta.
+Verificacoes posteriores e aceite do resultado permanecem pendentes.
+```
+
+No lote do exemplo, nao iniciar alteracoes sem baseline Sonar coletado, registrado
+e preservado e demais precondicoes satisfeitas. GO nao transforma pendencias em
+sucesso. Se o plano ainda estiver incompleto, mantenha PROPOSTA - NAO APROVADA.
+Mudar escopo, API ou criterios aprovados exige nova revisao e decisao humana.
+
+**4. Solicitar a execucao separadamente.** Depois de registrar GO, o desenvolvedor
+escolhe a branch/checkout e inicia uma etapa de implementacao com ferramentas
+apropriadas. Informe os caminhos reais do plano/to-do aprovados, lote, RequestId,
+Source e registro do GO; autorize explicitamente a implementacao apenas desse
+escopo. Nao use `/planejar-lotes` ou `/revisar-lote` para executar corretivas.
+O agente executor deve preservar trabalho local e evidencias, aplicar somente
+o lote e atualizar tarefas com resultados verificaveis, sem conceder aceite.
+
+**5. Verificar o artefato corrigido.** Siga os criterios do plano aprovado:
+
+1. Execute **Aplicacao: build Maven (Java 8)** e os testes previstos, registrando
+   o JDK efetivo e os resultados. Confira dependencias e identifique/inspecione o WAR.
+2. Execute **MTA: executar analise** com perfil/regras/versao comparaveis. Reconcile
+   os achados do lote; SUCCEEDED indica sucesso da ferramenta, nao ausencia de achados.
+3. Execute Sonar pela ferramenta autorizada da equipe e compare com o baseline
+   ANTES. Registre os criterios quantitativos e a aprovacao do Quality Gate
+   separadamente. Sem comparacao valida, mantenha a verificacao pendente.
+4. Valide o WAR identificado no EAP 7.4, pela rotina autorizada da equipe,
+   registrando versao carregada e comportamento funcional. POM/build/MTA nao
+   substituem evidencia de runtime. Deploy/servidor ainda nao possuem task no harness.
+
+Falha ou resultado inconclusivo exige registrar retrabalho; nao marque tarefa
+como concluida nem promova o artefato por ausencia de evidencia. Se necessario,
+use a reversao delimitada no plano, preservando evidencias e trabalho alheio.
+
+**6. Revisar e aceitar o resultado.** O desenvolvedor confere diff, build/testes,
+WAR, comparacoes MTA/Sonar e validacao EAP contra o plano aprovado. Registra aceite
+somente quando os criterios forem cumpridos e as pendencias impeditivas resolvidas.
+GO de implementacao e aceite do resultado sao duas decisoes distintas.
+
+Somente apos verificacoes e aceite, mediante pedido de continuidade, prepare
+contexto com a nova rodada MTA e o planejamento vigente em Previous. Reconcilie
+achados persistentes, novos, nao reencontrados e inconclusivos antes de planejar
+outro lote. Se o atual falhar, continue nele; nao trate a pendencia como sucesso.
+O ensaio documental de 29/09/2026 nao executou essas etapas de implementacao e aceite.
 
 ## Limpar execucoes para repetir o ensaio
 

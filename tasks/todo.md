@@ -1,5 +1,15 @@
 # To-do do agente: evolucao do harness
 
+## Consolidacao do guia para demonstracao - 2026-09-29
+
+- [x] Consolidar opcoes 1/2, Previous e correcao da revisao no guia.
+- [x] Criar exemplo limpo com feedback, LEIA-ME preenchido e roteiro de demonstracao.
+- [x] Explicar continuidade: evidencias/precondicoes, GO, execucao separada,
+  verificacoes e aceite; distinguir tasks disponiveis de atividades externas.
+- [x] Conferir links/ancoras, tarefas, limites do ensaio e diff.
+  55 links/ancoras locais conferidos; tarefas e prompts citados existem.
+  Integracao/publicacao desta entrega ficam registradas no trace local e no Git.
+
 ## Preparo explicito de revisao - 2026-09-29
 
 - [x] Reproduzir a falta de modo de revisao nos testes de planejamento.
@@ -13,26 +23,24 @@
   Commit 34992f8 integrado localmente por fast-forward em main e main_jboss_eap74.
   Checkout do ensaio mantido na mesma branch; exemplos sem diff. Sem push nesta entrega.
 
-## Pendencias atuais - 2026-09-28
+## Situacao do ensaio e pendencias - 2026-09-29
 
-Implementacoes recentes concluidas ate 6fa8b2b. O ensaio foi reiniciado apos
-limpeza autorizada; referencias antigas abaixo sao historicas, nao destinos para
-retomada. A limpeza das pendencias documentais nao exclui arquivos do ensaio.
-Ponto atual e evidencias declaradas pelo operador em [plan.md](plan.md#ponto-atual-do-ensaio---2026-09-28).
+O trace local referenciado em [plan.md](plan.md#consolidacao-do-guia-para-demonstracao---2026-09-29)
+e a fonte unica do diario. Referencias antigas abaixo sao historicas; nao
+reiniciar o ensaio nem reutilizar solicitacoes apagadas.
 
-- [ ] Operador: concluir preparo com MTA 13e178eb9c804e5e97a9190dbdd36816 e iniciar
-  planejamento independente. Conferir no Copilot a delegacao a devsquad.plan,
-  skills, persistencia/releitura dos dois destinos e estado PROPOSTA - NAO APROVADA.
-- [ ] Operador: usar a tarefa de evidencias e ensaiar revisar-lote com feedback
-  e Previous apontando para a proposta deste novo ciclo. Conferir mesmo ID do
-  lote, atendimento das observacoes, ausencia de contradicoes/gates Git e escrita
-  somente nos novos PlanPath/TodoPath, preservando os documentos anteriores.
+- [x] Proposta inicial com MTA 13e178eb9c804e5e97a9190dbdd36816 produzida;
+  plan.md/to-do e estado PROPOSTA - NAO APROVADA conferidos no disco.
+- [x] Revisao com feedback, Previous e build ANTES produzida; quatro pontos e
+  ajustes documentais conferidos nos dois destinos, anteriores preservados.
+  Delegacao relatada pelo operador; leitura de memoria nao verificada permanece
+  como limitacao explicita. Isso nao comprova conformidade integral das leituras.
 - [ ] Operador: ensaiar continuidade com novo MTA e Previous do ciclo atual;
   conferir reconciliacao tecnica e pendencias. Outro lote somente apos aceite
   do atual e pedido explicito. Corretivas e seus testes pertencem ao plano da aplicacao.
-- [ ] Ao concluir o ensaio, consolidar aprendizados confirmados no guia usando
-  somente o TRACE-ENSAIO.md local referenciado no plan.md; registrar ali o que foi
-  incorporado e preservar limitacoes, sem criar documentos narrativos paralelos.
+- [x] Consolidar aprendizados confirmados do percurso documental no guia e exemplo,
+  preservando limites. Consolidacao de nova rodada/execucao/aceite depende de
+  ensaios futuros; nao foram declarados concluidos.
 
 ## Backlog futuro - ainda requer planejamento
 

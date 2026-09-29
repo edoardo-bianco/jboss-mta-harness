@@ -15,6 +15,10 @@ O guia explica os requisitos, a escolha de projeto e branches, cada menu das
 Run Tasks, a consulta de resultados e a limpeza para repetir o ensaio.
 Se o workspace local ja existe, abra-o diretamente.
 
+**Vai demonstrar a revisao de um lote?** Use o
+[roteiro com exemplo preenchido](doc/guias/exemplo-revisao-lote.md).
+Ele mostra feedback, Previous, LEIA-ME, preparo e conferencia da revisao sem aplicar corretivas.
+
 ## Passo a passo pelo VS Code
 
 Use **Terminal > Run Task**, com as tarefas da pasta `harness`, e selecione o
