@@ -1,5 +1,17 @@
 # To-do do agente: evolucao do harness
 
+## Criterios Sonar e padroes de configuracao - 2026-09-29
+
+- [x] Confirmar Blocker/High reprovando; cobertura <85% e aumento de issues como avisos.
+- [x] Implementar avaliacao separada do Gate e resumo com motivos/valores.
+- [x] Comparar baseline ANTES explicitamente selecionado, preservando historico.
+- [x] Acrescentar padroes Sonar ausentes ao abrir configuracao, mantendo overrides.
+- [x] Documentar padroes, compatibilidade, metricas MQR e limites da comparacao.
+- [x] Concluir testes de criterios, configuracao, regressao e revisao local.
+  Sonar simulado, 52 verificacoes HTTP, tasks, build-config, workspace e limpeza
+  passaram. Sintaxe e diff conferidos; entrega local sem push.
+- [ ] Operador: ensaiar novos criterios no servidor real; nao equivale a GO.
+
 ## Integracao SonarQube - 2026-09-29
 
 - [x] Recuperar contratos pertinentes do template anterior e documentacao oficial.
@@ -9,7 +21,9 @@
 - [x] Validar regressao e revisar antes de entregar na branch do harness.
   Sonar simulado, 52 verificacoes HTTP e regressao build/config/workspace/target/
   tasks/limpeza passaram em PowerShell 5.1. Sem scan ou token reais.
-- [ ] Ensaio real com servidor/token do operador (nao equivale a GO da aplicacao).
+- [x] Ensaio real com servidor/token do operador (nao equivale a GO da aplicacao).
+  RunId 9bdf2bed884f47ebaa7a0f9ab861f8ce, 2026-09-29: scanner/CE sucesso,
+  Gate OK, cobertura 100%, 2 issues; novas severidades/criterios ainda nao coletados.
 
 ## Consolidacao do guia para demonstracao - 2026-09-29
 

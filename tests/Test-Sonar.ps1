@@ -59,7 +59,16 @@ try {
                 [pscustomobject]@{analyses=@([pscustomobject]@{key=$id})}
             }
             'api/ce/component' { [pscustomobject]@{queue=@()} }
-            'api/measures/component' { $script:MetricReads++; [pscustomobject]@{component=[pscustomobject]@{key='team:app'; measures=@([pscustomobject]@{metric='coverage'; value='86.0'})}} }
+            'api/measures/component' {
+                $script:MetricReads++
+                if ($script:Mode -eq 'NO_MQR' -and $Query.metricKeys -match 'software_quality') { throw 'Metricas indisponiveis.' }
+                $values=@{coverage='86.0'; violations='2'; software_quality_blocker_issues='0'; software_quality_high_issues='0'}
+                if ($script:Mode -eq 'LOW_COVERAGE') { $values.coverage='84.9' }
+                if ($script:Mode -eq 'HIGH') { $values.software_quality_high_issues='1' }
+                if ($script:Mode -eq 'INCREASE') { $values.violations='3' }
+                $data=@($Query.metricKeys.Split(',') | Where-Object { $values.ContainsKey($_) } | ForEach-Object { [pscustomobject]@{metric=$_; value=$values[$_]} })
+                [pscustomobject]@{component=[pscustomobject]@{key='team:app'; measures=$data}}
+            }
             default { throw "API inesperada: $Endpoint" }
         }
     }
@@ -76,6 +85,7 @@ try {
     $env:SONAR_TOKEN = 'previous-token'; $env:MAVEN_ARGS = 'deploy'
     $result = Invoke-HarnessSonar $context 'team:app' -Phase ANTES -Token $secure
     Assert ($result.Status -eq 'SUCCEEDED' -and $result.QualityGateStatus -eq 'OK' -and $result.MetricsStatus -eq 'MATCHED') 'Analise simulada deveria concluir.'
+    Assert ($result.CriteriaStatus -eq 'PASS' -and $result.BaselineComparison -eq 'PENDING') 'Criterios devem ser avaliados separadamente.'
     Assert ($result.Project -eq 'app' -and $result.AnalysisId -eq 'analysis-1' -and $result.Phase -eq 'ANTES') 'Identidade perdida.'
     Assert ($result.MissingMetrics -contains 'duplicated_lines_density') 'Metrica ausente deve ficar explicita.'
     $run = Split-Path -Parent $result.ResultPath
@@ -86,6 +96,17 @@ try {
     Assert ($scan.Args -contains ('-Dsonar.java.jdkHome=' + $context.Config.tools.applicationJdk8Home)) 'Java da aplicacao nao foi informado.'
     Assert ($env:SONAR_TOKEN -eq 'previous-token' -and $env:JAVA_HOME -eq $oldJava -and $env:MAVEN_ARGS -eq 'deploy') 'Ambiente nao restaurado.'
     $hash = (Get-FileHash $result.ResultPath).Hash
+    foreach ($mode in @('HIGH','LOW_COVERAGE','INCREASE','NO_MQR')) {
+        & $module { param($m) $script:Mode=$m; $script:MetricReads=0 } $mode
+        $next=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath $result.ResultPath
+        if ($mode -eq 'HIGH') { Assert ($next.Status -eq 'CRITERIA_FAILED' -and $next.CriteriaStatus -eq 'FAIL' -and $next.QualityGateStatus -eq 'OK') 'High nao reprovou com gate OK.' }
+        elseif ($mode -eq 'NO_MQR') { Assert ($next.Status -eq 'UNVERIFIED' -and $next.CriteriaStatus -eq 'UNVERIFIED') 'Ausencia de High virou aprovacao.' }
+        else { Assert ($next.Status -eq 'SUCCEEDED' -and $next.CriteriaStatus -eq 'WARN') 'Avisos nao devem reprovar.' }
+        if ($mode -eq 'INCREASE') {
+            $criteria=Get-Content -Raw (Join-Path (Split-Path $next.ResultPath) 'criteria.json') | ConvertFrom-Json
+            Assert ($criteria.Evaluation.IssuesDelta -eq 1 -and $criteria.Evaluation.BaselineRunId -eq $result.RunId) 'Comparacao nao vinculou baseline.'
+        }
+    }
     foreach ($mode in @('GATE_FAIL','MAVEN_FAIL','AUTH_FAIL','CE_FAIL','WRONG_SERVER','RACE','RACE_AFTER')) {
         & $module { param($m) $script:Mode=$m; $script:MetricReads=0 } $mode
         $next = Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure
@@ -95,6 +116,22 @@ try {
         if ($mode -like 'RACE*') { Assert ($next.MetricsStatus -eq 'UNVERIFIED' -and -not (Test-Path (Join-Path (Split-Path $next.ResultPath) 'measures.json'))) 'Metricas de outra analise exportadas.' }
     }
     Assert ((Get-FileHash $result.ResultPath).Hash -eq $hash) 'Recibo anterior alterado.'
+    # Baselines incompatíveis ou adulterados devem ser recusados antes do scanner.
+    $badDir=Join-Path (Split-Path $run) 'baseline-invalido'
+    $null=New-Item -ItemType Directory -Path $badDir
+    foreach ($field in @('Source','ProjectKey','BranchName','ServerUrl','ScannerVersion','Phase','MetricsStatus','InputsStatus','FinishedAtUtc','MeasuresAnalysisId','TotalIssues')) {
+        $record=Get-Content -Raw $result.ResultPath | ConvertFrom-Json
+        $savedMeasures=Get-Content -Raw (Join-Path $run 'measures.json') | ConvertFrom-Json
+        if ($field -eq 'MeasuresAnalysisId') { $savedMeasures.AnalysisId='other' }
+        elseif ($field -eq 'TotalIssues') { ($savedMeasures.Measures | Where-Object metric -eq 'violations').value='invalid' }
+        elseif ($field -eq 'FinishedAtUtc') { $record.FinishedAtUtc=[DateTime]::UtcNow.AddDays(1).ToString('o') }
+        else { $record.$field='other' }
+        Write-HarnessJson (Join-Path $badDir 'result.json') $record
+        Write-HarnessJson (Join-Path $badDir 'measures.json') $savedMeasures
+        $callsBefore=@(& $module { $script:Calls }).Count
+        $rejected=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath (Join-Path $badDir 'result.json')
+        Assert ($rejected.Status -eq 'FAILED' -and $rejected.Stage -eq 'BASELINE' -and @(& $module { $script:Calls }).Count -eq $callsBefore) "Baseline invalido aceito: $field"
+    }
     foreach ($file in Get-ChildItem -LiteralPath "$fixture/.harness/sonar" -Recurse -File) {
         Assert (-not ([IO.File]::ReadAllText($file.FullName).Contains($secret))) 'Token persistido.'
     }

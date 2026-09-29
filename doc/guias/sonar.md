@@ -7,8 +7,10 @@ nem altera a politica de qualidade do servidor.
 
 ## Configurar uma vez por maquina
 
-Em **Workspace: configurar caminhos**, acrescente este bloco no nivel raiz de
-`config/harness.local.json`, ao lado de `tools` e `mta`:
+Execute **Workspace: configurar caminhos**. A tarefa cria o JSON pelo modelo
+ou acrescenta os campos Sonar ausentes ao JSON existente, preservando os valores
+ja informados. Confira o bloco no nivel raiz de `config/harness.local.json`,
+ao lado de `tools` e `mta`. Exemplo preenchido para Docker local:
 
 ```json
 "sonar": {
@@ -19,6 +21,17 @@ Em **Workspace: configurar caminhos**, acrescente este bloco no nivel raiz de
   "profiles": []
 }
 ```
+
+| Campo | Padrao no modelo | O que conferir na maquina do desenvolvedor |
+| --- | --- | --- |
+| `serverUrl` | `null` | Preencher localhost:9000 para Docker local ou URL HTTPS final do Sonar corporativo. |
+| `scannerJdkHome` | `null` | Preencher caminho do JDK instalado e compativel com scanner/servidor. |
+| `scannerVersion` | `5.8.0.7211` | Versao fixa do plugin Maven; confirmar homologacao e acesso ao repositorio Maven corporativo. |
+| `ceTimeoutSeconds` | `300` | Tempo maximo de espera pelo processamento no servidor, em segundos. |
+| `profiles` | `[]` | Informar os perfis Maven necessarios, coerentes com o build. |
+
+Campos existentes, inclusive valores `null`, nao sao substituidos automaticamente.
+O token e solicitado na execucao e nunca faz parte desses valores padrao.
 
 O caminho do JDK e um exemplo. No trabalho, use a URL HTTPS e eventual caminho
 base corporativo, por exemplo `https://sonar.empresa/sonarqube`. HTTP e aceito
@@ -62,8 +75,8 @@ O scan e uma invocacao Maven separada, em outro JDK: confira perfis ativados por
 JDK e resolucao de dependencias. Opcoes especificas de cobertura/exclusoes ficam
 na configuracao normal aprovada do projeto/Sonar, nao em parametros arbitrarios
 do harness. Nao e preciso regenerar o workspace para mudar esse bloco.
-JSON antigo sem `sonar` continua servindo para build/MTA; a nova tarefa orienta
-adicionar o bloco e nao reescreve configuracao existente automaticamente.
+JSON antigo sem `sonar` continua servindo para build/MTA. Para incluir os padroes,
+abra **Workspace: configurar caminhos**; o scan apenas valida a configuracao.
 
 ## Executar e consultar
 
@@ -80,10 +93,13 @@ adicionar o bloco e nao reescreve configuracao existente automaticamente.
 6. Escolha **1 ANTES** ou **2 DEPOIS**. E identificacao declarada pelo operador,
    nao prova de que a corretiva foi ou nao aplicada. ANTES deve ser coletado e
    preservado antes das alteracoes exigidas pelo plano.
-7. Digite o token na entrada oculta do terminal. Precisa permitir analise do
+7. Informe o caminho do `result.json` de uma coleta **ANTES** para comparar
+   o total de issues. Enter deixa a comparacao **PENDING**; nao escolhe a mais
+   recente automaticamente. Na primeira coleta ANTES, use Enter.
+8. Digite o token na entrada oculta do terminal. Precisa permitir analise do
    projeto e leitura das APIs usadas (incluindo Browse conforme a politica).
    Nao coloque token em JSON, POM, argumentos ou conversa com o agente.
-8. Aguarde Maven e processamento no servidor. Abra o caminho `RESUMO.md` exibido
+9. Aguarde Maven e processamento no servidor. Abra o caminho `RESUMO.md` exibido
    no terminal ou o `DashboardUrl` do resultado.
 
 O token e temporario em `SONAR_TOKEN` do processo de execucao; o ambiente anterior
@@ -101,6 +117,7 @@ O resultado fica em:
   report-task.txt
   quality-gate.json
   measures.json
+  criteria.json
   RESUMO.md
 ```
 
@@ -117,10 +134,12 @@ Git e apenas informativo. Mudancas nas entradas durante o scan invalidam a colet
 | QualityGateStatus | Resultado do servidor para aquele analysisId; ERROR e reprovacao. |
 | MetricsStatus | MATCHED somente com analise atual conferida antes/depois da leitura e sem fila concorrente observada. |
 | MissingMetrics | Metricas nao retornadas; ausencia nao e zero nem conformidade. |
-| Status | SUCCEEDED com coleta concluida e Gate OK; QUALITY_GATE_FAILED com Gate ERROR; FAILED/UNVERIFIED nos demais casos. |
+| CriteriaStatus | PASS, WARN, FAIL ou UNVERIFIED para os criterios locais descritos abaixo. |
+| BaselineComparison | COMPARED quando comparou totais com o ANTES selecionado; PENDING sem comparacao disponivel. |
+| Status | SUCCEEDED com coleta concluida, Gate OK e criterios PASS/WARN; QUALITY_GATE_FAILED com Gate ERROR; CRITERIA_FAILED com criterio reprovado; FAILED/UNVERIFIED nos demais casos. |
 | InputsStatus | STABLE quando os hashes de entrada coincidem antes/depois do scan. |
 
-Exit code da tarefa: 0 para SUCCEEDED, 2 para QUALITY_GATE_FAILED e 1 para
+Exit code da tarefa: 0 para SUCCEEDED, 2 para QUALITY_GATE_FAILED/CRITERIA_FAILED e 1 para
 falha/coleta nao verificada. O timeout limita a espera pelo processamento CE;
 timeout nao cancela uma analise ja enviada. APIs tem timeout de transporte.
 O Maven usa sua rotina normal e pode ser interrompido pelo operador no terminal.
@@ -128,12 +147,46 @@ Nao rode outros scans do mesmo projeto/branch durante a coleta. A API de metrica
 nao recebe analysisId: a conferencia antes/depois reduz mistura de analises,
 mas nao constitui snapshot transacional do servidor.
 
-`SUCCEEDED` nao aprova automaticamente os criterios do lote: cobertura,
-duplicacao, severidades e issues novas devem ser avaliadas contra o plano.
-Nao ha comparacao automatica ANTES/DEPOIS, exportacao completa de issues,
-verificacao da equivalencia dos Quality Profiles/settings entre coletas ou
-GO/aceite. O campo new_violations usa a definicao de New Code do servidor,
-nao uma diferenca calculada contra um baseline local escolhido.
+## Criterios do harness e comparacao
+
+O resumo apresenta os valores e motivos; `criteria.json` preserva a avaliacao,
+vinculada ao analysisId. A politica acordada para esta tarefa e:
+
+| Criterio | Resultado |
+| --- | --- |
+| Issues Blocker ou High acima de zero | FAIL: reprova. |
+| Cobertura global menor que 85% | WARN: aviso, sem reprovar. Exatamente 85% atende. |
+| Total de issues maior que o ANTES selecionado | WARN: aviso com a diferenca numerica. |
+| Metrica necessaria ausente/invalida | UNVERIFIED; nao assume zero ou aprovacao. |
+
+As severidades usam as metricas MQR `software_quality_blocker_issues` e
+`software_quality_high_issues`. Critical no modo Standard nao substitui High.
+Se o servidor nao disponibilizar essas metricas, a avaliacao fica UNVERIFIED.
+Um Blocker/High comprovado sempre reprova, mesmo se faltar outra metrica.
+Ver [definicoes oficiais das metricas](https://docs.sonarsource.com/sonarqube-community-build/user-guide/code-metrics/metrics-definition).
+
+O Quality Gate do servidor continua independente. Pode reprovar por uma condicao
+de cobertura propria, mesmo quando o harness a classifica como aviso. A tarefa
+nao muda o Gate, os Quality Profiles nem as regras corporativas.
+
+O baseline deve estar em `.harness/sonar` deste harness, com processamento
+concluido, metricas vinculadas e entradas estaveis, declarado ANTES e anterior
+a nova coleta. Conferem-se Project/Source, servidor/versao, chave/branch Sonar,
+scanner, JDK da aplicacao, settings e perfis Maven registrados. Divergencias
+recusam a comparacao; branch/HEAD Git nao sao criterios de bloqueio.
+Os arquivos anteriores permanecem intactos. Coletas antigas com `violations`
+podem fornecer o total, mesmo sem a nova avaliacao de severidades.
+
+Sem baseline, os criterios disponiveis sao avaliados e a comparacao permanece
+PENDING. A diferenca usa `violations` (total de issues, incluindo todos os estados),
+nao `new_violations`, que depende da definicao de New Code no servidor.
+Uma contagem igual/menor nao prova ausencia de issues novas: outras podem ter sido
+resolvidas. A equivalencia de regras, exclusoes, conteudo dos settings e Quality
+Profiles exige conferencia do desenvolvedor; esta e uma comparacao numerica.
+
+`SUCCEEDED` nao aprova o lote. Duplicacao e outros requisitos do plano precisam
+de avaliacao propria, assim como GO/aceite humano. A tarefa nao exporta a lista
+completa de issues nem altera os planos da aplicacao.
 
 ## Usar como evidencia na revisao
 
@@ -164,6 +217,7 @@ e Web API disponivel em `/web_api` no proprio servidor. Sao usadas APIs
 Se a versao/politica corporativa nao oferecer uma dessas APIs, a coleta permanece
 FAILED/UNVERIFIED; nao ha fallback silencioso para metricas de outra analise.
 
-Testes: `tests/Test-Sonar.ps1` (Maven/API simulados) e `tests/Test-SonarApi.ps1`
+Testes: `tests/Test-Sonar.ps1` (Maven/API simulados), `tests/Test-SonarCriteria.ps1`,
+`tests/Test-SonarConfig.ps1` e `tests/Test-SonarApi.ps1`
 (HTTP real em loopback com token sintetico). Nao equivalem a homologacao no
 Sonar Docker ou corporativo do operador.

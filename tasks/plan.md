@@ -1,5 +1,36 @@
 # Plano do agente: evolucao do harness
 
+## Criterios Sonar e padroes de configuracao - 2026-09-29
+
+Continuar em harness/sonar, worktree isolado, a partir de main 8bbda20.
+Pedido confirmado: Blocker/High acima de zero reprovam; cobertura global abaixo
+de 85% e aumento do total de issues sao avisos. Gate do servidor independente.
+Consultar metricas MQR sem mapear Critical para High. Ausencia/invalidez permanece
+UNVERIFIED; nenhuma mudanca nos planos/criterios historicos da aplicacao.
+
+Comparar violations com result.json ANTES explicitamente escolhido; conferir
+identidade/configuracao e preservar historico. Sem baseline, comparacao PENDING.
+Exportar criteria.json e resumo legivel, sem GO. Comparacao numerica nao comprova
+equivalencia de regras/perfis/exclusoes nem ausencia de novas issues.
+
+Workspace: configurar caminhos deve incluir campos Sonar ausentes no JSON local,
+com scannerVersion 5.8.0.7211, timeout 300, profiles [] e URL/JDK a preencher.
+Preservar overrides existentes. Documentar cada padrao e o que conferir no trabalho.
+
+Ensaio real anterior informado pelo operador e measures.json local conferido:
+RunId 9bdf2bed884f47ebaa7a0f9ab861f8ce, 2026-09-29 13:26:34 -03:00,
+Sonar local 26.7.0.124771, scanner 5.8.0.7211, Gate OK, cobertura 100%, violations 2.
+Essa coleta nao continha contagem High nem avaliava os novos criterios. Preservar.
+Validar limites, dados ausentes, baseline incompativel, avisos versus falhas e
+configuracao antiga; revisar e integrar localmente sem push, conforme pedido.
+
+Validacao concluida: criterios e preenchimento de configuracao reproduziram
+as lacunas antes da implementacao e passaram depois. Fluxo Sonar simulado passou
+com High reprovando mesmo com Gate OK, avisos sem falha, MQR indisponivel e
+recusa de 11 baselines incompatíveis antes de iniciar scanner. Passaram tambem
+52 verificacoes HTTP, tasks, build-config, workspace e limpeza; sintaxe e diff
+conferidos. Revisao local concluida; novo scan real fica para o operador.
+
 ## Integracao SonarQube - 2026-09-29
 
 Retomar a pendencia Sonar por pedido explicito: uma Run Task de analise Maven

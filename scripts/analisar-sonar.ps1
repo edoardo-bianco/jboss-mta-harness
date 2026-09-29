@@ -1,7 +1,7 @@
 #requires -Version 5.1
 [CmdletBinding()]
 param([string]$ConfigPath, [string]$WorkspacePath, [string]$Target, [switch]$SelectTarget,
-    [string]$ProjectKey, [string]$BranchName, [ValidateSet('ANTES','DEPOIS')][string]$Phase)
+    [string]$ProjectKey, [string]$BranchName, [ValidateSet('ANTES','DEPOIS')][string]$Phase, [string]$BaselineResultPath)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $token=$null
@@ -22,12 +22,17 @@ try {
         $choice=Read-Host 'Estado da coleta: 1 ANTES da corretiva; 2 DEPOIS; q cancela'
         $Phase=switch ($choice) { '1' { 'ANTES' } '2' { 'DEPOIS' } default { throw 'Selecao cancelada.' } }
     }
+    if (-not $PSBoundParameters.ContainsKey('BaselineResultPath')) {
+        $BaselineResultPath=Read-Host 'Caminho do result.json ANTES para comparar issues (Enter deixa comparacao pendente; q cancela)'
+        if ($BaselineResultPath -eq 'q') { throw 'Selecao cancelada.' }
+    }
+    Write-Host 'Criterios: Blocker/High acima de zero reprovam; cobertura abaixo de 85% e aumento de issues geram avisos. Quality Gate do servidor e independente.'
     $token=Read-Host 'Token Sonar do usuario (entrada oculta, nao sera salvo)' -AsSecureString
-    $result=Invoke-HarnessSonar $context -ProjectKey $ProjectKey -BranchName $BranchName -Phase $Phase -Token $token
+    $result=Invoke-HarnessSonar $context -ProjectKey $ProjectKey -BranchName $BranchName -Phase $Phase -Token $token -BaselineResultPath $BaselineResultPath
     $result | ConvertTo-Json -Depth 6 | Write-Host
     Write-Host "Resumo: $(Join-Path (Split-Path $result.ResultPath) 'RESUMO.md')"
     if ($result.Status -eq 'SUCCEEDED') { exit 0 }
-    if ($result.Status -eq 'QUALITY_GATE_FAILED') { exit 2 }
+    if ($result.Status -in @('QUALITY_GATE_FAILED','CRITERIA_FAILED')) { exit 2 }
     exit 1
 } catch {
     Write-Host ('ERRO ao analisar Sonar: ' + $_.Exception.Message) -ForegroundColor Red
