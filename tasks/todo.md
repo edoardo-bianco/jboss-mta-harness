@@ -9,7 +9,9 @@
 - [x] Validar os fluxos e revisar o diff; registrar entrega na branch do harness.
   Test-Planning, Test-TaskInputs e Test-EvidenceFolder passaram em PowerShell 5.1;
   34 links locais e diff conferidos. Execucao do agente no Copilot nao simulada.
-- [ ] Integrar a entrega aceita na principal e, em etapa explicita, na integracao EAP 7.4.
+- [x] Integrar a entrega revisada na principal e, em etapa explicita, na integracao EAP 7.4.
+  Commit 34992f8 integrado localmente por fast-forward em main e main_jboss_eap74.
+  Checkout do ensaio mantido na mesma branch; exemplos sem diff. Sem push nesta entrega.
 
 ## Pendencias atuais - 2026-09-28
 

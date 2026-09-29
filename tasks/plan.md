@@ -27,6 +27,10 @@ PowerShell 5.1; 34 links locais e git diff --check conferidos. Testes cobrem men
 CLI, cancelamento, indice ausente, proposta ausente, preservacao e editor simulado.
 Foi usado mapeamento temporario de caminho curto para os testes no worktree;
 nao houve mudanca de ExecutionPolicy. Ensaio do prompt no Copilot segue pendente.
+Entrega 34992f8 integrada localmente por fast-forward na main e depois em
+main_jboss_eap74, preservando a branch do checkout do operador e sem diff nos
+exemplos. Sem publicacao remota nesta entrega. O trace local registra o aprendizado
+incorporado e a continuidade da revisao da aplicacao, ainda sem GO.
 
 ## Ponto atual do ensaio - 2026-09-28
 
