@@ -4,7 +4,9 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 14 -and @($labels | Sort-Object -Unique).Count -eq 14) 'Manter 14 tarefas distintas, incluindo criacao de evidencias.'
+Assert ($labels.Count -eq 15 -and @($labels | Sort-Object -Unique).Count -eq 15) 'Manter 15 tarefas distintas, incluindo analise Sonar.'
+$sonarTask = @($tasks.tasks | Where-Object label -eq 'Aplicacao: analisar SonarQube')
+Assert ($sonarTask.Count -eq 1 -and $sonarTask[0].args -contains '${workspaceFolder}/scripts/analisar-sonar.ps1' -and -not (($sonarTask[0].args -join ' ') -match '(?i)token')) 'Sonar deve ter tarefa unica, sem token nos argumentos.'
 Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -notcontains 'Planejamento: conferir Git do lote') 'Limpeza deve permanecer; controle Git deve sair do catalogo.'
 Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|MTA|Planejamento): ' }).Count -eq 0) 'Run Tasks devem ser classificadas pelo prefixo da etapa.'
 $projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' })
@@ -54,4 +56,10 @@ $output = 'q' | & powershell.exe @arguments 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Projeto do workspace') -and $output.Contains('Selecao cancelada')) 'A tarefa nao chegou ao menu do workspace informado.'
 Assert (-not $output.Contains('Caminho invalido') -and -not $output.Contains('Comando: mvn')) 'Workspace invalido ou build iniciado apos cancelamento.'
 Assert ((Get-FileHash $configPath).Hash -eq $originalConfig -and (Get-FileHash $workspacePath).Hash -eq $originalWorkspace) 'Tarefa alterou configuracao/workspace.'
+$sonarArguments = @($sonarTask[0].args | ForEach-Object {
+    $_.Replace('${workspaceFolder}', $root).Replace('${input:harnessWorkspacePath}', $workspacePath)
+})
+$sonarArguments += @('-ConfigPath', $configPath)
+$output = 'q' | & powershell.exe @sonarArguments 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Token Sonar')) 'Cancelamento Sonar deve preceder pedido de token e envio.'
 Write-Output 'PASS: variaveis de tarefa suportadas, workspace com espacos, entrada real do build e cancelamento sem execucao.'

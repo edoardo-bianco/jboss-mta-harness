@@ -16,6 +16,13 @@
     "eap71Home": null,
     "eap74Home": null
   },
+  "sonar": {
+    "serverUrl": null,
+    "scannerJdkHome": null,
+    "scannerVersion": "5.8.0.7211",
+    "ceTimeoutSeconds": 300,
+    "profiles": []
+  },
   "mta": {
     "profile": "eap71-to-eap74-java8",
     "rulesPath": null,

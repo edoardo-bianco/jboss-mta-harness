@@ -16,6 +16,9 @@ Write-HarnessJson "$build/result.json" @{Project='new';Source=$source;RunId='222
 Write-HarnessJson "$planning/context.json" @{Project='new';Source=$source;RunId='11111111111111111111111111111111';RequestId='33333333333333333333333333333333'}
 Set-Content "$planning/plan.md" 'proposta'
 Set-Content "$planning/todo.md" 'pendente'
+$sonarBaseline = "$fixture/.harness/sonar/app/sonar-baseline/result.json"
+Write-HarnessJson $sonarBaseline @{Phase='ANTES'; AnalysisId='preservar'}
+$sonarHash = (Get-FileHash $sonarBaseline).Hash
 Write-HarnessJson "$fixture/.harness/runs/other/44444444444444444444444444444444/manifest.json" @{Project='other';Source=$other;RunId='44444444444444444444444444444444'}
 foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/settings.xml','.harness/workspace-backups/backup.json','.github/prompts/planejar-lotes.prompt.md')) { Write-HarnessJson (Join-Path $fixture $file) @{preserve=$true} }
 Write-HarnessJson "$fixture/.harness/last-old.json" @{RunId='11111111111111111111111111111111'}
@@ -57,6 +60,7 @@ Assert (-not (Test-Path -LiteralPath $run) -and -not (Test-Path -LiteralPath $bu
 Assert (Test-Path "$fixture/.harness/runs/other/44444444444444444444444444444444/manifest.json") 'Limpeza atingiu outro projeto.'
 Assert (Test-Path "$fixture/.harness/runs/old/55555555555555555555555555555555/manifest.json") 'Limpeza atingiu outro Source com mesmo Project.'
 Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null
+Assert ((Get-FileHash $sonarBaseline).Hash -eq $sonarHash) 'Limpeza apagou ou alterou baseline Sonar.'
 foreach ($area in @('runs','builds','planning')) { Assert (-not (Test-Path "$fixture/.harness/$area")) 'Limpeza total incompleta.' }
 foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/settings.xml','.harness/workspace-backups/backup.json','.github/prompts/planejar-lotes.prompt.md')) {
     $path = Join-Path $fixture $file

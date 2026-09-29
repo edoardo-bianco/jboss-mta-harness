@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Integracao SonarQube - 2026-09-29
+
+- [x] Recuperar contratos pertinentes do template anterior e documentacao oficial.
+- [x] Testar configuracao, envio Maven, CE, gate, metricas e protecao do token.
+- [x] Implementar tarefa unica, entrada oculta e resultados por projeto/data/ID.
+- [x] Atualizar guia/configuracao e explicar baseline, cobertura e limites.
+- [x] Validar regressao e revisar antes de entregar na branch do harness.
+  Sonar simulado, 52 verificacoes HTTP e regressao build/config/workspace/target/
+  tasks/limpeza passaram em PowerShell 5.1. Sem scan ou token reais.
+- [ ] Ensaio real com servidor/token do operador (nao equivale a GO da aplicacao).
+
 ## Consolidacao do guia para demonstracao - 2026-09-29
 
 - [x] Consolidar opcoes 1/2, Previous e correcao da revisao no guia.
@@ -44,16 +55,16 @@ reiniciar o ensaio nem reutilizar solicitacoes apagadas.
 
 ## Backlog futuro - ainda requer planejamento
 
-- [ ] Planejar qualidade com scanner Maven local e selecao de Sonar corporativo
-  ou Sonar em Docker, considerando referencias fornecidas pelo desenvolvedor.
+- Retomado em Integracao SonarQube acima: scanner Maven local com servidor
+  corporativo ou Docker. Validacao integrada real permanece explicita nessa entrega.
 - [ ] Planejar release/deploy para JBoss EAP 7.1 e 7.4, destinos confirmados pelo
   desenvolvedor em 2026-09-28 e configurados em tools.eap71Home/tools.eap74Home
   no JSON local. Detalhar selecao do servidor, artefato, implantacao e rollback;
   as corretivas de migracao continuam destinadas ao EAP 7.4.
 - [ ] Planejar start/stop e consulta de estado do JBoss, coordenados com o deploy.
 
-Categorias futuras: Qualidade:, Deploy: e Servidor:. Detalhar contratos e criterios
-quando cada etapa for solicitada; este backlog nao autoriza execucao dessas operacoes.
+Classificar futuras operacoes nos prefixos da etapa definidos em AGENTS.md.
+Detalhar contratos e criterios quando solicitadas; este backlog nao autoriza execucao.
 
 ## Historico de entregas e ensaios
 

@@ -2,6 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Aplicacao: analisar SonarQube",
+      "detail": "Envia o projeto Maven ao Sonar configurado, solicita token oculto e coleta resultado, metricas e Quality Gate por projeto/data.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/analisar-sonar.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Workspace: limpar execucoes",
       "detail": "Escolha um projeto ou todos; confira os caminhos e confirme a remocao de MTA, builds e planejamentos.",
       "type": "process",

@@ -55,7 +55,10 @@ Build → MTA → proposta de um lote → revisao/GO humano → correcao autoriz
 verificacoes → revisao/aceite humano → novo MTA e reconciliacao → proximo lote.
 
 O agente de planejamento grava somente `plan.md` e `todo.md` do lote.
-Sonar, deploy e controle do servidor sao evolucoes futuras do harness.
+Para coletar Sonar ANTES/DEPOIS, use **Aplicacao: analisar SonarQube**;
+configure servidor e JDK, informe chave do projeto e token oculto, e preserve
+os resultados por projeto/data. [Configuracao e roteiro Sonar](doc/guias/sonar.md).
+Deploy e controle do servidor continuam como evolucoes futuras.
 
 ## Referencias
 

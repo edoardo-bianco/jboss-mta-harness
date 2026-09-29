@@ -20,7 +20,9 @@ a tarefa atua somente no alvo escolhido. Ter uma pasta aberta nao a torna o alvo
 | 8. Continuar | Novo MTA e proposta anterior vinculada | Reconciliar o lote; proximo lote somente apos aceite e pedido |
 
 Para consultar sem gerar outra solicitacao, use **Planejamento: abrir plano e to-do**.
-As etapas de Sonar, deploy e controle do servidor ainda nao sao automatizadas aqui.
+A coleta Sonar tem a tarefa **Aplicacao: analisar SonarQube**; veja o
+[roteiro Sonar local/corporativo](sonar.md). Deploy e controle do servidor
+ainda nao sao automatizados aqui.
 
 Navegacao: [configuracao](#comecar-na-maquina-de-trabalho) ·
 [projetos](#escolher-o-projeto-em-cada-tarefa) ·
@@ -192,6 +194,7 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
 | Workspace: limpar execucoes | `limpar-execucoes.ps1` |
 | MTA: conferir ambiente | `conferir-ambiente.ps1` |
 | **Aplicacao: build Maven (Java 8)** | **`construir-aplicacao.ps1 -Goals <fases escolhidas>`** |
+| Aplicacao: analisar SonarQube | `analisar-sonar.ps1` |
 | **MTA: executar analise** | **`executar-mta.ps1`** |
 | **MTA: acompanhar log da analise** | **`acompanhar-log-mta.ps1 -Active`** |
 | **MTA: acompanhar atividade interna** | **`acompanhar-log-mta.ps1 -Active -Detalhado`** |
@@ -243,6 +246,13 @@ Exemplo completo para preencher na etapa 3. **Os caminhos de ferramentas abaixo 
     "eap71Home": null,
     "eap74Home": null
   },
+  "sonar": {
+    "serverUrl": null,
+    "scannerJdkHome": null,
+    "scannerVersion": "5.8.0.7211",
+    "ceTimeoutSeconds": 300,
+    "profiles": []
+  },
   "mta": {
     "profile": "eap71-to-eap74-java8",
     "rulesPath": null,
@@ -265,6 +275,7 @@ Exemplo completo para preencher na etapa 3. **Os caminhos de ferramentas abaixo 
 | `tools.applicationMavenSettingsPath` | Opcional: `settings.xml` do build/importacao Java. Pode ter o mesmo caminho do MTA. Se null, Maven usa seus settings padrao; nao herda o campo do MTA. |
 | `tools.applicationJdk8Home` | Obrigatorio para o build: pasta do JDK 8, tambem configurada no workspace para a aplicacao. |
 | `tools.eap71Home`, `tools.eap74Home` | Opcionais: pastas dos JBoss ja extraidos, reservadas para a etapa de runtime. |
+| `sonar` | Opcional no ciclo build/MTA; necessario para a task Sonar. URL, JDK do scanner, versao fixa e perfis conforme [guia Sonar](sonar.md). Nunca gravar token. |
 | `mta.rulesPath` | `null` usa `rulesets/java` ao lado da CLI; preencha se as regras Java estiverem em outra pasta. |
 | `mta.profile` | `"eap71-to-eap74-java8"`: origem EAP 7.1, destino EAP 7.4, Java 8 e `javax.*`. |
 | `mta.sources`, `mta.targets`, `mta.mode` | Mantenha `[]`, `["eap7"]` e `"full"`. O harness recusa desvios desse perfil. |
@@ -822,10 +833,10 @@ como lista do que falta; registre resultados reais, origem e limites.
 
 Essas coletas sao uma atividade tecnica separada dos prompts de planejamento.
 `planejar-lotes` e `revisar-lote` leem os resultados fornecidos; nao executam Maven,
-Sonar ou EAP para produzi-los. O harness oferece build/MTA pelas Run Tasks, mas
-**ainda nao oferece Run Tasks de Sonar, deploy ou controle do servidor**. A coleta
-de Sonar e a inspecao do EAP usam as ferramentas/configuracoes autorizadas da equipe,
-fora desses prompts. Nao existe um comando `/aplicar-lote` entregue por este fluxo.
+Sonar ou EAP para produzi-los. O harness oferece build/MTA e a coleta Sonar pela
+task **Aplicacao: analisar SonarQube**, fora desses prompts; consulte o
+[roteiro Sonar](sonar.md). Deploy, inspecao e controle do EAP usam as rotinas
+autorizadas da equipe. Nao existe um comando `/aplicar-lote` entregue por este fluxo.
 Nao gravar credenciais, settings privados ou logs brutos na pasta de evidencias.
 
 **2. Incorporar as novas evidencias ao mesmo lote.** Crie outra pasta datada pela
@@ -871,7 +882,7 @@ o lote e atualizar tarefas com resultados verificaveis, sem conceder aceite.
    o JDK efetivo e os resultados. Confira dependencias e identifique/inspecione o WAR.
 2. Execute **MTA: executar analise** com perfil/regras/versao comparaveis. Reconcile
    os achados do lote; SUCCEEDED indica sucesso da ferramenta, nao ausencia de achados.
-3. Execute Sonar pela ferramenta autorizada da equipe e compare com o baseline
+3. Execute **Aplicacao: analisar SonarQube** no servidor autorizado e compare com o baseline
    ANTES. Registre os criterios quantitativos e a aprovacao do Quality Gate
    separadamente. Sem comparacao valida, mantenha a verificacao pendente.
 4. Valide o WAR identificado no EAP 7.4, pela rotina autorizada da equipe,

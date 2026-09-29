@@ -1,5 +1,39 @@
 # Plano do agente: evolucao do harness
 
+## Integracao SonarQube - 2026-09-29
+
+Retomar a pendencia Sonar por pedido explicito: uma Run Task de analise Maven
+para servidor local Docker ou corporativo. Branch harness/sonar derivada de main
+025f3ff em worktree isolado; nao aplicar corretivas nem alterar o ensaio.
+
+Configurar sonar.serverUrl, scannerJdkHome, scannerVersion fixa e timeout no JSON.
+Reutilizar projeto do workspace e Maven/settings da aplicacao. Solicitar chave
+Sonar e branch opcional por execucao (sem cadastro Git); ANTES/DEPOIS e declaracao
+do operador. Token por Read-Host -AsSecureString, somente no ambiente temporario
+do processo; nunca em argumentos, JSON ou logs. Scanner em JDK proprio, Java 8
+referenciado por sonar.java.jdkHome; build/testes devem existir antes da coleta.
+
+Adaptar SonarApi do template anterior: URL validada, sem redirecionamento de
+credencial, CE vinculado a task/projeto e Quality Gate por analysisId. Exportar
+metricas somente se a analise ainda for a atual antes/depois da consulta; concorrencia
+ou ausencia fica UNVERIFIED. Sem comparacao automatica ANTES/DEPOIS ou GO.
+Guardar recibo, metadados, metricas, gate e resumo por projeto/data/RunId em
+.harness/sonar, preservado pela limpeza existente. Registrar fontes/configuracao
+e Git informativo. Nao importar gates Git nem caches/settings proprios do template.
+
+Validar com Maven/API simulados: sucesso, gate reprovado, erros, concorrencia,
+timeout, isolamento de projeto, restauracao do ambiente e ausencia de token.
+Conferir contratos existentes de build/config/workspace/tasks/limpeza. Documentar
+limites de cobertura, baseline, autenticacao e APIs corporativas. Ensaio real
+depende do servidor, JDK e token do operador; nao inventar resultado integrado.
+
+Implementacao e revisao local concluidas: 52 verificacoes HTTP em loopback,
+scanner/Maven simulados (incluindo wrapper nativo com token sintetico), falhas,
+Gate reprovado e corrida antes/depois da consulta de metricas. Regressao de build,
+configuracao antiga, workspace, selecao, tasks e limpeza passou em PowerShell 5.1.
+Limpeza preserva o baseline Sonar. Nenhum scan real foi enviado nesta entrega;
+token e compatibilidade corporativa continuam dependendo do operador.
+
 ## Consolidacao do guia para demonstracao - 2026-09-29
 
 Pedido do desenvolvedor: consolidar o ensaio documental e explicar a continuidade
