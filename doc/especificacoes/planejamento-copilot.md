@@ -141,7 +141,28 @@ Pedido do desenvolvedor em 2026-09-28: manter planejamento inicial simples e
 oferecer revisao documental do mesmo lote com MTA e outros resultados fornecidos.
 O prompt separado `revisar-lote` recebe o caminho do prompt preparado e o de um
 indice de evidencias; reutiliza o contrato desse contexto e exige Previous com
-plano/to-do do lote existente. Nao altera o gerador de contexto.
+plano/to-do do lote existente.
+
+Evolucao de 2026-09-29: a mesma task de preparo oferece selecao explicita entre
+planejar-lotes e revisar-lote, sem nova entrada no catalogo. O modo revisar-lote
+exige Previous de proposta persistida e caminho explicito para LEIA-ME.md existente.
+Selecao vazia/cancelada, proposta ausente e indice ausente nao criam solicitacao.
+Nao escolher indice ou proposta pela recencia. A tarefa verifica existencia do
+indice; verificacao de Project/Source/lote/conteudo permanece com o revisor.
+
+Preservar o contexto-base planejar-lotes.prompt.md e gerar tambem uma copia do
+contrato revisar-lote.prompt.md com ContextPromptPath/EvidenceIndexPath explicitos.
+Abrir o prompt de revisao e exibir somente a chamada /revisar-lote com ambos os
+caminhos. Registrar Operation e EvidenceIndexPath no recibo de revisao; os hashes
+existentes de MTA/Previous e PromptSha256 do template-base mantem sua semantica.
+Nao criar hashes para o indice/arquivos adicionais nem editar evidencias ou Previous.
+Executar Prompt deve receber os dois caminhos sem depender de memoria do chat.
+
+CLI: -SelectOperation ativa o menu usado pela task; -Operation revisar-lote e
+-EvidenceIndexPath permitem selecao por parametros, com -PreviousRequestId.
+Sem selecao de operacao, preservar o padrao planejar-lotes dos consumidores atuais.
+-NewPlan nao e compativel com revisao. Contextos historicos continuam utilizaveis
+com a chamada manual de /revisar-lote e indice explicito; nao exigir regeneracao.
 
 A tarefa Planejamento: criar pasta de evidencias reutiliza selecao de projeto
 do workspace, identidade, chave de pasta e data do harness. Cria somente pasta

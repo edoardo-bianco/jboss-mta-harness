@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Preparo explicito de revisao - 2026-09-29
+
+- [x] Reproduzir a falta de modo de revisao nos testes de planejamento.
+- [x] Acrescentar selecao na task existente, Previous obrigatorio e indice explicito.
+- [x] Gerar/abrir prompt de revisao e chamada /revisar-lote com caminhos reais.
+- [x] Atualizar guia, modelo e contrato, incluindo identificacao de Previous.
+- [x] Validar os fluxos e revisar o diff; registrar entrega na branch do harness.
+  Test-Planning, Test-TaskInputs e Test-EvidenceFolder passaram em PowerShell 5.1;
+  34 links locais e diff conferidos. Execucao do agente no Copilot nao simulada.
+- [ ] Integrar a entrega aceita na principal e, em etapa explicita, na integracao EAP 7.4.
+
 ## Pendencias atuais - 2026-09-28
 
 Implementacoes recentes concluidas ate 6fa8b2b. O ensaio foi reiniciado apos

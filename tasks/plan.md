@@ -1,5 +1,33 @@
 # Plano do agente: evolucao do harness
 
+## Preparo explicito de revisao - 2026-09-29
+
+O ensaio mostrou que o terminal recomenda /planejar-lotes mesmo quando o operador
+precisa de /revisar-lote com Previous e evidencias. Evolucao do harness separada
+do lote HIB-CACHE-001, sem GO de corretivas. Branch harness/preparar-revisao,
+derivada de main f1d6b06, em worktree isolado; checkout do ensaio preservado.
+
+Reutilizar a task Planejamento: preparar contexto para Copilot com selecao explicita
+entre planejar-lotes e revisar-lote. Revisao exige proposta anterior salva e indice
+LEIA-ME existente, prepara prompt de revisao com ambos os caminhos e mostra somente
+a chamada adequada. Preservar o prompt-base/contexto, historico, hashes MTA/Previous
+e ausencia de hashes das evidencias complementares. CLI sem selecao continua com
+o comportamento de planejamento; permitir selecao explicita por parametro.
+
+Validar cancelamento/entradas incompletas sem criar solicitacoes, fluxo real da
+task, prompt aberto no editor, comandos exibidos e preservacao de documentos.
+Atualizar guia, modelo do indice e contrato. Revisar antes de integrar; entrega
+na integracao EAP 7.4 e etapa explicita posterior. Contexto da6aa1af0eae do ensaio
+permanece utilizavel com /revisar-lote e indice explicitos, sem repetir build/MTA.
+
+Implementacao revisada: menu na task existente (14 tarefas mantidas), revisao com
+Previous/indice obrigatorios, prompt executavel especifico e chamada completa no
+terminal. Test-Planning, Test-TaskInputs e Test-EvidenceFolder passaram em Windows
+PowerShell 5.1; 34 links locais e git diff --check conferidos. Testes cobrem menus,
+CLI, cancelamento, indice ausente, proposta ausente, preservacao e editor simulado.
+Foi usado mapeamento temporario de caminho curto para os testes no worktree;
+nao houve mudanca de ExecutionPolicy. Ensaio do prompt no Copilot segue pendente.
+
 ## Ponto atual do ensaio - 2026-09-28
 
 Coleta unica autorizada pelo desenvolvedor em 2026-09-28: consultar/atualizar

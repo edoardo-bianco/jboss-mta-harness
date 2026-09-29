@@ -29,12 +29,14 @@ Observacoes sao pedidos de revisao; nao representam GO, aceite ou testes realiza
    clean install e, apos sucesso, MTA: executar analise para o mesmo projeto.
    Espere SUCCEEDED. Se mudou somente o feedback documental, pode reutilizar a
    rodada existente; arquivos adicionais por si so nao exigem repetir MTA.
-5. Execute Planejamento: preparar contexto para Copilot. Escolha o projeto, a
-   rodada pertinente e o planejamento anterior que contem seu feedback. Nao
-   pressione Enter para iniciar independente. Confira Previous no novo contexto.
-6. Em nova conversa Copilot Local com devsquad, envie o comando abaixo com os
-   caminhos absolutos reais. O prompt preparado fornece o contexto; execute
-   revisar-lote para esta revisao, sem executar tambem planejar-lotes.
+5. Execute Planejamento: preparar contexto para Copilot. Escolha o projeto,
+   2. Revisar lote, a rodada pertinente e o planejamento anterior que contem seu
+   feedback. A Solicitacao do menu deve corresponder ao RequestId do plano que
+   deseja revisar. Informe o caminho deste LEIA-ME e confira Previous no contexto.
+6. Em nova conversa Copilot Local com devsquad, execute o revisar-lote.prompt.md
+   aberto pela task ou copie a chamada /revisar-lote exibida no terminal, ja com
+   os dois caminhos. Para contextos antigos, use o comando abaixo com caminhos
+   absolutos reais. Execute somente revisar-lote nesta etapa.
 7. Revise os novos PlanPath/TodoPath: mesmo lote, feedback atendido ou justificado,
    evidencias consideradas e tarefas consistentes. Os anteriores ficam preservados.
    A proposta revisada depende do seu GO; aplicar corretivas e uma etapa separada.

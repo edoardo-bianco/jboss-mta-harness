@@ -168,13 +168,14 @@
     },
     {
       "label": "Planejamento: preparar contexto para Copilot",
-      "detail": "Escolha projeto e rodada MTA; abra o prompt preenchido e acione o Copilot pelo editor.",
+      "detail": "Escolha planejar ou revisar lote; revisao exige plano anterior e LEIA-ME das evidencias. Abra o prompt adequado no editor.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
         "-NoProfile",
         "-File",
         "${workspaceFolder}/scripts/preparar-planejamento.ps1",
+        "-SelectOperation",
         "-WorkspacePath",
         "${input:harnessWorkspacePath}",
         "-SelectTarget",

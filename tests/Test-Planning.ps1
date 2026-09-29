@@ -206,6 +206,47 @@ $editorArgs = Get-Content -LiteralPath (Join-Path $scripts 'editor-args.json') -
 Assert ($editorArgs.Count -eq 2 -and $editorArgs[0] -eq '--reuse-window' -and (Test-Path -LiteralPath $editorArgs[1])) 'Editor recebeu argumentos diferentes de abertura do prompt.'
 Write-Output 'PASS: contexto unico e fixo, preservacao de evidencias/fontes, revalidacao e entrada real sem ferramentas externas.'
 
+# Revisao pela task: selecionar modo, proposta anterior e indice explicitamente.
+Copy-Item -LiteralPath (Join-Path $root '.github/prompts/revisar-lote.prompt.md') -Destination (Join-Path $fixture '.github/prompts/revisar-lote.prompt.md')
+$indexPath = Join-Path $fixture '.harness/evidencias/pasta com espacos/LEIA-ME.md'
+$null = New-Item -ItemType Directory -Path (Split-Path -Parent $indexPath) -Force
+Set-Content -LiteralPath $indexPath 'Indice de teste: somente observacoes, sem novas evidencias.' -Encoding UTF8
+$protected = @(@($prepared.ContextPath,$prepared.PlanPath,$prepared.TodoPath,$indexPath) | ForEach-Object { Get-FileHash -LiteralPath $_ })
+Reject { Select-MtaPreviousPlanning $otherContext -Required } 'Revisao sem proposta persistida aceita.'
+Reject { New-MtaPlanningContext $context -RunId $oldId -Operation revisar-lote -EvidenceIndexPath $indexPath } 'Revisao sem Previous aceita pela API.'
+Reject { New-MtaPlanningContext $context -RunId $oldId -Operation revisar-lote -PreviousRequestId $prepared.RequestId } 'Revisao sem indice aceita pela API.'
+$reviewArgs = @('-NoProfile','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-Target',$app,'-RunId',$oldId,'-SelectOperation','-EditorPath',$editorPath)
+$output = @('2','1',$indexPath) | & powershell.exe @reviewArgs 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0) "Preparo de revisao pelo menu falhou: $output"
+Assert ($output.Contains('Alternativa no chat: /revisar-lote ') -and -not $output.Contains('Alternativa no chat: /planejar-lotes ')) 'Revisao deve orientar somente o comando adequado.'
+Assert ($output.Contains($indexPath)) 'Chamada nao inclui o indice explicito.'
+$receiptLine = @($output -split '\r?\n' | Where-Object { $_.StartsWith('Recibo de contexto e hashes: ') })
+$reviewReceipt = Get-Content -LiteralPath ($receiptLine[0].Substring('Recibo de contexto e hashes: '.Length)) -Raw -Encoding UTF8 | ConvertFrom-Json
+Assert ($reviewReceipt.Previous.RequestId -eq $prepared.RequestId -and $reviewReceipt.RunId -eq $oldId) 'Revisao perdeu Previous ou trocou MTA.'
+Assert ($reviewReceipt.Operation -eq 'revisar-lote' -and $reviewReceipt.EvidenceIndexPath -eq $indexPath.Replace('\','/')) 'Recibo nao identifica modo e indice.'
+Assert (@($reviewReceipt.EvidenceHashes.PSObject.Properties).Count -eq 4) 'Evidencias complementares nao devem receber hashes.'
+$editorArgs = Get-Content -LiteralPath (Join-Path $scripts 'editor-args.json') -Raw | ConvertFrom-Json
+Assert ((Split-Path -Leaf $editorArgs[1]) -eq 'revisar-lote.prompt.md') 'Editor abriu planejamento em vez de revisao.'
+$reviewPrompt = Get-Content -LiteralPath $editorArgs[1] -Raw -Encoding UTF8
+Assert ($reviewPrompt.StartsWith((Get-Content -LiteralPath (Join-Path $fixture '.github/prompts/revisar-lote.prompt.md') -Raw -Encoding UTF8).TrimEnd())) 'Prompt de revisao perdeu seu contrato.'
+Assert ($reviewPrompt.Contains($indexPath.Replace('\','/')) -and $reviewPrompt.Contains('planejar-lotes.prompt.md')) 'Prompt executavel nao fornece os dois caminhos ao revisor.'
+$count = @(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness/planning') -Recurse -Filter 'context.json' -File).Count
+foreach ($answers in @(@('q'),@(''),@('2','q'),@('2',''),@('2','1','q'),@('2','1',''),@('2','1',(Join-Path $fixture 'ausente.md')))) {
+    $output = $answers | & powershell.exe @reviewArgs 2>&1 | Out-String
+    Assert ($LASTEXITCODE -eq 1) "Revisao aceitou selecao cancelada/incompleta: $answers"
+    Assert (@(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness/planning') -Recurse -Filter 'context.json' -File).Count -eq $count) 'Entrada invalida gerou contexto.'
+}
+foreach ($file in $protected) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash -eq $file.Hash) 'Revisao modificou proposta anterior ou indice.' }
+# CLI explicita deve ter os mesmos vinculos; o modo Planejar continua disponivel no menu.
+$explicitArgs = @('-NoProfile','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-Target',$app,'-RunId',$oldId,'-NoOpen')
+$output = & powershell.exe @explicitArgs -Operation revisar-lote -PreviousRequestId $prepared.RequestId -EvidenceIndexPath $indexPath 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains('Alternativa no chat: /revisar-lote ')) 'Revisao por parametros falhou.'
+$output = & powershell.exe @explicitArgs -Operation revisar-lote -NewPlan 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('nao use NewPlan')) 'Revisao aceitou iniciar independente.'
+$output = '1' | & powershell.exe @explicitArgs -SelectOperation -NewPlan 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains('Alternativa no chat: /planejar-lotes ') -and -not $output.Contains('Alternativa no chat: /revisar-lote ')) 'Menu perdeu modo de planejamento.'
+Write-Output 'PASS: revisao explicita, Previous obrigatorio, indice, comando/editor corretos e cancelamento sem escrita.'
+
 # Historico antigo continua acessivel sem mover documentos ou reescrever recibos.
 $legacy = $receipt | ConvertTo-Json -Depth 12 | ConvertFrom-Json
 $legacy.RequestId = '66666666666666666666666666666666'

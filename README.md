@@ -32,8 +32,10 @@ nao ha cadastro ou bloqueio Git no harness.
    `ExitCode: 0` e integridade confirmada; consulte **MTA: abrir ultimo relatorio**.
    [Analise e resultados](doc/guias/harness-migracao-desenvolvedor.md#analise-e-resultados).
 4. **Preparar contexto:** execute **Planejamento: preparar contexto para Copilot**
-   e selecione a rodada desejada. Para recomecar do zero, nao vincule planejamento
-   anterior; para continuar, selecione a proposta existente.
+   e escolha **1. Planejar lote**, depois a rodada desejada. Para recomecar do zero,
+   nao vincule planejamento anterior; para continuar, selecione a proposta existente.
+   Para revisar com evidencias, escolha **2. Revisar lote** nessa mesma task:
+   ela exige a proposta anterior e o LEIA-ME e abre `revisar-lote.prompt.md`.
    [Menus e continuidade](doc/guias/harness-migracao-desenvolvedor.md#planejar-lotes-de-correcao-com-copilot).
 5. **Executar o prompt:** confira o contexto no fim de `planejar-lotes.prompt.md`
    e use **Executar Prompt** em uma nova conversa **Copilot Local**, com `devsquad`.

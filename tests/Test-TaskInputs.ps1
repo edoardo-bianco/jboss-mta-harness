@@ -22,6 +22,7 @@ foreach ($task in $projectTasks) {
 $automatic = @($tasks.tasks | Where-Object label -eq 'Workspace: conferir configuracao ao abrir')[0]
 $planning = @($tasks.tasks | Where-Object label -eq 'Planejamento: preparar contexto para Copilot')
 Assert ($planning.Count -eq 1 -and $planning[0].args -contains '-EditorPath' -and $planning[0].args -contains '${execPath}') 'Planejamento deve abrir o prompt no editor da tarefa.'
+Assert ($planning[0].args -contains '-SelectOperation') 'Task deve oferecer planejamento ou revisao explicitamente.'
 $openPlanning = @($tasks.tasks | Where-Object label -eq 'Planejamento: abrir plano e to-do')
 $evidenceTask = @($tasks.tasks | Where-Object label -eq 'Planejamento: criar pasta de evidencias')
 Assert ($evidenceTask.Count -eq 1 -and $evidenceTask[0].args -contains '${workspaceFolder}/scripts/criar-pasta-evidencias.ps1' -and $evidenceTask[0].args -contains '${execPath}') 'Falta tarefa para criar evidencias e abrir indice.'

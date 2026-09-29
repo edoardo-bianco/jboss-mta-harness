@@ -452,7 +452,7 @@ O nome do agente no cabecalho e a prioridade das ferramentas do prompt seguem o
 
 **Fluxo pratico:**
 
-1. No workspace local salvo, execute **Terminal > Run Task > Planejamento: preparar contexto para Copilot**, da pasta `harness`, e escolha o projeto.
+1. No workspace local salvo, execute **Terminal > Run Task > Planejamento: preparar contexto para Copilot**, da pasta `harness`, escolha o projeto e **1. Planejar lote (/planejar-lotes)**. Para revisar uma proposta com evidencias, escolha **2. Revisar lote (/revisar-lote)** e siga [revisao com evidencias](#revisar-um-lote-com-evidencias-complementares).
 2. Confira projeto, fonte, horario local com fuso e RunId no terminal. O menu usa o fuso do Windows (por exemplo, `17:05:53 -03:00`); os recibos preservam UTC (`20:05:53Z` representa o mesmo instante). **Enter** usa a ultima rodada bem-sucedida com evidencias e integridade registradas; **h** lista o historico por data/resultado para escolher outra; **q** cancela. Uma tentativa mais recente indisponivel aparece como aviso. Sem rodada valida, conclua build e MTA antes de planejar.
 3. Nao ha pergunta de politica Git. Branch/commit sao registrados como referencia; o desenvolvedor escolhe onde trabalhar. Veja [branches e conferencia Git](#branches-e-conferencia-git).
 4. Se houver propostas salvas desse projeto, escolha o planejamento anterior para continuar/comparar ou pressione **Enter** para iniciar um independente. A lista mostra o projeto, a data local de preparacao e a data do MTA, ambas com fuso, alem dos IDs; ter arquivos nao significa que a proposta foi aprovada.
@@ -473,7 +473,7 @@ para conferir os dois documentos depois. Relate qualquer acao fora do contrato.
 
 Se o botao de executar nao aparecer, abra uma nova conversa Local e use a linha `/planejar-lotes ...` exibida no terminal. Ela referencia o arquivo preparado, sem preencher varios caminhos manualmente. Contextos antigos sem destinos de escrita devem ser preparados novamente. Nunca use `input` como checkout de trabalho.
 
-**Enter ou numero do planejamento anterior?** Ambos criam uma nova solicitacao. Enter inicia independente; o numero vincula o historico para comparar/continuar, sem sobrescreve-lo. Para continuar exatamente a mesma solicitacao, reabra seu prompt ja preparado. Se o lote anterior ainda nao foi aplicado ou aceito, peca reconciliar e manter o mesmo ID, sem criar outro lote.
+**Enter ou numero do planejamento anterior?** No modo Planejar lote, ambos criam uma nova solicitacao. Enter inicia independente; o numero vincula o historico para comparar/continuar, sem sobrescreve-lo. No modo Revisar lote, a escolha do anterior e obrigatoria; Enter cancela sem preparar contexto. Para continuar exatamente a mesma solicitacao, reabra seu prompt ja preparado. Se o lote anterior ainda nao foi aplicado ou aceito, peca reconciliar e manter o mesmo ID, sem criar outro lote.
 
 **Planejamento progressivo e continuidade:** com milhares de ocorrencias, o agente registra apenas a cobertura realmente analisada e candidatas ainda nao detalhadas. O `plan.md` contem o objetivo e o escopo do lote ativo, dependencias, riscos, criterios e historico resumido. O `todo.md` contem as tarefas desse lote; nao e um checklist de todo o relatorio.
 
@@ -591,7 +591,8 @@ suas observacoes e receber uma nova versao com historico preservado:
    Preserve identidade, ID do lote e evidencias. Uma observacao nao significa GO
    nem tarefa executada: mantenha a proposta nao aprovada e nao marque `[x]` sem evidencia.
 3. Salve os arquivos **antes** de executar **Planejamento: preparar contexto para
-   Copilot**. Escolha o mesmo projeto e, para uma revisao apenas documental, a mesma
+   Copilot**. Escolha o mesmo projeto, **1. Planejar lote** para este percurso de
+   feedback documental sem indice e, para uma revisao apenas documental, a mesma
    rodada MTA. Nao e necessario repetir build/MTA so para revisar o plano.
 4. Na pergunta do planejamento anterior, digite o numero da solicitacao que acabou
    de editar. **Enter inicia independente** e nao vincula suas observacoes.
@@ -623,6 +624,26 @@ salvos naquele momento. Depois de vincula-los, preserve essa versao anterior;
 novas observacoes entram na proxima revisao. Nao edite `context.json`, hashes ou
 evidencias MTA para registrar comentarios. Nao use `tasks/` do harness para isso.
 
+**Como identificar Previous depois de uma pausa:** use **Planejamento: abrir plano
+e to-do**, escolha o projeto e confira lote, observacoes e pendencias nos documentos.
+Leia o `RequestId` no cabecalho do plano que deseja revisar. Ao preparar o novo
+contexto, encontre esse valor no campo **Solicitacao** do menu e digite o numero
+da opcao correspondente. O horario **Planejado** identifica a preparacao do contexto,
+nao a ultima edicao do plano. Nao selecione automaticamente o mais recente.
+
+| Onde aparece | O que identifica |
+| --- | --- |
+| RequestId do plano / Solicitacao no menu | A proposta a revisar |
+| Previous.RequestId no novo contexto | A proposta escolhida no menu |
+| RunId | A rodada MTA |
+| ID do lote, por exemplo HIB-CACHE-001 | O lote, preservado entre revisoes |
+
+Exemplo: se o plano tem `RequestId: 581722d0364f467b828edb2bdc429946` e esse
+valor aparece na opcao **1**, digite **1**. A task preenche `Previous.RequestId`
+com esse identificador completo. `581722d0364f` e apenas sua abreviacao na pasta.
+Use o RequestId do plano, mesmo que o Previous dele seja null. Nao edite
+`context.json` manualmente para preencher Previous.
+
 ### Revisar um lote com evidencias complementares
 
 Use o prompt [revisar-lote](../../.github/prompts/revisar-lote.prompt.md) quando
@@ -630,6 +651,23 @@ ja existir plano/to-do e voce quiser considerar, junto ao MTA, outras evidencias
 arvore Maven, resultados de testes, exportacao Sonar, informacoes do EAP ou
 observacoes tecnicas. O planejamento inicial continua com `planejar-lotes`.
 A revisao mantem o mesmo lote; nao aplica corretivas nem concede GO.
+
+Use a mesma task **Planejamento: preparar contexto para Copilot**, escolhendo
+**2. Revisar lote (/revisar-lote)**. Nesse modo, selecione obrigatoriamente uma
+proposta com plan.md/to-do salvos e informe o caminho do **LEIA-ME.md preenchido**.
+A task verifica a existencia do indice; o agente confere identidade, arquivos
+listados e pertinencia das evidencias. Nenhuma evidencia complementar recebe hash.
+
+O editor abre **revisar-lote.prompt.md**, ja com os caminhos do contexto-base e
+do indice. Use **Executar Prompt** em nova conversa Copilot Local com `devsquad`
+ou copie a chamada **/revisar-lote** exibida no terminal. O arquivo
+`planejar-lotes.prompt.md` da mesma pasta e o contexto-base; execute somente
+o prompt de revisao. A task prepara os arquivos, mas nao aciona o agente.
+
+Se a revisao ja foi preparada, reabra esse prompt; outra preparacao cria outra
+solicitacao. Contextos antigos com Previous continuam utilizaveis com a chamada
+manual de /revisar-lote e os dois caminhos explicitos, como no exemplo abaixo.
+Nao e necessario repetir build/MTA ou substituir um contexto valido por essa melhoria.
 
 Execute **Terminal > Run Task > Planejamento: criar pasta de evidencias**.
 Informe o workspace em uso e escolha o projeto. A tarefa cria uma pasta nova,
@@ -675,15 +713,17 @@ tambem permite criar a estrutura manualmente, mantendo pastas antigas sem o ID f
    sem segredos, nao logs brutos ou settings privados. Salve tudo antes de iniciar.
    Nao copie o relatorio MTA para essa pasta: o contexto ja referencia a rodada.
 4. Execute **Planejamento: preparar contexto para Copilot**, escolha o mesmo
-   projeto, a **nova rodada MTA** e **selecione o planejamento anterior** que contem
-   seu feedback. Confira `Previous.RequestId` no novo prompt preparado.
-   Nao pressione Enter para iniciar independente: `Previous` deve apontar para o
+   projeto, **2. Revisar lote**, a **nova rodada MTA** e **selecione o planejamento
+   anterior** que contem seu feedback. Informe o caminho do LEIA-ME preenchido.
+   Confira `Previous.RequestId` no contexto-base preparado. A selecao anterior
+   e obrigatoria nesse modo: `Previous` deve apontar para o
    plano/to-do que quer revisar. O RunId atual identifica o novo MTA; Previous
    preserva o plano, o to-do e a rodada historica escolhidos, sem substitui-los.
-5. Em nova conversa Copilot Local com `devsquad`, invoque `/revisar-lote` com os
-   caminhos absolutos do prompt preparado e do indice, usando o texto abaixo.
-   Nesta etapa, execute `revisar-lote`; o prompt preparado e sua base de contexto.
-   Nao execute tambem `planejar-lotes`. A tarefa de evidencias so cria a estrutura;
+5. Em nova conversa Copilot Local com `devsquad`, execute o `revisar-lote.prompt.md`
+   aberto pela task ou copie a chamada `/revisar-lote` apresentada no terminal.
+   Os caminhos do contexto-base e do indice ja estao preenchidos. Para contextos
+   antigos, use a chamada manual abaixo. Nao execute tambem `planejar-lotes`.
+   A tarefa de evidencias so cria a estrutura;
    a revisao e acionada por voce no chat, nao pela Run Task.
 6. O condutor delega a `devsquad.plan`, que le o MTA, o plano/to-do anteriores e os
    arquivos listados. O condutor grava somente os novos PlanPath/TodoPath e rele
