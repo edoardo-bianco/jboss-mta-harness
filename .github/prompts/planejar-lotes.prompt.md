@@ -475,16 +475,28 @@ Indique dependencias e evidencia de conclusao esperada; tarefas futuras usam [ ]
 Nao marcar [x] sem conclusao sustentada; preservar referencias historicas. Nao criar
 checklists detalhados para todas as familias ou duplicar a analise do plan.md.
 
-No plano do lote, preservar baselines MTA/Sonar e prever build Maven Java 8 com
-POMs/dependencias alinhados ao destino, testes da aplicacao/consumidores,
-reanalise MTA comparavel, Sonar DEPOIS e validacao funcional do artefato identificado
-somente no EAP 7.4. Planejar o baseline Sonar antes de qualquer alteracao em codigo,
-POM ou testes. Sua ausencia permite proposta preliminar, mas deve ser apresentada
-na revisao/GO e impede comprovar zero issues novas sem evidencia comparavel.
-Resultados do artefato corrigido sao condicoes de aceite posteriores a implementacao,
-nao precondicoes para inicia-la. Manter precondicoes tecnicas e GO explicitos.
-Politica preservada: zero issues novas, zero HIGH/BLOCKER/CRITICAL,
-cobertura >=85%, duplicacao <=5%, Quality Gate separado; UNVERIFIED nao e conformidade.
+No plano do lote, preservar baselines existentes e prever build Maven Java 8 com
+POMs/dependencias alinhados ao destino, testes da aplicacao/consumidores e validacao
+funcional do artefato identificado somente no EAP 7.4. Em ambos os documentos,
+separar implementacao de "Checklist do desenvolvedor (nao bloqueante)". Nesse
+checklist incluir coleta Sonar (ANTES quando ainda possivel, DEPOIS e comparacao)
+e reexecucao MTA comparavel. Registrar [ ]/PENDENTE ate haver evidencia real.
+Ausencia dessas coletas nao impede GO, implementacao, entrega da corretiva ou
+submissao ao aceite; nao exigir dispensa individual nem promove-las a precondicoes
+ou gates automaticos de aceite. O desenvolvedor decide o aceite com as pendencias
+visiveis. Nao fabricar baseline ANTES depois da mudanca nem afirmar comparacao
+sem evidencia. Isso nao dispensa o contexto/MTA de origem e sua integridade.
+
+Cobertura de testes tem meta de 85%, com aviso abaixo dela; nao quebra o build nem
+bloqueia a implementacao/entrega. Manter testes, coleta/relatorio e limites visiveis.
+Planejar JaCoCo check com haltOnFailure=false quando configurar cobertura no POM;
+no build pelo harness essa politica e solicitada por -Djacoco.haltOnFailure=false.
+Nao usar skipTests, ignorar falhas de testes ou reduzir a meta para obter sucesso.
+Falhas reais de compilacao/testes continuam falhas. Sonar coletado conserva os
+criterios do harness: Blocker/High reprovam a avaliacao, cobertura <85% e aumento
+de issues geram avisos; Quality Gate do servidor e registrado separadamente.
+Nao converter falta de scan em reprovacao nem WARN em bloqueio. UNVERIFIED nao e
+conformidade, e ausencia de verificacao nao significa migracao global concluida.
 
 Se houver OpenRewrite, planejar testes da receita -> dryRun -> revisao do patch -> GO
 humano do escopo -> run -> verificacoes da aplicacao. Ajuste especifico requer diff

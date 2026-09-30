@@ -50,6 +50,8 @@ try {
     $calls = @(& $module { $script:Calls })
     $build = $calls[-1]
     Assert (($build.Arguments[-2..-1] -join ' ') -eq 'clean install') 'Ordem clean install perdida.'
+    Assert ($build.Arguments -contains '-Djacoco.haltOnFailure=false') 'Cobertura deve gerar aviso sem reprovar o build.'
+    Assert (-not ($build.Arguments -match 'skipTests|maven.test.failure.ignore|jacoco.skip')) 'Politica de cobertura nao pode ignorar testes ou relatorios.'
     Assert ($build.Java -eq $jdk -and $build.Maven -eq $maven) 'Build usou ferramentas do MTA.'
     Assert ($build.Cwd -eq $app -and $build.Executable -eq (Join-Path $maven 'bin/mvn.cmd')) 'Alvo/executavel errado.'
     Assert ($build.Arguments -contains $context.Config.tools.applicationMavenSettingsPath) 'Settings com espaco perdido.'

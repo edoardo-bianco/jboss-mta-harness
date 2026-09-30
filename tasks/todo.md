@@ -1,5 +1,20 @@
 # To-do do agente: evolucao do harness
 
+## Checklist sem bloqueio e cobertura como aviso - 2026-09-30
+
+- [x] Tornar Sonar/nova rodada MTA checklist nao bloqueante nos tres prompts.
+- [x] Aplicar cobertura como aviso no build, preservando erros de compilacao/testes.
+- [x] Atualizar guia/contrato e verificar prompts, launcher e JaCoCo real.
+
+Validacao: Test-Build (vermelho antes da mudanca, verde depois), Test-Planning,
+Test-Implementation e Test-SonarCriteria passaram em PowerShell 5.1.
+Test-BuildCoverage com JDK 8u504/Maven 3.9.16 passou: JaCoCo 0.8.12 com 20% de
+cobertura emitiu WARNING e exit 0; teste reprovado e compilacao invalida mantiveram
+exit diferente de zero. Fixture/evidencias locais: .harness/i/.harness/tests/
+coverage-2569395ed21d41569dada0f73e6f17ea/. Diff revisado e git diff --check passou.
+Obediencia do Copilot ao checklist ainda requer ensaio no cliente. POM/fontes e
+documentos ja gerados da aplicacao nao foram alterados por esta evolucao.
+
 ## POM alinhado ao Hibernate do EAP 7.4 - 2026-09-30
 
 - [x] Conferir raiz/branch/HEAD e isolar evolucao do lote ativo.

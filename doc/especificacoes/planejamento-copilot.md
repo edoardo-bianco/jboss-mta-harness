@@ -275,6 +275,18 @@ usa repositorios reais ficticios para validar menus, isolamento e preservacao.
 
 ## Implementacao e verificacao
 
+Sonar (baseline/coleta/comparacao) e reexecucao MTA pertencem ao checklist nao
+bloqueante do desenvolvedor nos dois documentos. Ausencia dessas verificacoes
+nao bloqueia GO, implementacao, entrega ou submissao ao aceite e nao exige dispensa
+individual. Preservar [ ]/PENDENTE e limites das evidencias; aceite e decisao humana.
+Isso nao elimina o contexto/MTA de origem nem suas conferencias de integridade.
+Cobertura <85% gera aviso; nao reprova build. O launcher solicita ao JaCoCo
+check -Djacoco.haltOnFailure=false; preservar testes/relatorios e falhas reais.
+POM com gate explicito que sobrepoe a propriedade exige ajuste aprovado no projeto,
+nao mascaramento do exit code. Outros plugins de cobertura requerem configuracao
+equivalente no escopo do lote. Resultados Sonar existentes mantem Blocker/High
+reprovados na avaliacao; avisos e falta de coleta nao viram bloqueio automatico.
+
 Para lotes Hibernate no perfil EAP 7.4, planejar-lotes e revisar-lote devem exigir
 POMs alinhados ao Hibernate ORM 5.3 do destino como entrega de implementacao,
 com tarefa explicita no to-do separada da confirmacao da versao exata. Identificar

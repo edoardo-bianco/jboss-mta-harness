@@ -1,5 +1,15 @@
 # Plano do agente: evolucao do harness
 
+## Checklist sem bloqueio e cobertura como aviso - 2026-09-30
+
+Pedido do desenvolvedor: coleta Sonar e reexecucao MTA sao checklist informativo,
+sem impedir implementar/entregar o lote ou exigir dispensa individual. Preservar
+pendencias/evidencias, GO e aceite separados. Cobertura abaixo de 85% deve alertar,
+sem reprovar build; falhas reais de compilacao/testes continuam falhas.
+Atualizar prompts/guia/contrato e o launcher Maven com jacoco.haltOnFailure=false,
+sem editar POM/testes do checkout da aplicacao em uso. Validar contrato do launcher
+e comportamento JaCoCo real em fixture isolada, alem da propagacao dos prompts.
+
 ## POM alinhado ao Hibernate do EAP 7.4 - 2026-09-30
 
 Evolucao dos prompts em harness/implementar-lote, derivada de main a549a15,

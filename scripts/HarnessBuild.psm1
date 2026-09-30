@@ -67,7 +67,8 @@ function Invoke-ApplicationBuild {
         $pushed = $true
         Write-Host "Projeto: $($Context.Active.label) | Fonte: $($Context.Active.path)"
         Write-Host "Java: $env:JAVA_HOME | Maven: $env:MAVEN_HOME"
-        Write-Host "Comando: mvn $Goals | Log: $($result.LogPath)"
+        Write-Host "Comando: mvn -Djacoco.haltOnFailure=false $Goals | Log: $($result.LogPath)"
+        Write-Host 'Cobertura JaCoCo abaixo da meta gera aviso; falhas de compilacao e testes continuam reprovando.'
         $version = Invoke-ApplicationTool $java @('-version')
         $result.JavaVersion = $version.Output
         if ($version.ExitCode -ne 0 -or $version.Output -notmatch 'version "1\.8\.') { throw 'O build exige Java 8 efetivo.' }
@@ -75,7 +76,7 @@ function Invoke-ApplicationBuild {
         $result.MavenVersion = $version.Output
         if ($version.ExitCode -ne 0 -or $version.Output -notmatch 'Apache Maven 3\.' -or $version.Output -notmatch 'Java version: 1\.8\.') { throw 'Maven deve executar com Java 8; confira sua versao e configuracao .mvn.' }
         Write-Host $version.Output
-        $arguments = @('-B', '-f', $pom)
+        $arguments = @('-B', '-f', $pom, '-Djacoco.haltOnFailure=false')
         if ($tool.applicationMavenSettingsPath) { $arguments += @('-s', $tool.applicationMavenSettingsPath) }
         $arguments += $Goals.Split(' ')
         $execution = Invoke-ApplicationTool $maven $arguments $result.LogPath

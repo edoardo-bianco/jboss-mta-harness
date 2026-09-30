@@ -138,8 +138,9 @@ selecione a nova solicitacao pelo ID mostrado no preparo. Confira:
 - Cada observacao atendida ou justificada nos dois documentos, sem contradicoes
   entre resumo, premissas, tarefas e criterios de aceite.
 - Evidencias citadas com seus limites; build ANTES nao conclui teste da corretiva.
-- Requisitos preservados: neste lote, baseline Sonar antes das alteracoes e
-  Quality Gate registrado e aprovado segundo a politica aplicavel.
+- Sonar/baseline e reexecucao MTA no checklist nao bloqueante do desenvolvedor,
+  com pendencias e resultados visiveis. A exigencia historica de baseline previo
+  nao bloqueia a implementacao no contrato atual; aceite permanece humano.
 - Documentos anteriores preservados e estado **PROPOSTA - NAO APROVADA**.
 
 Para omissao na entrega recem-gerada, ainda nao usada como Previous de outra

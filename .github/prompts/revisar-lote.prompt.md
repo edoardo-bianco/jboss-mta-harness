@@ -105,6 +105,16 @@ O especialista deve cruzar as evidencias adicionais com o MTA e o plano existent
   de teste, escopos e evidencia da versao resolvida. Sem evidencia, manter versao
   exata pendente; nao inventar. Build em 5.1 nao valida o alvo 5.3. Dispensa de
   precondicoes nao retira essa entrega; retirada exige mudanca explicita de escopo.
+- Classificar coletas Sonar/baseline e nova rodada MTA em "Checklist do desenvolvedor
+  (nao bloqueante)", separado da implementacao. Ausencia dessas verificacoes nao
+  bloqueia GO, implementacao, entrega ou submissao ao aceite e nao exige dispensa.
+  Corrigir exigencias antigas de baseline previo obrigatorio; preservar historico
+  e [ ]/PENDENTE, sem inventar baseline ou comparacao. Aceite e decisao do humano.
+  Cobertura <85% gera aviso, nao falha de build nem bloqueio. Manter testes,
+  relatorios e meta; JaCoCo check usa haltOnFailure=false, sem ignorar testes.
+  Falhas de compilacao/testes permanecem falhas. Blocker/High encontrados continuam
+  reprovando a avaliacao Sonar; aumento de issues e cobertura sao avisos, e Quality
+  Gate do servidor fica separado. Contexto/MTA de origem mantem integridade exigida.
 - Atualizar todas as secoes afetadas nos dois documentos, removendo contradicoes
   ativas. Separar precondicoes tecnicas/baseline, GO, implementacao, verificacoes
   posteriores e aceite. Resultado do artefato corrigido nao pode ser exigido antes

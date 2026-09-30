@@ -317,6 +317,14 @@ powershell.exe -NoProfile -File .\scripts\construir-aplicacao.ps1 -WorkspacePath
 O padrao da tarefa e do script sem `-Goals` continua sendo `clean verify`; para seguir a preparacao descrita neste guia, selecione ou informe `clean install`. `clean` remove as saidas conforme o POM;
 `install` percorre o ciclo ate instalar o artefato no repositorio Maven local.
 Veja o [ciclo oficial do Maven](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html).
+O harness passa `-Djacoco.haltOnFailure=false`: cobertura abaixo da meta de 85%
+gera aviso, sem quebrar o build. Testes, instrumentacao e relatorios continuam
+ativos; erros de compilacao e testes reprovados continuam retornando falha.
+Em Maven direto, use `mvn -Djacoco.haltOnFailure=false clean install`.
+Se o POM fixar `haltOnFailure=true` ou outro plugin impuser um gate, ajuste essa
+configuracao no escopo aprovado do projeto; a task nao edita o POM nem mascara erros.
+Ao configurar JaCoCo no POM, preserve os limites e use `haltOnFailure=false`,
+conforme a [documentacao do JaCoCo check](https://www.jacoco.org/jacoco/trunk/doc/check-mojo.html).
 Esta entrada aceita as fases acima (tambem `validate`/`compile`, com `clean` opcional),
 sem linha de shell, flags avulsas ou goals arbitrarios de plugins. Perfis, plugins,
 toolchains e `.mvn` existentes continuam sendo configuracao da aplicacao e precisam
@@ -590,6 +598,14 @@ Build que ainda resolve 5.1 nao comprova a migracao para 5.3. Para concluir, reg
 a versao resolvida e os resultados de clean install Java 8, testes/cobertura e WAR.
 Dispensar a confirmacao previa do ambiente nao elimina essa entrega de implementacao.
 
+**Checklist do desenvolvedor (nao bloqueante):** Sonar ANTES/DEPOIS e nova rodada
+MTA ficam como tarefas [ ] pendentes ate a execucao. Sua ausencia nao impede GO,
+implementacao, entrega da corretiva ou submissao ao aceite e nao exige dispensa.
+Nao marcar como feitas nem alegar comparacao sem baseline; o desenvolvedor decide
+o aceite com as pendencias visiveis. Cobertura <85% e aviso, nao bloqueio.
+Resultados Sonar coletados mantem Blocker/High reprovados na avaliacao, avisos de
+cobertura/aumento de issues e Quality Gate do servidor registrado separadamente.
+
 Repita ate concluir todas as corretivas do escopo. A conclusao exige reconciliar a
 cobertura acumulada com a rodada final comparavel, resolver pendencias e obter
 aceite humano final; terminar um lote ou nao reencontrar um achado nao basta.
@@ -690,10 +706,11 @@ Use o RequestId do plano, mesmo que o Previous dele seja null. Nao edite
 
 **Conferir e corrigir o resultado da revisao:** releia ambos os documentos,
 incluindo resumo, pendencias e criterios de aceite. Confirme que cada observacao
-foi atendida ou justificada e que requisitos anteriores nao foram enfraquecidos.
-No exemplo do cache, foi necessario restaurar a aprovacao do Quality Gate e
-uniformizar o baseline Sonar antes de alteracoes; somente registrar o gate ou
-tratar a falta do baseline como observacao no GO nao atendia ao criterio do lote.
+foi atendida ou justificada. Sonar/baseline e reexecucao MTA ficam no checklist
+nao bloqueante: a ausencia nao impede implementar/entregar nem exige dispensa.
+O exemplo historico do cache exigia baseline previo e aprovacao do Quality Gate;
+essa exigencia nao deve ser reproduzida como bloqueio automatico nos novos planos.
+Resultados coletados e pendencias continuam visiveis para o aceite humano.
 
 Para corrigir omissao/contradicao na entrega recem-gerada, ainda nao vinculada
 como Previous de outra solicitacao, peca na mesma conversa uma correcao documental
@@ -881,11 +898,11 @@ documentos. Data e opcional. Mantenha a mesma decisao nos dois arquivos.
 | --- | --- |
 | Implementar cumprindo as precondicoes do plano | `nenhuma` |
 | Prosseguir apesar de todas as pendencias previas listadas | `todas as precondicoes listadas neste plano e to-do` |
-| Prosseguir apesar de algumas pendencias | Liste apenas os IDs ou descricoes precisas, por exemplo `coleta do baseline Sonar ANTES` |
+| Prosseguir apesar de algumas precondicoes tecnicas | Liste apenas os IDs ou descricoes precisas das condicoes a dispensar |
 
 A dispensa expressa substitui exigencias anteriores somente nesse alcance; na
-opcao seletiva, as demais precondicoes continuam exigidas. GO sem dispensa nao
-autoriza pular pendencias. Registros em texto livre que expressem a mesma decisao
+opcao seletiva, as demais precondicoes tecnicas continuam exigidas. Sonar e nova
+rodada MTA sao checklist nao bloqueante e nao precisam de dispensa. Registros em texto livre que expressem a mesma decisao
 tambem sao aceitos, inclusive os existentes; nao e obrigatorio reescreve-los no modelo.
 
 O agente reconhece a decisao vigente antes de avaliar o estado antigo PROPOSTA -
@@ -895,8 +912,8 @@ plano/to-do, preservando historico. Nao pede o mesmo GO outra vez.
 Exemplo nao preenchido, aprovacao revogada ou decisoes humanas conflitantes nao
 autorizam execucao. Se a dispensa for ambigua, pede apenas o esclarecimento necessario.
 
-Verificacoes nao realizadas permanecem pendentes; dispensar o baseline Sonar como
-condicao previa nao comprova comparacao ANTES/DEPOIS nem zero issues novas. Aceite
+Verificacoes nao realizadas permanecem pendentes; falta do baseline Sonar nao
+bloqueia implementar, mas impede comprovar comparacao ANTES/DEPOIS. Aceite
 do resultado continua separado. Mudar escopo/API/criterios exige decisao explicita;
 a dispensa nao autoriza operacoes externas nem altera a integridade das evidencias.
 
@@ -1140,6 +1157,12 @@ de arquivos/indice. Nao altera branches da aplicacao real.
 Para testar configuracao e analise: execute `powershell.exe -NoProfile -File .\tests\Test-Workspace.ps1` e `powershell.exe -NoProfile -File .\tests\Test-Mta.ps1`. Criam fixtures em `.harness/tests/`; o segundo simula a chamada ao processo MTA.
 
 Para testar o build e sua configuracao: execute `powershell.exe -NoProfile -File .\tests\Test-Build.ps1` e `powershell.exe -NoProfile -File .\tests\Test-BuildConfig.ps1`. Verificam ferramentas separadas, Java 8, falhas, restauracao do ambiente e geracao do workspace, com chamadas de build simuladas.
+
+Para ensaiar cobertura com Maven real, execute `powershell.exe -NoProfile -File
+.\tests\Test-BuildCoverage.ps1 -Jdk8Home <caminho-do-jdk8> -MavenHome <caminho-do-maven>`
+em uma linha. O ensaio usa fixture isolada em `.harness/tests/`, dependencias e
+settings padrao da maquina: cobertura baixa gera aviso/exit 0, enquanto teste
+reprovado e erro de compilacao continuam falhando. Nao executa Sonar nem MTA.
 
 Para testar o acompanhamento e o historico, execute `powershell.exe -NoProfile -File .\tests\Test-MtaLog.ps1`. Usa logs ficticios e verifica novas linhas durante a leitura e selecao de rodadas anteriores, sem executar MTA. `powershell.exe -NoProfile -File .\tests\Test-MtaActive.ps1` verifica a deteccao da analise ativa sem selecao de projeto e recusa registros antigos e builds como fonte de observabilidade MTA.
 

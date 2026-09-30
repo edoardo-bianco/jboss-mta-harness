@@ -36,6 +36,12 @@ Data e desejavel para rastreabilidade; sua ausencia isolada nao invalida um GO
 inequivoco. Nao invente data de aprovacao. Preserve o texto e a origem da decisao.
 
 Leia a decisao completa antes de avaliar estados antigos e checkboxes:
+- Coleta Sonar/baseline e reexecucao MTA sao checklist nao bloqueante do
+  desenvolvedor. Sua ausencia nao exige dispensa e nao impede implementar,
+  entregar a corretiva ou submeter o resultado ao aceite. Reconciliar exigencias
+  antigas contrarias a esta politica ao registrar resultados, mantendo itens
+  [ ]/PENDENTE; nao alegar que foram executados. GO humano e integridade do contexto
+  e MTA de origem continuam exigidos. Aceite permanece decisao humana.
 - GO generico nao dispensa precondicoes. Conferir as que continuam exigidas.
 - O humano pode autorizar prosseguir apesar de todas as precondicoes listadas,
   ou dispensar apenas pendencias identificadas por ID/descricao. A dispensa vale
@@ -134,6 +140,16 @@ WAR; POM ja alinhado pode ser comprovado sem diff artificial.
 Acrescentar testes pertinentes a mudanca e executar build/testes conforme o plano,
 com JDK/perfis/settings previstos e padroes da maquina. Nao criar caches, mirrors
 ou settings alternativos por conveniencia; nao enfraquecer testes para obter sucesso.
+
+Cobertura abaixo da meta de 85% e aviso, sem reprovar build ou bloquear entrega.
+Manter execucao dos testes, instrumentacao, relatorios e meta. Usar o build do
+harness com -Djacoco.haltOnFailure=false; em comando Maven direto, incluir essa
+propriedade, e em configuracao de cobertura aprovada no POM usar haltOnFailure=false.
+Se o POM fixar outro gate que prevalece sobre a propriedade, relatar a origem e
+o ajuste necessario no escopo aprovado; nao converter exit code de erro em sucesso.
+Nao usar skipTests ou ignorar falhas dos testes. Compilacao/testes que falham
+continuam FALHOU. Blocker/High encontrados reprovam a avaliacao Sonar; cobertura
+e aumento de issues sao avisos, com Quality Gate do servidor separado.
 
 Terminal serve para conferencias de leitura e comandos tecnicos do escopo aprovado.
 Coletas MTA/Sonar, rede, EAP/deploy e outras operacoes externas somente quando
