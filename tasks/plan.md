@@ -1,5 +1,20 @@
 # Plano do agente: evolucao do harness
 
+## Planejamento a partir de MTA recebido - 2026-09-30
+
+Evolucao em harness/planejamento-portavel, derivada de main 2ecc997 no worktree
+.harness/i. Aceitar a pasta de uma rodada completa diretamente na tarefa existente,
+sem cadastro/importacao, copia de evidencias ou dependencia da maquina de origem.
+Preservar RunId e manifesto originais; criar nova solicitacao local de planejamento.
+Validar coerencia dos arquivos da rodada, sem vinculo de branch/commit/checkout
+de origem. Documentar a origem MTA nos documentos e separar os caminhos recebidos
+dos caminhos historicos contidos nos recibos. Preservar GO e aceite separados.
+Refinamento do desenvolvedor: projeto local tem o mesmo nome, nao a mesma raiz.
+Usar snapshot como base e codigo local para conferir os pontos a alterar.
+Comparar groupId:artifactId do POM raiz (incluindo parent), version separada;
+divergencia/inconclusao e apenas alerta, sem bloquear proposta. Recomendar novo
+MTA quando o trecho local tiver mudado, continuando a analise dos demais pontos.
+
 ## Nomes legiveis nas rodadas externas - 2026-09-30
 
 Retomar harness/caminhos-longos em .harness/i, alinhada a main 9c789ab.

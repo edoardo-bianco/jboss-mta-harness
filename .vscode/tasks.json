@@ -188,7 +188,7 @@
     },
     {
       "label": "Planejamento: preparar contexto para Copilot",
-      "detail": "Escolha planejar ou revisar lote; revisao exige plano anterior e LEIA-ME das evidencias. Abra o prompt adequado no editor.",
+      "detail": "Escolha planejar/revisar e uma rodada local ou p para pasta MTA recebida de outra maquina. Abre o prompt no editor.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [

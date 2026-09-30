@@ -1,5 +1,24 @@
 # To-do do agente: evolucao do harness
 
+## Planejamento a partir de MTA recebido - 2026-09-30
+
+- [x] Cobrir pasta recebida de outra maquina, identidade e evidencias ausentes.
+- [x] Permitir entrada por pasta na tarefa existente e gerar contexto novo.
+- [x] Ajustar prompts para origem MTA sem validacao de branch/checkout historico.
+- [x] Validar regressao, documentar uso e revisar entrega.
+
+Validacao: Test-PlanningPortable reproduziu ausencia de RunPath antes da mudanca;
+apos implementacao passou com origem Z:/ inexistente, Project diferente do local,
+POM com groupId/version herdados do parent, versao separada, coordenadas diferentes
+e propriedades inconclusivas (avisos sem bloquear). Menu p sem historico e CLI
+RunPath passaram; nova proposta, continuidade e preparo de implementacao mantiveram
+evidencias recebidas intactas. Test-Implementation passou com recibos legados.
+Os outros 18 testes passaram em Windows PowerShell 5.1 (20 no total, sem o ensaio
+Maven opt-in Test-BuildCoverage). Logs: .harness/i/.harness/tests/
+planejamento-portavel-validacao/. Diff revisado e diff --check passou.
+Comparacao semantica dos pontos alterados e geracao do plano/to-do dependem do
+agente Copilot; os testes comprovam preparo/contrato, nao obediencia do agente.
+
 ## Nomes legiveis nas rodadas externas - 2026-09-30
 
 - [x] Criar testes de nome/data, colisoes e leitura dos formatos antigos.

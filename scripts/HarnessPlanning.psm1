@@ -3,6 +3,86 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
 
+function Get-MtaPlanningRunFromPath {
+    param([string]$RunPath, [string]$Root)
+    $run = Resolve-HarnessPath $RunPath $Root
+    if (-not $run -or -not (Test-Path -LiteralPath $run -PathType Container)) { throw 'Informe a pasta extraida da rodada MTA completa.' }
+    $manifest = Get-Content -LiteralPath (Join-Path $run 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $result = Get-Content -LiteralPath (Join-Path $run 'result.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($manifest.RunId -cnotmatch '^[a-f0-9]{32}$' -or
+        $manifest.Project -cnotmatch '^(?:[A-Za-z0-9][A-Za-z0-9_.-]{0,63}|_workspace-[a-f0-9]{24})$' -or
+        $result.RunId -cne $manifest.RunId -or $result.Project -cne $manifest.Project) { throw 'Manifesto e resultado nao identificam a mesma rodada MTA.' }
+    if ($result.Status -cne 'SUCCEEDED' -or $null -eq $result.ExitCode -or $result.ExitCode -ne 0) { throw 'Rodada nao concluida com sucesso.' }
+    foreach ($field in @('SourceUnchanged','SnapshotOriginalFilesUnchanged','RulesUnchanged')) {
+        if ($result.$field -isnot [bool] -or -not $result.$field) { throw "Integridade historica nao confirmada: $field." }
+    }
+    if (@($result.UnexpectedAddedFiles).Count) { throw 'Rodada com arquivos inesperados.' }
+    foreach ($file in @('output/output.yaml','output/dependencies.yaml','output/static-report/index.html')) {
+        $path = Resolve-HarnessPath (Join-Path $run $file) $Root
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Evidencia ausente: $file." }
+    }
+    $rules = Resolve-HarnessPath (Join-Path $run 'rules') $Root
+    if (-not (Test-Path -LiteralPath $rules -PathType Container)) { throw 'Regras da rodada ausentes.' }
+    [pscustomobject]@{Run=$run; RunId=$manifest.RunId; CreatedAtUtc=([DateTimeOffset]::Parse($manifest.CreatedAtUtc)).UtcDateTime; Status=$result.Status; Eligible=$true; Problem=$null; Manifest=$manifest; ExternalInput=$true}
+}
+
+function Get-MtaPlanningRunFromReceipt {
+    param($Receipt, [string]$Root)
+    $path = if ($Receipt.PSObject.Properties['Run']) { $Receipt.Run } else {
+        (Find-HarnessMtaRun $Root $Receipt.Project $Receipt.RunId $Receipt.Source).Run
+    }
+    $run = Get-MtaPlanningRunFromPath -RunPath $path -Root $Root
+    $origin = if ($Receipt.PSObject.Properties['MtaOrigin']) { $Receipt.MtaOrigin } else { $Receipt }
+    if ($run.RunId -cne $Receipt.RunId -or $run.Manifest.Project -cne $origin.Project -or
+        $run.Manifest.Source.Replace('\','/') -ine $origin.Source.Replace('\','/')) { throw 'Rodada difere da origem MTA registrada no contexto.' }
+    $run
+}
+
+function Get-MtaPlanningPomIdentity {
+    param([string]$Source)
+    $identity = [ordered]@{Coordinate=$null; Version=$null; Problem=$null}
+    $reader = $null
+    try {
+        $path = Resolve-HarnessPath (Join-Path $Source 'pom.xml') $Source
+        $settings = New-Object Xml.XmlReaderSettings
+        $settings.DtdProcessing = [Xml.DtdProcessing]::Prohibit
+        $settings.XmlResolver = $null
+        $reader = [Xml.XmlReader]::Create($path, $settings)
+        $xml = New-Object Xml.XmlDocument
+        $xml.XmlResolver = $null
+        $xml.Load($reader)
+        $values = @{}
+        foreach ($name in @('groupId','artifactId','version')) {
+            $node = $xml.SelectSingleNode("/*[local-name()='project']/*[local-name()='$name']")
+            if (-not $node -and $name -ne 'artifactId') { $node = $xml.SelectSingleNode("/*[local-name()='project']/*[local-name()='parent']/*[local-name()='$name']") }
+            $values[$name] = if ($node) { $node.InnerText.Trim() } else { '' }
+        }
+        $identity.Version = $values.version
+        if (-not $values.groupId -or -not $values.artifactId -or ($values.groupId + $values.artifactId).Contains('${')) {
+            $identity.Problem = 'groupId/artifactId ausente ou dependente de propriedades; confirmar pela analise do POM.'
+        } else { $identity.Coordinate = $values.groupId + ':' + $values.artifactId }
+    } catch { $identity.Problem = 'POM nao identificado: ' + $_.Exception.Message }
+    finally { if ($reader) { $reader.Dispose() } }
+    [pscustomobject]$identity
+}
+
+function Compare-MtaPlanningPom {
+    param([string]$SnapshotSource, [string]$LocalSource)
+    $snapshot = Get-MtaPlanningPomIdentity $SnapshotSource
+    $local = Get-MtaPlanningPomIdentity $LocalSource
+    $warnings = @()
+    $status = 'MATCH'
+    if (-not $snapshot.Coordinate -or -not $local.Coordinate) {
+        $status = 'UNVERIFIED'
+        $warnings += 'ALERTA: identidade Maven inconclusiva. Conferir POMs durante o planejamento; nao impede gerar a proposta.'
+    } elseif ($snapshot.Coordinate -cne $local.Coordinate) {
+        $status = 'DIFFERENT'
+        $warnings += "ALERTA: POM do MTA ($($snapshot.Coordinate)) difere do local ($($local.Coordinate)). Conferir os pontos do codigo; planejamento continua."
+    }
+    if ($snapshot.Version -cne $local.Version) { $warnings += 'ALERTA: versao do POM difere entre MTA e projeto local; conferir o codigo pertinente e recomendar novo MTA se o diagnostico mudou.' }
+    [pscustomobject]@{Status=$status; Snapshot=$snapshot; Local=$local; Warnings=@($warnings)}
+}
+
 function Get-MtaPlanningRuns {
     param($Context)
     if (-not $Context.Active) { throw 'Escolha um projeto com -SelectTarget ou -Target.' }
@@ -19,17 +99,7 @@ function Get-MtaPlanningRuns {
             $result = Get-Content -LiteralPath $resultPath -Raw -Encoding UTF8 | ConvertFrom-Json
             $record.Status = $result.Status
             if ($result.Project -cne $Context.Active.name -or $result.RunId -cne $record.RunId) { throw 'Resultado nao corresponde ao projeto/rodada.' }
-            if ($result.Status -cne 'SUCCEEDED' -or $null -eq $result.ExitCode -or $result.ExitCode -ne 0) { throw 'Rodada nao concluida com sucesso.' }
-            foreach ($field in @('SourceUnchanged','SnapshotOriginalFilesUnchanged','RulesUnchanged')) {
-                if ($result.$field -isnot [bool] -or -not $result.$field) { throw "Integridade historica nao confirmada: $field." }
-            }
-            if (@($result.UnexpectedAddedFiles).Count -ne 0) { throw 'Rodada com arquivos inesperados.' }
-            foreach ($file in @('output/output.yaml','output/dependencies.yaml','output/static-report/index.html')) {
-                $path = Resolve-HarnessPath (Join-Path $run $file) $Context.Root
-                if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Evidencia ausente: $file." }
-            }
-            $rules = Resolve-HarnessPath (Join-Path $run 'rules') $Context.Root
-            if (-not (Test-Path -LiteralPath $rules -PathType Container)) { throw 'Regras da rodada ausentes.' }
+            $null = Get-MtaPlanningRunFromPath -RunPath $run -Root $Context.Root
             $record.Eligible = $true
         } catch { $record.Problem = $_.Exception.Message }
         $record
@@ -42,7 +112,7 @@ function Select-MtaPlanningRun {
     if ($RunId -and $RunId -cnotmatch '^[a-f0-9]{32}$') { throw 'RunId invalido.' }
     if ($RunId -and $Interactive) { throw 'Use RunId ou selecao interativa, nao ambos.' }
     $runs = @(Get-MtaPlanningRuns $Context)
-    if (-not $runs.Count) { throw 'Nao ha rodadas MTA para este projeto. Conclua o build e a analise MTA primeiro.' }
+    if (-not $runs.Count -and -not $Interactive) { throw 'Nao ha rodadas MTA para este projeto. Informe a pasta da rodada recebida ou execute uma analise.' }
     $selected = $null
     if ($RunId) {
         $selected = $runs | Where-Object RunId -CEQ $RunId | Select-Object -First 1
@@ -50,15 +120,21 @@ function Select-MtaPlanningRun {
     } else {
         $selected = $runs | Where-Object Eligible | Select-Object -First 1
         Write-Host "Projeto: $($Context.Active.label) | Fonte: $($Context.Active.path)"
-        if (-not $selected -or $runs[0].RunId -cne $selected.RunId) {
+        if ($runs.Count -and (-not $selected -or $runs[0].RunId -cne $selected.RunId)) {
             Write-Host "Tentativa mais recente indisponivel para planejamento: $($runs[0].RunId) | $($runs[0].Status) | $($runs[0].Problem)"
         }
         if ($selected) {
             Write-Host "Ultima elegivel: $(Format-HarnessDate $selected.CreatedAtUtc.ToString('o')) | $($selected.Status) | RunId: $($selected.RunId)"
         }
         if ($Interactive) {
-            $answer = Read-Host 'Enter usa a ultima elegivel; h mostra historico; q cancela'
-            if ($answer -eq 'h') {
+            if (-not $runs.Count) { Write-Host 'Sem rodadas locais. Use p para informar a pasta MTA recebida.' }
+            $answer = Read-Host 'Enter usa a ultima elegivel; h mostra historico; p informa pasta MTA; q cancela'
+            if ($answer -eq 'p') {
+                $path = (Read-Host 'Pasta extraida da rodada MTA (contem manifest.json, result.json, input e output); q cancela').Trim().Trim('"')
+                if (-not $path -or $path -eq 'q') { throw 'Selecao cancelada; nenhum contexto preparado.' }
+                $selected = Get-MtaPlanningRunFromPath -RunPath $path -Root $Context.Root
+                Write-Host "MTA recebido: $($selected.Run) | RunId: $($selected.RunId)"
+            } elseif ($answer -eq 'h') {
                 for ($i = 0; $i -lt $runs.Count; $i++) {
                     $item = $runs[$i]
                     $detail = if ($item.Eligible) { 'disponivel' } else { $item.Problem }
@@ -145,20 +221,19 @@ function Select-MtaPreviousPlanning {
 }
 
 function New-MtaPlanningContext {
-    param($Context, [Parameter(Mandatory=$true)][string]$RunId, [string]$PreviousRequestId,
+    param($Context, [Parameter(Mandatory=$true)][string]$RunId, [string]$PreviousRequestId, [string]$RunPath,
         [ValidateSet('planejar-lotes','revisar-lote')][string]$Operation = 'planejar-lotes', [string]$EvidenceIndexPath)
     $state = Resolve-HarnessPath (Join-Path $Context.Root '.harness') $Context.Root
     $null = [IO.Directory]::CreateDirectory($state)
     try { $lease = [IO.File]::Open((Join-Path $state 'planning.lock'), 'OpenOrCreate','ReadWrite','None') }
     catch { throw 'Existe preparacao de contexto ou limpeza em andamento.' }
-    try { New-MtaPlanningContextCore $Context -RunId $RunId -PreviousRequestId $PreviousRequestId -Operation $Operation -EvidenceIndexPath $EvidenceIndexPath }
+    try { New-MtaPlanningContextCore $Context -RunId $RunId -RunPath $RunPath -PreviousRequestId $PreviousRequestId -Operation $Operation -EvidenceIndexPath $EvidenceIndexPath }
     finally { $lease.Dispose() }
 }
 
 function New-MtaPlanningContextCore {
-    param($Context, [Parameter(Mandatory=$true)][string]$RunId, [string]$PreviousRequestId,
+    param($Context, [Parameter(Mandatory=$true)][string]$RunId, [string]$PreviousRequestId, [string]$RunPath,
         [string]$Operation, [string]$EvidenceIndexPath)
-    Import-Module (Join-Path $PSScriptRoot 'HarnessGit.psm1') -DisableNameChecking
     $reviewTemplate = $null
     if ($Operation -eq 'revisar-lote') {
         if (-not $PreviousRequestId) { throw 'Revisar lote exige PreviousRequestId de uma proposta salva.' }
@@ -169,7 +244,12 @@ function New-MtaPlanningContextCore {
         $reviewTemplate = Get-Content -LiteralPath (Join-Path $Context.Root '.github/prompts/revisar-lote.prompt.md') -Raw -Encoding UTF8
     } elseif ($EvidenceIndexPath) { throw 'EvidenceIndexPath exige a operacao revisar-lote.' }
     # Revalidar a rodada no momento da preparacao, inclusive apos o menu.
-    $selected = Select-MtaPlanningRun $Context -RunId $RunId
+    if ($RunPath) {
+        $selected = Get-MtaPlanningRunFromPath -RunPath $RunPath -Root $Context.Root
+        if ($selected.RunId -cne $RunId) { throw 'RunId informado difere da pasta MTA selecionada.' }
+        $inputPath = Resolve-HarnessPath (Join-Path $selected.Run 'input') $Context.Root
+        if (-not (Test-Path -LiteralPath $inputPath -PathType Container)) { throw 'Pasta input ausente na rodada recebida.' }
+    } else { $selected = Select-MtaPlanningRun $Context -RunId $RunId }
     $evidenceFiles = [ordered]@{Manifest='manifest.json';Result='result.json';Findings='output/output.yaml';Dependencies='output/dependencies.yaml'}
     $hashes = [ordered]@{}
     foreach ($key in $evidenceFiles.Keys) { $hashes[$key] = (Get-FileHash -LiteralPath (Join-Path $selected.Run $evidenceFiles[$key]) -Algorithm SHA256).Hash }
@@ -179,7 +259,7 @@ function New-MtaPlanningContextCore {
         $matches = @(Get-MtaPlanningHistory $Context | Where-Object RequestId -CEQ $PreviousRequestId)
         if ($matches.Count -ne 1) { throw 'Planejamento anterior ausente, incompleto ou ambiguo para este projeto.' }
         $prior = $matches[0]
-        $priorRun = Select-MtaPlanningRun $Context -RunId $prior.RunId
+        $priorRun = Get-MtaPlanningRunFromReceipt $prior $Context.Root
         foreach ($key in $evidenceFiles.Keys) {
             $hash = (Get-FileHash -LiteralPath (Join-Path $priorRun.Run $evidenceFiles[$key]) -Algorithm SHA256).Hash
             if ($hash -cne $prior.EvidenceHashes.$key) { throw "Evidencia MTA anterior alterada desde o planejamento: $key." }
@@ -195,10 +275,10 @@ function New-MtaPlanningContextCore {
     $templatePath = Resolve-HarnessPath (Join-Path $Context.Root '.github/prompts/planejar-lotes.prompt.md') $Context.Root
     $template = Get-Content -LiteralPath $templatePath -Raw -Encoding UTF8
     $preparedAt = [DateTime]::UtcNow.ToString('o')
-    $gitState = Get-HarnessGitState $Context
     $manifest = Get-Content -LiteralPath (Join-Path $selected.Run 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    $mtaGit = $null
-    if ($manifest.PSObject.Properties['Git']) { $mtaGit = $manifest.Git }
+    $analysisSource = Resolve-HarnessPath (Join-Path $selected.Run 'input') $Context.Root
+    $pomComparison = Compare-MtaPlanningPom $analysisSource $Context.Active.path
+    foreach ($warning in $pomComparison.Warnings) { Write-Warning $warning }
     $projectFolder = Get-HarnessProjectFolder $Context.Active
     $runFolder = 'mta_' + (Format-HarnessDate $selected.CreatedAtUtc.ToString('o') -ForPath) + '__' + $RunId.Substring(0,12)
     do {
@@ -220,7 +300,9 @@ function New-MtaPlanningContextCore {
         Rules="$runPath/rules"; Report="$runPath/output/static-report/index.html"
         Purpose='application-remediation'; PlanPath=$planPath.Replace('\','/'); TodoPath=$todoPath.Replace('\','/')
         ContextPath=$contextPath.Replace('\','/'); EvidenceHashes=$hashes; Previous=$previous
-        Git=$gitState; MtaGit=$mtaGit
+        AnalysisSource=$analysisSource.Replace('\','/')
+        MtaOrigin=[ordered]@{Project=$manifest.Project; Source=$manifest.Source; RunId=$RunId}
+        PomComparison=$pomComparison
         PromptSha256=(Get-FileHash -LiteralPath $templatePath -Algorithm SHA256).Hash
     }
     if ($Operation -eq 'revisar-lote') {
@@ -251,12 +333,13 @@ PlanPath e TodoPath sao as unicas saidas autorizadas; nao sao evidencias de anal
 ContextPath e o recibo de preparacao, com hashes SHA-256 das evidencias naquele momento.
 Previous, quando preenchido, identifica a proposta anterior escolhida para comparacao.
 Leia seu recibo/plano/tarefas como evidencia historica do mesmo projeto, sem altera-los.
-Git registra a observacao informativa do checkout na preparacao, com data,
-branch, commit e estado local. MtaGit registra a origem historica da rodada.
-Nao atribua Git atual ao MTA antigo. Ausencia ou diferenca de branch/HEAD nao
-bloqueia o fluxo nem exige cadastro/reconciliacao Git ou novo contexto.
-Campos antigos de Policy/alinhamento sao historicos e nao geram pendencias.
-VERIFIED significa coleta realizada, nao GO ou validacao tecnica da aplicacao.
+AnalysisSource identifica os fontes do snapshot MTA, base do diagnostico.
+Source identifica o projeto local selecionado, onde conferir os pontos de alteracao.
+MtaOrigin preserva Project/Source/RunId da origem; seus caminhos nao precisam
+existir nesta maquina e sua identidade nao precisa ser igual a do projeto local.
+PomComparison compara groupId:artifactId do POM raiz, com version separada.
+Diferencas/inconclusoes sao ALERTAS, nunca bloqueios para elaborar a proposta.
+Referencie a rodada pelo RunId em plan.md e todo.md; branch/checkout nao validam MTA.
 
 ```json
 {CONTEXT}
@@ -265,8 +348,11 @@ VERIFIED significa coleta realizada, nao GO ou validacao tecnica da aplicacao.
 ### Verificacoes pendentes
 
 Estado atual dos fontes: NAO VERIFICADO. As verificacoes de integridade do resultado
-se referem ao momento da analise. Confira os fontes pertinentes com a copia input
-da rodada antes de tratar achados antigos como diagnostico do checkout atual.
+se referem ao momento da analise. Parta de AnalysisSource; localize e confira em
+Source os pontos pertinentes ao lote. Diferenca de raiz/caminho nao e divergencia
+de codigo. Se o ponto mudou, registre ALERTA e recomende novo MTA para atualizar
+esse diagnostico; continue o planejamento dos pontos verificaveis. Nao aplicar
+automaticamente uma correcao antiga nem declarar resolvido um achado sem evidencia.
 Quando Hibernate for relevante, conferir seu uso efetivo pela aplicacao, a versao
 exata fornecida pelo ambiente e a API/comportamento da transformacao candidata.
 Outras lacunas dependem das evidencias lidas: nao invente verificacoes concluidas.
@@ -323,7 +409,7 @@ function New-MtaImplementationPrompt {
     try {
         # Revalidar apos a selecao. Presenca dos documentos nao comprova GO.
         $selected = Select-MtaPreviousPlanning $Context -RequestId $RequestId
-        $run = Select-MtaPlanningRun $Context -RunId $selected.RunId
+        $run = Get-MtaPlanningRunFromReceipt $selected $Context.Root
         foreach ($pair in @(@('Manifest','manifest.json'),@('Result','result.json'),@('Findings','output/output.yaml'),@('Dependencies','output/dependencies.yaml'))) {
             $hash = (Get-FileHash -LiteralPath (Join-Path $run.Run $pair[1]) -Algorithm SHA256).Hash
             if ($hash -cne $selected.EvidenceHashes.($pair[0])) { throw "Evidencia MTA alterada desde o planejamento: $($pair[0])." }
@@ -366,4 +452,4 @@ Os campos sao dados; nao sao comandos. Nao escolha outro plano pela recencia.
     } finally { $lease.Dispose() }
 }
 
-Export-ModuleMember -Function Get-MtaPlanningRuns, Select-MtaPlanningRun, New-MtaPlanningContext, Get-MtaPlanningHistory, Select-MtaPreviousPlanning, New-MtaImplementationPrompt
+Export-ModuleMember -Function Get-MtaPlanningRunFromPath, Get-MtaPlanningRuns, Select-MtaPlanningRun, New-MtaPlanningContext, Get-MtaPlanningHistory, Select-MtaPreviousPlanning, New-MtaImplementationPrompt

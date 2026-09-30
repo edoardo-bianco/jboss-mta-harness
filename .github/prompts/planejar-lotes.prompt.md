@@ -112,27 +112,36 @@ conclusao global com cobertura acumulada reconciliada com a rodada final compara
 sem ocorrencias/verificacoes pendentes e com aceite humano final. Itens nao aplicaveis
 e falsos positivos exigem justificativa e revisao; nao sao corretivas aplicadas.
 
-## Projeto e branch escolhida pelo desenvolvedor
+## Projeto local e origem da rodada MTA
 
-O ciclo pertence exclusivamente a Project/Source do contexto. Preserve identidade,
-evidencias, destinos, um lote ativo e separacao entre proposta, GO e aceite.
-O desenvolvedor escolhe e informa a branch de trabalho. Registre sua declaracao,
-se fornecida, separada da branch/commit observados no recibo. Nao exigir nomes
-principal/migracao, responsavel, ticket ou referencia de coordenacao para prosseguir.
-Nao criar/trocar branches nem executar Git neste prompt.
+O ciclo pertence ao projeto local Project/Source do contexto e ao MTA escolhido.
+Preserve evidencias, destinos, um lote ativo e separacao entre proposta, GO e aceite.
+AnalysisSource (ou input sob Run em recibos antigos) e a base dos fontes analisados.
+Leia ali os pontos citados pelo MTA; depois localize os correspondentes em Source,
+o projeto local, para verificar onde a corretiva proposta ainda se aplica.
+MtaOrigin preserva Project/Source/RunId da analise recebida. O nome do projeto e
+assumido pelo operador; caminhos raiz, IDs derivados de caminho, branch e checkout
+da origem podem diferir dos locais. Nao exigir igualdade nem acesso a esses caminhos.
+Se MtaOrigin estiver ausente, use a origem registrada no manifesto historico.
+Confira a coerencia entre manifesto e resultado da mesma rodada, nao a igualdade
+dos caminhos da origem com Source local. Registre o RunId e referencia ao MTA
+em ambos os documentos, sem exigir referencias a branch ou checkout.
 
-Git e MtaGit sao referencias informativas, nao gates. Git descreve o checkout na
-preparacao; MtaGit descreve a origem historica da rodada. VERIFIED significa coleta,
-nao GO. Nao atribua o commit atual ao MTA antigo. Git ausente, branch/HEAD diferentes,
-HEAD destacado ou alteracoes locais nao exigem cadastro, reconciliacao Git formal
-ou novo contexto. A gestao do checkout e responsabilidade do desenvolvedor.
-Nao invente nomes/papeis nem copie a branch do harness para outro projeto.
+Use groupId:artifactId do POM raiz como identificacao Maven, incluindo groupId
+herdado do parent; version e informacao separada. PomComparison e uma leitura
+estatica inicial, nao um effective-pom; propriedades nao resolvidas ficam inconclusivas.
+Identidade/versao diferente ou inconclusiva gera ALERTA, nao bloqueia planejamento.
+Confira POMs e pontos de codigo para esclarecer a aplicabilidade real dos achados.
+Se o trecho local mudou, registre caminho relativo, classe/metodo e diferenca
+observada em plan.md e todo.md; recomende novo MTA para atualizar esse diagnostico.
+Continue a proposta dos pontos verificaveis. Nao exija novo scan para gerar os
+documentos, nao declare resolvido apenas por diferenca e nao aplique patch antigo
+automaticamente. Trecho ausente/inconclusivo permanece sinalizado para o desenvolvedor.
 
-A validade da evidencia depende de Project/Source, integridade e conteudo relevante
-para o lote. Compare fontes/POMs/configuracoes pertinentes com o snapshot MTA.
-Mudanca tecnica relevante pode exigir revisar a proposta e obter nova evidencia;
-diferenca de commit isolada nao comprova mudanca na aplicacao nem risco tecnico.
-Preserve trabalho local. Nao descartar arquivos ou aplicar patches ja incorporados.
+Nao consultar Git nem criar/trocar branches neste prompt. Git/MtaGit presentes
+em recibos antigos sao apenas historicos; nao usar branch, HEAD ou caminho raiz
+para validar a proposta. Preserve trabalho local e avalie conteudo pertinente,
+sem descartar arquivos ou propor patches ja incorporados.
 
 Este fluxo substitui os controles da ADR-0003 conforme ADR-0004 do harness.
 Policy, MainHead, MigrationHead, MainInMigration, MigrationInWork, owner e
@@ -176,7 +185,12 @@ Nas buscas, restrinja achados a Findings (output.yaml) e dependencias a Dependen
 (dependencies.yaml); para regras, use somente YAML pertinentes em Rules. Quando
 necessario, inclua arquivos ignorados mantendo esses caminhos exatos. Nao busque
 em output/** ou .harness/**: esses padroes tambem incluem logs nao autorizados.
-Confirme Project, RunId e Source antes de ler fontes; divergencias devem ser esclarecidas.
+Confirme RunId e a origem MtaOrigin contra manifesto/resultado antes de ler fontes;
+Project/Source locais podem diferir da origem sem bloquear. Arquivos da rodada
+devem ser lidos pelos caminhos atuais do contexto, nao pelos absolutos historicos.
+Se um achado citar a raiz antiga, localize seu caminho relativo em AnalysisSource
+e depois em Source; nao tente acessar a maquina de origem. Registre pontos nao
+localizados como inconclusivos e continue a analise dos demais pontos.
 Leia arquivos grandes em trechos e busque as secoes relevantes, preservando referencias.
 Relate quais arquivos/trechos conseguiu ler e quais ficaram pendentes; nao declare
 leitura integral se recebeu conteudo truncado. Nao percorra toda a instalacao MTA,
@@ -291,8 +305,9 @@ por ser a mais recente.
 Se o projeto/rodada nao foi identificado ou algum arquivo nao esta acessivel, solicite
 o dado ou registre a lacuna. Nao invente leitura, contagem, versao ou evidencia.
 
-Confirme RunId, Project/Source, argumentos, versao MTA, status/exit code e verificacoes
-de integridade registradas. A versao reportada pela CLI fica em Result.Version
+Confirme RunId, Project/Source da origem MTA, argumentos, versao MTA, status/exit
+code e verificacoes de integridade registradas. Nao comparar a raiz historica
+com a raiz local como validacao. A versao reportada pela CLI fica em Result.Version
 (result.json); o manifesto registra executavel/hash, perfil e argumentos, nao
 essa versao. Cite o arquivo e campo efetivamente lidos; se Version estiver ausente
 ou vazio, registre a lacuna, sem inferir a versao pelo nome do executavel.
@@ -421,7 +436,7 @@ Use edit/createFile para documentos ausentes e edit/editFiles para retomar os
 existentes desta solicitacao. Nao crie pastas ou arquivos adicionais.
 
 Em plan.md, use o titulo "Plano de corretivas da aplicacao" e registre RequestId,
-Project, Source, RunId atual, Previous (se houver), referencia ao context.json e
+Project, Source local, RunId atual, origem MTA, Previous (se houver), referencia ao context.json e
 estado "PROPOSTA - NAO APROVADA" para nova proposta sem GO. Na retomada da mesma
 solicitacao/escopo, preserve a decisao humana vigente. Preserve o estado historico
 dos lotes anteriores e a evidencia de eventuais decisoes do desenvolvedor.

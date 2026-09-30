@@ -54,11 +54,11 @@ skills relatadas, somente dois documentos escritos e releitura antes de concluir
 Testes de preparacao nao comprovam obediencia do modelo ou integracao do plugin.
 
 A [ADR-0004](../adr/0004-git-informativo-sem-controle-de-branches.md) substitui
-os gates Git da ADR-0003. O desenvolvedor escolhe a branch; o harness apenas coleta
+os gates Git da ADR-0003. O desenvolvedor escolhe a branch; MTA/build registram
 Git informativo. Nao ha cadastro de politica, responsavel ou coordenacao, tarefa
 de conferencia ou bloqueio por ausencia/diferenca de branch/HEAD/estado local.
 `gitPolicies` legadas sao ignoradas sem reescrever configuracoes ou recibos.
-Novos contextos mantem Git/MtaGit distintos e deixam de gerar Policy e alinhamentos.
+Novos contextos de planejamento referenciam MtaOrigin/RunId e nao coletam Git.
 Contextos antigos com/sem esses campos continuam validos para consulta/continuidade.
 `VERIFIED` confirma coleta, nao GO; `UNAVAILABLE` nao bloqueia a preparacao.
 Abertura de planos nao consulta um gate Git. Projeto, integridade MTA e destinos
@@ -86,7 +86,20 @@ por trocar de branch; o desenvolvedor informa sua escolha ao agente.
   inclui somente rodadas externas registradas e validadas, nunca a raiz externa.
   Compartilhamento usa copia completa de static-report para consulta, conforme
   o guia do desenvolvedor; nao substitui caminhos/evidencias dos contextos existentes.
-- Oferecer a ultima rodada elegivel do projeto; permitir historico por data UTC,
+- Oferecer a ultima rodada elegivel do projeto e selecao do historico,
+  ou entrada `p`/RunPath de pasta completa recebida de outro harness/maquina.
+  Preparar nova solicitacao local sem importar/copiar/reescrever a rodada e sem
+  exigir igualdade de Source/Project derivados de caminho com o projeto local.
+  MtaOrigin preserva a origem e RunId; AnalysisSource aponta ao input recebido,
+  Source ao projeto local. Conferir coerencia interna manifesto/resultado e arquivos
+  necessarios; nao usar branch/checkout como validacao nem coletar Git nos novos
+  recibos de planejamento. POM groupId:artifactId (parent incluido), version separada:
+  divergencia/inconclusao gera apenas aviso. O agente verifica os pontos locais
+  contra o snapshot, registra alertas e recomenda novo MTA quando desatualizados,
+  sem bloquear a proposta. Reabertura, continuidade e preparo de implementacao
+  usam a pasta indicada no recibo; nao dependem de indice local para rodada recebida.
+  Preservar leitura de recibos antigos e hashes das evidencias na continuidade.
+  Oferecer historico por data UTC,
   status e RunId. Mostrar tentativa mais recente indisponivel; cancelar sem gerar.
 - Elegibilidade exige identidade de manifesto/resultado/fonte consistente,
   SUCCEEDED/exit 0, integridade historica confirmada, nenhum arquivo inesperado,

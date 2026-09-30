@@ -55,6 +55,17 @@ autorizacao para gerir branches: esta excecao pertence apenas a escolha na Run T
 
 ## Compatibilidade e operacao
 
+Complemento de 2026-09-30: o planejamento aceita a pasta completa de rodada MTA
+recebida de outra maquina. Nao exige igualdade do caminho raiz ou identidade
+derivada de caminho com o projeto local selecionado. MtaOrigin/RunId preservam
+a analise; AnalysisSource aponta ao snapshot e Source aos fontes locais.
+Novos recibos de planejamento nao coletam Git/MtaGit; campos antigos continuam
+historicos. MTA e build mantem suas observacoes informativas existentes.
+Comparacao estatica groupId:artifactId do POM raiz, com version separada, produz
+somente alertas de divergencia/inconclusao. O agente confere os pontos de codigo
+locais, registra diferencas e recomenda novo MTA se necessario, sem bloquear a
+proposta. Identidade interna da rodada, integridade e destinos continuam validados.
+
 `gitPolicies` em configuracoes antigas fica ignorado. Nao remover configuracao
 local nem reescrever contextos, prompts e planos antigos automaticamente.
 Campos antigos Policy/MainHead/MigrationHead/MainInMigration/MigrationInWork

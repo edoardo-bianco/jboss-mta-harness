@@ -38,6 +38,11 @@ o controle de branches da ADR-0003.
   `.harness/planning/`, na pasta da solicitacao identificada pelo recibo. Nunca use `tasks/` do harness
   para corretivas da aplicacao, nem altere o harness como parte de um lote.
 - Vincule cada ciclo a Project/Source e as evidencias/saidas da solicitacao.
+  Para MTA recebido, MtaOrigin preserva a origem e RunId; AnalysisSource e o
+  snapshot e Source e o projeto local. Caminhos/branches podem diferir.
+  Identidade Maven e diferencas de codigo geram alertas, sem bloquear a proposta;
+  conferir pontos locais e recomendar novo MTA se o diagnostico estiver desatualizado.
+  Planejamento referencia MtaOrigin/RunId, sem coletar Git do checkout local.
   Git e informativo: registre branch/commit observados quando disponiveis.
   O desenvolvedor escolhe e informa a branch de trabalho; o harness nao cadastra
   papeis, responsavel ou coordenacao, nem bloqueia por branch/HEAD/estado local.

@@ -581,6 +581,36 @@ e a navegacao. Enviar somente o HTML perde dependencias; a copia serve para cons
 e nao substitui o snapshot, os recibos ou os caminhos de retomada do agente.
 O harness nao publica nem envia arquivos automaticamente.
 
+**Compartilhar o MTA para gerar um plano novo:** envie a pasta completa da rodada
+(por exemplo `260930-154744`, com `manifest.json`, `result.json`, `input`, `rules`
+e `output`). O destinatario extrai em uma pasta local e usa **Planejamento:
+preparar contexto para Copilot**, seleciona o projeto local e a operacao planejar.
+Na selecao da rodada, digita **p** e informa a pasta extraida. Funciona mesmo sem
+historico MTA local. Para proposta independente, Enter no planejamento anterior.
+Nao e necessario copiar `.harness`, registrar/importar a rodada ou executar outro
+MTA somente por mudar de maquina. A pasta recebida nao e modificada nem incluida
+na limpeza de rodadas locais; mantenha-a no caminho informado enquanto for usada.
+
+O contexto novo referencia o RunId original e separa `MtaOrigin` (identidade e
+raiz historicas), `AnalysisSource` (input recebido) e `Source` (projeto local).
+Nao exige igualdade de caminhos, IDs derivados de caminho ou branches entre
+origem e destino. Compare o projeto escolhido pelo nome e pelo POM: o harness
+le `groupId:artifactId` do POM raiz, incluindo groupId herdado do parent, e mostra
+`version` separadamente. Diferencas ou propriedades nao resolvidas geram apenas
+ALERTA, sem impedir a proposta; essa leitura nao executa Maven/effective-pom.
+Novos recibos de planejamento nao coletam Git/branch/checkout para validacao.
+
+O agente parte dos fontes da rodada e verifica os pontos correspondentes nos
+fontes/POMs/testes locais. Se o trecho mudou, registra alerta no plano e no to-do,
+explica o que ainda se aplica e recomenda novo MTA para atualizar o diagnostico,
+continuando a proposta dos pontos verificaveis. O harness nao faz sozinho essa
+comparacao semantica. GO e aceite continuam separados. Rodada incompleta ou
+manifesto/resultado de IDs diferentes continuam sendo erros de entrada.
+
+Pela linha de comando, use `preparar-planejamento.ps1 -RunPath <pasta-extraida>`
+com o workspace/projeto local, `-NewPlan` e `-NoOpen` se desejar apenas preparar.
+Use RunPath ou RunId do historico, nunca ambos. Planos anteriores permanecem intactos.
+
 Verificacao em 2026-09-27: copia fora do repositorio com 23 arquivos e hashes
 iguais aos originais. No ensaio guiado posterior, o desenvolvedor confirmou a
 abertura e navegacao do relatorio da rodada das 15:15:54 e de sua copia externa.
