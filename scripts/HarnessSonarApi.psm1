@@ -1,6 +1,6 @@
 #requires -Version 5.1
 # Adaptado de jboss-eap-copilot-harness-template/scripts/SonarApi.psm1.
-# Origem, limites e APIs: doc/guias/sonar.md.
+# Origem, limites e APIs: doc/guias/harness-migracao-desenvolvedor.md (SonarQube).
 Set-StrictMode -Version Latest
 Add-Type -AssemblyName System.Net.Http
 

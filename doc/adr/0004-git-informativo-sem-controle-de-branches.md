@@ -15,7 +15,8 @@ O desenvolvedor pediu eliminar esse controle e assumir a gestao das branches.
 
 - O desenvolvedor escolhe/cria/seleciona a branch e pode informa-la ao agente.
   Nao ha cadastro de politica, responsavel ou coordenacao no harness.
-- Build, MTA e contexto continuam registrando observacao Git quando disponivel:
+- Build e MTA continuam registrando observacao Git quando disponivel (contextos
+  antigos preservam essa observacao; novos planejamentos nao a coletam):
   raiz/modulo, branch, commit, data e estado local. Ausencia de Git, HEAD destacado,
   alteracoes locais ou diferencas de branch/HEAD nao sao gates do harness.
 - Remover a tarefa e o script de conferencia Git, seus menus e funcoes de politica.

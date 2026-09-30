@@ -68,7 +68,7 @@ por trocar de branch; o desenvolvedor informa sua escolha ao agente.
 
 - Projetos vem do workspace salvo, inclusive agregadores Maven; nenhum cadastro
   adicional e necessario. Reutilizar identidade e validacao do harness.
-- Novas analises ficam em `.harness/runs/<nome>__<chave12>/mta_<data-fuso>__<RunId12>/`
+- Sem mta.runsPath configurado, novas analises ficam em `.harness/runs/<nome>__<chave12>/mta_<data-fuso>__<RunId12>/`
   e builds em `.harness/builds/<nome>__<chave12>/build_<data-fuso>__<RunId12>/`.
   Mesma convencao do planejamento; instantes CreatedAtUtc/StartedAtUtc e IDs
   completos nos recibos. Estruturas internas do MTA permanecem intactas.
@@ -99,7 +99,7 @@ por trocar de branch; o desenvolvedor informa sua escolha ao agente.
   sem bloquear a proposta. Reabertura, continuidade e preparo de implementacao
   usam a pasta indicada no recibo; nao dependem de indice local para rodada recebida.
   Preservar leitura de recibos antigos e hashes das evidencias na continuidade.
-  Oferecer historico por data UTC,
+  Oferecer historico ordenado pelo instante UTC, exibido no fuso local,
   status e RunId. Mostrar tentativa mais recente indisponivel; cancelar sem gerar.
 - Elegibilidade exige identidade de manifesto/resultado/fonte consistente,
   SUCCEEDED/exit 0, integridade historica confirmada, nenhum arquivo inesperado,

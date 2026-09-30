@@ -5,6 +5,10 @@ Status: aceita pelo desenvolvedor em 2026-09-27.
 Atualizacao em 2026-09-28: para identidade e Git, a
 [ADR-0004](0004-git-informativo-sem-controle-de-branches.md) substitui os controles
 de branches da ADR-0003. Mantidos os escopos, integridade MTA e GO/aceite separados.
+Leitura historica: as exigencias abaixo de reconciliar por mudanca de HEAD e de
+controle Git pela ADR-0003 foram substituidas. Confira conteudo relevante, sem
+exigir novo contexto apenas por branch/commit. No contrato atual, Sonar e nova
+rodada MTA sao checklist nao bloqueante; pendencias ficam visiveis para o aceite.
 
 ## Contexto
 

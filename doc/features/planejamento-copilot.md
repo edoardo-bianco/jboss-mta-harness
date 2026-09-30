@@ -1,6 +1,11 @@
-# Feature: preparar planejamento com evidencia MTA
+# Historico: preparar planejamento com evidencia MTA
 
-Status: implementada e validada nos scripts; ensaio de leitura/proposta no Copilot
+Registro dos ensaios de 26 a 28/09/2026. Estados e pendencias abaixo pertencem
+aquelas datas; nao sao instrucoes atuais nem pendencias a renovar. Para uso,
+consulte o [guia do desenvolvedor](../guias/harness-migracao-desenvolvedor.md);
+para trabalho atual, consulte o [to-do](../../tasks/todo.md).
+
+Status na epoca: implementada e validada nos scripts; ensaio de leitura/proposta no Copilot
 relatado pelo desenvolvedor em 2026-09-26. Refinamento aprovado: distinguir
 premissas confirmadas do destino, evidencias e verificacoes pendentes.
 

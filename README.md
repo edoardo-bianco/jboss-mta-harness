@@ -1,78 +1,89 @@
 # JBoss MTA Harness
 
-Harness para executar build Maven Java 8 e analise MTA pelo VS Code, consultar
-relatorios e preparar propostas de corretivas com GitHub Copilot e DevSquad.
-O perfil atual e EAP 7.1 → EAP 7.4, preservando Java 8 e `javax.*`.
+Harness para build Maven Java 8, analise MTA, coleta SonarQube e planejamento e
+implementacao assistidos por Copilot/DevSquad, sob controle do desenvolvedor.
+O perfil de migracao e EAP 7.1 para EAP 7.4, preservando Java 8 e `javax.*`.
+O **[guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md)** concentra
+as instrucoes completas; abaixo esta o percurso rapido com o exemplo incluido.
 
 ## Comecar
 
-1. Abra `iniciar-harness.code-workspace` no VS Code.
-2. Execute **Workspace: configurar caminhos**, preencha o JSON local e salve.
-3. Execute **Workspace: gerar workspace** e abra `jboss-mta-harness.local.code-workspace`.
-4. Siga o roteiro abaixo; consulte o **[guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md)** para requisitos e detalhes operacionais.
+Tenha Git, VS Code, Windows PowerShell 5.1, JDK 8 da aplicacao, Maven e a distribuicao
+Windows completa do MTA, com seu JDK compativel. O ensaio usa MTA 8.2.1/JDK 25.
+Para executar os prompts, tenha Copilot autenticado em sessao Local e o plugin
+DevSquad disponivel. O harness nao instala essas ferramentas.
 
-O guia explica os requisitos, a escolha de projeto e branches, cada menu das
-Run Tasks, a consulta de resultados e a limpeza para repetir o ensaio.
-Se o workspace local ja existe, abra-o diretamente.
+1. No clone, abra `iniciar-harness.code-workspace` no VS Code.
+2. Em **Terminal > Run Task**, escolha as tarefas da pasta **harness**.
+   Execute **Workspace: configurar caminhos** e preencha `config/harness.local.json`
+   conforme a conferencia abaixo. Mantenha os dois projetos de exemplo para o ensaio.
+3. Salve, execute **Workspace: gerar workspace** e abra
+   `jboss-mta-harness.local.code-workspace` em **File > Open Workspace from File**.
+4. Execute **MTA: conferir ambiente**, confirme esse workspace e selecione
+   `migracao-cache-antes`. Confira `OK`, projeto, fonte, perfil
+   `eap71-to-eap74-java8`, target `eap7` e modo `full`.
 
-**Vai demonstrar a revisao de um lote?** Use o
-[roteiro com exemplo preenchido](doc/guias/exemplo-revisao-lote.md).
-Ele mostra feedback, Previous, LEIA-ME, preparo e conferencia da revisao sem aplicar corretivas.
+**Ja configurou?** Abra diretamente o workspace local. Nao precisa gerar novamente
+antes de cada execucao. Se a conferencia falhar, corrija o JSON e repita-a.
 
-## Passo a passo pelo VS Code
+## Conferencia rapida da maquina
 
-Use **Terminal > Run Task**, com as tarefas da pasta `harness`, e selecione o
-mesmo projeto no build, no MTA e no planejamento. Para o primeiro ensaio, use
-`migracao-cache-antes`. A branch de trabalho e escolha do desenvolvedor;
-nao ha cadastro ou bloqueio Git no harness.
+No JSON local, use caminhos reais desta maquina com `/` ou `\\`. Os campos `Home`
+recebem a pasta da instalacao; `mtaExecutable` recebe o caminho do arquivo executavel.
 
-1. **Limpeza opcional, para recomecar:** execute **Workspace: limpar execucoes**,
-   escolha um projeto ou todos, confira os caminhos e confirme com `LIMPAR`.
-   Isso apaga resultados, prompts, planos e to-dos anteriores; preserva fontes,
-   configuracoes e Git. [Escopo e opcoes da limpeza](doc/guias/harness-migracao-desenvolvedor.md#limpar-execucoes-para-repetir-o-ensaio).
-2. **Build:** execute **Aplicacao: build Maven (Java 8)**, escolha `clean install`
-   e aguarde sucesso antes de seguir. [Build e escolha do modulo](doc/guias/harness-migracao-desenvolvedor.md#build-maven-da-aplicacao-com-java-8).
-3. **MTA:** execute **MTA: executar analise**. Aguarde `Status: SUCCEEDED`,
-   `ExitCode: 0` e integridade confirmada; consulte **MTA: abrir ultimo relatorio**.
-   [Analise e resultados](doc/guias/harness-migracao-desenvolvedor.md#analise-e-resultados).
-4. **Preparar contexto:** execute **Planejamento: preparar contexto para Copilot**
-   e escolha **1. Planejar lote**, depois a rodada desejada. Para recomecar do zero,
-   nao vincule planejamento anterior; para continuar, selecione a proposta existente.
-   Para revisar com evidencias, escolha **2. Revisar lote** nessa mesma task:
-   ela exige a proposta anterior e o LEIA-ME e abre `revisar-lote.prompt.md`.
-   [Menus e continuidade](doc/guias/harness-migracao-desenvolvedor.md#planejar-lotes-de-correcao-com-copilot).
-5. **Executar o prompt:** confira o contexto no fim de `planejar-lotes.prompt.md`
-   e use **Executar Prompt** em uma nova conversa **Copilot Local**, com `devsquad`.
-   Preparar o arquivo nao aciona o agente. [Ferramentas e delegacao](doc/guias/harness-migracao-desenvolvedor.md#planejar-lotes-de-correcao-com-copilot).
-6. **Revisar:** aguarde a gravacao e releitura de `plan.md` e `todo.md`; use
-   **Planejamento: abrir plano e to-do**. Confira o unico lote proposto e suas
-   pendencias. A proposta nao autoriza aplicar corretivas: essa etapa exige seu GO.
-   [Como registrar observacoes e pedir revisao](doc/guias/harness-migracao-desenvolvedor.md#revisao-manual-do-plano-e-do-to-do).
-7. **Implementar o lote aprovado:** registre o GO e execute **Aplicacao: preparar implementacao do lote**.
-   Selecione a solicitacao com plano/to-do e escolha criar `lote/<ID>`, usar a branch
-   atual ou criar uma com nome manual. Confira o prompt aberto e use **Executar Prompt**
-   no Copilot Local. DevSquad confere o GO e delega a implementacao do escopo aprovado;
-   verificacoes e aceite humano permanecem separados.
-   [Preparo e execucao](doc/guias/harness-migracao-desenvolvedor.md#preparar-implementacao-do-lote).
+| Conferir | Campos e valor esperado |
+| --- | --- |
+| Build da aplicacao | `tools.applicationJdk8Home`: JDK 8; `tools.applicationMavenHome`: Maven com `bin/mvn.cmd`. |
+| Analisador | `tools.mtaExecutable`: `windows-mta-cli.exe` na distribuicao completa; `tools.mtaJdkHome`: JDK do MTA; `tools.mavenHome`: Maven usado pelo MTA, podendo ser a mesma instalacao do build. |
+| Regras | `mta.rulesPath: null` usa `rulesets/java` da distribuicao; preserve `sources: []`, `targets: ["eap7"]` e `mode: "full"`. |
+| Rodadas externas | Recomenda-se `mta.runsPath: "C:/mta-runs"`, pasta dedicada com permissao de escrita, fora do harness e dos projetos. `null` mantem as rodadas dentro de `.harness/runs`. |
+| Settings Maven | `tools.mavenSettingsPath` e `tools.applicationMavenSettingsPath`: `null` usa os padroes da maquina; informe outro caminho somente para settings aprovado pela equipe. |
+| Etapas posteriores | Caminhos EAP e configuracao Sonar podem ficar sem preencher no primeiro ciclo build/MTA/planejamento. Configure-os quando for usar essas etapas; nunca grave token no JSON. |
 
-## Fluxo
+Nao basta copiar somente o executavel MTA: preserve os componentes da distribuicao.
+Nao e necessario alterar `JAVA_HOME`/PATH global. **Conferir ambiente valida os
+caminhos exigidos pelo MTA e mostra os configurados para a aplicacao; nao executa
+build, scan ou teste do servidor.** O build confirma o Java 8 efetivo e o Maven;
+a analise confirma o funcionamento do MTA. Veja o
+[exemplo completo de configuracao](doc/guias/harness-migracao-desenvolvedor.md#configuracao-da-maquina).
 
-Build → MTA → proposta de um lote → revisao/GO humano → correcao autorizada →
-verificacoes → revisao/aceite humano → novo MTA e reconciliacao → proximo lote.
+## Ensaio rapido: migracao-cache-antes
 
-O agente de planejamento grava somente `plan.md` e `todo.md` do lote.
-Para coletar Sonar ANTES/DEPOIS, use **Aplicacao: analisar SonarQube**;
-configure servidor e JDK, informe chave do projeto e token oculto, e preserve
-os resultados por projeto/data. [Configuracao e roteiro Sonar](doc/guias/sonar.md).
-Deploy e controle do servidor continuam como evolucoes futuras.
+Use **Terminal > Run Task**, pasta **harness**. Quando solicitado, confirme
+`jboss-mta-harness.local.code-workspace` e escolha **migracao-cache-antes pelo nome
+e caminho**, pois o numero pode variar. Mantenha o mesmo projeto nas etapas.
 
-## Referencias
+| Passo | Acao | Como conferir |
+| --- | --- | --- |
+| 1. Construir | **Aplicacao: build Maven (Java 8)**; escolha `clean install`. | `Status: SUCCEEDED`, `ExitCode: 0` e Java 8. Se falhar, corrija antes de analisar. |
+| 2. Analisar | **MTA: executar analise**. | `SUCCEEDED`, exit 0, integridade confirmada e `UnexpectedAddedFiles` vazio. Guarde o RunId e os caminhos exibidos. |
+| 3. Consultar | **MTA: abrir ultimo relatorio**. | Abre o HTML da ultima rodada concluida; confira o projeto e o caminho da rodada. |
+| 4. Preparar proposta | **Planejamento: preparar contexto para Copilot > 1. Planejar lote**. Confira o RunId e use Enter para a ultima elegivel; na escolha do anterior, Enter inicia independente. | Abre `planejar-lotes.prompt.md` com os destinos do plano/to-do. Ainda nao aciona o agente. |
+| 5. Gerar o plano | No arquivo aberto, use **Executar Prompt**, em nova conversa Copilot Local com **devsquad**. Sugestao: "Planeje somente a corretiva da limpeza do cache de consultas". | Chamada a `devsquad.plan`, gravacao e releitura de `plan.md` e `todo.md`, com um unico lote. |
+| 6. Revisar | **Planejamento: abrir plano e to-do**; escolha a solicitacao gerada. | Confira escopo, POM/dependencias, tarefas e pendencias. Para somente ensaiar o planejamento, termine aqui. |
+| 7. Implementar, quando autorizado | Registre o GO humano e execute **Aplicacao: preparar implementacao do lote**. Escolha criar `lote/<ID>`, usar a branch atual ou informar outro nome; depois execute o prompt no Copilot. | Corretiva limitada ao lote, verificacoes e pendencias registradas; aceite humano separado. Criar branch parte do HEAD atual e nao integra nem publica mudancas. |
 
-- [Guia: passo a passo e escolhas](doc/guias/harness-migracao-desenvolvedor.md)
-- [Decisoes arquiteturais](doc/adr/) e [contratos do harness](doc/especificacoes/)
-- [Evolucoes](doc/features/) e [tarefas do harness](tasks/todo.md)
-- [Instrucoes para agentes](AGENTS.md)
-- [Como testar os scripts](doc/guias/harness-migracao-desenvolvedor.md#testar-os-scripts-do-harness)
+Sonar e nova rodada MTA ficam no checklist do desenvolvedor, sem bloquear a
+implementacao por estarem pendentes. Cobertura abaixo de 85% gera aviso; falhas
+de compilacao/testes continuam falhando. GO autoriza implementar, nao aprova o resultado.
 
-Configuracao local, workspace gerado e artefatos de execucao em `.harness/`
-nao sao versionados. Os dois projetos de demonstracao acompanham o clone.
+**Ja tem um MTA pertinente?** Nao precisa repeti-lo so para gerar outra proposta.
+Na etapa 4, use Enter para a ultima elegivel, **h** para o historico ou **p** para
+uma pasta completa recebida de outra maquina. Confira a aplicabilidade aos fontes
+locais. Para continuar/revisar um lote existente, selecione seu planejamento
+anterior; Enter independente nao vincula esse historico.
+
+## Continuar pelo guia
+
+- [Formacao do lote e leitura delimitada do codigo](doc/guias/harness-migracao-desenvolvedor.md#como-se-forma-o-lote-o-planmd-e-o-todomd)
+- [Branches: estrategia e matriz origem/destino](doc/guias/harness-migracao-desenvolvedor.md#matriz-de-origem-e-destino-por-fase) e [diagnostico Git/TortoiseGit](doc/guias/diagnostico-branches-git-tortoisegit.md)
+- [Revisao com evidencias](doc/guias/harness-migracao-desenvolvedor.md#revisar-um-lote-com-evidencias-complementares), [GO e aceite](doc/guias/harness-migracao-desenvolvedor.md#da-proposta-revisada-a-execucao-e-ao-aceite) e [implementacao](doc/guias/harness-migracao-desenvolvedor.md#preparar-implementacao-do-lote)
+- [MTA compartilhado](doc/guias/harness-migracao-desenvolvedor.md#compartilhar-o-mta-e-planejar-em-outra-maquina), [SonarQube](doc/guias/harness-migracao-desenvolvedor.md#sonarqube-local-ou-corporativo) e [limpeza opcional](doc/guias/harness-migracao-desenvolvedor.md#limpar-execucoes-para-repetir-o-ensaio)
+
+Configuracao pessoal, workspace gerado e `.harness/` sao locais e nao acompanham
+clone/pull. Os exemplos acompanham o repositorio. Adicione projetos corporativos
+com **File > Add Folder to Workspace** e salve; nao precisa regenerar o workspace.
+
+Para evoluir o harness: [AGENTS.md](AGENTS.md), [decisoes](doc/adr/),
+[contrato](doc/especificacoes/planejamento-copilot.md), [tarefas](tasks/todo.md) e
+[testes dos scripts](doc/guias/harness-migracao-desenvolvedor.md#testar-os-scripts-do-harness).

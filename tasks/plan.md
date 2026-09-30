@@ -1,5 +1,24 @@
 # Plano do agente: evolucao do harness
 
+Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
+voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
+tecnicas reais permanecem nos checklists correspondentes.
+
+## Consolidacao da documentacao - 2026-09-30
+
+Evolucao do harness na branch harness/documentacao-consolidada, em worktree separado.
+Centralizar o uso no guia do desenvolvedor, incluindo Sonar, revisao e formacao de
+um unico lote a partir do MTA. Enxugar o README e retirar roteiros redundantes.
+Preservar o diagnostico de branches separado, o modelo usado pela Run Task,
+os contratos tecnicos, ADRs e historico de evidencias. Corrigir instrucoes antigas
+sobre Git, pasta externa, MTA recebido e checklist nao bloqueante.
+Validar referencias, ancoras, menus e coerencia com os prompts/scripts atuais.
+Nao alterar aplicacoes, prompts preparados nem resultados de rodadas.
+Publicacao autorizada pelo desenvolvedor: apos revisao documental, integrar por
+fast-forward em main e main_jboss_eap74, publicar ambas e confirmar os hashes
+remotos antes de remover branches auxiliares ja incorporadas. Preservar a branch
+lote/HIB-CACHE-001, com corretiva exclusiva, e os artefatos locais dos worktrees.
+
 ## Planejamento a partir de MTA recebido - 2026-09-30
 
 Evolucao em harness/planejamento-portavel, derivada de main 2ecc997 no worktree

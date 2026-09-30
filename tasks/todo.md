@@ -1,5 +1,22 @@
 # To-do do agente: evolucao do harness
 
+Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
+voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
+tecnicas reais permanecem nos checklists correspondentes.
+
+## Consolidacao da documentacao - 2026-09-30
+
+- [x] Centralizar Sonar/revisao no guia e retirar dois roteiros redundantes.
+- [x] README com conferencia rapida da maquina, ensaio do exemplo e pontos de parada/retomada; nomes e campos conferidos nos scripts/configuracao.
+- [x] Explicar triagem MTA, leitura delimitada e conteudo de plan.md/todo.md.
+- [x] Explicar principal, integracao EAP 7.4, lote e harness; separar push de integracao.
+- [x] Incluir matriz por fase com ORIGEM/DESTINO, evolutivas, atualizacao do lote e entrega final.
+- [x] Corrigir referencias antigas e conferir links/ancoras e contratos atuais.
+- [x] Revisar o diff sem alterar codigo da aplicacao ou evidencias historicas.
+- Validacao documental: referencias locais e ancoras sem erros; git diff --check aprovado.
+  Nomes/menus conferidos contra tasks e prompts. Sem alteracao de logica executavel;
+  Maven/MTA/Sonar nao foram reexecutados nesta revisao de documentacao.
+
 ## Planejamento a partir de MTA recebido - 2026-09-30
 
 - [x] Cobrir pasta recebida de outra maquina, identidade e evidencias ausentes.
