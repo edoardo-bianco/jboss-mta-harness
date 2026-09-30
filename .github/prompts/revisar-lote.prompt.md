@@ -98,6 +98,13 @@ O especialista deve cruzar as evidencias adicionais com o MTA e o plano existent
   cobertura; usar caminhos de evidencias autorizados pelo contexto e pelo indice.
 - Manter ID, historico, cobertura e pendencias tecnicas do mesmo lote. Preservar
   decisoes anteriores com sua origem; revisao nao concede novo GO ou aceite.
+- Em lote Hibernate para EAP 7.4, conferir se plan.md inclui os POMs no escopo e
+  todo.md tem a tarefa explicita de alinhar compilacao/teste ao Hibernate ORM 5.3
+  do destino. Corrigir omissao ou "se necessario", separando obtencao da versao
+  exata de sua aplicacao no POM. Verificar propriedade/parent/BOM, Core e integracoes
+  de teste, escopos e evidencia da versao resolvida. Sem evidencia, manter versao
+  exata pendente; nao inventar. Build em 5.1 nao valida o alvo 5.3. Dispensa de
+  precondicoes nao retira essa entrega; retirada exige mudanca explicita de escopo.
 - Atualizar todas as secoes afetadas nos dois documentos, removendo contradicoes
   ativas. Separar precondicoes tecnicas/baseline, GO, implementacao, verificacoes
   posteriores e aceite. Resultado do artefato corrigido nao pode ser exigido antes

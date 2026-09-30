@@ -579,6 +579,17 @@ Falhas ou pendencias impeditivas mantem o lote em retrabalho. Apos o aceite, um
 pedido de continuidade usa o novo MTA e o historico para identificar o proximo lote.
 O prompt de planejamento continua limitado a proposta e reconciliacao.
 
+**POM e Hibernate do destino:** para lote que migra Hibernate para EAP 7.4, o
+plano deve incluir os POMs afetados e o to-do deve conter a tarefa de alinhar
+compilacao e testes ao Hibernate ORM 5.3 fornecido por esse servidor. A versao
+exata depende do modulo/patch de destino; nao basta escolher qualquer 5.3 nem
+copiar a versao de outro exemplo. Conferir propriedade/parent/BOM, hibernate-core
+e integracoes usadas nos testes, preservando provided/test e evitando duplicatas
+no WAR. Sem evidencia, a versao exata fica pendente, mas a tarefa continua no lote.
+Build que ainda resolve 5.1 nao comprova a migracao para 5.3. Para concluir, registrar
+a versao resolvida e os resultados de clean install Java 8, testes/cobertura e WAR.
+Dispensar a confirmacao previa do ambiente nao elimina essa entrega de implementacao.
+
 Repita ate concluir todas as corretivas do escopo. A conclusao exige reconciliar a
 cobertura acumulada com a rodada final comparavel, resolver pendencias e obter
 aceite humano final; terminar um lote ou nao reencontrar um achado nao basta.

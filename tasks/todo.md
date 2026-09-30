@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## POM alinhado ao Hibernate do EAP 7.4 - 2026-09-30
+
+- [x] Conferir raiz/branch/HEAD e isolar evolucao do lote ativo.
+- [x] Exigir alinhamento do POM no plano e tarefa explicita no to-do.
+- [x] Preservar essa entrega na revisao e na execucao com dispensa de precondicoes.
+- [x] Atualizar guia/contrato e validar geracao de prompts e diff.
+
+Validacao: Test-Planning.ps1 e Test-Implementation.ps1 passaram em PowerShell 5.1;
+git diff --check passou. A obediencia do agente ao novo contrato requer ensaio
+no Copilot. Prompts/planos ja gerados e checkout do lote ativo foram preservados.
+
 ## GO simples e dispensa explicita de precondicoes - 2026-09-30
 
 - [x] Retomar branch do harness e identificar checkout do lote em uso.

@@ -275,6 +275,16 @@ usa repositorios reais ficticios para validar menus, isolamento e preservacao.
 
 ## Implementacao e verificacao
 
+Para lotes Hibernate no perfil EAP 7.4, planejar-lotes e revisar-lote devem exigir
+POMs alinhados ao Hibernate ORM 5.3 do destino como entrega de implementacao,
+com tarefa explicita no to-do separada da confirmacao da versao exata. Identificar
+propriedade/parent/BOM, Core/integracoes de teste, escopos e evidencia do modulo/
+patch do servidor. Sem evidencia, manter versao exata pendente, sem hardcode global.
+Verificar versao efetivamente resolvida no build, clean install Java 8, cobertura
+e WAR. Testes em 5.1 nao comprovam o alvo 5.3. Dispensa de precondicoes nao retira
+essa entrega; retirada exige decisao explicita de escopo. Implementar-lote deve
+relatar tarefa faltante ou versao indefinida, sem encerrar por sucesso parcial.
+
 PowerShell 5.1 em `scripts/`, tarefa em `.vscode/tasks.json`, testes com fixtures em
 `tests/`. Seguir o padrao existente: `#requires -Version 5.1`, parametros nomeados,
 `Set-StrictMode -Version Latest`, mensagens em portugues e `Resolve-HarnessPath`.

@@ -121,6 +121,16 @@ Adaptacoes obrigatorias aos defaults do plugin, para condutor e todos os workers
 
 Executar incrementalmente apenas tarefas tecnicas pendentes do lote aprovado.
 Na retomada, conferir diff e evidencias existentes antes de repetir trabalho.
+Em lote Hibernate para EAP 7.4, conferir a entrega de alinhamento dos POMs de
+compilacao/teste ao Hibernate ORM 5.3 do destino: propriedade/parent/BOM, versao
+exata sustentada por evidencia, Core/integracoes e escopos provided/test. Nao
+declarar essa entrega concluida com testes ainda em Hibernate 5.1. Se o plano
+omitiu o alinhamento, reportar a lacuna de escopo; nao alterar POM fora do GO.
+Dispensa de precondicoes nao cancela essa tarefa nem escolhe uma versao por
+inferencia. Sem evidencia/decisao suficiente sobre a versao exata, registrar a
+pendencia concreta e solicitar somente a decisao tecnica que falta. A conclusao
+exige conferir versao efetivamente resolvida, clean install Java 8, cobertura e
+WAR; POM ja alinhado pode ser comprovado sem diff artificial.
 Acrescentar testes pertinentes a mudanca e executar build/testes conforme o plano,
 com JDK/perfis/settings previstos e padroes da maquina. Nao criar caches, mirrors
 ou settings alternativos por conveniencia; nao enfraquecer testes para obter sucesso.

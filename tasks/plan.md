@@ -1,5 +1,17 @@
 # Plano do agente: evolucao do harness
 
+## POM alinhado ao Hibernate do EAP 7.4 - 2026-09-30
+
+Evolucao dos prompts em harness/implementar-lote, derivada de main a549a15,
+no worktree .harness/i. Nao editar POM, testes ou documentos do lote em andamento.
+Tornar obrigatorio no plano/to-do de lote Hibernate o alinhamento do classpath
+de compilacao/teste ao Hibernate ORM 5.3 fornecido pelo EAP 7.4 de destino.
+Separar entrega de implementacao (alinhar POM) de precondicao (confirmar versao).
+Sem evidencia, a versao exata fica pendente, mas a tarefa nao desaparece por
+dispensa de precondicoes. Nao fixar a versao do servidor deste ensaio no template
+global; seguir propriedade/parent/BOM e preservar escopos provided/test e caches.
+Conferir plano/revisao/implementacao, guia e contrato; testar propagacao nos prompts.
+
 ## GO simples e dispensa explicita de precondicoes - 2026-09-30
 
 Evolucao do harness em harness/implementar-lote, retomada de main b6ad314 no

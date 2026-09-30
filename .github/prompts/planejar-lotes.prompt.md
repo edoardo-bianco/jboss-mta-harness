@@ -350,6 +350,28 @@ Para cada dependencia que a corretiva afeta, registre:
   impacto de hibernate.version em core e integracoes, mantendo a versao exata
   pendente se ainda nao houver evidencia para fixa-la.
 
+Para lote que migra uso de Hibernate para EAP 7.4, o alinhamento do POM ao Hibernate
+ORM 5.3 fornecido pelo servidor de destino e entrega obrigatoria do mesmo lote.
+Nao o reduza a "avaliar se necessario" nem apenas a precondicao de confirmacao:
+- Em plan.md, inclua os POMs e a origem da versao (propriedade, parent ou BOM),
+  versao ANTES, versao exata de destino e sua evidencia. Confirmar modulo/patch
+  efetivo do EAP; se nao houver evidencia autorizada, manter a versao exata
+  PENDENTE, sem inventa-la ou copiar uma versao de outro ambiente/exemplo.
+- Em todo.md, inclua tarefa de implementacao "Alinhar os POMs de compilacao e
+  teste ao Hibernate do EAP 7.4 de destino", distinta da tarefa de obter evidencia.
+  Avalie hibernate-core e integracoes usadas (como hibernate-ehcache) em conjunto,
+  incluindo transitivas e perfis. Preserve provided para Hibernate fornecido pelo
+  servidor e test para provedores exclusivos dos testes; nao embutir Hibernate no
+  WAR como atalho. Nao adicionar Hibernate a aplicacoes que nao o utilizam.
+- Exija como evidencia de conclusao a versao efetivamente resolvida no build de
+  compilacao/teste alinhada ao destino, clean install Java 8, testes/cobertura e
+  inspecao do WAR. Build que ainda usa Hibernate 5.1 nao valida o alvo 5.3.
+  Se o POM ja estiver alinhado, registrar a comprovacao, sem alteracao artificial.
+- Dispensa de confirmar previamente o ambiente nao elimina a entrega de alinhar
+  o POM nem comprova compatibilidade. Se faltar decisao sobre a versao, registrar
+  a pendencia concreta; nao encerrar o lote como concluido mantendo 5.1 por omissao.
+  Retirar essa entrega exige mudanca explicita de escopo pelo desenvolvedor.
+
 Declare separadamente os estados do POM declarado, resolucao Maven, compatibilidade
 da API/testes, empacotamento e runtime: CONFERIDO NAS EVIDENCIAS, PENDENTE ou
 CONFLITO, com referencias, impacto e precondicoes para
