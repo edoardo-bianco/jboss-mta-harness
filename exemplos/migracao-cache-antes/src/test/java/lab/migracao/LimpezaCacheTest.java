@@ -1,5 +1,6 @@
 package lab.migracao;
 
+import java.lang.reflect.Proxy;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
@@ -9,6 +10,42 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class LimpezaCacheTest {
+    @Test
+    public void aceitaFactoryAusente() {
+        new LimpezaCache().limpar(null);
+    }
+
+    @Test
+    public void naoAcessaCacheDeFactoryFechada() {
+        SessionFactory factory = (SessionFactory) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{SessionFactory.class},
+                (proxy, method, args) -> {
+                    if ("isClosed".equals(method.getName())) {
+                        return true;
+                    }
+                    throw new AssertionError("Factory fechada nao deve ser acessada: " + method.getName());
+                });
+
+        new LimpezaCache().limpar(factory);
+    }
+
+    @Test
+    public void aceitaFactorySemCache() {
+        SessionFactory factory = (SessionFactory) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class<?>[]{SessionFactory.class},
+                (proxy, method, args) -> {
+                    if ("isClosed".equals(method.getName())) {
+                        return false;
+                    }
+                    if ("getCache".equals(method.getName())) {
+                        return null;
+                    }
+                    throw new AssertionError("Acesso inesperado: " + method.getName());
+                });
+
+        new LimpezaCache().limpar(factory);
+    }
+
     static SessionFactory abrirFactory(boolean cacheAtivo) {
         return new Configuration()
                 .setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect")
@@ -31,6 +68,38 @@ public class LimpezaCacheTest {
             }
             assertEquals(42, ((Number) query.uniqueResult()).intValue());
             transaction.commit();
+        }
+    }
+
+    @Test
+    public void ignoraFactoryNula() {
+        new LimpezaCache().limpar(null);
+    }
+
+    @Test
+    public void ignoraFactoryFechada() {
+        SessionFactory factory = abrirFactory(true);
+        factory.close();
+
+        new LimpezaCache().limpar(factory);
+        assertEquals(true, factory.isClosed());
+    }
+
+    @Test
+    public void ignoraCacheIndisponivel() {
+        SessionFactory factory = new Configuration()
+                .setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect")
+                .setProperty("hibernate.connection.driver_class", "org.h2.Driver")
+                .setProperty("hibernate.connection.url", "jdbc:h2:mem:cache_demo_sem_cache")
+                .setProperty("hibernate.cache.use_second_level_cache", "false")
+                .setProperty("hibernate.cache.use_query_cache", "false")
+                .setProperty("hibernate.generate_statistics", "true")
+                .buildSessionFactory();
+
+        try {
+            new LimpezaCache().limpar(factory);
+        } finally {
+            factory.close();
         }
     }
 
