@@ -34,9 +34,10 @@ function Add-Run($ctx, $id, $date, $status = 'SUCCEEDED', $readable = $false) {
     if ($readable) {
         $index = $run
         $external = Join-Path $area 'mta-runs'
-        $run = Join-Path $external ('p__' + (Get-HarnessProjectKey $ctx.Active.name) + '/' + $id)
+        $relative = 'Aplicacao/' + ([DateTimeOffset]::Parse($date)).ToLocalTime().ToString('yyMMdd-HHmmss')
+        $run = Join-Path $external $relative
         $manifest.IndexPath = $index
-        Write-HarnessJson (Join-Path $index 'location.json') @{Project=$ctx.Active.name;RunId=$id;Source=$ctx.Active.path;RunsPath=$external}
+        Write-HarnessJson (Join-Path $index 'location.json') @{Project=$ctx.Active.name;RunId=$id;Source=$ctx.Active.path;RunsPath=$external;RunRelativePath=$relative}
     }
     Write-HarnessJson (Join-Path $run 'manifest.json') $manifest
     Write-HarnessJson (Join-Path $run 'result.json') @{Project=$ctx.Active.name;RunId=$id;Status=$status;ExitCode=0;SourceUnchanged=$true;SnapshotOriginalFilesUnchanged=$true;RulesUnchanged=$true;UnexpectedAddedFiles=@()}

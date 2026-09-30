@@ -271,7 +271,12 @@ function Resolve-HarnessMtaRunDirectory {
         -not (Test-HarnessRunFolder (Split-Path -Leaf $indexPath) $location.RunId 'mta')) { throw 'Referencia externa MTA invalida.' }
     $base = Resolve-HarnessPath $location.RunsPath $Root
     if (-not $base -or $base.Length -le 3) { throw 'Raiz externa MTA invalida.' }
-    $run = Resolve-HarnessPath (Join-Path $base ('p__' + (Get-HarnessProjectKey $location.Project) + '/' + $location.RunId)) $Root
+    $relative = 'p__' + (Get-HarnessProjectKey $location.Project) + '/' + $location.RunId
+    if ($location.PSObject.Properties['RunRelativePath']) {
+        $relative = [string]$location.RunRelativePath
+        if ($relative -cnotmatch '^[A-Za-z0-9][A-Za-z0-9_-]*/\d{6}-\d{6}(?:-[1-9][0-9]*)?$') { throw 'Caminho relativo externo MTA invalido.' }
+    }
+    $run = Resolve-HarnessPath (Join-Path $base $relative) $Root
     $manifest = Get-Content -LiteralPath (Join-Path $run 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($manifest.Project -cne $location.Project -or $manifest.RunId -cne $location.RunId -or
         (Resolve-HarnessPath $manifest.Source $Root) -ine (Resolve-HarnessPath $location.Source $Root) -or
@@ -321,6 +326,47 @@ function Find-HarnessMtaRun {
     $matches[0]
 }
 
+function New-HarnessExternalRunDirectory {
+    param($Context, [string]$CreatedAtUtc)
+    $base = $Context.Config.mta.runsPath
+    $label = ([regex]::Replace($Context.Active.label, '[^A-Za-z0-9_-]', '-')).Trim('-','_')
+    if (-not $label) { $label = 'projeto' }
+    if ($label.Length -gt 64) { $label = $label.Substring(0,64) }
+    if ($label -match '^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])$') { $label = 'projeto-' + $label }
+    for ($number = 1; ; $number++) {
+        $name = if ($number -eq 1) { $label } else { $label + '-' + $number }
+        $projectPath = Resolve-HarnessPath (Join-Path $base $name) $Context.Root
+        $receipt = Join-Path $projectPath 'project.json'
+        if (Test-Path -LiteralPath $projectPath) {
+            # Nao adotar pastas desconhecidas nem misturar fontes homonimas.
+            if (-not (Test-Path -LiteralPath $receipt -PathType Leaf)) { continue }
+            $identity = Get-Content -LiteralPath $receipt -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ($identity.Project -ceq $Context.Active.name -and
+                (Resolve-HarnessPath $identity.Source $Context.Root) -ieq $Context.Active.path) { break }
+            continue
+        }
+        try { $null = New-Item -ItemType Directory -Path $projectPath -ErrorAction Stop }
+        catch {
+            if (Test-Path -LiteralPath $projectPath) { continue }
+            throw
+        }
+        Write-HarnessJson $receipt @{Project=$Context.Active.name; Label=$Context.Active.label; Source=$Context.Active.path}
+        break
+    }
+    $stamp = ([DateTimeOffset]::Parse($CreatedAtUtc)).ToLocalTime().ToString('yyMMdd-HHmmss', [Globalization.CultureInfo]::InvariantCulture)
+    for ($number = 1; ; $number++) {
+        $name = if ($number -eq 1) { $stamp } else { $stamp + '-' + $number }
+        $run = Resolve-HarnessPath (Join-Path $projectPath $name) $Context.Root
+        if (Test-Path -LiteralPath $run) { continue }
+        # Criacao sem Force reserva o destino, inclusive entre dois harnesses.
+        try { $null = New-Item -ItemType Directory -Path $run -ErrorAction Stop; return $run }
+        catch {
+            if (Test-Path -LiteralPath $run) { continue }
+            throw
+        }
+    }
+}
+
 function New-MtaSnapshot {
     param($Context)
     $rules = Get-MtaRequirements $Context
@@ -331,11 +377,9 @@ function New-MtaSnapshot {
         $id = [guid]::NewGuid().ToString('N')
         $runFolder = 'mta_' + (Format-HarnessDate $createdAt -ForPath) + '__' + $id.Substring(0,12)
         $indexPath = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/runs/' + $projectFolder + '/' + $runFolder)) $Context.Root
-        $run = $indexPath
-        if ($Context.Config.mta.runsPath) {
-            $run = Resolve-HarnessPath (Join-Path $Context.Config.mta.runsPath ('p__' + (Get-HarnessProjectKey $Context.Active.name) + '/' + $id)) $Context.Root
-        }
-    } while ((Test-Path -LiteralPath $run) -or (Test-Path -LiteralPath $indexPath))
+    } while (Test-Path -LiteralPath $indexPath)
+    $run = $indexPath
+    if ($Context.Config.mta.runsPath) { $run = New-HarnessExternalRunDirectory $Context $createdAt }
     $inputPath = Join-Path $run 'input'
     $outputPath = Join-Path $run 'output'
     $sourceFiles = @(Get-HarnessFiles $Context.Active.path)
@@ -359,7 +403,8 @@ function New-MtaSnapshot {
     if ($run -ine $indexPath) { $manifest.IndexPath = $indexPath }
     Write-HarnessJson (Join-Path $run 'manifest.json') $manifest
     if ($run -ine $indexPath) {
-        Write-HarnessJson (Join-Path $indexPath 'location.json') @{Project=$Context.Active.name; Source=$Context.Active.path; RunId=$id; RunsPath=$Context.Config.mta.runsPath}
+        $relative = (Split-Path -Leaf (Split-Path -Parent $run)) + '/' + (Split-Path -Leaf $run)
+        Write-HarnessJson (Join-Path $indexPath 'location.json') @{Project=$Context.Active.name; Source=$Context.Active.path; RunId=$id; RunsPath=$Context.Config.mta.runsPath; RunRelativePath=$relative}
     }
     [pscustomobject]@{Run=$run; Input=$inputPath; Output=$outputPath; Manifest=$manifest}
 }

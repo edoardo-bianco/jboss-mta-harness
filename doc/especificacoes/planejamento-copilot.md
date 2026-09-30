@@ -74,7 +74,12 @@ por trocar de branch; o desenvolvedor informa sua escolha ao agente.
   completos nos recibos. Estruturas internas do MTA permanecem intactas.
   Leitores MTA aceitam tambem `<Project>/<RunId>`, sem mover historico; usam
   identidades completas e fonte do manifesto. RunId duplicado e recusado.
-  Com mta.runsPath configurado, novas rodadas usam `<runsPath>/p__<chave12>/<RunId>/`;
+  Com mta.runsPath configurado, novas rodadas usam `<runsPath>/<nome>/yyMMdd-HHmmss/`;
+  nome seguro de ate 64 caracteres e horario local, com sufixos numericos para
+  colisoes. project.json identifica Project/Source/Label; RunId e instante UTC
+  permanecem no manifesto. location.json inclui RunRelativePath validado como
+  dois componentes; referencias sem esse campo continuam resolvendo o layout
+  anterior `p__<chave12>/<RunId>`. Pastas antigas nao sao renomeadas.
   location.json no indice local preserva descoberta de logs/relatorio/planejamento
   apos mudanca da configuracao, sem mover evidencias existentes. O manifesto
   externo deve corresponder a identidade, fonte e referencia local. Limpeza

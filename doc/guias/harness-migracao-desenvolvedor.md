@@ -391,11 +391,21 @@ configurar caminhos**, acrescente/ajuste somente `runsPath` no bloco `mta` de
 Salve e execute novamente **MTA: executar analise**. Nao precisa mover o harness
 nem alterar o workspace. A pasta precisa permitir escrita ao seu usuario e ficar
 fora do harness e dos projetos. Novas rodadas usam
-`C:/mta-runs/p__<chave12>/<RunId>/`, com `input`, `rules`, `output`, logs e recibos.
-Nomes dos fontes e estrutura dos modulos sao preservados. O rotulo, data e IDs
-continuam nos menus/manifestos; a pasta local da rodada guarda `location.json`.
+`C:/mta-runs/<nome-projeto>/yyMMdd-HHmmss/`, por exemplo
+`C:/mta-runs/SIMTR-Outsourcing-api/260930-151210/`, com `input`, `rules`, `output`,
+logs e recibos. A data/hora usa o horario local; o instante UTC e o RunId completo
+continuam no manifesto. Horarios repetidos recebem `-2`, `-3` etc., sem sobrescrever.
+O nome do projeto usa o rotulo do workspace/configuracao, com caracteres seguros
+e limite de 64 caracteres. Nomes iguais de projetos/fontes diferentes recebem
+sufixos numericos. `project.json` na pasta do projeto identifica `Label`, `Project`
+e `Source`; `manifest.json` em cada rodada registra tambem o Git observado.
+Nomes dos fontes e estrutura dos modulos sao preservados. A pasta local da rodada
+guarda `location.json`, incluindo o caminho relativo do destino externo.
 Logs, relatorio e planejamento resolvem essa referencia, inclusive apos trocar
 `runsPath` ou voltar a null. Historico existente nao e movido nem reescrito.
+Rodadas externas anteriores em `p__<chave12>/<RunId>/` continuam acessiveis.
+Na limpeza, a pasta do projeto e seu `project.json` permanecem; somente as rodadas
+registradas e selecionadas sao removidas, preservando a identificacao para reuso.
 Preserve as referencias locais junto com a pasta externa; nao mova rodadas a mao.
 
 O snapshot usa caminhos estendidos internamente para enumerar/copiar/calcular

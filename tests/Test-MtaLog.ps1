@@ -19,14 +19,22 @@ $oldId = '11111111111111111111111111111111'
 $newId = '22222222222222222222222222222222'
 foreach ($id in @($oldId,$newId)) {
     $run = Join-Path $fixture ".harness/runs/api/$id"
+    $manifest = @{RunId=$id; Project='api'; Source=$app; CreatedAtUtc='2026-09-24T10:00:00Z'}
     $date = '2026-09-24T10:00:00Z'
     if ($id -eq $newId) {
         $date = '2026-09-25T10:00:00Z'
         $run = Join-Path $fixture ('.harness/runs/Rotulo-anterior__' + (Get-HarnessProjectKey 'api') + '/mta_' + (Format-HarnessDate $date -ForPath) + '__' + $id.Substring(0,12))
+        $index = $run
+        $external = Join-Path $area 'mta-runs'
+        $relative = 'api/260925-070000'
+        $run = Join-Path $external $relative
+        $manifest.IndexPath = $index
+        Write-HarnessJson (Join-Path $index 'location.json') @{Project='api';Source=$app;RunId=$id;RunsPath=$external;RunRelativePath=$relative}
         $current = $run
     }
     $null = New-Item -ItemType Directory -Path $run -Force
-    @{RunId=$id; Project='api'; Source=$app; CreatedAtUtc=$date} | ConvertTo-Json | Set-Content "$run/manifest.json" -Encoding UTF8
+    $manifest.CreatedAtUtc = $date
+    Write-HarnessJson "$run/manifest.json" $manifest
 }
 $old = Join-Path $fixture ".harness/runs/api/$oldId"
 # Data do arquivo nao deve inverter a ordem das datas registradas nos manifestos.

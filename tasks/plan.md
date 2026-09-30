@@ -1,5 +1,14 @@
 # Plano do agente: evolucao do harness
 
+## Nomes legiveis nas rodadas externas - 2026-09-30
+
+Retomar harness/caminhos-longos em .harness/i, alinhada a main 9c789ab.
+Manter mta.runsPath externo; novas rodadas em <nome-projeto>/yyMMdd-HHmmss/.
+Usar sufixos numericos para homonimos e instantes repetidos, sem sobrescrever.
+Preservar RunId interno e hashes, indices locais e leitura do layout externo
+anterior. Identificar a origem em project.json e manifest.json; nao mover
+evidencias antigas. Testar criacao, colisoes, historico, planejamento e limpeza.
+
 ## Caminhos longos no snapshot MTA - 2026-09-30
 
 Evolucao isolada em harness/caminhos-longos, derivada de main 5c3b27a no worktree

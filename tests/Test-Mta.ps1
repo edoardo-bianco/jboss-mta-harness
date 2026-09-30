@@ -66,7 +66,21 @@ Write-HarnessJson $configPath $config
 $externalContext = Read-HarnessConfig $configPath $fixture
 $externalSnapshot = New-MtaSnapshot $externalContext
 Assert ($externalSnapshot.Run.StartsWith($external + '\')) 'Snapshot ignorou mta.runsPath.'
-Assert ((Split-Path -Leaf $externalSnapshot.Run) -ceq $externalSnapshot.Manifest.RunId) 'Rodada externa deve usar ID compacto.'
+Assert ((Split-Path -Leaf $externalSnapshot.Run) -cmatch '^\d{6}-\d{6}(-[0-9]+)?$') 'Rodada externa deve usar data/hora compacta.'
+Assert ((Split-Path -Leaf (Split-Path -Parent $externalSnapshot.Run)) -ceq $externalContext.Active.label) 'Pasta externa deve identificar o projeto pelo nome.'
+$projectReceipt = Get-Content (Join-Path (Split-Path -Parent $externalSnapshot.Run) 'project.json') -Raw | ConvertFrom-Json
+Assert ($projectReceipt.Source -eq $app -and $projectReceipt.Project -eq 'api') 'Origem do projeto nao identificada.'
+# Instante repetido e nome igual em repositorios diferentes nao sobrescrevem rodadas.
+$fixedDate = '2026-09-30T18:00:00Z'
+$first = & (Get-Module Harness) { param($c,$d) New-HarnessExternalRunDirectory $c $d } $externalContext $fixedDate
+$second = & (Get-Module Harness) { param($c,$d) New-HarnessExternalRunDirectory $c $d } $externalContext $fixedDate
+Assert ($second -ceq ($first + '-2')) 'Colisao no mesmo segundo nao recebeu sufixo sequencial.'
+$homonym = $externalContext | ConvertTo-Json -Depth 12 | ConvertFrom-Json
+$homonym.Active.path = Join-Path $area 'outro-repositorio'
+$third = & (Get-Module Harness) { param($c,$d) New-HarnessExternalRunDirectory $c $d } $homonym $fixedDate
+Assert ((Split-Path -Leaf (Split-Path -Parent $third)) -ceq ($externalContext.Active.label + '-2')) 'Projetos homonimos foram misturados.'
+$thirdAgain = & (Get-Module Harness) { param($c,$d) New-HarnessExternalRunDirectory $c $d } $homonym $fixedDate
+Assert ((Split-Path -Parent $thirdAgain) -ceq (Split-Path -Parent $third)) 'Pasta do projeto homonimo nao foi reutilizada.'
 $externalFound = Find-HarnessMtaRun $fixture 'api' $externalSnapshot.Manifest.RunId $app
 Assert ($externalFound.Run -eq $externalSnapshot.Run) 'Historico nao encontrou rodada externa.'
 $externalResult = Invoke-MtaAnalysis $externalContext

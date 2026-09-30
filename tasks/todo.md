@@ -1,5 +1,22 @@
 # To-do do agente: evolucao do harness
 
+## Nomes legiveis nas rodadas externas - 2026-09-30
+
+- [x] Criar testes de nome/data, colisoes e leitura dos formatos antigos.
+- [x] Implementar novo destino externo com identidade preservada.
+- [x] Validar planejamento, logs e limpeza; atualizar guia e contrato.
+- [x] Revisar diff e registrar evidencias da entrega.
+
+Validacao: Test-Mta falhou no formato esperado antes da implementacao e passou
+apos a mudanca, incluindo sufixos, homonimos, identidade, historico e relatorio.
+Test-Cleanup passou com layouts antigo/novo, cancelamento, referencia adulterada,
+travessia de diretorio, junction e preservacao de project.json. Os outros 17
+scripts de regressao passaram em Windows PowerShell 5.1 (19 no total); logs em
+.harness/i/.harness/tests/nomes-externos-validacao/. Test-BuildCoverage opt-in
+nao repetido. Revisao do diff e diff --check sem problemas. O MTA foi simulado
+na fronteira nativa; nova analise real com o nome legivel nao executada nesta
+alteracao. Rodadas reais existentes permanecem nos caminhos historicos.
+
 ## Caminhos longos no snapshot MTA - 2026-09-30
 
 - [x] Isolar branch derivada da main e preservar checkout do Copilot.
