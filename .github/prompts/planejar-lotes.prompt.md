@@ -400,12 +400,37 @@ existentes desta solicitacao. Nao crie pastas ou arquivos adicionais.
 
 Em plan.md, use o titulo "Plano de corretivas da aplicacao" e registre RequestId,
 Project, Source, RunId atual, Previous (se houver), referencia ao context.json e
-estado "PROPOSTA - NAO APROVADA" para o lote proposto. Preserve o estado historico
+estado "PROPOSTA - NAO APROVADA" para nova proposta sem GO. Na retomada da mesma
+solicitacao/escopo, preserve a decisao humana vigente. Preserve o estado historico
 dos lotes anteriores e a evidencia de eventuais decisoes do desenvolvedor.
 Inclua no inicio de ambos os documentos uma linha `Lote ativo: <ID-do-lote>`,
 fora de exemplos/blocos de codigo, com o mesmo ID estavel (letras, numeros, ponto,
 hifen ou sublinhado). A tarefa de implementacao usa esse metadado para sugerir
 branch; sua presenca nao e GO e nao autoriza criar branch durante o planejamento.
+
+Inclua em ambos os documentos o bloco abaixo, editavel pelo humano e inicialmente
+sem autorizacao. Responsavel fica vazio; nao preencha nome, GO ou dispensa pelo
+operador. Texto de instrucao/exemplo nao deve parecer decisao ja tomada.
+
+```text
+## Decisao humana
+Responsavel:
+GO humano: PENDENTE
+Pendencias dispensadas como precondicao: nenhuma.
+Aceite do resultado: PENDENTE.
+```
+
+Logo abaixo, explique de forma breve: preencher o nome e trocar PENDENTE por
+"autorizo implementar este plano e seu to-do". O lote/RequestId/escopo ja estao
+identificados, nao precisam ser repetidos. Para prosseguir apesar de pendencias,
+o humano pode escrever "todas as precondicoes listadas" no campo de dispensa ou
+listar somente os IDs/descricoes dispensados. GO sem dispensa mantem precondicoes
+exigidas; lista seletiva preserva as demais. A decisao expressa substitui as
+exigencias anteriores apenas nesse alcance; verificacoes nao realizadas continuam
+pendentes, nao concluidas, e aceite permanece separado. Data e opcional.
+Mantenha esse bloco igual no plano/to-do. Ao retomar a mesma solicitacao, preserve
+decisoes humanas existentes e sua origem; nao substitua GO vigente por placeholder.
+Nova proposta/revisao de escopo nao herda automaticamente GO de Previous.
 
 O conteudo deve cobrir:
 1. Premissas confirmadas e suas origens; evidencias lidas, identificacao da
@@ -470,7 +495,7 @@ disponiveis, informe precisamente o que foi salvo/pendente; nao alegue persisten
 nem use terminal como alternativa. Se faltarem ferramentas, orientar a configuracao
 de edit/createFile e edit/editFiles no Copilot Local e nova tentativa.
 
-O operador decide rota e aceite. Os documentos sao propostas, nao GO. Se existir
+O operador decide rota e aceite. A geracao dos documentos nao concede GO. Se existir
 plano canonico da aplicacao explicitamente informado, registre sua referencia e
 os pontos a conciliar sem edita-lo. tasks/ do harness nunca e destino das corretivas.
 

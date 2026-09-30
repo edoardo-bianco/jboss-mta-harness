@@ -1,5 +1,22 @@
 # Plano do agente: evolucao do harness
 
+## GO simples e dispensa explicita de precondicoes - 2026-09-30
+
+Evolucao do harness em harness/implementar-lote, retomada de main b6ad314 no
+worktree .harness/i. Checkout do lote esta em uso pelo Copilot: preservar branch,
+fontes, documentos locais e prompts preparados; nao integrar nele nesta etapa.
+Corrigir o contrato de implementacao para reconhecer decisao humana vigente,
+inclusive GO curto que referencia o proprio plano/to-do e dispensa explicita de
+todas ou de algumas precondicoes. Nao inferir dispensa de GO generico, checkbox,
+exemplo ou mera ordem no arquivo. Resolver textos antigos expressamente superados
+sem pedir novamente a mesma aprovacao; conflito real ou dispensa ambigua exige
+esclarecimento. Preservar identidade/hashes, escopo, historico e aceite separado.
+Planejamento/revisao passam a entregar bloco de decisao PENDENTE pronto para o
+operador preencher, com responsavel, GO e pendencias dispensadas. Documentar
+formas normal, geral e seletiva e manter verificacoes nao realizadas pendentes.
+Validar propagacao/preservacao no gerador, revisar cenarios semanticos, executar
+testes de implementacao e planejamento; ensaio do modelo permanece manual.
+
 ## Escolha explicita da branch na implementacao - 2026-09-30
 
 Retomar harness/implementar-lote, alinhada a main 2f288e0, no worktree .harness/i.

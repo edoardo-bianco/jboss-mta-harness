@@ -217,8 +217,28 @@ exige novo prompt, nao novo RequestId de planejamento. Hashes fixam versao, nao 
 
 O template separado implementar-lote habilita agent, leitura/busca, edicao e
 terminal, conforme as ferramentas do plugin instalado. Exige GO humano explicito
-do lote/solicitacao e precondicoes satisfeitas; presenca/checkbox/texto de exemplo
-nao concedem autorizacao. Contradicoes ou impedimentos interrompem antes da escrita.
+do lote/solicitacao; precondicoes continuam exigidas salvo dispensa humana explicita.
+Presenca/checkbox/texto de exemplo nao concedem autorizacao. GO curto com responsavel
+e referencia a este plano/to-do e suficiente quando identidade/escopo sao inequivocos;
+data e opcional. Planejamento e revisao incluem nos dois documentos um bloco editavel
+com Responsavel vazio, GO humano PENDENTE, Pendencias dispensadas como precondicao
+nenhuma e Aceite do resultado PENDENTE. Nao preencher aprovacao pelo humano.
+
+O operador pode dispensar todas as precondicoes listadas ou somente IDs/descricoes
+especificos. GO generico nao dispensa nada; lista seletiva mantem as demais exigidas.
+Decisao expressa que substitui exigencias anteriores prevalece sobre estado antigo
+PROPOSTA - NAO APROVADA e proibicoes historicas. Nao confundir texto superado com
+contradicao humana vigente; ordem no arquivo/mtime nao prova precedencia. Decisao
+ambigua, revogada ou conflitante e precondicao impeditiva nao dispensada exigem
+esclarecimento pontual; nao afirmar ausencia de GO quando a questao e seu alcance.
+Depois das conferencias, condutor encaminha GO/dispensas ao especialista e workers
+sem regravar os documentos antes da conferencia deles. Ao registrar os resultados,
+concilia estado/resumo/tarefas nos documentos atuais e preserva historico.
+Essa conciliacao autorizada na mesma execucao nao exige regenerar prompt; mudanca
+externa apos preparo continua sujeita aos hashes. Pendencias dispensadas como
+precondicao ficam pendentes de verificacao, sem [x] ficticio ou aceite automatico.
+Dispensa nao amplia escopo, nao comprova qualidade/compatibilidade e nao remove
+identidade, integridade das evidencias ou autorizacao para operacoes externas.
 O condutor passa contrato completo ao devsquad.implement; workers validate,
 execute, verify e review recebem os mesmos limites. PlanPath/TodoPath substituem
 tasks.md/spec/board; nao invocar finalize nem publicar, manipular Git ou memoria.

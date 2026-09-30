@@ -851,24 +851,48 @@ evidencia de ambiente ou mudanca documental, isoladamente, nao exige reanalise.
 Mudanca tecnica relevante exige avaliar nova rodada. Confira se a revisao fecha
 as precondicoes com evidencia, sem marcar o artefato corrigido como validado.
 
-**3. Registrar o GO humano para uma versao e escopo concretos.** O desenvolvedor
-confere as precondicoes e registra a decisao no plano/to-do vigente, identificando
-RequestId, ID do lote, escopo/API e evidencias. Exemplo de registro, a preencher
-somente apos a decisao real; nao copie campos genericos como se fossem autorizacao:
+**3. Registrar o GO humano no proprio plano/to-do.** Novos planejamentos e revisoes
+ja trazem este bloco nos dois documentos. Ele comeca sem aprovacao:
 
 ```text
-Data e responsavel pela decisao: preencher.
-Lote e RequestId da proposta aprovada: preencher.
-Precondicoes conferidas e respectivas evidencias: preencher.
-Escopo/API e limites aprovados: preencher.
-Decisao humana: GO para implementar este lote conforme esta proposta.
-Verificacoes posteriores e aceite do resultado permanecem pendentes.
+## Decisao humana
+Responsavel:
+GO humano: PENDENTE
+Pendencias dispensadas como precondicao: nenhuma.
+Aceite do resultado: PENDENTE.
 ```
 
-No lote do exemplo, nao iniciar alteracoes sem baseline Sonar coletado, registrado
-e preservado e demais precondicoes satisfeitas. GO nao transforma pendencias em
-sucesso. Se o plano ainda estiver incompleto, mantenha PROPOSTA - NAO APROVADA.
-Mudar escopo, API ou criterios aprovados exige nova revisao e decisao humana.
+Preencha seu nome e troque o GO por `autorizo implementar este plano e seu to-do`.
+Nao precisa repetir RequestId, lote, escopo ou criterios ja identificados nesses
+documentos. Data e opcional. Mantenha a mesma decisao nos dois arquivos.
+
+| Sua decisao | Campo Pendencias dispensadas como precondicao |
+| --- | --- |
+| Implementar cumprindo as precondicoes do plano | `nenhuma` |
+| Prosseguir apesar de todas as pendencias previas listadas | `todas as precondicoes listadas neste plano e to-do` |
+| Prosseguir apesar de algumas pendencias | Liste apenas os IDs ou descricoes precisas, por exemplo `coleta do baseline Sonar ANTES` |
+
+A dispensa expressa substitui exigencias anteriores somente nesse alcance; na
+opcao seletiva, as demais precondicoes continuam exigidas. GO sem dispensa nao
+autoriza pular pendencias. Registros em texto livre que expressem a mesma decisao
+tambem sao aceitos, inclusive os existentes; nao e obrigatorio reescreve-los no modelo.
+
+O agente reconhece a decisao vigente antes de avaliar o estado antigo PROPOSTA -
+NAO APROVADA. Apos conferir contexto/hashes e alcance, encaminha a decisao ao
+especialista; ao registrar resultados, concilia estado e textos superados no
+plano/to-do, preservando historico. Nao pede o mesmo GO outra vez.
+Exemplo nao preenchido, aprovacao revogada ou decisoes humanas conflitantes nao
+autorizam execucao. Se a dispensa for ambigua, pede apenas o esclarecimento necessario.
+
+Verificacoes nao realizadas permanecem pendentes; dispensar o baseline Sonar como
+condicao previa nao comprova comparacao ANTES/DEPOIS nem zero issues novas. Aceite
+do resultado continua separado. Mudar escopo/API/criterios exige decisao explicita;
+a dispensa nao autoriza operacoes externas nem altera a integridade das evidencias.
+
+Se editar os documentos depois de preparar implementacao, execute novamente
+**Aplicacao: preparar implementacao do lote** para fixar os hashes novos. Se a
+branch ja foi criada, escolha **2 - usar a branch atual**. Prompts antigos preservam
+o contrato anterior: use o novo arquivo gerado apos atualizar o harness.
 
 **4. Solicitar a execucao separadamente.** Depois de registrar GO, o desenvolvedor
 escolhe a branch/checkout e usa **Aplicacao: preparar implementacao do lote**.
@@ -908,12 +932,13 @@ O ensaio documental de 29/09/2026 nao executou essas etapas de implementacao e a
 
 ### Preparar implementacao do lote
 
-Use esta etapa depois de revisar o plano/to-do, resolver as precondicoes e registrar
+Use esta etapa depois de revisar o plano/to-do, resolver ou dispensar expressamente
+as precondicoes previas e registrar
 o GO humano para a solicitacao e escopo concretos. Preparar o prompt e executar a
 corretiva sao acoes diferentes; os scripts nao interpretam texto Markdown como GO.
 
 1. Salve o registro de GO no plano/to-do, conforme o modelo acima. Preserve o lote,
-   RequestId, escopo/API, criterios, evidencias e a origem/data da decisao humana.
+   RequestId, escopo/API, criterios, evidencias e a autoria da decisao humana.
 2. Execute **Terminal > Run Task > Aplicacao: preparar implementacao do lote**.
    Informe o workspace, escolha o projeto e selecione explicitamente a solicitacao
    com os dois documentos. O menu mostra datas/IDs; a presenca nao indica aprovacao.
@@ -931,8 +956,9 @@ corretiva sao acoes diferentes; os scripts nao interpretam texto Markdown como G
    no terminal. Exige plugin DevSquad com `devsquad.implement` e ferramentas de
    subagente, leitura, edicao e terminal; a task nao instala/verifica o plugin.
 6. O condutor le os dois documentos e confere versao, identidade, aplicabilidade,
-   precondicoes e GO. Sem GO valido, informa o impedimento antes de editar.
-   Com GO valido, delega ao `devsquad.implement` somente o escopo aprovado.
+   GO vigente e precondicoes nao dispensadas. Reconhece exigencias antigas
+   expressamente superadas e delega ao `devsquad.implement` somente o escopo
+   aprovado, com as dispensas. Ausencia de GO ou conflito real exige esclarecimento.
 7. Confira diff, comandos/resultados e as atualizacoes de PlanPath/TodoPath.
    Implementacao, testes/build, MTA, Sonar e runtime mantem estados separados;
    verificacao nao realizada fica pendente. Revise e registre o aceite humano depois.

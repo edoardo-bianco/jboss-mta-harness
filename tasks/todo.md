@@ -1,5 +1,20 @@
 # To-do do agente: evolucao do harness
 
+## GO simples e dispensa explicita de precondicoes - 2026-09-30
+
+- [x] Retomar branch do harness e identificar checkout do lote em uso.
+- [x] Corrigir precedencia da decisao humana e reconciliacao no prompt.
+- [x] Incluir bloco simples de GO nos modelos de plano/to-do e no guia.
+- [x] Validar geracao/preservacao, revisar cenarios e registrar limites do ensaio.
+
+  Test-Implementation, Test-Planning e Test-TaskInputs passaram em PowerShell 5.1.
+  Geracao propaga o template completo e preserva documentos/evidencias; 47 links/
+  ancoras e diff conferidos. Revisados: GO pendente, GO simples, dispensa geral,
+  dispensa seletiva, estado antigo superado e conflito/revogacao vigentes.
+  Nenhuma verificacao sem evidencia vira concluida. Interpretacao pelo Copilot
+  permanece ensaio manual; nao foi executada corretiva nesta evolucao do harness.
+  Plano/to-do locais ja estao sendo atualizados pelo Copilot e foram preservados.
+
 ## Escolha explicita da branch na implementacao - 2026-09-30
 
 - [x] Confirmar tres escolhas e fallback manual/atual quando ID ausente.

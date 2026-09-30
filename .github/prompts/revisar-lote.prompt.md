@@ -112,11 +112,31 @@ documentos anteriores. A autorizacao cobre os dois rascunhos, sem GO de corretiv
 
 Inclua o metadado `Lote ativo: <ID-do-lote>` no inicio de ambos os documentos,
 fora de exemplos/blocos de codigo, preservando o ID estavel.
+Inclua o mesmo bloco editavel de decisao humana no inicio do plano e do to-do:
+
+```text
+## Decisao humana
+Responsavel:
+GO humano: PENDENTE
+Pendencias dispensadas como precondicao: nenhuma.
+Aceite do resultado: PENDENTE.
+```
+
+Explique ao operador: basta preencher o nome e autorizar implementar este plano
+e seu to-do; nao precisa repetir lote/RequestId/escopo ja identificados. Para
+dispensar condicoes previas, escrever "todas as precondicoes listadas" ou listar
+IDs/descricoes especificos no campo de dispensa. GO generico mantem precondicoes;
+dispensa seletiva mantem as demais. Decisao expressa substitui exigencias antigas
+somente nesse alcance, sem declarar verificacoes executadas nem conceder aceite.
+Data e opcional. Nao preencher aprovacao/dispensa em nome do humano. Preservar
+decisoes existentes e sua origem ao retomar; proposta revisada que muda escopo
+nao herda GO anterior automaticamente, e o bloco novo permanece PENDENTE.
 Inclua no plano uma tabela curta de evidencias complementares, sem hashes, com
 referencias ao indice/arquivos efetivamente lidos e efeito sobre a proposta, e um
 historico breve da revisao. No to-do, atualize as tarefas afetadas e a evidencia
-esperada, sem duplicar toda a analise. A proposta revisada fica PROPOSTA - NAO
-APROVADA; mudancas de escopo/rota/criterios exigem nova revisao/GO humano.
+esperada, sem duplicar toda a analise. Nova proposta revisada fica PROPOSTA - NAO
+APROVADA; mudancas de escopo/rota/criterios exigem nova revisao/GO humano. Retomar
+a mesma solicitacao/escopo nao apaga decisao humana vigente ja registrada nela.
 
 Releia os dois documentos completos e confira identidade, lote, links, pendencias
 e consistencia de todos os paragrafos, tabelas e tarefas; nao basta adicionar uma

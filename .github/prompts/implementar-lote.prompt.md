@@ -28,13 +28,47 @@ real antes da primeira escrita. Documento alterado exige preparar outro prompt
 pela mesma tarefa, sem novo contexto de planejamento nem alteracao do historico.
 Hashes nao sao assinatura de aprovacao. Nao alegue recalculo por leitura textual.
 
-Identifique o unico ID de lote e o registro humano de GO para esta solicitacao,
-com data, responsavel, escopo/API, criterios e precondicoes/evidencias aprovados.
-Confirme consistencia entre plano e to-do; GO de outro lote, texto de exemplo,
-PROPOSTA - NAO APROVADA vigente, contradicao ou precondicao impeditiva pendente
-nao autorizam execucao. Nesses casos, exponha o impedimento sem editar arquivos;
-o desenvolvedor registra/corrige a decisao e prepara novamente. Nao responda por ele.
-GO ja valido dispensa pedir a mesma autorizacao outra vez. Aceite e decisao posterior.
+Identifique o unico lote e o GO humano vigente, com responsavel identificado e
+autorizacao explicita. Aceite registro curto, como "GO humano: autorizo executar
+este plano e seu to-do"; identidade, escopo e criterios podem ser referenciados
+pelos proprios documentos, sem repetir RequestId, lote ou todos os campos.
+Data e desejavel para rastreabilidade; sua ausencia isolada nao invalida um GO
+inequivoco. Nao invente data de aprovacao. Preserve o texto e a origem da decisao.
+
+Leia a decisao completa antes de avaliar estados antigos e checkboxes:
+- GO generico nao dispensa precondicoes. Conferir as que continuam exigidas.
+- O humano pode autorizar prosseguir apesar de todas as precondicoes listadas,
+  ou dispensar apenas pendencias identificadas por ID/descricao. A dispensa vale
+  somente como condicao previa a implementacao e somente no alcance expresso.
+  Lista seletiva mantem as demais precondicoes exigidas. Nao ampliar uma dispensa
+  nem interpretar "prosseguir" isoladamente como dispensa de todas as pendencias.
+- GO humano vigente substitui o estado anterior "PROPOSTA - NAO APROVADA", mesmo
+  que o operador tenha preenchido somente o bloco de decisao. O campo "Pendencias
+  dispensadas como precondicao" preenchido pelo humano, ou dispensa equivalente
+  em texto livre, ja explicita a substituicao de "sem excecao" e das exigencias
+  anteriores no alcance indicado; nao exigir uma frase adicional de substituicao.
+  Esses textos superados nao sao conflito ativo nem motivo para pedir outro GO.
+  Nao determinar vigencia apenas pela posicao do texto ou data de modificacao.
+- Responsavel vazio/placeholder, GO PENDENTE, exemplo nao confirmado, GO de outro
+  lote, revogacao vigente ou decisoes humanas realmente conflitantes nao autorizam
+  execucao. Dispensa ambigua ou precondicao impeditiva nao dispensada exige
+  esclarecimento pontual antes de editar; cite o trecho, sem afirmar que nao existe
+  GO quando ele existe. Nao responda pelo desenvolvedor.
+
+Depois das conferencias, transmita ao especialista a decisao vigente e o alcance
+das dispensas, sem regravar os documentos antes da leitura/conferencia dele. Ao
+registrar os resultados da delegacao, o condutor reconcilia PlanPath/TodoPath com
+a decisao ja dada: atualizar estado/resumo e marcar exigencias
+superadas como historicas ou "dispensada como precondicao por decisao humana".
+Preservar registro original, escopo e criterios; nao marcar verificacao [x] sem
+execucao/evidencia. Se a decisao ja esta clara nos dois documentos, essa conciliacao
+nao exige novo GO nem novo preparo durante a mesma execucao autorizada. Edicoes
+externas apos o preparo continuam sujeitas a conferencia de hashes acima.
+Dispensa nao comprova compatibilidade, baseline, qualidade ou sucesso: resultados
+ausentes continuam pendentes/UNVERIFIED e limitacoes devem constar da entrega.
+Ela nao dispensa identidade/integridade do contexto, nao autoriza operacoes externas
+por implicacao e nao amplia escopo. GO valido dispensa repetir a autorizacao;
+aceite do resultado permanece decisao humana posterior.
 
 Reconfira EvidenceHashes nos quatro artefatos MTA indicados no recibo. Confira
 identidade Project/Source/RunId de manifesto e resultado, caminhos dentro da rodada
@@ -56,7 +90,8 @@ sobreposicao real; conflito de edicao exige esclarecimento, nunca reset ou desca
 
 Invoque devsquad.implement via agent, com [CONDUCTOR] e [LANG: pt-BR]. Envie este
 contrato completo, caminhos literais do prompt/recibo/plano/to-do, sete campos
-de identidade acima, ID do lote, registro de GO, escopo aprovado, evidencias,
+de identidade acima, ID do lote, registro de GO, dispensas expressas e precondicoes
+que continuam exigidas, escopo aprovado, evidencias,
 estado local observado, comandos de verificacao e limites de escrita.
 O especialista deve ler os documentos; nao herda implicitamente este contexto.
 
@@ -71,7 +106,8 @@ Adaptacoes obrigatorias aos defaults do plugin, para condutor e todos os workers
   Nao chamar devsquad.implement.finalize, refine, sprint ou iniciar outra fase/lote.
 - Especialista/executor pode editar fontes, POMs, configuracoes e testes pertinentes
   dentro de Source, somente conforme o lote aprovado. O condutor atualiza apenas
-  PlanPath/TodoPath com os resultados e preserva GO/historico; nao altera criterios.
+  PlanPath/TodoPath com a conciliacao da decisao vigente e os resultados; preserva
+  GO/historico e nao altera criterios por iniciativa propria.
 - Nao escrever tasks/ do harness, scripts/prompts do harness, recibos, snapshots,
   regras MTA, propostas Previous, memoria, ADRs, boards ou documentos paralelos.
   Nao executar commit, push, merge, PR, troca de branch ou mensagens externas.
