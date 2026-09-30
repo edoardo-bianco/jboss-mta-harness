@@ -1,5 +1,19 @@
 # To-do do agente: evolucao do harness
 
+## Preparar implementacao do lote pelo DevSquad - 2026-09-30
+
+- [x] Conferir checkout, isolar branch e confirmar abertura manual do prompt.
+- [x] Testar preparo a partir do par de documentos, identidade, hashes e preservacao.
+- [x] Implementar geracao, entrada e Run Task unica com selecao existente.
+- [x] Definir prompt DevSquad com GO, escopo, verificacoes e aceite separados.
+- [x] Atualizar guia/contrato e validar regressao, sintaxe, links e diff.
+  Os 17 scripts Test-*.ps1 passaram em Windows PowerShell 5.1, incluindo entrada
+  real e editor simulado. Test-Mta teve uma falha de arquivo em uso na fixture;
+  repeticao isolada passou. 67 links/ancoras, sintaxe e diff conferidos.
+  Worktree encurtado para .harness/i apos limite de caminho no teste de planejamento.
+  Revisao local concluida; testes nao acionaram DevSquad nem corretivas reais.
+- [ ] Operador: ensaiar Executar Prompt, delegacao e corretiva autorizada no Copilot.
+
 ## Criterios Sonar e padroes de configuracao - 2026-09-29
 
 - [x] Confirmar Blocker/High reprovando; cobertura <85% e aumento de issues como avisos.

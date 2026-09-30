@@ -16,7 +16,7 @@ a tarefa atua somente no alvo escolhido. Ter uma pasta aberta nao a torna o alvo
 | 4. Preparar planejamento | Rodada MTA e proposta anterior ou independente | Prompt e recibo com destinos exclusivos; Git informativo |
 | 5. Acionar Copilot | Objetivo do lote; continuidade explicita quando houver historico | Um `plan.md` e um `todo.md`, ainda sem GO |
 | 6. Revisar | Pendencias tecnicas, rota, escopo e criterios de aceite | GO humano separado; branch escolhida pelo desenvolvedor |
-| 7. Aplicar e validar | Execucao autorizada do lote em etapa separada | Diff, build/testes, qualidade e validacao funcional; aceite humano |
+| 7. Aplicar e validar | Aplicacao: preparar implementacao do lote; selecionar plano/to-do com GO e executar o prompt | Diff, build/testes, qualidade e validacao funcional; aceite humano |
 | 8. Continuar | Novo MTA e proposta anterior vinculada | Reconciliar o lote; proximo lote somente apos aceite e pedido |
 
 Para consultar sem gerar outra solicitacao, use **Planejamento: abrir plano e to-do**.
@@ -195,6 +195,7 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
 | MTA: conferir ambiente | `conferir-ambiente.ps1` |
 | **Aplicacao: build Maven (Java 8)** | **`construir-aplicacao.ps1 -Goals <fases escolhidas>`** |
 | Aplicacao: analisar SonarQube | `analisar-sonar.ps1` |
+| Aplicacao: preparar implementacao do lote | `preparar-implementacao.ps1` |
 | **MTA: executar analise** | **`executar-mta.ps1`** |
 | **MTA: acompanhar log da analise** | **`acompanhar-log-mta.ps1 -Active`** |
 | **MTA: acompanhar atividade interna** | **`acompanhar-log-mta.ps1 -Active -Detalhado`** |
@@ -836,7 +837,8 @@ Essas coletas sao uma atividade tecnica separada dos prompts de planejamento.
 Sonar ou EAP para produzi-los. O harness oferece build/MTA e a coleta Sonar pela
 task **Aplicacao: analisar SonarQube**, fora desses prompts; consulte o
 [roteiro Sonar](sonar.md). Deploy, inspecao e controle do EAP usam as rotinas
-autorizadas da equipe. Nao existe um comando `/aplicar-lote` entregue por este fluxo.
+autorizadas da equipe. Para a execucao da corretiva, use o fluxo
+[implementar-lote](#preparar-implementacao-do-lote) depois do GO humano.
 Nao gravar credenciais, settings privados ou logs brutos na pasta de evidencias.
 
 **2. Incorporar as novas evidencias ao mesmo lote.** Crie outra pasta datada pela
@@ -869,12 +871,12 @@ sucesso. Se o plano ainda estiver incompleto, mantenha PROPOSTA - NAO APROVADA.
 Mudar escopo, API ou criterios aprovados exige nova revisao e decisao humana.
 
 **4. Solicitar a execucao separadamente.** Depois de registrar GO, o desenvolvedor
-escolhe a branch/checkout e inicia uma etapa de implementacao com ferramentas
-apropriadas. Informe os caminhos reais do plano/to-do aprovados, lote, RequestId,
-Source e registro do GO; autorize explicitamente a implementacao apenas desse
-escopo. Nao use `/planejar-lotes` ou `/revisar-lote` para executar corretivas.
-O agente executor deve preservar trabalho local e evidencias, aplicar somente
-o lote e atualizar tarefas com resultados verificaveis, sem conceder aceite.
+escolhe a branch/checkout e usa **Aplicacao: preparar implementacao do lote**.
+Selecione a solicitacao aprovada e execute o prompt aberto no Copilot Local,
+conforme o [roteiro de implementacao](#preparar-implementacao-do-lote).
+Nao use `/planejar-lotes` ou `/revisar-lote` para executar corretivas. O executor
+preserva trabalho local e evidencias, aplica somente o lote e registra resultados
+verificaveis; o aceite continua sendo uma decisao humana posterior.
 
 **5. Verificar o artefato corrigido.** Siga os criterios do plano aprovado:
 
@@ -903,6 +905,58 @@ contexto com a nova rodada MTA e o planejamento vigente em Previous. Reconcilie
 achados persistentes, novos, nao reencontrados e inconclusivos antes de planejar
 outro lote. Se o atual falhar, continue nele; nao trate a pendencia como sucesso.
 O ensaio documental de 29/09/2026 nao executou essas etapas de implementacao e aceite.
+
+### Preparar implementacao do lote
+
+Use esta etapa depois de revisar o plano/to-do, resolver as precondicoes e registrar
+o GO humano para a solicitacao e escopo concretos. Preparar o prompt e executar a
+corretiva sao acoes diferentes; os scripts nao interpretam texto Markdown como GO.
+
+1. Salve o registro de GO no plano/to-do, conforme o modelo acima. Preserve o lote,
+   RequestId, escopo/API, criterios, evidencias e a origem/data da decisao humana.
+2. Execute **Terminal > Run Task > Aplicacao: preparar implementacao do lote**.
+   Informe o workspace, escolha o projeto e selecione explicitamente a solicitacao
+   com os dois documentos. O menu mostra datas/IDs; a presenca nao indica aprovacao.
+   `q`, Enter vazio ou selecao invalida cancelam sem gerar prompt.
+3. Confira o arquivo `implementar-lote_<id12>.prompt.md` aberto na pasta da solicitacao.
+   O bloco final fixa Project/Source, RunId/RequestId, os caminhos literais e hashes
+   SHA-256 do recibo/plano/to-do. A tarefa revalida identidade, destinos e hashes MTA;
+   nao cria outro planejamento, nao altera documentos e nao aciona o agente.
+4. Use **Executar Prompt** em nova conversa **Copilot Local**, com `devsquad`.
+   A chamada `/implementar-lote` com o caminho do arquivo preparado tambem aparece
+   no terminal. Exige plugin DevSquad com `devsquad.implement` e ferramentas de
+   subagente, leitura, edicao e terminal; a task nao instala/verifica o plugin.
+5. O condutor le os dois documentos e confere versao, identidade, aplicabilidade,
+   precondicoes e GO. Sem GO valido, informa o impedimento antes de editar.
+   Com GO valido, delega ao `devsquad.implement` somente o escopo aprovado.
+6. Confira diff, comandos/resultados e as atualizacoes de PlanPath/TodoPath.
+   Implementacao, testes/build, MTA, Sonar e runtime mantem estados separados;
+   verificacao nao realizada fica pendente. Revise e registre o aceite humano depois.
+
+Se editar o plano/to-do depois do preparo, execute a tarefa novamente para fixar
+a nova versao. Cada preparo grava outro prompt e preserva os anteriores. Na retomada
+apos execucao parcial, use os documentos atualizados da mesma solicitacao; o agente
+confere o trabalho existente e continua somente as tarefas tecnicas pendentes,
+sem exigir novo GO quando escopo e decisao anteriores continuam validos.
+
+O contrato adapta o plugin: PlanPath/TodoPath substituem tasks.md e descoberta de
+spec; nao exige board/work item nem altera branches. Workers de validacao, execucao,
+verificacao e revisao recebem os mesmos limites; nao ha commit/push/PR automaticos,
+escrita em memoria ou abertura de outro lote. As ferramentas dos subagentes nao
+sao sandbox; conferir obediencia exige ensaio no cliente.
+MTA/Sonar, rede, EAP/deploy e operacoes externas dependem de autorizacao explicita
+para destino/finalidade; constar como criterio futuro nao autoriza a execucao.
+
+Alternativa pelo terminal, na raiz do harness (selecao interativa de projeto/plano):
+
+```powershell
+powershell.exe -NoProfile -File .\scripts\preparar-implementacao.ps1 -WorkspacePath .\jboss-mta-harness.local.code-workspace -SelectTarget
+```
+
+`-RequestId <id-completo>` seleciona uma solicitacao explicita; `-EditorPath <editor>`
+abre o prompt, e `-NoOpen` apenas informa o caminho. Sem editor ou com falha de
+abertura, o arquivo salvo continua disponivel. Limpeza do planejamento remove
+tambem esses prompts; preserve evidencias necessarias antes de limpar.
 
 ## Limpar execucoes para repetir o ensaio
 
@@ -1012,6 +1066,11 @@ historicos de teste em `.harness/tests/`; nao trocam a branch nem apagam histori
 reais do desenvolvedor.
 
 Para testar o planejamento, execute `powershell.exe -NoProfile -File .\tests\Test-Planning.ps1`. Verifica selecao de rodadas, isolamento por projeto, evidencia invalida, contexto fixo, pastas legiveis e compatibilidade com o historico antigo. Testa abertura de plano/to-do com editor simulado e cancelamento pela entrada real, sem iniciar Maven, MTA ou Copilot.
+
+Para testar o preparo de implementacao, execute `powershell.exe -NoProfile -File .\tests\Test-Implementation.ps1`.
+Verifica identidade/destinos/hashes, preservacao do historico, menus, cancelamento
+e abertura simulada do editor. Nao executa corretivas nem comprova o GO ou a
+delegacao no Copilot; esse ensaio permanece separado dos testes de scripts.
 
 Para testar configuracao e analise: execute `powershell.exe -NoProfile -File .\tests\Test-Workspace.ps1` e `powershell.exe -NoProfile -File .\tests\Test-Mta.ps1`. Criam fixtures em `.harness/tests/`; o segundo simula a chamada ao processo MTA.
 

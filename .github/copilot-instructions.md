@@ -27,3 +27,9 @@ projeto, hashes MTA e destinos; avalie conteudo relevante para aplicar os achado
 Os controles Git antigos da ADR-0003 foram substituidos. Nao renovar suas
 pendencias em propostas novas. Gestao de branches fica com o desenvolvedor;
 GO de corretivas, verificacoes tecnicas e aceite humano permanecem separados.
+
+Para executar a corretiva, use implementar-lote com o prompt preparado pela tarefa
+Aplicacao: preparar implementacao do lote. Confira o GO humano vigente e o par
+PlanPath/TodoPath antes de delegar ao devsquad.implement. A preparacao nao concede
+GO; a execucao autorizada limita-se ao lote e nao concede aceite nem autoriza
+commit/push/PR, escrita no harness ou tarefas de outro lote.

@@ -4,7 +4,9 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 15 -and @($labels | Sort-Object -Unique).Count -eq 15) 'Manter 15 tarefas distintas, incluindo analise Sonar.'
+Assert ($labels.Count -eq 16 -and @($labels | Sort-Object -Unique).Count -eq 16) 'Manter 16 tarefas distintas, incluindo preparo de implementacao.'
+$implementationTask = @($tasks.tasks | Where-Object label -eq 'Aplicacao: preparar implementacao do lote')
+Assert ($implementationTask.Count -eq 1 -and $implementationTask[0].args -contains '${workspaceFolder}/scripts/preparar-implementacao.ps1' -and $implementationTask[0].args -contains '${execPath}') 'Implementacao deve ter tarefa unica que abre prompt no editor.'
 $sonarTask = @($tasks.tasks | Where-Object label -eq 'Aplicacao: analisar SonarQube')
 Assert ($sonarTask.Count -eq 1 -and $sonarTask[0].args -contains '${workspaceFolder}/scripts/analisar-sonar.ps1' -and -not (($sonarTask[0].args -join ' ') -match '(?i)token')) 'Sonar deve ter tarefa unica, sem token nos argumentos.'
 Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -notcontains 'Planejamento: conferir Git do lote') 'Limpeza deve permanecer; controle Git deve sair do catalogo.'
@@ -62,4 +64,10 @@ $sonarArguments = @($sonarTask[0].args | ForEach-Object {
 $sonarArguments += @('-ConfigPath', $configPath)
 $output = 'q' | & powershell.exe @sonarArguments 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Token Sonar')) 'Cancelamento Sonar deve preceder pedido de token e envio.'
+$implementationArguments = @($implementationTask[0].args | ForEach-Object {
+    $_.Replace('${workspaceFolder}', $root).Replace('${input:harnessWorkspacePath}', $workspacePath).Replace('${execPath}', (Join-Path $fixture 'editor-ausente.exe'))
+})
+$implementationArguments += @('-ConfigPath', $configPath)
+$output = 'q' | & powershell.exe @implementationArguments 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Prompt preparado:')) 'Cancelamento da task de implementacao deve preceder preparo/editor.'
 Write-Output 'PASS: variaveis de tarefa suportadas, workspace com espacos, entrada real do build e cancelamento sem execucao.'

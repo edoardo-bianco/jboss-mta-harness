@@ -2,6 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Aplicacao: preparar implementacao do lote",
+      "detail": "Seleciona plan/to-do existentes e abre o prompt DevSquad; implementar exige GO humano registrado e Executar Prompt no Copilot.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/preparar-implementacao.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget", "-EditorPath", "${execPath}"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Aplicacao: analisar SonarQube",
       "detail": "Envia o projeto Maven ao Sonar configurado, solicita token oculto e coleta resultado, metricas e Quality Gate por projeto/data.",
       "type": "process",

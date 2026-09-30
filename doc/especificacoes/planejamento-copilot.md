@@ -9,7 +9,7 @@ O harness prepara evidencia selecionada pelo desenvolvedor. O GitHub Copilot,
 acionado explicitamente no VS Code, produz a proposta de corretivas. O desenvolvedor
 controla revisao, escolha do lote e autorizacao de implementacao posterior.
 
-Sempre preservar fontes, configuracao e rodadas. Nunca executar corretivas,
+Na preparacao de prompts, preservar fontes, configuracao e rodadas. Nunca executar corretivas,
 Maven/MTA ou enviar mensagens ao agente durante a preparacao. Commit/push exigem
 pedido explicito. Nao ampliar o escopo a outros projetos para completar evidencias.
 
@@ -196,6 +196,46 @@ dos contratos e links verificados. O ensaio DevSquad deve demonstrar leitura
 delimitada e revisao consistente, sem escrita fora dos dois destinos. Testes
 estruturais nao comprovam comportamento do modelo. Nenhuma corretiva nesta entrega.
 
+## Preparo da execucao autorizada
+
+Evolucao solicitada e fluxo de abertura confirmado em 2026-09-30: uma tarefa
+distinta, Aplicacao: preparar implementacao do lote, seleciona os documentos
+existentes pelo projeto/RequestId e abre um prompt para Executar Prompt no Copilot.
+Nao envia mensagem automaticamente nem executa corretiva pelo PowerShell.
+
+Reutilizar Get-MtaPlanningHistory/Select-MtaPreviousPlanning; exigir par completo,
+identidade Project/Source/RunId/RequestId e destinos do recibo. Revalidar a rodada
+e os quatro EvidenceHashes antes de gerar. Usar planning.lock contra preparacao
+ou limpeza concorrente. Nao bloquear por Git ou exigir nova rodada por HEAD.
+
+Gravar implementar-lote_<id12>.prompt.md na mesma solicitacao, sempre novo arquivo,
+sem mudar context.json, plan.md, todo.md, Previous ou as evidencias. O bloco de
+dados inclui caminhos literais, identidade, PreparedAtUtc, ContextSha256,
+PlanSha256, TodoSha256 e TemplateSha256. Escapar delimitadores Markdown nos dados.
+O agente confere hashes antes da primeira escrita; alteracao posterior ao preparo
+exige novo prompt, nao novo RequestId de planejamento. Hashes fixam versao, nao GO.
+
+O template separado implementar-lote habilita agent, leitura/busca, edicao e
+terminal, conforme as ferramentas do plugin instalado. Exige GO humano explicito
+do lote/solicitacao e precondicoes satisfeitas; presenca/checkbox/texto de exemplo
+nao concedem autorizacao. Contradicoes ou impedimentos interrompem antes da escrita.
+O condutor passa contrato completo ao devsquad.implement; workers validate,
+execute, verify e review recebem os mesmos limites. PlanPath/TodoPath substituem
+tasks.md/spec/board; nao invocar finalize nem publicar, manipular Git ou memoria.
+O executor edita somente o escopo aprovado em Source; o condutor registra resultados
+nos dois documentos atuais. Preservar trabalho local, criterios e historico.
+
+Verificacoes exigem comandos/resultados reais; ambiente ausente e falhas permanecem
+pendentes. Coletas/operacoes externas exigem autorizacao explicita, sem inferir
+permissao de um criterio de aceite futuro. GO e aceite continuam separados;
+encerrar com aceite humano pendente, sem proximo lote automatico. O contrato e
+comportamental, nao isolamento tecnico das ferramentas do especialista.
+
+Test-Implementation cobre geracao, identidade, hashes, repeticao, cancelamento,
+falhas e editor simulado. Test-TaskInputs confere a tarefa e seus argumentos.
+O ensaio de GO/delegacao/edicao pelo DevSquad no Copilot e uma verificacao separada;
+testes PowerShell nao comprovam comportamento do modelo.
+
 ## Implementacao e verificacao
 
 PowerShell 5.1 em `scripts/`, tarefa em `.vscode/tasks.json`, testes com fixtures em
@@ -205,6 +245,7 @@ Nao alterar ExecutionPolicy nem adicionar dependencias.
 
 ```powershell
 powershell.exe -NoProfile -File .\tests\Test-Planning.ps1
+powershell.exe -NoProfile -File .\tests\Test-Implementation.ps1
 powershell.exe -NoProfile -File .\tests\Test-TaskInputs.ps1
 powershell.exe -NoProfile -File .\tests\Test-EvidenceFolder.ps1
 git diff --check

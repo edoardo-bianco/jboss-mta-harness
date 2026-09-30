@@ -1,5 +1,39 @@
 # Plano do agente: evolucao do harness
 
+## Preparar implementacao do lote pelo DevSquad - 2026-09-30
+
+Pedido: priorizar uma Run Task de implementacao antes do backlog de deploy/servidor.
+Branch harness/implementar-lote, derivada de main e0671ea em worktree isolado.
+Fluxo confirmado: selecionar plano/to-do existentes, abrir prompt e o operador
+usar Executar Prompt no Copilot Local. Nao enviar mensagens automaticamente.
+
+Criar Aplicacao: preparar implementacao do lote e prompt implementar-lote.
+Reutilizar selecao por projeto/RequestId e validar identidade, destinos e hashes
+MTA antes de preparar. Gravar somente um novo prompt na solicitacao selecionada,
+com caminhos literais, data e hashes do contexto/plano/to-do; preservar os anteriores.
+Preparacao nao interpreta Markdown como autorizacao nem concede GO. O agente
+confere a versao dos documentos, precondicoes e GO humano explicito antes de editar.
+
+Delegar ao devsquad.implement instalado, passando contrato completo e adaptando
+defaults de tasks.md, board, memoria e Git ao harness. Permitir workers delimitados
+de validacao, execucao, verificacao e revisao; nao finalizar com PR/commit/push.
+Escrita somente no Source para o escopo aprovado e nos PlanPath/TodoPath atuais.
+Preservar historico, pendencias, evidencias e trabalho local. Verificacoes reais
+nao concedem aceite nem iniciam outro lote. Ferramentas do plugin nao sao sandbox.
+
+Incrementos: contrato/teste de preparo; geracao e entrada/task; guia e regressao.
+PowerShell 5.1 e convencoes existentes, sem dependencias ou mudanca de ExecutionPolicy.
+Verificar Test-Implementation.ps1, Test-Planning.ps1, Test-TaskInputs.ps1 e limpeza;
+conferir links, sintaxe e diff. Ensaio de delegacao/edicao no Copilot fica explicito
+como pendente do operador; nao executar corretiva real nesta entrega do harness.
+
+Validacao concluida: 17 scripts Test-*.ps1 passaram em PowerShell 5.1; teste novo
+com formatos antigo/atual, hashes, recusas, repeticao, menus, cancelamento e editor
+simulado. Test-Planning exigiu encurtar o worktree para .harness/i por MAX_PATH.
+Test-Mta falhou uma vez por arquivo de fixture em uso e passou na repeticao isolada.
+67 links/ancoras locais, sintaxe e diff conferidos; revisao local sem bloqueantes.
+Acionamento/delegacao/implementacao no Copilot permanece pendente de ensaio real.
+
 ## Criterios Sonar e padroes de configuracao - 2026-09-29
 
 Continuar em harness/sonar, worktree isolado, a partir de main 8bbda20.
