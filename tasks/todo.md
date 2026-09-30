@@ -1,5 +1,21 @@
 # To-do do agente: evolucao do harness
 
+## Escolha explicita da branch na implementacao - 2026-09-30
+
+- [x] Confirmar tres escolhas e fallback manual/atual quando ID ausente.
+- [x] Testar extracao do ID, menus e criacao Git em repositorios ficticios.
+- [x] Integrar escolha na tarefa existente sem alterar a coleta Git informativa.
+- [x] Atualizar contrato, guia e ADR com a excecao autorizada.
+- [x] Revisar e validar regressao, sintaxe e preservacao das evidencias.
+
+  Testes de implementacao/branch, Git, planejamento e tasks passaram, incluindo
+  fallback 2/3 na mesma execucao apos erro de nome automatico/manual. Regressao:
+  17 de 18 scripts passaram; Test-Mta falhou por input/pom.xml em uso por outro
+  processo, inclusive na repeticao isolada. Test-Mta e Harness.psm1 sem alteracoes.
+  67 links/ancoras, sintaxe e diff conferidos; 622 arquivos de configuracao/evidencias
+  locais com hashes registrados para conferir preservacao na integracao.
+- [ ] Diagnosticar bloqueio de arquivo na fixture Test-Mta antes de declarar regressao completa.
+
 ## Preparar implementacao do lote pelo DevSquad - 2026-09-30
 
 - [x] Conferir checkout, isolar branch e confirmar abertura manual do prompt.

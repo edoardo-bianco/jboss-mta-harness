@@ -80,7 +80,7 @@ Write-Output 'PASS: preparo de implementacao vinculado, sem GO inferido, isolado
 # Entrada real, sem Maven/MTA/Copilot: ferramentas deliberadamente nao configuradas.
 $scripts = Join-Path $fixture 'scripts'
 $null = [IO.Directory]::CreateDirectory($scripts)
-foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','preparar-implementacao.ps1')) {
+foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessGit.psm1','HarnessImplementation.psm1','preparar-implementacao.ps1')) {
     Copy-Item -LiteralPath (Join-Path $root ('scripts/' + $name)) -Destination $scripts
 }
 $config = Get-Content -LiteralPath (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
@@ -101,14 +101,22 @@ $editor = Join-Path $scripts 'editor simulado.ps1'
 param([Parameter(ValueFromRemainingArguments=$true)][string[]]$EditorArguments)
 $EditorArguments | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $PSScriptRoot 'editor-args.json') -Encoding UTF8
 '@ | Set-Content -LiteralPath $editor -Encoding UTF8
-$output = '1' | & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -Target app -EditorPath $editor 2>&1 | Out-String
+$output = @('1','2') | & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -Target app -EditorPath $editor 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $output.Contains('/implementar-lote ') -and $output.Contains($requestId)) "Menu real nao preparou a solicitacao: $output"
 $editorArgs = Get-Content -LiteralPath (Join-Path $scripts 'editor-args.json') -Raw | ConvertFrom-Json
 Assert ($editorArgs.Count -eq 2 -and $editorArgs[0] -eq '--reuse-window' -and (Test-Path -LiteralPath $editorArgs[1])) 'Editor recebeu envio/chat ou arquivo inexistente.'
 Assert ((Split-Path -Leaf $editorArgs[1]) -match '^implementar-lote_[a-f0-9]{12}\.prompt\.md$') 'Editor abriu documento errado.'
-$output = & powershell.exe @cliArgs -RequestId $requestId 2>&1 | Out-String
+$editorHash = (Get-FileHash -LiteralPath (Join-Path $scripts 'editor-args.json')).Hash
+$branchBefore = & git -C $app symbolic-ref --short HEAD
+$countBeforeCancel = @(Get-ChildItem $folder -Filter '*.prompt.md').Count
+$output = @('1','') | & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -Target app -EditorPath $editor 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Escolha de branch cancelada')) 'Enter escolheu branch implicitamente.'
+Assert (@(Get-ChildItem $folder -Filter '*.prompt.md').Count -eq ($countBeforeCancel+1)) 'Cancelamento Git nao preservou o prompt ja salvo.'
+Assert ((Get-FileHash -LiteralPath (Join-Path $scripts 'editor-args.json')).Hash -eq $editorHash) 'Cancelamento Git abriu editor.'
+Assert ((& git -C $app symbolic-ref --short HEAD) -eq $branchBefore) 'Cancelamento Git trocou branch.'
+$output = '2' | & powershell.exe @cliArgs -RequestId $requestId 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $output.Contains('Prompt preparado:')) 'Selecao explicita/NoOpen falhou.'
-$output = & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -Target app -RequestId $requestId -EditorPath (Join-Path $fixture 'ausente.exe') 2>&1 | Out-String
+$output = '2' | & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -Target app -RequestId $requestId -EditorPath (Join-Path $fixture 'ausente.exe') 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $output.Contains('Prompt salvo; nao foi possivel abrir')) 'Falha do editor perdeu alternativa de abertura.'
 foreach ($file in $protected) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash -eq $file.Hash) 'CLI alterou fonte/configuracao/evidencias/documentos.' }
 # Atualizar o plano nao reescreve o prompt antigo; preparar de novo fixa a versao nova.

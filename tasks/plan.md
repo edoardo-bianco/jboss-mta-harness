@@ -1,5 +1,35 @@
 # Plano do agente: evolucao do harness
 
+## Escolha explicita da branch na implementacao - 2026-09-30
+
+Retomar harness/implementar-lote, alinhada a main 2f288e0, no worktree .harness/i.
+Pedido: na tarefa existente, oferecer 1 criar/usar lote/<ID>, 2 usar a branch
+atual, 3 criar/usar nome informado. Sem padrao: Enter/q cancela. Criar significa
+branch local nova a partir do HEAD atual da aplicacao e seleciona-la; sem push,
+reset, stash, force, cadastro de papeis ou nova politica Git.
+
+Obter ID apenas de Lote ativo: <ID> ou ID do lote: <ID>, igual e unico no plano
+e no to-do, fora de blocos de exemplo. Sem ID confiavel, oferecer somente 2/3.
+Nome manual e literal, validado pelo Git; branch existente nao e sobrescrita
+nem selecionada automaticamente. Revalidar documentos e estado observado antes
+da mutacao. Falha do Git oferece novamente 2/3 na mesma execucao. A escolha atual
+(2) nao exige Git disponivel nem HEAD/branch especificos.
+
+Preparo valida evidencias e salva prompt antes da escolha; cancelar/falhar deixa
+o prompt preservado, sem abrir o editor. GO continua sendo decisao separada.
+Helper proprio da implementacao, sem alterar a coleta informativa HarnessGit.
+Atualizar AGENTS/ADR/guia para a excecao explicitamente pedida pelo desenvolvedor.
+Testar menus e Git real em fixtures: criacao automatica/manual, branch atual,
+ID ausente/divergente, nomes invalidos/existentes, cancelamento e preservacao de
+HEAD, indice e alteracoes locais. Regressao de implementacao, Git, planejamento
+e tasks; sintaxe e diff. Nao criar branch de lote real durante os testes.
+
+Validacao: cinco testes diretamente afetados passaram. Regressao: 17/18 scripts
+passaram; Test-Mta falhou duas vezes por input/pom.xml da fixture em uso por outro
+processo. Codigo MTA/teste inalterados; diagnostico segue pendente no to-do.
+67 links/ancoras locais, sintaxe e diff conferidos. Criacao testada somente em
+repositorios ficticios; ensaio Copilot real continua separado.
+
 ## Preparar implementacao do lote pelo DevSquad - 2026-09-30
 
 Pedido: priorizar uma Run Task de implementacao antes do backlog de deploy/servidor.

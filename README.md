@@ -49,7 +49,8 @@ nao ha cadastro ou bloqueio Git no harness.
    pendencias. A proposta nao autoriza aplicar corretivas: essa etapa exige seu GO.
    [Como registrar observacoes e pedir revisao](doc/guias/harness-migracao-desenvolvedor.md#revisao-manual-do-plano-e-do-to-do).
 7. **Implementar o lote aprovado:** registre o GO e execute **Aplicacao: preparar implementacao do lote**.
-   Selecione a solicitacao com plano/to-do, confira o prompt aberto e use **Executar Prompt**
+   Selecione a solicitacao com plano/to-do e escolha criar `lote/<ID>`, usar a branch
+   atual ou criar uma com nome manual. Confira o prompt aberto e use **Executar Prompt**
    no Copilot Local. DevSquad confere o GO e delega a implementacao do escopo aprovado;
    verificacoes e aceite humano permanecem separados.
    [Preparo e execucao](doc/guias/harness-migracao-desenvolvedor.md#preparar-implementacao-do-lote).

@@ -9,6 +9,7 @@ $ErrorActionPreference = 'Stop'
 try {
     Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -Force -DisableNameChecking
     Import-Module (Join-Path $PSScriptRoot 'HarnessPlanning.psm1') -Force -DisableNameChecking
+    Import-Module (Join-Path $PSScriptRoot 'HarnessImplementation.psm1') -Force -DisableNameChecking
     $harnessRoot = Split-Path -Parent $PSScriptRoot
     if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
     $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
@@ -18,6 +19,7 @@ try {
     Write-Host "Plano: $($prepared.PlanPath)"
     Write-Host "To-do: $($prepared.TodoPath)"
     Write-Host "Prompt preparado: $($prepared.PromptPath)"
+    $null = Select-ImplementationBranch $context $prepared
     Write-Host 'Confira o GO humano registrado no plano/to-do e use Executar Prompt em nova conversa Copilot Local com devsquad.'
     Write-Host 'Preparar/abrir nao aciona o agente, nao concede GO e nao aplica corretivas. O agente confere o GO antes de editar.'
     Write-Host 'A escolha da branch e do desenvolvedor; preserve trabalho local. Aceite do resultado continua separado.'

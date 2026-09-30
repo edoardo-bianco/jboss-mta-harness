@@ -31,6 +31,28 @@ O desenvolvedor pediu eliminar esse controle e assumir a gestao das branches.
 - GO para corretivas, verificacoes tecnicas e aceite humano continuam separados.
   Remover gates Git nao autoriza corretivas, descartar trabalho ou aprovar resultados.
 
+## Complemento: criacao local opcional na implementacao - 2026-09-30
+
+Pedido explicito do desenvolvedor: a tarefa Aplicacao: preparar implementacao do
+lote oferece uma decisao antes de abrir o prompt: 1 criar e usar lote/<ID-do-lote>,
+2 continuar na branch atual, 3 criar e usar nome informado. Nenhuma opcao padrao;
+Enter/q cancela. Sem ID unico e igual nos metadados do plano/to-do, oferecer 2/3.
+Essa conveniencia nao restaura o cadastro, papeis ou gates removidos nesta ADR.
+
+Criar significa executar git switch --no-track -c com o nome validado e HEAD
+exibido do repositorio da aplicacao, mesmo que Source seja um modulo. Revalidar
+documentos e estado exibido antes de mudar Git; nunca sobrescrever branch existente,
+forcar, fazer stash/reset/commit/push, integrar ou executar corretiva nesta tarefa.
+Branch atual, HEAD destacado, estado local ou Git indisponivel nao impedem a
+escolha 2. Falha na criacao e erro da operacao solicitada, nao gate de migracao.
+Se Git recusar a criacao, informar o erro e oferecer 2/3 na mesma execucao.
+O desenvolvedor confere uso exclusivo do checkout; o harness nao coordena agentes.
+
+O prompt ja salvo permanece se a etapa Git for cancelada/falhar; o editor nao abre.
+Recibos e evidencias historicos nao sao reescritos. GO e aceite humano continuam
+separados; criar uma branch nao aprova o lote. O agente Copilot nao passa a ter
+autorizacao para gerir branches: esta excecao pertence apenas a escolha na Run Task.
+
 ## Compatibilidade e operacao
 
 `gitPolicies` em configuracoes antigas fica ignorado. Nao remover configuracao

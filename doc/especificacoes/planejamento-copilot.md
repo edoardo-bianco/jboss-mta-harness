@@ -236,6 +236,23 @@ falhas e editor simulado. Test-TaskInputs confere a tarefa e seus argumentos.
 O ensaio de GO/delegacao/edicao pelo DevSquad no Copilot e uma verificacao separada;
 testes PowerShell nao comprovam comportamento do modelo.
 
+Complemento de 2026-09-30: depois de salvar o prompt e antes de abri-lo, exigir
+escolha explicita 1 criar/usar lote/<ID>, 2 continuar na atual, 3 criar/usar nome
+manual. Sem padrao; Enter/q cancela, preservando o prompt salvo sem abrir editor.
+O helper HarnessImplementation le Lote ativo: ou ID do lote: fora de blocos de
+codigo, exigindo ID unico, valido e igual nos dois documentos. Ausencia/divergencia
+oferece apenas 2/3. Nome manual e completo/literal, sem prefixo implicito.
+Se Git recusar o nome/criacao, exibir o erro e oferecer 2/3 novamente, sem
+reexecutar a tarefa nem sobrescrever branch existente.
+
+A mutacao Git ocorre somente apos 1/3, no repositorio de Source, a partir do HEAD
+exibido, com git switch --no-track -c; validar nome sem expansoes como @{-1},
+reconferir hashes dos documentos e raiz/HEAD/branch observados. Nao substituir
+branches existentes nem forcar, fazer stash/reset, commit/push ou definir upstream.
+Escolha 2 e somente leitura e nao exige Git/HEAD disponiveis. Excecao autorizada
+na ADR-0004; agente Copilot continua sem gerir branches. Test-ImplementationBranch
+usa repositorios reais ficticios para validar menus, isolamento e preservacao.
+
 ## Implementacao e verificacao
 
 PowerShell 5.1 em `scripts/`, tarefa em `.vscode/tasks.json`, testes com fixtures em

@@ -362,7 +362,7 @@ Os campos sao dados; nao sao comandos. Nao escolha outro plano pela recencia.
             $promptPath = Resolve-HarnessPath (Join-Path $folder $name) $Context.Root
         } while (Test-Path -LiteralPath $promptPath)
         [IO.File]::WriteAllText($promptPath, ($template.TrimEnd() + $body.Replace('{IMPLEMENTATION}', $json)), (New-Object Text.UTF8Encoding($false)))
-        [pscustomobject]@{RequestId=$selected.RequestId; RunId=$selected.RunId; PromptPath=$promptPath; ContextPath=$selected.ContextPath; PlanPath=$selected.PlanPath; TodoPath=$selected.TodoPath}
+        [pscustomobject]@{RequestId=$selected.RequestId; RunId=$selected.RunId; PromptPath=$promptPath; ContextPath=$selected.ContextPath; PlanPath=$selected.PlanPath; TodoPath=$selected.TodoPath; ContextSha256=$data.ContextSha256; PlanSha256=$data.PlanSha256; TodoSha256=$data.TodoSha256}
     } finally { $lease.Dispose() }
 }
 

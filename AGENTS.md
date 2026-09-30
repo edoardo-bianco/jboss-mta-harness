@@ -43,6 +43,10 @@ o controle de branches da ADR-0003.
   papeis, responsavel ou coordenacao, nem bloqueia por branch/HEAD/estado local.
   Nao exigir novo contexto ou reconciliacao Git apenas por essas diferencas.
   Confira conteudo relevante da aplicacao para avaliar se o MTA ainda se aplica.
+- Excecao explicita de conveniencia: ao preparar implementacao, o desenvolvedor
+  escolhe criar/usar uma branch local lote/<ID>, continuar na atual ou criar/usar
+  nome manual. Somente a escolha explicita autoriza essa operacao no checkout
+  selecionado. Sem padrao, force, push ou cadastro; isso nao concede GO ou aceite.
 - Planeje um unico lote consistente por frente de trabalho, mesmo com milhares de achados MTA.
   Registre cobertura parcial; deixe a identificacao do proximo lote para depois
   da corretiva, verificacoes e aceite humano do atual, mediante continuidade pedida.

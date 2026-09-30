@@ -402,7 +402,12 @@ Em plan.md, use o titulo "Plano de corretivas da aplicacao" e registre RequestId
 Project, Source, RunId atual, Previous (se houver), referencia ao context.json e
 estado "PROPOSTA - NAO APROVADA" para o lote proposto. Preserve o estado historico
 dos lotes anteriores e a evidencia de eventuais decisoes do desenvolvedor.
-O documento deve conter:
+Inclua no inicio de ambos os documentos uma linha `Lote ativo: <ID-do-lote>`,
+fora de exemplos/blocos de codigo, com o mesmo ID estavel (letras, numeros, ponto,
+hifen ou sublinhado). A tarefa de implementacao usa esse metadado para sugerir
+branch; sua presenca nao e GO e nao autoriza criar branch durante o planejamento.
+
+O conteudo deve cobrir:
 1. Premissas confirmadas e suas origens; evidencias lidas, identificacao da
    rodada/baseline, limitacoes e contagens apos deduplicacao. Separe as verificacoes
    pendentes, distinguindo as necessarias para fechar o plano das exigidas para executar/aceitar.

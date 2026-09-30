@@ -918,20 +918,42 @@ corretiva sao acoes diferentes; os scripts nao interpretam texto Markdown como G
    Informe o workspace, escolha o projeto e selecione explicitamente a solicitacao
    com os dois documentos. O menu mostra datas/IDs; a presenca nao indica aprovacao.
    `q`, Enter vazio ou selecao invalida cancelam sem gerar prompt.
-3. Confira o arquivo `implementar-lote_<id12>.prompt.md` aberto na pasta da solicitacao.
+3. Decida explicitamente a branch no terminal: **1** cria e seleciona
+   `lote/<ID-do-lote>`; **2** continua na atual; **3** pede o nome completo e cria
+   uma branch local com esse nome. Sem ID confiavel, aparecem somente **2/3**.
+   Enter/q cancela essa etapa, preservando o prompt ja salvo e sem abrir o editor.
+4. Confira o arquivo `implementar-lote_<id12>.prompt.md` aberto na pasta da solicitacao.
    O bloco final fixa Project/Source, RunId/RequestId, os caminhos literais e hashes
    SHA-256 do recibo/plano/to-do. A tarefa revalida identidade, destinos e hashes MTA;
    nao cria outro planejamento, nao altera documentos e nao aciona o agente.
-4. Use **Executar Prompt** em nova conversa **Copilot Local**, com `devsquad`.
+5. Use **Executar Prompt** em nova conversa **Copilot Local**, com `devsquad`.
    A chamada `/implementar-lote` com o caminho do arquivo preparado tambem aparece
    no terminal. Exige plugin DevSquad com `devsquad.implement` e ferramentas de
    subagente, leitura, edicao e terminal; a task nao instala/verifica o plugin.
-5. O condutor le os dois documentos e confere versao, identidade, aplicabilidade,
+6. O condutor le os dois documentos e confere versao, identidade, aplicabilidade,
    precondicoes e GO. Sem GO valido, informa o impedimento antes de editar.
    Com GO valido, delega ao `devsquad.implement` somente o escopo aprovado.
-6. Confira diff, comandos/resultados e as atualizacoes de PlanPath/TodoPath.
+7. Confira diff, comandos/resultados e as atualizacoes de PlanPath/TodoPath.
    Implementacao, testes/build, MTA, Sonar e runtime mantem estados separados;
    verificacao nao realizada fica pendente. Revise e registre o aceite humano depois.
+
+Para o nome automatico, mantenha `Lote ativo: HIB-CACHE-001` (exemplo) no inicio
+do plano e do to-do, com o mesmo ID. Tambem e aceito `ID do lote: HIB-CACHE-001`,
+inclusive com negrito/backticks. Sem metadado, com varios IDs ou com divergencia,
+a tarefa nao adivinha: oferece continuar na atual ou informar um nome manual.
+Na opcao 3, informe o nome completo, por exemplo `lote/ajuste-cache`; nao e
+adicionado prefixo automaticamente. Se o Git recusar a criacao (por exemplo, nome
+invalido ou branch existente), a tarefa informa o erro e oferece novamente 2/3
+na mesma execucao, sem sobrescrever ou selecionar a branch existente.
+
+A criacao parte do HEAD exibido do repositorio da aplicacao e seleciona a nova
+branch local. Se Source for um modulo, a escolha afeta todo o checkout: confira
+que outro agente nao o esta usando. Alteracoes locais e indice sao preservados;
+nao ha force/reset/stash, commit, push ou mudanca de remoto/upstream. A opcao 2
+nao exige uma branch padrao e funciona mesmo com HEAD destacado ou Git indisponivel.
+Criar branch nao concede GO nem altera recibos/evidencias. Se documentos ou o
+estado Git exibido mudarem durante a escolha, a criacao e interrompida para nova
+decisao. O agente Copilot continua sem permissao para gerir branches.
 
 Se editar o plano/to-do depois do preparo, execute a tarefa novamente para fixar
 a nova versao. Cada preparo grava outro prompt e preserva os anteriores. Na retomada
@@ -954,7 +976,8 @@ powershell.exe -NoProfile -File .\scripts\preparar-implementacao.ps1 -WorkspaceP
 ```
 
 `-RequestId <id-completo>` seleciona uma solicitacao explicita; `-EditorPath <editor>`
-abre o prompt, e `-NoOpen` apenas informa o caminho. Sem editor ou com falha de
+abre o prompt, e `-NoOpen` suprime apenas a abertura (a decisao de branch continua
+explicita). Sem editor ou com falha de
 abertura, o arquivo salvo continua disponivel. Limpeza do planejamento remove
 tambem esses prompts; preserve evidencias necessarias antes de limpar.
 
@@ -1071,6 +1094,11 @@ Para testar o preparo de implementacao, execute `powershell.exe -NoProfile -File
 Verifica identidade/destinos/hashes, preservacao do historico, menus, cancelamento
 e abertura simulada do editor. Nao executa corretivas nem comprova o GO ou a
 delegacao no Copilot; esse ensaio permanece separado dos testes de scripts.
+
+`powershell.exe -NoProfile -File .\tests\Test-ImplementationBranch.ps1` verifica
+as tres escolhas e o fallback, com criacao de branches somente em repositorios
+ficticios: nomes invalidos/existentes, cancelamento, HEAD destacado e preservacao
+de arquivos/indice. Nao altera branches da aplicacao real.
 
 Para testar configuracao e analise: execute `powershell.exe -NoProfile -File .\tests\Test-Workspace.ps1` e `powershell.exe -NoProfile -File .\tests\Test-Mta.ps1`. Criam fixtures em `.harness/tests/`; o segundo simula a chamada ao processo MTA.
 

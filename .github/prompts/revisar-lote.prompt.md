@@ -110,6 +110,8 @@ do recibo. Retorno fora do escopo deve ser corrigido pelo planejador antes da es
 Grave somente PlanPath/TodoPath, usando edit/createFile ou edit/editFiles. Preserve
 documentos anteriores. A autorizacao cobre os dois rascunhos, sem GO de corretivas.
 
+Inclua o metadado `Lote ativo: <ID-do-lote>` no inicio de ambos os documentos,
+fora de exemplos/blocos de codigo, preservando o ID estavel.
 Inclua no plano uma tabela curta de evidencias complementares, sem hashes, com
 referencias ao indice/arquivos efetivamente lidos e efeito sobre a proposta, e um
 historico breve da revisao. No to-do, atualize as tarefas afetadas e a evidencia
