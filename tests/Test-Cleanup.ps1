@@ -104,3 +104,37 @@ foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/se
 }
 Assert (@(Get-HarnessCleanupPaths $fixture -TemporaryBackups).Count -eq 0) 'Preview de temporarios removidos deveria ficar vazio.'
 Write-Output 'PASS: backups centralizados, menu 3, cancelamento, junction, isolamento e preservacao de configuracao/cache/workspace.'
+
+# Rodadas externas registradas; a raiz externa e outros arquivos nunca sao apagados.
+$external = $fixture + '-external'
+$null = [IO.Directory]::CreateDirectory($external)
+$sentinel = Join-Path $external 'arquivo-do-desenvolvedor.txt'
+Set-Content -LiteralPath $sentinel 'preservar'
+foreach ($id in @('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')) {
+    $index = Join-Path $fixture ('.harness/runs/external/' + $id)
+    $externalRun = Join-Path $external ('p__' + (Get-HarnessProjectKey 'external') + '/' + $id)
+    Write-HarnessJson (Join-Path $externalRun 'manifest.json') @{Project='external'; Source=$source; RunId=$id; IndexPath=$index}
+    Write-HarnessJson (Join-Path $index 'location.json') @{Project='external'; Source=$source; RunId=$id; RunsPath=$external}
+    $preview = @(Get-HarnessCleanupPaths $fixture -Source $source)
+    Assert ($preview -contains $externalRun -and $preview -contains $index -and $preview -notcontains $external) 'Preview externo incorreto.'
+    Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'cancelar' | Out-Null
+    Assert (Test-Path $externalRun) 'Cancelamento removeu rodada externa.'
+    $locationPath = Join-Path $index 'location.json'
+    Write-HarnessJson $locationPath @{Project='external'; Source=$other; RunId=$id; RunsPath=$external}
+    $rejected = $false
+    try { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null } catch { $rejected = $true }
+    Assert ($rejected -and (Test-Path $externalRun)) 'Referencia externa inconsistente autorizou exclusao.'
+    Write-HarnessJson $locationPath @{Project='external'; Source=$source; RunId=$id; RunsPath=$external}
+    $link = Join-Path $externalRun 'junction'
+    $null = New-Item -ItemType Junction -Path $link -Target $source
+    try {
+        $rejected = $false
+        try { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null } catch { $rejected = $true }
+        Assert ($rejected -and (Test-Path "$source/pom.xml")) 'Limpeza externa seguiu junction.'
+    } finally { [IO.Directory]::Delete($link) }
+    if ($id.StartsWith('a')) { Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null }
+    else { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null }
+    Assert (-not (Test-Path $externalRun) -and -not (Test-Path $index)) 'Limpeza externa incompleta.'
+    Assert (Test-Path $sentinel) 'Limpeza atingiu arquivo externo nao registrado.'
+}
+Write-Output 'PASS: limpeza externa por projeto/todos, preview, cancelamento e preservacao da raiz externa.'

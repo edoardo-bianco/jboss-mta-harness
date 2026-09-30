@@ -115,6 +115,17 @@ function Read-HarnessConfig {
         $config.tools.$field = Resolve-HarnessPath $config.tools.$field $Root
     }
     $config.mta.rulesPath = Resolve-HarnessPath $config.mta.rulesPath $Root
+    if (-not $config.mta.PSObject.Properties['runsPath']) { $config.mta | Add-Member NoteProperty runsPath $null }
+    $config.mta.runsPath = Resolve-HarnessPath $config.mta.runsPath $Root
+    if ($config.mta.runsPath) {
+        $storage = $config.mta.runsPath
+        if ($storage.Length -le 3) { throw 'mta.runsPath deve ser uma pasta dedicada, nao a raiz do disco.' }
+        foreach ($protected in (@($Root) + @($projects | ForEach-Object { $_.path }))) {
+            if ($storage -ieq $protected -or $storage.StartsWith($protected + '\', [StringComparison]::OrdinalIgnoreCase) -or $protected.StartsWith($storage + '\', [StringComparison]::OrdinalIgnoreCase)) {
+                throw 'mta.runsPath deve ficar fora do harness e dos projetos, sem conter essas pastas.'
+            }
+        }
+    }
     # Compatibilidade com o JSON local anterior, sem reescrever o arquivo.
     if (-not $config.mta.PSObject.Properties['profile']) { $config.mta | Add-Member NoteProperty profile 'eap71-to-eap74-java8' }
     if (-not $config.mta.PSObject.Properties['sources']) { $config.mta | Add-Member NoteProperty sources @() }
@@ -186,26 +197,38 @@ function Get-HarnessFiles {
     $pending.Push($Root)
     while ($pending.Count) {
         $directory = $pending.Pop()
-        foreach ($item in Get-ChildItem -LiteralPath $directory -Force) {
-            if ($item.PSIsContainer -and $item.Name -in @('.git','.harness','.scannerwork','node_modules')) { continue }
-            if ($item.PSIsContainer -and $Rules -and $item.Name -in @('test','tests')) { continue }
-            if ($item.PSIsContainer -and -not $Rules -and $item.Name -eq 'target' -and (Test-Path -LiteralPath (Join-Path $directory 'pom.xml'))) { continue }
+        $info = New-Object IO.DirectoryInfo ('\\?\' + $directory)
+        foreach ($item in $info.EnumerateFileSystemInfos()) {
+            $isDirectory = $item -is [IO.DirectoryInfo]
+            if ($isDirectory -and $item.Name -in @('.git','.harness','.scannerwork','node_modules')) { continue }
+            if ($isDirectory -and $Rules -and $item.Name -in @('test','tests')) { continue }
+            if ($isDirectory -and -not $Rules -and $item.Name -eq 'target' -and [IO.File]::Exists(('\\?\' + $directory + '\pom.xml'))) { continue }
             if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Link/junction na entrada: $($item.FullName)" }
-            if ($item.PSIsContainer) { $pending.Push($item.FullName); continue }
+            $normalPath = $item.FullName.Substring(4)
+            if ($isDirectory) { $pending.Push($normalPath); continue }
             if ($Rules -and $item.Extension -notin @('.yaml','.yml')) { continue }
-            $files.Add([pscustomobject]@{path=$item.FullName.Substring($Root.Length + 1).Replace('\','/'); sha256=(Get-FileHash -LiteralPath $item.FullName -Algorithm SHA256).Hash})
+            $files.Add([pscustomobject]@{path=$normalPath.Substring($Root.Length + 1).Replace('\','/'); sha256=(Get-HarnessFileHash $normalPath)})
         }
     }
     return @($files | Sort-Object path)
+}
+
+function Get-HarnessFileHash {
+    param([string]$Path)
+    $stream = [IO.File]::OpenRead(('\\?\' + $Path))
+    $sha = [Security.Cryptography.SHA256]::Create()
+    try { ([BitConverter]::ToString($sha.ComputeHash($stream))).Replace('-','') }
+    finally { $sha.Dispose(); $stream.Dispose() }
 }
 
 function Copy-HarnessFiles {
     param([string]$Source, [string]$Destination, [object[]]$Files)
     foreach ($file in $Files) {
         $target = Join-Path $Destination $file.path
-        $null = [IO.Directory]::CreateDirectory((Split-Path -Parent $target))
-        Copy-Item -LiteralPath (Join-Path $Source $file.path) -Destination $target
-        if ((Get-FileHash -LiteralPath $target).Hash -ine $file.sha256) { throw 'Entrada mudou durante a copia; repita com fontes estaveis.' }
+        $extended = '\\?\' + $target
+        $null = [IO.Directory]::CreateDirectory([IO.Path]::GetDirectoryName($extended))
+        [IO.File]::Copy(('\\?\' + (Join-Path $Source $file.path)), $extended, $false)
+        if ((Get-HarnessFileHash $target) -ine $file.sha256) { throw 'Entrada mudou durante a copia; repita com fontes estaveis.' }
     }
 }
 
@@ -238,6 +261,24 @@ function Get-HarnessProjectFolder {
     $label + '__' + (Get-HarnessProjectKey $Project.name)
 }
 
+function Resolve-HarnessMtaRunDirectory {
+    param([string]$Index, [string]$Root)
+    $indexPath = Resolve-HarnessPath $Index $Root
+    $locationPath = Join-Path $indexPath 'location.json'
+    if (-not (Test-Path -LiteralPath $locationPath -PathType Leaf)) { return $indexPath }
+    $location = Get-Content -LiteralPath $locationPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($location.Project -cnotmatch '^(?:[A-Za-z0-9][A-Za-z0-9_.-]{0,63}|_workspace-[a-f0-9]{24})$' -or
+        -not (Test-HarnessRunFolder (Split-Path -Leaf $indexPath) $location.RunId 'mta')) { throw 'Referencia externa MTA invalida.' }
+    $base = Resolve-HarnessPath $location.RunsPath $Root
+    if (-not $base -or $base.Length -le 3) { throw 'Raiz externa MTA invalida.' }
+    $run = Resolve-HarnessPath (Join-Path $base ('p__' + (Get-HarnessProjectKey $location.Project) + '/' + $location.RunId)) $Root
+    $manifest = Get-Content -LiteralPath (Join-Path $run 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($manifest.Project -cne $location.Project -or $manifest.RunId -cne $location.RunId -or
+        (Resolve-HarnessPath $manifest.Source $Root) -ine (Resolve-HarnessPath $location.Source $Root) -or
+        (Resolve-HarnessPath $manifest.IndexPath $Root) -ine $indexPath) { throw 'Manifesto externo nao corresponde a referencia local.' }
+    return $run
+}
+
 function Get-HarnessMtaRuns {
     param([string]$Root, [string]$Project, [string]$Source)
     if ($Project -cnotmatch '^(?:[A-Za-z0-9][A-Za-z0-9_.-]{0,63}|_workspace-[a-f0-9]{24})$') { throw 'Identidade de projeto invalida.' }
@@ -253,7 +294,7 @@ function Get-HarnessMtaRuns {
             if ($folder.Name -cnotmatch '^(?:[a-f0-9]{32}|mta_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}[+-]\d{4}__[a-f0-9]{12})$') { continue }
             $record = [pscustomobject]@{Run=$folder.FullName; RunId=$null; CreatedAtUtc=$folder.CreationTimeUtc; Manifest=$null; Problem=$null}
             try {
-                $record.Run = Resolve-HarnessPath $folder.FullName $Root
+                $record.Run = Resolve-HarnessMtaRunDirectory $folder.FullName $Root
                 $path = Resolve-HarnessPath (Join-Path $record.Run 'manifest.json') $Root
                 $manifest = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
                 $record.RunId = $manifest.RunId
@@ -289,8 +330,12 @@ function New-MtaSnapshot {
     do {
         $id = [guid]::NewGuid().ToString('N')
         $runFolder = 'mta_' + (Format-HarnessDate $createdAt -ForPath) + '__' + $id.Substring(0,12)
-        $run = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/runs/' + $projectFolder + '/' + $runFolder)) $Context.Root
-    } while (Test-Path -LiteralPath $run)
+        $indexPath = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/runs/' + $projectFolder + '/' + $runFolder)) $Context.Root
+        $run = $indexPath
+        if ($Context.Config.mta.runsPath) {
+            $run = Resolve-HarnessPath (Join-Path $Context.Config.mta.runsPath ('p__' + (Get-HarnessProjectKey $Context.Active.name) + '/' + $id)) $Context.Root
+        }
+    } while ((Test-Path -LiteralPath $run) -or (Test-Path -LiteralPath $indexPath))
     $inputPath = Join-Path $run 'input'
     $outputPath = Join-Path $run 'output'
     $sourceFiles = @(Get-HarnessFiles $Context.Active.path)
@@ -311,7 +356,11 @@ function New-MtaSnapshot {
         MtaJdkHome=$Context.Config.tools.mtaJdkHome; MavenHome=$Context.Config.tools.mavenHome
         Arguments=$arguments; SourceFiles=$sourceFiles; RuleFiles=$ruleFiles
     }
+    if ($run -ine $indexPath) { $manifest.IndexPath = $indexPath }
     Write-HarnessJson (Join-Path $run 'manifest.json') $manifest
+    if ($run -ine $indexPath) {
+        Write-HarnessJson (Join-Path $indexPath 'location.json') @{Project=$Context.Active.name; Source=$Context.Active.path; RunId=$id; RunsPath=$Context.Config.mta.runsPath}
+    }
     [pscustomobject]@{Run=$run; Input=$inputPath; Output=$outputPath; Manifest=$manifest}
 }
 
@@ -440,4 +489,4 @@ function Get-LastMtaReport {
     return $path
 }
 
-Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, New-MtaSnapshot, Invoke-MtaAnalysis, Get-ActiveMtaRun, Get-LastMtaReport, Format-HarnessDate, Test-HarnessRunFolder, Get-HarnessProjectKey, Get-HarnessProjectFolder, Get-HarnessMtaRuns, Find-HarnessMtaRun, Get-HarnessFiles
+Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, New-MtaSnapshot, Invoke-MtaAnalysis, Get-ActiveMtaRun, Get-LastMtaReport, Format-HarnessDate, Test-HarnessRunFolder, Get-HarnessProjectKey, Get-HarnessProjectFolder, Get-HarnessMtaRuns, Find-HarnessMtaRun, Get-HarnessFiles, Resolve-HarnessMtaRunDirectory

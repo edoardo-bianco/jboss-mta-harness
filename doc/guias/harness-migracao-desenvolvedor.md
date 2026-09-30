@@ -278,6 +278,7 @@ Exemplo completo para preencher na etapa 3. **Os caminhos de ferramentas abaixo 
 | `tools.eap71Home`, `tools.eap74Home` | Opcionais: pastas dos JBoss ja extraidos, reservadas para a etapa de runtime. |
 | `sonar` | Opcional no ciclo build/MTA; necessario para a task Sonar. URL, JDK do scanner, versao fixa e perfis conforme [guia Sonar](sonar.md). Nunca gravar token. |
 | `mta.rulesPath` | `null` usa `rulesets/java` ao lado da CLI; preencha se as regras Java estiverem em outra pasta. |
+| `mta.runsPath` | Pasta dedicada externa para novas rodadas, por exemplo `"C:/mta-runs"`. `null`/ausente mantem `.harness/runs`. |
 | `mta.profile` | `"eap71-to-eap74-java8"`: origem EAP 7.1, destino EAP 7.4, Java 8 e `javax.*`. |
 | `mta.sources`, `mta.targets`, `mta.mode` | Mantenha `[]`, `["eap7"]` e `"full"`. O harness recusa desvios desse perfil. |
 
@@ -378,6 +379,30 @@ Preservamos `full`, `--run-local`, todas as regras YAML da pasta Java (sem fixtu
 JSONs locais anteriores, sem `profile` e `sources`, recebem esses valores em memoria; caminhos permanecem inalterados. As novas rodadas registram perfil, origem/destino e filtros no manifesto, alem dos argumentos e hashes das regras. Atualizar a distribuicao ou `rulesPath` exige conferir novamente a comparabilidade com o baseline: o nome do perfil sozinho nao garante regras identicas.
 
 Cada nova rodada fica em `.harness/runs/<nome>__<chave12>/mta_<data-fuso>__<RunId12>/`, com copia do reactor e das regras, `manifest.json` (argumentos/hashes), `console.log`, `result.json` e `output/static-report/index.html`. A pasta usa o instante CreatedAtUtc do manifesto convertido para horario local com fuso; o ID completo permanece nos recibos. Excluimos `.git`, `.harness`, `.scannerwork`, `node_modules` e pastas Maven `target`; preservamos `.mvn` e os modulos. Modulos/pais externos precisam estar disponiveis no Maven ou incluidos na raiz escolhida. Links/junctions nao sao suportados. As fontes originais e as regras sao conferidas depois da execucao.
+
+**Pasta curta externa para projetos com caminhos longos:** em **Workspace:
+configurar caminhos**, acrescente/ajuste somente `runsPath` no bloco `mta` de
+`config/harness.local.json`, preservando os outros campos:
+
+```json
+"runsPath": "C:/mta-runs"
+```
+
+Salve e execute novamente **MTA: executar analise**. Nao precisa mover o harness
+nem alterar o workspace. A pasta precisa permitir escrita ao seu usuario e ficar
+fora do harness e dos projetos. Novas rodadas usam
+`C:/mta-runs/p__<chave12>/<RunId>/`, com `input`, `rules`, `output`, logs e recibos.
+Nomes dos fontes e estrutura dos modulos sao preservados. O rotulo, data e IDs
+continuam nos menus/manifestos; a pasta local da rodada guarda `location.json`.
+Logs, relatorio e planejamento resolvem essa referencia, inclusive apos trocar
+`runsPath` ou voltar a null. Historico existente nao e movido nem reescrito.
+Preserve as referencias locais junto com a pasta externa; nao mova rodadas a mao.
+
+O snapshot usa caminhos estendidos internamente para enumerar/copiar/calcular
+SHA-256 acima de 260 caracteres no PowerShell 5.1; manifestos e comandos MTA
+mantem caminhos normais. A pasta externa curta tambem reduz o caminho recebido
+pelo MTA/Java. Isso nao certifica todos os limites das ferramentas externas:
+confira `Status`, exit code e integridade na nova rodada real do projeto.
 
 Rodadas antigas em `.harness/runs/<Project>/<RunId>/` continuam acessiveis nas
 mesmas tarefas. O harness le ambos os formatos, inclusive ultimo relatorio,
@@ -1057,6 +1082,11 @@ prompt, cache Maven, backups e `.harness/evidencias/`. Nao apaga `target/` da ap
 de relatorios. No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
 pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
 recibo identificavel permanecem. A opcao todos remove as tres areas por inteiro.
+Rodadas externas registradas tambem aparecem no preview e sao removidas nas
+opcoes 1/2, antes das referencias locais. A limpeza nunca remove a raiz
+`C:/mta-runs` inteira nem pastas/arquivos externos sem referencia registrada.
+Referencia externa inconsistente cancela a limpeza; mantenha as evidencias para
+conferir o problema. A opcao 3 continua restrita aos backups temporarios locais.
 
 Para somente listar, sem excluir, execute na raiz:
 

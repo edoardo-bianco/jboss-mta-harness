@@ -30,7 +30,15 @@ function Add-Run($ctx, $id, $date, $status = 'SUCCEEDED', $readable = $false) {
     if ($readable) {
         $run = Join-Path $fixture ('.harness/runs/' + (Get-HarnessProjectFolder $ctx.Active) + '/mta_' + (Format-HarnessDate $date -ForPath) + '__' + $id.Substring(0,12))
     }
-    Write-HarnessJson (Join-Path $run 'manifest.json') @{Project=$ctx.Active.name;RunId=$id;Source=$ctx.Active.path;CreatedAtUtc=$date}
+    $manifest = @{Project=$ctx.Active.name;RunId=$id;Source=$ctx.Active.path;CreatedAtUtc=$date}
+    if ($readable) {
+        $index = $run
+        $external = Join-Path $area 'mta-runs'
+        $run = Join-Path $external ('p__' + (Get-HarnessProjectKey $ctx.Active.name) + '/' + $id)
+        $manifest.IndexPath = $index
+        Write-HarnessJson (Join-Path $index 'location.json') @{Project=$ctx.Active.name;RunId=$id;Source=$ctx.Active.path;RunsPath=$external}
+    }
+    Write-HarnessJson (Join-Path $run 'manifest.json') $manifest
     Write-HarnessJson (Join-Path $run 'result.json') @{Project=$ctx.Active.name;RunId=$id;Status=$status;ExitCode=0;SourceUnchanged=$true;SnapshotOriginalFilesUnchanged=$true;RulesUnchanged=$true;UnexpectedAddedFiles=@()}
     foreach ($file in @('output/output.yaml','output/dependencies.yaml','output/static-report/index.html','rules/regra.yaml')) {
         $path = Join-Path $run $file

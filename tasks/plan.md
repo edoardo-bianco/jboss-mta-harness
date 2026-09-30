@@ -1,5 +1,19 @@
 # Plano do agente: evolucao do harness
 
+## Caminhos longos no snapshot MTA - 2026-09-30
+
+Evolucao isolada em harness/caminhos-longos, derivada de main 5c3b27a no worktree
+.harness/i; preservar checkout do lote em uso pelo Copilot. Reproduzir em PS 5.1
+a falha de copia de arquivos Java com caminho de destino acima de MAX_PATH.
+Opcao escolhida pelo desenvolvedor: mta.runsPath = C:/mta-runs, pasta externa
+com p__<chave12>/<RunId>/ para encurtar a entrada do MTA/Java. Null preserva o
+padrao local. Manter referencias location.json no historico local, sem mover
+rodadas anteriores; adaptar descoberta e limpeza para os dois formatos.
+Cobrir enumeracao, copia e SHA-256 com caminhos estendidos, sem renomear os
+arquivos da aplicacao nem alterar configuracao global do Windows. Manter
+exclusoes, recusas de links/junctions e deteccao de alteracoes. Validar fixtures
+com destino e fonte longos e reactor parent, depois documentar limite do ensaio.
+
 ## Checklist sem bloqueio e cobertura como aviso - 2026-09-30
 
 Pedido do desenvolvedor: coleta Sonar e reexecucao MTA sao checklist informativo,

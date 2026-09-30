@@ -13,6 +13,13 @@ try {
     $defaults=Get-Content -LiteralPath (Join-Path $harnessRoot 'config/harness.example.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     $config=Get-Content -LiteralPath $ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json
     $changed=$false
+    if (-not $config.PSObject.Properties['mta']) {
+        $config | Add-Member NoteProperty mta $defaults.mta
+        $changed=$true
+    } elseif ($config.mta -is [pscustomobject] -and -not $config.mta.PSObject.Properties['runsPath']) {
+        $config.mta | Add-Member NoteProperty runsPath $null
+        $changed=$true
+    }
     if (-not $config.PSObject.Properties['sonar']) {
         $config | Add-Member -NotePropertyName sonar -NotePropertyValue $defaults.sonar
         $changed=$true
@@ -26,9 +33,10 @@ try {
     }
     if ($changed) {
         [IO.File]::WriteAllText($ConfigPath, ($config | ConvertTo-Json -Depth 100), (New-Object Text.UTF8Encoding($false)))
-        Write-Host 'Campos Sonar ausentes incluidos com os padroes do modelo; valores existentes preservados.'
+        Write-Host 'Campos de configuracao ausentes incluidos com os padroes do modelo; valores existentes preservados.'
     }
     Write-Host "Configuracao: $ConfigPath"
+    Write-Host 'Para rodadas MTA em pasta curta externa, configure mta.runsPath = C:/mta-runs. Null preserva .harness/runs. Historico existente nao e movido.'
     Write-Host 'Preencha os caminhos em tools e salve. Os projetos das tarefas vem do workspace aberto; activeProject e um padrao opcional.'
     Write-Host 'Confira sonar: serverUrl (local/corporativo), scannerJdkHome, scannerVersion (padrao 5.8.0.7211; validar compatibilidade), ceTimeoutSeconds e profiles. Token nunca vai no JSON; a tarefa solicita entrada oculta.'
     Write-Host 'Para criar um workspace pelo JSON, preencha repositories e execute Workspace: gerar workspace. Para adicionar projetos no workspace existente, use Add Folder to Workspace.'

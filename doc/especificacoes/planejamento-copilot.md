@@ -74,6 +74,11 @@ por trocar de branch; o desenvolvedor informa sua escolha ao agente.
   completos nos recibos. Estruturas internas do MTA permanecem intactas.
   Leitores MTA aceitam tambem `<Project>/<RunId>`, sem mover historico; usam
   identidades completas e fonte do manifesto. RunId duplicado e recusado.
+  Com mta.runsPath configurado, novas rodadas usam `<runsPath>/p__<chave12>/<RunId>/`;
+  location.json no indice local preserva descoberta de logs/relatorio/planejamento
+  apos mudanca da configuracao, sem mover evidencias existentes. O manifesto
+  externo deve corresponder a identidade, fonte e referencia local. Limpeza
+  inclui somente rodadas externas registradas e validadas, nunca a raiz externa.
   Compartilhamento usa copia completa de static-report para consulta, conforme
   o guia do desenvolvedor; nao substitui caminhos/evidencias dos contextos existentes.
 - Oferecer a ultima rodada elegivel do projeto; permitir historico por data UTC,

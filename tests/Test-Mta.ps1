@@ -59,6 +59,34 @@ $configPath = Join-Path $fixture 'config.json'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
 $context = Read-HarnessConfig $configPath $fixture
 Assert ($context.Config.mta.profile -ceq 'eap71-to-eap74-java8') 'Perfil de migracao ausente.'
+# Pasta externa ao harness da fixture; nunca usar C:\mta-runs nos testes.
+$external = Join-Path $area 'mta-runs'
+$config.mta | Add-Member -NotePropertyName runsPath -NotePropertyValue $external -Force
+Write-HarnessJson $configPath $config
+$externalContext = Read-HarnessConfig $configPath $fixture
+$externalSnapshot = New-MtaSnapshot $externalContext
+Assert ($externalSnapshot.Run.StartsWith($external + '\')) 'Snapshot ignorou mta.runsPath.'
+Assert ((Split-Path -Leaf $externalSnapshot.Run) -ceq $externalSnapshot.Manifest.RunId) 'Rodada externa deve usar ID compacto.'
+$externalFound = Find-HarnessMtaRun $fixture 'api' $externalSnapshot.Manifest.RunId $app
+Assert ($externalFound.Run -eq $externalSnapshot.Run) 'Historico nao encontrou rodada externa.'
+$externalResult = Invoke-MtaAnalysis $externalContext
+Assert ($externalResult.Status -eq 'SUCCEEDED') ('MTA externo falhou: ' + $externalResult.Error)
+Assert ((Get-LastMtaReport $externalContext) -eq $externalResult.ReportPath) 'Relatorio externo nao encontrado.'
+$externalHash = (Get-FileHash -LiteralPath (Join-Path $externalSnapshot.Run 'manifest.json')).Hash
+$config.mta.runsPath = $null
+Write-HarnessJson $configPath $config
+$context = Read-HarnessConfig $configPath $fixture
+Assert ((Find-HarnessMtaRun $fixture 'api' $externalSnapshot.Manifest.RunId $app).Run -eq $externalSnapshot.Run) 'Trocar configuracao perdeu historico externo.'
+Assert ((Get-FileHash -LiteralPath (Join-Path $externalSnapshot.Run 'manifest.json')).Hash -ceq $externalHash) 'Historico externo foi reescrito.'
+foreach ($invalidStorage in @($fixture, $app, $area, (Join-Path $app 'runs'), [IO.Path]::GetPathRoot($app))) {
+    $config.mta.runsPath = $invalidStorage
+    Write-HarnessJson $configPath $config
+    $rejected = $false
+    try { Read-HarnessConfig $configPath $fixture | Out-Null } catch { $rejected = $true }
+    Assert $rejected 'Pasta externa sobrepondo harness/fontes ou raiz do disco aceita.'
+}
+$config.mta.runsPath = $null
+Write-HarnessJson $configPath $config
 # Um filtro aparentemente mais preciso pode excluir as regras Hibernate do baseline.
 foreach ($case in @(
     @{field='sources'; value=@('eap7.1')},

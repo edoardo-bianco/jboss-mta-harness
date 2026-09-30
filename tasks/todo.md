@@ -1,5 +1,25 @@
 # To-do do agente: evolucao do harness
 
+## Caminhos longos no snapshot MTA - 2026-09-30
+
+- [x] Isolar branch derivada da main e preservar checkout do Copilot.
+- [x] Reproduzir copia longa no Windows PowerShell 5.1.
+- [x] Corrigir enumeracao/copia/hashes mantendo integridade e exclusoes.
+- [x] Configurar pasta externa curta, preservar descoberta/historico e limpeza.
+- [x] Validar regressao e documentar entrega para maquina de trabalho.
+
+Validacao: Test-LongPaths reproduziu PathTooLongException no modulo anterior;
+Test-Mta reproduziu runsPath ignorado antes da implementacao. Correcao passou
+nos 19 scripts de regressao PowerShell 5.1 (zero falhas), incluindo fonte/destino
+>260, hashes, exclusoes, junctions, destino externo, historico antigo/externo,
+planejamento, configuracao e limpeza seletiva/total. Test-Cleanup repetido com
+referencia inconsistente e junction externa: passou, sem tocar nos fontes.
+Test-BuildCoverage e ensaio Maven opt-in separado, nao repetido nesta alteracao.
+Diff revisado e git diff --check passou. MTA foi simulado na fronteira nativa;
+SIMTR real na maquina de trabalho continua ensaio do operador. Configurar
+mta.runsPath = C:/mta-runs nessa maquina apos atualizar o harness, sem mover
+evidencias antigas. Checkout/configuracao ativa do Copilot foram preservados.
+
 ## Checklist sem bloqueio e cobertura como aviso - 2026-09-30
 
 - [x] Tornar Sonar/nova rodada MTA checklist nao bloqueante nos tres prompts.
