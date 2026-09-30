@@ -39,15 +39,14 @@ public class LimpezaCacheTest {
         try (SessionFactory factory = abrirFactory(true)) {
             consultar(factory, null);
             consultar(factory, "outra-regiao");
-            factory.getStatistics().clear();
-            consultar(factory, null);
-            consultar(factory, "outra-regiao");
-            assertEquals(2, factory.getStatistics().getQueryCacheHitCount());
 
             new LimpezaCache().limpar(factory);
 
             factory.getStatistics().clear();
             consultar(factory, null);
+            assertEquals(1, factory.getStatistics().getQueryCacheMissCount());
+            assertEquals(0, factory.getStatistics().getQueryCacheHitCount());
+
             consultar(factory, "outra-regiao");
             assertEquals(1, factory.getStatistics().getQueryCacheMissCount());
             assertEquals(1, factory.getStatistics().getQueryCacheHitCount());
