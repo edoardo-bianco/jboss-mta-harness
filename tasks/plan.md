@@ -4,6 +4,16 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Clareza do fluxo de planejamento - 2026-10-01
+
+Evolucao do harness na branch harness/clareza-fluxo-planejamento, derivada de main
+ccadc22. Preencher objetivo editavel com as issues ANALISAR AGORA. Explicar no menu,
+na saida da tarefa, no README e no guia que a opcao 1 e o fluxo usual e tambem atualiza o
+catalogo; a opcao 2 atualiza somente o registro, com prompt de reconciliacao opcional.
+Manter selecao explicita, lote consistente, destinos de escrita e GO/aceite separados.
+Validar com os testes existentes de planejamento e tarefas e revisao do diff.
+Nao reescrever prompts/recibos historicos. Correcao da abertura do editor segue pendente.
+
 ## Proposta: registro por projeto e planejamento dirigido por issues - 2026-10-01
 
 Estado: implementacao concluida e validada nos scripts; ensaio Copilot pendente.

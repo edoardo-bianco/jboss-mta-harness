@@ -24,18 +24,20 @@ com DevSquad disponivel; o harness nao instala ferramentas.
 | --- | --- |
 | Construir | **Aplicacao: build Maven (Java 8)**, `clean install`; conferir sucesso. |
 | Analisar | **MTA: executar analise**, depois **MTA: abrir ultimo relatorio**. |
-| Escolher issues | **Planejamento: preparar contexto para Copilot > 2. Manter registro**; escolher MTA existente e editar `migracao.md`. Agente opcional para conciliar evidencias. |
-| Planejar/revisar | Mesmo menu, **1. Planejar ou atualizar lote**; selecionar plano anterior quando houver e preencher direcionamento no prompt. |
-| Gerar proposta | **Executar Prompt** no Copilot; conferir um `plan.md` e um `todo.md`. |
+| Preparar planejamento | **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**; escolher MTA e plano anterior, se houver. O harness atualiza o catalogo no `migracao.md` e prepara o prompt. |
+| Escolher issues | No `migracao.md`, marcar ANALISAR AGORA nas issues desejadas e salvar. Nao precisa preparar outro contexto por essa edicao. |
+| Gerar proposta | O prompt ja direciona as issues ANALISAR AGORA; edite o objetivo somente se necessario. Use **Executar Prompt** no Copilot e confira `plan.md` e `todo.md`. |
 | Implementar | Dar GO no plano, usar **Aplicacao: preparar implementacao do lote** e executar o prompt. Rever resultados e dar aceite separadamente. |
 
 `migracao.md` fica em `.harness/projetos/<nome>__<chave>/`, com
 `evidencias/LEIA-ME.md`. Selecione ANALISAR AGORA, ADIAR ou FORA DO ESCOPO;
-andamento e cobertura ficam separados. Manter registro nao precisa ser repetido
-antes de cada plano. Java 8/javax e as decisoes Hibernate permanecem no
+andamento e cobertura ficam separados. A opcao **2. Atualizar somente migracao.md**
+e opcional: atualiza o catalogo e prepara ajuda do Copilot para reconciliar o registro,
+sem plan/todo. Nao precisa executar esse prompt para apenas carregar o catalogo.
+Java 8/javax e as decisoes Hibernate permanecem no
 [contrato existente](doc/especificacoes/planejamento-copilot.md).
 
-**Ja tem MTA?** Reutilize pelo historico ou informe a pasta completa com **p**.
+**Ja tem MTA?** Comece em Preparar planejamento; reutilize pelo historico ou informe a pasta completa com **p**.
 Pode copiar/renomear uma rodada antiga para `C:/mta-runs/<projeto>/AAMMDD-HHMMSS`,
 sem editar seus arquivos. Isso nao a cadastra como ultimo relatorio.
 Veja [reconstrucao do registro](doc/guias/harness-migracao-desenvolvedor.md#reconstruir-a-pasta-usando-um-mta-existente):

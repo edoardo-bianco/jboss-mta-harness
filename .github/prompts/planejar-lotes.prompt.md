@@ -1,7 +1,7 @@
 ---
 name: planejar-lotes
 description: Cria ou atualiza um lote a partir do registro de issues, MTA e evidencias.
-argument-hint: Use o contexto preparado e indique o objetivo; plano anterior e evidencias sao opcionais.
+argument-hint: Use as issues ANALISAR AGORA do registro; ajuste o objetivo se necessario.
 agent: devsquad
 tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles']
 ---
@@ -9,6 +9,8 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 ## Direcionamento do desenvolvedor
 
 Objetivo desta rodada:
+Planejar um lote a partir das issues marcadas ANALISAR AGORA no migracao.md.
+
 Observacoes ou mudancas em relacao ao registro/plano:
 
 ## Trabalho solicitado

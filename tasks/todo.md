@@ -4,6 +4,18 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Clareza do fluxo de planejamento - 2026-10-01
+
+- [x] Preencher objetivo editavel do prompt com as issues ANALISAR AGORA.
+- [x] Distinguir planejamento usual e manutencao opcional no menu/saida/guia.
+- [x] Explicar catalogo automatico versus reconciliacao pelo agente sem plan/todo.
+- [x] Alinhar README e resumo inicial do guia: opcao 1, escolhas no registro e
+  execucao do prompt; opcao 2 opcional. MTA existente dispensa nova analise para planejar.
+- [x] Validar preparacao/menu e tarefas com os testes existentes e revisar o diff.
+  Test-TaskInputs e Test-Planning passaram (planejamento no Windows PowerShell 5.1).
+  git diff --check aprovado. Mudancas de texto revisadas; sem alterar selecoes,
+  destinos, historico ou regras de GO. A abertura real do editor segue pendente.
+
 ## Proposta: registro por projeto e planejamento dirigido por issues - 2026-10-01
 
 - [x] Inspecionar print, prompts, preparador, contexto e modelo de evidencias;

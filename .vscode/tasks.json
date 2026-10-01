@@ -188,7 +188,7 @@
     },
     {
       "label": "Planejamento: preparar contexto para Copilot",
-      "detail": "Escolha planejar/revisar e uma rodada local ou p para pasta MTA recebida de outra maquina. Abre o prompt no editor.",
+      "detail": "1: planejar/atualizar lote a partir do registro; 2: atualizar somente migracao.md, com ajuda opcional do Copilot. Aceita MTA local ou pasta recebida.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [

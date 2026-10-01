@@ -13,8 +13,8 @@ a tarefa atua somente no alvo escolhido. Ter uma pasta aberta nao a torna o alvo
 | 1. Configurar | Caminhos desta maquina e workspace local | Ambiente encontrado; conferir caminhos nao executa build/MTA |
 | 2. Build | Projeto/modulo e `clean install` no primeiro ensaio | `SUCCEEDED`, exit 0 e caminhos de `console.log`/`result.json` |
 | 3. MTA | Mesmo projeto e fontes do build | Rodada bem-sucedida, integridade e relatorio HTML |
-| 4. Preparar | Manter registro ou planejar/atualizar lote; selecionar MTA existente ou recebido | migracao.md, prompt e recibo; nenhuma corretiva executada |
-| 5. Acionar Copilot | Objetivo do lote; continuidade explicita quando houver historico | Um `plan.md` e um `todo.md`, ainda sem GO |
+| 4. Preparar | Opcao 1: planejar/atualizar lote; selecionar MTA existente ou recebido e plano anterior, se houver | migracao.md atualizado, prompt e recibo; nenhuma corretiva executada |
+| 5. Escolher issues e acionar Copilot | Salvar ANALISAR AGORA no registro; o prompt ja usa essas escolhas. Ajustar objetivo somente se necessario | Um `plan.md` e um `todo.md`, ainda sem GO |
 | 6. Revisar | Pendencias tecnicas, rota, escopo e criterios de aceite | GO humano separado; branch escolhida pelo desenvolvedor |
 | 7. Aplicar e validar | Aplicacao: preparar implementacao do lote; selecionar plano/to-do com GO e executar o prompt | Diff, build/testes, qualidade e validacao funcional; aceite humano |
 | 8. Continuar | Evidencias disponiveis, novo MTA quando houver e proposta anterior | Reconciliar o lote; proximo lote somente apos aceite e pedido |
@@ -622,9 +622,11 @@ arquivo mais recente nao vence automaticamente um conflito.
 
 ### Reconstruir a pasta usando um MTA existente
 
-Nao precisa repetir a analise:
+Nao precisa repetir a analise. Se pretende planejar um lote agora, use diretamente
+a opcao 1 descrita abaixo: ela tambem cria/atualiza o registro a partir do MTA.
+Para somente reconstruir ou atualizar o registro, sem planejar:
 
-1. Use **Planejamento: preparar contexto para Copilot > 2. Manter registro**.
+1. Use **Planejamento: preparar contexto para Copilot > 2. Atualizar somente migracao.md**.
 2. Escolha **1: selecionar MTA**. Use Enter para a ultima elegivel, **h** para o
    historico ou **p** para informar a pasta completa da rodada.
 3. Confira o caminho do migracao.md exibido. A pasta e o catalogo foram criados;
@@ -632,6 +634,11 @@ Nao precisa repetir a analise:
 4. Para recuperar andamento, forneca registro anterior ou planos/evidencias pertinentes
    e execute manter-migracao. Somente o MTA inicializa A DEFINIR/NAO ANALISADA;
    ele nao comprova analise, implementacao ou verificacao realizadas anteriormente.
+
+O prompt manter-migracao e gerado para ajuda opcional do Copilot: ele interpreta
+as evidencias e reconcilia decisoes/andamento somente no migracao.md, sem gerar
+plan.md/todo.md. Se queria apenas extrair o catalogo do MTA ou prefere editar o
+registro manualmente, a tarefa ja cumpriu esse objetivo; nao precisa executar o prompt.
 
 Para receber um registro de colega, use o parametro MigrationSourcePath abaixo.
 O arquivo recebido e entrada; o destino continua sendo o migracao.md local.
@@ -650,12 +657,16 @@ novamente antes de cada planejamento.
 
 ### Preparar e executar o prompt
 
-1. Edite ANALISAR AGORA nas issues desejadas ou informe um objetivo inequivoco.
-2. Use **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**.
+1. Use **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**.
    Escolha projeto e MTA: Enter ultima elegivel, h historico, p pasta completa, q cancela.
-3. Se houver proposta anterior, selecione-a para atualizar o mesmo lote; Enter inicia
+2. Se houver proposta anterior, selecione-a para atualizar o mesmo lote; Enter inicia
    independente. Previous nao concede GO nem transfere aprovacao.
-4. No inicio do prompt aberto, preencha **Direcionamento do desenvolvedor**.
+3. Abra o migracao.md no caminho exibido, marque ANALISAR AGORA nas issues desejadas
+   e salve. A preparacao ja preencheu/atualizou o catalogo quando disponivel no MTA;
+   escolhas existentes foram preservadas. Editar o registro nao exige novo preparo.
+4. O objetivo padrao do prompt e planejar um lote a partir das issues ANALISAR AGORA.
+   Altere **Direcionamento do desenvolvedor** somente se quiser outro objetivo ou
+   acrescentar observacoes; nao precisa repetir as escolhas do registro.
    Confira o contexto ao final: caminhos, rodada e destinos. O recibo guarda o
    registro no momento do preparo e a copia do contrato tecnico; o registro segue editavel.
 5. Use **Executar Prompt** em nova conversa **Copilot Local** com devsquad ou a

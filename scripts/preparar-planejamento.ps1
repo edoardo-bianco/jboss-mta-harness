@@ -19,8 +19,8 @@ try {
     if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
     $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
     if ($SelectOperation) {
-        Write-Host '1. Planejar ou atualizar lote (/planejar-lotes): registro, plano anterior e evidencias.'
-        Write-Host '2. Manter registro (/manter-migracao): novo MTA, documento existente e/ou evidencias.'
+        Write-Host '1. Planejar ou atualizar lote (/planejar-lotes): fluxo usual; atualiza o registro e prepara o planejamento.'
+        Write-Host '2. Atualizar somente migracao.md (/manter-migracao): sem planejar lote; ajuda do Copilot opcional.'
         switch (Read-Host 'Numero da operacao; q cancela') {
             '1' { $Operation = 'planejar-lotes' }
             '2' { $Operation = 'manter-migracao' }
@@ -50,7 +50,9 @@ try {
         Write-Host "Registro de migracao: $($prepared.MigrationPath)"
         Write-Host "Prompt preparado: $promptToOpen"
         Write-Host "Recibo de contexto: $($prepared.ContextPath)"
-        Write-Host 'Preencha o direcionamento e execute o prompt no Copilot. Sem rodada nova, a referencia MTA existente e preservada.'
+        Write-Host 'Se selecionou MTA, o catalogo ja foi atualizado no migracao.md; sem rodada nova, a referencia existente foi preservada.'
+        Write-Host 'O prompt e opcional: execute-o no Copilot somente para reconciliar decisoes/evidencias no registro. Ele nao gera plan.md/todo.md.'
+        Write-Host 'Para apenas atualizar o catalogo ou editar o registro manualmente, pode encerrar aqui. Para planejar um lote, use a opcao 1.'
     } else {
         if ($RunPath) { $selected = Get-MtaPlanningRunFromPath -RunPath $RunPath -Root $harnessRoot }
         else { $selected = Select-MtaPlanningRun $context -RunId $RunId -Interactive:(-not $RunId) }
