@@ -33,9 +33,15 @@ tecnicas reais permanecem nos checklists correspondentes.
 - [x] Concluir regressao automatizada e revisao final do diff.
 - [ ] Ensaiar no Copilot Local selecao de issues, cobertura parcial, persistencia e
   continuidade sem repetir triagem. Scripts nao comprovam obediencia do agente.
+- [ ] Corrigir e ensaiar a abertura automatica do prompt: chamada direta a Code.exe
+  exibiu service_worker_storage / Database IO error, sem abrir o arquivo. Registro,
+  prompt e recibo da solicitacao 6e051f7d12e3411286cfd7a5344f4886 foram conferidos
+  no disco. Testar bin/code.cmd e sinalizar falhas do editor; causa ainda pendente.
+  A pasta .harness oculta no Explorador nao explica a falha de abertura.
 
-Estado: implementacao local. O print e parcial; catalogo completo do SIMTR-api
-depende da rodada corporativa. Sem integrar/publicar branches neste pedido.
+Estado: implementacao no commit e2a9cf4, com publicacao solicitada em 2026-10-01.
+O print e parcial; catalogo completo do SIMTR-api depende da rodada corporativa.
+Publicacao nao encerra as pendencias operacionais acima nem concede aceite de lote.
 
 Validacao: 21 testes autonomos passaram em PowerShell 5.1 (Build, BuildConfig,
 Cleanup, EvidenceFolder, Git, Implementation, ImplementationBranch, LongPaths,

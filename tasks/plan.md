@@ -8,6 +8,12 @@ tecnicas reais permanecem nos checklists correspondentes.
 
 Estado: implementacao concluida e validada nos scripts; ensaio Copilot pendente.
 Branch harness/analise-prompts-por-issue, a partir de main a3c9ac7.
+Publicacao solicitada em 2026-10-01. Commit funcional e2a9cf4; preservar registros,
+evidencias, configuracao local e rodadas externas durante a organizacao Git.
+Ensaio manual localizou migracao.md, prompt e recibo gravados, mas a abertura via
+Code.exe --reuse-window exibiu service_worker_storage / Database IO error.
+A causa do editor ainda nao foi confirmada; testar a CLI bin/code.cmd e tratar
+falhas de abertura sem perder o contexto sao pendencias separadas da geracao.
 A analise abaixo preserva a proposta de origem; o contrato atual esta em
 doc/especificacoes/planejamento-copilot.md, sem novos documentos de orientacao.
 Skills utilizadas: using-agent-skills, spec-driven-development e documentation-and-adrs. O agente Copilot
