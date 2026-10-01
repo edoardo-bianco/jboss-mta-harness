@@ -62,8 +62,12 @@ mantidas ali e nas ADRs, sem criar documentos paralelos. Recibos novos guardam
 copia desse contrato; o caminho original continua como referencia. Prompts e recibos
 historicos nao sao reescritos. Preparacao nunca envia o pedido ao agente.
 
-manter-migracao pode escrever somente MigrationPath. Planejador/executor podem
-registrar andamento, cobertura e evidencia das issues do trabalho autorizado nesse
+manter-migracao pode escrever somente MigrationPath. O condutor DevSquad pode
+escolher um subagente disponivel para leitura e proposta de reconciliacao, sem
+nome fixo. Esse apoio nao escreve nem subdelega; o condutor confere e grava o
+registro, preservando decisoes humanas. Delegar e opcional e nao inicia outras fases.
+Planejador/executor podem registrar andamento, cobertura e evidencia das issues
+do trabalho autorizado nesse
 destino explicito; escolhas humanas, outras issues e catalogo ficam preservados.
 Isso amplia os dois destinos anteriores de forma delimitada, sem autorizar escrita
 geral em .harness, fontes no planejamento ou GO/aceite pelo agente.

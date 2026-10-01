@@ -4,6 +4,18 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Delegacao na manutencao do registro - 2026-10-01
+
+- [x] Conferir agentes disponiveis e permitir escolha pelo condutor, sem nome fixo.
+- [x] Habilitar agent no prompt e limitar apoio a leitura/proposta, sem subdelegacao.
+- [x] Manter somente o condutor como escritor de MigrationPath e preservar conflitos.
+- [x] Alinhar contrato, ADR e guia sem novos documentos ou fases.
+- [x] Validar geracao/revisao para publicacao em commit separado da abertura do editor.
+  Test-MigrationRegister e Test-Planning passaram no PowerShell 5.1; diff revisado,
+  sem conflito entre contrato e prompt, sem reescrever solicitacoes historicas.
+- [ ] Ensaiar no Copilot a escolha do subagente e a escrita exclusiva do condutor;
+  testes de scripts nao comprovam obediencia do agente.
+
 ## Abertura automatica do editor - 2026-10-01
 
 - [x] Conferir chamada direta, CLI instalada e preservacao do prompt existente.

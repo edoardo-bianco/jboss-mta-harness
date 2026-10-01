@@ -4,6 +4,20 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Delegacao na manutencao do registro - 2026-10-01
+
+Evolucao do harness em harness/delegacao-registro-migracao, de main ad4923b.
+Pedido: permitir que o DevSquad escolha o melhor subagente disponivel para ajudar
+na reconciliacao, sem fixar um especialista nem tornar a delegacao obrigatoria.
+Plugin local conferido: condutor possui agent e catalogo de especialistas; suas
+rotinas padrao excedem a manutencao e precisam receber os limites desta operacao.
+Subagente le/busca entradas autorizadas e devolve proposta por ID; nao escreve,
+subdelega ou executa ferramentas externas. Condutor confere e grava somente
+MigrationPath; conflitos humanos permanecem explicitos. Sem lotes, fontes ou GO.
+Alinhar prompt, contrato, ADR existente e guia; preservar solicitacoes anteriores.
+Validar geracao com Test-MigrationRegister e Test-Planning; ensaio de obediencia
+do Copilot permanece separado dos testes de scripts.
+
 ## Abertura automatica do editor - 2026-10-01
 
 Evolucao do harness na branch harness/abertura-editor-prompt, de main 9dae3cc.

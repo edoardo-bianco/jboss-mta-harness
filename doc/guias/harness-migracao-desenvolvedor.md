@@ -640,6 +640,11 @@ as evidencias e reconcilia decisoes/andamento somente no migracao.md, sem gerar
 plan.md/todo.md. Se queria apenas extrair o catalogo do MTA ou prefere editar o
 registro manualmente, a tarefa ja cumpriu esse objetivo; nao precisa executar o prompt.
 
+Ao executar manter-migracao, o DevSquad pode escolher um subagente para ajudar na
+leitura e reconciliacao. Esse apoio e opcional e somente devolve uma proposta;
+o condutor confere as evidencias e grava apenas migracao.md. Conflitos humanos
+permanecem para sua decisao. Nenhum dos agentes planeja lotes ou altera a aplicacao.
+
 Para receber um registro de colega, use o parametro MigrationSourcePath abaixo.
 O arquivo recebido e entrada; o destino continua sendo o migracao.md local.
 Conflitos ficam visiveis para conciliacao, sem substituir decisoes silenciosamente.

@@ -47,7 +47,15 @@ novo MTA e/ou evidencias. Pode atualizar apenas por evidencias sem novo scan.
 Grava somente MigrationPath; documento recebido, evidencias e planos sao entradas.
 Conflitos entre colegas ficam explicitos para conciliacao humana, sem escolher
 arquivo por recencia ou exigir acesso aos caminhos da maquina de origem.
-Nao delega, planeja lotes ou concede GO. Repetir nao deve duplicar observacoes.
+O condutor devsquad pode escolher um subagente disponivel adequado a reconciliacao,
+sem nome fixo nem delegacao obrigatoria. Encaminha via agent, com [CONDUCTOR],
+[LANG: pt-BR], caminhos literais, contrato, recorte e os mesmos limites de leitura.
+O subagente so le/busca e devolve proposta por ID com evidencias/cobertura/conflitos;
+nao escreve, subdelega ou executa ferramentas externas. Rotinas padrao do plugin
+nao ampliam o escopo nem iniciam outras fases. Somente o condutor confere a proposta
+e grava MigrationPath. Se agent/subagente estiver indisponivel, informa e faz a
+reconciliacao diretamente, sem simular delegacao. Relata qual apoio utilizou.
+Nao planeja lotes ou concede GO. Repetir nao deve duplicar observacoes.
 
 LEIA-ME tem tabela Arquivo relativo | Relacao com a correcao. Origem/data/ambiente
 entram na explicacao quando relevantes. Leia somente arquivos listados e pertinentes,
