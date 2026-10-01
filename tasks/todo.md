@@ -4,6 +4,18 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Planejamento sem ciclo de regeneracao - 2026-09-30
+
+- [x] Limitar invocacoes e preservar rascunho/identidade nos dois prompts.
+- [x] Separar ajustes editoriais/factuais de alteracoes tecnicas e bloqueios reais.
+- [x] Atualizar contrato e guia sem criar outro roteiro.
+- [x] Validar preparo, continuidade, historico preservado e referencias.
+- Validacao: Test-Planning.ps1 passou em Windows PowerShell 5.1 (exit 0), incluindo
+  os dois modos, copia integral dos templates e preservacao do historico. Revisao
+  documental cobre titulo/versao omitidos, secoes perdidas, lacunas e contexto invalido.
+- [ ] Ensaiar no Copilot Local: no maximo duas chamadas, par persistido/releitura,
+  sem perder matriz, deduplicacao, fatos MTA ou tarefa explicita de POM.
+
 ## Consolidacao da documentacao - 2026-09-30
 
 - [x] Centralizar Sonar/revisao no guia e retirar dois roteiros redundantes.

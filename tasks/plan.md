@@ -4,6 +4,20 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Planejamento sem ciclo de regeneracao - 2026-09-30
+
+Evolucao do harness em harness/planejamento-sem-loop, derivada de main 04d5937,
+com worktree isolado. O ensaio Copilot da solicitacao 07ad43178a49 chamou o
+planejador repetidamente, perdeu partes conferidas e terminou sem plan/to-do.
+Fixar uma elaboracao e no maximo uma correcao consolidada por execucao; preservar
+o rascunho e o ID do lote; permitir normalizacao editorial/factual pelo condutor,
+sem alterar escolhas tecnicas ou autoria humana. Correcao retorna trechos, nao
+regenera o par. Lacunas verificaveis viram pendencias, sem aceitar contradicoes.
+Aplicar o mesmo contrato em planejar-lotes/revisar-lote e explicar no guia atual.
+Validar preparo dos prompts, preservacao do historico e links. Comportamento do
+Copilot exige novo ensaio real; testes dos scripts nao provam obediencia do agente.
+Nao alterar solicitacoes historicas, evidencias, aplicacao ou plugin DevSquad.
+
 ## Consolidacao da documentacao - 2026-09-30
 
 Evolucao do harness na branch harness/documentacao-consolidada, em worktree separado.

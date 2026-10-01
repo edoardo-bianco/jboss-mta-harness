@@ -71,13 +71,25 @@ Determine leitura integral dos dois prompts e do recibo, sem executar a triagem
 inicial de familias ou criar outro lote. O especialista nao herda implicitamente
 os caminhos nem os limites do condutor.
 
-Determine expressamente: revise os dois documentos com as skills DevSquad
+Na elaboracao inicial, determine expressamente: revise os dois documentos com as skills DevSquad
 pertinentes, apenas por leitura/busca; nao delegue novamente nem chame workers.
 Os requisitos MTA substituem spec/envisioning e PlanPath/TodoPath substituem
 docs/features, docs/migrations e tasks.md. Retorne os textos completos como
 [CREATE caminho-absoluto] para ausentes ou [EDIT caminho-absoluto] para existentes,
 somente nos destinos literais do recibo, sem gravar arquivos. Nao reinvoque
 devsquad.plan; invocacao e persistencia pertencem ao condutor.
+
+Aplique "Conferencia e correcao sem regenerar a proposta" do contexto-base:
+no maximo duas invocacoes de devsquad.plan por execucao, uma revisao inicial e
+uma correcao consolidada, sem terceira chamada mesmo apos releitura dos arquivos.
+Preserve um rascunho de referencia em memoria, ID existente, fatos conferidos e
+decisoes humanas. O condutor normaliza titulo/metadados e restaura fatos ja
+verificados, sem alterar conclusoes tecnicas. Envie todas as questoes tecnicas
+em uma unica correcao, com a referencia completa; solicite apenas substituicoes
+ANTES/DEPOIS nos caminhos literais. Nao regenere o par nem apague secoes omitidas
+no retorno. Na continuidade de contexto antigo sem essa secao, estas regras de
+correcao prevalecem, mantendo identidade, destinos e demais limites historicos.
+Nao consultar memoria/session store ou reiniciar triagem para reparar o retorno.
 
 Ambos seguem os limites do contexto: nao executar terminal, Git, tarefas, build,
 testes, MTA, Sonar, EAP, OpenRewrite, web ou servicos externos. Nao instalar nada
@@ -123,7 +135,12 @@ O especialista deve cruzar as evidencias adicionais com o MTA e o plano existent
 ## 4. Persistir e conferir
 
 O condutor confere identidade, escopo e as duas acoes contra os destinos literais
-do recibo. Retorno fora do escopo deve ser corrigido pelo planejador antes da escrita.
+do recibo. Recuse acoes fora do escopo; sua correcao segue o limite acima.
+Lacuna tecnica que permita proposta coerente fica PENDENTE, com alternativas
+nao decididas, nunca com instrucoes contraditorias ativas. Identidade/destinos
+invalidos, falta de evidencia essencial ou impossibilidade de delimitar proposta
+coerente exigem explicar o bloqueio, preservando documentos existentes. Nao
+abandonar persistencia apenas por titulo, ordem ou fato ja conferido omitido.
 Grave somente PlanPath/TodoPath, usando edit/createFile ou edit/editFiles. Preserve
 documentos anteriores. A autorizacao cobre os dois rascunhos, sem GO de corretivas.
 

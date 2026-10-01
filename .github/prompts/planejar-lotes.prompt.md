@@ -37,8 +37,10 @@ sem criar esses artefatos. Nao grave learnings, memoria ou registros auxiliares.
 Este pedido autoriza elaborar e persistir a proposta, sem GO de corretivas.
 Use o protocolo nativo do condutor: devsquad.plan elabora o conteudo e devolve
 acoes [CREATE] ou [EDIT]; devsquad confere os destinos, grava e rele os dois
-documentos. A restricao do condutor a gerar conteudo diretamente nao impede
-executar essas acoes de persistencia. Nao encerre apenas com uma analise no chat.
+documentos. Neste modo, o condutor tambem pode normalizar forma e fatos ja
+conferidos conforme a secao abaixo; nao precisa delegar ajustes editoriais.
+Isso nao autoriza criar ou substituir a analise tecnica do especialista.
+Nao encerre apenas com uma analise no chat quando houver proposta coerente para salvar.
 
 1. Antes da triagem, leia o bloco "Contexto selecionado pelo desenvolvedor" ao
    final deste arquivo e o ContextPath. Confira os sete identificadores exigidos
@@ -82,8 +84,62 @@ executar essas acoes de persistencia. Nao encerre apenas com uma analise no chat
    deste pedido cobre gravar esses dois rascunhos; nao e aceite do seu conteudo.
    Persistir segue a secao 5 abaixo, inclusive conferencia de consistencia entre
    todos os trechos dos dois documentos, releitura e relato de falha parcial.
-   Se houver lacunas no retorno, nova invocacao deve levar contexto e lacunas;
-   nao reinicie a triagem nem repita indefinidamente uma chamada que falhou.
+   Para lacunas no retorno, aplique o procedimento abaixo. O limite e duas
+   invocacoes de devsquad.plan por execucao deste prompt: uma elaboracao e,
+   somente se necessario, uma correcao consolidada. Nao reinicie a triagem.
+
+### Conferencia e correcao sem regenerar a proposta
+
+O condutor mantem um unico rascunho de referencia dos dois textos no contexto
+da conversa, sem criar arquivo auxiliar nem consultar memoria/session store.
+Na revisao, confira o retorno inicial contra os documentos atuais, preserve
+decisoes humanas e adote somente alteracoes do escopo pedido. Para proposta nova,
+adote o primeiro retorno com lote e proposta tecnica identificaveis.
+O ID vem do pedido/documentos quando fornecido; para lote novo, fixe o primeiro
+ID univoco proposto para aquele escopo e repasse-o em qualquer correcao.
+
+Antes de nova invocacao, confira o par inteiro uma vez e classifique os problemas:
+
+- **Editorial ou factual verificavel:** o proprio condutor ajusta titulo, ordem
+  de secoes, metadados, links e o mesmo ID ja fixado nos dois documentos. Pode
+  restaurar fatos explicitamente conferidos no recibo/result.json ou no rascunho
+  de referencia, com origem: por exemplo, versao MTA omitida. Isso nao permite
+  inventar contagens, versoes de dependencias, deduplicacao ou conclusoes tecnicas.
+  Divergencia entre recibo e contexto nao e erro editorial a normalizar.
+- **Tecnico:** omissao, contradicao ou mudanca de escopo, deduplicacao, matriz,
+  rota, tarefa POM, teste ou criterio de aceite exige a unica correcao permitida.
+  Envie todos os pontos juntos, o rascunho completo, ID fixado, evidencias e
+  decisoes que devem permanecer. Nao solicite uma nova proposta do zero.
+- **Evidencia ausente:** se o lote ainda puder ser delimitado e proposto, registre
+  PENDENTE e o que falta verificar. Nao exigir resultado de build/runtime/Sonar
+  para salvar uma proposta preliminar nem transformar ausencia em sucesso.
+
+Na invocacao de correcao, determine: "Retorne somente [EDIT caminho-absoluto]
+com os trechos ANTES e DEPOIS e a justificativa de cada substituicao nos dois
+rascunhos. Nao regenere documentos completos, nao renomeie o lote e nao remova
+conteudo fora dos pontos listados. Nao releia evidencias ja conferidas salvo
+necessidade concreta para resolver um dos pontos. Nao reinicie triagem nem skills."
+Se um dos documentos faltar no retorno inicial, complete somente esse documento
+nessa correcao; preserve o outro. Isso nao autoriza regenerar o par inteiro.
+O condutor aplica essas substituicoes ao rascunho de referencia em memoria e
+depois grava com CREATE/EDIT conforme a existencia real de cada destino.
+Se o especialista devolver textos completos, aproveite apenas as correcoes
+solicitadas que puder conferir; nao substitua integralmente a referencia.
+Omissao de secao ou fato no retorno nao e autorizacao para apaga-lo.
+
+Depois dessa correcao nao faca terceira chamada, inclusive apos a releitura dos
+arquivos. Confira os trechos alterados e suas dependencias nos dois documentos.
+Resolva mecanicamente forma/fatos verificaveis. Uma questao tecnica ainda aberta
+pode ficar como PENDENTE nos dois, com alternativas conflitantes identificadas
+como nao decididas; nunca mantenha duas instrucoes contraditorias como ativas.
+Nao escolha uma solucao tecnica nem dispense requisito/GO pelo desenvolvedor.
+
+Se identidade/destinos forem invalidos, faltar acesso as evidencias essenciais,
+ou nao houver escopo e proposta coerentes mesmo explicitando pendencias, pare
+com o ponto exato e a decisao/dado necessario. Preserve arquivos existentes e
+informe qualquer escrita parcial. Nao salve um par ficticio so para concluir.
+Nos demais casos, grave/releia a proposta e suas pendencias. Titulo, ordem dos
+metadados ou omissao de fato ja conferido nao justificam abandonar a persistencia.
 
 Se agent ou devsquad.plan nao estiver disponivel, informe a limitacao antes da
 triagem e oriente conferir Run Subagent (agent/runSubagent) em Configure Tools
@@ -523,8 +579,9 @@ atuais as orientacoes antigas incompativeis; nao apenas acrescente secoes corret
 Preserve decisoes/historico com sua origem e estado, marcando orientacoes superadas
 como historicas, sem mante-las como exigencias ativas nem alterar documentos anteriores.
 O planejador deve harmonizar o conteudo completo; o condutor confere essa consistencia
-antes de persistir. Se houver contradicao semantica, devolva ao planejador os trechos
-conflitantes para correcao, respeitando o contrato de delegacao e os mesmos destinos.
+antes de persistir. Contradicoes semanticas entram juntas na unica correcao da
+secao "Conferencia e correcao sem regenerar a proposta"; esta verificacao nao
+reinicia a contagem de invocacoes nem autoriza regenerar o par a cada omissao.
 
 Releia integralmente os dois arquivos apos gravar, em trechos se necessario, e confira
 identidade, vinculos, lote ativo, estados e pendencias. Compare resumo, escopo, riscos,

@@ -40,6 +40,19 @@ evidencias autorizadas e contrato completo do prompt. O planejador usa as skills
 para elaborar os dois documentos em memoria e retorna `[CREATE]`/`[EDIT]`;
 somente o condutor grava e rele PlanPath/TodoPath apos conferir o retorno.
 O pedido de planejamento ja autoriza essa persistencia, nunca a implementacao.
+Por execucao do prompt, permitir uma elaboracao e no maximo uma correcao
+consolidada de devsquad.plan, inclusive em revisar-lote. O condutor preserva um
+rascunho de referencia em memoria e o ID do lote. Pode normalizar titulo,
+metadados/links e restaurar fatos ja conferidos com origem, sem substituir analise
+tecnica, modificar decisoes humanas ou corrigir divergencia do contexto/recibo.
+Reunir problemas tecnicos antes da unica correcao; enviar a referencia completa
+e pedir substituicoes ANTES/DEPOIS, preservando tudo fora dos pontos listados.
+Omissao no retorno nao implica exclusao. Completar documento ausente sem regenerar
+o outro. Nao consultar memoria/session store nem abrir arquivos auxiliares.
+Depois disso, salvar proposta coerente com lacunas explicitamente pendentes;
+nao manter instrucoes conflitantes como ativas nem inventar fatos para concluir.
+Bloqueio real de identidade, acesso essencial ou delimitacao da proposta exige
+relato exato e preservacao do trabalho existente, sem terceira chamada.
 Dados de runtime ausentes ficam PENDENTES na proposta; identidade/destinos
 divergentes impedem escrita. Retorno incompleto ou falha parcial deve ser explicito.
 
@@ -209,6 +222,9 @@ pelo Git, nao e criada pelo clone e nao e backup temporario.
 DevSquad repassa ao devsquad.plan os caminhos, limites e pedido de revisao.
 O planejador compara novas evidencias com o MTA e a proposta, distingue dados
 observados/declarados/pendentes e retorna apenas PlanPath/TodoPath atualizados.
+Revisao usa o mesmo limite de invocacoes e preservacao do rascunho do planejamento;
+o contrato atualizado de revisar-lote explicita essa regra tambem para contexto-base
+historico. Testes dos scripts verificam preparo, nao garantem obediencia do agente.
 Preservar ID do lote e historico; manter alteracoes de proposta nao aprovadas.
 Mudanca de escopo/abordagem exige nova revisao/GO. Evidencia conflitante nao
 autoriza reescrever MTA nem descartar premissas sem esclarecimento.

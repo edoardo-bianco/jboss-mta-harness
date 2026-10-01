@@ -597,6 +597,23 @@ O prompt versionado e [planejar-lotes](../../.github/prompts/planejar-lotes.prom
 Prompts ja preparados sao copias historicas: atualizacoes do harness valem para
 novos preparos. Nao e preciso repetir MTA somente para obter o prompt atualizado.
 
+**Se o agente ficar corrigindo o proprio rascunho sem gravar:** o contrato atual
+limita a execucao a uma elaboracao e, se necessario, uma correcao consolidada pelo
+`devsquad.plan`. O condutor preserva o rascunho e o ID; corrige forma/metadados e
+restaura fatos ja conferidos diretamente. Questoes tecnicas sao enviadas juntas;
+o retorno deve trazer somente os trechos a substituir, sem regenerar os documentos
+nem perder matriz de dependencias, deduplicacao ou tarefas ja conferidas.
+Lacunas que permitam uma proposta coerente ficam PENDENTES; titulo ou ordem de
+secoes nao justificam terminar sem arquivos. Identidade/destinos invalidos ou
+impossibilidade de delimitar a proposta continuam exigindo esclarecimento.
+
+Para ensaiar essa correcao, prepare um novo contexto com a mesma rodada MTA e
+execute o novo prompt em nova conversa Local. Se a tentativa anterior nao gravou
+os dois documentos, inicie independente; se os gravou, selecione-os como Previous
+para preservar e revisar o lote. Nao edite o prompt historico nem o recibo.
+Confira no maximo duas chamadas ao especialista e a gravacao/releitura do par.
+Os testes de scripts nao comprovam que o Copilot obedecera a esse limite.
+
 ### Como se forma o lote, o plan.md e o todo.md
 
 **O agente aprofunda uma fatia coerente do codigo, correspondente a um unico lote.**
