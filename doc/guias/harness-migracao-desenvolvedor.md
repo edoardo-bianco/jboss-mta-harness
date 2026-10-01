@@ -13,7 +13,7 @@ a tarefa atua somente no alvo escolhido. Ter uma pasta aberta nao a torna o alvo
 | 1. Configurar | Caminhos desta maquina e workspace local | Ambiente encontrado; conferir caminhos nao executa build/MTA |
 | 2. Build | Projeto/modulo e `clean install` no primeiro ensaio | `SUCCEEDED`, exit 0 e caminhos de `console.log`/`result.json` |
 | 3. MTA | Mesmo projeto e fontes do build | Rodada bem-sucedida, integridade e relatorio HTML |
-| 4. Preparar | Opcao 1: planejar/atualizar lote; selecionar MTA existente ou recebido e plano anterior, se houver | migracao.md atualizado, prompt e recibo; nenhuma corretiva executada |
+| 4. Preparar | Opcao 1: planejar/atualizar lote; selecionar MTA existente ou recebido e plano anterior, se houver | Catalogo atualizado quando disponivel no MTA, prompt e recibo; nenhuma corretiva executada |
 | 5. Escolher issues e acionar Copilot | Salvar ANALISAR AGORA no registro; o prompt ja usa essas escolhas. Ajustar objetivo somente se necessario | Um `plan.md` e um `todo.md`, ainda sem GO |
 | 6. Revisar | Pendencias tecnicas, rota, escopo e criterios de aceite | GO humano separado; branch escolhida pelo desenvolvedor |
 | 7. Aplicar e validar | Aplicacao: preparar implementacao do lote; selecionar plano/to-do com GO e executar o prompt | Diff, build/testes, qualidade e validacao funcional; aceite humano |
@@ -36,6 +36,22 @@ Navegacao: [configuracao](#comecar-na-maquina-de-trabalho) ·
 [revisao com evidencias](#revisar-um-lote-com-evidencias-complementares) ·
 [depois da revisao: GO, execucao e aceite](#da-proposta-revisada-a-execucao-e-ao-aceite) ·
 [limpeza](#limpar-execucoes-para-repetir-o-ensaio).
+
+### Qual caminho seguir
+
+Na tarefa **Planejamento: preparar contexto para Copilot**, **1** prepara um lote
+e **2** cuida somente do registro. Gerar ou abrir um prompt nao o executa no Copilot.
+
+| Situacao | Caminho e ponto de parada |
+| --- | --- |
+| Primeiro lote, com MTA novo ou ja existente | Opcao **1**; selecionar a rodada (ou **p** para pasta recebida), salvar ANALISAR AGORA e executar o prompt. [Passo a passo](#preparar-e-executar-o-prompt). |
+| Quero apenas carregar as issues do MTA | Opcao **2 > 1: selecionar MTA**; conferir o catalogo no registro. Pode parar sem executar o prompt. [Reconstrucao](#reconstruir-a-pasta-usando-um-mta-existente). |
+| Quero reconciliar decisoes, registro de colega ou evidencias | Opcao **2**, com MTA ou **2: somente registro/evidencias existentes**; executar o prompt opcional. Apenas migracao.md muda; nao produz lote. [Entradas e limites](#reconstruir-a-pasta-usando-um-mta-existente). |
+| So mudei as prioridades no migracao.md antes de planejar | Salvar o registro e usar o prompt ja preparado; nao gerar outra solicitacao. |
+| Quero completar ou corrigir a proposta atual | Pedir o ajuste na mesma conversa e nos mesmos documentos. Para uma revisao separada, opcao **1**, selecionando a proposta como Previous. [Revisao](#revisao-manual-do-plano-e-do-to-do). |
+| Tenho novo MTA para um lote em andamento | Opcao **1**, selecionar o novo MTA e o plano anterior; reconciliar o lote existente. Nao alterar o RunId do recibo antigo. [Evidencias e revisao](#revisar-um-lote-com-evidencias-complementares). |
+| Tenho GO ou preciso retomar implementacao parcial | Usar **Aplicacao: preparar implementacao do lote**, com os documentos atuais; escolher branch atual se ja criada. [Implementacao e retomada](#preparar-implementacao-do-lote). |
+| Terminei o lote e quero avancar | Conferir resultados, registrar aceite humano e pedir continuidade. Preparar opcao **1** com a proposta anterior e evidencias; proximo lote somente apos aceite. [GO e aceite](#da-proposta-revisada-a-execucao-e-ao-aceite). |
 
 ## Comecar na maquina de trabalho
 
@@ -74,6 +90,13 @@ Os passos abaixo usam a **opcao A: configuracao pelo harness**. Para configurar 
 Ao abrir o workspace, a conferencia automatica usa a configuracao legada `repositories`/`activeProject` do JSON, quando disponivel, sem perguntar qual arquivo de workspace usar. Sem padrao, orienta executar a conferencia manual; esta permite informar o workspace e escolher um projeto. Se a configuracao necessaria estiver incompleta, abre o JSON. O VS Code pode pedir para permitir tarefas automaticas; a tarefa manual de configuracao funciona independentemente dessa permissao. Nenhuma analise comeca automaticamente.
 
 Nos proximos dias, abra diretamente `jboss-mta-harness.local.code-workspace`. `iniciar-harness.code-workspace` fica como modelo para novos clones; nao precisa reabri-lo depois da configuracao. Relatorios, configuracao pessoal e workspace local nao acompanham o clone. Se uma politica impedir scripts, siga o procedimento de liberacao da empresa; este guia nao usa bypass nem altera ExecutionPolicy.
+
+Apos atualizar o harness com Git, continue usando seu workspace local. Se precisar
+recarregar a interface/extensoes, use **Ctrl+Shift+P > Developer: Reload Window**;
+isso nao gera workspace nem atualiza prompts salvos. Para usar instrucoes novas,
+prepare outro prompt na operacao desejada, reutilizando o MTA existente quando
+aplicavel. Na manutencao do registro, pode escolher somente registro/evidencias.
+Prompts e copias do contrato de solicitacoes anteriores permanecem historicos.
 
 ## Escolher o projeto em cada tarefa
 
@@ -629,8 +652,9 @@ Para somente reconstruir ou atualizar o registro, sem planejar:
 1. Use **Planejamento: preparar contexto para Copilot > 2. Atualizar somente migracao.md**.
 2. Escolha **1: selecionar MTA**. Use Enter para a ultima elegivel, **h** para o
    historico ou **p** para informar a pasta completa da rodada.
-3. Confira o caminho do migracao.md exibido. A pasta e o catalogo foram criados;
-   se ja existiam, escolhas, observacoes e issues manuais foram preservadas.
+3. Confira o caminho do migracao.md exibido. A pasta foi criada e o catalogo carregado
+   quando disponivel no formato MTA suportado; caso contrario, confira o aviso.
+   Escolhas, observacoes e issues manuais existentes foram preservadas.
 4. Para recuperar andamento, forneca registro anterior ou planos/evidencias pertinentes
    e execute manter-migracao. Somente o MTA inicializa A DEFINIR/NAO ANALISADA;
    ele nao comprova analise, implementacao ou verificacao realizadas anteriormente.
@@ -639,6 +663,11 @@ O prompt manter-migracao e gerado para ajuda opcional do Copilot: ele interpreta
 as evidencias e reconcilia decisoes/andamento somente no migracao.md, sem gerar
 plan.md/todo.md. Se queria apenas extrair o catalogo do MTA ou prefere editar o
 registro manualmente, a tarefa ja cumpriu esse objetivo; nao precisa executar o prompt.
+
+Para usar essa ajuda, confira as entradas e o direcionamento no arquivo
+manter-migracao.prompt.md aberto, e use **Executar Prompt** em conversa Copilot
+Local com **devsquad**. Ao terminar, revise o migracao.md no caminho informado.
+Se depois quiser planejar, siga a opcao 1.
 
 Ao executar manter-migracao, o DevSquad pode escolher um subagente para ajudar na
 leitura e reconciliacao. Esse apoio e opcional e somente devolve uma proposta;
@@ -736,6 +765,10 @@ Ali ficam prompt, context.json e, apos o agente, plan.md/todo.md. Manutencao do
 registro usa `registro/solicitacao_<id>` sob a pasta de planejamento do projeto e nao aparece
 como lote no menu. Formatos historicos continuam legiveis, sem renomeacao.
 Novos preparos usam o contrato atualizado; nao e preciso repetir MTA para isso.
+
+O historico de propostas so lista solicitacoes com **plan.md e todo.md** existentes.
+Se apenas preparou o contexto, abra o prompt pelo caminho exibido e execute-o no
+Copilot; ainda nao ha proposta para abrir ou selecionar como Previous.
 
 ### Compartilhar o MTA e planejar em outra maquina
 
@@ -1096,9 +1129,10 @@ Sonar Docker ou corporativo do operador.
 5. Para recomecar, execute build → MTA → preparar contexto. Sem historico salvo,
    nao ha proposta anterior para selecionar.
 
-A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, template versionado do
-prompt, cache Maven, backups e `.harness/evidencias/` e `.harness/projetos/`. Nao apaga `target/` da aplicacao nem copias externas
-de relatorios. No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
+A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, templates
+versionados dos prompts, cache Maven, backups, `.harness/evidencias/` e `.harness/projetos/`.
+Nao apaga `target/` da aplicacao nem copias externas sem referencia registrada.
+No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
 pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
 recibo identificavel permanecem. A opcao todos remove as tres areas por inteiro.
 Rodadas externas registradas tambem aparecem no preview e sao removidas nas
@@ -1113,8 +1147,8 @@ Para somente listar, sem excluir, execute na raiz:
 powershell.exe -NoProfile -File .\scripts\limpar-execucoes.ps1 -All -Preview
 ```
 
-Alteracoes permanentes do prompt devem estar em
-`.github/prompts/planejar-lotes.prompt.md`. Uma edicao feita apenas no prompt
+Alteracoes permanentes dos prompts devem estar no template correspondente em
+`.github/prompts/`. Uma edicao feita apenas no prompt
 preparado pertence aquela solicitacao e sera apagada com ela. Para conservar um
 resultado de ensaio, guarde antes uma copia fora das areas que serao removidas.
 
@@ -1132,7 +1166,7 @@ podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 | `.harness/runs/` | Rodadas MTA locais ou indices `location.json` das rodadas externas: `manifest.json` identifica entrada, argumentos, hashes e estado Git; `result.json` registra resultado/integridade; `console.log` guarda a saida. Cada rodada possui `input/` (copia dos fontes analisados), `rules/` (regras usadas) e `output/` (achados, dependencias e relatorio HTML com seus arquivos). A copia `input/` e evidencia, nao checkout para corretivas. |
 | `mta.runsPath/<projeto>/<data-compacta>/` | Rodada MTA externa completa; `project.json` fica no nivel do projeto. Os indices locais apontam para os arquivos reais nessa pasta. |
 | `.harness/sonar/` | Resultados Sonar por projeto/data, com RESUMO.md, metricas, criterios e Gate; preservados pela limpeza de execucoes. |
-| `.harness/planning/` | Solicitacoes de planejamento ligadas a uma rodada MTA: `context.json` com identidades, caminhos, hashes e vinculo anterior; `planejar-lotes.prompt.md` preparado; `plan.md` e `todo.md` gravados posteriormente pelo Copilot. Preparar contexto sozinho nao cria o plano/to-do nem aprova o lote. |
+| `.harness/planning/` | Contextos e prompts preparados. Planejamento vincula MTA e proposta anterior quando selecionada; o Copilot grava `plan.md`/`todo.md`. Manutencao usa `registro/solicitacao_<id>`, com ou sem MTA, e so reconcilia `migracao.md`. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
 | `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
 | `.harness/projetos/` | Registro por raiz local e evidencias/LEIA-ME.md; criacao idempotente, sem duplicar por rodada. Preservados pela limpeza, locais e ausentes no clone. |
 | `.harness/evidencias/` | Evidencias historicas, preservadas e ainda utilizaveis por EvidenceIndexPath. |
@@ -1220,6 +1254,10 @@ Para testar a selecao dos projetos do workspace, execute `powershell.exe -NoProf
 Para testar os argumentos das tarefas, execute `powershell.exe -NoProfile -File .\tests\Test-TaskInputs.ps1`. Verifica as entradas suportadas e executa o script real de build ate o menu, com caminho de workspace contendo espacos; cancela antes de iniciar Maven.
 
 Para testar o registro, execute `powershell.exe -NoProfile -File .\tests\Test-MigrationRegister.ps1`.
+
+Para testar a abertura no editor, execute `powershell.exe -NoProfile -File .\tests\Test-Editor.ps1`.
+Verifica a CLI da instalacao selecionada, argumentos e falhas com editor simulado;
+nao comprova que uma aba apareceu no VS Code real.
 
 Para testar a pasta de evidencias, execute `powershell.exe -NoProfile -File .\tests\Test-EvidenceFolder.ps1`.
 Verifica selecao/cancelamento pela entrada real, isolamento de projetos homonimos,

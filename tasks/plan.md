@@ -4,6 +4,17 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Revisao dos fluxos do guia e README - 2026-10-01
+
+Evolucao documental na branch harness/revisao-fluxos-guia, de main 3feee18.
+Conferir roteiro contra tarefas/menus e contratos: configuracao, build/MTA local
+ou recebido, registro opcional, planejamento/revisao, implementacao, Sonar e limpeza.
+Concentrar alternativas numa tabela de caminhos do guia; README permanece enxuto.
+Corrigir descricao da pasta de evidencias, manutencao sem MTA, historico somente
+com documentos gerados e alcance da limpeza externa. Sem novos documentos,
+mudancas de comportamento, fontes de aplicacao ou reescrita de dados locais.
+Validar links locais/ancoras, JSON da tarefa e diff; ensaio Copilot continua separado.
+
 ## Delegacao na manutencao do registro - 2026-10-01
 
 Evolucao do harness em harness/delegacao-registro-migracao, de main ad4923b.

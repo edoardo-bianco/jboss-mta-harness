@@ -24,7 +24,7 @@ com DevSquad disponivel; o harness nao instala ferramentas.
 | --- | --- |
 | Construir | **Aplicacao: build Maven (Java 8)**, `clean install`; conferir sucesso. |
 | Analisar | **MTA: executar analise**, depois **MTA: abrir ultimo relatorio**. |
-| Preparar planejamento | **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**; escolher MTA e plano anterior, se houver. O harness atualiza o catalogo no `migracao.md` e prepara o prompt. |
+| Preparar planejamento | **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**; escolher MTA e plano anterior, se houver. O harness atualiza o catalogo no `migracao.md` quando disponivel no MTA e prepara o prompt. |
 | Escolher issues | No `migracao.md`, marcar ANALISAR AGORA nas issues desejadas e salvar. Nao precisa preparar outro contexto por essa edicao. |
 | Gerar proposta | O prompt ja direciona as issues ANALISAR AGORA; edite o objetivo somente se necessario. Use **Executar Prompt** no Copilot e confira `plan.md` e `todo.md`. |
 | Implementar | Dar GO no plano, usar **Aplicacao: preparar implementacao do lote** e executar o prompt. Rever resultados e dar aceite separadamente. |
@@ -32,8 +32,10 @@ com DevSquad disponivel; o harness nao instala ferramentas.
 `migracao.md` fica em `.harness/projetos/<nome>__<chave>/`, com
 `evidencias/LEIA-ME.md`. Selecione ANALISAR AGORA, ADIAR ou FORA DO ESCOPO;
 andamento e cobertura ficam separados. A opcao **2. Atualizar somente migracao.md**
-e opcional: atualiza o catalogo e prepara ajuda do Copilot para reconciliar o registro,
-sem plan/todo. Nao precisa executar esse prompt para apenas carregar o catalogo.
+e opcional: com MTA selecionado, atualiza o catalogo disponivel; com ou sem novo MTA,
+prepara ajuda do Copilot para reconciliar o registro, sem plan/todo. Nao precisa
+executar esse prompt para apenas carregar o catalogo. Para retomadas e outros caminhos,
+consulte [qual fluxo seguir](doc/guias/harness-migracao-desenvolvedor.md#qual-caminho-seguir).
 Java 8/javax e as decisoes Hibernate permanecem no
 [contrato existente](doc/especificacoes/planejamento-copilot.md).
 

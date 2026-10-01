@@ -4,6 +4,16 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Revisao dos fluxos do guia e README - 2026-10-01
+
+- [x] Conferir caminhos principais e alternativos contra menus, scripts e contratos.
+- [x] Distinguir preparo, execucao opcional do agente e destinos de cada operacao.
+- [x] Orientar retomadas, prompts historicos e uso de MTA/catalogo existente.
+- [x] Corrigir limpeza externa e descricao da pasta de evidencias; manter README curto.
+- [x] Validar links/ancoras locais, JSON e diff da revisao documental.
+  Conferidos 53 links/ancoras locais; JSON das 16 tarefas valido; diff sem erros
+  de whitespace. Alteracoes restritas a texto; nenhum script executor alterado.
+
 ## Delegacao na manutencao do registro - 2026-10-01
 
 - [x] Conferir agentes disponiveis e permitir escolha pelo condutor, sem nome fixo.
