@@ -4,6 +4,21 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Pendencia: agente Copilot para o workflow de migracao - 2026-10-01
+
+Registrar como evolucao futura do harness. Antes de implementar o agente,
+o desenvolvedor quer revisar a logica e o conteudo dos prompts planejar-lotes,
+revisar-lote e implementar-lote. Essa revisao e a prioridade e deve orientar
+o contrato do futuro agente; este registro nao inicia a revisao ou implementacao.
+
+Depois da revisao, definir o agente customizado do GitHub Copilot para o fluxo
+de migracao, integrado aos contextos e tarefas existentes. Avaliar agente proprio
+ou condutor com especialistas DevSquad e a separacao de ferramentas por etapa.
+A sugestao de comecar pelo planejamento permanece candidata, nao decisao tomada.
+Preservar lote unico, identidade/origem MTA (inclusive rodadas recebidas), destinos
+PlanPath/TodoPath e separacao entre proposta, GO humano, implementacao autorizada,
+verificacoes e aceite humano. Retomar a implementacao mediante pedido posterior.
+
 ## Relatorio MTA apos mover o harness - 2026-10-01
 
 Evolucao em harness/relatorio-mta-portavel, derivada de main 310faf8.

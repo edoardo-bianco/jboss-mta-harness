@@ -4,6 +4,19 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Pendencia: agente Copilot para o workflow de migracao - 2026-10-01
+
+- [ ] Primeiro, revisar com o desenvolvedor a logica e o conteudo dos prompts
+  planejar-lotes, revisar-lote e implementar-lote, incluindo escopo, entradas,
+  saidas, ferramentas, delegacao e transicoes com GO/aceite humano.
+- [ ] Apos a revisao, definir o contrato do agente Copilot e sua relacao com
+  DevSquad, contextos e Run Tasks existentes; decidir a primeira etapa a atender.
+- [ ] Mediante retomada solicitada, implementar e validar o agente de migracao,
+  preservando origem MTA, lote unico e limites de cada etapa.
+
+Estado: somente pendencia registrada; revisao dos prompts e implementacao do
+agente ainda nao iniciadas. A implementacao depende da revisao previa dos prompts.
+
 ## Relatorio MTA apos mover o harness - 2026-10-01
 
 - [x] Reproduzir mudanca da raiz com rodada externa preservada.
