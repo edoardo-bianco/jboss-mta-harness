@@ -4,6 +4,19 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Relatorio MTA apos mover o harness - 2026-10-01
+
+Evolucao em harness/relatorio-mta-portavel, derivada de main 310faf8.
+Reproduzir perda da referencia externa ao mudar a raiz do harness. Validar a
+identidade e a parte do indice sob .harness/runs sem exigir a raiz historica.
+Permitir abrir rodada completa por caminho, inclusive recebida de colega, na
+tarefa existente. Preservar manifestos, resultados e referencias historicas.
+Cobrir formatos externos antigo/novo, erros de identidade, historico local e
+abertura por pasta sem cadastro. Validar em Windows PowerShell 5.1.
+Publicacao autorizada pelo desenvolvedor: registrar a correcao validada, integrar
+por fast-forward em main e depois main_jboss_eap74, publicar ambas e conferir
+os hashes remotos. Preservar a branch de lote e as evidencias historicas.
+
 ## Planejamento sem ciclo de regeneracao - 2026-09-30
 
 Evolucao do harness em harness/planejamento-sem-loop, derivada de main 04d5937,

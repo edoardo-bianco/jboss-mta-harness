@@ -278,9 +278,13 @@ function Resolve-HarnessMtaRunDirectory {
     }
     $run = Resolve-HarnessPath (Join-Path $base $relative) $Root
     $manifest = Get-Content -LiteralPath (Join-Path $run 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    # A raiz do harness pode mudar. A identidade do indice abaixo de runs permanece.
+    $indexSuffix = '\.harness\runs\' + (Split-Path -Leaf (Split-Path -Parent $indexPath)) + '\' + (Split-Path -Leaf $indexPath)
+    $originIndex = Resolve-HarnessPath $manifest.IndexPath $Root
     if ($manifest.Project -cne $location.Project -or $manifest.RunId -cne $location.RunId -or
         (Resolve-HarnessPath $manifest.Source $Root) -ine (Resolve-HarnessPath $location.Source $Root) -or
-        (Resolve-HarnessPath $manifest.IndexPath $Root) -ine $indexPath) { throw 'Manifesto externo nao corresponde a referencia local.' }
+        $indexPath -ine ((Resolve-HarnessPath $Root $Root) + $indexSuffix) -or
+        -not $originIndex -or -not $originIndex.EndsWith($indexSuffix, [StringComparison]::OrdinalIgnoreCase)) { throw 'Manifesto externo nao corresponde a referencia local.' }
     return $run
 }
 
@@ -299,6 +303,11 @@ function Get-HarnessMtaRuns {
             if ($folder.Name -cnotmatch '^(?:[a-f0-9]{32}|mta_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}[+-]\d{4}__[a-f0-9]{12})$') { continue }
             $record = [pscustomobject]@{Run=$folder.FullName; RunId=$null; CreatedAtUtc=$folder.CreationTimeUtc; Manifest=$null; Problem=$null}
             try {
+                $locationPath = Join-Path $folder.FullName 'location.json'
+                if (Test-Path -LiteralPath $locationPath -PathType Leaf) {
+                    $location = Get-Content -LiteralPath $locationPath -Raw -Encoding UTF8 | ConvertFrom-Json
+                    if ($location.Project -ceq $Project -and (Test-HarnessRunFolder $folder.Name $location.RunId 'mta')) { $record.RunId = $location.RunId }
+                }
                 $record.Run = Resolve-HarnessMtaRunDirectory $folder.FullName $Root
                 $path = Resolve-HarnessPath (Join-Path $record.Run 'manifest.json') $Root
                 $manifest = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json

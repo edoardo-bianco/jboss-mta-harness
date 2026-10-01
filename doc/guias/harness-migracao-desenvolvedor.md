@@ -409,7 +409,27 @@ Logs, relatorio e planejamento resolvem essa referencia, inclusive apos trocar
 Rodadas externas anteriores em `p__<chave12>/<RunId>/` continuam acessiveis.
 Na limpeza, a pasta do projeto e seu `project.json` permanecem; somente as rodadas
 registradas e selecionadas sao removidas, preservando a identificacao para reuso.
-Preserve as referencias locais junto com a pasta externa; nao mova rodadas a mao.
+Ao mover o harness, leve tambem `.harness/`: os indices continuam validos se a
+aplicacao e a pasta externa permanecerem no lugar. A raiz antiga em `IndexPath`
+e historica; projeto, fonte, RunId e trecho do indice sob `.harness/runs` continuam
+conferidos. Nao e necessario reexecutar MTA ou editar os manifestos.
+
+Se os indices nao estiverem disponiveis, ou a rodada vier de um colega, preserve
+a **pasta completa da rodada**. A tarefa **MTA: abrir ultimo relatorio**, quando
+nao consegue localizar o ultimo relatorio, pede essa pasta (Enter/q cancela).
+Tambem e possivel abrir diretamente, mesmo sem configuracao/cadastro local:
+
+```powershell
+.\scripts\abrir-relatorio-mta.ps1 -RunPath 'C:\mta-runs\SIMTR-Outsourcing-api\260930-154744'
+```
+
+O caminho acima e ilustrativo: informe a pasta que contem `manifest.json`,
+`result.json`, `input`, `rules` e `output`. O leitor confere resultado, identidade
+interna e evidencias e abre `output/static-report/index.html` na localizacao atual.
+Nao altera origem, indices nem ultimo sucesso local. Para planejar a partir dessa
+rodada, use a opcao `p` da tarefa de planejamento. Nao basta copiar so o HTML;
+para compartilhar apenas a visualizacao, envie `static-report` inteira e abra
+seu `index.html` diretamente no navegador.
 
 O snapshot usa caminhos estendidos internamente para enumerar/copiar/calcular
 SHA-256 acima de 260 caracteres no PowerShell 5.1; manifestos e comandos MTA

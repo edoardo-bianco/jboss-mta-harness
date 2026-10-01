@@ -25,9 +25,14 @@ Write-HarnessJson (Join-Path $run 'result.json') $result
 $before = @(Get-ChildItem $run -Recurse -File | Get-FileHash)
 $selected = Get-MtaPlanningRunFromPath -RunPath $run -Root $root
 Assert ($selected.RunId -ceq $id -and $selected.Run -eq $run -and $selected.Eligible) 'Pasta recebida depende da maquina/checkout de origem.'
+$reportEntry = Join-Path $root 'scripts/abrir-relatorio-mta.ps1'
+$reportOutput = & powershell.exe -NoProfile -File $reportEntry -RunPath $run -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $reportOutput.Contains((Join-Path $run 'output/static-report/index.html')) -and $reportOutput.Contains($id)) 'Abertura por pasta depende de cadastro ou caminho da origem.'
 $result.RunId = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 Write-HarnessJson (Join-Path $run 'result.json') $result
 Reject { Get-MtaPlanningRunFromPath -RunPath $run -Root $root } 'Resultado de outra rodada aceito.'
+$reportOutput = & powershell.exe -NoProfile -File $reportEntry -RunPath $run -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $reportOutput.Contains('mesma rodada MTA')) 'Abertura aceitou resultado de outra rodada.'
 $result.RunId = $id
 Write-HarnessJson (Join-Path $run 'result.json') $result
 $dependencyFile = Join-Path $run 'output/dependencies.yaml'
@@ -74,12 +79,19 @@ foreach ($file in $before) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash
 # Run Task real: entrada p funciona mesmo sem nenhuma rodada no historico local.
 $scriptFolder = Join-Path $fixture 'scripts'
 $null = New-Item -ItemType Directory -Path $scriptFolder -Force
-foreach ($file in @('Harness.psm1','HarnessPlanning.psm1','preparar-planejamento.ps1')) { Copy-Item (Join-Path $root "scripts/$file") $scriptFolder }
+foreach ($file in @('Harness.psm1','HarnessPlanning.psm1','preparar-planejamento.ps1','abrir-relatorio-mta.ps1')) { Copy-Item (Join-Path $root "scripts/$file") $scriptFolder }
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @(@{name='app';path=$localSource})
 $config.activeProject = 'app'
 $configPath = Join-Path $fixture 'config.json'
 Write-HarnessJson $configPath $config
+$reportEntry = Join-Path $scriptFolder 'abrir-relatorio-mta.ps1'
+$reportOutput = @('1',$run) | & powershell.exe -NoProfile -File $reportEntry -ConfigPath $configPath -SelectTarget -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $reportOutput.Contains('Ultimo relatorio indisponivel') -and $reportOutput.Contains($id)) 'Tarefa nao recuperou relatorio por pasta sem indice local.'
+$reportOutput = @('1','q') | & powershell.exe -NoProfile -File $reportEntry -ConfigPath $configPath -SelectTarget -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $reportOutput.Contains('Abertura cancelada')) 'Cancelamento da abertura nao respeitado.'
+Assert (-not (Test-Path (Join-Path $fixture '.harness/runs'))) 'Abertura cadastrou/copio rodada recebida.'
+foreach ($file in $before) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash -eq $file.Hash) 'Abertura reescreveu evidencia recebida.' }
 $entry = Join-Path $scriptFolder 'preparar-planejamento.ps1'
 $output = @('1','p',$run) | & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -Target app -SelectOperation -NewPlan -NoOpen 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $output.Contains($id) -and $output.Contains('Prompt preparado:')) "Menu p nao preparou pasta recebida: $output"

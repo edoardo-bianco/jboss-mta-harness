@@ -86,6 +86,34 @@ Assert ($externalFound.Run -eq $externalSnapshot.Run) 'Historico nao encontrou r
 $externalResult = Invoke-MtaAnalysis $externalContext
 Assert ($externalResult.Status -eq 'SUCCEEDED') ('MTA externo falhou: ' + $externalResult.Error)
 Assert ((Get-LastMtaReport $externalContext) -eq $externalResult.ReportPath) 'Relatorio externo nao encontrado.'
+# Simula mover apenas o harness, mantendo aplicacao e rodadas externas no lugar.
+$movedRoot = Join-Path $area 'h-movido'
+$null = New-Item -ItemType Directory -Path $movedRoot
+Copy-Item -LiteralPath (Join-Path $fixture '.harness') -Destination $movedRoot -Recurse
+$movedContext = $externalContext | ConvertTo-Json -Depth 20 | ConvertFrom-Json
+$movedContext.Root = $movedRoot
+$reportManifest = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $externalResult.ReportPath))) 'manifest.json'
+$reportHash = (Get-FileHash -LiteralPath $reportManifest).Hash
+Assert ((Get-LastMtaReport $movedContext) -eq $externalResult.ReportPath) 'Mover harness perdeu ultimo relatorio externo.'
+Assert ((Get-FileHash -LiteralPath $reportManifest).Hash -ceq $reportHash) 'Mover harness reescreveu manifesto historico.'
+# Referencia legada p__<chave>/<RunId> tambem deve sobreviver a mudanca de raiz.
+$legacyId = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+$legacyIndex = Join-Path $movedRoot ('.harness/runs/api/' + $legacyId)
+$legacyRun = Join-Path $external ('p__' + (Get-HarnessProjectKey 'api') + '/' + $legacyId)
+$legacyManifest = @{Project='api'; Source=$app; RunId=$legacyId; CreatedAtUtc='2026-09-29T12:00:00Z'; IndexPath=(Join-Path $fixture ('.harness/runs/api/' + $legacyId))}
+Write-HarnessJson (Join-Path $legacyRun 'manifest.json') $legacyManifest
+Write-HarnessJson (Join-Path $legacyIndex 'location.json') @{Project='api'; Source=$app; RunId=$legacyId; RunsPath=$external}
+Assert ((Find-HarnessMtaRun $movedRoot 'api' $legacyId $app).Run -eq $legacyRun) 'Referencia externa legada perdida apos mover harness.'
+foreach ($field in @('Project','Source','RunId','IndexPath')) {
+    $original = $legacyManifest[$field]
+    $legacyManifest[$field] = if ($field -eq 'IndexPath') { Join-Path $fixture ('.harness/runs/outro/' + $legacyId) } else { 'outra-identidade' }
+    Write-HarnessJson (Join-Path $legacyRun 'manifest.json') $legacyManifest
+    $problem = ''
+    try { Find-HarnessMtaRun $movedRoot 'api' $legacyId $app | Out-Null } catch { $problem = $_.Exception.Message }
+    Assert ($problem -eq 'Manifesto externo nao corresponde a referencia local.') "Identidade $field divergente aceita ou diagnostico ocultado."
+    $legacyManifest[$field] = $original
+}
+Write-HarnessJson (Join-Path $legacyRun 'manifest.json') $legacyManifest
 $externalHash = (Get-FileHash -LiteralPath (Join-Path $externalSnapshot.Run 'manifest.json')).Hash
 $config.mta.runsPath = $null
 Write-HarnessJson $configPath $config

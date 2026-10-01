@@ -4,6 +4,26 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Relatorio MTA apos mover o harness - 2026-10-01
+
+- [x] Reproduzir mudanca da raiz com rodada externa preservada.
+- [x] Corrigir localizacao mantendo validacao de identidade e indice relativo.
+- [x] Abrir rodada por pasta e orientar recuperacao na tarefa existente.
+- [x] Verificar regressao, preservacao do historico e documentar uso.
+- Validacao: Test-Mta falhou antes da correcao com a mesma mensagem relatada;
+  depois passaram Test-Mta, Test-PlanningPortable, Test-Planning, Test-MtaActive,
+  Test-MtaLog, Test-Cleanup, Test-LongPaths e Test-TaskInputs em PowerShell 5.1.
+  Revisao do diff: identidade, formatos legados, erros, cancelamento e ausencia
+  de escrita na abertura conferidos; git diff --check passou.
+- Rodada real C:/mta-runs/migracao-cache-antes/260930-154744 localizada por
+  abrir-relatorio-mta.ps1 -RunPath ... -NoOpen (exit 0), sem navegador ou novo MTA.
+  O ambiente corporativo SIMTR-Outsourcing nao esta disponivel nesta maquina;
+  sua validacao operacional permanece com o desenvolvedor.
+- Seguimento autorizado: commit, alinhamento de main/main_jboss_eap74 e push
+  para teste corporativo. As oito suites acima validam o mesmo codigo a integrar;
+  a publicacao acrescenta apenas este registro documental. Conferir igualdade
+  das arvores integradas e dos hashes remotos, preservando a branch de lote.
+
 ## Planejamento sem ciclo de regeneracao - 2026-09-30
 
 - [x] Limitar invocacoes e preservar rascunho/identidade nos dois prompts.
