@@ -4,6 +4,18 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Limpeza restrita ao estado local - 2026-10-01
+
+Evolucao na branch harness/limpeza-somente-local, de main 1d45404.
+As opcoes por projeto/todos devem remover somente destinos dentro de .harness.
+Indices location.json sao recibos locais: usar Source/Project/RunId para selecionar,
+sem abrir, validar ou remover a rodada externa. Preservar preview, confirmacao,
+locks e recusa de links/junctions locais. Validar os dois formatos de indices,
+isolamento entre projetos, arquivos externos intactos e destino externo ausente.
+Decisao confirmada: preservar migracao.md, evidencias e Sonar; limpar somente
+execucoes/planejamentos locais. Alinhar menus e guia; nao executar limpeza dos
+dados reais durante a implementacao.
+
 ## Revisao dos fluxos do guia e README - 2026-10-01
 
 Evolucao documental na branch harness/revisao-fluxos-guia, de main 3feee18.

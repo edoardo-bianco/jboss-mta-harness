@@ -8,9 +8,10 @@ try {
     $root = Split-Path -Parent $PSScriptRoot
     if (([int][bool]$All + [int][bool]$Target + [int][bool]$TemporaryBackups) -gt 1) { throw 'Escolha somente All, Target ou TemporaryBackups.' }
     if (-not $All -and -not $Target -and -not $TemporaryBackups) {
-        Write-Host '1. Limpar execucoes de um projeto'
-        Write-Host '2. Limpar execucoes de todos os projetos'
+        Write-Host '1. Limpar execucoes locais de um projeto (.harness)'
+        Write-Host '2. Limpar execucoes locais de todos os projetos (.harness)'
         Write-Host '3. Limpar somente backups temporarios de exercicios/ajustes'
+        Write-Host 'MTA externo, migracao.md, evidencias e Sonar sao preservados.'
         $choice = Read-Host 'Numero da opcao (q cancela)'
         if ($choice -eq '2') { $All = $true }
         elseif ($choice -eq '3') { $TemporaryBackups = $true }

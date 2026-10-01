@@ -35,7 +35,7 @@ Navegacao: [configuracao](#comecar-na-maquina-de-trabalho) ·
 [Copilot e documentos](#planejar-lotes-de-correcao-com-copilot) / [formacao do lote](#como-se-forma-o-lote-o-planmd-e-o-todomd) / [MTA recebido](#compartilhar-o-mta-e-planejar-em-outra-maquina) / [Sonar](#sonarqube-local-ou-corporativo) ·
 [revisao com evidencias](#revisar-um-lote-com-evidencias-complementares) ·
 [depois da revisao: GO, execucao e aceite](#da-proposta-revisada-a-execucao-e-ao-aceite) ·
-[limpeza](#limpar-execucoes-para-repetir-o-ensaio).
+[limpeza](#limpar-execucoes-locais).
 
 ### Qual caminho seguir
 
@@ -1112,34 +1112,37 @@ Testes: `tests/Test-Sonar.ps1` (Maven/API simulados), `tests/Test-SonarCriteria.
 (HTTP real em loopback com token sintetico). Nao equivalem a homologacao no
 Sonar Docker ou corporativo do operador.
 
-## Limpar execucoes para repetir o ensaio
+## Limpar execucoes locais
 
 1. Termine build/MTA e preparacao de contexto. Encerre a conversa Copilot que usa
    os documentos a apagar; o harness nao controla o agente externo.
 2. Execute **Workspace: limpar execucoes**. Escolha **1** para um projeto ou **2**
    para todos os projetos; **3** limpa somente backups temporarios de exercicios/ajustes.
    **q** cancela. Na opcao 1, selecione o projeto do workspace.
-3. Confira os caminhos listados. Nas opcoes **1/2**, a limpeza inclui historicos MTA, relatorios,
-   snapshots, builds e planejamentos, com prompts preparados, `plan.md`, `todo.md`
-   e recibos. Os ponteiros relacionados tambem sao removidos. Na opcao **3**,
+3. Confira os caminhos listados. Nas opcoes **1/2**, a limpeza inclui somente
+   execucoes em `.harness/runs`, `.harness/builds` e `.harness/planning`, com
+   relatorios/snapshots locais, indices de MTA externo, prompts, `plan.md`, `todo.md`
+   e recibos. Os ponteiros locais relacionados tambem sao removidos. Na opcao **3**,
    apenas a pasta central de backups temporarios sera removida.
 4. Digite **LIMPAR** para excluir. Enter ou outro texto cancela. Os scripts recusam
    links/junctions e caminhos fora das areas autorizadas, e bloqueiam limpeza
    concorrente com build/MTA/preparacao pelo harness.
-5. Para recomecar, execute build → MTA → preparar contexto. Sem historico salvo,
-   nao ha proposta anterior para selecionar.
+5. Para reutilizar MTA externo, prepare contexto e escolha **p**, informando a pasta
+   completa da rodada preservada. Para nova analise, execute build → MTA → preparar
+   contexto. Planos apagados deixam de aparecer como proposta anterior.
 
 A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, templates
 versionados dos prompts, cache Maven, backups, `.harness/evidencias/` e `.harness/projetos/`.
-Nao apaga `target/` da aplicacao nem copias externas sem referencia registrada.
+Nao apaga `target/` da aplicacao nem qualquer conteudo MTA externo, registrado ou recebido.
 No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
 pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
 recibo identificavel permanecem. A opcao todos remove as tres areas por inteiro.
-Rodadas externas registradas tambem aparecem no preview e sao removidas nas
-opcoes 1/2, antes das referencias locais. A limpeza nunca remove a raiz
-`C:/mta-runs` inteira nem pastas/arquivos externos sem referencia registrada.
-Referencia externa inconsistente cancela a limpeza; mantenha as evidencias para
-conferir o problema. A opcao 3 continua restrita aos backups temporarios locais.
+Para MTA externo, somente o indice local `location.json` e seus ponteiros entram
+na limpeza. O destino externo nao e consultado e pode estar indisponivel.
+Depois, o historico/ultimo relatorio perde a referencia local; use **p** no preparo
+ou informe a pasta quando **MTA: abrir ultimo relatorio** solicitar.
+O `migracao.md` mantem decisoes e referencias anteriores; limpa-se o historico de
+execucoes, sem zerar o registro. A opcao 3 continua restrita aos backups temporarios locais.
 
 Para somente listar, sem excluir, execute na raiz:
 
@@ -1150,7 +1153,7 @@ powershell.exe -NoProfile -File .\scripts\limpar-execucoes.ps1 -All -Preview
 Alteracoes permanentes dos prompts devem estar no template correspondente em
 `.github/prompts/`. Uma edicao feita apenas no prompt
 preparado pertence aquela solicitacao e sera apagada com ela. Para conservar um
-resultado de ensaio, guarde antes uma copia fora das areas que serao removidas.
+plano ou resultado, guarde antes uma copia fora das areas que serao removidas.
 
 ### Pastas locais e backups temporarios
 

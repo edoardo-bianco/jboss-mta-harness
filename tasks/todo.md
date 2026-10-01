@@ -4,6 +4,19 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Limpeza restrita ao estado local - 2026-10-01
+
+- [x] Reproduzir exclusao externa nos testes e exigir preservacao por projeto/todos.
+  Test-Cleanup falhou antes da correcao: preview incluia rodada externa.
+- [x] Restringir destinos a .harness e selecionar indices sem acessar MTA externo.
+- [x] Alinhar escopo local, mensagens e documentacao ao pedido do desenvolvedor.
+  Registro, evidencias e Sonar preservados conforme resposta explicita.
+- [x] Validar isolamento, cancelamento, locks, links e preservacao externa no PS 5.1.
+  Test-Cleanup e Test-TaskInputs passaram; hashes externos e dados preservados
+  conferidos nas fixtures. Destino indisponivel nao impede limpeza do indice.
+  Sem limpeza dos dados reais. Revisao: destinos restritos, sem resolvedor externo,
+  preview/confirmacao e protecoes locais mantidos.
+
 ## Revisao dos fluxos do guia e README - 2026-10-01
 
 - [x] Conferir caminhos principais e alternativos contra menus, scripts e contratos.

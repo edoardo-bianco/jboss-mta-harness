@@ -48,6 +48,8 @@ o MTA recupera issues/contagens; status anteriores exigem registro ou evidencias
 Sonar e novo MTA sao checklist nao bloqueante. Cobertura abaixo de 85% gera aviso;
 falhas de compilacao/testes continuam falhas. GO nao concede aceite do resultado.
 Configuracao, workspace gerado e `.harness/` sao locais e nao acompanham clone/pull.
+**Workspace: limpar execucoes** limpa execucoes/planejamentos locais por projeto
+ou de todos; preserva MTA externo, `migracao.md`, evidencias e Sonar.
 
 Para detalhes: [configuracao](doc/guias/harness-migracao-desenvolvedor.md#configuracao-da-maquina),
 [GO/aceite](doc/guias/harness-migracao-desenvolvedor.md#da-proposta-revisada-a-execucao-e-ao-aceite),

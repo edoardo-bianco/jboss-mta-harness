@@ -19,6 +19,12 @@ Set-Content "$planning/todo.md" 'pendente'
 $sonarBaseline = "$fixture/.harness/sonar/app/sonar-baseline/result.json"
 Write-HarnessJson $sonarBaseline @{Phase='ANTES'; AnalysisId='preservar'}
 $sonarHash = (Get-FileHash $sonarBaseline).Hash
+$preservedData = @('.harness/projetos/app/migracao.md', '.harness/projetos/app/evidencias/LEIA-ME.md', '.harness/evidencias/print.txt')
+foreach ($file in $preservedData) {
+    $path = Join-Path $fixture $file
+    $null = [IO.Directory]::CreateDirectory((Split-Path -Parent $path))
+    Set-Content -LiteralPath $path 'decisoes e evidencias a preservar'
+}
 Write-HarnessJson "$fixture/.harness/runs/other/44444444444444444444444444444444/manifest.json" @{Project='other';Source=$other;RunId='44444444444444444444444444444444'}
 foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/settings.xml','.harness/workspace-backups/backup.json','.github/prompts/planejar-lotes.prompt.md')) { Write-HarnessJson (Join-Path $fixture $file) @{preserve=$true} }
 Write-HarnessJson "$fixture/.harness/last-old.json" @{RunId='11111111111111111111111111111111'}
@@ -59,8 +65,16 @@ Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null
 Assert (-not (Test-Path -LiteralPath $run) -and -not (Test-Path -LiteralPath $build) -and -not (Test-Path -LiteralPath $planning)) 'Limpeza de projeto incompleta.'
 Assert (Test-Path "$fixture/.harness/runs/other/44444444444444444444444444444444/manifest.json") 'Limpeza atingiu outro projeto.'
 Assert (Test-Path "$fixture/.harness/runs/old/55555555555555555555555555555555/manifest.json") 'Limpeza atingiu outro Source com mesmo Project.'
+foreach ($file in $preservedData) {
+    $path = Join-Path $fixture $file
+    Assert ((Get-FileHash -LiteralPath $path).Hash -eq ($before | Where-Object Path -EQ $path).Hash) 'Limpeza por projeto alterou registro/evidencias.'
+}
 Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null
 Assert ((Get-FileHash $sonarBaseline).Hash -eq $sonarHash) 'Limpeza apagou ou alterou baseline Sonar.'
+foreach ($file in $preservedData) {
+    $path = Join-Path $fixture $file
+    Assert ((Get-FileHash -LiteralPath $path).Hash -eq ($before | Where-Object Path -EQ $path).Hash) 'Limpeza geral alterou registro/evidencias.'
+}
 foreach ($area in @('runs','builds','planning')) { Assert (-not (Test-Path "$fixture/.harness/$area")) 'Limpeza total incompleta.' }
 foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/settings.xml','.harness/workspace-backups/backup.json','.github/prompts/planejar-lotes.prompt.md')) {
     $path = Join-Path $fixture $file
@@ -105,7 +119,7 @@ foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/se
 Assert (@(Get-HarnessCleanupPaths $fixture -TemporaryBackups).Count -eq 0) 'Preview de temporarios removidos deveria ficar vazio.'
 Write-Output 'PASS: backups centralizados, menu 3, cancelamento, junction, isolamento e preservacao de configuracao/cache/workspace.'
 
-# Rodadas externas registradas; a raiz externa e outros arquivos nunca sao apagados.
+# Rodadas externas sao permanentes; somente indices e ponteiros locais sao limpos.
 $external = $fixture + '-external'
 $null = [IO.Directory]::CreateDirectory($external)
 $sentinel = Join-Path $external 'arquivo-do-desenvolvedor.txt'
@@ -120,39 +134,43 @@ foreach ($id in @('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','bbbbbbbbbbbbbbbbbbbbbbbbbb
         Write-HarnessJson (Join-Path $external 'external/project.json') @{Project='external'; Source=$source}
     }
     Write-HarnessJson (Join-Path $externalRun 'manifest.json') @{Project='external'; Source=$source; RunId=$id; IndexPath=$index}
+    Write-HarnessJson (Join-Path $externalRun 'output/resultado.json') @{preservar='MTA'}
     Write-HarnessJson (Join-Path $index 'location.json') $location
+    Write-HarnessJson "$fixture/.harness/last-external.json" @{RunId=$id}
+    $externalBefore = @(Get-ChildItem -LiteralPath $external -Recurse -File | Get-FileHash)
     $preview = @(Get-HarnessCleanupPaths $fixture -Source $source)
-    Assert ($preview -contains $externalRun -and $preview -contains $index -and $preview -notcontains $external) 'Preview externo incorreto.'
+    Assert ($preview -notcontains $externalRun -and $preview -contains $index -and $preview -notcontains $external) 'Preview deve incluir somente indice local, nunca rodada externa.'
+    Assert (@($preview | Where-Object { -not $_.StartsWith((Join-Path $fixture '.harness') + '\') }).Count -eq 0) 'Preview saiu de .harness.'
     Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'cancelar' | Out-Null
     Assert (Test-Path $externalRun) 'Cancelamento removeu rodada externa.'
     $locationPath = Join-Path $index 'location.json'
     $location.Source = $other
     Write-HarnessJson $locationPath $location
-    $rejected = $false
-    try { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null } catch { $rejected = $true }
-    Assert ($rejected -and (Test-Path $externalRun)) 'Referencia externa inconsistente autorizou exclusao.'
+    Assert (@(Get-HarnessCleanupPaths $fixture -Source $source) -notcontains $index) 'Indice local de outro Source foi selecionado.'
     $location.Source = $source
     Write-HarnessJson $locationPath $location
     if ($location.ContainsKey('RunRelativePath')) {
         $location.RunRelativePath = '../external/260930-151210'
         Write-HarnessJson $locationPath $location
-        $rejected = $false
-        try { Get-HarnessCleanupPaths $fixture -All | Out-Null } catch { $rejected = $true }
-        Assert ($rejected -and (Test-Path $externalRun)) 'Referencia com travessia de diretorio aceita.'
-        $location.RunRelativePath = 'external/260930-151210'
-        Write-HarnessJson $locationPath $location
+        Assert (@(Get-HarnessCleanupPaths $fixture -Source $source) -contains $index) 'Limpeza local tentou resolver RunRelativePath externo.'
     }
     $link = Join-Path $externalRun 'junction'
     $null = New-Item -ItemType Junction -Path $link -Target $source
     try {
-        $rejected = $false
-        try { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null } catch { $rejected = $true }
-        Assert ($rejected -and (Test-Path "$source/pom.xml")) 'Limpeza externa seguiu junction.'
+        if ($id.StartsWith('a')) { Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null }
+        else { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null }
+        Assert (Test-Path -LiteralPath $link) 'Limpeza alterou link dentro da rodada externa.'
     } finally { [IO.Directory]::Delete($link) }
-    if ($id.StartsWith('a')) { Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null }
-    else { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null }
-    Assert (-not (Test-Path $externalRun) -and -not (Test-Path $index)) 'Limpeza externa incompleta.'
+    Assert ((Test-Path $externalRun) -and -not (Test-Path $index)) 'Limpeza deve remover indice e preservar rodada externa.'
+    Assert (-not (Test-Path "$fixture/.harness/last-external.json")) 'Ponteiro local externo nao removido.'
+    $externalAfter = @(Get-ChildItem -LiteralPath $external -Recurse -File | Get-FileHash)
+    Assert ($externalAfter.Count -eq $externalBefore.Count) 'Limpeza alterou quantidade de arquivos externos.'
+    foreach ($file in $externalBefore) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash -eq $file.Hash) 'Limpeza alterou conteudo MTA externo.' }
     Assert (Test-Path $sentinel) 'Limpeza atingiu arquivo externo nao registrado.'
     if ($id.StartsWith('b')) { Assert (Test-Path (Join-Path $external 'external/project.json')) 'Limpeza removeu identidade do projeto.' }
 }
-Write-Output 'PASS: limpeza externa por projeto/todos, preview, cancelamento e preservacao da raiz externa.'
+$missingIndex = Join-Path $fixture '.harness/runs/missing/cccccccccccccccccccccccccccccccc'
+Write-HarnessJson "$missingIndex/location.json" @{Project='missing'; Source=$source; RunId='cccccccccccccccccccccccccccccccc'; RunsPath='Z:/mta-indisponivel'}
+Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null
+Assert (-not (Test-Path $missingIndex)) 'Limpeza local exigiu armazenamento externo disponivel.'
+Write-Output 'PASS: indices locais por projeto/todos; MTA externo intacto e independente da limpeza.'
