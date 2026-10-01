@@ -11,6 +11,9 @@ function Reject($action, $message) {
 }
 $area = Join-Path $root ('.harness/tests/i' + [guid]::NewGuid().ToString('N').Substring(0,8))
 $fixture = Join-Path $area 'h'
+$contractDestination = Join-Path $fixture 'doc/especificacoes/planejamento-copilot.md'
+$null = [IO.Directory]::CreateDirectory((Split-Path $contractDestination -Parent))
+Copy-Item (Join-Path $root 'doc/especificacoes/planejamento-copilot.md') $contractDestination
 $app = Join-Path $area 'app com espacos'
 $other = Join-Path $area 'outra'
 foreach ($path in @($fixture,$app,$other)) { $null = [IO.Directory]::CreateDirectory($path) }
@@ -46,6 +49,7 @@ $before = @(Get-ChildItem -LiteralPath $area -Recurse -File | Get-FileHash)
 $prepared = New-MtaImplementationPrompt $context -RequestId $requestId
 $content = Get-Content -LiteralPath $prepared.PromptPath -Raw -Encoding UTF8
 $data = [regex]::Match($content, '(?s)```json\s*(\{.*?\})\s*```').Groups[1].Value | ConvertFrom-Json
+Assert ($data.ContractSnapshot -is [string] -and $data.ContractSnapshot -ceq [IO.File]::ReadAllText($contractDestination)) 'Contrato deve ser texto puro, sem metadados do provider PowerShell.'
 Assert ($data.RequestId -eq $requestId -and $data.RunId -eq $runId -and $data.Project -eq 'app') 'Identidade da proposta perdida.'
 Assert ($data.PlanPath -eq $plan.Replace('\','/') -and $data.TodoPath -eq $todo.Replace('\','/')) 'Destinos divergentes.'
 Assert ($data.ContextSha256 -eq (Get-FileHash $receipt).Hash -and $data.PlanSha256 -eq (Get-FileHash $plan).Hash -and $data.TodoSha256 -eq (Get-FileHash $todo).Hash) 'Versao dos documentos nao vinculada.'

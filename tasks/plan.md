@@ -4,12 +4,340 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Proposta: registro por projeto e planejamento dirigido por issues - 2026-10-01
+
+Estado: implementacao concluida e validada nos scripts; ensaio Copilot pendente.
+Branch harness/analise-prompts-por-issue, a partir de main a3c9ac7.
+A analise abaixo preserva a proposta de origem; o contrato atual esta em
+doc/especificacoes/planejamento-copilot.md, sem novos documentos de orientacao.
+Skills utilizadas: using-agent-skills, spec-driven-development e documentation-and-adrs. O agente Copilot
+customizado continua pendente; primeiro simplificar o fluxo e os prompts.
+
+### Objetivo e diagnostico
+
+O desenvolvedor escolhe issues a tratar, adiar ou excluir do escopo da migracao,
+mantem andamento e observacoes em um documento local por projeto e o fornece ao
+planejador. O mesmo prompt atende proposta inicial e atualizacao de plano anterior.
+Evidencias complementares podem existir desde o inicio, sem obrigar uma revisao.
+
+Base visual local: .harness/evidencias/mta_simtr-api-corporativo.jpeg. O print
+mostra 15 entradas de issues, Hardcoded IP Address com 18 e hibernate4-00039 com
+138 ocorrencias; nao mostra todas as entradas. O total 193 foi informado pelo
+desenvolvedor, nao conferido no YAML corporativo. Nao gerar catalogo completo
+nem corretivas SIMTR a partir desta imagem. Exemplo YAML local examinado apenas
+para estrutura: violations, identificador da regra, description, category e incidents.
+
+Diagnostico do fluxo atual: planejar-lotes tem 614 linhas; revisar-lote tem 180 e
+exige ler o primeiro. EvidenceIndexPath so e aceito em revisar-lote, que exige
+Previous. O modelo de evidencias exige lote existente e repete passos de revisao.
+O contexto util aparece ao final; delegacao, estados, POMs e conferencias repetem
+regras. Simplificar exige ajustar preparador, contratos e testes, nao so encurtar texto.
+
+### Registro local por projeto
+
+Nome proposto: .harness/projetos/<nome>__<chave>/migracao.md, acompanhado de
+evidencias/LEIA-ME.md. Reusar a convencao de identidade do projeto; homonimos nao
+compartilham pasta. Considerar a raiz Maven selecionada, incluindo o reactor;
+nao criar um registro por modulo implicitamente. Se um repositorio tiver raizes
+independentes, explicitar a unidade selecionada. Nomes ainda sujeitos a revisao.
+
+Ao importar/preparar o projeto, garantir a pasta e o documento sem sobrescrever
+conteudo. Antes de selecionar MTA, estado AGUARDANDO MTA, sem inventar issues.
+Preencher o catalogo com a rodada explicitamente escolhida, local ou recebida.
+Hoje nao existe observador de inclusoes manuais pelo VS Code: cobrir a geracao
+do workspace e a descoberta do projeto na proxima tarefa, sem criar extensao.
+Reexecucao deve ser idempotente. Remover projeto do workspace nao apaga seu registro.
+
+### Quando criar e como atualizar migracao.md
+
+Separar catalogacao mecanica de interpretacao das evidencias. Nao depender de
+LLM para contar ocorrencias ou inventariar regras que ja existem no output.yaml.
+Nao tornar manutencao do registro uma etapa obrigatoria repetida a cada plano.
+
+| Momento | Acao proposta | Resultado |
+| --- | --- | --- |
+| Projeto importado/preparado | Harness garante pasta, legenda e estrutura, somente se ausentes | migracao.md em AGUARDANDO MTA; sem agente e sem rodada presumida |
+| Primeiro MTA selecionado, inclusive recebido | Harness extrai catalogo e registra origem/RunId; usuario pode revisar diretamente | Issues reais, contagens e categoria; decisoes A DEFINIR e andamento NAO ANALISADA |
+| Registro existente + novo MTA escolhido | Harness calcula novas/persistentes/nao reencontradas e atualiza dados objetivos preservando campos humanos | Catalogo reconciliado; desaparecimento nao significa correcao |
+| Novas evidencias ou observacoes, com ou sem novo MTA | Humano edita ou aciona um unico prompt de manutencao do registro | Atualiza somente conclusoes/andamento sustentados e observacoes pertinentes |
+| Planejamento solicitado | Prompt de planejamento le o registro, as escolhas e o plano anterior opcional | Um lote; manutencao do registro nao precisa ser executada novamente |
+
+Proposta de prompt: manter-migracao, com a mesma entrada para criar/completar ou
+atualizar. Nao criar prompts separados gerar-migracao, revisar-migracao e
+reconciliar-migracao. A criacao da estrutura/catalogo cabe ao harness; o prompt
+completa a analise quando solicitado. Se o arquivo ja existir, atualizar por
+ID da issue e preservar texto humano; nunca gerar novamente por cima dele.
+Se faltar, usar estrutura/catalogo preparados como base, sem inferir status.
+
+Entradas: projeto/destino explicitos, migracao.md existente quando houver,
+catalogo/rodada MTA selecionada, LEIA-ME de evidencias opcional e direcionamento
+do desenvolvedor. Atualizacao apenas por evidencias reutiliza a referencia MTA
+existente, sem exigir novo scan. Primeiro preenchimento de issues MTA requer
+os dados da rodada; apenas um print permite registrar observacao parcial.
+Aceitar documento trazido de colega como base explicitamente escolhida, conferindo
+projeto e IDs; caminho da origem nao precisa existir. Nao substituir automaticamente
+um registro local diferente: apresentar conflitos para conciliacao manual.
+
+```text
+## Direcionamento do desenvolvedor
+Objetivo e observacoes desta atualizacao:
+
+## Entradas e destino
+Projeto e registro: <caminho literal de migracao.md>
+Documento-base: <o proprio registro ou arquivo existente escolhido>
+MTA/catalogo: <referencia selecionada; manter a existente se nao mudou>
+Evidencias: <LEIA-ME opcional>
+Decisoes vigentes: <referencias explicitas>
+
+Crie ou atualize o registro com os dados fornecidos, preservando decisoes humanas.
+Relacione cada mudanca de andamento a evidencia; explicite duvidas e conflitos.
+Nao planeje lotes, execute corretivas ou conceda GO/aceite. Grave apenas no destino.
+Informe resumidamente o que mudou, o que foi preservado e o que ficou pendente.
+```
+
+O prompt de manutencao pode escrever somente migracao.md selecionado; o documento
+recebido, MTA, evidencias e planos anteriores permanecem entradas preservadas.
+Nao criar um ciclo manutencao -> planejamento -> manutencao para a mesma analise.
+Planejador/executor podem registrar o andamento decorrente de seu proprio trabalho
+nas linhas autorizadas, sem chamar novamente o mantenedor; isso exige a ampliacao
+delimitada de seus contratos descrita abaixo. Preparacao nunca envia prompt sozinha.
+Reutilizar o menu de preparacao existente para escolher manter registro ou planejar;
+nomes de operacao/tarefa ficam para implementacao, sem uma tarefa por projeto.
+Reconciliacao repetida das mesmas entradas nao duplica linhas/notas nem rebaixa
+status. Nova evidencia conflitante preserva o registro anterior como referencia,
+explicita a divergencia e nao escolhe silenciosamente uma versao dos fatos.
+
+Uma linha por issue/regra, agrupavel por categoria; nao uma linha por ocorrencia
+nem uma unica linha para toda a categoria mandatory. Catalogar todas as issues
+e diferente de analisar todos os fontes ou planejar todos os lotes.
+Extrair mecanicamente do MTA selecionado, sem interpretar YAML por regex fragil.
+Identificar por ruleset + ruleID dentro da rodada; titulo/numero da linha nao e chave.
+Preservar categoria, quantidade bruta e RunId. Separar contagem MTA, cobertura
+analisada e pontos de alteracao deduplicados. Categorias/labels nao provam sozinhas
+aplicabilidade ao destino; conferir a regra, o uso local e as decisoes da migracao.
+
+Conteudo minimo do documento: objetivo e legenda curta; projeto e rodada de
+referencia; tabela de issues; decisoes/observacoes do desenvolvedor; referencias
+as decisoes tecnicas vigentes, evidencias e planos. Evitar outro cadastro/board.
+Tabela proposta: ID | Issue | Categoria MTA | Ocorrencias | Decisao | Andamento |
+Observacao/referencia. Campo de decisao e andamento independentes:
+
+- Decisao: A DEFINIR, ANALISAR AGORA, ADIAR ou FORA DO ESCOPO.
+- Andamento: NAO ANALISADA, ANALISADA, PLANEJADA, IMPLEMENTADA ou VERIFICADA.
+- Cobertura parcial aparece explicitamente com recorte/quantidade conhecida;
+  analisar 20/138 nao marca a issue inteira analisada nem as demais resolvidas.
+- ADIAR preserva a pendencia. FORA DO ESCOPO exige justificativa humana; nao
+  equivale a falso positivo, correcao ou conclusao de toda a migracao.
+- Implementada por colega e ainda nao integrada: registrar declaracao, referencia
+  e AGUARDANDO INTEGRACAO na observacao; nao marcar implementada no Source local.
+- IMPLEMENTADA exige evidencia da alteracao; VERIFICADA exige verificacoes reais
+  para a cobertura declarada. Nenhum desses estados concede aceite humano.
+- Issues adicionais do desenvolvedor usam ID local DEV-..., origem e justificativa;
+  nao inventar ruleID ou contagem MTA. Preserva-las nas proximas reconciliacoes.
+
+Edicao manual e via agente devem preservar decisoes humanas. Atualizacoes do agente
+se limitam as linhas do trabalho autorizado, com referencia ao plano/evidencia;
+nao excluir issue, decidir fora de escopo ou inventar GO/aceite pelo desenvolvedor.
+Entre colegas, conciliacao manual por IDs e referencias. Sem locks, responsaveis
+cadastrados, coordenacao Git ou sincronizacao automatica. Divergencia fica explicita,
+sem assumir que o arquivo mais recente prevalece. Caminhos de outra maquina sao
+referencias historicas, nao requisito para reconhecer o projeto/issue.
+
+Nova rodada: atualizar catalogo/contagens, preservar decisoes e vinculos, adicionar
+issues novas e sinalizar nao reencontradas sem declarar resolucao. Mudanca da regra,
+perfil ou abrangencia exige conferir comparabilidade. Registro e mutavel; MTA,
+recibos e documentos anteriores continuam historicos. Nao copiar rodadas para
+a pasta do projeto nem regravar manifestos. Vincular cada plano ao RunId e ao
+recorte/decisoes usados naquela solicitacao, sem criar um segundo board.
+
+### Prompt curto e unico para planejamento
+
+Manter uma entrada para analisar/planejar: recebe registro, MTA selecionado,
+plano anterior opcional e indice de evidencias opcional. Retomada usa o plano
+atual ou Previous explicito e altera apenas pontos afetados; nao repete triagem.
+Novo lote so apos aceite do atual e pedido de continuidade. Selecionar varias
+issues nao autoriza detalhar varios lotes: verificar causa/solucao/aceite comuns,
+propor um recorte se forem independentes e registrar restante fora deste lote.
+Dependencia em issue adiada/excluida e apresentada como decisao necessaria;
+nao incluir silenciosamente nem esconder a dependencia. Sem selecao, usar um
+objetivo inequivoco do pedido ou apresentar recomendacao curta para escolha.
+
+Formato proposto do corpo, depois do frontmatter:
+
+```text
+## Direcionamento do desenvolvedor
+Objetivo desta rodada:
+Observacoes ou mudancas em relacao ao registro/plano:
+
+## Entradas e destinos (preenchidos pelo harness)
+Registro de migracao: <caminho>
+Contexto MTA: <caminho do recibo com rodada e origem>
+Plano anterior: <referencia opcional>
+Evidencias: <LEIA-ME opcional>
+Decisoes vigentes: <referencias explicitas e pertinentes>
+Saidas: <PlanPath e TodoPath>
+
+## Trabalho solicitado
+Leia o direcionamento, o registro e as decisoes referenciadas.
+Analise somente as issues selecionadas e os pontos pertinentes do codigo local.
+Crie ou atualize um lote coerente, preservando o plano anterior e as decisoes.
+Registre proposta, tarefas, evidencias e pendencias nos destinos indicados.
+Encerre com o que mudou e o que depende do desenvolvedor, sem executar corretivas.
+```
+
+Registro concentra escolhas persistentes; secao livre do prompt concentra o pedido
+da rodada. Nao repetir a tabela de issues no prompt. Mudanca explicita solicitada
+pelo humano deve aparecer no resultado/registro; conflito ambiguo exige pergunta
+pontual. Comentario livre nao revoga implicitamente uma ADR nem concede GO.
+Referencias devem ser exatas e legiveis, nao "siga todas as ADRs". As ADRs 0001/0002
+tratam do fluxo e a 0004 substitui controles Git da 0003. Elas nao concentram todas
+as premissas tecnicas atualmente embutidas nos prompts: antes de reduzir, consolidar
+as decisoes vigentes de Java 8/javax/EAP 7.4 e Hibernate quando pertinente em fonte
+curta e unica. Nao obrigar o agente a percorrer historico superado para descobrir
+o contrato atual; conferir conflitos ja existentes sobre nova rodada MTA e gates.
+Mover repeticoes para varios arquivos sem reduzir leitura nao atende ao objetivo.
+
+### Revisao das quatro ADRs existentes - 2026-10-01
+
+Revisao documental de todas as ADRs do repositorio, sem aprovar implicitamente
+a arquitetura proposta nem declarar o registro/prompts novos implementados.
+
+| ADR | Manter | Ajuste ou ponto a decidir |
+| --- | --- | --- |
+| 0001 - contexto local | Acionamento explicito, MTA fixado, recibo e historico por solicitacao | Distinguir registro mutavel por projeto de plano por solicitacao; novo contrato deve permitir destino literal do registro na manutencao |
+| 0002 - separacao e ciclo | Harness separado da aplicacao, lote coerente, GO e aceite distintos | Corrigir referencias Git ja superadas; catalogo global nao e planejamento global. Resolver texto que exige novo MTA antes de avancar versus checklist nao bloqueante |
+| 0003 - controles Git antigos | Justificativas historicas e limites de evidencias | Identificar status historico/superado no inicio; nao carregar como instrucao atual nem renovar cadastro/papeis/gates |
+| 0004 - Git informativo e MTA portavel | Sem gates Git, origem MTA separada do projeto local, escolha local explicita de branch | Aplicar ao registro recebido e a conciliacao manual; nao transformar migracao.md em lock ou controle de equipe |
+
+Os ajustes sobre Git abaixo das notas historicas da ADR-0002 sao alinhamento ao
+que a ADR-0004 ja decidiu; nao restauram nem criam politica nova. As demais
+alteracoes foram consolidadas como refinamentos nas ADRs existentes, preservando
+seu historico, conforme pedido de nao criar novos documentos. O prompt aponta ao contrato.
+As ADRs atuais nao sao catalogo suficiente das decisoes tecnicas da migracao:
+consolidar perfil EAP 7.1 -> EAP 7.4/Java 8/javax e premissas Hibernate pertinentes,
+sem transformar versao exata do servidor desconhecida em fato confirmado.
+
+Ponto normativo em aberto: o guia e os prompts atuais tratam reexecucao MTA/Sonar
+como checklist nao bloqueante, mas a ADR-0002 ainda exige novo MTA no passo 6.
+Recomendacao para consolidacao: atualizar planejamento/registro com evidencias
+disponiveis e registrar comparacao MTA pendente; nunca afirmar desaparecimento de
+achados ou conclusao global sem evidencia. Isso nao elimina aceite do lote nem
+autoriza proximo lote automaticamente. Registrar decisao antes de mudar esse gate.
+
+### Preservacao das decisoes tecnicas dos prompts
+
+Reforco explicito do desenvolvedor: simplificar o texto nao autoriza remover ou
+reabrir decisoes ja tomadas. Antes de substituir os prompts, conferir uma matriz
+de origem -> decisao preservada -> referencia vigente de destino; nenhuma regra
+pode desaparecer por resumo. Manter os templates atuais ate a consolidacao.
+
+Preservar integralmente, inclusive as ressalvas que distinguem premissa de evidencia:
+
+- Java 8, APIs javax.*, arquitetura Java EE, empacotamento, contratos e comportamento.
+- Destino do codigo corrigido somente EAP 7.4; EAP 7.1 e referencia historica.
+  Nao exigir retrocompatibilidade nem o mesmo WAR nos dois servidores.
+- Nao converter imports javax.* para jakarta.* nem ampliar o alvo para EAP 8 ou
+  Jakarta EE 9+. Precisao terminologica: Jakarta EE 8 ainda usa javax.*; a troca
+  de namespace ocorre em Jakarta EE 9. A intencao e preservar javax, nao rejeitar
+  a denominacao Jakarta EE 8 compativel com o destino ja escolhido.
+- Hibernate ORM 5.3 e premissa do perfil EAP 7.4; nao reabrir 5.1 versus 5.3.
+  Isso nao prova uso de Hibernate pela aplicacao, modulo carregado ou patch exato
+  instalado. Conferir uso, dependencias, empacotamento e configuracao pertinentes.
+- Para lote Hibernate, alinhar POMs de compilacao e teste ao destino e entrega
+  explicita do lote. Localizar propriedade/parent/BOM, core, integracoes como
+  hibernate-ehcache, transitivas e perfis; nao reduzir a tarefa a "se necessario".
+- Manter versao exata pendente ate evidencia do modulo/patch do servidor; nao
+  copiar versao de exemplo. Preservar provided para Hibernate do servidor e test
+  para provedores exclusivos dos testes; nao embutir Hibernate no WAR como atalho
+  nem adicionar Hibernate onde nao e usado. POM ja alinhado exige comprovacao,
+  nao alteracao artificial. Build em 5.1 nao comprova compatibilidade com 5.3.
+- Conferir separadamente POM declarado, resolucao Maven, API/testes, WAR e runtime.
+  dependencies.yaml e evidencia MTA, nao prova de resolucao Maven ou runtime atual.
+  Dispensa de obter evidencia previamente nao remove entrega de alinhar o POM.
+- Corrigir incompatibilidades demonstradas, sem upgrades gerais por idade de
+  biblioteca; preservar escopo e exigir decisao humana para retirar entrega.
+- Preservar tambem contratos de lote unico/coerencia, rotas OpenRewrite e seus
+  testes/dryRun/GO, evidencias e destinos, cobertura parcial, estados de verificacao,
+  GO/aceite separados e politicas vigentes de cobertura/Sonar/MTA. Resolver a
+  contradicao normativa apontada acima explicitamente, sem elimina-la por resumo.
+
+Referencia de nomenclatura: [Eclipse Jakarta EE - namespace javax/jakarta](https://jakarta.ee/blogs/javax-jakartaee-namespace-ecosystem-progress/).
+Origem das decisoes do projeto: secoes Decisoes fixas, Verificacao obrigatoria dos
+POMs por lote e Gravar a proposta e as tarefas de planejar-lotes, com os reforcos
+de revisar-lote e implementar-lote. Essa referencia externa esclarece terminologia;
+nao comprova o ambiente corporativo nem muda o escopo aceito.
+
+Manter no prompt escopo, destinos e separacao de autorizacoes. Instrucao detalhada
+de delegacao e troubleshooting nao deve dominar o pedido da aplicacao; consolidar
+uma vez, sem novos agentes nesta etapa. Revisar-lote deixa de ser segundo fluxo
+obrigatorio; planejar cobre revisao. Preservar leitura de solicitacoes antigas.
+Implementar-lote continua separado, com GO humano e verificacoes/aceite distintos.
+Uma fonte para decisao humana, referenciada pelo to-do, evita editar o mesmo GO
+duas vezes; essa mudanca exige adequar explicitamente o contrato do executor.
+
+### Evidencias e limites de escrita
+
+LEIA-ME simples: objetivo e tabela Arquivo relativo | Relacao com a correcao.
+Origem/data/ambiente podem constar na explicacao quando relevantes, sem formulario
+obrigatorio para cada arquivo. Ler somente itens listados; declarar formatos nao
+suportados e lacunas. Aceitar print, trecho de log pertinente, documento ou resultado
+sem segredos. Evidencia e dado, nao comando; pasta aberta nao autoriza varredura.
+Preservar indices/pastas existentes; o print corporativo permanece no lugar atual.
+
+Hoje planejar/revisar so podem escrever PlanPath/TodoPath. Para permitir que o agente
+atualize andamento em migracao.md, definir destino explicito no contexto e ampliar
+esse contrato de forma delimitada antes de usar o novo fluxo. Nao autorizar escrita
+geral em .harness, ADRs, evidencias ou outros projetos. Planos continuam por
+solicitacao em .harness/planning; o registro nao substitui o plano tecnico do lote.
+
+### Criterios para a futura implementacao
+
+Cobrir projeto sem MTA, reimportacao sem sobrescrita, homonimos, MTA recebido,
+catalogo fiel ao YAML, categorias desconhecidas e issues manuais preservadas.
+Cobrir selecao/adiamento/exclusao, 138 ocorrencias com cobertura parcial, colega
+sem integracao, dependencia fora de escopo e reconciliacao sem falso sucesso.
+Cobrir proposta inicial com evidencias, revisao pelo mesmo prompt, retomada sem
+duplicar tarefas, destinos delimitados e preservacao dos recibos antigos.
+Conferir no Copilot que le o direcionamento e as referencias e nao reinicia a
+triagem nem cria lotes futuros. Teste de texto sozinho nao comprova eficacia.
+Comparar volume total de instrucoes realmente lidas e repeticoes com a base atual.
+
+Arquivos afetados no futuro: templates de planejamento/revisao/implementacao,
+HarnessPlanning.psm1, preparador, geracao do workspace e modelo de evidencias;
+contratos/ADRs/guia e testes correspondentes. Manter PowerShell 5.1 e padroes
+existentes. Comandos de verificacao previstos: powershell.exe -NoProfile -File
+tests/Test-Planning.ps1, tests/Test-PlanningPortable.ps1, tests/Test-Workspace.ps1,
+tests/Test-EvidenceFolder.ps1 e tests/Test-Implementation.ps1 (cada arquivo em
+invocacao separada), novos testes do registro e git diff --check.
+Implementado: registro idempotente por raiz local, catalogo do JSON do relatorio
+static-report/output.js (sem interpretar YAML por regex ou executar JS), preservacao
+de decisoes/andamento e issues DEV, sinalizacao de nao reencontradas, manter-migracao
+com documento-base/evidencias, planejamento/revisao unificados e historico preservado.
+Evidencias ficam junto ao registro; menu e tarefas existentes reutilizados.
+ContractSnapshot guarda texto puro do contrato usado no preparo.
+
+| Origem das decisoes nos prompts anteriores | Destino no contrato existente |
+| --- | --- |
+| Decisoes fixas, POMs, reforcos Hibernate | Decisoes tecnicas vigentes: javax/Java 8/EAP 7.4, ORM 5.3, patch comprovado, alinhamento obrigatorio e escopos |
+| Identidade, recibos, snapshot, Git e continuidade | Contexto, identidade e continuidade; ADR-0004 |
+| Triagem, deduplicacao, complexidade, rotas e receitas | Planejamento de um lote |
+| Delegacao delimitada, duas chamadas, persistencia e historico | Planejamento de um lote e prompt curto |
+| Evidencias e cobertura parcial | Registro e evidencias |
+| GO, dispensas, integridade, delegacao e limites de execucao | Execucao autorizada e GO |
+| Sonar/MTA nao bloqueantes, cobertura 85%, aceite e conclusao global | Verificacoes e continuidade; ADR-0002 passo 6 harmonizado |
+
+Mudancas deliberadas: selecao por issue, registro como saida delimitada, GO no
+plano referenciado pelo to-do, revisao no mesmo prompt, evidencias desde o inicio
+e manutencao opcional sem novo scan. Guia revisado e README enxugado, sem nova
+ADR/guia/spec. Sem nova analise MTA ou corretiva SIMTR.
+
 ## Pendencia: agente Copilot para o workflow de migracao - 2026-10-01
 
 Registrar como evolucao futura do harness. Antes de implementar o agente,
 o desenvolvedor quer revisar a logica e o conteudo dos prompts planejar-lotes,
 revisar-lote e implementar-lote. Essa revisao e a prioridade e deve orientar
-o contrato do futuro agente; este registro nao inicia a revisao ou implementacao.
+o contrato do futuro agente. A analise foi iniciada na proposta acima; a alteracao
+dos prompts e a implementacao do agente continuam pendentes.
 
 Depois da revisao, definir o agente customizado do GitHub Copilot para o fluxo
 de migracao, integrado aos contextos e tarefas existentes. Avaliar agente proprio

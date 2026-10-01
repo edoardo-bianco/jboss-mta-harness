@@ -4,6 +4,54 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Proposta: registro por projeto e planejamento dirigido por issues - 2026-10-01
+
+- [x] Inspecionar print, prompts, preparador, contexto e modelo de evidencias;
+  distinguir catalogo de issues, ocorrencias e lote tecnico.
+- [x] Registrar proposta com documento local por projeto, decisoes/andamento,
+  conciliacao manual, evidencias simples e prompt unico com direcionamento livre.
+- [x] Revisar todas as quatro ADRs; registrar o que permanece, o que foi superado
+  e a contradicao pendente sobre exigir novo MTA para avancar.
+- [x] Definir criacao automatica da estrutura/catalogo e manutencao opcional por
+  um unico prompt, aceitando documento existente, novo MTA e/ou novas evidencias.
+- [x] Registrar preservacao explicita das decisoes Java 8/javax/EAP 7.4 e Hibernate
+  5.3, incluindo alinhamento dos POMs, integracoes, escopos e versao exata pendente.
+- [x] Antes de encurtar templates, conferir matriz de todas as decisoes existentes
+  para suas referencias de destino, sem perda de regras ou ressalvas por resumo.
+- [x] Revisar com o desenvolvedor nomes, legenda e limites de atualizacao pelo
+  agente; consolidar as decisoes tecnicas vigentes referenciadas pelo prompt.
+- [x] Apos definicao da proposta, implementar registro idempotente e extracao do
+  catalogo a partir do MTA, preservando decisoes e issues manuais na reconciliacao.
+- [x] Refinar ADRs existentes com destinos do registro, perfil tecnico e politica
+  de continuidade/MTA, preservando historico e sem documentos adicionais.
+- [x] Implementar manter-migracao como uma unica operacao de criar/atualizar,
+  sem repetir manutencao antes de cada planejamento nem criar loop de agentes.
+- [x] Unificar planejamento/revisao e aceitar evidencias desde o inicio; reduzir
+  repeticoes e adequar limites de escrita/decisoes sem alterar contextos antigos.
+- [x] Revisar guia e README, incluindo reconstruir registro com MTA existente,
+  copiar/renomear rodada antiga e recuperar andamento somente com evidencias.
+- [x] Concluir regressao automatizada e revisao final do diff.
+- [ ] Ensaiar no Copilot Local selecao de issues, cobertura parcial, persistencia e
+  continuidade sem repetir triagem. Scripts nao comprovam obediencia do agente.
+
+Estado: implementacao local. O print e parcial; catalogo completo do SIMTR-api
+depende da rodada corporativa. Sem integrar/publicar branches neste pedido.
+
+Validacao: 21 testes autonomos passaram em PowerShell 5.1 (Build, BuildConfig,
+Cleanup, EvidenceFolder, Git, Implementation, ImplementationBranch, LongPaths,
+MigrationRegister, Mta, MtaActive, MtaLog, Planning, PlanningPortable, Sonar,
+SonarApi, SonarConfig, SonarCriteria, Target, TaskInputs e Workspace).
+BuildCoverage e ensaio opcional com Maven real, nao executado nesta alteracao.
+Testes novos verificam 138 incidentes, categoria desconhecida, documento recebido,
+edicoes humanas/DEV preservadas, ausencia de regra sem falso sucesso, formatos
+invalidos, idempotencia, cancelamento e manutencao sem scan. Menu/portabilidade
+revalidados apos ampliar os casos. Leitura de rodada real local encontrou as duas
+regras Hibernate com uma ocorrencia cada, sem executar MTA ou alterar a rodada.
+Revisao conferiu limites de escrita, decisoes tecnicas, histórico e limpeza.
+Contrato e serializado como texto puro (sem metadados de Get-Content no PS 5.1).
+git diff --check passou. README: 51 linhas; planejar-lotes: 57 linhas mais contrato
+referenciado/preservado no recibo, sem duplicar tabela de issues no prompt.
+
 ## Pendencia: agente Copilot para o workflow de migracao - 2026-10-01
 
 - [ ] Primeiro, revisar com o desenvolvedor a logica e o conteudo dos prompts
@@ -14,8 +62,8 @@ tecnicas reais permanecem nos checklists correspondentes.
 - [ ] Mediante retomada solicitada, implementar e validar o agente de migracao,
   preservando origem MTA, lote unico e limites de cada etapa.
 
-Estado: somente pendencia registrada; revisao dos prompts e implementacao do
-agente ainda nao iniciadas. A implementacao depende da revisao previa dos prompts.
+Estado: revisao dos prompts iniciada pela proposta acima; implementacao do agente
+ainda nao iniciada. Ela depende da revisao previa dos prompts.
 
 ## Relatorio MTA apos mover o harness - 2026-10-01
 

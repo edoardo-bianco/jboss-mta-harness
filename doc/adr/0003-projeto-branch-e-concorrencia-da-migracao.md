@@ -1,6 +1,7 @@
 # ADR-0003: vincular a migracao ao projeto, branch e estado do codigo
 
-Status: aceita pelo desenvolvedor em 2026-09-27.
+Status: historica; aceita em 2026-09-27, com requisitos de cadastro, papeis,
+coordenacao obrigatoria e bloqueios Git substituidos pela ADR-0004 em 2026-09-28.
 
 Atualizacao em 2026-09-28: os requisitos de cadastro, papeis, coordenacao obrigatoria
 e bloqueios por Git deste texto foram substituidos pela

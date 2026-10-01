@@ -13,11 +13,11 @@ a tarefa atua somente no alvo escolhido. Ter uma pasta aberta nao a torna o alvo
 | 1. Configurar | Caminhos desta maquina e workspace local | Ambiente encontrado; conferir caminhos nao executa build/MTA |
 | 2. Build | Projeto/modulo e `clean install` no primeiro ensaio | `SUCCEEDED`, exit 0 e caminhos de `console.log`/`result.json` |
 | 3. MTA | Mesmo projeto e fontes do build | Rodada bem-sucedida, integridade e relatorio HTML |
-| 4. Preparar planejamento | Rodada local ou recebida e proposta anterior ou independente | Prompt e recibo com destinos exclusivos e origem MTA |
+| 4. Preparar | Manter registro ou planejar/atualizar lote; selecionar MTA existente ou recebido | migracao.md, prompt e recibo; nenhuma corretiva executada |
 | 5. Acionar Copilot | Objetivo do lote; continuidade explicita quando houver historico | Um `plan.md` e um `todo.md`, ainda sem GO |
 | 6. Revisar | Pendencias tecnicas, rota, escopo e criterios de aceite | GO humano separado; branch escolhida pelo desenvolvedor |
 | 7. Aplicar e validar | Aplicacao: preparar implementacao do lote; selecionar plano/to-do com GO e executar o prompt | Diff, build/testes, qualidade e validacao funcional; aceite humano |
-| 8. Continuar | Novo MTA e proposta anterior vinculada | Reconciliar o lote; proximo lote somente apos aceite e pedido |
+| 8. Continuar | Evidencias disponiveis, novo MTA quando houver e proposta anterior | Reconciliar o lote; proximo lote somente apos aceite e pedido |
 
 Se voce recebeu uma rodada MTA completa, pode iniciar na etapa 4 com a opcao **p**;
 nao precisa repetir build/MTA apenas para preparar uma proposta nesta maquina.
@@ -528,7 +528,8 @@ checkout: o nome da branch nao garante que contenha as ultimas integracoes.
 **Ao concluir um lote:** confira diff, verificacoes e pendencias, obtenha aceite e
 integre pelo processo da equipe. Push publica a branch; **nao integra** as mudancas
 na principal nem na EAP 7.4. Depois da integracao, revalide o codigo resultante;
-para planejar o proximo lote, use novo MTA dessa base e reconcilie o historico.
+para planejar o proximo lote, reconcilie o historico e evidencias dessa base;
+se nao houver novo MTA, mantenha a comparacao pendente.
 A branch do lote pode permanecer publicada como historico; o harness nao a apaga.
 Registre tambem o commit integrado e as evidencias da verificacao.
 
@@ -575,295 +576,221 @@ Os comandos de comparacao e diagnostico visual ficam no documento separado
 
 ## Planejar lotes de correcao com Copilot
 
-A Run Task prepara o contexto; **voce executa o prompt**. O agente escreve apenas
-`plan.md` e `todo.md` da solicitacao, em `.harness/planning/`. Nao altera fontes,
-POMs, testes ou documentos do harness. Os planos em `tasks/` pertencem a evolucao
-do harness e nunca recebem corretivas da aplicacao.
+O registro do projeto concentra escolhas; o plano detalha um unico lote. A Run Task
+prepara os arquivos e **voce executa o prompt** no Copilot. Preparacao nao concede
+GO nem aplica corretivas. Os planos da aplicacao ficam em .harness/planning/;
+tasks/ pertence a evolucao do harness.
+
+### Registro de migracao por projeto
+
+Ao gerar o workspace ou executar a primeira tarefa apos adicionar um projeto,
+o harness cria, sem sobrescrever:
+
+```text
+.harness/projetos/<nome>__<chave>/
+  migracao.md
+  evidencias/LEIA-ME.md
+```
+
+A chave identifica a raiz local, inclusive agregadores Maven; modulos nao recebem
+registros separados implicitamente. Rotulos iguais em raizes diferentes ficam
+separados. Alterar o nome no Explorer ou alternar entre configuracao e workspace
+nao duplica a pasta. Remover o projeto do workspace nao apaga seu registro.
+
+Antes do MTA, o documento fica AGUARDANDO MTA. Ao escolher uma rodada, recebe uma
+linha por issue (ruleset::regra), com titulo, categoria e numero de ocorrencias.
+Os dados vem de output/static-report/output.js, lido como JSON sem executar JavaScript.
+O harness nao inventa as demais issues a partir de um print parcial.
+Formato nao suportado e informado. Rodada antiga sem output.js continua utilizavel
+no planejamento, mas nao preenche o catalogo automaticamente.
+
+Edite as escolhas no migracao.md; mantenha as oito colunas e os marcadores da tabela:
+
+| Campo | Uso |
+| --- | --- |
+| Decisao | A DEFINIR, ANALISAR AGORA, ADIAR ou FORA DO ESCOPO, com justificativa humana. |
+| Andamento | NAO ANALISADA, ANALISADA, PLANEJADA, IMPLEMENTADA ou VERIFICADA. |
+| Observacao/referencia | Cobertura parcial, motivo, plano/evidencia e declaracoes de colegas. |
+| Presenca | PRESENTE na rodada selecionada; NAO REENCONTRADA preserva a ultima contagem, sem afirmar correcao. |
+
+Analisar 20 de 138 ocorrencias nao conclui toda a issue. Correcao de colega ainda
+ausente no codigo local fica AGUARDANDO INTEGRACAO na observacao, com referencia.
+Issues adicionais usam ID DEV-..., categoria manual, contagem - e presenca MANUAL.
+Para escrever barra vertical dentro de celula, use &#124;.
+Nenhum status concede GO ou aceite. Entre desenvolvedores, a conciliacao e manual;
+arquivo mais recente nao vence automaticamente um conflito.
+
+### Reconstruir a pasta usando um MTA existente
+
+Nao precisa repetir a analise:
+
+1. Use **Planejamento: preparar contexto para Copilot > 2. Manter registro**.
+2. Escolha **1: selecionar MTA**. Use Enter para a ultima elegivel, **h** para o
+   historico ou **p** para informar a pasta completa da rodada.
+3. Confira o caminho do migracao.md exibido. A pasta e o catalogo foram criados;
+   se ja existiam, escolhas, observacoes e issues manuais foram preservadas.
+4. Para recuperar andamento, forneca registro anterior ou planos/evidencias pertinentes
+   e execute manter-migracao. Somente o MTA inicializa A DEFINIR/NAO ANALISADA;
+   ele nao comprova analise, implementacao ou verificacao realizadas anteriormente.
+
+Para receber um registro de colega, use o parametro MigrationSourcePath abaixo.
+O arquivo recebido e entrada; o destino continua sendo o migracao.md local.
+Conflitos ficam visiveis para conciliacao, sem substituir decisoes silenciosamente.
+
+```powershell
+.\scripts\preparar-planejamento.ps1 -WorkspacePath .\jboss-mta-harness.local.code-workspace -SelectTarget -Operation manter-migracao -RunPath "C:\mta-runs\SIMTR-api\260930-154744" -MigrationSourcePath "C:\recebidos\migracao.md"
+```
+
+Para atualizar somente observacoes/evidencias, escolha **2: somente registro/evidencias
+existentes**, sem selecionar outro scan. Pela CLI, use -WithoutMta no lugar de
+-RunPath. Pode informar -EvidenceIndexPath para um LEIA-ME existente fora da pasta
+padrao. Planos anteriores podem ser referenciados nesse indice como evidencias;
+o mantenedor nao os altera. Manter registro e opcional: nao precisa executa-lo
+novamente antes de cada planejamento.
 
 ### Preparar e executar o prompt
 
-1. Execute **Planejamento: preparar contexto para Copilot**, da pasta `harness`,
-   confirme o workspace, escolha o projeto local e **1. Planejar lote**.
-2. Confira projeto, fonte, data/hora com fuso e RunId da **ultima elegivel**.
-   **Enter** usa essa rodada; **h** abre o historico; **p** recebe o caminho de
-   uma pasta MTA completa, inclusive de outra maquina; **q** cancela. Uma tentativa
-   mais recente que falhou nao substitui a ultima elegivel e aparece como aviso.
-   Compare o RunId com o JSON final da analise para confirmar qual MTA foi escolhido.
-3. Se houver propostas anteriores, **Enter** inicia uma independente; o numero
-   vincula a proposta escolhida como `Previous`. Para continuar um lote existente,
-   selecione seus documentos; nao escolha apenas pela data mais recente.
-4. Confira o **Contexto selecionado pelo desenvolvedor** ao fim do prompt aberto.
-   `context.json` fixa RunId, RequestId, caminhos, hashes das evidencias e Previous.
-   Preparar contexto nao executa MTA nem cria o plano/to-do.
-5. Use **Executar Prompt** em nova conversa **Copilot Local**, com **devsquad**.
-   Alternativamente, use a chamada `/planejar-lotes ...` mostrada no terminal.
-   Informe um objetivo, por exemplo: "Planeje somente a limpeza do cache de consultas".
-6. Confira a chamada a **devsquad.plan**. O especialista elabora os textos por
-   leitura/busca; o condutor confere, grava e rele somente os dois destinos.
-   Use **Planejamento: abrir plano e to-do** para consultar os arquivos gravados.
+1. Edite ANALISAR AGORA nas issues desejadas ou informe um objetivo inequivoco.
+2. Use **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**.
+   Escolha projeto e MTA: Enter ultima elegivel, h historico, p pasta completa, q cancela.
+3. Se houver proposta anterior, selecione-a para atualizar o mesmo lote; Enter inicia
+   independente. Previous nao concede GO nem transfere aprovacao.
+4. No inicio do prompt aberto, preencha **Direcionamento do desenvolvedor**.
+   Confira o contexto ao final: caminhos, rodada e destinos. O recibo guarda o
+   registro no momento do preparo e a copia do contrato tecnico; o registro segue editavel.
+5. Use **Executar Prompt** em nova conversa **Copilot Local** com devsquad ou a
+   chamada /planejar-lotes mostrada no terminal. O condutor delega a devsquad.plan,
+   grava/rele o plano/to-do e registra andamento/cobertura das issues trabalhadas.
+6. Abra os resultados com **Planejamento: abrir plano e to-do** e revise.
 
-O plugin deve disponibilizar `devsquad`, `devsquad.plan` e as skills pertinentes.
-Confira em **Chat: Open Customizations** e, em **Configure Tools**, subagente
-(`agent/runSubagent`), leitura/busca e edicao. O harness nao instala o plugin.
-O seletor mostrando apenas **Agent** nao confirma execucao pelo DevSquad.
-Se faltar o especialista ou leitura, ajuste a sessao antes de continuar; uma
-resposta no chat nao substitui os dois arquivos. `.harness` pode estar oculta:
-use o caminho completo para leitura direta, sem depender do indice de busca.
+O plugin deve disponibilizar devsquad, devsquad.plan e skills pertinentes.
+Confira **Chat: Open Customizations** e **Configure Tools**: subagente
+(agent/runSubagent), leitura/busca e edicao. O harness nao instala o plugin.
+Se .harness estiver oculta, abra o caminho exibido com Ctrl+P. Ausencia na busca
+nao prova ausencia do arquivo. Resposta apenas no chat nao substitui a proposta salva.
 
-Os limites do prompt sao instrucoes comportamentais, nao uma sandbox dos agentes.
-Durante o planejamento, nao executar terminal, Git, Maven, MTA, web ou corretivas,
-nem criar specs, ADRs, diagramas ou board. Confira ferramentas e destinos usados.
-O prompt versionado e [planejar-lotes](../../.github/prompts/planejar-lotes.prompt.md).
-Prompts ja preparados sao copias historicas: atualizacoes do harness valem para
-novos preparos. Nao e preciso repetir MTA somente para obter o prompt atualizado.
+O prompt [planejar-lotes](../../.github/prompts/planejar-lotes.prompt.md) atende inicio
+e revisao; revisar-lote permanece para contextos antigos. Nao ha segundo prompt
+obrigatorio nem ciclo de manutencao/planejamento repetido. Na retomada, preserve
+ID e trabalho feito. O limite e uma elaboracao e uma correcao tecnica consolidada
+pelo especialista; forma/fatos conferidos sao ajustados pelo condutor. Sem terceiro
+ciclo de regeneracao. Os testes de scripts nao comprovam obediencia do Copilot.
 
-**Se o agente ficar corrigindo o proprio rascunho sem gravar:** o contrato atual
-limita a execucao a uma elaboracao e, se necessario, uma correcao consolidada pelo
-`devsquad.plan`. O condutor preserva o rascunho e o ID; corrige forma/metadados e
-restaura fatos ja conferidos diretamente. Questoes tecnicas sao enviadas juntas;
-o retorno deve trazer somente os trechos a substituir, sem regenerar os documentos
-nem perder matriz de dependencias, deduplicacao ou tarefas ja conferidas.
-Lacunas que permitam uma proposta coerente ficam PENDENTES; titulo ou ordem de
-secoes nao justificam terminar sem arquivos. Identidade/destinos invalidos ou
-impossibilidade de delimitar a proposta continuam exigindo esclarecimento.
-
-Para ensaiar essa correcao, prepare um novo contexto com a mesma rodada MTA e
-execute o novo prompt em nova conversa Local. Se a tentativa anterior nao gravou
-os dois documentos, inicie independente; se os gravou, selecione-os como Previous
-para preservar e revisar o lote. Nao edite o prompt historico nem o recibo.
-Confira no maximo duas chamadas ao especialista e a gravacao/releitura do par.
-Os testes de scripts nao comprovam que o Copilot obedecera a esse limite.
+Planejamento nao executa terminal, Git, Maven, MTA, Sonar, web ou corretivas.
+Limites sao instrucoes comportamentais, nao sandbox tecnica dos subagentes.
+O contrato unico esta na [especificacao existente](../especificacoes/planejamento-copilot.md).
 
 ### Como se forma o lote, o plan.md e o todo.md
 
-**O agente aprofunda uma fatia coerente do codigo, correspondente a um unico lote.**
-Nao precisa ler todo o repositorio nem detalhar todos os achados do MTA antes de
-propor uma corretiva. O contrato e:
+O agente aprofunda somente as issues escolhidas e pontos relacionados. Varias issues
+so formam um lote com causa/solucao, aceite e reversao comuns. Dependencia em issue
+adiada/excluida exige decisao; sem selecao clara, o agente recomenda e pede escolha.
+Categoria mandatory nao transforma todo o relatorio em um lote.
 
-1. **Delimitar o objetivo.** Usa o objetivo informado. Sem objetivo, explora no
-   maximo tres familias candidatas em trechos limitados do MTA e escolhe um lote
-   pequeno, justificando a escolha. Outras familias ficam somente como candidatas.
-2. **Triar as ocorrencias pertinentes.** Relaciona regras, locais afetados,
-   dependencias e possiveis falsos positivos. Uma regra pode gerar varios achados;
-   duas regras podem apontar a mesma chamada. Regra, ocorrencia e lote nao sao
-   equivalentes. O agrupamento exige objetivo, transformacao, aceite e reversao comuns.
-3. **Conferir o codigo do lote.** Parte do `input` da rodada e verifica os pontos
-   correspondentes no projeto local: classes/metodos citados, POM raiz e dos modulos
-   afetados, testes e configuracoes relevantes. Amplia a leitura para interfaces,
-   consumidores e dependencias quando necessario para avaliar o impacto. Portanto,
-   nao fica restrito apenas as linhas citadas no relatorio, mas tambem nao faz uma
-   varredura indiscriminada. Registra arquivos lidos e cobertura parcial.
-4. **Propor a corretiva e sua verificacao.** Justifica a rota (ajuste especifico,
-   OpenRewrite ou combinacao), riscos, complexidade, precondicoes, testes, criterios
-   de aceite e reversao. Receita nao verificada e candidata; o planejamento nao a executa.
-5. **Gravar e reconciliar os dois documentos.** O plano explica a proposta; o
-   to-do organiza somente as tarefas desse lote. O condutor rele ambos, corrige
-   contradicoes e mantem lacunas como pendentes, sem inventar resultados.
+O agente confere regras MTA, snapshot input e pontos correspondentes no Source,
+POMs, consumidores, testes e configuracoes relevantes. Distingue contagem bruta,
+cobertura analisada e alteracoes deduplicadas. Justifica rota assistida/OpenRewrite/
+combinada, riscos, testes e pendencias sem inventar resultados.
 
-| Documento | Conteudo a conferir |
+| Documento | Conteudo |
 | --- | --- |
-| `plan.md` | Projeto/Source, RequestId, RunId/MtaOrigin, Previous quando houver; objetivo e escopo; achados e trechos conferidos; dependencias/POMs; solucao e alternativas; riscos; verificacoes e aceite; cobertura parcial e historico. |
-| `todo.md` | Mesmo lote e referencia ao plano; tarefas de implementacao e verificacao; pendencias tecnicas; checklist do desenvolvedor; revisao/GO e aceite separados. Nao e checklist de todo o MTA. |
-| Ambos | `Lote ativo: <ID>` consistente e bloco de decisao humana. Uma proposta nova comeca sem GO; Previous nao transfere aprovacao automaticamente. |
+| migracao.md | Escolhas/andamento por issue, cobertura e referencias. Nao substitui o plano tecnico. |
+| plan.md | Identidade, Lote ativo, proposta, POM/dependencias, escopo, verificacoes, reversao, historico e decisao humana. |
+| todo.md | Mesmo Lote ativo, link para plano/decisao e tarefas com evidencia de conclusao. Sem repetir a analise. |
 
-**Alvo EAP 7.4:** preservar Java 8 e `javax.*`; EAP 7.1 e referencia historica,
-sem exigir retrocompatibilidade. Para lotes Hibernate, incluir explicitamente o
-alinhamento dos POMs ao ORM 5.3 fornecido pelo EAP 7.4. A versao exata depende do
-modulo/patch instalado. Conferir parent/BOM/propriedades, escopos e dependencias
-de testes, evitando Hibernate duplicado no WAR. Nao copiar a versao de um exemplo
-sem evidencia nem considerar build com 5.1 prova de migracao para 5.3.
-
-POM declarado, resolucao Maven, API/testes, empacotamento e runtime possuem estados
-separados: CONFERIDO NAS EVIDENCIAS, PENDENTE ou CONFLITO. Ausencia de evidencia
-permite proposta preliminar; leitura de codigo nao comprova build ou runtime.
-Dispensar uma confirmacao previa nao elimina a entrega de alinhar o POM.
-
-**Sonar ANTES/DEPOIS e nova rodada MTA sao checklist nao bloqueante.** Sua ausencia
-nao impede proposta, GO, implementacao, entrega ou submissao ao aceite e nao exige
-dispensa. Continuam `[ ]` ate execucao comprovada. Cobertura abaixo de 85% gera
-aviso; testes reprovados e erro de compilacao continuam falhando. Sonar coletado
-mantem Blocker/High como reprovacao e o Gate do servidor separado; veja
-[criterios Sonar](#criterios-do-harness-e-comparacao).
-
-O proximo lote so sera identificado apos a corretiva, verificacoes e aceite
-humano do atual, mediante pedido de continuidade e reconciliacao com novo MTA.
-Nao reencontrar um achado nao prova homologacao. O que nao foi analisado deve
-permanecer explicitamente fora da cobertura, sem declarar a migracao concluida.
+Java 8, javax.* e EAP 7.4 permanecem; nao migrar para jakarta.*. Lote Hibernate inclui
+alinhar compilacao/testes ao ORM 5.3; patch exato depende de evidencia do destino.
+Conferir propriedade/parent/BOM, integracoes e escopos provided/test, sem embutir
+Hibernate no WAR. Build em 5.1 nao comprova 5.3; dispensa previa nao elimina a entrega.
 
 ### Localizar documentos e identificar o historico
 
-**Planejamento: abrir plano e to-do** lista solicitacoes com os dois documentos
-salvos. Selecione pelo projeto, datas e IDs; a tarefa apenas abre arquivos.
+**Planejamento: abrir plano e to-do** lista propostas salvas, pelo projeto/datas/IDs.
+RunId identifica MTA; RequestId identifica solicitacao; Previous aponta a anterior.
+Lote ativo identifica o trabalho mantido entre revisoes, independentemente do RunId.
 
-| Identificador | Significado |
-| --- | --- |
-| RunId | Rodada MTA; compare com o resultado da analise. |
-| RequestId / Solicitacao | Preparo do contexto de uma proposta. |
-| Previous.RequestId | Proposta anterior selecionada pelo desenvolvedor. |
-| Lote ativo | Trabalho mantido entre revisoes, por exemplo HIB-CACHE-001. |
-| Planejado | Data de preparacao do contexto, nao a ultima edicao do plano. |
-
-As solicitacoes ficam em
-`.harness/planning/<nome>__<chave12>/mta_<data-fuso>__<RunId12>/plano_<data-fuso>__<RequestId12>/`.
-Ali estao `context.json`, o prompt preparado e, depois da execucao pelo agente,
-`plan.md` e `todo.md`. O rotulo usa ate 24 caracteres, a chave distingue projetos
-homonimos e os recibos preservam IDs completos e datas UTC. Formatos antigos
-continuam legiveis, sem renomeacao. O armazenamento fisico MTA pode ser externo;
-use sempre os caminhos do contexto, conforme [analise e resultados](#analise-e-resultados).
+Solicitacoes ficam em
+`.harness/planning/<nome>__<chave>/mta_<data-fuso>__<RunId12>/plano_<data-fuso>__<RequestId12>/`.
+Ali ficam prompt, context.json e, apos o agente, plan.md/todo.md. Manutencao do
+registro usa `registro/solicitacao_<id>` sob a pasta de planejamento do projeto e nao aparece
+como lote no menu. Formatos historicos continuam legiveis, sem renomeacao.
+Novos preparos usam o contrato atualizado; nao e preciso repetir MTA para isso.
 
 ### Compartilhar o MTA e planejar em outra maquina
 
-Para **consulta visual**, copie `output/static-report` inteira, incluindo assets,
-scripts e arquivos ao lado de `index.html`. Abra a copia e confira a navegacao;
-somente o HTML nao basta. Essa copia nao e entrada completa para planejamento.
+Para consulta visual, copie output/static-report inteira; somente index.html nao
+basta. Para registro/planejamento, envie a rodada completa: manifest.json, result.json,
+input, rules e output. O destinatario seleciona projeto local e usa **p** no menu.
+Nao e necessario copiar toda .harness ou igualar caminhos/branches das maquinas.
 
-Para **gerar um plano novo**, envie a pasta inteira da rodada, por exemplo
-`C:/mta-runs/migracao-cache-antes/260930-154744`, com `manifest.json`, `result.json`,
-`input`, `rules` e `output`. O destinatario extrai em pasta local, seleciona seu
-projeto na task de planejamento e usa **p** para informar essa pasta. Enter no
-planejamento anterior inicia uma proposta independente. Nao precisa copiar toda
-`.harness`, importar/cadastrar a rodada, igualar os caminhos das maquinas ou rodar
-MTA novamente apenas porque mudou de maquina. O snapshot contem fontes: compartilhe
-somente com destinatarios autorizados ao projeto e confira o conteudo enviado.
+Pode copiar uma rodada antiga para `C:/mta-runs/<projeto>/AAMMDD-HHMMSS` e renomear
+apenas a pasta, usando data/hora original. Nao altere RunId, datas ou caminhos dos
+manifestos/resultados. Informe a copia por p/RunPath; renomear nao a cadastra como
+ultimo relatorio. Preserve a pasta original enquanto planos antigos a referenciarem.
+O snapshot contem fontes; confira o conteudo e os destinatarios do compartilhamento.
 
-A pasta recebida permanece intacta, fora da limpeza de rodadas locais. Mantenha-a
-no caminho informado durante o uso. O contexto separa:
-
-| Campo | Referencia |
-| --- | --- |
-| `MtaOrigin` | Identidade/Source historicos e RunId original do MTA. |
-| `AnalysisSource` | `input` da rodada recebida, base do diagnostico. |
-| `Source` | Projeto local escolhido, onde a corretiva sera proposta. |
-| `PomComparison` | Comparacao de `groupId:artifactId` no POM raiz; groupId pode vir do parent. `version` e informacao separada. |
-
-O POM ajuda a identificar o projeto, mas nao comprova igualdade dos fontes.
-Diferencas de coordenadas/versao ou propriedades nao resolvidas geram **alertas**,
-sem bloquear a proposta; essa leitura nao executa Maven/effective-pom. Novos
-contextos de planejamento nao coletam Git nem exigem igualdade de raiz, branch,
-HEAD ou IDs derivados de caminho entre as maquinas.
-
-O agente confere os trechos locais pertinentes contra o snapshot. Se mudaram,
-registra o alerta nos dois documentos, explica o que ainda se aplica e recomenda
-novo MTA, continuando a proposta dos pontos verificaveis. O harness nao faz essa
-comparacao semantica sozinho. Rodada incompleta, analise sem sucesso/integridade
-ou manifesto e resultado com IDs diferentes continuam sendo erros de entrada.
-
-Pela CLI, use `preparar-planejamento.ps1 -RunPath <pasta>` com workspace/projeto
-local e `-NewPlan`; `-NoOpen` apenas suprime abertura. RunPath e RunId sao alternativos.
+MtaOrigin preserva identidade/Source/RunId da origem; AnalysisSource e o input atual
+da rodada e Source e o projeto local. Diferencas Maven/codigo geram alertas; o agente
+confere aplicabilidade e recomenda novo MTA se necessario, sem bloquear por caminho/Git.
+Analise sem sucesso/integridade ou rodada incompleta continuam erros de entrada.
+A pasta recebida nao e copiada/importada nem apagada pela limpeza de rodadas locais.
 
 ### Revisao manual do plano e do to-do
 
-| Necessidade | Operacao na task de planejamento | Previous |
-| --- | --- | --- |
-| Nova proposta independente | 1. Planejar lote | Enter, sem anterior. |
-| Rever MTA e feedback salvo no plano/to-do | 1. Planejar lote | Selecionar a proposta com feedback. |
-| Rever com arquivos adicionais listados no LEIA-ME | 2. Revisar lote | Obrigatorio, junto com o indice preenchido. |
-
-Abra a proposta e salve uma secao **Observacoes do desenvolvedor - revisao pendente**,
-com data, ponto a corrigir e resultado esperado. Nao precisa duplicar o feedback
-nos dois arquivos; use plano para decisoes e to-do para tarefas. Preserve lote,
-identidade e evidencias. Prepare o novo contexto selecionando essa solicitacao
-como Previous e a rodada pertinente. Execute o prompt aberto em nova conversa
-Local com `devsquad`, pedindo revisao do mesmo lote, sem aplicar corretivas.
-
-O novo RequestId preserva os documentos anteriores. Confira se cada observacao
-foi atendida ou justificada em todas as secoes afetadas, sem manter exigencias
-antigas contraditorias. Uma revisao documental continua sem GO automatico.
-Os hashes fixam a versao de Previous no preparo: depois de vincula-la, preserve-a.
-Nao edite recibos ou evidencias MTA para registrar comentarios.
-
-Para corrigir uma omissao na entrega recem-gerada, ainda nao usada como Previous,
-peca na mesma conversa ajuste somente dos dois destinos atuais e releitura integral.
-Nao precisa repetir task, build ou MTA. Uma revisao com historico separado exige
-novo preparo com a proposta escolhida em Previous.
+Para completar a entrega atual, peca ajuste na mesma conversa/destinos; nao precisa
+refazer task, build ou MTA. Para registrar uma revisao separada, salve observacoes
+no plano, prepare contexto escolhendo-o como Previous e execute planejar-lotes.
+Preencha somente o que mudou no direcionamento; preserve ID, historico e pendencias.
+Nova proposta/revisao de escopo nao herda GO automaticamente. Nao edite recibos/MTA.
 
 ### Revisar um lote com evidencias complementares
 
-Evidencias adicionais sao opcionais para o planejamento inicial. Use-as quando
-quiser fundamentar a revisao com build/testes, arvore Maven, Sonar, ambiente EAP
-ou observacoes tecnicas. O MTA ja esta no contexto e nao precisa ser copiado outra vez.
+Use **Planejamento: criar pasta de evidencias** para abrir o indice do projeto.
+Repetir a tarefa reabre o mesmo indice, preservando seu conteudo. Liste arquivos
+relativos e sua relacao com a correcao; nao precisa de lote anterior.
 
-1. Execute **Planejamento: criar pasta de evidencias** para o projeto. A tarefa
-   cria `.harness/evidencias/<projeto>/evidencias_<data-fuso>__<id12>/LEIA-ME.md`,
-   preenche projeto/Source/data e abre o indice; nao coleta arquivos nem escolhe lote.
-2. Preencha lote e objetivo; copie manualmente os arquivos pertinentes e liste
-   cada caminho relativo, origem, data real da coleta, ambiente e limites.
-   Data de copia nao e data de coleta. Use PENDENTE para informacao desconhecida.
-3. Execute **Planejamento: preparar contexto para Copilot > 2. Revisar lote**,
-   selecione MTA e Previous e informe o LEIA-ME preenchido.
-4. Execute somente **revisar-lote.prompt.md** aberto pela task, em nova conversa
-   Local com `devsquad`. O `planejar-lotes.prompt.md` da mesma pasta e contexto-base.
-5. Confira os novos PlanPath/TodoPath, mesmo lote, feedback atendido ou justificado,
-   evidencias e pendencias. Revisar nao executa a corretiva nem concede GO.
+| Arquivo relativo | Relacao com a correcao |
+| --- | --- |
+| build-antes-result.json | Resultado ANTES; informar origem/data quando conhecidos. Nao comprova testes DEPOIS ou runtime. |
 
-Exemplo de feedback: "Separe os testes da regiao padrao e da nomeada; use o build
-ANTES apenas como evidencia do estado original; mantenha runtime DEPOIS pendente."
-No LEIA-ME, liste somente dados conferidos, como neste modelo a preencher:
+O indice padrao ja entra no preparo. Indice antigo/externo usa -EvidenceIndexPath.
+O [modelo existente](modelo-evidencias-complementares.md) serve como referencia
+para preenchimento manual. Nao exige formulario/hashes adicionais; o agente le
+somente os arquivos listados. Preserve evidencias ja usadas e dê nomes distintos
+a novos resultados. Pastas antigas .harness/evidencias continuam preservadas.
 
-| Arquivo relativo | Origem e data de coleta (com fuso) | Ambiente e artefato/versao | O que ajuda a verificar / limitacoes |
-| --- | --- | --- | --- |
-| build-antes-result.json | Tarefa build Maven; preencher data e RunId reais. | Preencher projeto, JDK, Maven e estado ANTES. | Resultado anterior a corretiva; nao comprova testes DEPOIS, runtime EAP ou GO. |
-
-A task usa o [modelo de indice](modelo-evidencias-complementares.md), mantido como
-arquivo separado por ser um template operacional. Nao ha hashes dos arquivos
-adicionais: o agente registra origem/limites e le somente os listados. Nao forneca
-segredos, settings privados ou logs brutos. Preserve a pasta depois de usada;
-para novos resultados, crie outra. Reabrir um LEIA-ME existente nao exige repetir
-a task. `.harness/evidencias` e local e preservada pela limpeza; os planos/MTA
-referenciados podem ser apagados pelas opcoes de limpeza correspondentes.
-
-#### Percurso de feedback com nova rodada MTA
-
-Se mudou apenas o feedback documental, reutilize a rodada pertinente. Para
-reavaliar codigo alterado, execute build/testes e novo MTA, depois selecione a
-nova rodada e o plano vigente em Previous. Acrescente resultados complementares
-quando disponiveis. O agente reconcilia achados persistentes, novos, nao reencontrados
-e inconclusivos, preservando o lote e as evidencias anteriores.
-A nova rodada nao muda o RunId de um contexto ja preparado. Proximo lote exige
-aceite do atual e pedido explicito; ausencia de achado nao equivale a aceite.
+Se ha novo MTA, selecione-o junto com Previous. Compare persistentes, novas,
+nao reencontradas e inconclusivas; nao altere o RunId de contexto ja preparado.
+Se mudou somente feedback/evidencia, reutilize a rodada pertinente.
 
 ### Da proposta revisada a execucao e ao aceite
 
-**GO autoriza implementar; aceite aprova o resultado depois.** Novos planos e
-revisoes trazem este bloco nos dois documentos:
+GO autoriza implementar; aceite aprova o resultado depois. Novos planos trazem uma
+unica secao **Decisao humana** no plan.md; todo.md aponta para ela:
 
 ```text
-## Decisao humana
 Responsavel:
 GO humano: PENDENTE
 Pendencias dispensadas como precondicao: nenhuma.
 Aceite do resultado: PENDENTE.
 ```
 
-Preencha seu nome e substitua GO por `autorizo implementar este plano e seu to-do`.
-Nao precisa repetir lote, RequestId e escopo ja identificados. Data e opcional.
-Mantenha a decisao consistente nos dois arquivos. Texto livre equivalente tambem vale.
+Preencha nome e GO com "autorizo implementar este plano e seu to-do". Data opcional.
+GO generico mantem precondicoes; para dispensa, identifique quais ou escreva
+"todas as precondicoes listadas". Verificacoes ausentes continuam pendentes.
+Documentos antigos com decisao nos dois arquivos continuam aceitos, sem exigir
+preencher GO duplicado. O agente nao responde pelo humano.
 
-| Decisao | Campo Pendencias dispensadas como precondicao |
-| --- | --- |
-| Cumprir as precondicoes tecnicas antes de implementar | `nenhuma` |
-| Prosseguir apesar de todas as precondicoes listadas | `todas as precondicoes listadas neste plano e to-do` |
-| Dispensar algumas | IDs ou descricoes precisas das condicoes dispensadas. As demais continuam exigidas. |
-
-Sonar e reexecucao MTA ja sao checklist nao bloqueante e nao precisam de dispensa.
-Uma dispensa expressa supera exigencias anteriores somente nesse alcance, sem
-marcar verificacoes como realizadas, alterar criterios ou conceder aceite.
-O executor reconhece o GO vigente antes do rotulo antigo PROPOSTA - NAO APROVADA
-e concilia textos superados; nao exige novamente a mesma decisao valida.
-Exemplo vazio, GO revogado ou decisoes conflitantes nao autorizam executar.
-
-Depois da implementacao, confira diff, build Java 8/testes, dependencias e WAR;
-registre separadamente MTA, Sonar e runtime EAP 7.4 realizados ou pendentes.
-Compilacao/testes reprovados exigem retrabalho. Cobertura abaixo de 85% e aviso,
-com `haltOnFailure=false` no JaCoCo quando configurado conforme o plano.
-O Quality Gate do servidor pode ter outra politica; o harness nao a altera.
-O desenvolvedor decide o aceite com as pendencias visiveis. Nao inventar comparacao
-ANTES/DEPOIS sem baseline nem homologacao EAP a partir de build/MTA.
-Deploy e controle do servidor seguem as rotinas autorizadas da equipe, sem Run Task aqui.
+Sonar ANTES/DEPOIS e novo MTA sao checklist nao bloqueante; nao precisam de dispensa.
+Nao fabricar baseline ANTES depois da corretiva. Cobertura meta 85% gera aviso;
+falha de compilacao/testes continua falha. Confira diff, build Java 8, dependencias,
+WAR e runtime EAP 7.4, distinguindo realizado de pendente. O desenvolvedor decide
+aceite com esses limites visiveis. Proximo lote exige aceite e pedido de continuidade;
+sem novo MTA, comparacao fica pendente, sem afirmar conclusao global.
 
 ### Preparar implementacao do lote
 
-1. Salve o GO nos documentos da solicitacao escolhida. Execute **Aplicacao:
+1. Salve o GO no plano da solicitacao escolhida. Execute **Aplicacao:
    preparar implementacao do lote**, confirme workspace/projeto e selecione a
    solicitacao com os dois arquivos. Enter vazio, q ou selecao invalida cancelam.
 2. Escolha explicitamente **1** para criar `lote/<ID-do-lote>`, **2** para usar a
@@ -1107,8 +1034,8 @@ Pela task **Planejamento: criar pasta de evidencias**, organize copias dos JSONs
 pertinentes e do resumo, listando cada arquivo real no LEIA-ME. Registre servidor,
 chave/branch, analysisId, data de coleta, estado dos fontes, configuracao relevante
 e limitacoes. Data de copia nao substitui data de coleta. Nao copie logs brutos,
-settings privados, credenciais ou scanner-work. Depois prepare **2. Revisar lote**
-com Previous e esse LEIA-ME. O agente de planejamento apenas le os resultados.
+settings privados, credenciais ou scanner-work. Depois prepare **1. Planejar ou
+atualizar lote**, com Previous quando houver e esse LEIA-ME. O agente apenas le os resultados.
 
 ### Origem e verificacao
 
@@ -1149,7 +1076,7 @@ Sonar Docker ou corporativo do operador.
    nao ha proposta anterior para selecionar.
 
 A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, template versionado do
-prompt, cache Maven, backups e `.harness/evidencias/`. Nao apaga `target/` da aplicacao nem copias externas
+prompt, cache Maven, backups e `.harness/evidencias/` e `.harness/projetos/`. Nao apaga `target/` da aplicacao nem copias externas
 de relatorios. No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
 pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
 recibo identificavel permanecem. A opcao todos remove as tres areas por inteiro.
@@ -1186,7 +1113,8 @@ podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 | `.harness/sonar/` | Resultados Sonar por projeto/data, com RESUMO.md, metricas, criterios e Gate; preservados pela limpeza de execucoes. |
 | `.harness/planning/` | Solicitacoes de planejamento ligadas a uma rodada MTA: `context.json` com identidades, caminhos, hashes e vinculo anterior; `planejar-lotes.prompt.md` preparado; `plan.md` e `todo.md` gravados posteriormente pelo Copilot. Preparar contexto sozinho nao cria o plano/to-do nem aprova o lote. |
 | `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
-| `.harness/evidencias/` | A tarefa Planejamento: criar pasta de evidencias cria pasta por projeto/data/ID e LEIA-ME.md orientativo. O desenvolvedor adiciona/lista os arquivos manualmente. Sem hashes adicionais; usados por revisar-lote. Preservados pela limpeza, locais e ausentes no clone. |
+| `.harness/projetos/` | Registro por raiz local e evidencias/LEIA-ME.md; criacao idempotente, sem duplicar por rodada. Preservados pela limpeza, locais e ausentes no clone. |
+| `.harness/evidencias/` | Evidencias historicas, preservadas e ainda utilizaveis por EvidenceIndexPath. |
 | `.harness/workspace-backups/` | Copia automatica do workspace anterior quando o gerador o substitui; permite recuperar pastas e ajustes manuais. Preservada pela tarefa de limpeza. |
 | `.harness/tests/` | Fixtures e resultados dos testes dos scripts; descartaveis quando nenhum teste estiver rodando. Recriada nos proximos testes. |
 | `%USERPROFILE%\.m2\repository` | Repositorio local padrao do Maven, fora do harness; compartilhado com os demais projetos da maquina, salvo configuracao propria do Maven. |
@@ -1221,7 +1149,7 @@ O [README](../../README.md) e a entrada resumida. Este guia concentra o fluxo op
 
 | Local | Conteudo |
 | --- | --- |
-| `doc/guias/` | Este guia concentra o uso. [Comparacao de branches](diagnostico-branches-git-tortoisegit.md) permanece separada; o [modelo de evidencias](modelo-evidencias-complementares.md) e consumido pela Run Task. |
+| `doc/guias/` | Este guia concentra o uso. [Comparacao de branches](diagnostico-branches-git-tortoisegit.md) permanece separada; o [modelo de evidencias](modelo-evidencias-complementares.md) orienta o preenchimento manual do indice. |
 | `doc/adr/` | Decisoes e justificativas, como [contexto local e acionamento do Copilot](../../doc/adr/0001-contexto-copilot.md). |
 | `doc/especificacoes/` | Contratos duradouros do harness e criterios verificaveis, como [planejamento Copilot](../../doc/especificacoes/planejamento-copilot.md). |
 | `doc/features/` | Registro historico dos primeiros ensaios, explicitamente datado; nao e outro guia de uso nem fonte de pendencias atuais. |
@@ -1269,6 +1197,8 @@ Para testar o acompanhamento e o historico, execute `powershell.exe -NoProfile -
 Para testar a selecao dos projetos do workspace, execute `powershell.exe -NoProfile -File .\tests\Test-Target.ps1`. Verifica o menu, packaging pom, padrao opcional, projetos homonimos, adicao/renomeacao e preservacao do JSON/workspace.
 
 Para testar os argumentos das tarefas, execute `powershell.exe -NoProfile -File .\tests\Test-TaskInputs.ps1`. Verifica as entradas suportadas e executa o script real de build ate o menu, com caminho de workspace contendo espacos; cancela antes de iniciar Maven.
+
+Para testar o registro, execute `powershell.exe -NoProfile -File .\tests\Test-MigrationRegister.ps1`.
 
 Para testar a pasta de evidencias, execute `powershell.exe -NoProfile -File .\tests\Test-EvidenceFolder.ps1`.
 Verifica selecao/cancelamento pela entrada real, isolamento de projetos homonimos,

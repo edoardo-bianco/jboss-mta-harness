@@ -42,15 +42,16 @@ ao fluxo da aplicacao e nao recebem desenvolvimento direto do harness.
 
 Nos exemplos deste repositorio, harness e aplicacao compartilham a raiz Git.
 Depois de integrar a evolucao do harness na principal, alinhar explicitamente
-a branch EAP 7.4; qualquer mudanca de HEAD exige reconciliar contextos/evidencias.
+a branch EAP 7.4 e revalidar o conteudo afetado. Conforme a ADR-0004, mudanca de
+HEAD isolada nao exige novo contexto nem reconciliacao formal de evidencias.
 Com frentes simultaneas, usar checkouts isolados. Em aplicacoes com repositorio
 proprio, a entrega do harness nao autoriza alterar as branches da aplicacao.
 
 ### Ciclo progressivo da migracao
 
 O ciclo pertence ao projeto/repositorio e a frente de trabalho identificados.
-A [ADR-0003](0003-projeto-branch-e-concorrencia-da-migracao.md) define a identidade
-Git, verificacao de branch e HEAD, alinhamento com a principal e corretivas paralelas.
+A [ADR-0004](0004-git-informativo-sem-controle-de-branches.md) define Git como
+informativo; os controles de branch/HEAD da ADR-0003 sao historicos e superados.
 Um lote ativo e por frente, nao um bloqueio global a outros desenvolvedores.
 
 1. Partir da rodada MTA selecionada e de evidencia identificada da aplicacao.
@@ -72,11 +73,13 @@ Um lote ativo e por frente, nao um bloqueio global a outros desenvolvedores.
    validacao funcional no EAP 7.4 conforme os criterios do lote. Registrar resultados,
    falhas e verificacoes pendentes; ausencia de evidencia nao equivale a aprovacao.
    Submeter o resultado e as pendencias a nova revisao humana para aceite ou retrabalho.
-6. Apos as verificacoes e o aceite humano, mediante pedido de continuidade, usar
-   o novo MTA e o planejamento anterior selecionados pelo desenvolvedor. Reconciliar
-   ocorrencias persistentes, novas, nao reencontradas e inconclusivas antes de
-   identificar e planejar o proximo lote. Preservar identidade e historico; nao
-   sobrescrever a rodada anterior. Pendencia impeditiva mantem o lote em retrabalho.
+6. Apos as verificacoes e o aceite humano, mediante pedido de continuidade,
+   reconciliar o planejamento anterior com as evidencias disponiveis. Novo MTA e
+   Sonar sao checklist nao bloqueante (consolidacao de 2026-10-01); sem novo MTA,
+   comparacao fica PENDENTE, sem afirmar desaparecimento ou conclusao global.
+   Quando houver rodada comparavel, conferir persistentes, novas, nao reencontradas
+   e inconclusivas. Preservar identidade/historico e a rodada anterior. Pendencia
+   tecnica impeditiva mantem o lote em retrabalho.
 
 Repetir esse ciclo ate concluir todas as corretivas do escopo de migracao. A
 conclusao exige reconciliacao da cobertura acumulada com a rodada final comparavel,
@@ -88,7 +91,9 @@ e revisao humana; nao devem ser contabilizados como corretivas aplicadas.
 ### Limites e guardrails
 
 O prompt `planejar-lotes` implementa a etapa de proposta e persistencia, com escrita
-somente em PlanPath/TodoPath. A execucao autorizada e outra etapa, com ferramentas
+em PlanPath/TodoPath e, desde o refinamento de 2026-10-01 da ADR-0001, andamento,
+cobertura e referencias das issues trabalhadas em MigrationPath explicito.
+O registro global de issues nao e um plano de todos os lotes. A execucao autorizada e outra etapa, com ferramentas
 e escopo proprios; este ADR nao habilita terminal ou alteracao da aplicacao dentro
 do prompt de planejamento. GO de um lote nao aprova seu resultado nem o proximo lote.
 

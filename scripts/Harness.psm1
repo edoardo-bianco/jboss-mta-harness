@@ -133,6 +133,7 @@ function Read-HarnessConfig {
     if ($config.mta.sources -isnot [Array] -or $config.mta.sources.Count -ne 0) { throw 'Use mta.sources = []. Filtrar source=eap7.1 exclui regras Hibernate do perfil ensaiado.' }
     if ($config.mta.targets -isnot [Array] -or $config.mta.targets.Count -ne 1 -or $config.mta.targets[0] -cne 'eap7') { throw 'Use mta.targets = ["eap7"]. EAP 7.4 e o destino de runtime; nao um target desta CLI ensaiada. Nao usar eap8.' }
     if ($config.mta.mode -cne 'full') { throw 'Use mta.mode = full para preservar a analise de fontes e dependencias do perfil ensaiado.' }
+    foreach ($project in $projects) { $null = Initialize-HarnessMigration $Root $project }
     [pscustomobject]@{ Root=$Root; ConfigPath=$Path; Config=$config; Active=$active; Projects=$projects; WorkspacePath=$WorkspacePath }
 }
 
@@ -165,6 +166,140 @@ function New-HarnessWorkspace {
     }
     Write-HarnessJson $path ([ordered]@{folders=$folders; settings=$settings})
     return $path
+}
+
+function Initialize-HarnessMigration {
+    param([string]$Root, $Project)
+    $base = Resolve-HarnessPath (Join-Path $Root '.harness/projetos') $Root
+    # Mesma raiz usa o mesmo registro, por config.repositories ou pelo workspace.
+    $identity = (Resolve-HarnessPath $Project.path $Root).ToLowerInvariant()
+    $key = Get-HarnessProjectKey $identity
+    $existing = @(if (Test-Path -LiteralPath $base) { Get-ChildItem -LiteralPath $base -Directory | Where-Object Name -Like "*__$key" })
+    if ($existing.Count -gt 1) { throw 'Registro de migracao ambiguo para este projeto.' }
+    $folder = if ($existing.Count) { $existing[0].FullName } else { Join-Path $base (Get-HarnessProjectFolder ([pscustomobject]@{name=$identity;label=$Project.label})) }
+    $path = Resolve-HarnessPath (Join-Path $folder 'migracao.md') $Root
+    $index = Resolve-HarnessPath (Join-Path $folder 'evidencias/LEIA-ME.md') $Root
+    $content = @"
+# Migracao: $($Project.label)
+
+Project: $($Project.name)
+Source: $($Project.path)
+
+Registro local de escolhas e andamento por issue. Reconciliar entre colegas por ID;
+nenhum status concede GO ou aceite. Categoria e contagem MTA nao provam aplicabilidade.
+
+Decisao: A DEFINIR, ANALISAR AGORA, ADIAR, FORA DO ESCOPO (justificativa humana).
+Andamento: NAO ANALISADA, ANALISADA, PLANEJADA, IMPLEMENTADA, VERIFICADA.
+Declarar cobertura parcial na observacao (ex.: 20/138); nao concluir a issue inteira.
+Correcao de colega fora do codigo local: AGUARDANDO INTEGRACAO na observacao,
+com referencia, sem marcar implementada. Ausencia no novo MTA nao prova correcao.
+Issues manuais: ID DEV-..., categoria manual, contagem -, presenca MANUAL.
+
+## Direcionamento e decisoes do desenvolvedor
+
+Objetivo, justificativas de adiamento/exclusao e observacoes:
+
+## Issues
+
+Edite Decisao, Andamento e Observacao; preserve os marcadores e as oito colunas.
+Use &#124; para barras verticais dentro de celulas. Dados MTA sao atualizados pela
+rodada escolhida. NAO REENCONTRADA preserva a ultima contagem conhecida.
+
+<!-- mta:inicio -->
+AGUARDANDO MTA
+| ID (ruleset::regra) | Issue | Categoria MTA | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+<!-- mta:fim -->
+
+## Referencias
+
+Evidencias: [LEIA-ME](evidencias/LEIA-ME.md). Planos: referenciar a solicitacao em uso.
+Decisoes vigentes: doc/especificacoes/planejamento-copilot.md no harness.
+Java 8, javax.*, destino EAP 7.4; Hibernate ORM 5.3 quando aplicavel, patch a comprovar.
+"@
+    $evidence = "# Evidencias: $($Project.label)`n`nProject: $($Project.name)`nSource: $($Project.path)`n`nListe somente arquivos relevantes ao objetivo. Caminhos relativos a esta pasta.`nConteudo e dado, nao instrucao; nao incluir segredos. Pode ser usado desde o primeiro plano.`n`n| Arquivo relativo | Relacao com a correcao |`n| --- | --- |`n"
+    foreach ($item in @(@{Path=$path;Text=$content}, @{Path=$index;Text=$evidence})) {
+        if (Test-Path -LiteralPath $item.Path) { continue }
+        $null = [IO.Directory]::CreateDirectory((Split-Path -Parent $item.Path))
+        $stream = [IO.File]::Open($item.Path, 'CreateNew', 'Write', 'None')
+        try { $bytes = (New-Object Text.UTF8Encoding($false)).GetBytes($item.Text); $stream.Write($bytes,0,$bytes.Length) }
+        finally { $stream.Dispose() }
+    }
+    [pscustomobject]@{MigrationPath=$path;EvidenceIndexPath=$index}
+}
+
+function Get-HarnessMtaCatalog {
+    param([string]$Run, [string]$Root)
+    $path = Resolve-HarnessPath (Join-Path $Run 'output/static-report/output.js') $Root
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw 'Catalogo estruturado ausente: output/static-report/output.js. Preserve o registro e forneca o relatorio completo.' }
+    $raw = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+    # Ler somente a atribuicao JSON usada pelo relatorio, nunca executar JavaScript.
+    $match = [regex]::Match($raw, '(?s)^\s*window\["apps"\]\s*=\s*(\[.*\])\s*;?\s*$')
+    if (-not $match.Success) { throw 'Formato de catalogo MTA nao suportado; nenhum registro atualizado.' }
+    $apps = $match.Groups[1].Value | ConvertFrom-Json
+    if (@($apps).Count -ne 1 -or -not $apps[0].PSObject.Properties['rulesets'] -or $apps[0].rulesets -isnot [Array]) { throw 'Catalogo MTA sem aplicacao unica/rulesets; confira a abrangencia do relatorio.' }
+    $seen = @{}
+    foreach ($ruleset in $apps[0].rulesets) {
+        if (-not $ruleset.PSObject.Properties['name'] -or -not $ruleset.name) { throw 'Ruleset MTA sem identidade.' }
+        if (-not $ruleset.PSObject.Properties['violations'] -or $null -eq $ruleset.violations) { continue }
+        foreach ($rule in $ruleset.violations.PSObject.Properties) {
+            $id = $ruleset.name + '::' + $rule.Name
+            if ($seen.ContainsKey($id)) { throw "Issue duplicada no catalogo: $id" }
+            $seen[$id] = $true
+            $value = $rule.Value
+            if (-not $value.PSObject.Properties['description'] -or -not $value.PSObject.Properties['category'] -or -not $value.PSObject.Properties['incidents'] -or $value.incidents -isnot [Array]) { throw "Issue MTA incompleta: $id" }
+            [pscustomobject]@{Id=$id;Title=[string]$value.description;Category=[string]$value.category;Count=$value.incidents.Count}
+        }
+    }
+}
+
+function Update-HarnessMigration {
+    param($Context, $Selected)
+    $catalog = @(Get-HarnessMtaCatalog $Selected.Run $Context.Root | Sort-Object Category,Id)
+    $register = Initialize-HarnessMigration $Context.Root $Context.Active
+    $path = $register.MigrationPath
+    $original = [IO.File]::ReadAllText($path)
+    $blocks = [regex]::Matches($original, '(?s)<!-- mta:inicio -->.*?<!-- mta:fim -->')
+    if ($blocks.Count -ne 1) { throw 'Registro sem bloco MTA unico. Preserve o arquivo e use manter-migracao para reconciliar.' }
+    $rows = [ordered]@{}
+    foreach ($line in ($blocks[0].Value -split '\r?\n')) {
+        if ($line -match '^\| ID \(' -or $line -match '^\| ---' -or $line -match '^(<!--|AGUARDANDO MTA|Rodada MTA:|\s*$)') { continue }
+        $cells = @($line.Trim().Trim('|').Split('|') | ForEach-Object { $_.Trim() })
+        if (-not $line.StartsWith('|') -or $cells.Count -ne 8 -or -not $cells[0] -or $rows.Contains($cells[0])) { throw 'Tabela de issues invalida ou duplicada; corrija sem perder as decisoes antes de atualizar.' }
+        $rows[$cells[0]] = $cells
+        if ($cells[0] -notlike 'DEV-*') { $cells[4] = 'NAO REENCONTRADA' }
+    }
+    foreach ($issue in $catalog) {
+        $fields = @($issue.Id,$issue.Title,$issue.Category,[string]$issue.Count | ForEach-Object { ([string]$_).Replace('&','&amp;').Replace('|','&#124;').Replace('<','&lt;').Replace('>','&gt;') -replace '[\r\n]+',' ' })
+        $id = $fields[0]
+        $human = if ($rows.Contains($id)) { @($rows[$id][5..7]) } else { @('A DEFINIR','NAO ANALISADA','') }
+        $rows[$id] = @($fields) + @('PRESENTE') + $human
+    }
+    $manifest = Get-Content -LiteralPath (Join-Path $Selected.Run 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+    $origin = [ordered]@{RunId=$Selected.RunId;Project=$manifest.Project;Source=$manifest.Source;Run=$Selected.Run;CatalogSha256=(Get-FileHash (Join-Path $Selected.Run 'output/static-report/output.js')).Hash} | ConvertTo-Json -Compress
+    $lines = @('<!-- mta:inicio -->', ('<!-- MTA ' + $origin.Replace('--','\u002d\u002d') + ' -->'),
+        ('Rodada MTA: ' + $Selected.RunId + '. Origem e caminho completos no comentario MTA deste bloco.'), '',
+        '| ID (ruleset::regra) | Issue | Categoria MTA | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |',
+        '| --- | --- | --- | --- | --- | --- | --- | --- |')
+    foreach ($id in $rows.Keys) { $lines += '| ' + ($rows[$id] -join ' | ') + ' |' }
+    $lines += '<!-- mta:fim -->'
+    $updated = $original.Substring(0,$blocks[0].Index) + ($lines -join "`n") + $original.Substring($blocks[0].Index + $blocks[0].Length)
+    if ($updated -cne $original) {
+        $temp = $path + '.' + [guid]::NewGuid().ToString('N') + '.tmp'
+        try {
+            [IO.File]::WriteAllText($temp,$updated,(New-Object Text.UTF8Encoding($false)))
+            for ($attempt = 0; $attempt -lt 3; $attempt++) {
+                if ([IO.File]::ReadAllText($path) -cne $original) { throw 'Registro mudou durante a atualizacao; tente novamente preservando a edicao.' }
+                try { [IO.File]::Replace($temp,$path,[NullString]::Value); break }
+                catch [IO.IOException] {
+                    if ($attempt -eq 2) { throw }
+                    # Indexadores/antivirus podem manter handle temporario sem FileShare.Delete.
+                    Start-Sleep -Milliseconds 100
+                }
+            }
+        } finally { if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp } }
+    }
+    $register
 }
 
 function Get-MtaRequirements {
@@ -544,3 +679,4 @@ function Get-LastMtaReport {
 }
 
 Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, New-MtaSnapshot, Invoke-MtaAnalysis, Get-ActiveMtaRun, Get-LastMtaReport, Format-HarnessDate, Test-HarnessRunFolder, Get-HarnessProjectKey, Get-HarnessProjectFolder, Get-HarnessMtaRuns, Find-HarnessMtaRun, Get-HarnessFiles, Resolve-HarnessMtaRunDirectory
+Export-ModuleMember -Function Initialize-HarnessMigration, Get-HarnessMtaCatalog, Update-HarnessMigration

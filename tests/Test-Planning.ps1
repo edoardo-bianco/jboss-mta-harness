@@ -10,6 +10,9 @@ function Reject($action, $message) {
 }
 $area = Join-Path $root ('.harness/tests/p' + [guid]::NewGuid().ToString('N').Substring(0,8))
 $fixture = Join-Path $area 'h'
+$contractDestination = Join-Path $fixture 'doc/especificacoes/planejamento-copilot.md'
+$null = [IO.Directory]::CreateDirectory((Split-Path $contractDestination -Parent))
+Copy-Item (Join-Path $root 'doc/especificacoes/planejamento-copilot.md') $contractDestination
 $app = Join-Path $area 'aplicacao com espacos'
 $other = Join-Path $area 'outra aplicacao'
 foreach ($path in @($fixture,$app,$other)) { $null = New-Item -ItemType Directory -Path $path -Force }
@@ -130,7 +133,7 @@ Set-Content -LiteralPath $prepared.PlanPath 'PLANO-DE-CORRETIVAS-EXISTENTE'
 Set-Content -LiteralPath $prepared.TodoPath 'TAREFAS-DE-CORRETIVAS-EXISTENTES'
 $plansBefore = @(@($prepared.PlanPath,$prepared.TodoPath) | ForEach-Object { Get-FileHash -LiteralPath $_ })
 Assert ($prepared.RunId -eq $oldId -and $promptText.Contains($oldId)) 'Prompt nao fixou a rodada escolhida.'
-Assert ($promptText.Contains('output/dependencies.yaml') -and $promptText.Contains('Estado atual dos fontes: NAO VERIFICADO')) 'Contexto sem evidencias ou sem limite historico.'
+Assert ($promptText.Contains('ContextPath') -and $promptText.Contains('Estado atual dos fontes: NAO VERIFICADO')) 'Contexto sem evidencias ou sem limite historico.'
 Assert ($promptText.StartsWith((Get-Content -LiteralPath $promptSource -Raw -Encoding UTF8).TrimEnd())) 'Prompt gerado divergiu das instrucoes versionadas.'
 $again = New-MtaPlanningContext $context -RunId $oldId
 Assert ($again.PromptPath -ne $prepared.PromptPath) 'Nova solicitacao sobrescreveu a anterior.'
@@ -215,7 +218,7 @@ $editorArgs = Get-Content -LiteralPath (Join-Path $scripts 'editor-args.json') -
 Assert ($editorArgs.Count -eq 2 -and $editorArgs[0] -eq '--reuse-window' -and (Test-Path -LiteralPath $editorArgs[1])) 'Editor recebeu argumentos diferentes de abertura do prompt.'
 Write-Output 'PASS: contexto unico e fixo, preservacao de evidencias/fontes, revalidacao e entrada real sem ferramentas externas.'
 
-# Revisao pela task: selecionar modo, proposta anterior e indice explicitamente.
+# Compatibilidade: revisao antiga explicita continua legivel; novo menu usa planejamento unico.
 Copy-Item -LiteralPath (Join-Path $root '.github/prompts/revisar-lote.prompt.md') -Destination (Join-Path $fixture '.github/prompts/revisar-lote.prompt.md')
 $indexPath = Join-Path $fixture '.harness/evidencias/pasta com espacos/LEIA-ME.md'
 $null = New-Item -ItemType Directory -Path (Split-Path -Parent $indexPath) -Force
@@ -224,8 +227,8 @@ $protected = @(@($prepared.ContextPath,$prepared.PlanPath,$prepared.TodoPath,$in
 Reject { Select-MtaPreviousPlanning $otherContext -Required } 'Revisao sem proposta persistida aceita.'
 Reject { New-MtaPlanningContext $context -RunId $oldId -Operation revisar-lote -EvidenceIndexPath $indexPath } 'Revisao sem Previous aceita pela API.'
 Reject { New-MtaPlanningContext $context -RunId $oldId -Operation revisar-lote -PreviousRequestId $prepared.RequestId } 'Revisao sem indice aceita pela API.'
-$reviewArgs = @('-NoProfile','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-Target',$app,'-RunId',$oldId,'-SelectOperation','-EditorPath',$editorPath)
-$output = @('2','1',$indexPath) | & powershell.exe @reviewArgs 2>&1 | Out-String
+$reviewArgs = @('-NoProfile','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-Target',$app,'-RunId',$oldId,'-Operation','revisar-lote','-EditorPath',$editorPath)
+$output = @('1',$indexPath) | & powershell.exe @reviewArgs 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0) "Preparo de revisao pelo menu falhou: $output"
 Assert ($output.Contains('Alternativa no chat: /revisar-lote ') -and -not $output.Contains('Alternativa no chat: /planejar-lotes ')) 'Revisao deve orientar somente o comando adequado.'
 Assert ($output.Contains($indexPath)) 'Chamada nao inclui o indice explicito.'
@@ -240,7 +243,7 @@ $reviewPrompt = Get-Content -LiteralPath $editorArgs[1] -Raw -Encoding UTF8
 Assert ($reviewPrompt.StartsWith((Get-Content -LiteralPath (Join-Path $fixture '.github/prompts/revisar-lote.prompt.md') -Raw -Encoding UTF8).TrimEnd())) 'Prompt de revisao perdeu seu contrato.'
 Assert ($reviewPrompt.Contains($indexPath.Replace('\','/')) -and $reviewPrompt.Contains('planejar-lotes.prompt.md')) 'Prompt executavel nao fornece os dois caminhos ao revisor.'
 $count = @(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness/planning') -Recurse -Filter 'context.json' -File).Count
-foreach ($answers in @(@('q'),@(''),@('2','q'),@('2',''),@('2','1','q'),@('2','1',''),@('2','1',(Join-Path $fixture 'ausente.md')))) {
+foreach ($answers in @(@('q'),@(''),@('1','q'),@('1',''),@('1',(Join-Path $fixture 'ausente.md')))) {
     $output = $answers | & powershell.exe @reviewArgs 2>&1 | Out-String
     Assert ($LASTEXITCODE -eq 1) "Revisao aceitou selecao cancelada/incompleta: $answers"
     Assert (@(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness/planning') -Recurse -Filter 'context.json' -File).Count -eq $count) 'Entrada invalida gerou contexto.'
@@ -255,6 +258,26 @@ Assert ($LASTEXITCODE -eq 1 -and $output.Contains('nao use NewPlan')) 'Revisao a
 $output = '1' | & powershell.exe @explicitArgs -SelectOperation -NewPlan 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $output.Contains('Alternativa no chat: /planejar-lotes ') -and -not $output.Contains('Alternativa no chat: /revisar-lote ')) 'Menu perdeu modo de planejamento.'
 Write-Output 'PASS: revisao explicita, Previous obrigatorio, indice, comando/editor corretos e cancelamento sem escrita.'
+# Evidencias desde a proposta inicial e revisao no mesmo prompt.
+$initialWithEvidence = New-MtaPlanningContext $context -RunId $oldId -EvidenceIndexPath $indexPath
+$initialReceipt = Get-Content $initialWithEvidence.ContextPath -Raw | ConvertFrom-Json
+Assert ($initialReceipt.Previous -eq $null -and $initialReceipt.EvidenceIndexPath -eq $indexPath.Replace('\','/')) 'Proposta inicial nao aceita evidencias.'
+Assert ($initialReceipt.MigrationSnapshot -and (Test-Path $initialReceipt.MigrationPath)) 'Registro e escolhas nao vinculados ao recibo.'
+$updatedUnified = New-MtaPlanningContext $context -RunId $oldId -PreviousRequestId $prepared.RequestId -EvidenceIndexPath $indexPath
+Assert (-not $updatedUnified.ReviewPromptPath -and (Split-Path $updatedUnified.PromptPath -Leaf) -eq 'planejar-lotes.prompt.md') 'Atualizacao ainda exige segundo prompt.'
+Copy-Item (Join-Path $root '.github/prompts/manter-migracao.prompt.md') (Join-Path $fixture '.github/prompts/manter-migracao.prompt.md')
+$maintenanceArgs = @('-NoProfile','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-Target',$app,'-NoOpen')
+$registerHash = (Get-FileHash $initialReceipt.MigrationPath).Hash
+$output = @('2','2') | & powershell.exe @maintenanceArgs -SelectOperation 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains('manter-migracao.prompt.md')) 'Menu deve preparar manutencao sem novo MTA.'
+Assert ((Get-FileHash $initialReceipt.MigrationPath).Hash -eq $registerHash) 'Manutencao por evidencias alterou o catalogo.'
+$output = & powershell.exe @maintenanceArgs -Operation manter-migracao -WithoutMta -MigrationSourcePath $prepared.PlanPath -EvidenceIndexPath $indexPath 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0) 'Documento-base e indice existentes recusados.'
+$count = @(Get-ChildItem (Join-Path $fixture '.harness/planning') -Filter context.json -Recurse).Count
+$output = @('2','q') | & powershell.exe @maintenanceArgs -SelectOperation 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and @(Get-ChildItem (Join-Path $fixture '.harness/planning') -Filter context.json -Recurse).Count -eq $count) 'Cancelar manutencao criou contexto.'
+Write-Output 'PASS: menu unificado, manutencao sem scan e documento/evidencias existentes.'
+
 
 # Historico antigo continua acessivel sem mover documentos ou reescrever recibos.
 $legacy = $receipt | ConvertTo-Json -Depth 12 | ConvertFrom-Json

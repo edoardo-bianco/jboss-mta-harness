@@ -56,11 +56,17 @@ o controle de branches da ADR-0003.
   Registre cobertura parcial; deixe a identificacao do proximo lote para depois
   da corretiva, verificacoes e aceite humano do atual, mediante continuidade pedida.
 - Separe proposta, revisao/GO humano, execucao autorizada, verificacoes automaticas
-  e revisao/aceite humano do resultado. Use a nova rodada MTA e o historico para
-  reconciliar resultados antes do proximo lote; nunca trate pendencia como sucesso.
-- Os prompts `planejar-lotes` e `revisar-lote` so gravam os dois documentos de
-  corretivas. Aplicar o lote exige etapa autorizada separadamente. Nao infira permissao de execucao ou
-  aceite a partir da existencia de arquivos, ferramentas ou resultados de testes.
+  e revisao/aceite humano do resultado. Reconcilie evidencias e historico antes do
+  proximo lote; nova rodada MTA/Sonar sao checklist nao bloqueante. Comparacao
+  ausente fica pendente, sem declarar resolucao ou conclusao global.
+- Siga o [contrato vigente](doc/especificacoes/planejamento-copilot.md), inclusive
+  Java 8/javax/EAP 7.4 e Hibernate 5.3 quando aplicavel. `planejar-lotes` cria ou
+  atualiza um lote; `revisar-lote` permanece para compatibilidade.
+  Escreva PlanPath/TodoPath e, se MigrationPath estiver explicito, apenas andamento,
+  cobertura e referencias das issues trabalhadas, preservando decisoes humanas.
+  `manter-migracao` so escreve MigrationPath, sem planejar ou aplicar corretivas.
+  Aplicar o lote exige etapa autorizada separadamente. Nao infira execucao ou
+  aceite da existencia de arquivos, ferramentas ou resultados de testes.
 - Gestao de branches, integracao e coordenacao de frentes pertencem ao desenvolvedor.
   .harness e local: nao e lock compartilhado. Politicas Git antigas sao historicas,
   nao pendencias a renovar. Preserve trabalho local e revalide o codigo integrado

@@ -31,19 +31,19 @@ Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada')) 'Cancela
 Assert (-not (Test-Path -LiteralPath (Join-Path $fixture '.harness'))) 'Cancelar criou estrutura.'
 $output = '2' | & powershell.exe @entryArgs 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0) ('Criacao falhou: ' + $output)
-$base = Join-Path $fixture '.harness/evidencias'
-$first = @(Get-ChildItem -LiteralPath $base -Recurse -File)
+$base = Join-Path $fixture '.harness/projetos'
+$first = @(Get-ChildItem -LiteralPath $base -Recurse -Filter LEIA-ME.md -File | Where-Object { (Get-Content $_.FullName -Raw).Contains($other) })
 Assert ($first.Count -eq 1 -and $first[0].Name -eq 'LEIA-ME.md') 'Criou arquivos alem do indice.'
 $index = Get-Content -Raw -Encoding UTF8 $first[0].FullName
 Assert ($index.Contains($other) -and -not $index.Contains($app)) 'Identidade de outro projeto.'
-Assert ($index.Contains('/revisar-lote') -and $index.Contains('Previous') -and $index.Contains('ID do lote existente: PREENCHER')) 'Faltam instrucoes ou inferiu lote.'
+Assert ($index.Contains('Arquivo relativo') -and $index.Contains('Relacao com a correcao') -and $index.Contains('primeiro plano')) 'Faltam instrucoes ou inferiu lote.'
 Assert ($output.Contains($first[0].FullName)) 'Terminal nao informou caminho do indice.'
 Add-Content -LiteralPath $first[0].FullName 'EVIDENCIA MANUAL PRESERVAR'
 $preserved = Get-Content -Raw $first[0].FullName
 $output = '2' | & powershell.exe @entryArgs 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0) 'Repeticao falhou.'
 Assert ((Get-Content -Raw $first[0].FullName) -ceq $preserved) 'Repeticao sobrescreveu indice anterior.'
-Assert (@(Get-ChildItem -LiteralPath $base -Directory).Count -eq 1 -and @(Get-ChildItem -LiteralPath $base -Recurse -File).Count -eq 2) 'Repeticao nao criou nova pasta no mesmo projeto.'
+Assert (@(Get-ChildItem -LiteralPath $base -Directory).Count -eq 2 -and @(Get-ChildItem -LiteralPath $base -Recurse -File).Count -eq 4) 'Repeticao duplicou arquivos do projeto.'
 $editor = Join-Path $scripts 'editor.ps1'
 Set-Content -LiteralPath $editor -Encoding UTF8 -Value '$args | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $PSScriptRoot "editor-args.json")'
 $output = & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -EditorPath $editor 2>&1 | Out-String

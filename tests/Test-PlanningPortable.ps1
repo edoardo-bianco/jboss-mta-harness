@@ -18,6 +18,7 @@ Set-Content (Join-Path $run 'rules/test.yaml') '[]'
 Set-Content (Join-Path $run 'output/output.yaml') '[]'
 Set-Content (Join-Path $run 'output/dependencies.yaml') '[]'
 Set-Content (Join-Path $run 'output/static-report/index.html') '<html />'
+Set-Content (Join-Path $run 'output/static-report/output.js') 'window["apps"] = [{"id":"0000","rulesets":[{"name":"teste","violations":{"regra":{"description":"Issue recebida","category":"mandatory","incidents":[{"uri":"file:///antigo/a.java"}]}}}]}]'
 $manifest = @{RunId=$id;Project='projeto-na-origem';Source='Z:/maquina-origem/repositorio';CreatedAtUtc='2026-09-30T18:47:44Z';Git=@{Branch='branch-origem';Head='historico'};IndexPath='Z:/harness/.harness/runs/inexistente'}
 $result = @{RunId=$id;Project=$manifest.Project;Status='SUCCEEDED';ExitCode=0;SourceUnchanged=$true;SnapshotOriginalFilesUnchanged=$true;RulesUnchanged=$true;UnexpectedAddedFiles=@();ReportPath='Z:/origem/relatorio.html'}
 Write-HarnessJson (Join-Path $run 'manifest.json') $manifest
@@ -44,17 +45,25 @@ foreach ($file in $before) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash
 
 # Mesmo projeto, raiz e identidade derivada do caminho diferentes nesta maquina.
 $fixture = Join-Path $area 'h'
+$contractDestination = Join-Path $fixture 'doc/especificacoes/planejamento-copilot.md'
+$null = [IO.Directory]::CreateDirectory((Split-Path $contractDestination -Parent))
+Copy-Item (Join-Path $root 'doc/especificacoes/planejamento-copilot.md') $contractDestination
 $localSource = Join-Path $area 'checkout-local/repositorio'
 $null = New-Item -ItemType Directory -Path $localSource -Force
 Set-Content (Join-Path $localSource 'pom.xml') '<project><groupId>org.exemplo</groupId><artifactId>app</artifactId><version>2</version></project>'
 $context = [pscustomobject]@{Root=$fixture;Active=[pscustomobject]@{name='projeto-local';label='app';path=$localSource}}
-foreach ($name in @('planejar-lotes','revisar-lote','implementar-lote')) {
+foreach ($name in @('planejar-lotes','revisar-lote','implementar-lote','manter-migracao')) {
     $destination = Join-Path $fixture ('.github/prompts/' + $name + '.prompt.md')
     $null = New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force
     Copy-Item (Join-Path $root ('.github/prompts/' + $name + '.prompt.md')) $destination
 }
 $prepared = New-MtaPlanningContext $context -RunId $id -RunPath $run
 $receipt = Get-Content $prepared.ContextPath -Raw | ConvertFrom-Json
+Assert ($receipt.CatalogStatus -eq 'ATUALIZADO' -and $receipt.ContractSnapshot.Contains('Hibernate ORM 5.3')) 'Catalogo/decisoes nao foram preservados no contexto.'
+Assert ($receipt.MigrationSnapshot.Contains('teste::regra') -and $receipt.MigrationSnapshot.Contains('| mandatory | 1 |')) 'Rodada recebida nao preencheu registro.'
+$maintained = New-MtaMigrationPrompt $context -RunPath $run
+$maintainedReceipt = Get-Content $maintained.ContextPath -Raw -Encoding UTF8 | ConvertFrom-Json
+Assert ($maintainedReceipt.RunId -ceq $id -and $maintainedReceipt.MigrationPath.Replace('\','/') -eq $receipt.MigrationPath) 'Manutencao com MTA recebido perdeu origem ou registro.'
 Assert ($receipt.Source -eq $localSource.Replace('\','/') -and $receipt.AnalysisSource -eq (Join-Path $run 'input').Replace('\','/')) 'Snapshot e aplicacao local foram confundidos.'
 Assert ($receipt.MtaOrigin.Project -eq $manifest.Project -and $receipt.MtaOrigin.Source -eq $manifest.Source -and $receipt.RunId -eq $id) 'Origem MTA foi reatribuida ao checkout local.'
 Assert (-not $receipt.PSObject.Properties['Git'] -and -not $receipt.PSObject.Properties['MtaGit']) 'Novo planejamento exige referencias Git.'

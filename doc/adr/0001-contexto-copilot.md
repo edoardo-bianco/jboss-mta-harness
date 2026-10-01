@@ -41,3 +41,29 @@ o lote aceito. O agente reconcilia rodadas e resultados antes de propor outro lo
 Habilitamos criacao/edicao de arquivos para os dois resultados, sem terminal.
 Os limites de paths sao instrucoes do prompt e revisao do desenvolvedor, nao uma
 sandbox de escrita por pasta. A execucao das corretivas permanece outra etapa.
+
+## Refinamento: registro por projeto e prompt unico - 2026-10-01
+
+Implementacao solicitada pelo desenvolvedor. Cada raiz Maven recebe registro local
+migracao.md e indice de evidencias sob .harness/projetos; a criacao e idempotente.
+O catalogo usa a rodada explicitamente selecionada, inclusive antiga ou recebida;
+nao depende de executar outro MTA. Categorias/contagens vem dos dados do relatorio,
+nao de inferencia do agente. Decisoes e andamento sao campos independentes.
+
+planejar-lotes atende proposta inicial e atualizacao, com plano anterior e evidencias
+opcionais. manter-migracao e uma operacao opcional do mesmo menu para conciliar
+registro existente/recebido, novo MTA e/ou evidencias, sem loop obrigatorio de prompts.
+O recibo preserva o retrato do registro usado no preparo; o registro permanece mutavel.
+A decisao humana fica no plano, referenciada pelo to-do; formatos antigos continuam legiveis.
+
+Os templates curtos referenciam o contrato tecnico existente em
+[planejamento-copilot](../especificacoes/planejamento-copilot.md); novas decisoes sao
+mantidas ali e nas ADRs, sem criar documentos paralelos. Recibos novos guardam
+copia desse contrato; o caminho original continua como referencia. Prompts e recibos
+historicos nao sao reescritos. Preparacao nunca envia o pedido ao agente.
+
+manter-migracao pode escrever somente MigrationPath. Planejador/executor podem
+registrar andamento, cobertura e evidencia das issues do trabalho autorizado nesse
+destino explicito; escolhas humanas, outras issues e catalogo ficam preservados.
+Isso amplia os dois destinos anteriores de forma delimitada, sem autorizar escrita
+geral em .harness, fontes no planejamento ou GO/aceite pelo agente.

@@ -15,9 +15,15 @@ principal e alinhe a migracao separadamente, conforme AGENTS.md.
 
 Planeje somente um lote consistente por vez. O ciclo e proposta, revisao/GO humano,
 execucao autorizada, verificacoes automaticas e revisao/aceite humano do resultado.
-Depois, com pedido de continuidade, reconcilie o novo MTA com o historico antes de
-identificar o proximo lote. Mantenha cobertura pendente ate a conclusao verificada
-de todo o escopo. O prompt de planejamento nao autoriza executar corretivas.
+Depois, com aceite e pedido de continuidade, reconcilie as evidencias disponiveis;
+comparacao com novo MTA fica pendente se nao houver rodada. Nao declarar conclusao
+global sem evidencia. O prompt de planejamento nao autoriza executar corretivas.
+
+Siga o [contrato vigente](../doc/especificacoes/planejamento-copilot.md): decisoes
+Java 8/javax/EAP 7.4 e Hibernate permanecem. planejar-lotes atende proposta e revisao.
+MigrationPath explicito permite somente andamento/cobertura/referencias das issues
+trabalhadas, preservando escolhas humanas e catalogo. manter-migracao grava apenas
+esse registro; nao concede GO/aceite nem inicia planejamento automaticamente.
 
 Siga a [ADR-0004](../doc/adr/0004-git-informativo-sem-controle-de-branches.md):
 o desenvolvedor escolhe a branch. Git e informativo, sem cadastro de politica,

@@ -85,3 +85,13 @@ As regras de branch exclusiva e revisao para evoluir o proprio harness permanece
 Testar coleta sem politica, configuracao legada ignorada/preservada, preparo sem
 menu Git e abertura sem gate. Manter testes de isolamento por projeto, integridade
 MTA e preservacao de contextos antigos. Obediencia do agente requer ensaio no cliente.
+
+## Registro local e conciliacao entre colegas - 2026-10-01
+
+migracao.md identifica issues e decisoes, sem lock compartilhado, responsaveis
+cadastrados, papeis de branch ou sincronizacao automatica. A raiz local identifica
+sua pasta; documentos recebidos sao entradas explicitamente escolhidas. Caminhos
+historicos nao precisam existir. Conflitos ficam visiveis para conciliacao manual;
+correcao declarada por colega nao comprova integracao no Source local.
+Receber/copiar/renomear pasta MTA nao cadastra automaticamente o ultimo relatorio.
+Selecao explicita por RunPath preserva a origem e o RunId sem editar manifestos.
