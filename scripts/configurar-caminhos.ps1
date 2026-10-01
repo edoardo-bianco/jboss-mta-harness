@@ -41,8 +41,8 @@ try {
     Write-Host 'Confira sonar: serverUrl (local/corporativo), scannerJdkHome, scannerVersion (padrao 5.8.0.7211; validar compatibilidade), ceTimeoutSeconds e profiles. Token nunca vai no JSON; a tarefa solicita entrada oculta.'
     Write-Host 'Para criar um workspace pelo JSON, preencha repositories e execute Workspace: gerar workspace. Para adicionar projetos no workspace existente, use Add Folder to Workspace.'
     if ($EditorPath) {
-        if (-not (Test-Path -LiteralPath $EditorPath -PathType Leaf)) { throw 'Executavel do editor nao encontrado.' }
-        & $EditorPath --reuse-window $ConfigPath
+        Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -Force -DisableNameChecking
+        Open-HarnessEditor -EditorPath $EditorPath -FilePaths $ConfigPath -Root (Split-Path -Parent $PSScriptRoot)
     }
     exit 0
 } catch {

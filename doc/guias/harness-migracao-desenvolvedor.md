@@ -680,6 +680,11 @@ Confira **Chat: Open Customizations** e **Configure Tools**: subagente
 Se .harness estiver oculta, abra o caminho exibido com Ctrl+P. Ausencia na busca
 nao prova ausencia do arquivo. Resposta apenas no chat nao substitui a proposta salva.
 
+A abertura usa bin/code.cmd da mesma instalacao indicada pela tarefa (code-insiders.cmd
+no Insiders), com --reuse-window. O terminal informa a CLI usada e eventuais falhas;
+os arquivos ja preparados permanecem salvos. Se a aba nao aparecer, use Ctrl+O com
+o caminho exibido, sem preparar outra solicitacao nem limpar o cache do editor.
+
 O prompt [planejar-lotes](../../.github/prompts/planejar-lotes.prompt.md) atende inicio
 e revisao; revisar-lote permanece para contextos antigos. Nao ha segundo prompt
 obrigatorio nem ciclo de manutencao/planejamento repetido. Na retomada, preserve

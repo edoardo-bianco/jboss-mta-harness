@@ -22,6 +22,38 @@ function Resolve-HarnessPath {
     return $full
 }
 
+function Open-HarnessEditor {
+    param(
+        [Parameter(Mandatory=$true)][string]$EditorPath,
+        [Parameter(Mandatory=$true)][string[]]$FilePaths,
+        [Parameter(Mandatory=$true)][string]$Root
+    )
+    $editor = Resolve-HarnessPath $EditorPath $Root
+    if (-not $editor -or -not (Test-Path -LiteralPath $editor -PathType Leaf)) { throw 'Executavel do editor nao encontrado.' }
+    # ${execPath} aponta ao aplicativo Electron. A CLI encaminha a abertura para
+    # a instancia existente, usando a mesma instalacao (inclusive portable).
+    $cliName = switch ([IO.Path]::GetFileName($editor)) {
+        'Code.exe' { 'code.cmd' }
+        'Code - Insiders.exe' { 'code-insiders.cmd' }
+    }
+    if ($cliName) {
+        $editor = Resolve-HarnessPath (Join-Path (Split-Path -Parent $editor) ('bin/' + $cliName)) $Root
+        if (-not (Test-Path -LiteralPath $editor -PathType Leaf)) {
+            throw "CLI do VS Code nao encontrada: $editor. Confira a instalacao ou informe -EditorPath com o caminho da CLI."
+        }
+    }
+    if (-not $FilePaths.Count) { throw 'Informe ao menos um arquivo para abrir.' }
+    $files = @(foreach ($file in $FilePaths) {
+        $path = Resolve-HarnessPath $file $Root
+        if (-not $path -or -not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Arquivo para abrir nao encontrado: $file" }
+        if ([IO.Path]::IsPathRooted($file)) { $file } else { $path }
+    })
+    Write-Host "Abrindo arquivos via: $editor"
+    $global:LASTEXITCODE = 0
+    & $editor --reuse-window @files
+    if ($LASTEXITCODE -ne 0) { throw "Editor retornou codigo $LASTEXITCODE. Os arquivos continuam salvos nos caminhos informados." }
+}
+
 function Write-HarnessJson {
     param([string]$Path, $Value)
     $null = [IO.Directory]::CreateDirectory((Split-Path -Parent $Path))
@@ -680,3 +712,4 @@ function Get-LastMtaReport {
 
 Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, New-MtaSnapshot, Invoke-MtaAnalysis, Get-ActiveMtaRun, Get-LastMtaReport, Format-HarnessDate, Test-HarnessRunFolder, Get-HarnessProjectKey, Get-HarnessProjectFolder, Get-HarnessMtaRuns, Find-HarnessMtaRun, Get-HarnessFiles, Resolve-HarnessMtaRunDirectory
 Export-ModuleMember -Function Initialize-HarnessMigration, Get-HarnessMtaCatalog, Update-HarnessMigration
+Export-ModuleMember -Function Open-HarnessEditor

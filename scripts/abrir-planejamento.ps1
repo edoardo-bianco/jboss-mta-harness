@@ -20,11 +20,7 @@ try {
     if (-not $NoOpen) {
         if (-not $EditorPath) { Write-Host 'Abra os dois arquivos acima no VS Code ou informe -EditorPath.' }
         else {
-            $editor = Resolve-HarnessPath $EditorPath $harnessRoot
-            if (-not (Test-Path -LiteralPath $editor -PathType Leaf)) { throw 'Executavel do editor nao encontrado.' }
-            $global:LASTEXITCODE = 0
-            & $editor --reuse-window $selected.PlanPath $selected.TodoPath
-            if ($LASTEXITCODE -ne 0) { throw "Editor retornou codigo $LASTEXITCODE. Os caminhos estao acima." }
+            Open-HarnessEditor -EditorPath $EditorPath -FilePaths @($selected.PlanPath, $selected.TodoPath) -Root $harnessRoot
         }
     }
     exit 0

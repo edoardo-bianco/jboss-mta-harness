@@ -4,6 +4,19 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Abertura automatica do editor - 2026-10-01
+
+Evolucao do harness na branch harness/abertura-editor-prompt, de main 9dae3cc.
+Relato: contexto salvo, mas Code.exe --reuse-window apresentou Database IO error
+e o prompt nao abriu. A CLI instalada bin/code.cmd executa cli.js e encaminha a
+abertura; teste real com o prompt existente retornou 0 e o desenvolvedor confirmou
+que abriu na janela existente. A funcao corrigida tambem retornou 0 no PS 5.1.
+Reproduzir tambem o codigo de erro ignorado pelo preparador. Centralizar abertura
+na CLI da mesma instalacao, preservando editores explicitos e os arquivos salvos.
+Conferir codigo de saida e testar caminhos com espacos, multiplos documentos,
+editor/CLI ausente e falha. Sem limpar cache, fechar VS Code ou alterar perfis.
+Nao declarar resolvida a causa interna do armazenamento apenas pelo retorno da CLI.
+
 ## Clareza do fluxo de planejamento - 2026-10-01
 
 Evolucao do harness na branch harness/clareza-fluxo-planejamento, derivada de main

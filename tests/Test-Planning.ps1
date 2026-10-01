@@ -216,6 +216,12 @@ $output = & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -Work
 Assert ($LASTEXITCODE -eq 0) 'Preparacao com editor falhou.'
 $editorArgs = Get-Content -LiteralPath (Join-Path $scripts 'editor-args.json') -Raw | ConvertFrom-Json
 Assert ($editorArgs.Count -eq 2 -and $editorArgs[0] -eq '--reuse-window' -and (Test-Path -LiteralPath $editorArgs[1])) 'Editor recebeu argumentos diferentes de abertura do prompt.'
+$failedEditor = Join-Path $scripts 'editor falho.cmd'
+Set-Content -LiteralPath $failedEditor -Encoding ASCII -Value "@echo off`r`nexit /b 23"
+$output = & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -RunId $oldId -NewPlan -EditorPath $failedEditor 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains('Contexto salvo; nao foi possivel abrir o editor:') -and $output.Contains('23')) 'Falha do editor deve ser informada sem perder o contexto preparado.'
+$savedPrompt = @($output -split '\r?\n' | Where-Object { $_.StartsWith('Prompt preparado: ') })[0].Substring('Prompt preparado: '.Length)
+Assert (Test-Path -LiteralPath $savedPrompt) 'Falha do editor apagou o prompt preparado.'
 Write-Output 'PASS: contexto unico e fixo, preservacao de evidencias/fontes, revalidacao e entrada real sem ferramentas externas.'
 
 # Compatibilidade: revisao antiga explicita continua legivel; novo menu usa planejamento unico.

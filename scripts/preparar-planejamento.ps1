@@ -93,9 +93,7 @@ try {
         if (-not $EditorPath) { Write-Host 'Abra o arquivo acima no VS Code ou informe -EditorPath. O contexto ja esta salvo.' }
         else {
             try {
-                $editor = Resolve-HarnessPath $EditorPath $harnessRoot
-                if (-not (Test-Path -LiteralPath $editor -PathType Leaf)) { throw 'Executavel do editor nao encontrado.' }
-                & $editor --reuse-window $promptToOpen
+                Open-HarnessEditor -EditorPath $EditorPath -FilePaths $promptToOpen -Root $harnessRoot
             } catch { Write-Warning ('Contexto salvo; nao foi possivel abrir o editor: ' + $_.Exception.Message) }
         }
     }

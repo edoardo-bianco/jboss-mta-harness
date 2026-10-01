@@ -4,6 +4,21 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Abertura automatica do editor - 2026-10-01
+
+- [x] Conferir chamada direta, CLI instalada e preservacao do prompt existente.
+- [x] Reproduzir codigo de erro ignorado e adicionar regressao: retorno 23 ignorado
+  antes da correcao; apos o ajuste, aviso explicito com contexto preservado.
+- [x] Usar CLI da instalacao selecionada e unificar tratamento da abertura.
+- [x] Validar testes afetados, preservacao de arquivos e abertura real.
+  Passaram Test-Editor, Test-Planning, Test-Implementation, Test-EvidenceFolder,
+  Test-SonarConfig e Test-TaskInputs no PowerShell 5.1. A regressao do retorno 23
+  falhou antes do ajuste e passou depois. Desenvolvedor confirmou a aba na janela
+  existente com code.cmd; funcao corrigida tambem retornou 0 com o prompt real.
+  Revisao: mesma instalacao, sem busca no PATH, sem alterar perfis/cache, abertura
+  sem envio ao Copilot e documentos preservados. Database IO error interno nao
+  foi reproduzido novamente; nao atribuir causa especifica ao banco do editor.
+
 ## Clareza do fluxo de planejamento - 2026-10-01
 
 - [x] Preencher objetivo editavel do prompt com as issues ANALISAR AGORA.
@@ -45,10 +60,11 @@ tecnicas reais permanecem nos checklists correspondentes.
 - [x] Concluir regressao automatizada e revisao final do diff.
 - [ ] Ensaiar no Copilot Local selecao de issues, cobertura parcial, persistencia e
   continuidade sem repetir triagem. Scripts nao comprovam obediencia do agente.
-- [ ] Corrigir e ensaiar a abertura automatica do prompt: chamada direta a Code.exe
+- [x] Corrigir e ensaiar a abertura automatica do prompt: chamada direta a Code.exe
   exibiu service_worker_storage / Database IO error, sem abrir o arquivo. Registro,
   prompt e recibo da solicitacao 6e051f7d12e3411286cfd7a5344f4886 foram conferidos
-  no disco. Testar bin/code.cmd e sinalizar falhas do editor; causa ainda pendente.
+  no disco. Resolvido no harness pelo uso de bin/code.cmd e aviso de falha, conforme
+  validacao em Abertura automatica do editor acima; causa interna do editor nao confirmada.
   A pasta .harness oculta no Explorador nao explica a falha de abertura.
 
 Estado: implementacao no commit e2a9cf4, com publicacao solicitada em 2026-10-01.

@@ -22,11 +22,7 @@ try {
         if (-not $EditorPath) { Write-Host 'Abra o indice acima no VS Code ou informe -EditorPath.' }
         else {
             try {
-                $editor = Resolve-HarnessPath $EditorPath $harnessRoot
-                if (-not (Test-Path -LiteralPath $editor -PathType Leaf)) { throw 'Executavel do editor nao encontrado.' }
-                $global:LASTEXITCODE = 0
-                & $editor --reuse-window $index
-                if ($LASTEXITCODE -ne 0) { throw "Editor retornou codigo $LASTEXITCODE." }
+                Open-HarnessEditor -EditorPath $EditorPath -FilePaths $index -Root $harnessRoot
             } catch { Write-Warning ('Pasta criada; abra o indice pelo caminho acima. ' + $_.Exception.Message) }
         }
     }
