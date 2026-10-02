@@ -123,7 +123,7 @@ function Invoke-HarnessJbossOperation {
     try { $lock=[IO.File]::Open((Join-Path $Server.State 'operation.lock'),'OpenOrCreate','ReadWrite','None') } catch { throw 'Outra operacao JBoss esta em andamento.' }
     $id=[guid]::NewGuid().ToString('N')
     $run=Resolve-HarnessPath (Join-Path $Server.State ('operations/'+$id)) $Context.Root
-    $result=[ordered]@{RunId=$id;Action=$Action;Eap=$Server.Eap;Home=$Server.Home;Base=$Server.Base;StandaloneConfig=$Server.Settings.standaloneConfig;Source=$Context.Active.path;Project=$Context.Active.name;Status='FAILED';Observed=$null;Error=$null;StartedAtUtc=[DateTime]::UtcNow.ToString('o');FinishedAtUtc=$null;ResultPath=(Join-Path $run 'result.json')}
+    $result=[ordered]@{RunId=$id;Action=$Action;Scope='Server';Eap=$Server.Eap;Home=$Server.Home;Base=$Server.Base;StandaloneConfig=$Server.Settings.standaloneConfig;Source=$null;Project=$null;Status='FAILED';Observed=$null;Error=$null;StartedAtUtc=[DateTime]::UtcNow.ToString('o');FinishedAtUtc=$null;ResultPath=(Join-Path $run 'result.json')}
     try {
         $null=[IO.Directory]::CreateDirectory($run)
         Write-HarnessJson $result.ResultPath $result

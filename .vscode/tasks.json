@@ -2,11 +2,51 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Aplicacao: gerenciar JBoss",
-      "detail": "Selecione EAP 7.1/7.4 e estado, start/debug, deploy, rollback ou stop; uma acao por execucao.",
+      "label": "Aplicacao: iniciar JBoss",
+      "detail": "Escolha start normal ou debug e EAP 7.1/7.4; nao exige aplicacao ou workspace.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-SelectStartMode"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Aplicacao: parar JBoss",
+      "detail": "Escolha EAP 7.1/7.4; encerra o servidor inteiro e todas as aplicacoes nele.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Stop"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Aplicacao: consultar estado JBoss",
+      "detail": "Escolha EAP 7.1/7.4 e consulte estado e identidade; nao exige aplicacao.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Status"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Aplicacao: deploy no JBoss",
+      "detail": "Escolha EAP ativo, aplicacao e WAR/EAR construido; nao inicia servidor nem executa build.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Deploy", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Aplicacao: rollback no JBoss",
+      "detail": "Escolha EAP ativo, aplicacao, deployment e release anterior gerenciada.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Rollback", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],
       "problemMatcher": [],
       "runOptions": { "instanceLimit": 1 },
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }

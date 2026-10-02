@@ -1,5 +1,20 @@
 # To-do do agente: evolucao do harness
 
+## Controle JBoss sem aplicacao - 2026-10-02
+
+- [x] Separar tarefas do servidor e releases, preservando escolha EAP e modo debug.
+- [x] Remover dependencia de aplicacao/workspace/MTA das operacoes do servidor.
+- [x] Validar contexto, recibos, cancelamento e regressao deploy/rollback/identidade.
+- [x] Atualizar README, guia e mensagens; revisar antes de integrar.
+
+Validacao: Test-JbossServerContext, Test-TaskInputs, Test-Jboss,
+Test-JbossRuntime e Test-JbossWorkspace passaram no Windows PowerShell 5.1.
+Teste novo falhou antes da implementacao; cobre configuracao com projeto ausente,
+recibos sem app, ambos EAPs e modos, cancelamento e entrada real sem workspace.
+Operacoes de runtime simuladas; instalacoes reais nao iniciadas/paradas nesta etapa.
+Confirmado pelo desenvolvedor: WAR/EAR automatico fica para depois. Ensaio manual
+das novas tarefas permanece pendente, sem declarar validacao funcional da aplicacao.
+
 ## Link explicito do registro no indice - 2026-10-02
 
 - [x] Tornar visivel o nome real do registro como link na coluna Registro de migracao,
@@ -11,16 +26,17 @@
 
 ## Proxima evolucao JBoss: servidor e deploy separados - 2026-10-02
 
-- [ ] Separar start/stop e deploy no menu principal, mantendo consulta de estado,
+- [x] Separar start/stop e deploy no menu principal, mantendo consulta de estado,
   start com debug e rollback acessiveis. Servidor seleciona EAP 7.1/7.4 sem app.
 - [ ] No deploy, selecionar EAP e aplicacao/modulo e reconhecer o WAR/EAR gerado;
   exibir caminho/destino e tratar build ausente ou multiplos candidatos.
-- [ ] Preservar rastreabilidade e rollback por projeto/servidor, nome estavel
+- [x] Preservar rastreabilidade e rollback por projeto/servidor, nome estavel
   do deployment e validacao da identidade do EAP antes das operacoes.
 - [ ] Definir se preparar deploy antes do start fara parte do escopo futuro.
   Hoje o deploy via CLI exige servidor ativo; preparo offline nao e implementado.
 
-Registro de backlog apenas; comportamento atual permanece inalterado.
+Separacao implementada na entrega Controle JBoss sem aplicacao, acima.
+Reconhecimento automatico do artefato e preparo offline continuam no backlog.
 
 ## Estrategia e documentacao Java/JBoss - 2026-10-02
 

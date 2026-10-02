@@ -26,7 +26,7 @@ Para consultar sem gerar outra solicitacao, use **Planejamento: abrir plano e to
 Para a visao de todos os projetos, use [Workspace: atualizar indice dos projetos](#indice-da-situacao-dos-projetos).
 A coleta Sonar tem a tarefa **Aplicacao: analisar SonarQube**; veja o
 [roteiro Sonar local/corporativo](#sonarqube-local-ou-corporativo). Para deploy, rollback,
-estado, start e stop, use **Aplicacao: gerenciar JBoss**; veja
+estado, start e stop, use as tarefas JBoss da categoria **Aplicacao:**; veja
 [JBoss local, releases e debug Java](#jboss-local-releases-e-debug-java).
 
 Navegacao: [configuracao](#comecar-na-maquina-de-trabalho) ·
@@ -248,7 +248,8 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
 | MTA: conferir ambiente | `conferir-ambiente.ps1` |
 | **Aplicacao: build Maven (Java 8)** | **`construir-aplicacao.ps1 -Goals <fases escolhidas>`** |
 | Aplicacao: analisar SonarQube | `analisar-sonar.ps1` |
-| Aplicacao: gerenciar JBoss | `gerenciar-jboss.ps1` |
+| Aplicacao: iniciar JBoss / parar JBoss / consultar estado JBoss | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
+| Aplicacao: deploy no JBoss / rollback no JBoss | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
 | Aplicacao: preparar implementacao do lote | `preparar-implementacao.ps1` |
 | **MTA: executar analise** | **`executar-mta.ps1`** |
 | **MTA: acompanhar log da analise** | **`acompanhar-log-mta.ps1 -Active`** |
@@ -424,10 +425,23 @@ Referencia: [configuracao da extensao Maven](https://github.com/microsoft/vscode
 
 ## JBoss local, releases e debug Java
 
-Use **Aplicacao: gerenciar JBoss**. Selecione projeto, EAP 7.1/7.4 e uma acao:
-estado, start, start com debug, deploy, rollback ou stop. Cada execucao realiza
-somente a acao escolhida; deploy nao inicia servidor e desconectar debug nao para
-o JBoss. Stop encerra o servidor inteiro, incluindo todas as aplicacoes nele.
+Em **Terminal > Run Task**, use as tarefas da pasta **harness**:
+
+| Tarefa | Selecao |
+| --- | --- |
+| Aplicacao: iniciar JBoss | Modo normal ou debug, depois EAP 7.1/7.4. |
+| Aplicacao: parar JBoss | EAP 7.1/7.4. |
+| Aplicacao: consultar estado JBoss | EAP 7.1/7.4. |
+| Aplicacao: deploy no JBoss | Workspace, EAP 7.1/7.4, aplicacao e caminho do WAR/EAR construido. |
+| Aplicacao: rollback no JBoss | Workspace, EAP 7.1/7.4, aplicacao, deployment e release anterior. |
+
+Iniciar, parar e consultar estado nao pedem aplicacao nem workspace: atuam sobre
+o servidor escolhido, inclusive sem projeto Maven disponivel. Nao criam registros
+de migracao. Cada execucao realiza somente a acao escolhida; deploy exige servidor
+ativo e nao o inicia. Desconectar debug nao para o JBoss. Stop encerra o servidor
+inteiro, incluindo todas as aplicacoes nele. Enter/q cancela os menus sem executar.
+As tarefas ficam no repositorio; nao precisa regenerar workspace para receber
+o novo menu. Se necessario, recarregue a janela do VS Code.
 Escopo atual: Windows, PowerShell 5.1, Java 8 e servidor local standalone.
 
 Configure `tools.eap71Home`, `tools.eap74Home` e `tools.applicationJdk8Home`.
@@ -457,14 +471,14 @@ Em timeout, consulte o recibo e os logs; o processo e preservado para diagnostic
 ### Deploy e rollback
 
 1. Construa a aplicacao pela tarefa Maven e confira seu resultado.
-2. Execute start (normal ou debug) e confira o estado.
-3. Escolha deploy, informe o caminho do WAR/EAR e um **nome estavel**, por exemplo
+2. Execute **Aplicacao: iniciar JBoss** (normal ou debug) e **Aplicacao: consultar estado JBoss**; espere RUNNING.
+3. Execute **Aplicacao: deploy no JBoss**, escolha EAP e aplicacao, informe o caminho do WAR/EAR e um **nome estavel**, por exemplo
    `minha-api.war`, mesmo que o arquivo contenha a versao no nome.
 4. Confira o recibo, o status do deployment e valide a aplicacao funcionalmente.
-5. Para reverter, escolha rollback, o mesmo nome e a release anterior mostrada no
+5. Para reverter, execute **Aplicacao: rollback no JBoss**, escolha o mesmo EAP/aplicacao/nome e a release anterior mostrada no
    menu. O harness reimplanta a copia preservada e verifica hash/status no servidor.
 
-Nao executa build automaticamente. A escolha do arquivo e explicita; o harness
+Nao executa build nem reconhece WAR/EAR automaticamente nesta etapa. A escolha do arquivo e explicita; o harness
 registra sua associacao ao projeto selecionado, sem inferir sua origem Maven.
 Substituicao exige que o deployment atual corresponda ao ultimo recibo do mesmo
 projeto/EAP/nome. Deploy existente sem historico, conteudo alterado externamente,
@@ -478,20 +492,24 @@ o ultimo sucesso permanece preservado, e uma divergencia impede sobrescrita sile
 Recibos, hashes SHA256 (arquivo), SHA1 (conteudo gerenciado JBoss), logs e copias
 de releases ficam em `.harness/jboss/<eap>__<chave>/`. Essa area e permanente e
 fica fora de **Workspace: limpar execucoes**. Nao e backup temporario. Recibos
-de operacao sao por execucao; releases sao por ID e guardam referencia a anterior.
+de operacao sao por execucao, com `Scope: Server` e `Project`/`Source` nulos nos
+novos recibos de estado/start/stop. Recibos antigos permanecem historicos.
+Releases continuam vinculadas a aplicacao, sao por ID e guardam referencia a anterior.
 Registram tambem caminho do artefato, base/XML do servidor e observacao Git
 informativa. Troca de branch ou ausencia de Git nao bloqueia deploy/rollback.
 Uma release SUCCEEDED confirma conteudo/status do deployment, sem conceder aceite
 funcional ou GO de migracao. O indice dos projetos continua mostrando build/MTA/
 planejamento/Sonar; os recibos JBoss sao consultados pelo caminho exibido na tarefa.
 
-Exemplos CLI, com selecao explicita de projeto:
+Exemplos CLI: projeto e necessario apenas para deploy/rollback. Sem `-Action`,
+o script oferece o menu geral de compatibilidade; selecione a acao antes do EAP.
+Parametros antigos de projeto/workspace nao sao utilizados nas operacoes do servidor.
 
 ```powershell
-powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Target minha-api -Eap eap74 -Action StartDebug
+powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Eap eap74 -Action StartDebug
 powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Target minha-api -Eap eap74 -Action Deploy -ArtifactPath C:\apps\minha-api\target\api-1.0.war -DeploymentName minha-api.war
-powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Target minha-api -Eap eap74 -Action Status
-powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Target minha-api -Eap eap74 -Action Stop
+powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Eap eap74 -Action Status
+powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Eap eap74 -Action Stop
 ```
 
 ### Debug Java no VS Code
@@ -501,7 +519,7 @@ Language Support for Java (`redhat.java`) e Debugger for Java
 (`vscjava.vscode-java-debug`); instale essas extensoes se ainda nao estiverem disponiveis.
 O Java do language server continua separado do Java 8 da aplicacao.
 
-1. Use **Start com debug** e faca deploy do artefato construido com os fontes abertos.
+1. Use **Aplicacao: iniciar JBoss > 2. Start com debug**, selecione o EAP e faca deploy do artefato construido com os fontes abertos.
 2. No painel **Run and Debug**, selecione **JBoss eap71 - attach Java** ou
    **JBoss eap74 - attach Java**, conforme o servidor, e pressione F5.
 3. Coloque breakpoint no fonte e invoque o endpoint/fluxo da aplicacao.

@@ -4,6 +4,17 @@ $ErrorActionPreference='Stop'
 Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
 Import-Module (Join-Path $PSScriptRoot 'HarnessJbossConfig.psm1') -DisableNameChecking
 
+function Read-HarnessJbossContext {
+    param([string]$Path, [string]$Root = (Split-Path -Parent $PSScriptRoot))
+    $Root=Resolve-HarnessPath $Root $Root
+    $Path=Resolve-HarnessPath $Path $Root
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'Configure primeiro: Terminal > Run Task > Workspace: configurar caminhos.' }
+    $config=Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ($config.schemaVersion -ne 1) { throw 'schemaVersion deve ser 1.' }
+    # Operacoes do servidor nao dependem de projetos, workspace ou perfil MTA.
+    [pscustomobject]@{Root=$Root;ConfigPath=$Path;Config=$config;Active=$null}
+}
+
 function Get-HarnessJbossServer {
     param($Context, [ValidateSet('eap71','eap74')][string]$Eap)
     $settings=Get-HarnessJbossSettings $Context.Config $Eap
@@ -173,4 +184,4 @@ function Stop-HarnessJboss {
     if ($after.State -ne 'STOPPED') { throw 'Processo encerrou, mas servidor/launcher ainda ativo. Confira o estado.' }
     return $after
 }
-Export-ModuleMember -Function Get-HarnessJbossServer, Get-HarnessJbossStatus, Start-HarnessJboss, Stop-HarnessJboss, Invoke-JbossCli, Read-JbossValue
+Export-ModuleMember -Function Read-HarnessJbossContext, Get-HarnessJbossServer, Get-HarnessJbossStatus, Start-HarnessJboss, Stop-HarnessJboss, Invoke-JbossCli, Read-JbossValue

@@ -1,5 +1,21 @@
 # Plano do agente: evolucao do harness
 
+## Controle JBoss sem aplicacao - 2026-10-02
+
+Evolucao do harness na branch harness/jboss-servidor-menu, derivada da main d4b6ae9.
+Expor iniciar (normal/debug), parar, estado, deploy e rollback como operacoes
+distintas no Run Task, com EAP 7.1/7.4 escolhido em cada execucao. Reutilizar
+gerenciar-jboss.ps1; CLI sem Action preserva menu geral por compatibilidade.
+Operacoes de servidor leem somente configuracao JBoss/JDK, sem depender de
+workspace/projetos/MTA ou inicializar registros de migracao. Recibos novos dessas
+operacoes terao escopo de servidor; releases continuam vinculadas a aplicacao.
+Preservar verificacao de identidade, locks locais, timeout, historico e attaches.
+Deploy/rollback continuam exigindo servidor ativo e nunca iniciam implicitamente.
+Validar entradas reais/cancelamento, contexto sem app, recibos e regressao JBoss;
+nao iniciar ou parar as instalacoes reais durante a verificacao automatizada.
+Escopo confirmado pelo desenvolvedor: separar controle do servidor agora;
+reconhecimento automatico de WAR/EAR permanece para uma proxima entrega.
+
 ## Link explicito do registro no indice - 2026-10-02
 
 Prioridade solicitada: abrir os detalhes da migracao diretamente do resumo.
