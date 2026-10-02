@@ -2,6 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Workspace: atualizar indice dos projetos",
+      "detail": "Atualiza os registros com o ultimo MTA reconhecido, preserva anotacoes e prepara prompts de reconciliacao; abre o indice e salva copia datada. Execute os prompts pendentes no Copilot.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/atualizar-indice-projetos.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-EditorPath", "${execPath}"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Aplicacao: preparar implementacao do lote",
       "detail": "Seleciona plan/to-do existentes e abre o prompt DevSquad; implementar exige GO humano registrado e Executar Prompt no Copilot.",
       "type": "process",
