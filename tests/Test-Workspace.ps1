@@ -17,7 +17,7 @@ $context = Read-HarnessConfig $configPath $fixture
 Assert ($context.Active.path -eq $app) 'Alvo inicial incorreto.'
 $path = New-HarnessWorkspace $context
 Assert (Test-Path (Initialize-HarnessMigration $fixture $context.Active).MigrationPath) 'Workspace deve preparar registro por projeto.'
-$registers = @(Get-ChildItem (Join-Path $fixture '.harness/projetos') -Filter migracao.md -Recurse)
+$registers = @(Get-ChildItem (Join-Path $fixture '.harness/projetos') -Filter migracao-*.md -Recurse)
 Assert ($registers.Count -eq 2) 'Workspace deve preparar todos os projetos importados.'
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.folders.Count -eq 3) 'Workspace deve conter harness e dois repos.'

@@ -11,6 +11,7 @@ Copy-Item (Join-Path $root 'doc/especificacoes/planejamento-copilot.md') $contra
 $project = [pscustomobject]@{name='app';label='Aplicacao';path=(Join-Path $area 'source')}
 $context = [pscustomobject]@{Root=$area;Active=$project}
 $register = Initialize-HarnessMigration $area $project
+Assert ((Split-Path $register.MigrationPath -Leaf) -eq 'migracao-Aplicacao.md') 'Novo registro deve identificar o projeto no nome.'
 Assert (Test-Path $register.MigrationPath) 'Projeto sem MTA deve ter registro.'
 Assert ((Get-Content $register.MigrationPath -Raw).Contains('AGUARDANDO MTA')) 'Nao inventar catalogo inicial.'
 $before = (Get-FileHash $register.MigrationPath).Hash
@@ -36,6 +37,7 @@ $updated = Update-HarnessMigration $context $selected
 $text = Get-Content $updated.MigrationPath -Raw -Encoding UTF8
 Assert ($text.Contains('| mandatory | 138 | PRESENTE | A DEFINIR | NAO ANALISADA |')) 'Contar incidentes reais por regra.'
 Assert ($text.Contains('future-category')) 'Preservar categoria desconhecida.'
+Assert ($text.Contains('Total MTA: 2 issues (regras) / 140 ocorrencias.')) 'Falta total de regras e ocorrencias do catalogo.'
 $text = $text.Replace('| A DEFINIR | NAO ANALISADA |', '| ADIAR | ANALISADA |')
 $text = $text.Replace('<!-- mta:fim -->', "| DEV-001 | Adicional | manual | - | MANUAL | ANALISAR AGORA | NAO ANALISADA | Evidencia local |`n<!-- mta:fim -->")
 $text += "`nDecisao humana fora da tabela: preservar javax.`n"
@@ -46,6 +48,7 @@ $text = Get-Content $updated.MigrationPath -Raw -Encoding UTF8
 Assert ($text.Contains('| mandatory | 1 | PRESENTE | ADIAR | ANALISADA |')) 'Novo MTA nao pode redefinir decisoes/andamento.'
 Assert ($text.Contains('| future-category | 2 | NAO REENCONTRADA | ADIAR | ANALISADA |')) 'Ausencia nao e correcao nem contagem zero.'
 Assert ($text.Contains('DEV-001') -and $text.Contains('Decisao humana fora da tabela')) 'Preservar issues manuais e texto livre.'
+Assert ($text.Contains('Total MTA: 1 issues (regras) / 1 ocorrencias.')) 'Total deve excluir nao reencontradas e manuais.'
 $before = (Get-FileHash $updated.MigrationPath).Hash
 $null = Update-HarnessMigration $context $selected
 Assert ((Get-FileHash $updated.MigrationPath).Hash -eq $before) 'Reconciliacao deve ser idempotente.'
@@ -69,14 +72,24 @@ $existing = Join-Path $area 'registro-colega.md'
 Set-Content -LiteralPath $existing 'Decisao conflitante trazida de colega; nao sobrescrever.'
 $before = (Get-FileHash $updated.MigrationPath).Hash
 $sourceHash = (Get-FileHash $existing).Hash
+$beforeMaintenance = [IO.File]::ReadAllText($updated.MigrationPath)
 $maintenance = New-MtaMigrationPrompt $context -MigrationSourcePath $existing
 $receipt = Get-Content $maintenance.ContextPath -Raw | ConvertFrom-Json
 Assert ($receipt.Run -eq $null -and $receipt.RunId -eq $null) 'Evidencias nao podem escolher scan implicitamente.'
 Assert ($receipt.MigrationSourcePath -eq $existing -and $receipt.MigrationPath -eq $updated.MigrationPath) 'Documento recebido foi confundido com destino.'
-Assert ((Get-FileHash $updated.MigrationPath).Hash -eq $before -and (Get-FileHash $existing).Hash -eq $sourceHash) 'Preparo de manutencao alterou decisoes/documento recebido.'
+$afterMaintenance = [IO.File]::ReadAllText($updated.MigrationPath)
+$withoutState = [regex]::Replace($afterMaintenance, '(?s)<!-- reconciliacao:inicio -->.*?<!-- reconciliacao:fim -->\r?\n\r?\n', '')
+Assert ($withoutState -ceq $beforeMaintenance -and (Get-FileHash $existing).Hash -eq $sourceHash) 'Preparo alterou conteudo alem da secao de reconciliacao ou documento recebido.'
+Assert ($afterMaintenance.Contains('Estado: PENDENTE')) 'Preparo deve deixar execucao do prompt pendente.'
 Assert (Test-Path $maintenance.PromptPath) 'Manutencao sem MTA deve gerar prompt.'
 Import-Module (Join-Path $root 'scripts/HarnessCleanup.psm1') -Force -DisableNameChecking
 $cleanup = @(Get-HarnessCleanupPaths $area -Source $project.path)
 Assert ((Split-Path $maintenance.ContextPath -Parent) -in $cleanup) 'Limpeza por projeto deve reconhecer preparo do registro.'
 Assert ($updated.MigrationPath -notin $cleanup -and (Split-Path $updated.MigrationPath -Parent) -notin $cleanup) 'Limpeza nao pode incluir registro permanente.'
+$legacyPath = Join-Path (Split-Path $other.MigrationPath -Parent) 'migracao.md'
+Move-Item -LiteralPath $other.MigrationPath -Destination $legacyPath
+$legacy = Initialize-HarnessMigration $area ([pscustomobject]@{name='outro';label='Novo rotulo';path='C:/outro'})
+Assert ($legacy.MigrationPath -eq $legacyPath) 'Registro legado deve manter caminho referenciado por prompts antigos.'
+$null = Update-HarnessMigration $context $selected
+Assert ([IO.File]::ReadAllText($updated.MigrationPath).Contains('Total MTA: 0 issues (regras) / 0 ocorrencias.')) 'Rodada sem achados deve apresentar totais zero sem apagar historico.'
 Write-Output 'PASS: registro, identidade, catalogo real, contagens, conciliacao e preservacao humana.'

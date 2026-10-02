@@ -51,8 +51,8 @@ try {
         Write-Host "Prompt preparado: $promptToOpen"
         Write-Host "Recibo de contexto: $($prepared.ContextPath)"
         Write-Host 'Se selecionou MTA, o catalogo ja foi atualizado no migracao.md; sem rodada nova, a referencia existente foi preservada.'
-        Write-Host 'O prompt e opcional: execute-o no Copilot somente para reconciliar decisoes/evidencias no registro. Ele nao gera plan.md/todo.md.'
-        Write-Host 'Para apenas atualizar o catalogo ou editar o registro manualmente, pode encerrar aqui. Para planejar um lote, use a opcao 1.'
+        Write-Host 'RECONCILIACAO PENDENTE: execute o prompt no Copilot para reconciliar decisoes/evidencias. Carga MTA nao conclui essa etapa; ele nao gera plan.md/todo.md.'
+        Write-Host 'Depois da execucao, confira Estado na secao Reconciliacao do registro. Para planejar um lote, use a opcao 1.'
     } else {
         if ($RunPath) { $selected = Get-MtaPlanningRunFromPath -RunPath $RunPath -Root $harnessRoot }
         else { $selected = Select-MtaPlanningRun $context -RunId $RunId -Interactive:(-not $RunId) }

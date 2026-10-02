@@ -118,7 +118,7 @@ function Select-HarnessProject {
 }
 
 function Read-HarnessConfig {
-    param([string]$Path, [string]$Root = (Split-Path -Parent $PSScriptRoot), [string]$WorkspacePath, [string]$Target, [switch]$SelectTarget)
+    param([string]$Path, [string]$Root = (Split-Path -Parent $PSScriptRoot), [string]$WorkspacePath, [string]$Target, [switch]$SelectTarget, [switch]$SkipMigrationInitialization)
     $Root = Resolve-HarnessPath $Root $Root
     $Path = Resolve-HarnessPath $Path $Root
     if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) { throw 'Configure primeiro: Terminal > Run Task > Workspace: configurar caminhos.' }
@@ -165,7 +165,9 @@ function Read-HarnessConfig {
     if ($config.mta.sources -isnot [Array] -or $config.mta.sources.Count -ne 0) { throw 'Use mta.sources = []. Filtrar source=eap7.1 exclui regras Hibernate do perfil ensaiado.' }
     if ($config.mta.targets -isnot [Array] -or $config.mta.targets.Count -ne 1 -or $config.mta.targets[0] -cne 'eap7') { throw 'Use mta.targets = ["eap7"]. EAP 7.4 e o destino de runtime; nao um target desta CLI ensaiada. Nao usar eap8.' }
     if ($config.mta.mode -cne 'full') { throw 'Use mta.mode = full para preservar a analise de fontes e dependencias do perfil ensaiado.' }
-    foreach ($project in $projects) { $null = Initialize-HarnessMigration $Root $project }
+    if (-not $SkipMigrationInitialization) {
+        foreach ($project in $projects) { $null = Initialize-HarnessMigration $Root $project }
+    }
     [pscustomobject]@{ Root=$Root; ConfigPath=$Path; Config=$config; Active=$active; Projects=$projects; WorkspacePath=$WorkspacePath }
 }
 
@@ -200,6 +202,17 @@ function New-HarnessWorkspace {
     return $path
 }
 
+function Resolve-HarnessMigrationPath {
+    param([string]$Folder)
+    $existing = @(if (Test-Path -LiteralPath $Folder) {
+        Get-ChildItem -LiteralPath $Folder -File | Where-Object { $_.Name -ieq 'migracao.md' -or $_.Name -like 'migracao-*.md' }
+    })
+    if ($existing.Count -gt 1) { throw 'Mais de um registro de migracao na pasta; preserve os arquivos e resolva a ambiguidade.' }
+    if ($existing.Count -eq 1) { return $existing[0].FullName }
+    $label = (Split-Path -Leaf $Folder) -replace '__[a-f0-9]{12}$',''
+    Join-Path $Folder ('migracao-' + $label + '.md')
+}
+
 function Initialize-HarnessMigration {
     param([string]$Root, $Project)
     $base = Resolve-HarnessPath (Join-Path $Root '.harness/projetos') $Root
@@ -209,7 +222,7 @@ function Initialize-HarnessMigration {
     $existing = @(if (Test-Path -LiteralPath $base) { Get-ChildItem -LiteralPath $base -Directory | Where-Object Name -Like "*__$key" })
     if ($existing.Count -gt 1) { throw 'Registro de migracao ambiguo para este projeto.' }
     $folder = if ($existing.Count) { $existing[0].FullName } else { Join-Path $base (Get-HarnessProjectFolder ([pscustomobject]@{name=$identity;label=$Project.label})) }
-    $path = Resolve-HarnessPath (Join-Path $folder 'migracao.md') $Root
+    $path = Resolve-HarnessPath (Resolve-HarnessMigrationPath $folder) $Root
     $index = Resolve-HarnessPath (Join-Path $folder 'evidencias/LEIA-ME.md') $Root
     $content = @"
 # Migracao: $($Project.label)
@@ -217,15 +230,28 @@ function Initialize-HarnessMigration {
 Project: $($Project.name)
 Source: $($Project.path)
 
-Registro local de escolhas e andamento por issue. Reconciliar entre colegas por ID;
-nenhum status concede GO ou aceite. Categoria e contagem MTA nao provam aplicabilidade.
+Registro local de escolhas e andamento por issue; reconciliar entre colegas por ID.
 
-Decisao: A DEFINIR, ANALISAR AGORA, ADIAR, FORA DO ESCOPO (justificativa humana).
-Andamento: NAO ANALISADA, ANALISADA, PLANEJADA, IMPLEMENTADA, VERIFICADA.
-Declarar cobertura parcial na observacao (ex.: 20/138); nao concluir a issue inteira.
-Correcao de colega fora do codigo local: AGUARDANDO INTEGRACAO na observacao,
-com referencia, sem marcar implementada. Ausencia no novo MTA nao prova correcao.
-Issues manuais: ID DEV-..., categoria manual, contagem -, presenca MANUAL.
+## Como usar este registro
+
+Workspace: atualizar indice dos projetos carrega o ultimo MTA reconhecido neste
+registro, preserva anotacoes e prepara o prompt. Execute-o se a secao Reconciliacao
+estiver PENDENTE; carga do catalogo nao conclui essa etapa. Para outra rodada/origem,
+use Preparar planejamento > 2 Manter registro. Numeros do indice vem do MTA;
+decisoes e andamento vem deste registro.
+Edite Decisao, Andamento e Observacao; mantenha os marcadores e as oito colunas.
+Use &#124; para barras verticais nas celulas.
+
+| Campo | Significado e valores |
+| --- | --- |
+| Categoria MTA / Ocorrencias | Classificacao e quantidade copiadas da rodada carregada. mandatory = obrigatoria; optional = opcional; demais categorias mantem o valor original. Nao determinam a prioridade escolhida pelo desenvolvedor. |
+| Presenca | PRESENTE = encontrada na rodada carregada; NAO REENCONTRADA = ausente nessa rodada, mantendo a contagem anterior, sem provar correcao; MANUAL = adicionada pelo desenvolvedor. |
+| Decisao | A DEFINIR = falta escolher; ANALISAR AGORA = priorizar no planejamento; ADIAR = tratar depois; FORA DO ESCOPO = nao incluir na migracao. Justifique adiamento/exclusao. |
+| Andamento | NAO ANALISADA = sem diagnostico; ANALISADA = diagnostico registrado; PLANEJADA = incluida em plano; IMPLEMENTADA = correcao aplicada ao codigo local; VERIFICADA = verificacoes registradas. Nenhum valor concede GO ou aceite. |
+| Observacao/referencia | Justificativa, evidencia e cobertura parcial (ex.: 20/138), sem concluir a issue inteira. Correcao de colega ainda fora do codigo local: AGUARDANDO INTEGRACAO e referencia, sem marcar IMPLEMENTADA. |
+
+Issue manual: ID DEV-..., categoria manual, ocorrencias -, presenca MANUAL.
+Decisao e Andamento sao independentes; categoria e contagem nao provam aplicabilidade.
 
 ## Direcionamento e decisoes do desenvolvedor
 
@@ -233,14 +259,12 @@ Objetivo, justificativas de adiamento/exclusao e observacoes:
 
 ## Issues
 
-Edite Decisao, Andamento e Observacao; preserve os marcadores e as oito colunas.
-Use &#124; para barras verticais dentro de celulas. Dados MTA sao atualizados pela
-rodada escolhida. NAO REENCONTRADA preserva a ultima contagem conhecida.
-
 <!-- mta:inicio -->
 AGUARDANDO MTA
 | ID (ruleset::regra) | Issue | Categoria MTA | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |
 | --- | --- | --- | --- | --- | --- | --- | --- |
+
+Total MTA: indisponivel (AGUARDANDO MTA).
 <!-- mta:fim -->
 
 ## Referencias
@@ -295,7 +319,7 @@ function Update-HarnessMigration {
     if ($blocks.Count -ne 1) { throw 'Registro sem bloco MTA unico. Preserve o arquivo e use manter-migracao para reconciliar.' }
     $rows = [ordered]@{}
     foreach ($line in ($blocks[0].Value -split '\r?\n')) {
-        if ($line -match '^\| ID \(' -or $line -match '^\| ---' -or $line -match '^(<!--|AGUARDANDO MTA|Rodada MTA:|\s*$)') { continue }
+        if ($line -match '^\| ID \(' -or $line -match '^\| ---' -or $line -match '^(<!--|AGUARDANDO MTA|Rodada MTA:|Total MTA:|\s*$)') { continue }
         $cells = @($line.Trim().Trim('|').Split('|') | ForEach-Object { $_.Trim() })
         if (-not $line.StartsWith('|') -or $cells.Count -ne 8 -or -not $cells[0] -or $rows.Contains($cells[0])) { throw 'Tabela de issues invalida ou duplicada; corrija sem perder as decisoes antes de atualizar.' }
         $rows[$cells[0]] = $cells
@@ -314,6 +338,9 @@ function Update-HarnessMigration {
         '| ID (ruleset::regra) | Issue | Categoria MTA | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |',
         '| --- | --- | --- | --- | --- | --- | --- | --- |')
     foreach ($id in $rows.Keys) { $lines += '| ' + ($rows[$id] -join ' | ') + ' |' }
+    [long]$totalOccurrences = 0
+    foreach ($issue in $catalog) { $totalOccurrences += $issue.Count }
+    $lines += @('', "Total MTA: $($catalog.Count) issues (regras) / $totalOccurrences ocorrencias. Somente a rodada carregada; exclui manuais e nao reencontradas.")
     $lines += '<!-- mta:fim -->'
     $updated = $original.Substring(0,$blocks[0].Index) + ($lines -join "`n") + $original.Substring($blocks[0].Index + $blocks[0].Length)
     if ($updated -cne $original) {
@@ -455,20 +482,48 @@ function Resolve-HarnessMtaRunDirectory {
     return $run
 }
 
+function Get-HarnessExternalMtaRuns {
+    [CmdletBinding()]
+    param([string]$Root, [string]$RunsPath)
+    if (-not $RunsPath) { return }
+    $base = Resolve-HarnessPath $RunsPath $Root
+    if (-not (Test-Path -LiteralPath $base -PathType Container)) {
+        Write-Warning "Pasta MTA externa indisponivel: $base"
+        return
+    }
+    # Apenas projeto/rodada; nao percorrer snapshots nem seguir links de diretorio.
+    foreach ($projectFolder in Get-ChildItem -LiteralPath $base -Directory) {
+        if ($projectFolder.Attributes -band [IO.FileAttributes]::ReparsePoint) { Write-Warning "Link MTA externo ignorado: $($projectFolder.FullName)"; continue }
+        foreach ($folder in Get-ChildItem -LiteralPath $projectFolder.FullName -Directory) {
+            $record = [pscustomobject]@{Run=$folder.FullName;RunId=$null;CreatedAtUtc=[DateTime]::MinValue;Manifest=$null;Source=$null;Problem=$null;ExternalInput=$true}
+            try {
+                if ($folder.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Link MTA externo ignorado.' }
+                $manifest = Get-Content -LiteralPath (Join-Path $folder.FullName 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+                $record.Source = Resolve-HarnessPath $manifest.Source $Root
+                if (-not $record.Source) { throw 'Source ausente.' }
+                if ($manifest.RunId -cnotmatch '^[a-f0-9]{32}$' -or $manifest.Project -cnotmatch '^(?:[A-Za-z0-9][A-Za-z0-9_.-]{0,63}|_workspace-[a-f0-9]{24})$') { throw 'Identidade MTA externa invalida.' }
+                $record.RunId = $manifest.RunId
+                $record.CreatedAtUtc = ([DateTimeOffset]::Parse($manifest.CreatedAtUtc)).UtcDateTime
+                $record.Manifest = $manifest
+            } catch { $record.Problem = "MTA externo $($folder.FullName): $($_.Exception.Message)" }
+            $record
+        }
+    }
+}
+
 function Get-HarnessMtaRuns {
-    param([string]$Root, [string]$Project, [string]$Source)
+    param([string]$Root, [string]$Project, [string]$Source, [string]$RunsPath)
     if ($Project -cnotmatch '^(?:[A-Za-z0-9][A-Za-z0-9_.-]{0,63}|_workspace-[a-f0-9]{24})$') { throw 'Identidade de projeto invalida.' }
     $base = Resolve-HarnessPath (Join-Path $Root '.harness/runs') $Root
-    if (-not (Test-Path -LiteralPath $base -PathType Container)) { return }
     $key = Get-HarnessProjectKey $Project
-    $projects = @(Get-ChildItem -LiteralPath $base -Directory | Where-Object {
+    $projects = @(if (Test-Path -LiteralPath $base -PathType Container) { Get-ChildItem -LiteralPath $base -Directory | Where-Object {
         $_.Name -ceq $Project -or $_.Name.EndsWith(('__' + $key), [StringComparison]::Ordinal)
-    })
+    } })
     $records = @(foreach ($directory in $projects) {
         $projectPath = Resolve-HarnessPath $directory.FullName $Root
         foreach ($folder in Get-ChildItem -LiteralPath $projectPath -Directory) {
             if ($folder.Name -cnotmatch '^(?:[a-f0-9]{32}|mta_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}[+-]\d{4}__[a-f0-9]{12})$') { continue }
-            $record = [pscustomobject]@{Run=$folder.FullName; RunId=$null; CreatedAtUtc=$folder.CreationTimeUtc; Manifest=$null; Problem=$null}
+            $record = [pscustomobject]@{Run=$folder.FullName; RunId=$null; CreatedAtUtc=$folder.CreationTimeUtc; Manifest=$null; Problem=$null; ExternalInput=$false}
             try {
                 $locationPath = Join-Path $folder.FullName 'location.json'
                 if (Test-Path -LiteralPath $locationPath -PathType Leaf) {
@@ -488,6 +543,15 @@ function Get-HarnessMtaRuns {
             $record
         }
     })
+    foreach ($external in Get-HarnessExternalMtaRuns $Root $RunsPath) {
+        # Caminho da origem e a unica associacao automatica; nomes de pastas nao bastam.
+        if (-not $Source -or $external.Source -ine (Resolve-HarnessPath $Source $Root)) {
+            if ($external.Problem) { Write-Warning $external.Problem }
+            continue
+        }
+        if (@($records | Where-Object { $_.Run -ieq $external.Run }).Count) { continue }
+        $records += $external
+    }
     $duplicates = @($records | Where-Object { $_.RunId } | Group-Object RunId | Where-Object Count -gt 1)
     if ($duplicates.Count) { throw 'RunId ambiguo: mais de uma pasta encontrada para a mesma rodada/projeto.' }
     $records | Sort-Object -Property @{Expression='CreatedAtUtc';Descending=$true}, RunId
@@ -712,4 +776,6 @@ function Get-LastMtaReport {
 
 Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, New-MtaSnapshot, Invoke-MtaAnalysis, Get-ActiveMtaRun, Get-LastMtaReport, Format-HarnessDate, Test-HarnessRunFolder, Get-HarnessProjectKey, Get-HarnessProjectFolder, Get-HarnessMtaRuns, Find-HarnessMtaRun, Get-HarnessFiles, Resolve-HarnessMtaRunDirectory
 Export-ModuleMember -Function Initialize-HarnessMigration, Get-HarnessMtaCatalog, Update-HarnessMigration
+Export-ModuleMember -Function Get-HarnessExternalMtaRuns
+Export-ModuleMember -Function Resolve-HarnessMigrationPath
 Export-ModuleMember -Function Open-HarnessEditor

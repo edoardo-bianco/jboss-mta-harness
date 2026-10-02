@@ -273,10 +273,12 @@ $updatedUnified = New-MtaPlanningContext $context -RunId $oldId -PreviousRequest
 Assert (-not $updatedUnified.ReviewPromptPath -and (Split-Path $updatedUnified.PromptPath -Leaf) -eq 'planejar-lotes.prompt.md') 'Atualizacao ainda exige segundo prompt.'
 Copy-Item (Join-Path $root '.github/prompts/manter-migracao.prompt.md') (Join-Path $fixture '.github/prompts/manter-migracao.prompt.md')
 $maintenanceArgs = @('-NoProfile','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-Target',$app,'-NoOpen')
-$registerHash = (Get-FileHash $initialReceipt.MigrationPath).Hash
+$registerBeforeMaintenance = [IO.File]::ReadAllText($initialReceipt.MigrationPath)
 $output = @('2','2') | & powershell.exe @maintenanceArgs -SelectOperation 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $output.Contains('manter-migracao.prompt.md')) 'Menu deve preparar manutencao sem novo MTA.'
-Assert ((Get-FileHash $initialReceipt.MigrationPath).Hash -eq $registerHash) 'Manutencao por evidencias alterou o catalogo.'
+$registerAfterMaintenance = [IO.File]::ReadAllText($initialReceipt.MigrationPath)
+$withoutReconciliation = [regex]::Replace($registerAfterMaintenance, '(?s)<!-- reconciliacao:inicio -->.*?<!-- reconciliacao:fim -->\r?\n\r?\n', '')
+Assert ($withoutReconciliation -ceq $registerBeforeMaintenance -and $registerAfterMaintenance.Contains('Estado: PENDENTE')) 'Manutencao deve preservar catalogo/texto e acrescentar apenas pendencia de reconciliacao.'
 $output = & powershell.exe @maintenanceArgs -Operation manter-migracao -WithoutMta -MigrationSourcePath $prepared.PlanPath -EvidenceIndexPath $indexPath 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0) 'Documento-base e indice existentes recusados.'
 $count = @(Get-ChildItem (Join-Path $fixture '.harness/planning') -Filter context.json -Recurse).Count
