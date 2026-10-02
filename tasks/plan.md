@@ -1,5 +1,29 @@
 # Plano do agente: evolucao do harness
 
+## Estrategia e clareza do ambiente Java/JBoss - 2026-10-02
+
+Publicar a estrategia escrita pelo desenvolvedor, preservando suas propostas,
+imagens e formatos Markdown/Mermaid/HTML. Atualizar o estado JBoss para implementado,
+com validacao manual completa pendente. Conferir coerencia com ADR-0002/0004,
+README e contrato; tornar extensoes Java visiveis na preparacao do ambiente.
+Trabalho documental na branch harness/documentar-estrategia, derivada da main.
+Revisar links, consistencia das versoes e escopo antes de commit; integrar e publicar
+main e main_jboss_eap74 alinhadas, removendo a branch temporaria apos conferencia.
+
+Backlog solicitado: planejar futuramente a estrategia em fatias pequenas,
+independentes e verificaveis. Consolidar a validacao JBoss antes de ampliar a base;
+avaliar contratos comuns, portabilidade de IDE e linguagem em pilotos separados,
+depois perfis Quarkus, engines alternativos, SDLC, entrega/operacao e modernizacao.
+Cada fatia devera declarar caso de uso, beneficio esperado, limites, dependencias,
+criterios de aceite, evidencia e reversao. Detalhar somente a proxima fatia quando
+solicitado; Node.js/TypeScript e novos adaptadores permanecem propostas, sem
+reescrita geral ou mudanca dos contratos vigentes autorizada por este documento.
+
+Pendencia futura de suporte aos testes do harness: disponibilizar um exemplo
+funcional no EAP 7.1 para exercitar deploy, rollback e debug remoto.
+O exemplo serve ao ensaio do harness; estrategia e guia permanecem genericos.
+Nenhuma alteracao da aplicacao de exemplo sera feita nesta entrega documental.
+
 ## JBoss local: operacoes, releases e debug Java - 2026-10-02
 
 Pedido autorizado: implementar para EAP 7.1/7.4 locais, standalone, com menu de

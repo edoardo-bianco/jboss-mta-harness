@@ -25,13 +25,15 @@ nao precisa repetir build/MTA apenas para preparar uma proposta nesta maquina.
 Para consultar sem gerar outra solicitacao, use **Planejamento: abrir plano e to-do**.
 Para a visao de todos os projetos, use [Workspace: atualizar indice dos projetos](#indice-da-situacao-dos-projetos).
 A coleta Sonar tem a tarefa **Aplicacao: analisar SonarQube**; veja o
-[roteiro Sonar local/corporativo](#sonarqube-local-ou-corporativo). Deploy e controle do servidor
-ainda nao sao automatizados aqui.
+[roteiro Sonar local/corporativo](#sonarqube-local-ou-corporativo). Para deploy, rollback,
+estado, start e stop, use **Aplicacao: gerenciar JBoss**; veja
+[JBoss local, releases e debug Java](#jboss-local-releases-e-debug-java).
 
 Navegacao: [configuracao](#comecar-na-maquina-de-trabalho) ·
 [projetos](#escolher-o-projeto-em-cada-tarefa) ·
 [branches](#branches-e-conferencia-git) ·
 [build](#build-maven-da-aplicacao-com-java-8) ·
+[JBoss e debug](#jboss-local-releases-e-debug-java) ·
 [MTA](#analise-e-resultados) ·
 [Copilot e documentos](#planejar-lotes-de-correcao-com-copilot) / [formacao do lote](#como-se-forma-o-lote-o-planmd-e-o-todomd) / [MTA recebido](#compartilhar-o-mta-e-planejar-em-outra-maquina) / [Sonar](#sonarqube-local-ou-corporativo) ·
 [revisao com evidencias](#revisar-um-lote-com-evidencias-complementares) ·
@@ -78,7 +80,7 @@ git clone https://github.com/edoardo-bianco/jboss-mta-harness.git
 Os passos abaixo usam a **opcao A: configuracao pelo harness**. Para configurar a IDE diretamente, veja a [opcao B: configuracao manual do workspace](#opcao-b-configurar-o-workspace-manualmente).
 
 1. Na primeira configuracao, use **File > Open Workspace from File** e abra `iniciar-harness.code-workspace`, na raiz do clone. Ele ja mostra `harness`, `migracao-cache-antes` e `migracao-cache-depois`, com caminhos relativos. Use-o para configurar os caminhos e gerar seu workspace local nos passos seguintes.
-2. Execute **Terminal > Run Task > Workspace: configurar caminhos**. A tarefa cria e abre `config/harness.local.json`. Em configuracoes existentes, acrescenta somente campos Sonar ausentes, preservando os valores ja informados; confira os [padroes e requisitos Sonar](#configurar-uma-vez-por-maquina).
+2. Execute **Terminal > Run Task > Workspace: configurar caminhos**. A tarefa cria e abre `config/harness.local.json`. Em configuracoes existentes, acrescenta campos Sonar e EAP ausentes, preservando os valores ja informados; confira os [padroes Sonar](#configurar-uma-vez-por-maquina) e [JBoss](#jboss-local-releases-e-debug-java).
 3. Preencha em `tools` os caminhos **desta maquina**, incluindo `applicationJdk8Home` e `applicationMavenHome`, e salve. Os dois exemplos e `activeProject: migracao-cache-antes` ja estao configurados; mantenha-os para o primeiro ensaio. Use o [exemplo completo abaixo](#configuracao-da-maquina). Para repositorios Maven privados/proxy, informe o `settings.xml` aprovado em `tools.mavenSettingsPath` (MTA) e `tools.applicationMavenSettingsPath` (build); podem apontar para o mesmo arquivo. Nao copie o settings da demo pessoal.
 4. Execute **Terminal > Run Task > Workspace: gerar workspace**. Abra o arquivo gerado `jboss-mta-harness.local.code-workspace`, na raiz do clone, em **File > Open Workspace from File**. O Explorer deve mostrar `harness` e os projetos cadastrados. A partir daqui, use esse arquivo local para as tarefas e para adicionar seus projetos; quando Run Task pedir o arquivo de workspace, confirme esse nome.
 5. Execute **MTA: conferir ambiente**, da pasta `harness`. Deve mostrar `OK`, o projeto certo, os caminhos locais, perfil `eap71-to-eap74-java8`, `Targets: eap7 | Modo: full` e filtro source nenhum. Se falhar, use **Workspace: configurar caminhos**, corrija o JSON e repita a conferencia.
@@ -98,6 +100,27 @@ isso nao gera workspace nem atualiza prompts salvos. Para usar instrucoes novas,
 prepare outro prompt na operacao desejada, reutilizando o MTA existente quando
 aplicavel. Na manutencao do registro, pode escolher somente registro/evidencias.
 Prompts e copias do contrato de solicitacoes anteriores permanecem historicos.
+
+### Extensoes Java no VS Code
+
+No painel **Extensions** (`Ctrl+Shift+X`), procure pelo identificador e instale/habilite:
+
+| Extensao | Identificador | Uso |
+| --- | --- | --- |
+| Language Support for Java(TM) by Red Hat | `redhat.java` | Importacao dos projetos Java, navegacao e suporte aos fontes usados no debug. |
+| Debugger for Java | `vscjava.vscode-java-debug` | Breakpoints e attach remoto a JVM do JBoss. |
+| Maven for Java (opcional) | `vscjava.vscode-maven` | Painel Maven da IDE; as Run Tasks Maven do harness funcionam sem esta extensao. |
+
+O workspace gerado recomenda as duas primeiras; recomendacao nao instala extensoes.
+Confira que estao habilitadas no workspace. Copilot/DevSquad atendem ao fluxo
+assistido e nao sao necessarios para start, deploy, stop ou attach Java.
+
+O JDK do servidor de linguagem deve atender aos requisitos da extensao instalada;
+ele e separado do JDK 8 da aplicacao/JBoss e do JDK do MTA. Configure os caminhos
+locais e aguarde a importacao Java terminar antes de testar breakpoints.
+Depois de atualizar um workspace antigo, execute **Workspace: gerar workspace**
+uma vez para receber as recomendacoes e os attaches JBoss, e reabra o arquivo local.
+Se os attaches ja aparecem e as portas nao mudaram, nao precisa regenerar.
 
 ## Escolher o projeto em cada tarefa
 
@@ -306,7 +329,7 @@ Exemplo completo para preencher na etapa 3. **Os caminhos de ferramentas abaixo 
 | `tools.applicationMavenHome` | Maven do build da aplicacao, com `bin/mvn.cmd`. Pode apontar para a mesma instalacao do MTA; depois pode ser trocado independentemente. |
 | `tools.applicationMavenSettingsPath` | Opcional: `settings.xml` do build/importacao Java. Pode ter o mesmo caminho do MTA. Se null, Maven usa seus settings padrao; nao herda o campo do MTA. |
 | `tools.applicationJdk8Home` | Obrigatorio para o build: pasta do JDK 8, tambem configurada no workspace para a aplicacao. |
-| `tools.eap71Home`, `tools.eap74Home` | Opcionais: pastas dos JBoss ja extraidos, reservadas para a etapa de runtime. |
+| `tools.eap71Home`, `tools.eap74Home` | Pastas dos JBoss ja extraidos. O caminho do EAP escolhido e necessario para gerenciar o servidor; opcionais para build/MTA. |
 | `sonar` | Opcional no ciclo build/MTA; necessario para a task Sonar. URL, JDK do scanner, versao fixa e perfis conforme [guia Sonar](#sonarqube-local-ou-corporativo). Nunca gravar token. |
 | `mta.rulesPath` | `null` usa `rulesets/java` ao lado da CLI; preencha se as regras Java estiverem em outra pasta. |
 | `mta.runsPath` | Pasta dedicada externa para novas rodadas, por exemplo `"C:/mta-runs"`. `null`/ausente mantem `.harness/runs`. |

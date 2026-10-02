@@ -1,5 +1,26 @@
 # To-do do agente: evolucao do harness
 
+## Estrategia e documentacao Java/JBoss - 2026-10-02
+
+- [x] Ler a estrategia e confrontar com a base e contratos existentes: contexto,
+  evidencias e revisao humana coerentes; modularizacao e novos perfis sao propostas.
+- [x] Atualizar status JBoss nos formatos fornecidos e explicitar extensoes Java
+  na preparacao do ambiente; corrigir a descricao antiga de deploy no guia.
+- [x] Revisar escopo documental e validar links locais, UTF-8, secoes Java/JBoss,
+  cinco imagens incorporadas no HTML e status consistente nos tres formatos.
+  Nenhum script, fonte da aplicacao ou configuracao de runtime alterado.
+- [ ] Planejar futuramente a estrategia em fatias pequenas e verificaveis,
+  priorizadas por caso de uso e beneficio, com aceite, evidencias e reversao.
+  Referencia: [estrategia](../doc/estrategia/estrategia-harness_.md).
+  Planejamento e implementacao dessas evolucoes nao iniciados nesta entrega.
+- [ ] Concluir validacao manual JBoss EAP 7.1/7.4: deploy funcional, duas releases,
+  rollback, start debug, breakpoint/variaveis no VS Code, desconexao e stop.
+  Estado/start sem debug no EAP 7.1 confirmados pelo desenvolvedor em 2026-10-02;
+  stop ainda sem resultado informado. Ensaios automatizados anteriores preservados.
+
+- [ ] Disponibilizar um exemplo funcional no EAP 7.1 para testar o harness,
+  incluindo deploy, rollback e debug remoto. Ajuste do exemplo ainda nao executado.
+
 ## JBoss local: operacoes, releases e debug Java - 2026-10-02
 
 - [x] Conferir referencia, contratos e escopo: local standalone, menu com acoes separadas.

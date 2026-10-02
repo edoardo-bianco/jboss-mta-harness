@@ -13,6 +13,12 @@ Destino: EAP 7.4, preservando Java 8 e `javax.*`. O
 3. Execute **Workspace: gerar workspace** e abra `jboss-mta-harness.local.code-workspace`.
 4. Use **MTA: conferir ambiente**; escolha `migracao-cache-antes` para o primeiro ensaio.
 
+Para editar e depurar Java no VS Code, instale **Language Support for Java(TM) by Red Hat**
+(`redhat.java`) e **Debugger for Java** (`vscjava.vscode-java-debug`), recomendadas
+pelo workspace gerado. Veja [extensoes e JDKs](doc/guias/harness-migracao-desenvolvedor.md#extensoes-java-no-vs-code).
+Para operar JBoss, configure o caminho do EAP desejado e siga o
+[roteiro de deploy e debug](doc/guias/harness-migracao-desenvolvedor.md#jboss-local-releases-e-debug-java).
+
 Para projetos corporativos, use **File > Add Folder to Workspace** e salve.
 A primeira tarefa reconhece o projeto e cria seu registro local. Nao precisa gerar
 workspace novamente a cada uso. Copilot deve estar autenticado em sessao Local,
@@ -65,3 +71,5 @@ Para detalhes: [configuracao](doc/guias/harness-migracao-desenvolvedor.md#config
 [GO/aceite](doc/guias/harness-migracao-desenvolvedor.md#da-proposta-revisada-a-execucao-e-ao-aceite),
 [Sonar](doc/guias/harness-migracao-desenvolvedor.md#sonarqube-local-ou-corporativo).
 Para evoluir o harness: [AGENTS.md](AGENTS.md), [ADRs](doc/adr/) e [tarefas](tasks/todo.md).
+A [estrategia de evolucao](doc/estrategia/estrategia-harness_.md) distingue a base
+implementada dos pilotos futuros; seu planejamento em fatias permanece no backlog.
