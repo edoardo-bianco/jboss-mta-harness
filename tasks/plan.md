@@ -1,5 +1,23 @@
 # Plano do agente: evolucao do harness
 
+## Proxima evolucao JBoss: servidor e deploy separados - 2026-10-02
+
+Backlog solicitado, sem implementacao nesta etapa: separar no menu principal
+as operacoes de servidor das operacoes de deployment. Estado, start normal/debug
+e stop devem selecionar somente EAP 7.1 ou EAP 7.4, sem exigir aplicacao.
+Deploy deve selecionar EAP e projeto/modulo e descobrir o WAR/EAR construido,
+exibindo o destino e o artefato resolvido. Tratar ausencia de build e ambiguidade
+entre modulos/artefatos sem escolher arbitrariamente; preservar nome estavel,
+hashes, historico de releases, rollback e isolamento por projeto/servidor.
+Manter prefixos de Run Tasks vigentes e nao duplicar entradas por versao do EAP.
+
+Contrato atual: deploy/rollback via CLI exigem servidor RUNNING com identidade
+confirmada; start continua explicito. Avaliar separadamente se havera preparo
+de artefato com servidor parado e aplicacao no proximo start, distinguindo
+preparo de deploy verificado. Nao misturar deployment scanner com o historico
+gerenciado sem definir reconciliacao e validacao. Nenhum desses novos fluxos
+esta implementado ou autorizado a iniciar servidor implicitamente.
+
 ## Estrategia e clareza do ambiente Java/JBoss - 2026-10-02
 
 Publicar a estrategia escrita pelo desenvolvedor, preservando suas propostas,

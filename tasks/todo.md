@@ -1,5 +1,18 @@
 # To-do do agente: evolucao do harness
 
+## Proxima evolucao JBoss: servidor e deploy separados - 2026-10-02
+
+- [ ] Separar start/stop e deploy no menu principal, mantendo consulta de estado,
+  start com debug e rollback acessiveis. Servidor seleciona EAP 7.1/7.4 sem app.
+- [ ] No deploy, selecionar EAP e aplicacao/modulo e reconhecer o WAR/EAR gerado;
+  exibir caminho/destino e tratar build ausente ou multiplos candidatos.
+- [ ] Preservar rastreabilidade e rollback por projeto/servidor, nome estavel
+  do deployment e validacao da identidade do EAP antes das operacoes.
+- [ ] Definir se preparar deploy antes do start fara parte do escopo futuro.
+  Hoje o deploy via CLI exige servidor ativo; preparo offline nao e implementado.
+
+Registro de backlog apenas; comportamento atual permanece inalterado.
+
 ## Estrategia e documentacao Java/JBoss - 2026-10-02
 
 - [x] Ler a estrategia e confrontar com a base e contratos existentes: contexto,
