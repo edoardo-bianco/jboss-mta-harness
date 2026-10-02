@@ -16,6 +16,10 @@
     "eap71Home": null,
     "eap74Home": null
   },
+  "eap": {
+    "eap71": {"standaloneConfig": "standalone.xml", "portOffset": 0, "debugPort": 8787, "timeoutSeconds": 120},
+    "eap74": {"standaloneConfig": "standalone.xml", "portOffset": 100, "debugPort": 8788, "timeoutSeconds": 120}
+  },
   "sonar": {
     "serverUrl": null,
     "scannerJdkHome": null,

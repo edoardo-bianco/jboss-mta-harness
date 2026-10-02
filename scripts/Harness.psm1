@@ -173,6 +173,8 @@ function Read-HarnessConfig {
 
 function New-HarnessWorkspace {
     param($Context)
+    Import-Module (Join-Path $PSScriptRoot 'HarnessJbossConfig.psm1') -DisableNameChecking
+    $debugConfigurations = @(Get-HarnessJbossDebugConfigurations $Context.Config)
     $folders = @([ordered]@{name='harness'; path='.'})
     foreach ($repo in $Context.Config.repositories) { $folders += [ordered]@{name=$repo.name; path=$repo.path} }
     $settings = [ordered]@{
@@ -193,12 +195,33 @@ function New-HarnessWorkspace {
         $settings['maven.settingsFile'] = $Context.Config.tools.applicationMavenSettingsPath
     }
     $path = Join-Path $Context.Root 'jboss-mta-harness.local.code-workspace'
+    $document = [pscustomobject]@{folders=$folders; settings=[pscustomobject]$settings}
     if (Test-Path -LiteralPath $path) {
+        $document = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
+        foreach ($folder in $folders) {
+            $existing=@($document.folders | Where-Object name -eq $folder.name)
+            if (-not $existing.Count) { $document.folders += [pscustomobject]$folder }
+            else { $existing[0].path=$folder.path }
+        }
+        if (-not $document.PSObject.Properties['settings']) { $document | Add-Member NoteProperty settings ([pscustomobject]@{}) }
+        foreach ($name in @('java.configuration.runtimes','maven.terminal.useJavaHome','maven.terminal.customEnv','java.jdt.ls.java.home','maven.executable.path','java.configuration.maven.userSettings','maven.settingsFile')) {
+            $document.settings.PSObject.Properties.Remove($name)
+        }
+        foreach ($name in $settings.Keys) {
+            if (-not $document.settings.PSObject.Properties[$name]) { $document.settings | Add-Member NoteProperty $name $settings[$name] }
+        }
         $backup = Join-Path $Context.Root ('.harness/workspace-backups/' + [guid]::NewGuid().ToString('N') + '.code-workspace')
         $null = [IO.Directory]::CreateDirectory((Split-Path -Parent $backup))
         Copy-Item -LiteralPath $path -Destination $backup
     }
-    Write-HarnessJson $path ([ordered]@{folders=$folders; settings=$settings})
+    if (-not $document.PSObject.Properties['launch']) { $document | Add-Member NoteProperty launch ([pscustomobject]@{version='0.2.0'; configurations=@()}) }
+    if (-not $document.launch.PSObject.Properties['configurations']) { $document.launch | Add-Member NoteProperty configurations @() }
+    $names=@($debugConfigurations | ForEach-Object name)
+    $document.launch.configurations = @($document.launch.configurations | Where-Object { $_.name -notin $names }) + $debugConfigurations
+    if (-not $document.PSObject.Properties['extensions']) { $document | Add-Member NoteProperty extensions ([pscustomobject]@{}) }
+    if (-not $document.extensions.PSObject.Properties['recommendations']) { $document.extensions | Add-Member NoteProperty recommendations @() }
+    $document.extensions.recommendations = @(@($document.extensions.recommendations) + @('redhat.java','vscjava.vscode-java-debug') | Select-Object -Unique)
+    Write-HarnessJson $path $document
     return $path
 }
 

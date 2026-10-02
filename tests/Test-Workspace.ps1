@@ -54,7 +54,7 @@ Assert ($context.Active.path -eq (Join-Path $fixture 'exemplos/migracao-cache-an
 Assert ($context.Config.tools.mtaExecutable -eq $null) 'Clone nao deve carregar ferramentas pessoais.'
 $path = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
-Assert ($workspace.folders.Count -eq 3) 'Clone deve abrir harness e dois exemplos.'
+Assert ($workspace.folders.Count -eq 5 -and @($workspace.folders | Where-Object name -like 'migracao-cache-*').Count -eq 2) 'Regeneracao deve acrescentar exemplos e preservar projetos existentes.'
 $config.activeProject = 'migracao-cache-depois'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
 $context = Read-HarnessConfig $configPath $fixture
