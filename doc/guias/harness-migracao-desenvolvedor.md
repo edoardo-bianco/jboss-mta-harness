@@ -425,7 +425,8 @@ Referencia: [configuracao da extensao Maven](https://github.com/microsoft/vscode
 
 ## JBoss local, releases e debug Java
 
-Em **Terminal > Run Task**, use as tarefas da pasta **harness**:
+Em **Terminal > Run Task**, use as tarefas da pasta **harness**.
+Elas substituem a antiga tarefa **Aplicacao: gerenciar JBoss**:
 
 | Tarefa | Selecao |
 | --- | --- |
@@ -467,6 +468,22 @@ equivale a servidor correto. Processo existente sem gerenciamento fica
 `UNREACHABLE`; nao iniciar outra instancia. Start aguarda `RUNNING`. Stop usa
 shutdown e aguarda a saida do processo identificado, sem encerrar outros Java.
 Em timeout, consulte o recibo e os logs; o processo e preservado para diagnostico.
+
+### Testar o controle do servidor sem deploy
+
+1. Execute **Aplicacao: consultar estado JBoss** e escolha EAP 7.1 ou 7.4.
+2. Se estiver STOPPED, execute **Aplicacao: iniciar JBoss**, escolha **1. Start normal**
+   e o mesmo EAP. Confira `Status: SUCCEEDED` e `Observed.State: RUNNING`.
+3. Consulte o estado novamente; confira `Identity: MATCHED` e `Debug: false`.
+4. Execute **Aplicacao: parar JBoss** para o mesmo EAP; confira `SUCCEEDED` e `STOPPED`.
+5. Para testar o modo debug, inicie com **2. Start com debug**; confira `Debug: true`.
+   O attach e o breakpoint na aplicacao seguem o roteiro de debug abaixo.
+   Ao terminar, pare o servidor pela tarefa correspondente.
+
+Esse roteiro nao exige selecionar aplicacao nem construir um WAR. Start pode carregar
+aplicacoes ja implantadas no servidor; stop encerra todas elas. Repita no outro EAP
+quando quiser validar as duas instalacoes. Falha ou timeout exige conferir os logs
+e o recibo antes de continuar; nao equivale a sucesso parcial confirmado.
 
 ### Deploy e rollback
 
@@ -514,7 +531,9 @@ powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Eap eap74 -Action
 
 ### Debug Java no VS Code
 
-Execute **Workspace: gerar workspace** e abra o workspace local. Ele recomenda
+Se os attaches JBoss ainda nao aparecem, execute **Workspace: gerar workspace**
+e abra o workspace local. Se ja aparecem e as portas nao mudaram, nao precisa
+regenerar. O workspace recomenda
 Language Support for Java (`redhat.java`) e Debugger for Java
 (`vscjava.vscode-java-debug`); instale essas extensoes se ainda nao estiverem disponiveis.
 O Java do language server continua separado do Java 8 da aplicacao.
@@ -1477,9 +1496,12 @@ Crie documentos apenas quando houver conteudo proprio: nao criar outro roteiro p
 
 Estes testes verificam os scripts do harness; o build da aplicacao continua sendo uma etapa separada do fluxo.
 
-JBoss: `tests/Test-Jboss.ps1`, `tests/Test-JbossRuntime.ps1` e
-`tests/Test-JbossWorkspace.ps1` verificam releases/rollback, identidade/estados,
-timeouts e preservacao do workspace com processos simulados. Ensaio opt-in:
+JBoss: `tests/Test-Jboss.ps1`, `tests/Test-JbossRuntime.ps1`,
+`tests/Test-JbossWorkspace.ps1`, `tests/Test-JbossServerContext.ps1` e
+`tests/Test-TaskInputs.ps1` verificam releases/rollback, identidade/estados,
+timeouts, preservacao do workspace, tarefas separadas e controle sem aplicacao.
+Operacoes de runtime sao simuladas; entradas reais usam cancelamento ou instalacoes
+ficticias para nao iniciar/parar servidores da maquina. Ensaio opt-in:
 `powershell.exe -NoProfile -File tests/Test-JbossReal.ps1 -RunReal -Eap eap74`
 (ou `eap71`). Usa base isolada em `.harness/tests`, HTTP 8280, gerenciamento 10190
 e debug 8790: start/JDWP, deploy v1/v2 com HTTP, rollback HTTP e stop. Exige as

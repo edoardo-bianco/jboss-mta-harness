@@ -6,6 +6,8 @@
 - [x] Remover dependencia de aplicacao/workspace/MTA das operacoes do servidor.
 - [x] Validar contexto, recibos, cancelamento e regressao deploy/rollback/identidade.
 - [x] Atualizar README, guia e mensagens; revisar antes de integrar.
+  Revisao documental complementar: roteiro de start/estado/stop, extensoes/attach,
+  lista dos testes e menu anterior identificado como historico.
 
 Validacao: Test-JbossServerContext, Test-TaskInputs, Test-Jboss,
 Test-JbossRuntime e Test-JbossWorkspace passaram no Windows PowerShell 5.1.

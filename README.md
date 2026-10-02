@@ -20,7 +20,8 @@ Para operar JBoss, configure o caminho do EAP desejado e siga o
 [roteiro de deploy e debug](doc/guias/harness-migracao-desenvolvedor.md#jboss-local-releases-e-debug-java).
 
 Para projetos corporativos, use **File > Add Folder to Workspace** e salve.
-A primeira tarefa reconhece o projeto e cria seu registro local. Nao precisa gerar
+As tarefas que selecionam projeto reconhecem a aplicacao e criam seu registro local.
+O controle do servidor JBoss independe desse registro. Nao precisa gerar
 workspace novamente a cada uso. Copilot deve estar autenticado em sessao Local,
 com DevSquad disponivel; o harness nao instala ferramentas.
 

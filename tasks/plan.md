@@ -70,6 +70,10 @@ Nenhuma alteracao da aplicacao de exemplo sera feita nesta entrega documental.
 
 ## JBoss local: operacoes, releases e debug Java - 2026-10-02
 
+Registro da primeira implementacao. O menu unico e a selecao de projeto para
+controlar o servidor foram substituidos pela entrega Controle JBoss sem aplicacao,
+no inicio deste plano. Os demais contratos e as evidencias abaixo permanecem.
+
 Pedido autorizado: implementar para EAP 7.1/7.4 locais, standalone, com menu de
 acoes separadas. Branch harness/jboss-operacoes-debug derivada de main eff0e12.
 Referencia: scripts HarnessEap* do jboss-eap-copilot-harness-template; adaptar
