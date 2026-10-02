@@ -23,6 +23,14 @@ e validacao funcional corporativa permanecem ensaios do desenvolvedor.
 Revisao conferiu isolamento, hashes, falhas/timeout, lock local, compatibilidade
 7.1/7.4, padroes Maven e preservacao de configuracoes extras. Sem integrar na main.
 
+Continuidade autorizada pelo desenvolvedor em 2026-10-02: alinhar e publicar
+main e main_jboss_eap74 com esta entrega; remover harness/jboss-operacoes-debug
+apos confirmar a preservacao dos commits nas duas branches. Remoto conferido:
+ambas partem de eff0e12 e permitem fast-forward, sem conflitos ou mudancas de
+codigo adicionais. As validacoes acima continuam aplicaveis ao mesmo conteudo.
+Teste manual do JBoss/debug pelo desenvolvedor foi adiado; a integracao nao
+declara esse ensaio concluido nem altera GO/aceite de corretivas da aplicacao.
+
 Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
