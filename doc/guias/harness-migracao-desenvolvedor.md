@@ -143,8 +143,10 @@ As duas opcoes configuram a IDE. Para executar as tarefas do harness, mantenha t
 
 Gerar novamente sincroniza a IDE com o JSON; nao precisa fazer isso antes de cada build.
 As tarefas do harness leem o JSON a cada execucao, mas o arquivo de workspace so muda
-quando e gerado ou editado. O gerador reescreve `folders` e `settings` e guarda o arquivo
-anterior em `.harness/workspace-backups/`: ajustes manuais podem ser sobrescritos.
+quando e gerado ou editado. O gerador atualiza caminhos dos projetos cadastrados,
+Java/Maven e os dois attaches JBoss; preserva pastas extras, demais settings e
+launches manuais. Guarda o arquivo anterior em `.harness/workspace-backups/`.
+Settings Maven null removem os overrides gerados, mantendo os padroes da maquina.
 
 ### Opcao B: configurar o workspace manualmente
 
@@ -223,6 +225,7 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
 | MTA: conferir ambiente | `conferir-ambiente.ps1` |
 | **Aplicacao: build Maven (Java 8)** | **`construir-aplicacao.ps1 -Goals <fases escolhidas>`** |
 | Aplicacao: analisar SonarQube | `analisar-sonar.ps1` |
+| Aplicacao: gerenciar JBoss | `gerenciar-jboss.ps1` |
 | Aplicacao: preparar implementacao do lote | `preparar-implementacao.ps1` |
 | **MTA: executar analise** | **`executar-mta.ps1`** |
 | **MTA: acompanhar log da analise** | **`acompanhar-log-mta.ps1 -Active`** |
@@ -395,6 +398,104 @@ opcao com `clean install` e aguarde `BUILD SUCCESS` antes de executar MTA. Confi
 e nao passa pelo lock/recibo da tarefa do harness: execute uma operacao por vez.
 Configuracoes particulares de pasta podem sobrescrever as do workspace.
 Referencia: [configuracao da extensao Maven](https://github.com/microsoft/vscode-maven#additional-configurations).
+
+## JBoss local, releases e debug Java
+
+Use **Aplicacao: gerenciar JBoss**. Selecione projeto, EAP 7.1/7.4 e uma acao:
+estado, start, start com debug, deploy, rollback ou stop. Cada execucao realiza
+somente a acao escolhida; deploy nao inicia servidor e desconectar debug nao para
+o JBoss. Stop encerra o servidor inteiro, incluindo todas as aplicacoes nele.
+Escopo atual: Windows, PowerShell 5.1, Java 8 e servidor local standalone.
+
+Configure `tools.eap71Home`, `tools.eap74Home` e `tools.applicationJdk8Home`.
+**Workspace: configurar caminhos** acrescenta campos `eap` ausentes sem substituir
+valores existentes. Padroes (offset aplicado aos sockets do standalone):
+
+| Servidor | Configuracao | Offset | HTTP | Gerenciamento | Debug |
+| --- | --- | --- | --- | --- | --- |
+| eap71 | standalone.xml | 0 | 8080 | 9990 | 8787 |
+| eap74 | standalone.xml | 100 | 8180 | 10090 | 8788 |
+
+Cada `eap.<servidor>` aceita `standaloneConfig` (nome em standalone/configuration),
+`portOffset`, `debugPort` e `timeoutSeconds` (10 a 600; padrao 120 por operacao CLI/espera).
+O perfil espera os sockets padrao HTTP 8080 e gerenciamento 9990 mais offset.
+Preserva e executa o `standalone.conf.bat` instalado. Datasources, drivers e demais
+requisitos da aplicacao continuam sendo configurados pelo desenvolvedor no JBoss.
+Overrides locais do launcher que mudem Java, portas ou debug devem corresponder
+ao perfil; falha de identidade nao sera tratada como sucesso.
+
+O gerenciamento usa CLI local com autenticacao local do JBoss; nao grava senha.
+Confere home, base, XML, versao e Java 8 antes das mutacoes. Porta ocupada nao
+equivale a servidor correto. Processo existente sem gerenciamento fica
+`UNREACHABLE`; nao iniciar outra instancia. Start aguarda `RUNNING`. Stop usa
+shutdown e aguarda a saida do processo identificado, sem encerrar outros Java.
+Em timeout, consulte o recibo e os logs; o processo e preservado para diagnostico.
+
+### Deploy e rollback
+
+1. Construa a aplicacao pela tarefa Maven e confira seu resultado.
+2. Execute start (normal ou debug) e confira o estado.
+3. Escolha deploy, informe o caminho do WAR/EAR e um **nome estavel**, por exemplo
+   `minha-api.war`, mesmo que o arquivo contenha a versao no nome.
+4. Confira o recibo, o status do deployment e valide a aplicacao funcionalmente.
+5. Para reverter, escolha rollback, o mesmo nome e a release anterior mostrada no
+   menu. O harness reimplanta a copia preservada e verifica hash/status no servidor.
+
+Nao executa build automaticamente. A escolha do arquivo e explicita; o harness
+registra sua associacao ao projeto selecionado, sem inferir sua origem Maven.
+Substituicao exige que o deployment atual corresponda ao ultimo recibo do mesmo
+projeto/EAP/nome. Deploy existente sem historico, conteudo alterado externamente,
+estado diferente de OK ou arquivo de rollback adulterado sao recusados. Use outro
+nome para iniciar um historico ou trate a implantacao anterior manualmente.
+O primeiro deploy nao tem release anterior para rollback. Rollback restaura WAR/EAR;
+nao reverte banco, configuracao do servidor nem efeitos externos da aplicacao.
+Nao ha rollback automatico em erro. Falha depois do envio exige conferir o servidor:
+o ultimo sucesso permanece preservado, e uma divergencia impede sobrescrita silenciosa.
+
+Recibos, hashes SHA256 (arquivo), SHA1 (conteudo gerenciado JBoss), logs e copias
+de releases ficam em `.harness/jboss/<eap>__<chave>/`. Essa area e permanente e
+fica fora de **Workspace: limpar execucoes**. Nao e backup temporario. Recibos
+de operacao sao por execucao; releases sao por ID e guardam referencia a anterior.
+Registram tambem caminho do artefato, base/XML do servidor e observacao Git
+informativa. Troca de branch ou ausencia de Git nao bloqueia deploy/rollback.
+Uma release SUCCEEDED confirma conteudo/status do deployment, sem conceder aceite
+funcional ou GO de migracao. O indice dos projetos continua mostrando build/MTA/
+planejamento/Sonar; os recibos JBoss sao consultados pelo caminho exibido na tarefa.
+
+Exemplos CLI, com selecao explicita de projeto:
+
+```powershell
+powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Target minha-api -Eap eap74 -Action StartDebug
+powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Target minha-api -Eap eap74 -Action Deploy -ArtifactPath C:\apps\minha-api\target\api-1.0.war -DeploymentName minha-api.war
+powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Target minha-api -Eap eap74 -Action Status
+powershell.exe -NoProfile -File .\scripts\gerenciar-jboss.ps1 -Target minha-api -Eap eap74 -Action Stop
+```
+
+### Debug Java no VS Code
+
+Execute **Workspace: gerar workspace** e abra o workspace local. Ele recomenda
+Language Support for Java (`redhat.java`) e Debugger for Java
+(`vscjava.vscode-java-debug`); instale essas extensoes se ainda nao estiverem disponiveis.
+O Java do language server continua separado do Java 8 da aplicacao.
+
+1. Use **Start com debug** e faca deploy do artefato construido com os fontes abertos.
+2. No painel **Run and Debug**, selecione **JBoss eap71 - attach Java** ou
+   **JBoss eap74 - attach Java**, conforme o servidor, e pressione F5.
+3. Coloque breakpoint no fonte e invoque o endpoint/fluxo da aplicacao.
+4. Desconecte o debugger quando terminar e use stop separadamente se desejar.
+
+Os attaches conectam em `127.0.0.1`, nas portas configuradas; JDWP inicia com
+`suspend=n`. Um servidor ja iniciado sem debug exige stop e novo start debug.
+Alterar a porta no JSON requer regenerar o workspace e reiniciar o servidor.
+Os nomes desses dois attaches sao gerenciados pelo harness. Para personalizar,
+duplique com outro nome. Em workspace com classes/projetos homonimos, acrescente
+`projectName` com o nome Java importado pelo VS Code no attach personalizado.
+Breakpoints nao vinculados exigem conferir fontes/bytecode e importacao do projeto;
+o gerador nao recompila nem executa deploy ao pressionar F5.
+
+Referencias: [Red Hat EAP: comandos CLI](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html/management_cli_guide/how_to_cli)
+e [VS Code: debug Java e attach](https://code.visualstudio.com/docs/java/java-debugging).
+A compatibilidade 7.1 tambem e verificada contra a CLI instalada, que usa saida DMR.
 
 ## Analise e resultados
 
@@ -1329,6 +1430,14 @@ Crie documentos apenas quando houver conteudo proprio: nao criar outro roteiro p
 ## Testar os scripts do harness
 
 Estes testes verificam os scripts do harness; o build da aplicacao continua sendo uma etapa separada do fluxo.
+
+JBoss: `tests/Test-Jboss.ps1`, `tests/Test-JbossRuntime.ps1` e
+`tests/Test-JbossWorkspace.ps1` verificam releases/rollback, identidade/estados,
+timeouts e preservacao do workspace com processos simulados. Ensaio opt-in:
+`powershell.exe -NoProfile -File tests/Test-JbossReal.ps1 -RunReal -Eap eap74`
+(ou `eap71`). Usa base isolada em `.harness/tests`, HTTP 8280, gerenciamento 10190
+e debug 8790: start/JDWP, deploy v1/v2 com HTTP, rollback HTTP e stop. Exige as
+instalacoes locais configuradas e portas livres. Nao executa breakpoint no VS Code.
 
 Para Git e limpeza, execute `powershell.exe -NoProfile -File .\tests\Test-Git.ps1`
 e `powershell.exe -NoProfile -File .\tests\Test-Cleanup.ps1`. Usam repositorios e

@@ -1,5 +1,28 @@
 # To-do do agente: evolucao do harness
 
+## JBoss local: operacoes, releases e debug Java - 2026-10-02
+
+- [x] Conferir referencia, contratos e escopo: local standalone, menu com acoes separadas.
+- [x] Configurar EAPs e attach Java no workspace, preservando ajustes existentes.
+- [x] Implementar estado/start/debug/stop com identidade, portas e timeout.
+- [x] Implementar deploy e rollback de releases preservadas com hashes/recibos.
+- [x] Integrar menu, documentar operacao e limites, validar regressao PowerShell 5.1.
+- [x] Ensaiar localmente operacoes e protocolo de debug; registrar limites de validacao.
+
+Validacao: 27 scripts autonomos passaram; logs em
+`.harness/tests/jboss-regressao-710656cc7ba34b01bc3903775416c691/`.
+Test-Jboss e Test-JbossRuntime revalidados apos metadados finais e correcao shutdown.
+EAP 7.4: ciclo real completo em `jboss-real-c46cedad27b4431dabb6f55905597c7a`.
+EAP 7.1: start/JDWP, deploy v1/v2, rollback HTTP v1 em
+`jboss-real-6c9227a0ed564b74b3e5231880972b94`; stop inicial recusou argumento 7.4,
+corrigido para --timeout e confirmado no recibo `7970307611a3414bbedde171d759c0aa`.
+Bases isoladas sob .harness/tests; XML original preservado no ciclo 7.4.
+JSON local atualizado e workspace regenerado com backup automatico.
+Limite: JDWP validado por handshake; breakpoint no VS Code com aplicacao real
+e validacao funcional corporativa permanecem ensaios do desenvolvedor.
+Revisao conferiu isolamento, hashes, falhas/timeout, lock local, compatibilidade
+7.1/7.4, padroes Maven e preservacao de configuracoes extras. Sem integrar na main.
+
 Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
@@ -439,11 +462,13 @@ reiniciar o ensaio nem reutilizar solicitacoes apagadas.
 
 - Retomado em Integracao SonarQube acima: scanner Maven local com servidor
   corporativo ou Docker. Validacao integrada real permanece explicita nessa entrega.
-- [ ] Planejar release/deploy para JBoss EAP 7.1 e 7.4, destinos confirmados pelo
+- [x] Planejar release/deploy para JBoss EAP 7.1 e 7.4, destinos confirmados pelo
   desenvolvedor em 2026-09-28 e configurados em tools.eap71Home/tools.eap74Home
   no JSON local. Detalhar selecao do servidor, artefato, implantacao e rollback;
   as corretivas de migracao continuam destinadas ao EAP 7.4.
-- [ ] Planejar start/stop e consulta de estado do JBoss, coordenados com o deploy.
+- [x] Planejar start/stop e consulta de estado do JBoss, coordenados com o deploy.
+  Implementado e ensaiado em JBoss local: operacoes, releases e debug Java (2026-10-02),
+  com menu de acoes separadas conforme escolha do desenvolvedor.
 
 Classificar futuras operacoes nos prefixos da etapa definidos em AGENTS.md.
 Detalhar contratos e criterios quando solicitadas; este backlog nao autoriza execucao.

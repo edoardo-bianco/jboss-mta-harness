@@ -4,7 +4,9 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 17 -and @($labels | Sort-Object -Unique).Count -eq 17) 'Manter 17 tarefas distintas, incluindo indice dos projetos.'
+Assert ($labels.Count -eq 18 -and @($labels | Sort-Object -Unique).Count -eq 18) 'Manter 18 tarefas distintas, incluindo menu JBoss.'
+$jbossTask = @($tasks.tasks | Where-Object label -eq 'Aplicacao: gerenciar JBoss')
+Assert ($jbossTask.Count -eq 1 -and $jbossTask[0].args -contains '${workspaceFolder}/scripts/gerenciar-jboss.ps1') 'JBoss deve usar menu unico.'
 $indexTask = @($tasks.tasks | Where-Object label -eq 'Workspace: atualizar indice dos projetos')
 Assert ($indexTask.Count -eq 1 -and $indexTask[0].args -contains '${workspaceFolder}/scripts/atualizar-indice-projetos.ps1' -and $indexTask[0].args -contains '${input:harnessWorkspacePath}' -and $indexTask[0].args -notcontains '-SelectTarget') 'Indice deve abranger workspace sem selecao de alvo.'
 $implementationTask = @($tasks.tasks | Where-Object label -eq 'Aplicacao: preparar implementacao do lote')

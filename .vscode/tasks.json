@@ -2,6 +2,16 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Aplicacao: gerenciar JBoss",
+      "detail": "Selecione EAP 7.1/7.4 e estado, start/debug, deploy, rollback ou stop; uma acao por execucao.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Workspace: atualizar indice dos projetos",
       "detail": "Atualiza os registros com o ultimo MTA reconhecido, preserva anotacoes e prepara prompts de reconciliacao; abre o indice e salva copia datada. Execute os prompts pendentes no Copilot.",
       "type": "process",

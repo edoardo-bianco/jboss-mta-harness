@@ -1,5 +1,54 @@
 # Plano do agente: evolucao do harness
 
+## JBoss local: operacoes, releases e debug Java - 2026-10-02
+
+Pedido autorizado: implementar para EAP 7.1/7.4 locais, standalone, com menu de
+acoes separadas. Branch harness/jboss-operacoes-debug derivada de main eff0e12.
+Referencia: scripts HarnessEap* do jboss-eap-copilot-harness-template; adaptar
+controle sem restricao ao WAR de laboratorio nem dependencias Sonar do template.
+
+Contrato: uma tarefa Aplicacao: gerenciar JBoss seleciona projeto, EAP e acao
+(estado, start, start debug, deploy, rollback, stop). Nao encadear operacoes.
+Usar tools.eap71Home/eap74Home e applicationJdk8Home. Configuracao eap por servidor
+define standaloneConfig, portOffset, debugPort e timeoutSeconds. Preservar
+standalone.conf.bat e configuracoes existentes. CLI local sem credenciais gravadas.
+Estado verifica home/base/versao pelo gerenciamento; falha de conexao nao prova
+servidor parado. Start verifica portas/processo e aguarda running; stop usa shutdown
+gracioso e confirma saida, sem matar processos Java alheios.
+
+Deploy seleciona explicitamente WAR/EAR e nome estavel. Copia imutavel e SHA256,
+Project/Source/EAP/horario e resultado em .harness/jboss (evidencia permanente,
+fora da limpeza de execucoes e de backups temporarios). Substituir somente release
+gerenciada cuja identidade/conteudo atual correspondam ao recibo. Rollback escolhe
+release anterior do mesmo projeto/servidor/nome e reimplanta o artefato preservado.
+Falha nao atualiza ponteiro de sucesso; nenhum rollback automatico ou migracao de
+banco. Status OK do deployment nao equivale a verificacao funcional/aceite humano.
+
+Workspace recebe attach Java para os dois EAPs, loopback e portas distintas,
+recomendacoes das extensoes Java e preservacao das configuracoes do usuario.
+F5 conecta a JVM iniciada em debug; desconectar nao para o servidor. Manter Java 8
+da aplicacao separado do Java do language server. Nao instalar extensoes automaticamente.
+
+Implementacao incremental: configuracao/workspace; CLI/identidade e ciclo do servidor;
+releases/rollback; menu/documentacao e regressao. PowerShell 5.1, funcoes pequenas
+em modulos HarnessJboss*.psm1, entradas scripts/gerenciar-jboss.ps1 e testes autonomos
+tests/Test-Jboss*.ps1. Testar comandos e resultado por fronteira nativa simulada,
+recusa de servidor/artefato divergente, timeout, falhas, cancelamento, historico e
+preservacao de workspace. Executar powershell.exe -NoProfile -File tests/Test-Jboss.ps1
+e regressao Workspace/TaskInputs/Target/Cleanup/BuildConfig; ensaio real local separado.
+
+Fontes: documentacao Red Hat EAP 7.4 Management CLI Guide (how_to_cli) e VS Code
+Java Debugging; conferir tambem CLI e scripts das instalacoes 7.1/7.4 locais.
+Nao alterar aplicacoes, settings Maven, GO/aceite ou historico MTA. Nao editar
+manualmente XML do servidor; deploy CLI persiste normalmente na base selecionada.
+
+Resultado: implementacao concluida, regressao de 27 scripts aprovada e operacoes
+reais verificadas em bases isoladas EAP 7.1/7.4. Duas incompatibilidades encontradas
+no ensaio e corrigidas: argumento --debug numerico com DEBUG_PORT em loopback;
+shutdown --timeout no 7.1 versus --suspend-timeout no 7.4. CLI 7.1 usa saida DMR,
+sem --output-json. JSON/workspace locais atualizados; detalhes/evidencias no to-do.
+Attach JDWP foi verificado no protocolo, sem declarar breakpoint exercitado no editor.
+
 Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.

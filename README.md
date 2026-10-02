@@ -23,6 +23,7 @@ com DevSquad disponivel; o harness nao instala ferramentas.
 | Etapa | Tarefa/acao |
 | --- | --- |
 | Construir | **Aplicacao: build Maven (Java 8)**, `clean install`; conferir sucesso. |
+| Executar / depurar | **Aplicacao: gerenciar JBoss**: selecionar EAP 7.1/7.4 e estado, start/debug, deploy, rollback ou stop. Para debug, usar o attach Java do EAP no painel Run and Debug. |
 | Analisar | **MTA: executar analise**, depois **MTA: abrir ultimo relatorio**. |
 | Preparar planejamento | **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**; escolher MTA e plano anterior, se houver. O harness atualiza o catalogo no `migracao.md` quando disponivel no MTA e prepara o prompt. |
 | Escolher issues | No `migracao.md`, marcar ANALISAR AGORA nas issues desejadas e salvar. Nao precisa preparar outro contexto por essa edicao. |
@@ -60,6 +61,7 @@ O proprio indice inclui **Como interpretar o indice**, com legenda e acoes indic
 ou de todos; preserva MTA externo, `migracao.md`, evidencias e Sonar.
 
 Para detalhes: [configuracao](doc/guias/harness-migracao-desenvolvedor.md#configuracao-da-maquina),
+[JBoss, releases e debug](doc/guias/harness-migracao-desenvolvedor.md#jboss-local-releases-e-debug-java),
 [GO/aceite](doc/guias/harness-migracao-desenvolvedor.md#da-proposta-revisada-a-execucao-e-ao-aceite),
 [Sonar](doc/guias/harness-migracao-desenvolvedor.md#sonarqube-local-ou-corporativo).
 Para evoluir o harness: [AGENTS.md](AGENTS.md), [ADRs](doc/adr/) e [tarefas](tasks/todo.md).
