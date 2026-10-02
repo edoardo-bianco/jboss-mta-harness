@@ -1255,6 +1255,11 @@ os projetos Maven desse workspace, distinguindo nomes iguais pelo caminho Source
 Sem workspace pela CLI, usa os projetos cadastrados no JSON local.
 
 A tarefa abre `.harness/projetos/indice-projetos.md` e salva uma copia datada em `indices/`.
+Na tabela de resumo, a coluna **Registro de migracao** mostra o nome do arquivo
+clicavel (`migracao-<projeto>.md` ou `migracao.md` legado), com o status ao lado.
+Clique nesse nome para consultar detalhes, decisoes e evidencias do projeto.
+Quando o registro ainda nao existe, a coluna mostra **NAO GERADO**, sem link.
+
 Antes do resumo, carrega/recalcula os registros possiveis a partir da ultima rodada
 reconhecida de cada projeto e prepara prompts manter-migracao. Preserva decisoes,
 andamento, texto livre, issues manuais e evidencias. Nao altera os relatorios MTA.

@@ -363,10 +363,12 @@ function New-HarnessProjectIndex {
             'Leitura sequencial: mudancas simultaneas podem nao aparecer. A copia datada preserva este resumo, nao os arquivos apontados pelos links.', '',
             ('Projetos: ' + $projects.Count + '; sem migracao.md: ' + @($projects | Where-Object { $_.Migration.Status -eq 'NAO GERADO' }).Count + '; registros aguardando carga MTA: ' + @($projects | Where-Object { $_.Migration.Status -eq 'AGUARDANDO MTA' }).Count + '; registros com catalogo carregado: ' + @($projects | Where-Object { $_.Migration.Status -eq 'CATALOGO CARREGADO' }).Count), '',
             (New-IndexLink 'Copia desta consulta' $snapshot $directory), (New-IndexLink 'Historico de indices' ($history + '\') $directory), '',
-            '| Projeto / Source | Ultimo build | Ultimo MTA | Ultimo planejamento | Ultimo Sonar | Registro atual | MTA x registro | Reconciliacao | Issues / ocorrencias (ultimo MTA) | Categorias MTA (issues / ocorrencias) | Decisoes (registro) | Andamento (registro) | Proximos passos sugeridos |', '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |')
+            '| Projeto / Source | Ultimo build | Ultimo MTA | Ultimo planejamento | Ultimo Sonar | Registro de migracao | MTA x registro | Reconciliacao | Issues / ocorrencias (ultimo MTA) | Categorias MTA (issues / ocorrencias) | Decisoes (registro) | Andamento (registro) | Proximos passos sugeridos |', '| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |')
         foreach ($project in $projects) {
             $migration = $project.Migration
-            $register = if ($migration.Path) { New-IndexLink $migration.Status $migration.Path $directory } else { $migration.Status }
+            $register = if ($migration.Path) {
+                (New-IndexLink (Split-Path -Leaf $migration.Path) $migration.Path $directory) + ' - ' + (ConvertTo-IndexText $migration.Status)
+            } else { $migration.Status }
             $reconciliationLabel = if ($migration.Reconciliation -eq 'PENDENTE') { 'PENDENTE - executar prompt' } elseif ($migration.Reconciliation -eq 'CONCLUIDA') { 'CONCLUIDA (declarada no registro)' } else { $migration.Reconciliation }
             $reconciliation = $reconciliationLabel
             $reconciliationPrompt = Get-IndexReconciliationPrompt $project
@@ -393,6 +395,7 @@ function New-HarnessProjectIndex {
             '', '## Como interpretar o indice', '',
             'A tarefa carrega o ultimo MTA reconhecido nos registros possiveis e prepara/reutiliza prompts, preservando decisoes e anotacoes. Nao executa agente nem planeja lote.',
             'Issues, ocorrencias e categorias vem diretamente do ultimo MTA. Decisoes e andamento vem do migracao.md; carga automatica nao comprova que essas escolhas foram reconciliadas.',
+            'Registro de migracao: clique no nome do arquivo para abrir os detalhes, decisoes e evidencias do projeto. O status aparece ao lado; NAO GERADO significa que ainda nao ha arquivo disponivel.',
             'Categorias MTA: cada par indica issues / ocorrencias (ex.: mandatory: 2 / 138). A classificacao do MTA nao e a prioridade escolhida pelo desenvolvedor; categorias ausentes nao sao listadas.',
             'A coluna MTA x registro compara a ultima tentativa encontrada com o RunId carregado no registro. Ela nao valida o conteudo do catalogo nem o codigo atual.', '',
             '| Indicacao | Significado | O que fazer |', '| --- | --- | --- |',

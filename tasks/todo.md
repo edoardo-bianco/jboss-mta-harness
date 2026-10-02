@@ -1,5 +1,14 @@
 # To-do do agente: evolucao do harness
 
+## Link explicito do registro no indice - 2026-10-02
+
+- [x] Tornar visivel o nome real do registro como link na coluna Registro de migracao,
+  preservando status, projetos sem registro e caminhos das copias datadas.
+- [x] Validar indice e integracao de carga MTA; conferir resultado local e documentar.
+  Test-ProjectIndex e Test-ExternalMtaDiscovery passaram no Windows PowerShell 5.1.
+  Indice local regenerado em modo de consulta, com dois links validos no resumo
+  atual e na nova copia datada. Hashes dos registros e indices anteriores preservados.
+
 ## Proxima evolucao JBoss: servidor e deploy separados - 2026-10-02
 
 - [ ] Separar start/stop e deploy no menu principal, mantendo consulta de estado,

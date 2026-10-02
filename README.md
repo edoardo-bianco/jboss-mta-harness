@@ -58,6 +58,8 @@ Configuracao, workspace gerado e `.harness/` sao locais e nao acompanham clone/p
 **Workspace: atualizar indice dos projetos** gera `.harness/projetos/indice-projetos.md`
 com uma linha por projeto: ultimas acoes, issues/ocorrencias por categoria, decisoes, andamento e
 proximos passos sugeridos. Inclui totais e guarda uma copia datada em `indices/`.
+Na coluna **Registro de migracao**, clique no nome do arquivo para abrir os detalhes
+do projeto; o status aparece ao lado, ou **NAO GERADO** quando nao ha registro.
 Le issues/ocorrencias diretamente do ultimo MTA, inclusive externo, e atualiza os
 registros possiveis preservando decisoes/anotacoes. Prepara os prompts de reconciliacao
 e reutiliza os da mesma rodada/contexto. **Execute os prompts PENDENTES no Copilot**:

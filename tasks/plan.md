@@ -1,5 +1,15 @@
 # Plano do agente: evolucao do harness
 
+## Link explicito do registro no indice - 2026-10-02
+
+Prioridade solicitada: abrir os detalhes da migracao diretamente do resumo.
+Reutilizar a coluna existente, renomeada Registro de migracao, com o nome real
+do arquivo clicavel e status ao lado. Resolver migracao-<projeto>.md e migracao.md
+legado pelo mecanismo existente; sem arquivo, manter NAO GERADO sem link.
+Preservar caminhos relativos no indice atual e copia datada, identidade por Source,
+contagens, decisoes e evidencias. Validar com Test-ProjectIndex e
+Test-ExternalMtaDiscovery e conferir o indice local atualizado.
+
 ## Proxima evolucao JBoss: servidor e deploy separados - 2026-10-02
 
 Backlog solicitado, sem implementacao nesta etapa: separar no menu principal
