@@ -23,6 +23,7 @@ Se voce recebeu uma rodada MTA completa, pode iniciar na etapa 4 com a opcao **p
 nao precisa repetir build/MTA apenas para preparar uma proposta nesta maquina.
 
 Para consultar sem gerar outra solicitacao, use **Planejamento: abrir plano e to-do**.
+Para a visao de todos os projetos, use [Workspace: atualizar indice dos projetos](#indice-da-situacao-dos-projetos).
 A coleta Sonar tem a tarefa **Aplicacao: analisar SonarQube**; veja o
 [roteiro Sonar local/corporativo](#sonarqube-local-ou-corporativo). Deploy e controle do servidor
 ainda nao sao automatizados aqui.
@@ -45,8 +46,8 @@ e **2** cuida somente do registro. Gerar ou abrir um prompt nao o executa no Cop
 | Situacao | Caminho e ponto de parada |
 | --- | --- |
 | Primeiro lote, com MTA novo ou ja existente | Opcao **1**; selecionar a rodada (ou **p** para pasta recebida), salvar ANALISAR AGORA e executar o prompt. [Passo a passo](#preparar-e-executar-o-prompt). |
-| Quero apenas carregar as issues do MTA | Opcao **2 > 1: selecionar MTA**; conferir o catalogo no registro. Pode parar sem executar o prompt. [Reconstrucao](#reconstruir-a-pasta-usando-um-mta-existente). |
-| Quero reconciliar decisoes, registro de colega ou evidencias | Opcao **2**, com MTA ou **2: somente registro/evidencias existentes**; executar o prompt opcional. Apenas migracao.md muda; nao produz lote. [Entradas e limites](#reconstruir-a-pasta-usando-um-mta-existente). |
+| Quero carregar os MTA reconhecidos de todos os projetos | **Workspace: atualizar indice dos projetos** carrega os registros possiveis e prepara prompts. Execute os que aparecerem PENDENTES. [Indice](#indice-da-situacao-dos-projetos). |
+| Quero escolher outra rodada ou reconciliar registro de colega/evidencias | Opcao **2**, com MTA ou **2: somente registro/evidencias existentes**; executar o prompt para concluir a reconciliacao. Apenas migracao.md muda; nao produz lote. [Entradas e limites](#reconstruir-a-pasta-usando-um-mta-existente). |
 | So mudei as prioridades no migracao.md antes de planejar | Salvar o registro e usar o prompt ja preparado; nao gerar outra solicitacao. |
 | Quero completar ou corrigir a proposta atual | Pedir o ajuste na mesma conversa e nos mesmos documentos. Para uma revisao separada, opcao **1**, selecionando a proposta como Previous. [Revisao](#revisao-manual-do-plano-e-do-to-do). |
 | Tenho novo MTA para um lote em andamento | Opcao **1**, selecionar o novo MTA e o plano anterior; reconciliar o lote existente. Nao alterar o RunId do recibo antigo. [Evidencias e revisao](#revisar-um-lote-com-evidencias-complementares). |
@@ -218,6 +219,7 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
 | Workspace: configurar caminhos | `configurar-caminhos.ps1` |
 | Workspace: gerar workspace | `gerar-workspace.ps1` |
 | Workspace: limpar execucoes | `limpar-execucoes.ps1` |
+| Workspace: atualizar indice dos projetos | `atualizar-indice-projetos.ps1` |
 | MTA: conferir ambiente | `conferir-ambiente.ps1` |
 | **Aplicacao: build Maven (Java 8)** | **`construir-aplicacao.ps1 -Goals <fases escolhidas>`** |
 | Aplicacao: analisar SonarQube | `analisar-sonar.ps1` |
@@ -611,7 +613,7 @@ o harness cria, sem sobrescrever:
 
 ```text
 .harness/projetos/<nome>__<chave>/
-  migracao.md
+  migracao-<projeto>.md
   evidencias/LEIA-ME.md
 ```
 
@@ -620,13 +622,23 @@ registros separados implicitamente. Rotulos iguais em raizes diferentes ficam
 separados. Alterar o nome no Explorer ou alternar entre configuracao e workspace
 nao duplica a pasta. Remover o projeto do workspace nao apaga seu registro.
 
+O nome novo inclui o rotulo seguro do projeto para distinguir abas no editor.
+Arquivos ja existentes, inclusive migracao.md, mantem o caminho. Neste guia e nos
+prompts, migracao.md significa o registro indicado por MigrationPath no contexto;
+nao renomeie um registro usado por solicitacoes antigas.
+
 Antes do MTA, o documento fica AGUARDANDO MTA. Ao escolher uma rodada, recebe uma
 linha por issue (ruleset::regra), com titulo, categoria e numero de ocorrencias.
 Os dados vem de output/static-report/output.js, lido como JSON sem executar JavaScript.
 O harness nao inventa as demais issues a partir de um print parcial.
 Formato nao suportado e informado. Rodada antiga sem output.js continua utilizavel
 no planejamento, mas nao preenche o catalogo automaticamente.
+O rodape mostra o total de issues/regras e de ocorrencias da rodada carregada.
+Issues manuais e NAO REENCONTRADA ficam fora desses totais. Em registros anteriores,
+selecione o MTA novamente no preparo para atualizar o rodape; nao precisa novo scan.
 
+Novos registros incluem **Como usar este registro**, com significados e valores
+por campo; registros existentes preservam seu texto ao atualizar o MTA.
 Edite as escolhas no migracao.md; mantenha as oito colunas e os marcadores da tabela:
 
 | Campo | Uso |
@@ -659,10 +671,9 @@ Para somente reconstruir ou atualizar o registro, sem planejar:
    e execute manter-migracao. Somente o MTA inicializa A DEFINIR/NAO ANALISADA;
    ele nao comprova analise, implementacao ou verificacao realizadas anteriormente.
 
-O prompt manter-migracao e gerado para ajuda opcional do Copilot: ele interpreta
-as evidencias e reconcilia decisoes/andamento somente no migracao.md, sem gerar
-plan.md/todo.md. Se queria apenas extrair o catalogo do MTA ou prefere editar o
-registro manualmente, a tarefa ja cumpriu esse objetivo; nao precisa executar o prompt.
+O catalogo ja esta carregado, mas a reconciliacao fica PENDENTE. Execute
+manter-migracao no Copilot para interpretar evidencias e reconciliar decisoes/andamento
+somente no migracao.md, sem gerar plan.md/todo.md. Gerar o prompt nao executa essa etapa.
 
 Para usar essa ajuda, confira as entradas e o direcionamento no arquivo
 manter-migracao.prompt.md aberto, e use **Executar Prompt** em conversa Copilot
@@ -686,8 +697,8 @@ Para atualizar somente observacoes/evidencias, escolha **2: somente registro/evi
 existentes**, sem selecionar outro scan. Pela CLI, use -WithoutMta no lugar de
 -RunPath. Pode informar -EvidenceIndexPath para um LEIA-ME existente fora da pasta
 padrao. Planos anteriores podem ser referenciados nesse indice como evidencias;
-o mantenedor nao os altera. Manter registro e opcional: nao precisa executa-lo
-novamente antes de cada planejamento.
+o mantenedor nao os altera. Uma reconciliacao CONCLUIDA nao precisa ser repetida
+antes de cada planejamento; execute novamente quando houver nova pendencia/contexto.
 
 ### Preparar e executar o prompt
 
@@ -1112,6 +1123,105 @@ Testes: `tests/Test-Sonar.ps1` (Maven/API simulados), `tests/Test-SonarCriteria.
 (HTTP real em loopback com token sintetico). Nao equivalem a homologacao no
 Sonar Docker ou corporativo do operador.
 
+## Indice da situacao dos projetos
+
+Execute **Terminal > Run Task > Workspace: atualizar indice dos projetos** e
+informe o workspace em uso. Nao ha escolha de projeto: a consulta abrange todos
+os projetos Maven desse workspace, distinguindo nomes iguais pelo caminho Source.
+Sem workspace pela CLI, usa os projetos cadastrados no JSON local.
+
+A tarefa abre `.harness/projetos/indice-projetos.md` e salva uma copia datada em `indices/`.
+Antes do resumo, carrega/recalcula os registros possiveis a partir da ultima rodada
+reconhecida de cada projeto e prepara prompts manter-migracao. Preserva decisoes,
+andamento, texto livre, issues manuais e evidencias. Nao altera os relatorios MTA.
+Falha recente, ambiguidade, catalogo invalido ou integridade nao confirmada deixa
+o registro preservado e a causa visivel; os demais projetos continuam sendo tratados.
+Nao substitui uma falha recente por sucesso antigo. Projetos sem MTA nao recebem
+catalogo inventado. Para outra rodada/origem, use a selecao explicita no preparo.
+
+**Execute no Copilot cada prompt indicado como PENDENTE.** A coluna Reconciliacao
+e a secao homonima do migracao.md mostram estado e link. Catalogo atualizado e
+MESMA RODADA nao significam reconciliacao concluida. Depois de executar o prompt,
+registrar conclusoes e resolver conflitos, Estado pode ser marcado CONCLUIDA;
+a tarefa nao o faz automaticamente. Isso nao concede GO/aceite da migracao.
+Repetir a tarefa reutiliza o prompt vinculado se rodada/catalogo, indice de evidencias,
+contrato e modelo forem iguais; anotacoes atuais sao lidas no registro. Uma conclusao
+registrada nao dispara outro prompt. Nova rodada/contexto inicia nova pendencia.
+
+O indice e a selecao MTA no preparo tambem consultam `mta.runsPath`, mesmo sem
+referencias em `.harness/runs` depois da limpeza. Use a estrutura
+`<pasta externa>/<projeto>/<rodada completa>`; formatos antigos e novos sao lidos
+pelo manifesto, sem renomear arquivos. A associacao automatica exige Source igual
+ao caminho local. Para MTA de outra maquina/caminho, use **p** no preparo: nomes
+iguais nao sao suficientes para associar automaticamente. Copias em pastas distintas
+com o mesmo RunId sao ambiguas e exigem conferencia; referencias a mesma pasta
+nao duplicam a rodada.
+
+A coluna **MTA x registro** deixa visivel a diferenca entre encontrar um relatorio
+e carregar seu catalogo:
+
+O proprio relatorio inclui a secao **Como interpretar o indice**, com a legenda
+abaixo e a acao indicada para cada estado, sem precisar abrir este guia.
+
+| Indicacao | Significado e acao |
+| --- | --- |
+| CATALOGO NAO CARREGADO | Nao foi possivel carregar o registro. Confira Atualizacao do registro e Limites da leitura; os numeros MTA podem estar disponiveis mesmo assim. |
+| MESMA RODADA | RunId encontrado e carregado coincidem; nao e validacao de conteudo, codigo ou aceite. |
+| RODADA DIFERENTE | Conferir RunIds e o motivo da carga nao concluida nos detalhes. |
+| ULTIMA TENTATIVA FAILED (ou outro estado sem sucesso) | Conferir a tentativa; nao substituir o catalogo por resultado com falha. |
+| SEM MTA LOCALIZADO / COMPARACAO INDISPONIVEL | Conferir pasta configurada, origem e limites da leitura; nao significa que nunca houve MTA. |
+
+Copiar um relatorio e executar **Atualizar indice dos projetos** carrega o MTA
+reconhecido no registro e deixa o prompt pronto. A execucao desse prompt e uma
+etapa separada e necessaria para concluir a reconciliacao.
+
+No inicio, uma linha por projeto consolida as ultimas acoes, o registro, as issues
+e ocorrencias MTA, decisoes, andamento e proximos passos sugeridos. **Numeros e
+categorias sao lidos diretamente do ultimo MTA**, mesmo sem migracao.md ou com
+registro desatualizado. Nao precisa preparar contexto para ver esse resumo.
+Categorias aparecem na linha resumida, nos totais gerais e nos detalhes. Cada par
+indica issues / ocorrencias (ex.: mandatory: 2 / 138); categorias adicionais do MTA
+sao preservadas. Essa classificacao nao e a prioridade de execucao do desenvolvedor.
+Os totais informam quantos catalogos
+MTA foram contabilizados; tentativa com falha, ambiguidade ou catalogo ausente/ilegivel
+fica indisponivel, sem usar outra rodada ou o registro como substituto. Catalogo
+valido vazio mostra zero. Issues sao regras por projeto: a mesma regra em dois
+projetos conta duas vezes. Ocorrencias sao os pontos MTA.
+**Decisoes e andamento vem do registro**, que pode usar outra rodada (confira MTA x
+registro); contam issues presentes e manuais, excluindo nao reencontradas. Nao some
+essas duas dimensoes da mesma issue. Manuais nao entram no total MTA.
+As sugestoes usam os registros atuais para orientar a conferencia de falhas,
+carga do MTA, prioridades, planejamento, GO ou verificacao; nao executam essas etapas.
+IMPLEMENTADA/VERIFICADA pode ter cobertura parcial e nao comprova migracao concluida.
+
+Mostra somente a ultima tentativa de cada acao por projeto, com datas, IDs
+e links, sem contar ou listar historico. Uma falha recente nao e substituida pelo
+ultimo sucesso; avisos de rodadas comprovadamente anteriores ficam fora. Sem
+data/identidade suficiente para determinar a ultima, informa leitura parcial. Planejamento
+distingue contexto preparado, documentos incompletos e plano/to-do presentes.
+Mostra tambem o ultimo preparo de manutencao do registro, separadamente. O registro mostra catalogo carregado
+ou aguardando MTA, contagens, escolhas e andamento por issue.
+
+Execute novamente apos novas rodadas ou edicoes manuais/pelo agente; nao ha
+atualizacao continua. A tarefa cria registros ausentes quando ha MTA valido e
+prepara prompts; nao executa agente, build ou analise, nao concede GO/aceite e
+nao comprova que os resultados valem para o codigo atual.
+Leitura invalida/inacessivel aparece como limite; SEM REGISTRO nao significa que
+nunca executou. Apos limpar indices MTA locais, a referencia carregada no registro
+continua visivel, mas nao substitui um recibo de execucao disponivel.
+Se o RunId carregado no registro difere do ultimo MTA registrado, o indice avisa.
+Categorias/contagens **no migracao.md** sao sincronizadas pela tarefa do indice,
+preservando decisoes. A selecao manual no preparo continua disponivel para outra
+rodada/origem; a proxima atualizacao geral volta a usar a ultima rodada reconhecida.
+No proprio registro, o rodape continua refletindo a rodada carregada, excluindo
+manuais e nao reencontradas. Por isso seus totais podem diferir dos numeros do indice.
+
+Cada copia guarda os textos/contagens consultados naquele momento; links continuam
+apontando para os arquivos originais e podem deixar de funcionar se forem apagados.
+Nao e backup das evidencias nem do codigo. Indice e historico sao locais, ficam
+fora do Git e sao preservados pela limpeza de execucoes. Se houver tarefas/agentes
+alterando arquivos durante a consulta, repita ao terminar para obter nova fotografia.
+
 ## Limpar execucoes locais
 
 1. Termine build/MTA e preparacao de contexto. Encerre a conversa Copilot que usa
@@ -1172,6 +1282,7 @@ podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 | `.harness/planning/` | Contextos e prompts preparados. Planejamento vincula MTA e proposta anterior quando selecionada; o Copilot grava `plan.md`/`todo.md`. Manutencao usa `registro/solicitacao_<id>`, com ou sem MTA, e so reconcilia `migracao.md`. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
 | `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
 | `.harness/projetos/` | Registro por raiz local e evidencias/LEIA-ME.md; criacao idempotente, sem duplicar por rodada. Preservados pela limpeza, locais e ausentes no clone. |
+| `.harness/projetos/indice-projetos.md` e `indices/` | Ultima acao por projeto e copias datadas dessas consultas, geradas pela tarefa de indice e preservadas pela limpeza. |
 | `.harness/evidencias/` | Evidencias historicas, preservadas e ainda utilizaveis por EvidenceIndexPath. |
 | `.harness/workspace-backups/` | Copia automatica do workspace anterior quando o gerador o substitui; permite recuperar pastas e ajustes manuais. Preservada pela tarefa de limpeza. |
 | `.harness/tests/` | Fixtures e resultados dos testes dos scripts; descartaveis quando nenhum teste estiver rodando. Recriada nos proximos testes. |
@@ -1257,6 +1368,8 @@ Para testar a selecao dos projetos do workspace, execute `powershell.exe -NoProf
 Para testar os argumentos das tarefas, execute `powershell.exe -NoProfile -File .\tests\Test-TaskInputs.ps1`. Verifica as entradas suportadas e executa o script real de build ate o menu, com caminho de workspace contendo espacos; cancela antes de iniciar Maven.
 
 Para testar o registro, execute `powershell.exe -NoProfile -File .\tests\Test-MigrationRegister.ps1`.
+`tests/Test-ProjectIndex.ps1` verifica resumo por Source, ultimas falhas, ausencias,
+MTA externo, documentos incompletos, links e preservacao de entradas/historico.
 
 Para testar a abertura no editor, execute `powershell.exe -NoProfile -File .\tests\Test-Editor.ps1`.
 Verifica a CLI da instalacao selecionada, argumentos e falhas com editor simulado;

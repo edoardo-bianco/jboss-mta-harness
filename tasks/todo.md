@@ -4,6 +4,68 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Indice dos projetos sob demanda - 2026-10-01
+
+- [x] Integrar carga dos registros e preparo/reuso de prompts na tarefa do indice,
+  preservando notas e deixando falhas por projeto explicitas; revisar instrucoes.
+  Estado PENDENTE e link aparecem no indice e no registro; conclusao somente
+  explicita apos executar o prompt. Test-ExternalMtaDiscovery cobre reuso sem loop,
+  conclusao preservada, novas evidencias/rodada, notas humanas e projetos com falha.
+  Passaram tambem Test-ProjectIndex, Test-MigrationRegister, Test-Planning e
+  Test-TaskInputs. Tarefa real carregou migracao-cache-antes e deixou prompt PENDENTE.
+
+- [x] Separar categorias na linha resumida e totais, validando mandatory, optional
+  e categorias adicionais com quantidades de issues/ocorrencias distintas.
+  Test-ProjectIndex passou; indice local regenerado e README/guia alinhados.
+
+- [x] Ler contagens/categorias diretamente do ultimo MTA no indice, sem depender
+  do registro; validar catalogo ausente, vazio, divergente e ultima tentativa falha.
+  Test-ProjectIndex, Test-ExternalMtaDiscovery e Test-MigrationRegister passaram.
+  Indice real: migracao-cache-antes com 2 issues/2 ocorrencias mandatory, mesmo
+  sem catalogo carregado no registro. Modelo, exemplos locais, legenda do indice,
+  guia, README e contrato esclarecem as duas fontes e suas rodadas independentes.
+
+- [x] Consolidar instrucoes e dominios no template e registros locais, sem repeticoes.
+  Test-MigrationRegister passou; catalogos, decisoes e referencias preservados.
+
+- [x] Incluir legenda completa no indice, manter README/guia coerentes e validar geracao.
+  Test-ProjectIndex e Test-ExternalMtaDiscovery passaram; indice local regenerado.
+
+- [x] Descobrir MTA externo sem indice local, deduplicar referencias e testar
+  isolamento por Source, ambiguidade e preservacao dos arquivos/decisoes.
+- [x] Exibir comparacao MTA/registro e orientar carga sem exigir execucao do prompt.
+  Passaram Test-ExternalMtaDiscovery, Test-ProjectIndex, Test-Planning,
+  Test-MigrationRegister e Test-Mta (processo simulado) no PowerShell 5.1.
+  Indice real encontrou MTA SUCCEEDED externo de migracao-cache-antes e mostrou
+  CATALOGO NAO CARREGADO; migracao-cache-depois ficou SEM MTA LOCALIZADO na
+  consulta final. Nenhum registro alterado nem referencia local recriada.
+
+- [x] Consolidar numeros, decisoes, andamento e proximos passos por projeto;
+  validar totais, ausencias, regras manuais e nao reencontradas no mesmo indice.
+  Test-ProjectIndex passou no PowerShell 5.1: soma entre projetos, exclusao de
+  registros invalidos e historico, sugestoes para planejamento/GO/verificacao.
+
+- [x] Testar resumo de projetos homonimos, ultimas falhas, planos incompletos e catalogo.
+- [x] Implementar leitura sem criar registros, indice atual e copias datadas.
+- [x] Adicionar uma Run Task e abertura pela CLI de editor existente.
+  Desenvolvedor confirmou atualizacao manual, com copia datada a cada consulta.
+- [x] Validar historico imutavel, leitura sem mutacoes e entradas ausentes/invalidas.
+- [x] Incluir projeto no nome dos registros novos, preservar legados e informar
+  totais de regras/ocorrencias; corrigido caso vazio reproduzido no PS 5.1.
+- [x] Alinhar README/guia/contrato e revisar a entrega.
+  Passaram Test-ProjectIndex, Test-MigrationRegister, Test-Workspace, Test-Target,
+  Test-Planning, Test-TaskInputs e Test-EvidenceFolder no PowerShell 5.1.
+  Testes conferem links atuais/historicos, abertura CLI, hashes das entradas e
+  totais sem manuais/nao reencontradas. 54 links/ancoras documentais validos.
+  Geracao real no workspace local sem abrir editor: indice e copia gravados;
+  ausencia de registros foi exibida sem inicializa-los. Sem analises executadas.
+  Na consulta final, uma pasta MTA local sem manifest.json foi sinalizada como
+  leitura parcial; dados incompletos foram preservados, sem inventar sucesso.
+- [x] Revisao: nome indice-projetos.md e somente ultima tentativa por Source/acao.
+  Sem contagens de execucoes ou avisos de historico substituido; ultima falha ou
+  acao incompleta preservada. MTA carregado diferente da ultima execucao gera aviso,
+  sem alterar registro. Test-ProjectIndex passou com varias rodadas por acao.
+
 ## Limpeza restrita ao estado local - 2026-10-01
 
 - [x] Reproduzir exclusao externa nos testes e exigir preservacao por projeto/todos.

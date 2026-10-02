@@ -29,12 +29,12 @@ com DevSquad disponivel; o harness nao instala ferramentas.
 | Gerar proposta | O prompt ja direciona as issues ANALISAR AGORA; edite o objetivo somente se necessario. Use **Executar Prompt** no Copilot e confira `plan.md` e `todo.md`. |
 | Implementar | Dar GO no plano, usar **Aplicacao: preparar implementacao do lote** e executar o prompt. Rever resultados e dar aceite separadamente. |
 
-`migracao.md` fica em `.harness/projetos/<nome>__<chave>/`, com
-`evidencias/LEIA-ME.md`. Selecione ANALISAR AGORA, ADIAR ou FORA DO ESCOPO;
-andamento e cobertura ficam separados. A opcao **2. Atualizar somente migracao.md**
-e opcional: com MTA selecionado, atualiza o catalogo disponivel; com ou sem novo MTA,
-prepara ajuda do Copilot para reconciliar o registro, sem plan/todo. Nao precisa
-executar esse prompt para apenas carregar o catalogo. Para retomadas e outros caminhos,
+O registro `migracao-<projeto>.md` fica em `.harness/projetos/<nome>__<chave>/`, com
+`evidencias/LEIA-ME.md`. Arquivos antigos `migracao.md` mantem o nome; o prompt usa o caminho exibido.
+Selecione ANALISAR AGORA, ADIAR ou FORA DO ESCOPO; andamento e cobertura ficam separados.
+A opcao **2. Atualizar somente migracao.md** permite escolher outra rodada, documento
+ou evidencias e preparar a reconciliacao, sem plan/todo. A carga do catalogo acontece
+no preparo; **execute o prompt para concluir a reconciliacao**. Para outros caminhos,
 consulte [qual fluxo seguir](doc/guias/harness-migracao-desenvolvedor.md#qual-caminho-seguir).
 Java 8/javax e as decisoes Hibernate permanecem no
 [contrato existente](doc/especificacoes/planejamento-copilot.md).
@@ -48,6 +48,14 @@ o MTA recupera issues/contagens; status anteriores exigem registro ou evidencias
 Sonar e novo MTA sao checklist nao bloqueante. Cobertura abaixo de 85% gera aviso;
 falhas de compilacao/testes continuam falhas. GO nao concede aceite do resultado.
 Configuracao, workspace gerado e `.harness/` sao locais e nao acompanham clone/pull.
+**Workspace: atualizar indice dos projetos** gera `.harness/projetos/indice-projetos.md`
+com uma linha por projeto: ultimas acoes, issues/ocorrencias por categoria, decisoes, andamento e
+proximos passos sugeridos. Inclui totais e guarda uma copia datada em `indices/`.
+Le issues/ocorrencias diretamente do ultimo MTA, inclusive externo, e atualiza os
+registros possiveis preservando decisoes/anotacoes. Prepara os prompts de reconciliacao
+e reutiliza os da mesma rodada/contexto. **Execute os prompts PENDENTES no Copilot**:
+catalogo atualizado e MESMA RODADA nao significam reconciliacao concluida.
+O proprio indice inclui **Como interpretar o indice**, com legenda e acoes indicadas.
 **Workspace: limpar execucoes** limpa execucoes/planejamentos locais por projeto
 ou de todos; preserva MTA externo, `migracao.md`, evidencias e Sonar.
 

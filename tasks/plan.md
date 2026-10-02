@@ -4,6 +4,63 @@ Registros datados preservam decisoes e ensaios da epoca. Regras substituidas nao
 voltam a ser exigencias: o guia e os contratos atuais orientam o uso. Pendencias
 tecnicas reais permanecem nos checklists correspondentes.
 
+## Indice dos projetos sob demanda - 2026-10-01
+
+Novo comportamento pedido: a tarefa de atualizar indice tambem sincroniza todos os
+registros possiveis com o ultimo MTA reconhecido e prepara prompts manter-migracao.
+Isso substitui a consulta somente leitura da tarefa; numeros continuam vindo do MTA.
+Nao executar agente nem planejar lote. Preservar texto/decisoes/andamento/evidencias;
+falha, ambiguidade ou catalogo invalido preserva registro e aparece como pendencia.
+Reutilizar prompt vinculado se rodada/catalogo, indice de evidencias, contrato e
+modelo nao mudaram; anotacoes sao lidas no registro atual. Estado PENDENTE exige
+executar o prompt; CONCLUIDA somente declarada apos reconciliar, nunca inferida.
+Disponibilizar links por projeto, sem abrir dezenas de prompts no editor.
+
+Mostrar contagens por categoria MTA tambem na linha resumida e nos totais gerais,
+sempre como issues/ocorrencias; preservar categorias adicionais sem reclassificar.
+
+Correcao do resumo: issues/ocorrencias e categorias do indice devem ser lidas
+diretamente do ultimo MTA encontrado, independentemente de migracao.md. Decisoes e
+andamento continuam vindos do registro, com RunId e divergencias visiveis. Totais
+nao usam historico nem substituem falha/catalogo ilegivel por contagens do registro.
+
+Concentrar orientacoes do migracao.md em Como usar este registro, com dominios e
+significados resumidos por campo. Atualizar template e os dois registros locais
+de exemplo apenas na introducao; preservar catalogos, escolhas e referencias.
+
+Incluir no indice gerado a secao Como interpretar o indice com legenda completa,
+acoes por estado e instrucao de carga/reconsulta. Alinhar README e guia existentes.
+
+Descobrir rodadas em mta.runsPath sem depender de .harness/runs. Associar
+automaticamente somente Source exato; outra maquina/origem exige selecao por p.
+Reutilizar descoberta no preparo e indice, sem gravar referencias nem alterar MTA.
+Comparar explicitamente rodada encontrada e carregada: nao carregado, mesma rodada,
+rodada diferente, ultima tentativa falhou ou comparacao indisponivel. Atualizar
+catalogo somente no preparo selecionado; teste deve preservar decisoes humanas.
+
+Consolidar no mesmo indice uma linha por projeto com regras/ocorrencias do MTA,
+decisoes e andamento das issues presentes/manuais, totais com cobertura explicita
+e proximos passos sugeridos. Ausencia nao equivale a zero; sugestoes nao dao GO.
+
+Evolucao na branch harness/indice-projetos, de main cea5cdc. Nova acao Workspace:
+atualizar indice dos projetos, sobre os projetos Maven do workspace informado.
+Gerar .harness/projetos/indice-projetos.md e copia datada em indices/, com resumo por Source
+de build, MTA, planejamento, Sonar e registro/catalogo/decisoes. Ler recibos, nao
+executar ferramentas nem criar migracao.md para aparentar registro existente.
+Mostrar ultima tentativa (inclusive falha), datas e links; contexto preparado nao
+e plano gerado nem GO. MTA carregado no registro nao comprova execucao local.
+Snapshots sao resumos locais preservados pela limpeza; links nao copiam evidencias.
+Entradas ausentes/invalidas viram pendencias visiveis. Usar modulo especifico,
+testes de isolamento/atualizacao/historico e documentacao existente, sem novos guias.
+Complemento do desenvolvedor: novos registros incluem projeto no nome; existentes
+mantem caminhos. Rodape da tabela informa regras/ocorrencias da rodada carregada,
+excluindo linhas manuais e nao reencontradas. Testar preparo de prompts com caminho
+nomeado e legado, sem renomeacao retroativa.
+Revisao pedida: indice-projetos.md como nome do resumo; somente ultima tentativa
+por Source/acao, sem contagem de execucoes ou avisos de rodadas antigas substituidas.
+Ultima falha/incompleta permanece visivel; nao substituir por sucesso anterior.
+Copias datadas das consultas continuam preservadas. Registro mantem seu estado atual.
+
 ## Limpeza restrita ao estado local - 2026-10-01
 
 Evolucao na branch harness/limpeza-somente-local, de main 1d45404.

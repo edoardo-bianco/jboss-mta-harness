@@ -10,8 +10,23 @@ desenvolvedor explica operacao; o registro local concentra escolhas por projeto.
 
 ## Registro e evidencias
 
-Cada projeto importado recebe .harness/projetos/<nome>__<chave>/migracao.md e
+Cada projeto importado recebe .harness/projetos/<nome>__<chave>/migracao-<projeto>.md e
 evidencias/LEIA-ME.md na geracao do workspace ou na proxima tarefa que o descobre.
+Registros existentes preservam o nome (inclusive migracao.md); nao renomear
+arquivos referenciados por contextos anteriores. MigrationPath e a autoridade do
+caminho; o termo migracao.md nos prompts/guias designa esse registro. Nomes novos
+usam o rotulo seguro da pasta do projeto; renomear o rotulo nao move o registro.
+A tarefa de indice sincroniza os registros possiveis com o ultimo MTA reconhecido,
+inclusive inicializando ausentes, e prepara prompts manter-migracao, sem executar agente.
+Contagens/categorias vem diretamente do MTA; decisoes/andamento vem do registro.
+Falha, ambiguidade, catalogo invalido ou integridade nao confirmada preservam registro
+e geram pendencia. Cada projeto e independente; problemas nao impedem os demais.
+Os prompts sao reutilizados para a mesma rodada/catalogo, indice de evidencias,
+contrato e modelo, vinculados pela Solicitacao do registro; novas anotacoes sao
+lidas no arquivo atual. Alteracao de notas ou conclusao pelo agente nao cria loop.
+O registro e o indice mostram Reconciliacao PENDENTE com link ao prompt. Executa-lo
+e necessario para concluir essa etapa; Estado: CONCLUIDA e declaracao explicita apos
+tratar evidencias/conflitos, nunca inferida de arquivos, MESMA RODADA ou nova consulta.
 Uma raiz Maven selecionada, inclusive agregadora, corresponde a um registro.
 Remover do workspace nao apaga registro. Renomear o rotulo preserva a chave.
 Nao ha observador de alteracoes manuais do VS Code.
@@ -31,6 +46,9 @@ ultima contagem conhecida, sem conclusao de correcao. DEV-... identifica issue
 manual, com origem/justificativa, sem ruleID ou contagem MTA inventados.
 Preserve marcadores e oito colunas da tabela; barras em celulas usam &#124;.
 Tabela invalida/duplicada falha sem substituir arquivo. Nenhuma linha e removida.
+O rodape Total MTA conta regras distintas e ocorrencias somente da rodada carregada;
+nao inclui issues manuais nem as nao reencontradas. Nao interpreta esses totais
+como quantidade de corretivas ou comprovacao de conclusao.
 
 Decisao e andamento sao independentes:
 - A DEFINIR, ANALISAR AGORA, ADIAR, FORA DO ESCOPO; exclusao exige justificativa humana.
@@ -42,8 +60,10 @@ Decisao e andamento sao independentes:
 - Nova rodada nao rebaixa estados por si so nem confirma sua validade para novos
   incidentes. Antes de reutiliza-los, conferir recorte, regra, perfil e abrangencia.
 
-manter-migracao e opcional: recebe registro atual, documento-base escolhido e
+manter-migracao recebe registro atual, documento-base escolhido e
 novo MTA e/ou evidencias. Pode atualizar apenas por evidencias sem novo scan.
+O preparo carrega dados objetivos; executar o prompt e necessario para concluir
+a reconciliacao PENDENTE. Uma conclusao existente nao deve ser repetida sem motivo.
 Grava somente MigrationPath; documento recebido, evidencias e planos sao entradas.
 Conflitos entre colegas ficam explicitos para conciliacao humana, sem escolher
 arquivo por recencia ou exigir acesso aos caminhos da maquina de origem.
