@@ -39,3 +39,10 @@ Aplicacao: preparar implementacao do lote. Confira o GO humano vigente e o par
 PlanPath/TodoPath antes de delegar ao devsquad.implement. A preparacao nao concede
 GO; a execucao autorizada limita-se ao lote e nao concede aceite nem autoriza
 commit/push/PR, escrita no harness ou tarefas de outro lote.
+
+<!-- mermaid-ai-skills:start -->
+## Mermaid Diagrams
+
+When the user asks to create, edit, or visualize a diagram, follow the
+instructions in `.github/instructions/mermaid.instructions.md`.
+<!-- mermaid-ai-skills:end -->
