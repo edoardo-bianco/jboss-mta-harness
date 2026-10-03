@@ -1,83 +1,51 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # JBoss MTA Harness
 
-Build Maven Java 8, analise MTA, SonarQube e migracao assistida por Copilot/DevSquad.
-Destino: EAP 7.4, preservando Java 8 e `javax.*`. O
-[guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md) concentra as instrucoes.
+Migrar uma aplicacao exige relacionar diagnosticos com o codigo, escolher o que
+corrigir, verificar o resultado e preservar as decisoes entre uma rodada e outra.
+O **JBoss MTA Harness** organiza esse trabalho em um ambiente no VS Code, com
+apoio do GitHub Copilot/DevSquad e controle do desenvolvedor.
 
-## Comecar
+O harness conecta ferramentas de analise e execucao — MTA, Maven, SonarQube e
+JBoss — a contexto, prompts e evidencias. A proposta e transformar achados em
+lotes de corretivas que possam ser revisados, implementados e verificados,
+mantendo prioridades, cobertura e pendencias visiveis. O desenvolvedor define
+o escopo, autoriza a implementacao e aceita o resultado.
 
-1. Abra `iniciar-harness.code-workspace` no VS Code.
-2. Em **Terminal > Run Task**, pasta **harness**, execute **Workspace: configurar caminhos**.
-   Preencha JDK 8/Maven da aplicacao e distribuicao completa MTA/JDK compativel.
-   O ensaio usa MTA 8.2.1/JDK 25. Settings opcionais ficam `null`, usando os padroes da maquina.
-3. Execute **Workspace: gerar workspace** e abra `jboss-mta-harness.local.code-workspace`.
-4. Use **MTA: conferir ambiente**; escolha `migracao-cache-antes` para o primeiro ensaio.
+A base atual atende a migracao de **JBoss EAP 7.1 para EAP 7.4, preservando
+Java 8 e `javax.*`**. O repositorio inclui scripts, tarefas, configuracao,
+prompts e dois projetos de demonstracao para ensaiar o processo. O mesmo
+ambiente pode trabalhar com repositorios corporativos mantidos separadamente.
 
-Para editar e depurar Java no VS Code, instale **Language Support for Java(TM) by Red Hat**
-(`redhat.java`) e **Debugger for Java** (`vscjava.vscode-java-debug`), recomendadas
-pelo workspace gerado. Veja [extensoes e JDKs](doc/guias/harness-migracao-desenvolvedor.md#extensoes-java-no-vs-code).
-Para operar JBoss, configure o caminho do EAP desejado e siga o
-[roteiro de deploy e debug](doc/guias/harness-migracao-desenvolvedor.md#jboss-local-releases-e-debug-java).
-Para acessar a console, configure e confira o
-[usuario de gerenciamento](doc/guias/harness-migracao-desenvolvedor.md#console-administrativa-e-usuario-de-gerenciamento);
-a tarefa MTA: conferir ambiente nao verifica esse login.
+## Direcao estrategica
 
-Para projetos corporativos, use **File > Add Folder to Workspace** e salve.
-As tarefas que selecionam projeto reconhecem a aplicacao e criam seu registro local.
-O controle do servidor JBoss independe desse registro. Nao precisa gerar
-workspace novamente a cada uso. Copilot deve estar autenticado em sessao Local,
-com DevSquad disponivel; o harness nao instala ferramentas.
+A estrategia combina contexto preparado antes da atuacao da IA (**feedforward**)
+com resultados de verificacoes que orientam a proxima decisao (**feedback**).
+O conhecimento fica nos artefatos do projeto: diagnosticos, planos, decisoes,
+testes e evidencias. O objetivo e reduzir perda de contexto e retrabalho,
+preservando os fundamentos da engenharia e a responsabilidade humana.
 
-## Fluxo de trabalho
+A evolucao proposta e aproveitar essa base em outras tecnologias e etapas do
+ciclo de desenvolvimento, incluindo modernizacao. Um nucleo comum, plugins
+tecnologicos e adaptadores de IA e IDE sao o caminho estudado; Quarkus, IntelliJ
+e engines alternativos dependem de implementacao e pilotos.
+A [estrategia do harness](doc/estrategia/estrategia-harness_.md) distingue
+as capacidades existentes das propostas e seus criterios de avanco.
 
-| Etapa | Tarefa/acao |
-| --- | --- |
-| Construir | **Aplicacao: build Maven (Java 8)**, `clean install`; conferir sucesso. |
-| Controlar JBoss | **Servidor: iniciar JBoss**, **Servidor: parar JBoss** e **Servidor: consultar estado JBoss**: escolher EAP 7.1/7.4, sem selecionar aplicacao. Iniciar oferece modo normal ou debug; para depurar, conectar o attach Java do EAP no painel Run and Debug. |
-| Criar usuario JBoss | **Servidor: criar usuario JBoss**: escolher EAP 7.1/7.4; o assistente oficial solicita tipo Management/Application, nome e senha usando o JDK 8 configurado. Para a console, escolher Management User. |
-| Implantar / reverter | **Aplicacao: deploy no JBoss** ou **Aplicacao: rollback no JBoss**: selecionar EAP ativo e aplicacao. No deploy, informar o WAR/EAR construido; reconhecimento automatico do artefato permanece no backlog. |
-| Analisar | **MTA: executar analise**, depois **MTA: abrir ultimo relatorio**. |
-| Preparar planejamento | **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**; escolher MTA e plano anterior, se houver. O harness atualiza o catalogo no `migracao.md` quando disponivel no MTA e prepara o prompt. |
-| Escolher issues | No `migracao.md`, marcar ANALISAR AGORA nas issues desejadas e salvar. Nao precisa preparar outro contexto por essa edicao. |
-| Gerar proposta | O prompt ja direciona as issues ANALISAR AGORA; edite o objetivo somente se necessario. Use **Executar Prompt** no Copilot e confira `plan.md` e `todo.md`. |
-| Implementar | Dar GO no plano, usar **Aplicacao: preparar implementacao do lote** e executar o prompt. Rever resultados e dar aceite separadamente. |
+## Como usar
 
-O registro `migracao-<projeto>.md` fica em `.harness/projetos/<nome>__<chave>/`, com
-`evidencias/LEIA-ME.md`. Arquivos antigos `migracao.md` mantem o nome; o prompt usa o caminho exibido.
-Selecione ANALISAR AGORA, ADIAR ou FORA DO ESCOPO; andamento e cobertura ficam separados.
-A opcao **2. Atualizar somente migracao.md** permite escolher outra rodada, documento
-ou evidencias e preparar a reconciliacao, sem plan/todo. A carga do catalogo acontece
-no preparo; **execute o prompt para concluir a reconciliacao**. Para outros caminhos,
-consulte [qual fluxo seguir](doc/guias/harness-migracao-desenvolvedor.md#qual-caminho-seguir).
-Java 8/javax e as decisoes Hibernate permanecem no
-[contrato existente](doc/especificacoes/planejamento-copilot.md).
+**Siga o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md).**
+Ele explica a primeira configuracao e conduz o fluxo completo, da analise ao
+planejamento, implementacao, verificacao, aceite e reconciliacao. Em cada etapa,
+indica o guia de ferramenta adequado para os comandos, opcoes e caminhos de
+retomada.
 
-**Ja tem MTA?** Comece em Preparar planejamento; reutilize pelo historico ou informe a pasta completa com **p**.
-Pode copiar/renomear uma rodada antiga para `C:/mta-runs/<projeto>/AAMMDD-HHMMSS`,
-sem editar seus arquivos. Isso nao a cadastra como ultimo relatorio.
-Veja [reconstrucao do registro](doc/guias/harness-migracao-desenvolvedor.md#reconstruir-a-pasta-usando-um-mta-existente):
-o MTA recupera issues/contagens; status anteriores exigem registro ou evidencias.
-
-Sonar e novo MTA sao checklist nao bloqueante. Cobertura abaixo de 85% gera aviso;
-falhas de compilacao/testes continuam falhas. GO nao concede aceite do resultado.
-Configuracao, workspace gerado e `.harness/` sao locais e nao acompanham clone/pull.
-**Workspace: atualizar indice dos projetos** gera `.harness/projetos/indice-projetos.md`
-com uma linha por projeto: ultimas acoes, issues/ocorrencias por categoria, decisoes, andamento e
-proximos passos sugeridos. Inclui totais e guarda uma copia datada em `indices/`.
-Na coluna **Registro de migracao**, clique no nome do arquivo para abrir os detalhes
-do projeto; o status aparece ao lado, ou **NAO GERADO** quando nao ha registro.
-Le issues/ocorrencias diretamente do ultimo MTA, inclusive externo, e atualiza os
-registros possiveis preservando decisoes/anotacoes. Prepara os prompts de reconciliacao
-e reutiliza os da mesma rodada/contexto. **Execute os prompts PENDENTES no Copilot**:
-catalogo atualizado e MESMA RODADA nao significam reconciliacao concluida.
-O proprio indice inclui **Como interpretar o indice**, com legenda e acoes indicadas.
-**Workspace: limpar execucoes** limpa execucoes/planejamentos locais por projeto
-ou de todos; preserva MTA externo, `migracao.md`, evidencias e Sonar.
-
-Para detalhes: [configuracao](doc/guias/harness-migracao-desenvolvedor.md#configuracao-da-maquina),
-[JBoss, releases e debug](doc/guias/harness-migracao-desenvolvedor.md#jboss-local-releases-e-debug-java),
-[GO/aceite](doc/guias/harness-migracao-desenvolvedor.md#da-proposta-revisada-a-execucao-e-ao-aceite),
-[Sonar](doc/guias/harness-migracao-desenvolvedor.md#sonarqube-local-ou-corporativo).
-Para evoluir o harness: [AGENTS.md](AGENTS.md), [ADRs](doc/adr/) e [tarefas](tasks/todo.md).
-A [estrategia de evolucao](doc/estrategia/estrategia-harness_.md) distingue a base
-implementada dos pilotos futuros; seu planejamento em fatias permanece no backlog.
+Para contribuir com a evolucao do harness, consulte [AGENTS.md](AGENTS.md) e as
+[decisoes arquiteturais](doc/adr/). O [contrato de planejamento](doc/especificacoes/planejamento-copilot.md)
+define os limites do trabalho assistido e os registros de cada etapa.

@@ -1,5 +1,190 @@
 # To-do do agente: evolucao do harness
 
+## Revisao e publicacao da branch - 2026-10-03
+
+- [x] Revisar alteracoes e executar regressao automatizada/documental.
+- [ ] Registrar commits por assunto e publicar a branch no origin.
+- [ ] Conferir sincronizacao remoto/local e checkout limpo.
+
+Revisao em 2026-10-03 sem bloqueios para publicar a branch. Passaram 12 suites:
+JbossAllServers, JbossArtifacts, JbossServerContext, TaskInputs, Jboss,
+JbossRuntime, JbossWorkspace, JbossAddUser, Workspace, BuildConfig, Planning
+e Implementation. Logs e results.json preservados localmente em
+.harness/tests/publicacao-jboss-7a02dc5935604bcb845d71ac05a5d6de/.
+Validados 227 links locais/ancoras e sete exemplos JSON em dez documentos,
+sem erros. As validacoes manuais ainda abertas abaixo permanecem pendentes.
+
+## Guia principal como orientacao do fluxo - 2026-10-03
+
+- [x] Retirar instrucoes operacionais do principal, mantendo papel/resultado/fluxo.
+- [x] Conferir destinos dos guias especificos, ancoras e limites de cada etapa.
+
+Cada uma das oito etapas explica finalidade, destaca Guia(s) da etapa e informa
+resultado esperado/continuidade. Menus, comandos, parametros e selecoes ficam
+nos guias especificos; Run Task/Maven direto permanecem como caminhos do build.
+Preservados titulos, 47 ancoras e cabecalho de exportacao. Principal com 230 linhas.
+227 links locais/ancoras e sete exemplos JSON validos no conjunto documental;
+diff sem erros. Nenhum guia novo, script ou tarefa alterado.
+
+## Clareza dos caminhos de build - 2026-10-03
+
+- [x] Distinguir Run Task do harness e Maven direto no guia de build existente.
+- [x] Ajustar a entrada no fluxo principal e conferir nomes/links.
+
+Guia existente identificado como Build da aplicacao: Run Task e Maven. Opcao A
+descreve a tarefa existente e suas selecoes; opcao B explica painel/terminal,
+ambiente Java/Maven e diferenca dos recibos. Nomes, ordem das entradas e fases
+conferidos no tasks.json. 240 links locais/ancoras e sete exemplos JSON validos;
+front matter e ancoras anteriores preservados, diff sem erros. Nenhuma tarefa
+ou script alterado, nenhum build executado por esta revisao documental.
+
+## Cabecalho de exportacao da documentacao - 2026-10-03
+
+- [x] Aplicar o cabecalho HTML da estrategia ao README e a documentacao em doc/.
+- [x] Conferir campos, ausencia de duplicacao e preservacao integral do corpo.
+
+Validacao em 2026-10-03: 19 documentos com embed_local_images=true, embed_svg=true
+e offline=true; 18 cabecalhos acrescentados e o da estrategia preservado. Corpos
+dos documentos, BOM e quebras de linha preservados byte a byte; nenhum cabecalho
+duplicado. Diff sem erros. Inclusao de imagens e exportacao permanecem manuais.
+
+## Objetivo e fluxo principal do guia do desenvolvedor - 2026-10-03
+
+- [x] Explicar proposito, capacidades e controle humano, alinhados a estrategia.
+- [x] Revisar o fluxo principal completo e as entradas conforme a situacao do dev.
+- [x] Conectar etapas e guias de detalhe, revisar redundancias e validar navegacao.
+- [x] Reescrever README como apresentacao e estrategia, remetendo o uso ao guia.
+- [x] Extrair workspace, Maven, Git, limpeza, catalogo e manutencao para guias
+  especificos, mantendo o principal como mapa do trabalho e conferindo os links.
+- [x] Eliminar o espaco antes da tabela de ferramentas, preservando as ancoras.
+
+Ajuste visual: 47 ancoras antigas incorporadas nas linhas dos guias respectivos,
+sem bloco separado antes da tabela. Conteudo visivel e IDs preservados. Conversao
+Markdown/HTML com PowerShell 7 confirmou oito linhas (cabecalho e sete guias),
+47 ancoras e nenhum bloco vazio/quebra antes da tabela. Diff sem erros.
+
+Revisao documental em 2026-10-03, com using-agent-skills/documentation-and-adrs e
+agente revisor independente solicitado pelo usuario: sem bloqueadores. README
+apresenta contexto/estrategia e remete ao guia. Principal com 286 linhas, incluindo
+ancoras de compatibilidade, conserva objetivo, entradas, oito etapas completas,
+orientacao de proximo passo e mapa de ferramentas. Somente tres novos documentos
+nesta extracao: workspace, Maven e manutencao; Git reutiliza o guia existente.
+Catalogo de tarefas tem 20 links para os procedimentos canonicos; limpeza/dados
+locais ficam no workspace. Ajustada exigencia historica de novo MTA no guia Git
+ao checklist nao bloqueante; conclusao global continua exigindo rodada comparavel.
+Validacao: 238 links locais/ancoras em dez documentos, sete exemplos JSON e 16
+exemplos PowerShell com sintaxe valida, sem execucao. As 118 linhas distintas
+dos exemplos anteriores foram preservadas; removida apenas repeticao de CLI no
+catalogo. Ancoras antigas preservadas e navegacao corrente atualizada aos destinos.
+Diff sem erros. Nenhum agente operacional, script, configuracao ou registro real
+de migracao foi alterado neste trabalho documental.
+
+## Guia de planejamento e reconciliacao - 2026-10-03
+
+- [x] Consolidar indice, registro, planos, implementacao e reconciliacao no guia
+  doc/guias/tools/planejamento-migracao.md, com ordem de uso e estados distintos.
+- [x] Referenciar pelo guia principal, README e guias relacionados, mantendo
+  ancoras antigas e os limites do contrato vigente.
+- [x] Comparar conteudo movido e validar links/ancoras, exemplos e diff.
+
+Revisao documental em 2026-10-03: 347 linhas nao vazias dos trechos movidos
+conferidas sem perda, descontando nivel de titulo e ajuste de caminho relativo.
+130 links locais/ancoras e sete exemplos JSON validos nos seis guias/entradas;
+dois exemplos PowerShell do novo guia com sintaxe valida, sem execucao.
+Preservadas 13 ancoras adicionais no guia principal. Roteiro de reconciliacao
+confrontado com contrato, prompts e preparo: estados, Previous, mesmo lote,
+GO e aceite separados. Diff sem erros. Nenhum registro/recibo/plano real da
+aplicacao foi alterado; trata-se somente da organizacao e clareza dos guias.
+
+## Hot Code Replace no workspace e modelo - 2026-10-03
+
+- [x] Habilitar compilacao automatica e Hot Code Replace automatico no workspace
+  local, no modelo inicial e nos padroes do gerador.
+- [x] Ajustar guia JBoss para os novos padroes e workspaces antigos.
+- [x] Conferir preservacao dos demais ajustes e validar geracao/JSON/regressao.
+- [ ] Confirmar substituicao de codigo na JVM pelo ensaio manual do desenvolvedor.
+
+Validacao em 2026-10-03: Test-JbossWorkspace, Test-Workspace e Test-BuildConfig
+passaram no Windows PowerShell 5.1. JSON do modelo, workspace local e workspace
+gerado em fixture conferidos com autobuild=true e hotCodeReplace=auto. Comparacao
+estrutural do workspace local confirmou que somente essas duas propriedades
+mudaram, preservando JDKs, pastas e attaches. Diff sem erros de whitespace.
+Gerador continua preservando valores explicitos dessas opcoes em workspaces
+existentes. Nenhuma substituicao real de classe, deploy ou restart executado.
+
+## Guias de ferramentas separados - 2026-10-03
+
+- [x] Separar configuracao e uso de JBoss, Sonar e MTA em doc/guias/tools.
+- [x] Atualizar entrada no guia principal, README e referencias locais.
+- [x] Documentar controles de debug, Watch e Hot Code Replace no guia JBoss.
+- [x] Conferir conteudo preservado, links/ancoras, exemplos JSON e diff.
+- [ ] Receber resultado manual de breakpoint/Watch/Hot Code Replace no VS Code.
+
+Revisao documental em 2026-10-03: 112 links locais/ancoras e sete exemplos JSON
+validos nos cinco arquivos de entrada/uso; blocos Markdown fechados e UTF-8
+conferido. Trechos movidos comparados com o guia anterior; 13 ancoras antigas
+encaminham para a tabela dos novos guias. Sintaxe dos exemplos PowerShell e
+git diff --check aprovados. Orientacao de limpeza MTA externo alinhada ao
+script/teste existente: rodadas externas preservadas, somente indices locais
+removidos. Debug documentado com referencias oficiais e sem declarar ensaio
+manual concluido. Nenhum servidor, fonte da aplicacao ou configuracao local
+alterado por esta reorganizacao; ajustes anteriores permanecem preservados.
+
+## Runtime do exemplo de teste no EAP 7.1 - 2026-10-03
+
+- [x] Habilitar cache de segundo nivel em migracao-cache-antes, preservando
+  o codigo legado e o recibo de falha 0d66e7bb12a44138855daf491e470213.
+- [x] Executar clean install com Java 8 e conferir testes e persistence.xml no WAR.
+- [x] Validar deploy no EAP 7.1 ativo e POST /migracao-cache/cache/limpar.
+- [ ] Obter revisao humana do exemplo para continuar os ensaios de rollback/debug.
+
+Build b1842566409b4532b3cb444432982a62 SUCCEEDED: Java 1.8.0_504, clean install,
+tres testes sem falhas e cobertura aprovada. Maven usou settings padrao (null).
+WAR conferido com use_second_level_cache=true e query cache preservado;
+SHA256 C82F8958FD74D03A7C37B7EFBB63CFBF3C3E1BEF55AC15D4BDA136F5B3456EFD.
+As duas classes mantiveram bytecode igual ao WAR do deploy que falhou.
+Consulta inicial 80bf066af4ed4b7b8c02b22f3d77ab1f encontrou EAP 7.1 STOPPED.
+Na continuidade manual, start 9aae14029986491ab1969fb77ffdc0f5 e deploy
+d37044bae6624b409c365c28f527414c terminaram SUCCEEDED. Recibo do deploy conferido:
+mesmo Source, EAP 7.1, migracao-cache.war, SHA256 acima e Error null.
+Desenvolvedor informou POST http://localhost:8080/migracao-cache/cache/limpar
+com HTTP 200 e corpo CACHE_CONSULTAS_LIMPO em 2026-10-03. Validacao funcional
+desse endpoint concluida; stop, rollback, debug e aceite global seguem pendentes.
+Resultado HTTP informado pelo desenvolvedor; agente nao repetiu a chamada.
+Recibos anteriores, inclusive a falha de deploy, preservados.
+
+## Descoberta de WAR/EAR no deploy - 2026-10-03
+
+- [x] Testar projeto simples, modulos, multiplos artefatos, ausencia de build,
+  cancelamento e alternativa manual, sem operar instalacoes reais.
+- [x] Integrar descoberta e selecao na tarefa de deploy, preservando -ArtifactPath.
+- [x] Atualizar documentacao e validar regressao JBoss.
+- [ ] Confirmar reconhecimento automatico do WAR no menu do VS Code.
+  Deploy funcional no EAP 7.1 e POST confirmados no registro acima; o recibo
+  nao informa se o caminho foi descoberto ou digitado manualmente.
+
+Validacao em 2026-10-03: Test-JbossArtifacts falhou antes da implementacao e passou
+com descoberta/confirmacao, modulos, ciclos, ambiguidade, entrada manual e CLI real
+com adaptadores ficticios. Regressao final: oito testes JBoss/TaskInputs aprovados;
+logs em `.harness/tests/jboss-menu-validacao-f3bfe6831dce4c7cbc805ec1a1433697/`.
+Revisao conferiu escopo dos modulos, XML sem entidades externas, ausencia de build
+implicito e preservacao de -ArtifactPath/nome estavel. Descoberta limitada a target
+e modulos estaticos; saidas/perfis/propriedades personalizados usam caminho manual.
+
+## Todos os servidores JBoss - 2026-10-03
+
+- [x] Cobrir menu/CLI de Todos, modos normal/debug, falha parcial, configuracao
+  invalida, cancelamento e restricao a operacoes de servidor com testes isolados.
+- [x] Implementar selecao Todos nas tarefas existentes, resultados individuais
+  e codigo de saida agregado, preservando verificacoes e recibos atuais.
+- [x] Revisar e validar regressao; documentar uso e comportamento de falhas.
+- [ ] Ensaiar manualmente Todos no VS Code com as instalacoes reais.
+
+Test-JbossAllServers falhou inicialmente porque all nao era aceito e passou apos
+a implementacao. Regressao final de oito testes aprovada (logs acima), incluindo
+7.1/7.4, modos, falha parcial, configuracao invalida, selecao individual e cancelamento.
+Revisao preservou validacoes/locks/recibos existentes; nenhum JBoss real operado.
+
 ## Controle JBoss sem aplicacao - 2026-10-02
 
 - [x] Adotar categoria Servidor: com acoes separadas e assistente de usuario oficial,
@@ -22,7 +207,8 @@ teste manual. README, guia e prefixos do AGENTS atualizados para Servidor:.
 Teste novo falhou antes da implementacao; cobre configuracao com projeto ausente,
 recibos sem app, ambos EAPs e modos, cancelamento e entrada real sem workspace.
 Operacoes de runtime simuladas; instalacoes reais nao iniciadas/paradas nesta etapa.
-Confirmado pelo desenvolvedor: WAR/EAR automatico fica para depois. Ensaio manual
+Na entrega de 2026-10-02, WAR/EAR automatico foi adiado pelo desenvolvedor;
+implementado na continuidade de 2026-10-03 registrada acima. Ensaio manual
 das novas tarefas permanece pendente, sem declarar validacao funcional da aplicacao.
 
 Retomada em 2026-10-03: os seis testes acima passaram novamente no Windows
@@ -33,6 +219,13 @@ com commit/push na branch harness/jboss-servidor-menu, sem integracao nesta etap
 
 - [ ] Ensaiar as tarefas Servidor: no VS Code para EAP 7.1/7.4: estado, start
   normal/debug, stop, assistente de usuario e login na console.
+
+- [x] Documentar nome personalizado de XML standalone na secao JBoss do guia,
+  com exemplo por EAP, diretorio esperado e ordem parar/alterar/iniciar.
+  Conferido com HarnessJbossConfig/HarnessJbossRuntime; alteracao documental.
+- [x] Documentar habilitacao eventual de admin existente, senha anterior/nova,
+  grupos conforme simple/RBAC e verificacao do login, com referencia Red Hat.
+  Revisao documental; nenhum usuario ou servidor alterado.
 
 ## Link explicito do registro no indice - 2026-10-02
 
@@ -47,7 +240,7 @@ com commit/push na branch harness/jboss-servidor-menu, sem integracao nesta etap
 
 - [x] Separar start/stop e deploy no menu principal, mantendo consulta de estado,
   start com debug e rollback acessiveis. Servidor seleciona EAP 7.1/7.4 sem app.
-- [ ] No deploy, selecionar EAP e aplicacao/modulo e reconhecer o WAR/EAR gerado;
+- [x] No deploy, selecionar EAP e aplicacao/modulo e reconhecer o WAR/EAR gerado;
   exibir caminho/destino e tratar build ausente ou multiplos candidatos.
 - [x] Preservar rastreabilidade e rollback por projeto/servidor, nome estavel
   do deployment e validacao da identidade do EAP antes das operacoes.
@@ -55,7 +248,8 @@ com commit/push na branch harness/jboss-servidor-menu, sem integracao nesta etap
   Hoje o deploy via CLI exige servidor ativo; preparo offline nao e implementado.
 
 Separacao implementada na entrega Controle JBoss sem aplicacao, acima.
-Reconhecimento automatico do artefato e preparo offline continuam no backlog.
+Descoberta de artefatos implementada em 2026-10-03, conforme registro acima.
+Preparo offline continua no backlog.
 
 ## Estrategia e documentacao Java/JBoss - 2026-10-02
 
@@ -76,7 +270,8 @@ Reconhecimento automatico do artefato e preparo offline continuam no backlog.
   stop ainda sem resultado informado. Ensaios automatizados anteriores preservados.
 
 - [ ] Disponibilizar um exemplo funcional no EAP 7.1 para testar o harness,
-  incluindo deploy, rollback e debug remoto. Ajuste do exemplo ainda nao executado.
+  incluindo deploy, rollback e debug remoto. Ajuste, deploy e POST validados em
+  2026-10-03 no registro Runtime acima; rollback e debug remoto seguem pendentes.
 
 ## JBoss local: operacoes, releases e debug Java - 2026-10-02
 

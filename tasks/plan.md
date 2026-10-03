@@ -1,5 +1,144 @@
 # Plano do agente: evolucao do harness
 
+## Revisao e publicacao da branch - 2026-10-03
+
+Pedido explicito de commit/push e checkout limpo. Revisar o conjunto pendente
+na branch harness/jboss-servidor-menu, validar regressao e documentacao, registrar
+commits por assunto e publicar no remoto origin. Incluir as instrucoes Mermaid
+locais em commit proprio. Manter configuracoes/evidencias ignoradas e as
+validacoes manuais pendentes. Conferir HEAD remoto/local e ausencia de alteracoes
+no checkout; sem integrar em main ou na branch de migracao nesta operacao.
+
+## Guia principal como orientacao do fluxo - 2026-10-03
+
+Refinar o guia do desenvolvedor para explicar papel das ferramentas, momento
+de uso, resultado esperado e continuidade. Retirar menus, comandos, teclas,
+campos e sequencias operacionais ja presentes nos guias especificos. Preservar
+o ciclo completo, GO/aceite, entradas de retomada, links, front matter e ancoras.
+Manter visiveis Run Task e Maven direto como capacidades do build, com execucao
+detalhada somente no guia existente; nenhum documento ou procedimento novo.
+
+## Clareza dos caminhos de build - 2026-10-03
+
+Explicitar a Run Task Aplicacao: build Maven (Java 8) como caminho principal e
+painel Maven/terminal como alternativas para executar a mesma ferramenta.
+Reorganizar o guia existente maven.md e sua entrada no guia principal, mantendo
+configuracoes, limites, front matter e links; sem criar ou renomear tarefas.
+Conferir os nomes no tasks.json e a navegacao entre as opcoes.
+
+## Cabecalho de exportacao da documentacao - 2026-10-03
+
+Aplicar somente o front matter HTML ja usado pela estrategia ao README e aos
+Markdowns de doc/: embed_local_images, embed_svg e offline habilitados.
+Preservar integralmente o corpo dos documentos e cabecalhos existentes.
+O desenvolvedor inclui imagens e exporta manualmente; sem gerar HTML/imagens.
+Prompts, instrucoes de agentes e controles de trabalho mantem seu formato proprio.
+Conferir cobertura, unicidade do cabecalho, preservacao do conteudo e diff.
+
+## Objetivo e fluxo principal do guia do desenvolvedor - 2026-10-03
+
+Revisao documental autorizada na branch harness/jboss-servidor-menu. Explicar o
+harness como ambiente que organiza contexto, ferramentas, IA e evidencias sob
+decisao do desenvolvedor, usando a estrategia existente e o contrato vigente.
+Distinguir capacidades atuais das evolucoes propostas. Manter no guia principal
+o ciclo completo: configurar, selecionar/build, analisar/reutilizar MTA, triar,
+planejar/GO, implementar, verificar/aceitar e reconciliar para continuar.
+Indicar em cada etapa resultado esperado, proximo passo e guia de detalhe;
+oferecer entradas para primeiro uso, MTA recebido e retomada. Rever redundancias,
+ordem das referencias e retornos dos quatro guias, preservando ancoras e conteudo
+operacional. Validar navegacao, consistencia com o contrato e diff; sem alterar
+scripts, configuracao local ou documentos reais de migracao.
+
+Complemento solicitado: README apresenta contexto, proposito e direcao estrategica,
+com encaminhamento ao guia do desenvolvedor. Remover dele passos de configuracao,
+tabela de tarefas e detalhes operacionais ja cobertos pelos guias.
+
+Novo refinamento autorizado: extrair as referencias restantes do guia principal
+sem proliferar documentos. Workspace, configuracao, projetos, limpeza, dados
+locais e catalogo de tarefas ficam juntos em tools/workspace.md; build em
+tools/maven.md; manutencao/testes em manutencao-harness.md. Reutilizar o guia
+existente diagnostico-branches-git-tortoisegit.md para Git/branches/integracao.
+Cada procedimento tem um destino canonico e pontos de entrada/retorno ao fluxo.
+Preservar links historicos com ancoras/encaminhamentos, sem duplicar procedimentos.
+O guia principal orienta etapas e decisoes, servindo de referencia tambem para
+apoio de agentes; nao implementar agentes neste ajuste. Revisao independente
+solicitada explicitamente pelo usuario via using-agent-skills.
+
+Ajuste visual solicitado: incorporar as ancoras de compatibilidade nas linhas
+dos guias correspondentes, eliminando o bloco vazio antes da tabela. Preservar
+todos os IDs e destinos; conferir Markdown renderizado e diff.
+
+## Guia de planejamento e reconciliacao - 2026-10-03
+
+Evolucao documental autorizada: extrair do guia principal o indice dos projetos,
+registro migracao.md, reconciliacao com MTA/evidencias, proposta plan/todo,
+GO, preparo da implementacao e aceite para doc/guias/tools/planejamento-migracao.md.
+Organizar na ordem de uso e explicitar a consistencia entre catalogo, presenca,
+decisao, andamento, reconciliacao e decisoes humanas ao atualizar o mesmo lote.
+Manter a separacao do contrato: preparar prompt nao executa agente, manter-migracao
+so altera registro, planejar-lotes gera proposta e implementar-lote exige GO.
+Principal, README e guias MTA/Sonar apontam para o novo guia; preservar ancoras
+antigas e conteudo operacional. Validar links, exemplos e diff na branch atual,
+sem reconciliar registros reais nem gerar/executar planos de aplicacao.
+
+## Hot Code Replace no workspace e modelo - 2026-10-03
+
+Evolucao de configuracao autorizada na branch harness/jboss-servidor-menu:
+habilitar java.autobuild.enabled e java.debug.settings.hotCodeReplace=auto
+no workspace local atual, em iniciar-harness.code-workspace e nos padroes do
+gerador. Preservar caminhos, JDKs, attaches e demais ajustes locais; ao regenerar
+outros workspaces, manter escolhas explicitas existentes e incluir padroes
+ausentes. Atualizar o guia JBoss e conferir JSON/geracao/regressao do workspace.
+Nao alterar o codigo da aplicacao nem reiniciar/operar o servidor para configurar.
+
+## Guias de ferramentas separados - 2026-10-03
+
+Reorganizacao documental autorizada na branch harness/jboss-servidor-menu,
+preservando os ajustes locais. Manter no guia do desenvolvedor o fluxo geral,
+workspace, build, planejamento e aceite; criar doc/guias/tools/jboss.md,
+sonar.md e mta.md, cada um com Configuracao e Uso. Mover os procedimentos
+existentes e referenciar os novos guias no principal e no README, com caminhos
+relativos corretos e encaminhamento das ancoras antigas usadas na navegacao.
+Incluir no guia JBoss o roteiro solicitado de attach, breakpoint, controles,
+Watch, alteracao de valor e Hot Code Replace, deixando o ensaio manual pendente.
+Conferir preservacao do conteudo, links/ancoras, exemplos JSON e diff; sem
+alterar runtime, scripts, fontes dos exemplos ou evidencias da aplicacao.
+
+## Runtime do exemplo de teste no EAP 7.1 - 2026-10-03
+
+Correcao autorizada pelo desenvolvedor para viabilizar o ensaio do harness com
+migracao-cache-antes. O deploy 0d66e7bb12a44138855daf491e470213 falhou na unidade
+demo com NoCacheRegionFactoryAvailableException. Habilitar explicitamente o
+cache de segundo nivel no persistence.xml para usar a integracao JPA/Infinispan
+do EAP, mantendo query cache, Java 8, javax e o codigo legado do exemplo.
+Suporte ao teste do harness, sem aplicar lote de migracao ou alterar o exemplo
+depois. Reconstruir com clean install e configuracao Maven da maquina, conferir
+o WAR e validar deploy/POST no EAP 7.1 ativo pelo mesmo fluxo de releases.
+Preservar recibo da falha e registrar novo resultado, sem inferir aceite humano.
+
+## Descoberta de WAR/EAR no deploy - 2026-10-03
+
+Pedido durante o teste manual: reconhecer o artefato a partir do projeto Maven
+selecionado. Procurar WAR/EAR diretamente em target do projeto e dos modulos
+declarados no POM, sem executar Maven/build nem escolher pelo mais recente.
+Um candidato sera sugerido com confirmacao por Enter; varios exigem selecao.
+Manter caminho manual e -ArtifactPath para saidas personalizadas; ausencia de
+artefato orienta executar build. Exibir caminho antes do deploy e preservar nome
+estavel, hashes, recibos e exigencia de EAP ativo. Testar descoberta, ambiguidade,
+modulos, cancelamento e entrada manual em fixtures; nao implantar no EAP real.
+
+## Todos os servidores JBoss - 2026-10-03
+
+Evolucao na branch harness/jboss-servidor-menu, preservando os complementos
+documentais e ajustes Mermaid locais. Reutilizar as tarefas de iniciar, parar e
+consultar estado com escolha explicita Todos (EAP 7.1 e 7.4), inclusive start debug,
+e equivalente CLI -Eap all. Sem padrao para Todos; criar usuario, deploy e rollback
+continuam individuais. Executar 7.1 e depois 7.4 com identidade, lock e recibo
+proprios; falha de configuracao ou operacao de um nao impede tentar o outro.
+Exibir resumo por EAP e retornar erro se qualquer um falhar, sem desfazer sucessos.
+Validar menu/CLI reais em fixtures isoladas, runtime simulado e regressao JBoss;
+nao iniciar/parar instalacoes reais. Atualizar guia/README e detalhes das tarefas.
+
 ## Controle JBoss sem aplicacao - 2026-10-02
 
 Evolucao do harness na branch harness/jboss-servidor-menu, derivada da main d4b6ae9.
@@ -13,8 +152,8 @@ Preservar verificacao de identidade, locks locais, timeout, historico e attaches
 Deploy/rollback continuam exigindo servidor ativo e nunca iniciam implicitamente.
 Validar entradas reais/cancelamento, contexto sem app, recibos e regressao JBoss;
 nao iniciar ou parar as instalacoes reais durante a verificacao automatizada.
-Escopo confirmado pelo desenvolvedor: separar controle do servidor agora;
-reconhecimento automatico de WAR/EAR permanece para uma proxima entrega.
+Escopo confirmado naquela etapa: separar controle do servidor; reconhecimento
+automatico de WAR/EAR adiado e retomado em 2026-10-03, conforme registro acima.
 Complemento documental: orientar acesso a console, usuario ManagementRealm e
 execucao manual de add-user.bat com JDK 8, restaurando JAVA_HOME do terminal.
 A conferencia MTA nao valida login. Ampliacao solicitada: categoria Servidor: com
@@ -28,6 +167,13 @@ Retomada em 2026-10-03: revisar o ajuste Servidor:/AddUser, revalidar os seis
 testes e publicar na propria branch harness/jboss-servidor-menu. Desenvolvedor
 confirmou manter o ensaio manual pendente. Integracao na principal e na branch
 EAP 7.4 permanece uma etapa posterior.
+
+Complemento solicitado em 2026-10-03: documentar na configuracao JBoss do guia
+a escolha de XML standalone com nome personalizado no JSON local, preservacao
+dos demais campos e sequencia parar/alterar/iniciar, sem regenerar o workspace.
+Documentar tambem a eventual habilitacao de admin existente pelo assistente,
+com redefinicao de senha quando desconhecida e orientacao de grupos conforme
+simple/RBAC; sem alterar usuarios ou configuracoes reais nesta etapa documental.
 
 ## Link explicito do registro no indice - 2026-10-02
 
