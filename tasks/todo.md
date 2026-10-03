@@ -3,8 +3,8 @@
 ## Revisao e publicacao da branch - 2026-10-03
 
 - [x] Revisar alteracoes e executar regressao automatizada/documental.
-- [ ] Registrar commits por assunto e publicar a branch no origin.
-- [ ] Conferir sincronizacao remoto/local e checkout limpo.
+- [x] Registrar commits por assunto e publicar a branch no origin.
+- [x] Conferir sincronizacao remoto/local e checkout limpo.
 
 Revisao em 2026-10-03 sem bloqueios para publicar a branch. Passaram 12 suites:
 JbossAllServers, JbossArtifacts, JbossServerContext, TaskInputs, Jboss,
@@ -13,6 +13,12 @@ e Implementation. Logs e results.json preservados localmente em
 .harness/tests/publicacao-jboss-7a02dc5935604bcb845d71ac05a5d6de/.
 Validados 227 links locais/ancoras e sete exemplos JSON em dez documentos,
 sem erros. As validacoes manuais ainda abertas abaixo permanecem pendentes.
+
+Publicados seis commits por assunto, de 22ecb39 a 063e6d4, em
+origin/harness/jboss-servidor-menu. Conferencia apos o push: checkout limpo e
+HEAD local/remoto 063e6d4b22e76d70eb3e1278c6c6df2c5d81fef5, confirmado por
+git ls-remote. Este registro de conclusao segue em commit documental adicional.
+Configuracoes locais e evidencias ignoradas foram preservadas.
 
 ## Guia principal como orientacao do fluxo - 2026-10-03
 
