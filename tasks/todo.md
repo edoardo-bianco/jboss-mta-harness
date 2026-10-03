@@ -2,20 +2,37 @@
 
 ## Controle JBoss sem aplicacao - 2026-10-02
 
+- [x] Adotar categoria Servidor: com acoes separadas e assistente de usuario oficial,
+  escolhendo EAP e JDK 8 sem registrar credenciais; validar restauracao do ambiente.
 - [x] Separar tarefas do servidor e releases, preservando escolha EAP e modo debug.
 - [x] Remover dependencia de aplicacao/workspace/MTA das operacoes do servidor.
 - [x] Validar contexto, recibos, cancelamento e regressao deploy/rollback/identidade.
 - [x] Atualizar README, guia e mensagens; revisar antes de integrar.
   Revisao documental complementar: roteiro de start/estado/stop, extensoes/attach,
   lista dos testes e menu anterior identificado como historico.
+- [x] Documentar console, usuario de gerenciamento e selecao temporaria do JDK 8
+  para add-user.bat; explicitar que a verificacao de login e manual, fora do MTA.
 
 Validacao: Test-JbossServerContext, Test-TaskInputs, Test-Jboss,
-Test-JbossRuntime e Test-JbossWorkspace passaram no Windows PowerShell 5.1.
+Test-JbossRuntime, Test-JbossWorkspace e Test-JbossAddUser passaram no Windows PowerShell 5.1.
+Assistente ficticio validou JDK 8, instalacao selecionada, ausencia de argumentos
+de credenciais, restauracao do ambiente e propagacao de erro; nenhum usuario real
+foi criado. Criacao interativa e login nas consoles EAP 7.1/7.4 permanecem para
+teste manual. README, guia e prefixos do AGENTS atualizados para Servidor:.
 Teste novo falhou antes da implementacao; cobre configuracao com projeto ausente,
 recibos sem app, ambos EAPs e modos, cancelamento e entrada real sem workspace.
 Operacoes de runtime simuladas; instalacoes reais nao iniciadas/paradas nesta etapa.
 Confirmado pelo desenvolvedor: WAR/EAR automatico fica para depois. Ensaio manual
 das novas tarefas permanece pendente, sem declarar validacao funcional da aplicacao.
+
+Retomada em 2026-10-03: os seis testes acima passaram novamente no Windows
+PowerShell 5.1. Revisao conferiu tarefas, selecao do EAP/JDK 8, restauracao do
+ambiente, falhas e ausencia de credenciais nos argumentos/recibos; git diff --check
+sem erros. Desenvolvedor confirmou manter a validacao manual pendente e seguir
+com commit/push na branch harness/jboss-servidor-menu, sem integracao nesta etapa.
+
+- [ ] Ensaiar as tarefas Servidor: no VS Code para EAP 7.1/7.4: estado, start
+  normal/debug, stop, assistente de usuario e login na console.
 
 ## Link explicito do registro no indice - 2026-10-02
 

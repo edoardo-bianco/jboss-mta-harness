@@ -58,6 +58,12 @@ e **2** cuida somente do registro. Gerar ou abrir um prompt nao o executa no Cop
 
 ## Comecar na maquina de trabalho
 
+Para usar a console administrativa do JBoss, inclua na preparacao o
+[usuario de gerenciamento e a verificacao de acesso](#console-administrativa-e-usuario-de-gerenciamento).
+**MTA: conferir ambiente** e a conferencia ao abrir validam requisitos do MTA;
+nao criam usuarios nem testam login na console. Essa verificacao e manual, com
+o EAP iniciado, e nao e requisito para a CLI local na configuracao padrao.
+
 **Qual workspace abrir?**
 
 | Arquivo | Quando usar |
@@ -248,7 +254,8 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
 | MTA: conferir ambiente | `conferir-ambiente.ps1` |
 | **Aplicacao: build Maven (Java 8)** | **`construir-aplicacao.ps1 -Goals <fases escolhidas>`** |
 | Aplicacao: analisar SonarQube | `analisar-sonar.ps1` |
-| Aplicacao: iniciar JBoss / parar JBoss / consultar estado JBoss | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
+| Servidor: iniciar JBoss / parar JBoss / consultar estado JBoss | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
+| Servidor: criar usuario JBoss | `gerenciar-jboss.ps1 -Action AddUser` (assistente oficial com JDK 8, sem selecao de aplicacao) |
 | Aplicacao: deploy no JBoss / rollback no JBoss | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
 | Aplicacao: preparar implementacao do lote | `preparar-implementacao.ps1` |
 | **MTA: executar analise** | **`executar-mta.ps1`** |
@@ -430,9 +437,10 @@ Elas substituem a antiga tarefa **Aplicacao: gerenciar JBoss**:
 
 | Tarefa | Selecao |
 | --- | --- |
-| Aplicacao: iniciar JBoss | Modo normal ou debug, depois EAP 7.1/7.4. |
-| Aplicacao: parar JBoss | EAP 7.1/7.4. |
-| Aplicacao: consultar estado JBoss | EAP 7.1/7.4. |
+| Servidor: iniciar JBoss | Modo normal ou debug, depois EAP 7.1/7.4. |
+| Servidor: parar JBoss | EAP 7.1/7.4. |
+| Servidor: consultar estado JBoss | EAP 7.1/7.4. |
+| Servidor: criar usuario JBoss | EAP 7.1/7.4; assistente oficial solicita tipo, nome e senha. Nao exige servidor ativo. |
 | Aplicacao: deploy no JBoss | Workspace, EAP 7.1/7.4, aplicacao e caminho do WAR/EAR construido. |
 | Aplicacao: rollback no JBoss | Workspace, EAP 7.1/7.4, aplicacao, deployment e release anterior. |
 
@@ -469,13 +477,70 @@ equivale a servidor correto. Processo existente sem gerenciamento fica
 shutdown e aguarda a saida do processo identificado, sem encerrar outros Java.
 Em timeout, consulte o recibo e os logs; o processo e preservado para diagnostico.
 
+### Console administrativa e usuario de gerenciamento
+
+No VS Code, execute **Terminal > Run Task > Servidor: criar usuario JBoss** e
+escolha o EAP. A tarefa usa `applicationJdk8Home` e abre o assistente oficial no
+terminal. Selecione **a - Management User** para acesso ao gerenciamento/console
+ou **b - Application User** para usuario de aplicacao. O proprio assistente pede
+nome, senha e confirmacao. Management User nao concede por si so um papel
+administrativo especifico em instalacoes que usam RBAC.
+
+Essa tarefa funciona com o servidor parado. Usa os arquivos padrao de usuarios
+da instalacao selecionada (standalone e domain, conforme o utilitario oficial).
+Nao inicia o JBoss, nao passa senha como argumento e nao grava recibos ou logs
+do assistente. Ao terminar, restaura o ambiente do processo. Encerrar o assistente
+sem erro nao comprova criacao: confirme a operacao nele e depois teste o login.
+
+Com o EAP iniciado, abra a console correspondente aos offsets padrao do harness:
+
+| Servidor | Console |
+| --- | --- |
+| EAP 7.1 | http://localhost:9990/console |
+| EAP 7.4 | http://localhost:10090/console |
+
+Se alterou `portOffset`, use a porta de gerenciamento exibida pela tarefa.
+Na configuracao padrao, a console exige usuario de gerenciamento, mesmo em
+localhost; a CLI local pode autenticar sem esse usuario.
+
+Se aparecer a mensagem de que nenhum usuario foi adicionado, use a tarefa acima.
+Como alternativa manual, execute o assistente do EAP escolhido com o JDK 8.
+No PowerShell, a partir da raiz do harness:
+
+```powershell
+$jbossConfig = Get-Content .\config\harness.local.json -Raw | ConvertFrom-Json
+$eapHome = $jbossConfig.tools.eap71Home # Troque por eap74Home para EAP 7.4.
+$javaHomeAnterior = $env:JAVA_HOME
+try {
+    $env:JAVA_HOME = $jbossConfig.tools.applicationJdk8Home
+    & (Join-Path $eapHome 'bin\add-user.bat')
+} finally {
+    $env:JAVA_HOME = $javaHomeAnterior
+}
+```
+
+Escolha **a - Management User**, mantenha **ManagementRealm**, informe usuario e
+senha no assistente, deixe grupos vazios para o uso basico e confirme com **yes**.
+Na pergunta sobre conexao entre servidores/processos, responda **no** para um
+usuario humano da console. Volte ao navegador, clique **Try Again** e confirme
+que consegue entrar. Repita na outra instalacao se precisar acessa-la.
+
+O script usa `JAVA_HOME` do terminal: se apontar para um Java recente, como JDK 25,
+pode falhar com `Setting a system-wide Policy object is not supported`. O bloco
+acima seleciona o JDK 8 apenas durante o assistente e restaura o valor anterior.
+As Run Tasks JBoss ja usam o JDK 8 configurado. A tarefa de usuario delega a
+criacao ao assistente oficial; o harness nao armazena suas senhas. Ambientes com
+autenticacao corporativa seguem sua configuracao.
+
+Referencia: [Red Hat: usuarios de gerenciamento e add-user](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html/configuration_guide/jboss_eap_management).
+
 ### Testar o controle do servidor sem deploy
 
-1. Execute **Aplicacao: consultar estado JBoss** e escolha EAP 7.1 ou 7.4.
-2. Se estiver STOPPED, execute **Aplicacao: iniciar JBoss**, escolha **1. Start normal**
+1. Execute **Servidor: consultar estado JBoss** e escolha EAP 7.1 ou 7.4.
+2. Se estiver STOPPED, execute **Servidor: iniciar JBoss**, escolha **1. Start normal**
    e o mesmo EAP. Confira `Status: SUCCEEDED` e `Observed.State: RUNNING`.
 3. Consulte o estado novamente; confira `Identity: MATCHED` e `Debug: false`.
-4. Execute **Aplicacao: parar JBoss** para o mesmo EAP; confira `SUCCEEDED` e `STOPPED`.
+4. Execute **Servidor: parar JBoss** para o mesmo EAP; confira `SUCCEEDED` e `STOPPED`.
 5. Para testar o modo debug, inicie com **2. Start com debug**; confira `Debug: true`.
    O attach e o breakpoint na aplicacao seguem o roteiro de debug abaixo.
    Ao terminar, pare o servidor pela tarefa correspondente.
@@ -488,7 +553,7 @@ e o recibo antes de continuar; nao equivale a sucesso parcial confirmado.
 ### Deploy e rollback
 
 1. Construa a aplicacao pela tarefa Maven e confira seu resultado.
-2. Execute **Aplicacao: iniciar JBoss** (normal ou debug) e **Aplicacao: consultar estado JBoss**; espere RUNNING.
+2. Execute **Servidor: iniciar JBoss** (normal ou debug) e **Servidor: consultar estado JBoss**; espere RUNNING.
 3. Execute **Aplicacao: deploy no JBoss**, escolha EAP e aplicacao, informe o caminho do WAR/EAR e um **nome estavel**, por exemplo
    `minha-api.war`, mesmo que o arquivo contenha a versao no nome.
 4. Confira o recibo, o status do deployment e valide a aplicacao funcionalmente.
@@ -538,7 +603,7 @@ Language Support for Java (`redhat.java`) e Debugger for Java
 (`vscjava.vscode-java-debug`); instale essas extensoes se ainda nao estiverem disponiveis.
 O Java do language server continua separado do Java 8 da aplicacao.
 
-1. Use **Aplicacao: iniciar JBoss > 2. Start com debug**, selecione o EAP e faca deploy do artefato construido com os fontes abertos.
+1. Use **Servidor: iniciar JBoss > 2. Start com debug**, selecione o EAP e faca deploy do artefato construido com os fontes abertos.
 2. No painel **Run and Debug**, selecione **JBoss eap71 - attach Java** ou
    **JBoss eap74 - attach Java**, conforme o servidor, e pressione F5.
 3. Coloque breakpoint no fonte e invoque o endpoint/fluxo da aplicacao.
@@ -1497,9 +1562,12 @@ Crie documentos apenas quando houver conteudo proprio: nao criar outro roteiro p
 Estes testes verificam os scripts do harness; o build da aplicacao continua sendo uma etapa separada do fluxo.
 
 JBoss: `tests/Test-Jboss.ps1`, `tests/Test-JbossRuntime.ps1`,
-`tests/Test-JbossWorkspace.ps1`, `tests/Test-JbossServerContext.ps1` e
+`tests/Test-JbossWorkspace.ps1`, `tests/Test-JbossServerContext.ps1`,
+`tests/Test-JbossAddUser.ps1` e
 `tests/Test-TaskInputs.ps1` verificam releases/rollback, identidade/estados,
 timeouts, preservacao do workspace, tarefas separadas e controle sem aplicacao.
+O teste de usuario usa assistente ficticio para conferir JDK 8, selecao da
+instalacao, restauracao do ambiente e propagacao de falhas; nao cria usuarios.
 Operacoes de runtime sao simuladas; entradas reais usam cancelamento ou instalacoes
 ficticias para nao iniciar/parar servidores da maquina. Ensaio opt-in:
 `powershell.exe -NoProfile -File tests/Test-JbossReal.ps1 -RunReal -Eap eap74`

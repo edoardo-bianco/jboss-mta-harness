@@ -184,4 +184,29 @@ function Stop-HarnessJboss {
     if ($after.State -ne 'STOPPED') { throw 'Processo encerrou, mas servidor/launcher ainda ativo. Confira o estado.' }
     return $after
 }
-Export-ModuleMember -Function Read-HarnessJbossContext, Get-HarnessJbossServer, Get-HarnessJbossStatus, Start-HarnessJboss, Stop-HarnessJboss, Invoke-JbossCli, Read-JbossValue
+function Invoke-HarnessJbossAddUser {
+    param($Server)
+    $launcher=Join-Path $Server.Home 'bin/add-user.bat'
+    if (-not (Test-Path -LiteralPath $launcher -PathType Leaf)) { throw "Arquivo ausente: $launcher" }
+    $previous=@{}
+    try {
+        foreach ($name in @('JAVA_HOME','JBOSS_HOME','JBOSS_MODULEPATH','JAVA_OPTS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','JDK_JAVA_OPTIONS','COMMON_CONF','NOPAUSE')) {
+            $previous[$name]=[Environment]::GetEnvironmentVariable($name,'Process')
+            [Environment]::SetEnvironmentVariable($name,$null,'Process')
+        }
+        $env:JAVA_HOME=$Server.Jdk
+        $env:JBOSS_HOME=$Server.Home
+        $env:JBOSS_MODULEPATH=Join-Path $Server.Home 'modules'
+        $env:NOPAUSE='true'
+        $java=Invoke-JbossJava $Server @('-version')
+        if ($java.ExitCode -ne 0 -or $java.Output -notmatch 'version "1\.8\.') { throw 'Criar usuario exige JDK 8 efetivo.' }
+        # Assistente nativo conectado ao terminal: sem credenciais nos argumentos,
+        # sem redirecionar sua saida e sem recibo contendo dados do usuario.
+        & $launcher
+        if ($LASTEXITCODE -ne 0) { throw "Assistente add-user encerrou com codigo $LASTEXITCODE." }
+    } finally {
+        foreach ($name in $previous.Keys) { [Environment]::SetEnvironmentVariable($name,$previous[$name],'Process') }
+    }
+}
+
+Export-ModuleMember -Function Read-HarnessJbossContext, Get-HarnessJbossServer, Get-HarnessJbossStatus, Start-HarnessJboss, Stop-HarnessJboss, Invoke-HarnessJbossAddUser, Invoke-JbossCli, Read-JbossValue

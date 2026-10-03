@@ -2,7 +2,7 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Aplicacao: iniciar JBoss",
+      "label": "Servidor: iniciar JBoss",
       "detail": "Escolha start normal ou debug e EAP 7.1/7.4; nao exige aplicacao ou workspace.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
@@ -12,7 +12,7 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
-      "label": "Aplicacao: parar JBoss",
+      "label": "Servidor: parar JBoss",
       "detail": "Escolha EAP 7.1/7.4; encerra o servidor inteiro e todas as aplicacoes nele.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
@@ -22,7 +22,7 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
-      "label": "Aplicacao: consultar estado JBoss",
+      "label": "Servidor: consultar estado JBoss",
       "detail": "Escolha EAP 7.1/7.4 e consulte estado e identidade; nao exige aplicacao.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
@@ -30,6 +30,16 @@
       "problemMatcher": [],
       "runOptions": { "instanceLimit": 1 },
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Servidor: criar usuario JBoss",
+      "detail": "Escolha EAP 7.1/7.4; assistente oficial solicita tipo Management/Application, nome e senha usando o JDK 8 configurado.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "AddUser"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": false }
     },
     {
       "label": "Aplicacao: deploy no JBoss",

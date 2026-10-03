@@ -18,6 +18,9 @@ Para editar e depurar Java no VS Code, instale **Language Support for Java(TM) b
 pelo workspace gerado. Veja [extensoes e JDKs](doc/guias/harness-migracao-desenvolvedor.md#extensoes-java-no-vs-code).
 Para operar JBoss, configure o caminho do EAP desejado e siga o
 [roteiro de deploy e debug](doc/guias/harness-migracao-desenvolvedor.md#jboss-local-releases-e-debug-java).
+Para acessar a console, configure e confira o
+[usuario de gerenciamento](doc/guias/harness-migracao-desenvolvedor.md#console-administrativa-e-usuario-de-gerenciamento);
+a tarefa MTA: conferir ambiente nao verifica esse login.
 
 Para projetos corporativos, use **File > Add Folder to Workspace** e salve.
 As tarefas que selecionam projeto reconhecem a aplicacao e criam seu registro local.
@@ -30,7 +33,8 @@ com DevSquad disponivel; o harness nao instala ferramentas.
 | Etapa | Tarefa/acao |
 | --- | --- |
 | Construir | **Aplicacao: build Maven (Java 8)**, `clean install`; conferir sucesso. |
-| Controlar JBoss | **Aplicacao: iniciar JBoss**, **Aplicacao: parar JBoss** e **Aplicacao: consultar estado JBoss**: escolher EAP 7.1/7.4, sem selecionar aplicacao. Iniciar oferece modo normal ou debug; para depurar, conectar o attach Java do EAP no painel Run and Debug. |
+| Controlar JBoss | **Servidor: iniciar JBoss**, **Servidor: parar JBoss** e **Servidor: consultar estado JBoss**: escolher EAP 7.1/7.4, sem selecionar aplicacao. Iniciar oferece modo normal ou debug; para depurar, conectar o attach Java do EAP no painel Run and Debug. |
+| Criar usuario JBoss | **Servidor: criar usuario JBoss**: escolher EAP 7.1/7.4; o assistente oficial solicita tipo Management/Application, nome e senha usando o JDK 8 configurado. Para a console, escolher Management User. |
 | Implantar / reverter | **Aplicacao: deploy no JBoss** ou **Aplicacao: rollback no JBoss**: selecionar EAP ativo e aplicacao. No deploy, informar o WAR/EAR construido; reconhecimento automatico do artefato permanece no backlog. |
 | Analisar | **MTA: executar analise**, depois **MTA: abrir ultimo relatorio**. |
 | Preparar planejamento | **Planejamento: preparar contexto para Copilot > 1. Planejar ou atualizar lote**; escolher MTA e plano anterior, se houver. O harness atualiza o catalogo no `migracao.md` quando disponivel no MTA e prepara o prompt. |

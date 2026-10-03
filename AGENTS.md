@@ -31,7 +31,7 @@ o controle de branches da ADR-0003.
   Backups automaticos do gerador ficam em `.harness/workspace-backups/`;
   fixtures ficam em `.harness/tests/`. Nao misture essas finalidades.
 - Classifique Run Tasks por etapa usando os prefixos `Workspace:`, `Aplicacao:`,
-  `MTA:` e `Planejamento:`. Reutilize tarefas e menus/parametros existentes;
+  `Servidor:`, `MTA:` e `Planejamento:`. Reutilize tarefas e menus/parametros existentes;
   nao crie uma entrada por projeto, rodada, arquivo, formato ou funcao auxiliar.
   Uma nova tarefa deve representar uma operacao distinta e necessaria ao usuario.
 - Migracao usa `PlanPath` e `TodoPath` do contexto selecionado, sob

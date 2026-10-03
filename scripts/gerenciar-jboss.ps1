@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param([string]$ConfigPath,[string]$WorkspacePath,[string]$Target,[switch]$SelectTarget,
     [ValidateSet('eap71','eap74')][string]$Eap,
-    [ValidateSet('Status','Start','StartDebug','Deploy','Rollback','Stop')][string]$Action,
+    [ValidateSet('Status','Start','StartDebug','Deploy','Rollback','Stop','AddUser')][string]$Action,
     [string]$ArtifactPath,[string]$DeploymentName,[string]$ReleaseId,[switch]$SelectStartMode)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
@@ -19,9 +19,9 @@ try {
         $Action=switch ($choice) {'1' {'Start'} '2' {'StartDebug'} default {throw 'Selecao cancelada.'}}
     }
     if (-not $Action) {
-        Write-Host '1. Estado | 2. Start | 3. Start com debug | 4. Deploy | 5. Rollback | 6. Stop'
+        Write-Host '1. Estado | 2. Start | 3. Start com debug | 4. Deploy | 5. Rollback | 6. Stop | 7. Criar usuario'
         $choice=Read-Host 'Acao (Enter/q cancela)'
-        $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Rollback'} '6' {'Stop'} default {throw 'Selecao cancelada.'}}
+        $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Rollback'} '6' {'Stop'} '7' {'AddUser'} default {throw 'Selecao cancelada.'}}
     }
     if (-not $Eap) {
         Write-Host 'Servidor: 1. EAP 7.1 | 2. EAP 7.4 | Enter/q cancela'
@@ -39,6 +39,13 @@ try {
     $server=Get-HarnessJbossServer $context $Eap
     Write-Host "Servidor: $Eap | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
     Write-Host "HTTP: $($server.HttpPort) | Gerenciamento: $($server.ManagementPort) | Debug: 127.0.0.1:$($server.Settings.debugPort)"
+    if ($Action -eq 'AddUser') {
+        Write-Host 'Assistente oficial: a = Management User (gerenciamento/console); b = Application User.'
+        Write-Host 'Informe nome e senha no assistente. O servidor pode estar parado.'
+        Invoke-HarnessJbossAddUser $server
+        Write-Host 'Assistente encerrado. Se confirmou a criacao de Management User, confira o login na console com o servidor ativo.'
+        exit 0
+    }
     if ($Action -in @('Deploy','Rollback')) {
         if ($Action -eq 'Deploy') {
             if (-not $ArtifactPath) { $ArtifactPath=Read-Host 'Caminho do WAR/EAR ja construido (Enter cancela)' }

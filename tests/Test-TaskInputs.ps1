@@ -4,8 +4,8 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 22 -and @($labels | Sort-Object -Unique).Count -eq 22) 'Manter 22 tarefas distintas, incluindo operacoes JBoss separadas.'
-$serverLabels=@('Aplicacao: iniciar JBoss','Aplicacao: parar JBoss','Aplicacao: consultar estado JBoss')
+Assert ($labels.Count -eq 23 -and @($labels | Sort-Object -Unique).Count -eq 23) 'Manter 23 tarefas distintas, incluindo operacoes JBoss separadas.'
+$serverLabels=@('Servidor: iniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
     Assert ($task.Count -eq 1 -and $task[0].args -contains '${workspaceFolder}/scripts/gerenciar-jboss.ps1') 'Falta tarefa de servidor JBoss.'
@@ -22,7 +22,7 @@ Assert ($implementationTask.Count -eq 1 -and $implementationTask[0].args -contai
 $sonarTask = @($tasks.tasks | Where-Object label -eq 'Aplicacao: analisar SonarQube')
 Assert ($sonarTask.Count -eq 1 -and $sonarTask[0].args -contains '${workspaceFolder}/scripts/analisar-sonar.ps1' -and -not (($sonarTask[0].args -join ' ') -match '(?i)token')) 'Sonar deve ter tarefa unica, sem token nos argumentos.'
 Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -notcontains 'Planejamento: conferir Git do lote') 'Limpeza deve permanecer; controle Git deve sair do catalogo.'
-Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|MTA|Planejamento): ' }).Count -eq 0) 'Run Tasks devem ser classificadas pelo prefixo da etapa.'
+Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|Servidor|MTA|Planejamento): ' }).Count -eq 0) 'Run Tasks devem ser classificadas pelo prefixo da etapa.'
 $projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels })
 foreach ($monitor in @($tasks.tasks | Where-Object label -like 'MTA: acompanhar*')) {
     Assert ($monitor.args -contains '-Active' -and $monitor.args -notcontains '-SelectTarget' -and -not ($monitor.args | Where-Object { $_ -like '${input:*}' })) 'Observabilidade nao deve solicitar workspace/projeto.'

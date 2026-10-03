@@ -15,6 +15,19 @@ Validar entradas reais/cancelamento, contexto sem app, recibos e regressao JBoss
 nao iniciar ou parar as instalacoes reais durante a verificacao automatizada.
 Escopo confirmado pelo desenvolvedor: separar controle do servidor agora;
 reconhecimento automatico de WAR/EAR permanece para uma proxima entrega.
+Complemento documental: orientar acesso a console, usuario ManagementRealm e
+execucao manual de add-user.bat com JDK 8, restaurando JAVA_HOME do terminal.
+A conferencia MTA nao valida login. Ampliacao solicitada: categoria Servidor: com
+tarefas separadas de iniciar, parar, estado e criar usuario. Deploy/rollback
+continuam em Aplicacao:. Criar usuario abre add-user.bat interativamente, que
+solicita tipo Management/Application, nome, senha e confirmacao. Usar JDK 8 efetivo
+e instalacao escolhida, restaurar ambiente e nao capturar senha/saida em recibos.
+Nao criar usuario automaticamente ou durante os testes; verificar com script ficticio.
+
+Retomada em 2026-10-03: revisar o ajuste Servidor:/AddUser, revalidar os seis
+testes e publicar na propria branch harness/jboss-servidor-menu. Desenvolvedor
+confirmou manter o ensaio manual pendente. Integracao na principal e na branch
+EAP 7.4 permanece uma etapa posterior.
 
 ## Link explicito do registro no indice - 2026-10-02
 

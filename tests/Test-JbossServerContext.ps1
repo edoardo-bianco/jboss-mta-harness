@@ -33,13 +33,13 @@ foreach ($eap in @('eap71','eap74')) {
         if ($action -eq 'StartDebug') { Assert $receipt.Observed.Debug 'Modo debug perdido.' }
     }
 }
-foreach ($arguments in @(@('-Action','Start'),@('-SelectStartMode'))) {
+foreach ($arguments in @(@('-Action','Start'),@('-Action','AddUser'),@('-SelectStartMode'))) {
     $output='q' | & powershell.exe -NoProfile -File (Join-Path $root 'scripts/gerenciar-jboss.ps1') -ConfigPath $configPath @arguments 2>&1 | Out-String
     Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada')) 'Cancelamento deve encerrar antes de executar operacoes.'
     Assert (-not $output.Contains('Escolha o projeto Maven') -and -not $output.Contains('Pasta ausente')) 'Operacao de servidor pediu aplicacao.'
 }
 Assert (-not (Test-Path (Join-Path $area '.harness/projetos'))) 'Entrada real criou registro de migracao.'
-foreach ($action in @('Status','Start','StartDebug','Stop')) {
+foreach ($action in @('Status','Start','StartDebug','Stop','AddUser')) {
     # Instalacoes ficticias: a entrada deve chegar a validacao do servidor, sem
     # consultar projeto/workspace antigos nem executar Java.
     $output=& powershell.exe -NoProfile -File (Join-Path $root 'scripts/gerenciar-jboss.ps1') -ConfigPath $configPath -Eap eap71 -Action $action -WorkspacePath 'workspace-ausente' -SelectTarget 2>&1 | Out-String
