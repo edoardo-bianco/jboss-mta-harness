@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # Contrato do fluxo de migracao com Copilot
 
 Contrato vigente dos prompts planejar-lotes, manter-migracao e implementar-lote.

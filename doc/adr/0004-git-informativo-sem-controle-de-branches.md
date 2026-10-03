@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # ADR-0004: Git informativo, sem controle de branches no harness
 
 Status: aceita pelo desenvolvedor em 2026-09-28.

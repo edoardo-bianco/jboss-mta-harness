@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # ADR-0001: contexto local e acionamento explicito do Copilot
 
 Status: aceita no fluxo aprovado em 2026-09-26.

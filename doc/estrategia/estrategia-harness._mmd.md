@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # Visão estratégica e tática do harness para JBoss Quarkus SDLC e modernização
 
 O **JBoss MTA Harness** é um ambiente de trabalho padronizado que construí no VS Code para apoiar a migração das aplicações para JBoss EAP 7.4. Ele reúne ferramentas de análise, scripts de execução, contexto do projeto e evidências de validação, permitindo planejar e realizar correções com apoio de IA e revisão humana. Na prática, o harness organiza como o desenvolvedor utiliza essas ferramentas e acompanha os resultados de cada mudança.

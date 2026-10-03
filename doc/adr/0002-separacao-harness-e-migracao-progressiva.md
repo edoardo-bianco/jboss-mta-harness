@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # ADR-0002: separar evolucao do harness e migracao progressiva das aplicacoes
 
 Status: aceita pelo desenvolvedor em 2026-09-27.

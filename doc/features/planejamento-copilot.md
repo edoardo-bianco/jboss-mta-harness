@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # Historico: preparar planejamento com evidencia MTA
 
 Registro dos ensaios de 26 a 28/09/2026. Estados e pendencias abaixo pertencem

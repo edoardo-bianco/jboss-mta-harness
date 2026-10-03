@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # Evidencias do projeto
 
 Objetivo: fornecer dados pertinentes ao registro e ao planejamento da migracao.

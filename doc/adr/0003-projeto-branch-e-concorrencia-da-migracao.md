@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # ADR-0003: vincular a migracao ao projeto, branch e estado do codigo
 
 Status: historica; aceita em 2026-09-27, com requisitos de cadastro, papeis,
