@@ -5,7 +5,8 @@
     {"name": "migracao-cache-depois", "path": "exemplos/migracao-cache-depois"}
   ],
   "settings": {
-    "java.autobuild.enabled": false,
+    "java.autobuild.enabled": true,
+    "java.debug.settings.hotCodeReplace": "auto",
     "java.configuration.updateBuildConfiguration": "disabled",
     "java.import.generatesMetadataFilesAtProjectRoot": false,
     "files.exclude": {"**/.harness": true}

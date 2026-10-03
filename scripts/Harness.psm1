@@ -178,7 +178,8 @@ function New-HarnessWorkspace {
     $folders = @([ordered]@{name='harness'; path='.'})
     foreach ($repo in $Context.Config.repositories) { $folders += [ordered]@{name=$repo.name; path=$repo.path} }
     $settings = [ordered]@{
-        'java.autobuild.enabled'=$false
+        'java.autobuild.enabled'=$true
+        'java.debug.settings.hotCodeReplace'='auto'
         'java.configuration.updateBuildConfiguration'='disabled'
         'java.import.generatesMetadataFilesAtProjectRoot'=$false
         'files.exclude'=@{ '**/.harness'=$true }
