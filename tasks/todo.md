@@ -5,7 +5,7 @@
 - [x] Receber confirmacao do desenvolvedor de que realizou a validacao manual
   e autorizacao para integrar esta entrega em main e main_jboss_eap74.
 - [x] Conferir checkout limpo, referencias remotas e caminho de fast-forward.
-- [ ] Integrar e publicar as duas principais, preservando o lote em tag de arquivo.
+- [x] Integrar e publicar as duas principais, preservando o lote em tag de arquivo.
 
 Confirmacao humana: "fiz validacao manual vamos alinhar as branch main e main
 jboss e eliminar as branches secundarias". Este aceite permite integrar a entrega
@@ -15,8 +15,17 @@ ou recibos por cenario. Nao atribuir essa confirmacao ao aceite da migracao
 HIB-CACHE-001, cujos dois commits exclusivos serao preservados em tag.
 
 Regressao da entrega preservada: 12 suites aprovadas, 227 links locais/ancoras
-e sete exemplos JSON validos, conforme a publicacao abaixo. A integracao prevista
-nao altera os fontes validados; conferir igualdade de conteudo apos o alinhamento.
+e sete exemplos JSON validos, conforme a publicacao abaixo. Integracao por
+fast-forward concluida e publicada nas duas principais em a7cb02a, com hashes
+local/remoto iguais. Comparacao com 6256e53 confirmou conteudo identico fora dos
+dois registros tasks/plan.md e tasks/todo.md; links/JSON revalidados sem erros.
+Nenhuma nova rodada MTA ou alteracao dos recibos historicos foi necessaria.
+
+Tag anotada arquivo/lote-HIB-CACHE-001-2026-10-03 publicada e conferida no remoto:
+commit 870d5eb46e5c12a387dc2d13119b01abe2aab807, incluindo o ancestral 61243ca.
+Ela preserva o lote sem incorpora-lo as principais. Este registro final tambem
+segue para ambas as principais antes da exclusao das duas branches secundarias
+autorizada pelo desenvolvedor. O checkout final deve permanecer em main.
 
 ## Revisao e publicacao da branch - 2026-10-03
 
