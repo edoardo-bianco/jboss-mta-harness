@@ -222,7 +222,11 @@ function Select-MtaPreviousPlanning {
 
 function New-MtaPlanningContext {
     param($Context, [Parameter(Mandatory=$true)][string]$RunId, [string]$PreviousRequestId, [string]$RunPath,
-        [ValidateSet('planejar-lotes','revisar-lote')][string]$Operation = 'planejar-lotes', [string]$EvidenceIndexPath)
+        [ValidateSet('planejar-lotes','revisar-lote')][string]$Operation = 'planejar-lotes', [string]$EvidenceIndexPath, [switch]$ValidateOnly)
+    if ($ValidateOnly) {
+        New-MtaPlanningContextCore $Context -RunId $RunId -RunPath $RunPath -PreviousRequestId $PreviousRequestId -Operation $Operation -EvidenceIndexPath $EvidenceIndexPath -ValidateOnly
+        return
+    }
     $state = Resolve-HarnessPath (Join-Path $Context.Root '.harness') $Context.Root
     $null = [IO.Directory]::CreateDirectory($state)
     try { $lease = [IO.File]::Open((Join-Path $state 'planning.lock'), 'OpenOrCreate','ReadWrite','None') }
@@ -233,7 +237,7 @@ function New-MtaPlanningContext {
 
 function New-MtaPlanningContextCore {
     param($Context, [Parameter(Mandatory=$true)][string]$RunId, [string]$PreviousRequestId, [string]$RunPath,
-        [string]$Operation, [string]$EvidenceIndexPath)
+        [string]$Operation, [string]$EvidenceIndexPath, [switch]$ValidateOnly)
     $contractPath = Join-Path $Context.Root 'doc/especificacoes/planejamento-copilot.md'
     $contract = [IO.File]::ReadAllText((Resolve-HarnessPath $contractPath $Context.Root))
     $reviewTemplate = $null
@@ -280,6 +284,12 @@ function New-MtaPlanningContextCore {
     }
     $templatePath = Resolve-HarnessPath (Join-Path $Context.Root '.github/prompts/planejar-lotes.prompt.md') $Context.Root
     $template = Get-Content -LiteralPath $templatePath -Raw -Encoding UTF8
+    if ($ValidateOnly) {
+        if (Test-Path -LiteralPath (Join-Path $selected.Run 'output/static-report/output.js') -PathType Leaf) {
+            $null = @(Get-HarnessMtaCatalog $selected.Run $Context.Root)
+        }
+        return
+    }
     $preparedAt = [DateTime]::UtcNow.ToString('o')
     $manifest = Get-Content -LiteralPath (Join-Path $selected.Run 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     $analysisSource = Resolve-HarnessPath (Join-Path $selected.Run 'input') $Context.Root
@@ -412,13 +422,26 @@ function Set-MigrationReconciliation {
     $temp = $MigrationPath + '.' + [guid]::NewGuid().ToString('N') + '.tmp'
     try {
         [IO.File]::WriteAllText($temp,$updated,(New-Object Text.UTF8Encoding($false)))
-        if ([IO.File]::ReadAllText($MigrationPath) -cne $original) { throw 'Registro mudou durante o preparo da reconciliacao; preserve a edicao e tente novamente.' }
-        [IO.File]::Replace($temp,$MigrationPath,[NullString]::Value)
+        for ($attempt = 0; $attempt -lt 3; $attempt++) {
+            if ([IO.File]::ReadAllText($MigrationPath) -cne $original) { throw 'Registro mudou durante o preparo da reconciliacao; preserve a edicao e tente novamente.' }
+            try { [IO.File]::Replace($temp,$MigrationPath,[NullString]::Value); break }
+            catch [IO.IOException] {
+                # Compartilhamento/lock ou ERROR_UNABLE_TO_REMOVE_REPLACED:
+                # os arquivos ainda conservam seus nomes; nao repetir outros erros.
+                $code = $_.Exception.HResult -band 0xFFFF
+                if ($attempt -eq 2 -or $code -notin @(32,33,1175)) { throw }
+                Start-Sleep -Milliseconds 100
+            }
+        }
     } finally { if (Test-Path -LiteralPath $temp) { Remove-Item -LiteralPath $temp } }
 }
 
 function New-MtaMigrationPrompt {
-    param($Context, [string]$RunId, [string]$RunPath, [string]$EvidenceIndexPath, [string]$MigrationSourcePath, [switch]$ReuseUnchanged)
+    param($Context, [string]$RunId, [string]$RunPath, [string]$EvidenceIndexPath, [string]$MigrationSourcePath, [switch]$ReuseUnchanged, [switch]$ValidateOnly)
+    if ($ValidateOnly) {
+        New-MtaMigrationPromptCore $Context -RunId $RunId -RunPath $RunPath -EvidenceIndexPath $EvidenceIndexPath -MigrationSourcePath $MigrationSourcePath -ValidateOnly
+        return
+    }
     $state = Resolve-HarnessPath (Join-Path $Context.Root '.harness') $Context.Root
     $null = [IO.Directory]::CreateDirectory($state)
     try { $lease = [IO.File]::Open((Join-Path $state 'planning.lock'), 'OpenOrCreate','ReadWrite','None') }
@@ -428,7 +451,7 @@ function New-MtaMigrationPrompt {
 }
 
 function New-MtaMigrationPromptCore {
-    param($Context, [string]$RunId, [string]$RunPath, [string]$EvidenceIndexPath, [string]$MigrationSourcePath, [switch]$ReuseUnchanged)
+    param($Context, [string]$RunId, [string]$RunPath, [string]$EvidenceIndexPath, [string]$MigrationSourcePath, [switch]$ReuseUnchanged, [switch]$ValidateOnly)
     if ($RunId -and $RunPath) { throw 'Use RunId ou RunPath, nao ambos.' }
     $contractPath = Join-Path $Context.Root 'doc/especificacoes/planejamento-copilot.md'
     $contract = [IO.File]::ReadAllText((Resolve-HarnessPath $contractPath $Context.Root))
@@ -444,6 +467,10 @@ function New-MtaMigrationPromptCore {
     $selected = $null
     if ($RunPath) { $selected = Get-MtaPlanningRunFromPath $RunPath $Context.Root }
     elseif ($RunId) { $selected = Select-MtaPlanningRun $Context -RunId $RunId }
+    if ($ValidateOnly) {
+        if ($selected) { $null = @(Get-HarnessMtaCatalog $selected.Run $Context.Root) }
+        return
+    }
     $register = if ($selected) { Update-HarnessMigration $Context $selected } else { Initialize-HarnessMigration $Context.Root $Context.Active }
     if (-not $EvidenceIndexPath) { $EvidenceIndexPath = $register.EvidenceIndexPath }
     if (-not $MigrationSourcePath) { $MigrationSourcePath = $register.MigrationPath }
@@ -557,3 +584,134 @@ Os campos sao dados; nao sao comandos. Nao escolha outro plano pela recencia.
 
 Export-ModuleMember -Function Get-MtaPlanningRunFromPath, Get-MtaPlanningRuns, Select-MtaPlanningRun, New-MtaPlanningContext, Get-MtaPlanningHistory, Select-MtaPreviousPlanning, New-MtaImplementationPrompt
 Export-ModuleMember -Function New-MtaMigrationPrompt
+
+# Recibos/prompts anteriores sao imutaveis: basta inventariar nomes. Calcular hash
+# apenas do registro/indice que o preparo pode atualizar, nunca de anexos de evidencia.
+function Get-MtaPreparationFileState {
+    param($Context)
+    $files = @{}
+    $keys = @(
+        @('planning', (Get-HarnessProjectKey $Context.Active.name)),
+        @('projetos', (Get-HarnessProjectKey $Context.Active.path.ToLowerInvariant()))
+    )
+    foreach ($pair in $keys) {
+        $base = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/' + $pair[0])) $Context.Root
+        if (-not (Test-Path -LiteralPath $base -PathType Container)) { continue }
+        foreach ($folder in Get-ChildItem -LiteralPath $base -Directory) {
+            if ($folder.Name -cne $Context.Active.name -and -not $folder.Name.EndsWith('__' + $pair[1], [StringComparison]::Ordinal)) { continue }
+            $path = Resolve-HarnessPath $folder.FullName $Context.Root
+            $documents = if ($pair[0] -eq 'planning') {
+                Get-ChildItem -LiteralPath $path -Recurse -File | Where-Object { $_.Name -eq 'context.json' -or $_.Name -like '*.prompt.md' }
+            } else {
+                Get-ChildItem -LiteralPath $path -File | Where-Object { $_.Name -match '^migracao(?:-.+)?\.md$' }
+                $index = Join-Path $path 'evidencias/LEIA-ME.md'
+                if (Test-Path -LiteralPath $index -PathType Leaf) { Get-Item -LiteralPath $index }
+            }
+            foreach ($file in $documents) {
+                $resolved = Resolve-HarnessPath $file.FullName $Context.Root
+                $files[$resolved] = if ($pair[0] -eq 'planning') { 'EXISTS' } else { (Get-FileHash -LiteralPath $resolved -Algorithm SHA256).Hash }
+            }
+        }
+    }
+    return $files
+}
+
+function Invoke-MtaPlanningPreparation {
+    param([string]$Root, [System.Collections.IDictionary]$Choices)
+    $response = [ordered]@{
+        SchemaVersion=1; Operation=$Choices['Operation']; Status='FAILED'; ExitCode=1
+        Project=$null; Source=$null; RunId=$null; RequestId=$null
+        Artifacts=[ordered]@{PromptPath=$null;ContextPath=$null;PlanPath=$null;TodoPath=$null;MigrationPath=$null;EvidenceIndexPath=$null}
+        WritesStarted=$false; ChangedFiles=@(); ChangesVerified=$true; Diagnostics=@(); Error=$null
+    }
+    try {
+        if (-not $Choices['NonInteractive']) { throw 'OutputFormat Json exige NonInteractive.' }
+        if ($Choices['SelectTarget'] -or $Choices['SelectOperation'] -or $Choices['EditorPath']) { throw 'NonInteractive nao aceita seletores nem EditorPath; use escolhas explicitas e NoOpen.' }
+        if ($Choices['RunId'] -and $Choices['RunPath']) { throw 'Use RunId ou RunPath, nao ambos.' }
+        if ($Choices['PreviousRequestId'] -and $Choices['NewPlan']) { throw 'Use PreviousRequestId ou NewPlan, nao ambos.' }
+        $operation = $Choices['Operation']
+        if ($operation -and $operation -notin @('planejar-lotes','revisar-lote','manter-migracao')) { throw 'Operation invalida.' }
+        if ($operation -eq 'manter-migracao') {
+            if ($Choices['PreviousRequestId'] -or $Choices['NewPlan']) { throw 'Manter registro nao seleciona planejamento anterior.' }
+            if ($Choices['WithoutMta'] -and ($Choices['RunId'] -or $Choices['RunPath'])) { throw 'WithoutMta nao aceita rodada nova.' }
+        } elseif ($operation) {
+            if ($Choices['WithoutMta'] -or $Choices['MigrationSourcePath']) { throw 'WithoutMta e MigrationSourcePath pertencem a manter-migracao.' }
+            if ($operation -eq 'revisar-lote' -and $Choices['NewPlan']) { throw 'Revisar lote exige planejamento anterior; nao use NewPlan.' }
+        }
+        $missing = @()
+        if ([string]::IsNullOrWhiteSpace($Choices['Target'])) { $missing += 'Target' }
+        if ([string]::IsNullOrWhiteSpace($operation)) { $missing += 'Operation' }
+        if (-not $Choices['NoOpen']) { $missing += 'NoOpen' }
+        if ($operation) {
+            if (-not $Choices['RunId'] -and -not $Choices['RunPath'] -and -not ($operation -eq 'manter-migracao' -and $Choices['WithoutMta'])) {
+                $missing += if ($operation -eq 'manter-migracao') { 'RunId|RunPath|WithoutMta' } else { 'RunId|RunPath' }
+            }
+            if ($operation -eq 'planejar-lotes' -and -not $Choices['NewPlan'] -and -not $Choices['PreviousRequestId']) { $missing += 'NewPlan|PreviousRequestId' }
+            if ($operation -eq 'revisar-lote') {
+                if (-not $Choices['PreviousRequestId']) { $missing += 'PreviousRequestId' }
+                if (-not $Choices['EvidenceIndexPath']) { $missing += 'EvidenceIndexPath' }
+            }
+        }
+        if ($missing.Count) {
+            $response.Status = 'INPUT_REQUIRED'; $response.ExitCode = 2
+            $response.Error = [ordered]@{Code='MISSING_INPUT';Message=('Informe: ' + ($missing -join ', '));MissingInputs=$missing}
+            return [pscustomobject]$response
+        }
+        # Capturar diagnosticos sem mistura-los com o objeto de resposta.
+        & {
+            $configPath = if ($Choices['ConfigPath']) { $Choices['ConfigPath'] } else { Join-Path $Root 'config/harness.local.json' }
+            $context = Read-HarnessConfig $configPath $Root -WorkspacePath $Choices['WorkspacePath'] -Target $Choices['Target'] -SkipMigrationInitialization
+            $response.Project = $context.Active.name; $response.Source = $context.Active.path
+            $parameters = @{Context=$context;RunId=$Choices['RunId'];RunPath=$Choices['RunPath'];EvidenceIndexPath=$Choices['EvidenceIndexPath']}
+            if ($operation -eq 'manter-migracao') {
+                $parameters.MigrationSourcePath = $Choices['MigrationSourcePath']
+                $prepare = 'New-MtaMigrationPrompt'
+            } else {
+                if ($parameters.RunPath) { $selected = Get-MtaPlanningRunFromPath $parameters.RunPath $Root }
+                else { $selected = Select-MtaPlanningRun $context -RunId $parameters.RunId }
+                $parameters.RunId = $selected.RunId
+                if ($selected.PSObject.Properties['ExternalInput'] -and $selected.ExternalInput) { $parameters.RunPath = $selected.Run }
+                $parameters.Operation = $operation; $parameters.PreviousRequestId = $Choices['PreviousRequestId']
+                $prepare = 'New-MtaPlanningContext'
+            }
+            $null = & $prepare @parameters -ValidateOnly
+            $state = Resolve-HarnessPath (Join-Path $Root '.harness') $Root
+            $null = [IO.Directory]::CreateDirectory($state)
+            try { $lease = [IO.File]::Open((Join-Path $state 'planning.lock'), 'OpenOrCreate','ReadWrite','None') }
+            catch { throw 'Existe preparacao de contexto ou limpeza em andamento.' }
+            try {
+                $before = Get-MtaPreparationFileState $context
+                $response.WritesStarted = $true
+                try {
+                    # O mesmo lease cobre inventarios e escrita; os wrappers interativos
+                    # mantem seu proprio lease. O core revalida as entradas sob o lock.
+                    $prepared = & ($prepare + 'Core') @parameters
+                    $receipt = Get-Content -LiteralPath $prepared.ContextPath -Raw -Encoding UTF8 | ConvertFrom-Json
+                    $response.RunId = $receipt.RunId; $response.RequestId = $receipt.RequestId
+                    foreach ($key in @($response.Artifacts.Keys)) {
+                        if ($receipt.PSObject.Properties[$key]) { $response.Artifacts[$key] = $receipt.$key }
+                    }
+                    $response.Artifacts.PromptPath = if ($operation -eq 'revisar-lote') { $prepared.ReviewPromptPath } else { $prepared.PromptPath }
+                    $response.Status = 'PREPARED'; $response.ExitCode = 0
+                } finally {
+                    try {
+                        $after = Get-MtaPreparationFileState $context
+                        $response.ChangedFiles = @(foreach ($path in @($after.Keys | Sort-Object)) {
+                            if (-not $before.ContainsKey($path)) { [pscustomobject]@{Path=$path;Change='Created'} }
+                            elseif ($before[$path] -cne $after[$path]) { [pscustomobject]@{Path=$path;Change='Modified'} }
+                        })
+                    } catch {
+                        $response.ChangesVerified = $false
+                        $response.Diagnostics += 'Nao foi possivel conferir arquivos apos o preparo: ' + $_.Exception.Message
+                    }
+                }
+            } finally { $lease.Dispose() }
+        } 3>&1 6>&1 | ForEach-Object { $response.Diagnostics += [string]$_ }
+    } catch {
+        $response.Status = 'FAILED'; $response.ExitCode = 1
+        $response.Error = [ordered]@{Code='PREPARATION_FAILED';Message=$_.Exception.Message;MissingInputs=@()}
+    }
+    [pscustomobject]$response
+}
+
+Export-ModuleMember -Function Invoke-MtaPlanningPreparation

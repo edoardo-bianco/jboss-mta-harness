@@ -5,10 +5,24 @@ param(
     [string]$RunId, [string]$RunPath, [string]$EditorPath, [switch]$NoOpen,
     [string]$PreviousRequestId, [switch]$NewPlan,
     [ValidateSet('planejar-lotes','revisar-lote','manter-migracao')][string]$Operation = 'planejar-lotes',
-    [switch]$SelectOperation, [string]$EvidenceIndexPath, [string]$MigrationSourcePath, [switch]$WithoutMta
+    [switch]$SelectOperation, [string]$EvidenceIndexPath, [string]$MigrationSourcePath, [switch]$WithoutMta,
+    [switch]$NonInteractive, [ValidateSet('Text','Json')][string]$OutputFormat = 'Text'
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+if ($NonInteractive -or $OutputFormat -eq 'Json') {
+    Import-Module (Join-Path $PSScriptRoot 'HarnessPlanning.psm1') -Force -DisableNameChecking
+    $response = Invoke-MtaPlanningPreparation -Root (Split-Path -Parent $PSScriptRoot) -Choices $PSBoundParameters
+    if ($OutputFormat -eq 'Json') { $response | ConvertTo-Json -Depth 8 }
+    else {
+        Write-Host ("{0}: {1}" -f $response.Status, $response.Operation)
+        foreach ($diagnostic in $response.Diagnostics) { Write-Warning $diagnostic }
+        if ($response.Error) { Write-Host $response.Error.Message }
+        if ($response.Artifacts.ContextPath) { Write-Host "Recibo: $($response.Artifacts.ContextPath)" }
+        foreach ($file in $response.ChangedFiles) { Write-Host ("{0}: {1}" -f $file.Change, $file.Path) }
+    }
+    exit $response.ExitCode
+}
 try {
     if ($PreviousRequestId -and $NewPlan) { throw 'Use PreviousRequestId ou NewPlan, nao ambos.' }
     if ($RunId -and $RunPath) { throw 'Use RunId do historico ou RunPath da pasta recebida, nao ambos.' }

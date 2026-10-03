@@ -369,6 +369,66 @@ Planejamento nao executa terminal, Git, Maven, MTA, Sonar, web ou corretivas.
 Limites sao instrucoes comportamentais, nao sandbox tecnica dos subagentes.
 O contrato unico esta na [especificacao existente](../../especificacoes/planejamento-copilot.md).
 
+#### Preparar contexto por automacao, sem menus
+
+Use esta interface quando um agente ou script ja tiver as escolhas do desenvolvedor.
+As Run Tasks continuam usando os menus acima. O preparo cria o prompt e seu recibo;
+nao executa o agente, nao gera corretivas e nao concede GO. Os prompts preparados
+ainda seguem o contrato Copilot/DevSquad; a interface CLI nao instala agentes nem
+comprova a adaptacao de sua execucao ao Codex.
+
+No Windows PowerShell 5.1, substitua os valores pelo projeto e pela rodada escolhidos:
+
+~~~powershell
+$projeto = 'C:\repos\minha-aplicacao'
+$rodada = 'C:\mta-runs\minha-aplicacao\rodada-escolhida'
+$json = & powershell.exe -NoProfile -NonInteractive -File .\scripts\preparar-planejamento.ps1 `
+  -WorkspacePath .\jboss-mta-harness.local.code-workspace -Target $projeto `
+  -Operation planejar-lotes -RunPath $rodada -NewPlan `
+  -NonInteractive -NoOpen -OutputFormat Json
+$codigo = $LASTEXITCODE
+$resultado = $json | ConvertFrom-Json
+$resultado
+~~~
+
+O primeiro -NonInteractive pertence ao PowerShell e impede perguntas do processo;
+o segundo pertence ao preparador e exige escolhas completas. `-OutputFormat Json`
+exige o modo nao interativo. Sem esse formato, a resposta e textual.
+
+| Escolha | Parametros da chamada nao interativa |
+| --- | --- |
+| Comuns | Target, Operation, NonInteractive e NoOpen obrigatorios. ConfigPath/WorkspacePath identificam a configuracao existente. Nao aceita SelectTarget, SelectOperation nem EditorPath. |
+| Planejar/atualizar lote | Operation planejar-lotes; RunId **ou** RunPath; NewPlan **ou** PreviousRequestId. Use PreviousRequestId para continuar a proposta escolhida; NewPlan inicia solicitacao independente. |
+| Revisao compativel com contextos antigos | Operation revisar-lote; RunId **ou** RunPath; PreviousRequestId e EvidenceIndexPath apontando o LEIA-ME.md existente. |
+| Reconciliar somente registro | Operation manter-migracao; RunId, RunPath **ou** WithoutMta. EvidenceIndexPath e MigrationSourcePath sao opcionais, como no fluxo acima. |
+
+RunId seleciona uma rodada existente do projeto; RunPath recebe a pasta completa.
+WithoutMta preserva a referencia existente no registro, sem selecionar novo scan.
+Nenhuma dessas opcoes executa MTA. Uma nova rodada continua exigindo autorizacao
+expressa do desenvolvedor, em operacao separada.
+
+A resposta JSON usa SchemaVersion 1. Status e ExitCode correspondem ao codigo do
+processo: PREPARED/0, INPUT_REQUIRED/2 (escolhas ausentes, em Error.MissingInputs)
+ou FAILED/1 (erro em Error.Message). Project/Source, RunId e RequestId identificam
+o contexto preparado. Artifacts informa PromptPath, ContextPath, MigrationPath,
+EvidenceIndexPath e, quando aplicaveis, PlanPath/TodoPath. Estes dois ultimos sao
+destinos futuros; sua presenca na resposta nao prova que o plano foi escrito.
+Diagnostics preserva avisos sem texto solto misturado ao JSON. Erros de sintaxe
+da invocacao ou de carregamento do PowerShell/modulos precedem esse contrato.
+
+Entradas ausentes, conflitantes ou selecoes invalidas encerram antes de inicializar
+registros. Somente o projeto selecionado recebe documentos. WritesStarted indica
+que o preparo entrou na etapa de escrita; ChangedFiles lista documentos criados
+ou modificados observados nessa chamada, inclusive em falha parcial. O lock local
+de preparo nao integra essa lista. Se ChangesVerified for false, a conferencia de
+arquivos falhou: consulte Diagnostics e inspecione os destinos antes de continuar.
+
+Em FAILED com WritesStarted=true, confira ChangedFiles e preserve os arquivos.
+Em interrupcao/timeout sem resposta, confira a pasta do projeto em .harness/planning
+e o registro em .harness/projetos. Nao repita automaticamente: cada novo preparo
+cria outra solicitacao. Em PREPARED, retome pelo Artifacts.PromptPath e confira o
+recibo; executar/revisar o resultado continua sendo uma etapa separada.
+
 #### Como se forma o lote, o plan.md e o todo.md
 
 O agente aprofunda somente as issues escolhidas e pontos relacionados. Varias issues

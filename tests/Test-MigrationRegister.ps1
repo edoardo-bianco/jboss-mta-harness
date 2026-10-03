@@ -93,3 +93,40 @@ Assert ($legacy.MigrationPath -eq $legacyPath) 'Registro legado deve manter cami
 $null = Update-HarnessMigration $context $selected
 Assert ([IO.File]::ReadAllText($updated.MigrationPath).Contains('Total MTA: 0 issues (regras) / 0 ocorrencias.')) 'Rodada sem achados deve apresentar totais zero sem apagar historico.'
 Write-Output 'PASS: registro, identidade, catalogo real, contagens, conciliacao e preservacao humana.'
+
+# Bloqueio real de exclusao no Windows; substituir apenas a espera permite liberar
+# o handle exatamente entre tentativas, sem depender de temporizacao de outro processo.
+& (Get-Module HarnessPlanning) {
+    param($MigrationPath, $PromptPath)
+    $script:retryCount = 0
+    $script:heldFile = [IO.File]::Open($MigrationPath, 'Open', 'Read', 'ReadWrite')
+    function script:Start-Sleep {
+        param($Milliseconds)
+        $script:retryCount++
+        $script:heldFile.Dispose()
+    }
+    try {
+        Set-MigrationReconciliation $MigrationPath ('d'*32) $PromptPath
+        if ($script:retryCount -ne 1 -or -not ([IO.File]::ReadAllText($MigrationPath).Contains('Solicitacao: ' + ('d'*32)))) {
+            throw 'Reconciliacao nao recuperou bloqueio transitorio de substituicao.'
+        }
+    } finally {
+        $script:heldFile.Dispose()
+        Remove-Item Function:script:Start-Sleep
+    }
+    $original = [IO.File]::ReadAllText($MigrationPath)
+    $script:retryCount = 0
+    $script:heldFile = [IO.File]::Open($MigrationPath, 'Open', 'Read', 'ReadWrite')
+    function script:Start-Sleep { param($Milliseconds) $script:retryCount++ }
+    try {
+        $failed = $false
+        try { Set-MigrationReconciliation $MigrationPath ('e'*32) $PromptPath } catch { $failed = $true }
+        if (-not $failed -or $script:retryCount -ne 2 -or [IO.File]::ReadAllText($MigrationPath) -cne $original) {
+            throw 'Bloqueio persistente nao encerrou preservando o registro.'
+        }
+    } finally {
+        $script:heldFile.Dispose()
+        Remove-Item Function:script:Start-Sleep
+    }
+} $updated.MigrationPath $maintenance.PromptPath
+Write-Output 'PASS: reconciliacao recupera bloqueio transitorio e limita tentativas sem perder registro.'

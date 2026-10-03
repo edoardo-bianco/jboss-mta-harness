@@ -1,5 +1,376 @@
 # Plano do agente: evolucao do harness
 
+## Trabalho atual: backlog e squad de migracao - 2026-10-03
+
+Consolidacao da revisao de prompts e do desenho da squad, na branch
+harness/backlog-agente-orientacao, derivada de main de59750. Esta entrega consolida
+o desenho, corrige um template e implementa a primeira interface CLI; demais entregas estao no
+[backlog vigente](todo.md#backlog-vigente). Historico e evidencias ficam preservados.
+
+### Referencias e arquitetura
+
+Este plano complementa as fontes abaixo; procedimentos continuam nos guias.
+Nao criar outro conjunto de documentos, um wrapper por Run Task ou um agente
+por comando. A modularizacao da estrategia e proposta, nao capacidade ja entregue.
+
+| Fonte | Responsabilidade preservada |
+| --- | --- |
+| [Estrategia](../doc/estrategia/estrategia-harness_.md) | Nucleo comum, plugins tecnologicos, adaptadores de engine e de IDE; separar objetivo, perfil, engine e IDE. |
+| [ADR-0002](../doc/adr/0002-separacao-harness-e-migracao-progressiva.md) | Evolucao do harness em tasks/; corretivas em PlanPath/TodoPath da aplicacao. |
+| [ADR-0004](../doc/adr/0004-git-informativo-sem-controle-de-branches.md) | Git informativo e gestao pelo desenvolvedor; nao restaurar gates por branch/HEAD. |
+| [Contrato vigente](../doc/especificacoes/planejamento-copilot.md) | Identidade, destinos, snapshot, lote, GO, verificacoes, aceite e limites de cada fase. |
+| [Guia do desenvolvedor](../doc/guias/harness-migracao-desenvolvedor.md) | Fluxo principal e acesso aos guias especificos; passos operacionais ficam nesses guias. |
+
+Distribuicao proposta: nucleo organiza contexto, decisoes e evidencias; coletores
+tecnologicos produzem fatos e executam acoes; skills orientam seu uso; agentes
+assumem papeis; adaptadores ligam Copilot/Codex e VS Code. O coletor Java pode ser
+compartilhado por JBoss, Quarkus e SDLC cotidiano. Regras Java 8/javax/EAP 7.4 e
+Hibernate 5.3 pertencem ao perfil atual, nao ao nucleo ou a toda consulta Java.
+
+### Modos, papeis e decisoes humanas
+
+| Modo escolhido pelo desenvolvedor | Coordenacao | Quem executa |
+| --- | --- | --- |
+| Assistido | Orquestrador helper consulta estado/guias e helpers especializados; entrega uma etapa por vez e confere evidencias na retomada. | Humano executa tarefas, prompts, edicoes e verificacoes. |
+| Delegado | Orquestrador executor encaminha a etapa autorizada aos especialistas e apresenta resultados/checkpoints. | Agentes executores, dentro das permissoes e decisoes humanas daquela etapa. |
+
+A primeira entrega de agentes sera o modo assistido. Cada especialista abaixo tera helper
+do mesmo dominio; todos usam um metodo de orientacao compartilhado. Helpers sao
+leitores, inclusive quando apoiam um executor. O condutor/orquestrador encaminha
+o apoio quando permitido; especialistas sem permissao de subdelegacao nao o
+chamam diretamente. Nao iniciar todos os agentes/helpers em paralelo por padrao.
+
+| Especialista | Responsabilidade | Ajuda do helper |
+| --- | --- | --- |
+| Preparar contexto | Selecionar entradas explicitas e usar preparadores; devolver recibos/caminhos reais. | Projeto, origem MTA, evidencias, novo plano ou continuidade. |
+| Reconciliar contexto | Confrontar registro, decisoes e evidencias; somente MigrationPath conforme contrato. | Divergencias, estado e execucao do prompt preparado. |
+| Planejar | Propor/revisar um lote consistente; condutor persiste destinos autorizados. | Selecao das issues, cobertura, revisao e GO. |
+| Analisar impacto da issue | Localizar pontos afetados, dependencias, configuracoes, consumidores e testes; separar fatos e lacunas. | Como reunir/interpretar evidencias, com exploracao Java opcional. |
+| Implementar | Aplicar lote com GO vigente, verificar e devolver evidencias para aceite. | Preparo, build, debug, testes e revisao do resultado. |
+
+Invariantes comuns aos dois modos:
+- O humano prioriza issues de migracao.md, escolhe objetivo/escopo, concede GO e
+  aceita resultados. Agente recomenda com motivos; preserva ANALISAR AGORA,
+  ADIAR/FORA DO ESCOPO e decisoes existentes.
+- GO vigente cobre as tarefas autorizadas do mesmo lote. Checkpoints do plano,
+  mudanca de escopo, conflito ou decisao reservada devolvem controle ao humano;
+  nao pedir GO repetido a cada comando nem inferi-lo de preparo/testes.
+- Um escritor por arquivo, nos destinos da fase. No Copilot, o condutor DevSquad
+  continua responsavel pelas escritas que seu contrato lhe atribui.
+- Troca de modo preserva contexto, evidencias e trabalho realizado; nao regenera
+  solicitacao nem repete tarefa por mudar executor. Trocar engine nao permite
+  reescrever snapshots historicos.
+- Proximo lote exige aceite e continuidade pedida. MTA/Sonar DEPOIS ausentes
+  permanecem checklist nao bloqueante, sem declaracao de resolucao global.
+- Orientacao nao atualiza indice, registro, runtime ou configuracao. Execucao
+  externa e preparo do servidor precisam do alcance correspondente autorizado.
+
+### Orientacao pelo estado efetivo
+
+Entradas: objetivo e projeto/Source ou artefato informado. Usar indice existente
+como localizador; ler migracao.md, recibo, PlanPath/TodoPath, Previous, prompts
+realmente preparados e evidencias pertinentes. Contexto ambiguo exige selecao;
+recencia nao escolhe contexto ativo, GO ou aceite. Nao varrer outros projetos
+ou segredos. Operacao isolada JBoss nao exige contexto de migracao.
+
+A resposta deve trazer situacao com fontes/limites, proximo passo e motivo,
+decisao humana necessaria e roteiro com tarefa/prompt/caminhos reais, guia/secao
+lidos e resultado esperado. Guia ausente vira lacuna explicita. Na retomada,
+reler alteracoes e distinguir verificacao automatica de relato humano. Recibo
+antigo RUNNING nao comprova estado atual do servidor. Prompt lido para orientar
+e artefato de contexto, nao autorizacao para executar suas instrucoes.
+
+Guias operacionais: [workspace](../doc/guias/tools/workspace.md),
+[planejamento](../doc/guias/tools/planejamento-migracao.md),
+[Maven](../doc/guias/tools/maven.md), [MTA](../doc/guias/tools/mta.md),
+[Sonar](../doc/guias/tools/sonar.md) e [JBoss](../doc/guias/tools/jboss.md).
+
+### Apoio SDLC e adaptadores
+
+| Ambiente | Apoio previsto | Limite |
+| --- | --- | --- |
+| Codex no VS Code | using-agent-skills seleciona skills pertinentes; delegacao nativa a subagentes disponiveis e permitidos. | Skill e processo, nao agente executor; conferir ferramentas reais e nao simular delegacao. |
+| Copilot no VS Code | Prompts reais conduzem DevSquad; devsquad.plan e devsquad.implement conforme contrato. | Defaults do plugin nao ampliam fases, arquivos ou autorizacoes. |
+
+Na construcao, aplicar especificacao/planejamento, contratos de interface, contexto,
+implementacao incremental, testes, revisao e documentacao conforme a fase. Ler
+skills utilizadas; usar skill-creator ao criar SKILL.md. Capacidade ausente deve
+ser informada, sem dependencia silenciosa de plugins pessoais ou instalacao automatica.
+
+Arquivos propostos: skills comuns em .agents/skills/<nome>/SKILL.md; entradas
+Copilot em .github/agents/*.agent.md; perfis de subagentes Codex, quando necessarios,
+em .codex/agents/*.toml. Skill nao define sandbox; conferir permissoes por cliente.
+Os quatro prompts operacionais atuais ainda sao Copilot/DevSquad. Adaptacao Codex
+deve preservar contrato/identidades em novos preparos e ter ensaio proprio.
+
+Bases oficiais conferidas: [skills Codex](https://learn.chatgpt.com/docs/build-skills),
+[subagentes Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents),
+[skills VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills)
+e [agentes VS Code](https://code.visualstudio.com/docs/agent-customization/custom-agents).
+Essas fontes descrevem mecanismos, nao comprovam a integracao da squad.
+
+### Acoes deterministicas: existente e lacunas
+
+23 Run Tasks chamam 15 scripts PowerShell. Reutilizar a CLI e os modulos; o
+[catalogo existente](../doc/guias/tools/workspace.md#tarefa-e-script-correspondente)
+continua sendo a referencia dos nomes. "Hook" significa aqui acao invocavel;
+hooks automaticos de eventos ficam fora da primeira entrega.
+
+| Grupo | Situacao verificada |
+| --- | --- |
+| Build e MTA | Alvo explicito evita selecao; executam ferramentas e gravam resultados. Build aceita fases Maven, nao goals como dependency:tree. |
+| Preparo de planejamento/reconciliacao | NonInteractive/NoOpen exigem escolhas explicitas, validam entradas antes de inicializar registros e permitem OutputFormat Json; somente o alvo recebe documentos. Procedimento no guia de planejamento. |
+| Preparo de implementacao | RequestId/NoOpen nao eliminam o menu de branch; escolha Git precisa continuar humana/explicita. |
+| Sonar | Parametros de projeto/coleta e entrada oculta de token; interacao prevista no fluxo assistido. |
+| JBoss | Action/Eap e argumentos de deploy/rollback evitam menus; muda runtime e grava recibos, inclusive Status. AddUser e assistente humano. |
+| Indice, configuracao, evidencias, abertura e limpeza | NoOpen evita editor, nao garante leitura pura. Read-HarnessConfig inicializa registros por padrao; indice escreve/sincroniza; exclusao confirma. |
+| Logs MTA | Once limita acompanhamento; sem ele a chamada pode permanecer aberta. |
+
+Primeira acao normalizada: preparar-planejamento.ps1. NonInteractive exige escolhas
+pertinentes, rejeita conflitos/switches de selecao, valida antes de inicializar/gravar,
+retorna INPUT_REQUIRED sem Read-Host e limita escrita ao alvo escolhido. Usa NoOpen
+e carrega configuracao com SkipMigrationInitialization antes da validacao.
+Comportamento das Run Tasks interativas preservado.
+
+Saida estruturada optativa: versao do esquema, operacao/status, Project/Source,
+RequestId, caminhos dos artefatos e erro com campos faltantes. Diagnosticos em campo
+proprio, sem texto solto; codigos legados preservados e nao zero para falha/entrada pendente.
+Preparo nao equivale a execucao de prompt. Em falha parcial/timeout, identificar
+o que foi criado antes de repetir; novo preparo cria nova solicitacao.
+
+Contrato da primeira fatia: `-NonInteractive -NoOpen`, com `-OutputFormat Json`
+opcional (Text por padrao). Exigir Target e Operation explicitos; para planejar,
+RunId ou RunPath e NewPlan ou PreviousRequestId; para revisar, PreviousRequestId
+e EvidenceIndexPath; para manter, RunId, RunPath ou WithoutMta. Rejeitar menus,
+EditorPath e combinacoes conflitantes. JSON exige NonInteractive. Saida v1:
+Status PREPARED/INPUT_REQUIRED/FAILED, ExitCode 0/2/1, identidade, Artifacts,
+Diagnostics, Error.MissingInputs, WritesStarted e ChangedFiles. Diagnosticos
+ficam no campo proprio, sem texto solto na saida JSON. Validacao previa reutiliza
+os preparadores em modo somente validacao; falhas operacionais posteriores podem
+deixar arquivos, que devem ser informados sem rollback ou repeticao automatica.
+Teste de CLI real em fixture com dois projetos: entradas faltantes/conflitantes,
+alvo/rodada/evidencias/Previous invalidos, tres operacoes, warnings, preservacao
+do outro projeto, continuidade e falha parcial. Depois, regressao dos menus.
+
+Rastreio sob o mesmo planning.lock da escrita: inventariar recibos/prompts por nome
+e calcular hashes somente do registro/indice afetaveis, sem ler anexos. Falha ao
+obter lease nao inicia a escrita de documentos. Testes cobrem anexo bloqueado e
+lease ocupado. A reconciliacao tambem passou a repetir File.Replace apenas nos
+erros transitorios 32/33/1175, ate tres tentativas, relendo o original a cada vez;
+teste com handle real cobre recuperacao e preservacao apos bloqueio persistente.
+Referencia: [ReplaceFileW, Microsoft](https://learn.microsoft.com/windows/win32/api/winbase/nf-winbase-replacefilew).
+
+MTA: oferecer reuso de RunId escolhido, pasta completa de rodada recebida, nova
+execucao expressamente autorizada no alvo ou adiamento. WithoutMta vale apenas
+nas fases que o admitem. Escolha humana ja explicita dispensa perguntar novamente.
+Defasagem, falha, troca de branch ou "verificar" nao autorizam nova rodada/retry.
+Reuso preserva MtaOrigin/snapshot e confere aplicabilidade ao Source atual.
+
+Sonar: pedir token em entrada oculta no inicio da operacao autorizada, apos definir
+destino/projeto; manter tratamento SecureString/processo e descarte existentes.
+Chat, prompts e recibos nao recebem segredo. Sem terminal interativo, orientar a
+Run Task e retomar pelo resultado. A CLI atual nao guarda token entre processos.
+
+### Matriz de compatibilidade por projeto
+
+Capacidade solicitada: ferramenta de coleta deterministica mais prompt especifico
+para produzir matriz das dependencias reais do projeto e recomendar a acao para
+cada dependencia pertinente ao destino. Sera uma entrega propria, COMP-01; nao
+depende de implantar o explorador Java opcional nem de executar novo MTA.
+
+Hoje o contrato exige analisar POMs/dependencias e uma matriz curta no plano.
+HarnessPlanning vincula dependencies.yaml e compara identidade Maven declarada
+entre snapshot e POM local. Isso nao resolve a arvore atual nem constitui
+verificador automatico completo de compatibilidade.
+
+Percurso proposto:
+1. Coleta autorizada identifica Project/Source, raiz/modulos, POMs, parent/BOM,
+   propriedades, perfis, exclusoes e ambiente Maven/JDK/settings pertinente.
+   Obter effective POM e dependency:tree; diferenciar declaradas, resolvidas e
+   transitivas, incluindo conflitos e dependencias nao resolvidas. Nao interpretar
+   dependencias gerenciadas mas nao usadas como presentes no artefato.
+2. Conferir WAR/EAR e modulos/runtime quando existirem evidencias pertinentes.
+   Registrar separadamente versao declarada, resolvida, empacotada e fornecida/
+   carregada pelo servidor. Provided ou build aprovado nao comprovam classe carregada.
+3. Prompt especifico confronta coleta com perfil de destino, fontes oficiais
+   verificadas e restricoes corporativas fornecidas. Matriz de suporte EAP/JDK/SO,
+   versoes/classificacao de modulos e compatibilidade de API/comportamento sao
+   verificacoes distintas; nenhuma tabela cobre automaticamente todas as bibliotecas.
+4. Produzir matriz por projeto com dependencia/consumidores, versoes/origens/escopos,
+   destino avaliado, compatibilidade e evidencia, acao recomendada e lacunas.
+   Classificar como COMPATIVEL NAS CONDICOES AVALIADAS, INCOMPATIVEL, CONDICIONADA
+   ou NAO VERIFICADA, com evidencia CONFERIDA/PENDENTE/CONFLITO conforme contrato.
+   Nao deduzir
+   compatibilidade da ausencia de achado ou da versao Maven mais recente.
+5. Acoes possiveis: manter, alinhar ao BOM/servidor, alterar versao com evidencia,
+   excluir transitiva indevida, substituir biblioteca/API ou ajustar configuracao/
+   codigo. Sem patch exato comprovado, marcar PENDENTE. Recomendacao nao aplica
+   mudanca no POM nem amplia escopo/GO de um lote.
+6. Persistir coleta/matriz somente nos destinos de evidencia explicitamente
+   escolhidos, referenciados pelo indice existente. Registrar fontes, data/versao,
+   parametros pertinentes, hashes e cobertura. O plano do lote usa as linhas
+   relevantes e referencia a matriz; evitar copias divergentes por agente.
+
+Coleta Maven pode acessar rede e gravar cache; seguir ferramentas/settings da
+maquina e verificar versao dos plugins compativel com o JDK selecionado. Coleta e
+pesquisa oficial sao operacoes separadas do planejar-lotes atual, que nao permite
+terminal/web/subdelegacao. O novo prompt deve ter contrato proprio de entradas,
+consulta e escrita limitada a matriz/evidencias; planejador consome o resultado.
+Lacunas permitem proposta preliminar conforme contrato, sem criar gate global.
+
+Referencias: [arvore Maven](https://maven.apache.org/plugins/maven-dependency-plugin/tree-mojo.html),
+[effective POM](https://maven.apache.org/plugins/maven-help-plugin/effective-pom-mojo.html),
+[configuracoes EAP suportadas](https://access.redhat.com/articles/2026253),
+[componentes EAP](https://access.redhat.com/articles/112673) e
+[classificacao de modulos](https://access.redhat.com/articles/2158031).
+Conferir aplicabilidade ao patch/destino; nao tratar esses links como certificado do projeto.
+
+### Exploracao Java opcional e transversal
+
+CORE-01 e apoio para o desenvolvedor entender o contexto e para agentes de impacto,
+revisao e manutencao. Nao e precondicao universal da migracao. Consulta generica
+recebe Source/recorte e ambiente pertinente; nao exige RunId MTA, EAP ou javax.
+O contrato comum organiza fatos; o coletor Java resolve a linguagem; perfis aplicam
+regras tecnologicas. Quarkus pode reutiliza-lo, e outras linguagens terao coletores
+somente quando houver demanda.
+
+| Recurso | Fatos obtidos / limite |
+| --- | --- |
+| Busca local e artefatos MTA existentes | Ocorrencias, regras e configuracoes; busca textual nao comprova referencia semantica. |
+| JDT / Java Language Server | Simbolos, referencias, implementacoes, hierarquia de tipos e chamadas. Ja previsto na extensao Java do workspace; acesso pela IDE nao prova acesso dos agentes. |
+| jar, javap e jdeps | Artefatos, assinaturas/bytecode e dependencias de classes/pacotes; dependem do build/classpath e nao explicam intencao de negocio. |
+| Testes, cobertura, logs e debug | Comportamento observado nos cenarios executados; execucao tem efeitos e nao prova cobertura completa. |
+
+Priorizar acesso ao [JDT](https://github.com/eclipse-jdtls/eclipse.jdt.ls).
+[JavaParser/Symbol Solver](https://github.com/javaparser/javaparser) e alternativa
+a avaliar para coletor CLI; nao instalar outro motor antecipadamente.
+[javap](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/javap.html) e
+[jdeps](https://docs.oracle.com/javase/8/docs/technotes/tools/windows/jdeps.html)
+complementam a leitura de binarios.
+
+Saida desejada: pontos de entrada, consumidores/chamadas, dependencias,
+configuracoes/efeitos e testes, com arquivo/linha/simbolo, origem e cobertura.
+Registrar ferramenta/versao, classpath/perfis e simbolos nao resolvidos; normalizar
+ordem para comparar mesmos insumos. Reflexao, CDI/EJB, proxies e configuracao
+dinamica deixam lacunas. O agente explica fatos e inferencias; o humano confirma
+intencao de negocio. Persistencia autorizada usa a area de evidencias existente.
+
+### Preparo do servidor
+
+SERV-01 e operacao JBoss propria, com ferramenta e prompt/helper, utilizavel nos
+dois modos. O harness hoje opera instalacoes existentes; drivers/datasources e
+demais requisitos ainda sao preparados pelo desenvolvedor.
+
+O JBoss Server Migration Tool incluido no EAP 7.4 migra configuracoes e gera
+relatorios. O guia documenta origens 6.4 e 7.3, exige servidores parados e destino
+limpo cuja configuracao sera substituida. A rota direta 7.1 -> 7.4 nao esta
+comprovada; verificar suporte/versao antes de gerar comandos.
+[Guia oficial](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html-single/using_the_jboss_server_migration_tool/index).
+A [CLI embutida](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html/management_cli_guide/running_embedded_server)
+permite configuracao em admin-only; inicia componentes administrativos e escreve,
+sem comprovar funcionamento da aplicacao.
+
+O preparo deve evidenciar tanto a migracao da configuracao quanto os requisitos
+de instalacao da aplicacao no destino:
+
+| Recorte | Conferencia e acao proposta |
+| --- | --- |
+| Home/Base/XML e subsistemas | Identificar configuracao realmente usada e versoes/patches; confrontar requisitos da aplicacao com recursos existentes, migrados, removidos ou substituidos no destino. |
+| Drivers, modulos e adaptadores | Identificar JARs JDBC, module.xml/dependencias, registro do driver, adaptadores de recursos e bibliotecas nativas quando pertinentes; comprovar presenca/versao e indicar instalar, atualizar, substituir ou manter. |
+| Recursos e configuracao externa | Conferir datasources/JNDI, filas/connection factories, seguranca, caches, propriedades, caminhos e referencias a certificados; distinguir recurso presente de configuracao/artefato ainda necessario, sem expor segredos. |
+
+Saida: inventario por requisito com evidencia da necessidade (codigo/descritor/
+configuracao), situacao na origem e no destino, versao/compatibilidade e fonte,
+acao, artefato aprovado/fornecido necessario e verificacao esperada. Estados:
+PRESENTE, AUSENTE, INCOMPATIVEL ou NAO VERIFICADO, sem declarar ausencia quando a
+inspecao foi parcial. Relacionar dependencia da COMP-01 ao recurso do servidor;
+nao duplicar a matriz nem inferir instalacao a partir de uma dependencia no POM.
+Exemplo de evidencias distintas: JAR do driver, registro JDBC, datasource/JNDI
+e teste da conexao; cada qual tem resultado proprio, sem sucesso implicito.
+
+A migracao de modulos referenciados pode ser realizada pela ferramenta na rota
+suportada, mas isso nao comprova todos os requisitos do projeto. Instalacao e
+registro JDBC sao etapas documentadas no
+[guia de datasources](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html/configuration_guide/datasource_management).
+O prompt de preparo usa inventario e fontes para propor configuracao candidata,
+comandos e checklist de instalacoes; pendencias sem artefato/versao comprovados
+permanecem visiveis. Migrar XML nao descobre automaticamente subsistemas minimos.
+
+Apresentar destinos/efeitos/reversao para GO proprio; executar em instalacao
+destino separada escolhida; conferir diff/relatorio, boot e recursos pertinentes;
+testar conexoes/deploy somente no alcance autorizado e submeter ao aceite antes
+de apontar o perfil local. Manter inventario/resultados nos artefatos da operacao
+e referencias de evidencia existentes. Nao migrar o EAP ja customizado como
+destino limpo, presumir dry-run ou executar parada/deploy implicitamente. Sem rota
+comprovada, manter pendente ou propor preparo CLI documentado, sem substituir
+silenciosamente pela ferramenta comunitaria. Detalhes vao ao guia JBoss.
+
+### Revisao dos prompts existentes
+
+| Prompt | Resultado |
+| --- | --- |
+| planejar-lotes | Mantido: contexto/snapshot explicito, um lote, devsquad.plan leitor e condutor escritor nos destinos do contrato. |
+| revisar-lote | Corrigido: ler prompt-base preparado e ContractSnapshot do recibo; contrato atual somente como fallback historico sem snapshot. Preservar Previous. |
+| manter-migracao | Mantido: somente MigrationPath; carga de catalogo/indice nao conclui reconciliacao; apoio opcional conforme contrato. |
+| implementar-lote | Mantido: GO e hashes, Source no escopo, registros pelo condutor e aceite humano separado. |
+
+Correcao vale para novos preparos; recibos/prompts historicos nao foram reescritos.
+Revisao estatica e testes de preparadores nao comprovam comportamento dos agentes.
+
+### Sequencia e verificacao
+
+IDs/estado ficam apenas no backlog. Prioridade confirmada pelo desenvolvedor:
+concluir o preparo das ferramentas em andamento (SDLC-01), depois entregar a
+squad de helpers (SDLC-02/03) para auxiliar o humano em todas as etapas. Somente
+apos validar essa orientacao nos dois clientes (VAL-01), iniciar os executores
+(SDLC-04/05). SDLC-03 sera incremental: orquestrador + preparo; depois reconciliacao,
+planejamento, impacto da issue e implementacao, sempre em modo de orientacao.
+Helpers podem orientar as Run Tasks/guias existentes sem esperar novas interfaces
+de execucao. SDLC-06 adapta outras ferramentas conforme necessidade, sem adiar a
+entrega assistida para automatizar todas elas. COMP-01 entrega coleta e
+matriz antes de sua integracao aos especialistas; pode ser usada pelo humano.
+CORE-01 e piloto opcional. SERV-01 depende da rota suportada comprovada.
+Nao condicionar a orientacao inicial a todos esses pilotos.
+
+| Fatia | Arquivos/alcance a detalhar | Verificacao de encerramento |
+| --- | --- | --- |
+| SDLC-01 | preparar-planejamento.ps1, modulos pertinentes, teste CLI e guia. | Processo com entradas completas gera recibos validos; faltantes/conflitos nao perguntam nem escrevem; Run Tasks preservadas. |
+| SDLC-02 | Skill compartilhada e referencias nos guias workspace/principal. | Metadados/links e regras de leitura/orientacao dos casos abaixo; skills pessoais ausentes nao inventam capacidades. |
+| SDLC-03 | Entradas Copilot/Codex para orquestrador helper e cinco helpers, em subfatias por etapa. | VAL-01 nas duas extensoes: preparo, reconciliacao, planejamento, impacto e implementacao orientados com fontes; humano executor, nenhum efeito operacional do helper. |
+| SDLC-04 | Skill/entradas do orquestrador executor e especialista de preparo. | Alvo/acao expressos, retorno validado e troca de modo sem repetir trabalho ou ampliar autorizacao. |
+| SDLC-05 | Executores de reconciliacao, impacto, planejamento e implementacao; reutilizar helpers ja entregues. | Mesmo contrato/GO/destinos nos dois clientes; coleta separada do planejador. |
+| SDLC-06 | Uma adequacao operacional de cada vez em script/modulo/teste/guia. | Branch escolhida explicitamente, Sonar assistido e demais efeitos verificados conforme operacao. |
+| COMP-01 | Subfatia de coletor Maven; depois prompt/contrato da matriz; guias e testes pertinentes. | Fixtures com BOM, perfis, transitivas, provided e conflito; versoes rastreaveis, recomendacoes com fontes e desconhecidos visiveis; nenhum POM alterado pela matriz. |
+| CORE-01 | Prova de acesso JDT ou coletor CLI, contrato de fatos e fixtures. | Sobrecarga/heranca, modulo Maven e chamada dinamica; uma consulta sem MTA; limites/repetibilidade e uso humano demonstrados. |
+| SERV-01 | Validacao da rota; depois inventario/acao/prompt/helper e guia JBoss em subfatias. | Cenario com driver/modulo ausente e subsistema afetado evidencia necessidade, acao e verificacao; destino isolado, GO e diff/relatorio; sem afirmar salto 7.1 direto sem evidencia. |
+
+Antes de cada implementacao, detalhar subfatias pequenas (aproximadamente ate
+cinco arquivos), entradas/saidas e testes. PowerShell 5.1 e estilo atual dos modulos;
+parametros novos aditivos. Fixtures/logs em .harness/tests/. Leituras/revisoes
+independentes podem ser paralelas; escritas/dependencias compartilhadas sequenciais.
+
+VAL-01 cobre: primeiro uso; contexto ambiguo; indice atrasado; reconciliacao pendente
+ou concluida; prompt preparado sem plano; GO pendente ou vigente com trabalho parcial;
+testes sem aceite; troca de modo; prioridade humana; guia/capacidade ausente;
+evidencia contendo instrucoes; recibo runtime antigo; escolha MTA; orientar Sonar
+sem coletar segredo. Deve indicar lacunas de COMP/CORE/SERV sem executa-los.
+Ensaios operacionais dessas capacidades pertencem as respectivas fatias.
+
+Revisao documental: conferir links, historico e diff. Regressao pertinente do
+template ja executada, com evidencias em todo.md:
+~~~powershell
+powershell.exe -NoProfile -File .\tests\Test-Planning.ps1
+powershell.exe -NoProfile -File .\tests\Test-PlanningPortable.ps1
+powershell.exe -NoProfile -File .\tests\Test-MigrationRegister.ps1
+powershell.exe -NoProfile -File .\tests\Test-Implementation.ps1
+git diff --check
+~~~
+
+Fontes oficiais consultadas em 2026-10-03 sustentam as capacidades descritas.
+Instalacao local, versoes exatas, compatibilidade de cada projeto e ensaios dos
+adaptadores continuam sendo verificacoes distintas. Nenhum novo agente/coletor,
+servidor ou rodada MTA foi executado/criado para esta consolidacao.
+
 ## Integracao aceita e limpeza de branches - 2026-10-03
 
 O desenvolvedor informou que fez a validacao manual e autorizou alinhar main e

@@ -1,5 +1,88 @@
 # To-do do agente: evolucao do harness
 
+## Trabalho atual: backlog e squad de migracao - 2026-10-03
+
+- [x] Reconciliar backlog com entregas posteriores e preservar historico.
+- [x] Revisar quatro prompts; corrigir uso do contrato preservado em revisar-lote.
+- [x] Consolidar modos, papeis, acoes, matriz por projeto e capacidades opcionais.
+- [x] Conferir proposta com ADRs/contrato/estrategia e fontes oficiais pertinentes.
+- [x] Validar consolidacao final, referencias e limites com revisao independente.
+- [x] Entregar SDLC-01: CLI sem menus, validacao previa, JSON e rastreio protegido por lock.
+- [x] Confirmar prioridade: ferramentas atuais, depois squad completa de helpers, antes dos executores.
+
+Decisoes, responsabilidades, fontes e verificacoes ficam no
+[plano consolidado](plan.md#trabalho-atual-backlog-e-squad-de-migracao---2026-10-03).
+Este arquivo concentra estado e ordem das entregas; os guias mantem os procedimentos.
+A squad, os novos coletores e o preparo automatizado de servidor ainda sao futuros.
+
+## Backlog vigente
+
+| ID | Estado / ordem | Proxima entrega |
+| --- | --- | --- |
+| SDLC-01 | Concluida | Preparo de planejamento/reconciliacao por CLI com escolhas explicitas, validacao antes de escrita e saida estruturada. |
+| SDLC-02 | Proxima entrega | Skill compartilhada de orientacao pelo estado efetivo e pelos guias. |
+| SDLC-03 | Prioridade apos SDLC-02 | Orquestrador helper e helpers de preparo, reconciliacao, planejamento, impacto e implementacao, em subfatias; humano executor nos dois clientes. |
+| SDLC-04 | Apos SDLC-03 / VAL-01 | Orquestrador executor e especialista de preparo; modo delegado e retorno ao humano. |
+| SDLC-05 | Apos SDLC-04 | Executores das demais etapas, reutilizando os helpers ja entregues; consumir matriz COMP-01 e coleta Java opcional. |
+| SDLC-06 | Conforme necessidade | Adequar uma acao existente por vez: branch explicita, Sonar assistido, build/MTA/JBoss e limpeza. |
+| COMP-01 | Capacidade solicitada | Coletor deterministico das dependencias Maven e prompt especifico de matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. |
+| CORE-01 | Piloto opcional transversal | Navegacao/coleta de contexto Java para compreensao pelo desenvolvedor e apoio ao SDLC, independente de MTA/engine. |
+| SERV-01 | Capacidade solicitada; validar rota primeiro | Migrar configuracao/subsistemas e inventariar drivers, modulos e recursos necessarios; ferramenta oficial/CLI e prompt/helper com evidencias, acoes e validacao no destino isolado. |
+| VAL-01 | Ensaio de SDLC-03 | Descoberta/delegacao/orientacao nas extensoes Copilot e Codex, sem efeitos operacionais; casos do plano. |
+| VAL-02 | Ensaio operacional existente pendente | Prompts Copilot: reconciliacao/delegacao, issues, persistencia, retomada, GO, implementacao e continuidade com Previous/novo MTA. |
+| VAL-03 | Ensaio Sonar real pendente | Criterios Blocker/High, avisos de cobertura e comparacao com baseline, separados do Quality Gate. |
+| DEC-01 | Decisao futura | Decidir preparo de deploy com servidor parado; deploy atual exige servidor ativo. |
+| EVO-01 | Futuro, apos priorizacao | Demais fatias da estrategia: nucleo, Node.js/TypeScript, IntelliJ, Quarkus, outros engines e entrega/operacao. |
+
+Criterios, dependencias e arquivos por fatia estao na
+[sequencia de implementacao](plan.md#sequencia-e-verificacao). COMP-01 e independente
+do explorador CORE-01; ambos fornecem evidencias, sem ampliar ferramentas do
+planejador atual. SERV-01 nao e deploy offline nem autorizacao para migrar o EAP
+local. Os prompts existentes seguem Copilot/DevSquad ate adaptacao e ensaio Codex.
+
+### Verificacoes e reconciliacao do historico
+
+SDLC-01 passou em sete suites: Test-PlanningCli, Test-Planning,
+Test-PlanningPortable, Test-MigrationRegister, Test-Implementation,
+Test-ProjectIndex e Test-TaskInputs. Logs e results.json:
+.harness/tests/sdlc01-validacao/. O teste CLI executa processos PowerShell 5.1 em
+fixtures, com ferramentas externas indisponiveis; nenhum MTA/Sonar/JBoss real foi
+executado. RED/GREEN adicional cobre bloqueio transitorio de File.Replace.
+Revisao independente final sem achados, apos corrigir escopo do inventario e lock.
+Conferencia documental: historico preservado, 15 referencias locais do plano/template
+e 227 links/7 exemplos JSON dos 10 guias validos; git diff --check sem erros.
+Esses testes validam os preparadores, nao a squad ou sua execucao nas extensoes.
+
+A revisao dos preparadores passou em Test-Planning, Test-PlanningPortable,
+Test-MigrationRegister e Test-Implementation. Logs e results.json:
+.harness/tests/revisao-prompts-0c193931db9340fba75940f5de510a96/.
+Esses resultados sao da revisao do template; nao validam agentes/coletores futuros.
+
+Revisao independente conferiu inventario (23 tarefas/15 scripts) e alinhamento
+arquitetural. A consolidacao separa coleta de planejamento, restringe delegacao
+dos helpers e conserva CORE-01 opcional. Fontes oficiais nao comprovam a rota
+direta EAP 7.1 -> 7.4; SERV-01 precisa verificar o caminho suportado.
+Revisao final sem achados: COMP-01 separado de CORE-01, limites do planejador
+preservados e prioridades explicitas. Validados 15 links locais/ancoras, diff e
+preservacao integral do historico, exceto os 20 rotulos descritos abaixo.
+
+- JBoss, Todos, descoberta de WAR/EAR, debug/HCR e exemplo EAP 7.1: entregues e
+  cobertos pelo aceite manual geral de 2026-10-03, sem inventar ensaios individuais.
+- Ensaios Copilot antes espalhados em cinco secoes: reunidos em VAL-02.
+- Test-Mta: bloqueio de arquivo em 2026-09-30, seguido de passes em 2026-10-01,
+  inclusive regressao de 21 testes. Causa nao comprovada; reabrir se reproduzido.
+- Sonar real, deploy offline e demais evolucoes: VAL-03, DEC-01 e EVO-01.
+- Lote HIB-CACHE-001: preservado na tag arquivo/lote-HIB-CACHE-001-2026-10-03,
+  sem integracao/aceite; continuidade pertence ao plano da aplicacao.
+- Historico do plano intacto; 20 pendencias antigas do to-do apenas rotuladas
+  "Pendencia na epoca", sem falso fechamento. Entrega atual nao altera esses relatos.
+
+## Historico de entregas e decisoes
+
+Preservado abaixo, incluindo evidencias, limitacoes e decisoes das respectivas
+datas. "Pendencia na epoca" conserva o texto anterior; sua classificacao atual
+e a do backlog vigente. Marcacoes concluidas historicas continuam como registradas.
+
 ## Aceite manual e integracao nas principais - 2026-10-03
 
 - [x] Receber confirmacao do desenvolvedor de que realizou a validacao manual
@@ -135,7 +218,7 @@ aplicacao foi alterado; trata-se somente da organizacao e clareza dos guias.
   local, no modelo inicial e nos padroes do gerador.
 - [x] Ajustar guia JBoss para os novos padroes e workspaces antigos.
 - [x] Conferir preservacao dos demais ajustes e validar geracao/JSON/regressao.
-- [ ] Confirmar substituicao de codigo na JVM pelo ensaio manual do desenvolvedor.
+- Pendencia na epoca: Confirmar substituicao de codigo na JVM pelo ensaio manual do desenvolvedor.
 
 Validacao em 2026-10-03: Test-JbossWorkspace, Test-Workspace e Test-BuildConfig
 passaram no Windows PowerShell 5.1. JSON do modelo, workspace local e workspace
@@ -151,7 +234,7 @@ existentes. Nenhuma substituicao real de classe, deploy ou restart executado.
 - [x] Atualizar entrada no guia principal, README e referencias locais.
 - [x] Documentar controles de debug, Watch e Hot Code Replace no guia JBoss.
 - [x] Conferir conteudo preservado, links/ancoras, exemplos JSON e diff.
-- [ ] Receber resultado manual de breakpoint/Watch/Hot Code Replace no VS Code.
+- Pendencia na epoca: Receber resultado manual de breakpoint/Watch/Hot Code Replace no VS Code.
 
 Revisao documental em 2026-10-03: 112 links locais/ancoras e sete exemplos JSON
 validos nos cinco arquivos de entrada/uso; blocos Markdown fechados e UTF-8
@@ -169,7 +252,7 @@ alterado por esta reorganizacao; ajustes anteriores permanecem preservados.
   o codigo legado e o recibo de falha 0d66e7bb12a44138855daf491e470213.
 - [x] Executar clean install com Java 8 e conferir testes e persistence.xml no WAR.
 - [x] Validar deploy no EAP 7.1 ativo e POST /migracao-cache/cache/limpar.
-- [ ] Obter revisao humana do exemplo para continuar os ensaios de rollback/debug.
+- Pendencia na epoca: Obter revisao humana do exemplo para continuar os ensaios de rollback/debug.
 
 Build b1842566409b4532b3cb444432982a62 SUCCEEDED: Java 1.8.0_504, clean install,
 tres testes sem falhas e cobertura aprovada. Maven usou settings padrao (null).
@@ -192,7 +275,7 @@ Recibos anteriores, inclusive a falha de deploy, preservados.
   cancelamento e alternativa manual, sem operar instalacoes reais.
 - [x] Integrar descoberta e selecao na tarefa de deploy, preservando -ArtifactPath.
 - [x] Atualizar documentacao e validar regressao JBoss.
-- [ ] Confirmar reconhecimento automatico do WAR no menu do VS Code.
+- Pendencia na epoca: Confirmar reconhecimento automatico do WAR no menu do VS Code.
   Deploy funcional no EAP 7.1 e POST confirmados no registro acima; o recibo
   nao informa se o caminho foi descoberto ou digitado manualmente.
 
@@ -211,7 +294,7 @@ e modulos estaticos; saidas/perfis/propriedades personalizados usam caminho manu
 - [x] Implementar selecao Todos nas tarefas existentes, resultados individuais
   e codigo de saida agregado, preservando verificacoes e recibos atuais.
 - [x] Revisar e validar regressao; documentar uso e comportamento de falhas.
-- [ ] Ensaiar manualmente Todos no VS Code com as instalacoes reais.
+- Pendencia na epoca: Ensaiar manualmente Todos no VS Code com as instalacoes reais.
 
 Test-JbossAllServers falhou inicialmente porque all nao era aceito e passou apos
 a implementacao. Regressao final de oito testes aprovada (logs acima), incluindo
@@ -250,7 +333,7 @@ ambiente, falhas e ausencia de credenciais nos argumentos/recibos; git diff --ch
 sem erros. Desenvolvedor confirmou manter a validacao manual pendente e seguir
 com commit/push na branch harness/jboss-servidor-menu, sem integracao nesta etapa.
 
-- [ ] Ensaiar as tarefas Servidor: no VS Code para EAP 7.1/7.4: estado, start
+- Pendencia na epoca: Ensaiar as tarefas Servidor: no VS Code para EAP 7.1/7.4: estado, start
   normal/debug, stop, assistente de usuario e login na console.
 
 - [x] Documentar nome personalizado de XML standalone na secao JBoss do guia,
@@ -277,7 +360,7 @@ com commit/push na branch harness/jboss-servidor-menu, sem integracao nesta etap
   exibir caminho/destino e tratar build ausente ou multiplos candidatos.
 - [x] Preservar rastreabilidade e rollback por projeto/servidor, nome estavel
   do deployment e validacao da identidade do EAP antes das operacoes.
-- [ ] Definir se preparar deploy antes do start fara parte do escopo futuro.
+- Pendencia na epoca: Definir se preparar deploy antes do start fara parte do escopo futuro.
   Hoje o deploy via CLI exige servidor ativo; preparo offline nao e implementado.
 
 Separacao implementada na entrega Controle JBoss sem aplicacao, acima.
@@ -293,16 +376,16 @@ Preparo offline continua no backlog.
 - [x] Revisar escopo documental e validar links locais, UTF-8, secoes Java/JBoss,
   cinco imagens incorporadas no HTML e status consistente nos tres formatos.
   Nenhum script, fonte da aplicacao ou configuracao de runtime alterado.
-- [ ] Planejar futuramente a estrategia em fatias pequenas e verificaveis,
+- Pendencia na epoca: Planejar futuramente a estrategia em fatias pequenas e verificaveis,
   priorizadas por caso de uso e beneficio, com aceite, evidencias e reversao.
   Referencia: [estrategia](../doc/estrategia/estrategia-harness_.md).
   Planejamento e implementacao dessas evolucoes nao iniciados nesta entrega.
-- [ ] Concluir validacao manual JBoss EAP 7.1/7.4: deploy funcional, duas releases,
+- Pendencia na epoca: Concluir validacao manual JBoss EAP 7.1/7.4: deploy funcional, duas releases,
   rollback, start debug, breakpoint/variaveis no VS Code, desconexao e stop.
   Estado/start sem debug no EAP 7.1 confirmados pelo desenvolvedor em 2026-10-02;
   stop ainda sem resultado informado. Ensaios automatizados anteriores preservados.
 
-- [ ] Disponibilizar um exemplo funcional no EAP 7.1 para testar o harness,
+- Pendencia na epoca: Disponibilizar um exemplo funcional no EAP 7.1 para testar o harness,
   incluindo deploy, rollback e debug remoto. Ajuste, deploy e POST validados em
   2026-10-03 no registro Runtime acima; rollback e debug remoto seguem pendentes.
 
@@ -435,7 +518,7 @@ tecnicas reais permanecem nos checklists correspondentes.
 - [x] Validar geracao/revisao para publicacao em commit separado da abertura do editor.
   Test-MigrationRegister e Test-Planning passaram no PowerShell 5.1; diff revisado,
   sem conflito entre contrato e prompt, sem reescrever solicitacoes historicas.
-- [ ] Ensaiar no Copilot a escolha do subagente e a escrita exclusiva do condutor;
+- Pendencia na epoca: Ensaiar no Copilot a escolha do subagente e a escrita exclusiva do condutor;
   testes de scripts nao comprovam obediencia do agente.
 
 ## Abertura automatica do editor - 2026-10-01
@@ -492,7 +575,7 @@ tecnicas reais permanecem nos checklists correspondentes.
 - [x] Revisar guia e README, incluindo reconstruir registro com MTA existente,
   copiar/renomear rodada antiga e recuperar andamento somente com evidencias.
 - [x] Concluir regressao automatizada e revisao final do diff.
-- [ ] Ensaiar no Copilot Local selecao de issues, cobertura parcial, persistencia e
+- Pendencia na epoca: Ensaiar no Copilot Local selecao de issues, cobertura parcial, persistencia e
   continuidade sem repetir triagem. Scripts nao comprovam obediencia do agente.
 - [x] Corrigir e ensaiar a abertura automatica do prompt: chamada direta a Code.exe
   exibiu service_worker_storage / Database IO error, sem abrir o arquivo. Registro,
@@ -522,12 +605,12 @@ referenciado/preservado no recibo, sem duplicar tabela de issues no prompt.
 
 ## Pendencia: agente Copilot para o workflow de migracao - 2026-10-01
 
-- [ ] Primeiro, revisar com o desenvolvedor a logica e o conteudo dos prompts
+- Pendencia na epoca: Primeiro, revisar com o desenvolvedor a logica e o conteudo dos prompts
   planejar-lotes, revisar-lote e implementar-lote, incluindo escopo, entradas,
   saidas, ferramentas, delegacao e transicoes com GO/aceite humano.
-- [ ] Apos a revisao, definir o contrato do agente Copilot e sua relacao com
+- Pendencia na epoca: Apos a revisao, definir o contrato do agente Copilot e sua relacao com
   DevSquad, contextos e Run Tasks existentes; decidir a primeira etapa a atender.
-- [ ] Mediante retomada solicitada, implementar e validar o agente de migracao,
+- Pendencia na epoca: Mediante retomada solicitada, implementar e validar o agente de migracao,
   preservando origem MTA, lote unico e limites de cada etapa.
 
 Estado: revisao dos prompts iniciada pela proposta acima; implementacao do agente
@@ -562,7 +645,7 @@ ainda nao iniciada. Ela depende da revisao previa dos prompts.
 - Validacao: Test-Planning.ps1 passou em Windows PowerShell 5.1 (exit 0), incluindo
   os dois modos, copia integral dos templates e preservacao do historico. Revisao
   documental cobre titulo/versao omitidos, secoes perdidas, lacunas e contexto invalido.
-- [ ] Ensaiar no Copilot Local: no maximo duas chamadas, par persistido/releitura,
+- Pendencia na epoca: Ensaiar no Copilot Local: no maximo duas chamadas, par persistido/releitura,
   sem perder matriz, deduplicacao, fatos MTA ou tarefa explicita de POM.
 
 ## Consolidacao da documentacao - 2026-09-30
@@ -689,7 +772,7 @@ no Copilot. Prompts/planos ja gerados e checkout do lote ativo foram preservados
   processo, inclusive na repeticao isolada. Test-Mta e Harness.psm1 sem alteracoes.
   67 links/ancoras, sintaxe e diff conferidos; 622 arquivos de configuracao/evidencias
   locais com hashes registrados para conferir preservacao na integracao.
-- [ ] Diagnosticar bloqueio de arquivo na fixture Test-Mta antes de declarar regressao completa.
+- Pendencia na epoca: Diagnosticar bloqueio de arquivo na fixture Test-Mta antes de declarar regressao completa.
 
 ## Preparar implementacao do lote pelo DevSquad - 2026-09-30
 
@@ -703,7 +786,7 @@ no Copilot. Prompts/planos ja gerados e checkout do lote ativo foram preservados
   repeticao isolada passou. 67 links/ancoras, sintaxe e diff conferidos.
   Worktree encurtado para .harness/i apos limite de caminho no teste de planejamento.
   Revisao local concluida; testes nao acionaram DevSquad nem corretivas reais.
-- [ ] Operador: ensaiar Executar Prompt, delegacao e corretiva autorizada no Copilot.
+- Pendencia na epoca: Operador: ensaiar Executar Prompt, delegacao e corretiva autorizada no Copilot.
 
 ## Criterios Sonar e padroes de configuracao - 2026-09-29
 
@@ -715,7 +798,7 @@ no Copilot. Prompts/planos ja gerados e checkout do lote ativo foram preservados
 - [x] Concluir testes de criterios, configuracao, regressao e revisao local.
   Sonar simulado, 52 verificacoes HTTP, tasks, build-config, workspace e limpeza
   passaram. Sintaxe e diff conferidos; entrega local sem push.
-- [ ] Operador: ensaiar novos criterios no servidor real; nao equivale a GO.
+- Pendencia na epoca: Operador: ensaiar novos criterios no servidor real; nao equivale a GO.
 
 ## Integracao SonarQube - 2026-09-29
 
@@ -765,7 +848,7 @@ reiniciar o ensaio nem reutilizar solicitacoes apagadas.
   ajustes documentais conferidos nos dois destinos, anteriores preservados.
   Delegacao relatada pelo operador; leitura de memoria nao verificada permanece
   como limitacao explicita. Isso nao comprova conformidade integral das leituras.
-- [ ] Operador: ensaiar continuidade com novo MTA e Previous do ciclo atual;
+- Pendencia na epoca: Operador: ensaiar continuidade com novo MTA e Previous do ciclo atual;
   conferir reconciliacao tecnica e pendencias. Outro lote somente apos aceite
   do atual e pedido explicito. Corretivas e seus testes pertencem ao plano da aplicacao.
 - [x] Consolidar aprendizados confirmados do percurso documental no guia e exemplo,

@@ -13,9 +13,13 @@ Objetivo e observacoes da revisao:
 ## Trabalho solicitado
 
 Leia ContextPromptPath e EvidenceIndexPath da selecao explicita ao final.
-Use o contexto desse arquivo e o contrato atual de planejar-lotes do harness,
-incluindo doc/especificacoes/planejamento-copilot.md. Execute a revisao nesta
-mesma solicitacao; nao invoque outro prompt nem reinicie a triagem.
+ContextPromptPath aponta o prompt-base preparado: leia suas instrucoes e o
+ContextPath indicado nele. Confira identidades/destinos e use ContractSnapshot
+desse recibo, sem substituir as copias pelo template ou contrato atuais.
+Somente se o recibo historico nao tiver ContractSnapshot, use
+doc/especificacoes/planejamento-copilot.md do harness.
+Execute a revisao na solicitacao desse contexto, preservando Previous como
+entrada historica; nao invoque outro prompt nem reinicie a triagem.
 Preserve ID, cobertura, historico e decisoes; altere apenas pontos afetados.
 Novos preparos usam planejar-lotes para proposta inicial e atualizacao.
 Mantenha proposta, GO, execucao e aceite separados; nao aplique corretivas.
