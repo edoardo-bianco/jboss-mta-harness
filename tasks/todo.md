@@ -1,5 +1,23 @@
 # To-do do agente: evolucao do harness
 
+## Aceite manual e integracao nas principais - 2026-10-03
+
+- [x] Receber confirmacao do desenvolvedor de que realizou a validacao manual
+  e autorizacao para integrar esta entrega em main e main_jboss_eap74.
+- [x] Conferir checkout limpo, referencias remotas e caminho de fast-forward.
+- [ ] Integrar e publicar as duas principais, preservando o lote em tag de arquivo.
+
+Confirmacao humana: "fiz validacao manual vamos alinhar as branch main e main
+jboss e eliminar as branches secundarias". Este aceite permite integrar a entrega
+do harness. As pendencias de validacao manual registradas nas etapas anteriores
+sao historicas; a confirmacao recebida e geral, sem novos resultados individuais
+ou recibos por cenario. Nao atribuir essa confirmacao ao aceite da migracao
+HIB-CACHE-001, cujos dois commits exclusivos serao preservados em tag.
+
+Regressao da entrega preservada: 12 suites aprovadas, 227 links locais/ancoras
+e sete exemplos JSON validos, conforme a publicacao abaixo. A integracao prevista
+nao altera os fontes validados; conferir igualdade de conteudo apos o alinhamento.
+
 ## Revisao e publicacao da branch - 2026-10-03
 
 - [x] Revisar alteracoes e executar regressao automatizada/documental.

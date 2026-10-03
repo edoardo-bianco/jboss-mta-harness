@@ -1,5 +1,20 @@
 # Plano do agente: evolucao do harness
 
+## Integracao aceita e limpeza de branches - 2026-10-03
+
+O desenvolvedor informou que fez a validacao manual e autorizou alinhar main e
+main_jboss_eap74, eliminando as branches secundarias. Integrar a entrega revisada
+do harness por fast-forward em main e, em etapa explicita, em main_jboss_eap74.
+Preservar configuracao local, workspace e evidencias historicas.
+
+A branch lote/HIB-CACHE-001 possui dois commits exclusivos de corretiva de
+migracao (61243ca e 870d5eb). Preserva-los na tag anotada
+arquivo/lote-HIB-CACHE-001-2026-10-03, local e remota, antes de excluir a branch.
+O arquivamento nao integra nem concede aceite a esse lote de migracao. Remover
+a branch harness/jboss-servidor-menu somente depois de incorporar/publicar seus
+commits nas duas principais. Encerrar em main, com checkout limpo e os dois
+pares local/remoto sincronizados; conferir conteudo e ancestrais da integracao.
+
 ## Revisao e publicacao da branch - 2026-10-03
 
 Pedido explicito de commit/push e checkout limpo. Revisar o conjunto pendente
