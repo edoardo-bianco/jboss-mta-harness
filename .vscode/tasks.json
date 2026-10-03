@@ -3,7 +3,7 @@
   "tasks": [
     {
       "label": "Servidor: iniciar JBoss",
-      "detail": "Escolha start normal ou debug e EAP 7.1/7.4; nao exige aplicacao ou workspace.",
+      "detail": "Escolha start normal ou debug e EAP 7.1/7.4 ou Todos; nao exige aplicacao ou workspace.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-SelectStartMode"],
@@ -13,7 +13,7 @@
     },
     {
       "label": "Servidor: parar JBoss",
-      "detail": "Escolha EAP 7.1/7.4; encerra o servidor inteiro e todas as aplicacoes nele.",
+      "detail": "Escolha EAP 7.1/7.4 ou Todos; encerra os servidores escolhidos e suas aplicacoes.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Stop"],
@@ -23,7 +23,7 @@
     },
     {
       "label": "Servidor: consultar estado JBoss",
-      "detail": "Escolha EAP 7.1/7.4 e consulte estado e identidade; nao exige aplicacao.",
+      "detail": "Escolha EAP 7.1/7.4 ou Todos e consulte estado e identidade por servidor; nao exige aplicacao.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Status"],
@@ -43,7 +43,7 @@
     },
     {
       "label": "Aplicacao: deploy no JBoss",
-      "detail": "Escolha EAP ativo, aplicacao e WAR/EAR construido; nao inicia servidor nem executa build.",
+      "detail": "Escolha EAP ativo e aplicacao; sugere WAR/EAR encontrados em target, com selecao ou caminho manual. Nao executa build.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Deploy", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],

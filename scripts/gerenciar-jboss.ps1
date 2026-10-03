@@ -1,7 +1,7 @@
 #requires -Version 5.1
 [CmdletBinding()]
 param([string]$ConfigPath,[string]$WorkspacePath,[string]$Target,[switch]$SelectTarget,
-    [ValidateSet('eap71','eap74')][string]$Eap,
+    [ValidateSet('eap71','eap74','all')][string]$Eap,
     [ValidateSet('Status','Start','StartDebug','Deploy','Rollback','Stop','AddUser')][string]$Action,
     [string]$ArtifactPath,[string]$DeploymentName,[string]$ReleaseId,[switch]$SelectStartMode)
 Set-StrictMode -Version Latest
@@ -23,11 +23,14 @@ try {
         $choice=Read-Host 'Acao (Enter/q cancela)'
         $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Rollback'} '6' {'Stop'} '7' {'AddUser'} default {throw 'Selecao cancelada.'}}
     }
+    $serverAction=$Action -in @('Status','Start','StartDebug','Stop')
     if (-not $Eap) {
-        Write-Host 'Servidor: 1. EAP 7.1 | 2. EAP 7.4 | Enter/q cancela'
+        $allOption=if ($serverAction) {' | 3. Todos (EAP 7.1 e 7.4)'} else {''}
+        Write-Host "Servidor: 1. EAP 7.1 | 2. EAP 7.4$allOption | Enter/q cancela"
         $choice=Read-Host 'EAP'
-        $Eap=switch ($choice) {'1' {'eap71'} '2' {'eap74'} default {throw 'Selecao cancelada.'}}
+        $Eap=switch ($choice) {'1' {'eap71'} '2' {'eap74'} '3' {if ($serverAction) {'all'} else {throw 'Selecao cancelada.'}} default {throw 'Selecao cancelada.'}}
     }
+    if ($Eap -eq 'all' -and -not $serverAction) { throw 'Todos so se aplica a iniciar, parar e consultar estado do servidor.' }
     if ($Action -in @('Deploy','Rollback')) {
         $context=Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:($SelectTarget -or -not $Target)
         if (-not $context.Active) { throw 'Escolha o projeto com -SelectTarget ou -Target.' }
@@ -35,6 +38,34 @@ try {
     } else {
         if ($ArtifactPath -or $DeploymentName -or $ReleaseId) { throw 'Argumentos de release so se aplicam a deploy/rollback.' }
         $context=Read-HarnessJbossContext $ConfigPath $root
+    }
+    if ($serverAction) {
+        $selected=if ($Eap -eq 'all') {@('eap71','eap74')} else {@($Eap)}
+        $summary=@()
+        foreach ($serverId in $selected) {
+            try {
+                $server=Get-HarnessJbossServer $context $serverId
+                Write-Host "Servidor: $serverId | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
+                Write-Host "HTTP: $($server.HttpPort) | Gerenciamento: $($server.ManagementPort) | Debug: 127.0.0.1:$($server.Settings.debugPort)"
+                if ($Action -eq 'Stop') { Write-Host 'Stop encerra este servidor e todas as aplicacoes nele implantadas.' }
+                $result=Invoke-HarnessJbossOperation $context $server $Action
+            } catch {
+                # Falhas anteriores ao recibo (configuracao/lock) tambem entram no resumo.
+                $result=[pscustomobject]@{Eap=$serverId;Action=$Action;Status='FAILED';Observed=$null;Error=$_.Exception.Message;ResultPath=$null}
+            }
+            $result | ConvertTo-Json -Depth 8 | Write-Host
+            $state=if ($result.Observed) {$result.Observed.State} else {'UNVERIFIED'}
+            $summary+=[pscustomobject]@{Eap=$serverId;Status=$result.Status;State=$state}
+            if ($Action -eq 'StartDebug' -and $result.Status -eq 'SUCCEEDED') {
+                Write-Host "No VS Code: Run and Debug > JBoss $serverId - attach Java > F5. Desconectar nao para o servidor."
+            }
+        }
+        if ($Eap -eq 'all') {
+            Write-Host 'Resumo por servidor:'
+            $summary | Format-Table -AutoSize | Out-String | Write-Host
+        }
+        if (@($summary | Where-Object Status -ne 'SUCCEEDED').Count) { exit 1 }
+        exit 0
     }
     $server=Get-HarnessJbossServer $context $Eap
     Write-Host "Servidor: $Eap | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
@@ -48,7 +79,10 @@ try {
     }
     if ($Action -in @('Deploy','Rollback')) {
         if ($Action -eq 'Deploy') {
-            if (-not $ArtifactPath) { $ArtifactPath=Read-Host 'Caminho do WAR/EAR ja construido (Enter cancela)' }
+            if (-not $ArtifactPath) {
+                Import-Module (Join-Path $PSScriptRoot 'HarnessJbossArtifacts.psm1') -DisableNameChecking
+                $ArtifactPath=Select-HarnessJbossArtifact $context.Active.path
+            }
             if (-not $ArtifactPath) { throw 'Selecao cancelada.' }
             $ArtifactPath=Resolve-HarnessPath $ArtifactPath $root
             if (-not $DeploymentName) {
@@ -71,12 +105,8 @@ try {
             }
         }
         $result=Invoke-HarnessJbossRelease $context $server $Action -ArtifactPath $ArtifactPath -DeploymentName $DeploymentName -ReleaseId $ReleaseId
-    } else {
-        if ($Action -eq 'Stop') { Write-Host 'Stop encerra este servidor e todas as aplicacoes nele implantadas.' }
-        $result=Invoke-HarnessJbossOperation $context $server $Action
     }
     $result | ConvertTo-Json -Depth 8 | Write-Host
     if ($result.Status -ne 'SUCCEEDED') { exit 1 }
-    if ($Action -eq 'StartDebug') { Write-Host "No VS Code: Run and Debug > JBoss $Eap - attach Java > F5. Desconectar nao para o servidor." }
     exit 0
 } catch { Write-Host ('ERRO JBoss: '+$_.Exception.Message) -ForegroundColor Red; exit 1 }
