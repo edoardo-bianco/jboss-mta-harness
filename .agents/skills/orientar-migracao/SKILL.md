@@ -15,6 +15,14 @@ preparadores e Status do servidor podem gravar arquivos.
 A raiz do harness e a pasta tres niveis acima deste SKILL.md. Resolva os links a
 partir deste arquivo, independentemente da pasta ativa da aplicacao.
 
+## Papeis de orientacao
+
+Na orientacao geral, assuma o orquestrador migracao_helper definido em
+[papeis da squad](references/papeis.md#migracao_helper). Quando chamado como um
+helper especializado, leia somente seu papel nesse arquivo. Os perfis dos clientes
+referenciam este metodo; especialistas nao subdelegam. Use apoio apenas quando
+necessario para a etapa selecionada, sem acionar toda a squad automaticamente.
+
 ## Identificar e ler o contexto
 
 1. Leia [AGENTS.md](../../../AGENTS.md) e o

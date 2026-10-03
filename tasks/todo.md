@@ -10,11 +10,14 @@
 - [x] Entregar SDLC-01: CLI sem menus, validacao previa, JSON e rastreio protegido por lock.
 - [x] Confirmar prioridade: ferramentas atuais, depois squad completa de helpers, antes dos executores.
 - [x] Entregar SDLC-02: skill compartilhada de orientacao, guias de uso e ensaios de leitura do contexto.
+- [x] Implementar SDLC-03: orquestrador e cinco helpers com entradas Codex/Copilot e metodo comum.
+- [ ] Concluir VAL-01: descoberta e delegacao nativas nas duas extensoes antes dos executores.
 
 Decisoes, responsabilidades, fontes e verificacoes ficam no
 [plano consolidado](plan.md#trabalho-atual-backlog-e-squad-de-migracao---2026-10-03).
 Este arquivo concentra estado e ordem das entregas; os guias mantem os procedimentos.
-A squad, os novos coletores e o preparo automatizado de servidor ainda sao futuros.
+Os perfis da squad helper estao no repositorio; validacao nas extensoes, executores,
+novos coletores e preparo automatizado de servidor permanecem pendentes.
 
 ## Backlog vigente
 
@@ -22,7 +25,7 @@ A squad, os novos coletores e o preparo automatizado de servidor ainda sao futur
 | --- | --- | --- |
 | SDLC-01 | Concluida | Preparo de planejamento/reconciliacao por CLI com escolhas explicitas, validacao antes de escrita e saida estruturada. |
 | SDLC-02 | Concluida | Skill compartilhada de orientacao pelo estado efetivo e pelos guias. |
-| SDLC-03 | Proxima entrega | Orquestrador helper e helpers de preparo, reconciliacao, planejamento, impacto e implementacao, em subfatias; humano executor nos dois clientes. |
+| SDLC-03 | Implementada; aguarda VAL-01 | Orquestrador helper e helpers de preparo, reconciliacao, planejamento, impacto e implementacao; humano executor nos dois clientes. |
 | SDLC-04 | Apos SDLC-03 / VAL-01 | Orquestrador executor e especialista de preparo; modo delegado e retorno ao humano. |
 | SDLC-05 | Apos SDLC-04 | Executores das demais etapas, reutilizando os helpers ja entregues; consumir matriz COMP-01 e coleta Java opcional. |
 | SDLC-06 | Conforme necessidade | Adequar uma acao existente por vez: branch explicita, Sonar assistido, build/MTA/JBoss e limpeza. |
@@ -42,6 +45,23 @@ planejador atual. SERV-01 nao e deploy offline nem autorizacao para migrar o EAP
 local. Os prompts existentes seguem Copilot/DevSquad ate adaptacao e ensaio Codex.
 
 ### Verificacoes e reconciliacao do historico
+
+SDLC-03: 12 perfis para seis papeis, YAML/TOML e limites estruturais aprovados;
+37 links locais da skill/papeis/adaptadores, 230 links/7 exemplos JSON dos guias
+e skill-creator/quick_validate validos. Revisao independente dos perfis sem achados.
+Evidencia estrutural: .harness/tests/orientacao-sdlc03/structural.json. DevSquad
+instalado inspecionado: perfil plan com ferramentas de escrita/terminal/delegacao,
+incompativel com o apoio leitor; fallback documentado. Descoberta nativa segue
+pendente, sem afirmar compatibilidade pela mera presenca dos arquivos.
+
+Ensaios de instrucoes SDLC-03: orquestrador delegou uma leitura ao helper de
+implementacao, preservou GO/solicitacao e orientou runtime/aceite sem executar;
+helpers de reconciliacao e planejamento trataram indice atrasado e ambiguidade.
+Os 34 arquivos das fixtures permaneceram intactos. Resultados/limites em
+.harness/tests/orientacao-sdlc03/results.json; fixtures sao sinteticas, nao prova de
+prontidao operacional. Preparo e impacto tiveram verificacao estrutural; ensaios
+nativos de todos os papeis continuam em VAL-01. Nenhuma mudanca nos scripts,
+Run Tasks ou prompts operacionais nesta fatia.
 
 SDLC-02: skill-creator/quick_validate aprovou o SKILL.md; 10 links locais da skill
 e 230 links/7 exemplos JSON dos 10 guias validos. Tres ensaios com subagentes

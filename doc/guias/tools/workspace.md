@@ -249,11 +249,12 @@ aberta. Nao e necessario regenerar o workspace para acrescentar esta skill.
 1. Abra o workspace que inclui a pasta harness. No Codex, inicie a conversa com
    a raiz do harness como pasta de trabalho; uma aplicacao em repositorio irmao
    nao herda automaticamente as skills do harness.
-2. No Codex, selecione **$orientar-migracao** no chat. No Copilot, procure
-   **/orientar-migracao** entre as skills do chat. Se nao aparecer, confira
-   se o SKILL.md esta no clone e se a skill esta disponivel/habilitada no cliente;
-   no Copilot, a lista de skills fica em **/skills**. No Codex, reinicie o cliente
-   se a descoberta nao refletir o novo arquivo.
+2. No Codex, selecione **$orientar-migracao** no chat. Ela assume o papel de
+   orquestrador helper. No Copilot, abra a lista de agentes do Chat e selecione
+   **migracao_helper**. A skill tambem pode ser usada por **/orientar-migracao**.
+   Se nao aparecer, confira os arquivos no clone e se as customizacoes estao
+   habilitadas no cliente; no Copilot, a lista de skills fica em **/skills**.
+   No Codex, reinicie o cliente se a descoberta nao refletir os novos arquivos.
 3. Informe o objetivo e o projeto/caminho. Na retomada, acrescente o context.json,
    prompt preparado ou RequestId da solicitacao escolhida. Exemplo de pedido:
    "Oriente a retomada do projeto C:/repos/minha-app usando este context.json.
@@ -267,11 +268,44 @@ O apoio using-agent-skills/subagentes no Codex e DevSquad no Copilot depende das
 capacidades instaladas e permitidas. Se faltar apoio compativel com leitura e
 orientacao, a skill informa a limitacao e continua pelos guias.
 
-Esta entrega fornece o metodo de orientacao; as entradas do orquestrador e dos
-helpers especializados e os ensaios nas duas extensoes seguem no backlog. Os
-prompts de execucao existentes continuam no fluxo Copilot/DevSquad, descrito no
-[guia de planejamento](planejamento-migracao.md). A skill nao executa esses prompts
-nem configura permissoes de ferramentas; use-a para orientacao no chat.
+O orquestrador consulta somente o helper pertinente; uma duvida simples pode ser
+respondida diretamente pelo guia. Tambem e possivel pedir ajuda a uma etapa especifica:
+
+| Nome do agente | Quando usar |
+| --- | --- |
+| migracao_helper | Entender a situacao atual e decidir o proximo passo. |
+| migracao_preparo_helper | Escolher projeto, origem MTA e entradas para preparar o contexto. |
+| migracao_reconciliacao_helper | Entender divergencias entre registro, decisoes e evidencias. |
+| migracao_planejamento_helper | Priorizar issues e revisar cobertura, proposta e GO. |
+| migracao_impacto_helper | Localizar codigo, dependencias, configuracoes e testes da issue escolhida. |
+| migracao_implementacao_helper | Seguir as pendencias autorizadas, build, debug, testes e aceite. |
+
+No Copilot, os perfis ficam em `.github/agents`; escolha o helper na lista de
+agentes. No Codex, `.codex/agents` fornece perfis para subagentes; solicite ao
+chat que use o nome desejado, com o projeto e a pergunta. Nao sao comandos de
+terminal nem novas Run Tasks. As duas entradas leem a mesma skill e sua referencia
+de papeis. Formatos: [agentes VS Code](https://code.visualstudio.com/docs/agent-customization/custom-agents)
+e [subagentes Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents).
+
+Os perfis Copilot oferecem leitura/busca, com delegacao somente no orquestrador.
+Os perfis Codex pedem sandbox read-only e desabilitam subdelegacao dos especialistas;
+as permissoes efetivas tambem dependem da sessao. A skill isolada nao configura
+sandbox. Confira as ferramentas/acoes exibidas pelo cliente.
+
+O apoio opcional DevSquad usa `devsquad.plan` apenas quando seu perfil real permite
+leitura sem terminal, escrita ou subdelegacao. O perfil instalado examinado nesta
+entrega oferece essas capacidades adicionais; o helper deve informar a limitacao
+e orientar pelo guia/helpers locais. Instalar o plugin nao comprova integracao
+compativel. Nao e necessario alterar o plugin ou regenerar o workspace para usar
+os helpers locais.
+
+**Validacao nas extensoes ainda pendente:** arquivos e ensaios simulados foram
+verificados; descoberta e delegacao nativas precisam ser conferidas no seu VS Code.
+Em cada cliente, abra o mesmo contexto e peca o proximo passo; confira projeto,
+solicitacao, decisao pendente, guia e apoio realmente utilizado. Reabra os documentos
+ao retomar, sem rodar tarefas somente para testar o helper. Os prompts de execucao
+existentes continuam no fluxo Copilot/DevSquad do
+[guia de planejamento](planejamento-migracao.md); o helper apenas explica seu uso.
 
 ### Escolher o projeto em cada tarefa
 

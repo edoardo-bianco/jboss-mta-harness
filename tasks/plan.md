@@ -4,7 +4,8 @@
 
 Consolidacao da revisao de prompts e do desenho da squad, na branch
 harness/backlog-agente-orientacao, derivada de main de59750. Esta entrega consolida
-o desenho, corrige um template e entrega a primeira interface CLI e a skill de orientacao; demais entregas estao no
+o desenho, corrige um template e entrega a primeira interface CLI, a skill e os perfis
+de orientacao. Validacao nativa e demais entregas estao no
 [backlog vigente](todo.md#backlog-vigente). Historico e evidencias ficam preservados.
 
 ### Referencias e arquitetura
@@ -34,7 +35,8 @@ Hibernate 5.3 pertencem ao perfil atual, nao ao nucleo ou a toda consulta Java.
 | Assistido | Orquestrador helper consulta estado/guias e helpers especializados; entrega uma etapa por vez e confere evidencias na retomada. | Humano executa tarefas, prompts, edicoes e verificacoes. |
 | Delegado | Orquestrador executor encaminha a etapa autorizada aos especialistas e apresenta resultados/checkpoints. | Agentes executores, dentro das permissoes e decisoes humanas daquela etapa. |
 
-A primeira entrega de agentes sera o modo assistido. Cada especialista abaixo tera helper
+A primeira entrega de agentes e o modo assistido, com perfis implementados e
+validacao nas extensoes ainda pendente. Cada especialista abaixo tem helper
 do mesmo dominio; todos usam um metodo de orientacao compartilhado. Helpers sao
 leitores, inclusive quando apoiam um executor. O condutor/orquestrador encaminha
 o apoio quando permitido; especialistas sem permissao de subdelegacao nao o
@@ -107,9 +109,10 @@ implementacao incremental, testes, revisao e documentacao conforme a fase. Ler
 skills utilizadas; usar skill-creator ao criar SKILL.md. Capacidade ausente deve
 ser informada, sem dependencia silenciosa de plugins pessoais ou instalacao automatica.
 
-Arquivos propostos: skills comuns em .agents/skills/<nome>/SKILL.md; entradas
-Copilot em .github/agents/*.agent.md; perfis de subagentes Codex, quando necessarios,
-em .codex/agents/*.toml. Skill nao define sandbox; conferir permissoes por cliente.
+Arquivos dos helpers: metodo em .agents/skills/orientar-migracao/SKILL.md e papeis
+em references/papeis.md; entradas Copilot em .github/agents/*.agent.md e perfis
+de subagentes Codex em .codex/agents/*.toml. Skill nao define sandbox; conferir
+permissoes por cliente. Os adaptadores nao fixam modelo nem repetem procedimentos.
 Os quatro prompts operacionais atuais ainda sao Copilot/DevSquad. Adaptacao Codex
 deve preservar contrato/identidades em novos preparos e ter ensaio proprio.
 
@@ -329,20 +332,37 @@ Revisao estatica e testes de preparadores nao comprovam comportamento dos agente
 
 ### Sequencia e verificacao
 
+Fatia SDLC-03 implementada, aguardando VAL-01: perfis finos nos dois clientes, sem modelo fixado,
+com uma referencia de papeis na skill existente. Subfatias: (a) referencia comum,
+orquestrador e preparo; (b) reconciliacao e planejamento; (c) impacto e implementacao;
+(d) guia de uso e verificacao. Copilot limita ferramentas a leitura/busca e delegacao
+no orquestrador; Codex usa sandbox read-only e desabilita subdelegacao nos especialistas.
+O orquestrador seleciona apenas o apoio pertinente e confere o retorno. DevSquad
+exige perfil real compativel; nao substituir orientacao por prompt operacional.
+YAML/TOML, nomes, referencias e limites conferidos; revisao independente sem achados.
+Evidencias de ensaios e links ficam no todo. VAL-01 continua separado: arquivos validos e ensaios
+simulados nao comprovam descoberta/delegacao nas extensoes.
+
+DevSquad local conferido: devsquad.plan oferece escrita, terminal e subdelegacao.
+Por isso, o helper desta entrega informa a incompatibilidade e usa fontes/helpers
+locais. O nome opcional consta na lista do orquestrador Copilot, mas so pode ser
+acionado quando o perfil disponivel for compativel com leitura pura. Nao alterar
+o plugin pessoal nem os prompts operacionais para contornar esse limite.
+
 Fatia SDLC-02 entregue: uma skill `orientar-migracao` compartilhada em
 `.agents/skills/orientar-migracao/SKILL.md`, com leitura do contexto efetivo,
 roteiro fundamentado nos guias e apoio SDLC condicionado a capacidades reais.
 Uso no guia de workspace e acesso no guia principal; scripts, prompts operacionais
 e configuracoes existentes preservados nesta fatia. Frontmatter/links validados e
 ensaios independentes somente leitura com indice atrasado, GO/trabalho parcial e
-solicitacoes ambiguas; evidencias referenciadas no todo. Descoberta/delegacao nas extensoes
-e entradas dos orquestradores/helpers permanecem em SDLC-03/VAL-01.
+solicitacoes ambiguas; evidencias referenciadas no todo. Descoberta/delegacao nas
+extensoes permanecem em VAL-01.
 
 IDs/estado ficam apenas no backlog. Prioridade confirmada pelo desenvolvedor:
 concluir o preparo das ferramentas em andamento (SDLC-01), depois entregar a
 squad de helpers (SDLC-02/03) para auxiliar o humano em todas as etapas. Somente
 apos validar essa orientacao nos dois clientes (VAL-01), iniciar os executores
-(SDLC-04/05). SDLC-03 sera incremental: orquestrador + preparo; depois reconciliacao,
+(SDLC-04/05). SDLC-03 cobre orquestrador, preparo, reconciliacao,
 planejamento, impacto da issue e implementacao, sempre em modo de orientacao.
 Helpers podem orientar as Run Tasks/guias existentes sem esperar novas interfaces
 de execucao. SDLC-06 adapta outras ferramentas conforme necessidade, sem adiar a
