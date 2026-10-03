@@ -28,7 +28,7 @@ A squad, os novos coletores e o preparo automatizado de servidor ainda sao futur
 | COMP-01 | Capacidade solicitada | Coletor deterministico das dependencias Maven e prompt especifico de matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. |
 | CORE-01 | Piloto opcional transversal | Navegacao/coleta de contexto Java para compreensao pelo desenvolvedor e apoio ao SDLC, independente de MTA/engine. |
 | SERV-01 | Capacidade solicitada; validar rota primeiro | Migrar configuracao/subsistemas e inventariar drivers, modulos e recursos necessarios; ferramenta oficial/CLI e prompt/helper com evidencias, acoes e validacao no destino isolado. |
-| VAL-01 | Ensaio de SDLC-03 | Descoberta/delegacao/orientacao nas extensoes Copilot e Codex, sem efeitos operacionais; casos do plano. |
+| VAL-01 | Ensaio obrigatorio de SDLC-03 nos dois clientes | Descoberta e orientacao pelo mesmo contexto; apoio using-agent-skills/subagentes no Codex e DevSquad no Copilot, presente/ausente/inadequado, sem efeitos operacionais; casos do plano. |
 | VAL-02 | Ensaio operacional existente pendente | Prompts Copilot: reconciliacao/delegacao, issues, persistencia, retomada, GO, implementacao e continuidade com Previous/novo MTA. |
 | VAL-03 | Ensaio Sonar real pendente | Criterios Blocker/High, avisos de cobertura e comparacao com baseline, separados do Quality Gate. |
 | DEC-01 | Decisao futura | Decidir preparo de deploy com servidor parado; deploy atual exige servidor ativo. |

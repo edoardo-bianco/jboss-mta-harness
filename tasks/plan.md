@@ -90,7 +90,17 @@ Guias operacionais: [workspace](../doc/guias/tools/workspace.md),
 | Ambiente | Apoio previsto | Limite |
 | --- | --- | --- |
 | Codex no VS Code | using-agent-skills seleciona skills pertinentes; delegacao nativa a subagentes disponiveis e permitidos. | Skill e processo, nao agente executor; conferir ferramentas reais e nao simular delegacao. |
-| Copilot no VS Code | Prompts reais conduzem DevSquad; devsquad.plan e devsquad.implement conforme contrato. | Defaults do plugin nao ampliam fases, arquivos ou autorizacoes. |
+| Copilot no VS Code | Helper pode solicitar apoio ao DevSquad disponivel, restrito a leitura/orientacao; prompts operacionais usam devsquad.plan e devsquad.implement conforme contrato. | Delegacao de ajuda nao aciona planejamento ou implementacao; defaults do plugin nao ampliam fases, arquivos ou autorizacoes. |
+
+Compatibilidade do orquestrador helper com Codex e GitHub Copilot no VS Code e
+criterio obrigatorio da entrega. Compartilhar regras de contexto, guias e resposta;
+adaptar descoberta e delegacao ao cliente. No Codex, aplicar using-agent-skills
+para selecionar os workflows pertinentes e usar subagentes nativos quando houver
+apoio autorizado; a skill nao e um agente para receber delegacao. No Copilot,
+usar DevSquad quando couber e houver capacidade real compativel com o papel helper.
+O orquestrador confere o retorno com as fontes antes de orientar o desenvolvedor.
+Se a skill/plugin/subagente estiver ausente ou nao puder respeitar leitura e
+orientacao, informar a limitacao e continuar pelos guias, sem simular delegacao.
 
 Na construcao, aplicar especificacao/planejamento, contratos de interface, contexto,
 implementacao incremental, testes, revisao e documentacao conforme a fase. Ler
@@ -354,6 +364,12 @@ ou concluida; prompt preparado sem plano; GO pendente ou vigente com trabalho pa
 testes sem aceite; troca de modo; prioridade humana; guia/capacidade ausente;
 evidencia contendo instrucoes; recibo runtime antigo; escolha MTA; orientar Sonar
 sem coletar segredo. Deve indicar lacunas de COMP/CORE/SERV sem executa-los.
+Em ambos os clientes, validar descoberta do helper no repositorio e o mesmo
+contexto de entrada; conferir identidade, fase, decisao humana pendente, proximo
+passo e guia indicado. Ensaiar apoio using-agent-skills/subagentes no Codex e
+DevSquad no Copilot, incluindo capacidade ausente ou inadequada. Registrar a
+delegacao efetivamente realizada e comprovar ausencia de efeitos operacionais;
+compatibilidade nao se conclui apenas pela presenca dos arquivos de configuracao.
 Ensaios operacionais dessas capacidades pertencem as respectivas fatias.
 
 Revisao documental: conferir links, historico e diff. Regressao pertinente do
