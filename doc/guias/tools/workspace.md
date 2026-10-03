@@ -232,6 +232,47 @@ Para o Java de um novo comando Maven, salve as configuracoes e crie um terminal 
 
 ## Uso
 
+### Orientacao com Codex ou GitHub Copilot
+
+A skill [orientar-migracao](../../../.agents/skills/orientar-migracao/SKILL.md)
+ajuda a localizar a etapa atual e decidir o proximo passo. Ela consulta o indice,
+registro, recibos, planos, prompts preparados e evidencias pertinentes; responde
+com os caminhos conferidos e um roteiro baseado no guia da etapa. Voce executa
+as tarefas e toma as decisoes de prioridade, GO e aceite.
+
+O arquivo fica em .agents/skills no repositorio, local reconhecido por
+[Codex](https://learn.chatgpt.com/docs/build-skills) e
+[Copilot no VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills).
+As instrucoes sao compartilhadas; a descoberta depende do cliente e da pasta
+aberta. Nao e necessario regenerar o workspace para acrescentar esta skill.
+
+1. Abra o workspace que inclui a pasta harness. No Codex, inicie a conversa com
+   a raiz do harness como pasta de trabalho; uma aplicacao em repositorio irmao
+   nao herda automaticamente as skills do harness.
+2. No Codex, selecione **$orientar-migracao** no chat. No Copilot, procure
+   **/orientar-migracao** entre as skills do chat. Se nao aparecer, confira
+   se o SKILL.md esta no clone e se a skill esta disponivel/habilitada no cliente;
+   no Copilot, a lista de skills fica em **/skills**. No Codex, reinicie o cliente
+   se a descoberta nao refletir o novo arquivo.
+3. Informe o objetivo e o projeto/caminho. Na retomada, acrescente o context.json,
+   prompt preparado ou RequestId da solicitacao escolhida. Exemplo de pedido:
+   "Oriente a retomada do projeto C:/repos/minha-app usando este context.json.
+   Qual e o proximo passo, por que e em qual guia encontro o procedimento?"
+4. Confira as fontes citadas e siga o roteiro indicado. Quando houver mais de
+   um contexto possivel, escolha a solicitacao; a skill nao assume a mais recente.
+
+Sem descoberta automatica, voce pode referenciar o SKILL.md pelo caminho e pedir
+ao cliente que leia e aplique suas instrucoes; isso nao comprova a integracao nativa.
+O apoio using-agent-skills/subagentes no Codex e DevSquad no Copilot depende das
+capacidades instaladas e permitidas. Se faltar apoio compativel com leitura e
+orientacao, a skill informa a limitacao e continua pelos guias.
+
+Esta entrega fornece o metodo de orientacao; as entradas do orquestrador e dos
+helpers especializados e os ensaios nas duas extensoes seguem no backlog. Os
+prompts de execucao existentes continuam no fluxo Copilot/DevSquad, descrito no
+[guia de planejamento](planejamento-migracao.md). A skill nao executa esses prompts
+nem configura permissoes de ferramentas; use-a para orientacao no chat.
+
 ### Escolher o projeto em cada tarefa
 
 Use **File > Add Folder to Workspace...** para adicionar os projetos Java/Maven e salve o workspace. **Nao e preciso cadastra-los em `repositories` no JSON do harness.** Cada pasta do workspace que contenha `pom.xml` aparece na selecao, incluindo agregadores e projetos com packaging `pom`, `jar` ou `war`. Para escolher um modulo separadamente, adicione tambem a pasta dele ao workspace. Pastas sem POM e a pasta do harness ficam fora da lista.

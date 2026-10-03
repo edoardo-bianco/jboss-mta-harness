@@ -56,6 +56,7 @@ nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 | Corretiva pronta para conferir | [7. Verificar e aceitar o resultado](#7-verificar-e-aceitar-o-resultado). |
 | Novo MTA, novas evidencias ou lote aceito para continuar | [8. Reconciliar e decidir a continuidade](#8-reconciliar-e-decidir-a-continuidade). |
 | Somente uma operacao, como iniciar JBoss, depurar ou analisar Sonar | [Guias de ferramentas](#guias-de-ferramentas); essas operacoes tambem podem ser usadas separadamente. |
+| Preciso de ajuda para identificar a etapa e o proximo passo | [Orientacao com Codex ou GitHub Copilot](tools/workspace.md#orientacao-com-codex-ou-github-copilot); a skill consulta o contexto existente e indica o guia da etapa. |
 
 O fluxo pertence ao projeto e ao codigo em analise. O workspace pode reunir
 varias aplicacoes; as evidencias e decisoes continuam vinculadas a cada uma.

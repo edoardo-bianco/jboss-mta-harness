@@ -4,7 +4,7 @@
 
 Consolidacao da revisao de prompts e do desenho da squad, na branch
 harness/backlog-agente-orientacao, derivada de main de59750. Esta entrega consolida
-o desenho, corrige um template e implementa a primeira interface CLI; demais entregas estao no
+o desenho, corrige um template e entrega a primeira interface CLI e a skill de orientacao; demais entregas estao no
 [backlog vigente](todo.md#backlog-vigente). Historico e evidencias ficam preservados.
 
 ### Referencias e arquitetura
@@ -328,6 +328,15 @@ Correcao vale para novos preparos; recibos/prompts historicos nao foram reescrit
 Revisao estatica e testes de preparadores nao comprovam comportamento dos agentes.
 
 ### Sequencia e verificacao
+
+Fatia SDLC-02 entregue: uma skill `orientar-migracao` compartilhada em
+`.agents/skills/orientar-migracao/SKILL.md`, com leitura do contexto efetivo,
+roteiro fundamentado nos guias e apoio SDLC condicionado a capacidades reais.
+Uso no guia de workspace e acesso no guia principal; scripts, prompts operacionais
+e configuracoes existentes preservados nesta fatia. Frontmatter/links validados e
+ensaios independentes somente leitura com indice atrasado, GO/trabalho parcial e
+solicitacoes ambiguas; evidencias referenciadas no todo. Descoberta/delegacao nas extensoes
+e entradas dos orquestradores/helpers permanecem em SDLC-03/VAL-01.
 
 IDs/estado ficam apenas no backlog. Prioridade confirmada pelo desenvolvedor:
 concluir o preparo das ferramentas em andamento (SDLC-01), depois entregar a

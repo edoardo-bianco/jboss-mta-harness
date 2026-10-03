@@ -9,6 +9,7 @@
 - [x] Validar consolidacao final, referencias e limites com revisao independente.
 - [x] Entregar SDLC-01: CLI sem menus, validacao previa, JSON e rastreio protegido por lock.
 - [x] Confirmar prioridade: ferramentas atuais, depois squad completa de helpers, antes dos executores.
+- [x] Entregar SDLC-02: skill compartilhada de orientacao, guias de uso e ensaios de leitura do contexto.
 
 Decisoes, responsabilidades, fontes e verificacoes ficam no
 [plano consolidado](plan.md#trabalho-atual-backlog-e-squad-de-migracao---2026-10-03).
@@ -20,8 +21,8 @@ A squad, os novos coletores e o preparo automatizado de servidor ainda sao futur
 | ID | Estado / ordem | Proxima entrega |
 | --- | --- | --- |
 | SDLC-01 | Concluida | Preparo de planejamento/reconciliacao por CLI com escolhas explicitas, validacao antes de escrita e saida estruturada. |
-| SDLC-02 | Proxima entrega | Skill compartilhada de orientacao pelo estado efetivo e pelos guias. |
-| SDLC-03 | Prioridade apos SDLC-02 | Orquestrador helper e helpers de preparo, reconciliacao, planejamento, impacto e implementacao, em subfatias; humano executor nos dois clientes. |
+| SDLC-02 | Concluida | Skill compartilhada de orientacao pelo estado efetivo e pelos guias. |
+| SDLC-03 | Proxima entrega | Orquestrador helper e helpers de preparo, reconciliacao, planejamento, impacto e implementacao, em subfatias; humano executor nos dois clientes. |
 | SDLC-04 | Apos SDLC-03 / VAL-01 | Orquestrador executor e especialista de preparo; modo delegado e retorno ao humano. |
 | SDLC-05 | Apos SDLC-04 | Executores das demais etapas, reutilizando os helpers ja entregues; consumir matriz COMP-01 e coleta Java opcional. |
 | SDLC-06 | Conforme necessidade | Adequar uma acao existente por vez: branch explicita, Sonar assistido, build/MTA/JBoss e limpeza. |
@@ -41,6 +42,16 @@ planejador atual. SERV-01 nao e deploy offline nem autorizacao para migrar o EAP
 local. Os prompts existentes seguem Copilot/DevSquad ate adaptacao e ensaio Codex.
 
 ### Verificacoes e reconciliacao do historico
+
+SDLC-02: skill-creator/quick_validate aprovou o SKILL.md; 10 links locais da skill
+e 230 links/7 exemplos JSON dos 10 guias validos. Tres ensaios com subagentes
+independentes confirmaram indice atrasado/reconciliacao pendente, contexto escolhido
+com GO/trabalho parcial e solicitacoes ambiguas sem DevSquad. O caso com GO continha
+instrucao indevida na evidencia, que nao foi executada. Os 34 arquivos das fixtures
+permaneceram intactos. Evidencias: .harness/tests/orientacao-sdlc02/results.json e
+before.json. Somente leitura simulada; descoberta nativa e delegacao nas extensoes
+seguem pendentes em VAL-01. Scripts/prompts operacionais nao foram alterados nesta
+fatia; permanecem as evidencias de regressao abaixo.
 
 SDLC-01 passou em sete suites: Test-PlanningCli, Test-Planning,
 Test-PlanningPortable, Test-MigrationRegister, Test-Implementation,
