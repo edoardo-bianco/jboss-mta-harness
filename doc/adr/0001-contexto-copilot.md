@@ -9,6 +9,11 @@ html:
 
 Status: aceita no fluxo aprovado em 2026-09-26.
 
+Atualizacao em 2026-10-04: a [ADR-0005](0005-planejamento-orientado-pelo-registro.md)
+substitui a exigencia de base MTA completa e o menu de operacoes descritos abaixo.
+O fluxo vigente usa Planejamento: planejar, com base MTA ou EVIDENCIAS, e orientacao
+para Codex ou Copilot. Permanecem contexto local, historico e acionamento humano.
+
 ## Contexto
 
 O harness ja possui tarefas PowerShell e um prompt de leitura. O desenvolvedor

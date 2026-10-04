@@ -45,6 +45,8 @@ distribuicao Windows completa e seu JDK (JDK 25 no ensaio), conforme a
 Para o planejamento assistido, configure [Codex ou Copilot/DevSquad](planejamento-migracao.md#configuracao)
 em sessao Local. Quem vai somente planejar com uma rodada recebida segue o caminho
 de reutilizacao da etapa 3, sem repetir a analise apenas para preparar a proposta.
+Tambem pode planejar com issues e evidencias fornecidas, sem pacote MTA completo;
+nesse caso siga a etapa 4 do guia principal.
 
 Para o ensaio completo, nao precisa clonar outro repo: `exemplos/migracao-cache-antes`
 e `exemplos/migracao-cache-depois` ja acompanham este. JBoss 7.1/7.4 podem permanecer
@@ -68,6 +70,8 @@ Os passos abaixo usam a **opcao A: configuracao pelo harness**. Para configurar 
 
 **Configuracao concluida:** volte a [etapa 2 para selecionar e construir a aplicacao](../harness-migracao-desenvolvedor.md#2-escolher-o-projeto-e-fazer-o-build),
 ou a [etapa 3 para usar MTA existente/recebido](../harness-migracao-desenvolvedor.md#3-obter-ou-reutilizar-o-diagnostico-mta).
+Se ja tem uma issue e evidencias, siga diretamente a
+[etapa 4 para registrar a escolha](../harness-migracao-desenvolvedor.md#4-conferir-o-registro-e-escolher-prioridades).
 A sequencia de analise, planejamento, implementacao e aceite esta no roteiro principal.
 
 Ao abrir o workspace, a conferencia automatica usa a configuracao legada `repositories`/`activeProject` do JSON, quando disponivel, sem perguntar qual arquivo de workspace usar. Sem padrao, orienta executar a conferencia manual; esta permite informar o workspace e escolher um projeto. Se a configuracao necessaria estiver incompleta, abre o JSON. O VS Code pode pedir para permitir tarefas automaticas; a tarefa manual de configuracao funciona independentemente dessa permissao. Nenhuma analise comeca automaticamente.
@@ -368,7 +372,7 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
 
 ### Limpar execucoes locais
 
-1. Termine build/MTA e preparacao de contexto. Encerre a conversa Copilot que usa
+1. Termine build/MTA e preparacao de contexto. Encerre a conversa Codex/Copilot que usa
    os documentos a apagar; o harness nao controla o agente externo.
 2. Execute **Workspace: limpar execucoes**. Escolha **1** para um projeto ou **2**
    para todos os projetos; **3** limpa somente backups temporarios de exercicios/ajustes.
@@ -381,9 +385,11 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
 4. Digite **LIMPAR** para excluir. Enter ou outro texto cancela. Os scripts recusam
    links/junctions e caminhos fora das areas autorizadas, e bloqueiam limpeza
    concorrente com build/MTA/preparacao pelo harness.
-5. Para reutilizar MTA externo, prepare contexto e escolha **p**, informando a pasta
-   completa da rodada preservada. Para nova analise, execute build → MTA → preparar
-   contexto. Planos apagados deixam de aparecer como proposta anterior.
+5. O registro e a origem MTA externa permanecem. Confira suas referencias antes de
+   usar **Planejamento: planejar**: planos/recibos apagados nao podem ser retomados.
+   Para reconstruir o preparo preservando as escolhas, peca ao helper o
+   [encaminhamento apropriado](planejamento-migracao.md#recuperar-um-preparo-apos-limpeza).
+   Para adotar outra rodada, use manutencao explicita; Planejar nao oferece menu de MTA.
 
 A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, templates
 versionados dos prompts, cache Maven, backups, `.harness/evidencias/`, `.harness/projetos/`
@@ -490,6 +496,9 @@ uso e dos resultados esperados. Para o ciclo build/MTA, siga o
 
 Com o workspace pronto, siga para [build e diagnostico](../harness-migracao-desenvolvedor.md#2-escolher-o-projeto-e-fazer-o-build)
 ou [reutilize um MTA existente](../harness-migracao-desenvolvedor.md#3-obter-ou-reutilizar-o-diagnostico-mta).
+Com issue/evidencias ja fornecidas, pode seguir diretamente ao
+[registro e escolha](../harness-migracao-desenvolvedor.md#4-conferir-o-registro-e-escolher-prioridades)
+e usar **Planejamento: planejar**, sem executar MTA apenas para preencher contexto.
 Depois de ajustar configuracao ou limpar execucoes, confira o que permanece
 disponivel e retome a [etapa do seu trabalho](../harness-migracao-desenvolvedor.md#como-usar-este-guia).
 Configurar o ambiente nao executa a migracao.

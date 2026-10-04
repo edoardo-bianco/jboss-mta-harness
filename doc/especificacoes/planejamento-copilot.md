@@ -348,8 +348,10 @@ sem repetir IDs/escopo. Data opcional. Nao preencher GO, nome ou dispensa por el
 Preservar GO vigente na mesma solicitacao/escopo; nova proposta/revisao de escopo nao
 herda GO de Previous. Documentos antigos com decisao em ambos continuam legiveis.
 
-No Copilot, condutor devsquad delega a devsquad.plan via agent, com contrato/caminhos/
-objetivo/limites integrais. Especialista le/busca, sem escrita/subdelegacao/web/
+No Copilot, condutor devsquad delega a devsquad.plan via agent quando disponivel
+e compativel, com contrato/caminhos/objetivo/limites integrais. Sem apoio compativel,
+informa o limite e elabora diretamente dentro deste escopo, sem simular delegacao.
+Especialista le/busca, sem escrita/subdelegacao/web/
 terminal, devolve CREATE/EDIT para o par. Defaults de spec/board/tasks.md/memoria/
 ADRs e fases extras sao substituidos por este contrato. Skills lidas nao ampliam
 autorizacao. Maximo duas chamadas: inicial e correcao tecnica consolidada por trechos.
@@ -381,8 +383,11 @@ ferramentas, checkbox ou testes aprovados nao concedem GO. Antes da primeira esc
 conferir por ferramenta real ContextSha256, PlanSha256, TodoSha256 e EvidenceHashes
 das entradas registradas. Em base MTA, incluem os quatro artefatos MTA; em EVIDENCIAS,
 conferir os anexos vinculados, sem exigir arquivos MTA inexistentes.
-Edicao externa apos preparo exige outro prompt de implementacao,
-sem novo contexto de planejamento. Hashes nao sao assinatura de aprovacao.
+Edicao externa somente de plan.md/todo.md (incluindo GO), com a base ainda vigente,
+exige outro prompt de implementacao na mesma solicitacao. Se mudar origem MTA ou
+evidencias vinculadas, use Planejamento: planejar para reavaliar a proposta com
+novo recibo e Previous antes de preparar a implementacao. Nao reescrever hashes
+para contornar a mudanca da base. Hashes nao sao assinatura de aprovacao.
 Ler decisao completa: GO explicito com responsavel substitui estado antigo PROPOSTA.
 Responsavel vazio/placeholder, exemplo, GO PENDENTE, revogacao, GO de outro lote ou
 decisoes realmente conflitantes nao autorizam. Perguntar somente o ponto ambiguo.
@@ -396,8 +401,10 @@ ou aceite. Verificacao ausente continua PENDENTE/UNVERIFIED, nao [x].
 GO inequivoco nao deve ser pedido novamente. Plano e to-do recebem reconciliacao
 da decisao ja dada, preservando origem/criterios; isso nao exige novo GO/preparo.
 
-No Copilot, delegar a devsquad.implement via agent com [CONDUCTOR], [LANG: pt-BR], contrato,
-caminhos, identidades, lote, GO/dispensas, precondicoes vigentes, escopo e comandos.
+No Copilot, delegar a devsquad.implement via agent quando disponivel e compativel,
+com [CONDUCTOR], [LANG: pt-BR], contrato, caminhos, identidades, lote, GO/dispensas,
+precondicoes vigentes, escopo e comandos. Sem apoio compativel, informar o limite
+e executar diretamente dentro do GO e das ferramentas disponiveis, sem simular apoio.
 No Codex, usar o agente principal e subagentes de execucao compativeis disponiveis,
 sem converter perfis helper em executores. Especialista le documentos antes de escrita.
 No DevSquad, pode usar validate/execute/verify/review,
@@ -420,7 +427,9 @@ nunca sobrescrever baseline ANTES. Segredos nao entram em chat/plano/log salvo.
 Registrar comandos reais, diretorio, versoes/perfis, resultado/exit code e evidencias;
 separar implementacao, testes/build, MTA, Sonar, WAR/runtime e revisao. Simulacao nao
 prova runtime, MTA SUCCEEDED nao significa zero achados. Conferir diff contra GO,
-reler plano/to-do, relatar falhas e manter ACEITE HUMANO PENDENTE. Sem publicacao,
+reler plano/to-do e relatar falhas. Se ainda nao houve aceite humano desse resultado,
+indicar que ele falta; preservar aceite vigente para o mesmo resultado/escopo.
+Resultado alterado exige nova avaliacao humana, sem inferir aceite. Sem publicacao,
 integracao, proximo lote ou conclusao global automatica.
 
 ## Verificacoes e continuidade

@@ -21,11 +21,13 @@ try {
     Write-Host "Prompt preparado: $($prepared.PromptPath)"
     Write-Host "Revisao do resultado (apos corretiva): $($prepared.ResultReviewPromptPath)"
     $null = Select-ImplementationBranch $context $prepared
-    Write-Host 'Confira o GO humano registrado no plano/to-do e use Executar Prompt em nova conversa Copilot Local com devsquad.'
+    Write-Host 'Confira o GO humano registrado no plano/to-do antes de executar o prompt no cliente escolhido.'
+    Write-Host ('Codex: Execute o prompt deste arquivo: ' + $prepared.PromptPath)
+    Write-Host 'Copilot: abra o arquivo e use Executar Prompt em nova conversa Local com devsquad.'
     Write-Host 'Preparar/abrir nao aciona o agente, nao concede GO e nao aplica corretivas. O agente confere o GO antes de editar.'
     Write-Host 'A escolha da branch e do desenvolvedor; preserve trabalho local. Aceite do resultado continua separado.'
     Write-Host 'Se alterar plano/to-do antes de executar, prepare novamente. O prompt anterior fica preservado.'
-    Write-Host ('Alternativa no chat: /implementar-lote Leia o prompt preparado "' + $prepared.PromptPath + '" e implemente somente o lote com GO humano registrado, conforme seu contrato.')
+    Write-Host ('Alternativa no chat do Copilot: /implementar-lote Leia o prompt preparado "' + $prepared.PromptPath + '" e implemente somente o lote com GO humano registrado, conforme seu contrato.')
     if (-not $NoOpen) {
         if (-not $EditorPath) { Write-Host 'Abra o prompt acima no VS Code ou informe -EditorPath. O arquivo ja esta salvo.' }
         else {

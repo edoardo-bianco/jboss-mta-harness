@@ -1,5 +1,54 @@
 # To-do do agente: evolucao do harness
 
+## Auditoria documental e risco de integracao - 2026-10-04
+
+- [x] Auditar README, guias, contrato, ADRs, prompts, skill e perfis em dois recortes
+  independentes; conferir tarefas visiveis e comparar com os scripts.
+- [x] Corrigir os sete achados dos revisores e obter reconferencia dos trechos.
+- [x] Conferir precedencia da ADR-0005 nas ADRs anteriores e atualizar panorama dos
+  dois clientes nos documentos de estrategia e testes no guia de manutencao.
+- [x] Validar links locais, JSON das tarefas, diff e testes pertinentes.
+- [x] Consultar o remoto somente em leitura e registrar limites/recomendacao abaixo.
+
+Achados corrigidos sobre a base 2c6b6e6:
+
+| Achado | Correcao |
+| --- | --- |
+| Descricao da tarefa de indice prometia adotar o ultimo MTA e impunha prompts pendentes | Descricao alinhada a criacao/localizacao, escolhas/origem preservadas e avisos. |
+| Pos-limpeza ainda mandava escolher menu p | Guia usa registro; distingue restauracao de preparo e reconstrucao explicita com NewPlan, sem recuperar GO/aceite perdido. |
+| Tarefa/terminal de implementacao orientavam apenas Copilot | Mensagem pronta para Codex e instrucao especifica do Copilot, preservando GO. |
+| Saida da configuracao omitia planejamento por evidencias | Dois encaminhamentos diretos para registrar issue/evidencias e Planejar. |
+| Contrato mandava manter todo aceite PENDENTE | Preservar aceite vigente do mesmo resultado; resultado alterado exige avaliacao. |
+| Edicao de evidencias e edicao de plan/to-do/GO tinham mesmo encaminhamento | Base alterada volta a Planejar/Previous; documentos/GO com base vigente atualizam preparo de implementacao. |
+| Contrato impunha delegacao, templates admitiam apoio indisponivel | Delegacao condicionada a disponibilidade/compatibilidade, com conducao direta no escopo autorizado. |
+
+Auditoria_guias e auditoria_codigo confirmaram as respectivas correcoes sem novos
+achados nos trechos; nao executaram ferramentas da aplicacao. O README e a jornada
+principal ja distinguiam escolha, proposta, GO, execucao e aceite. A recuperacao
+apos limpeza ganhou instrucoes especificas porque os links antigos podem continuar
+no registro mesmo apos excluir os recibos; nada foi apagado dos registros reais.
+
+Verificacoes novas desta auditoria: 317 links locais em 38 Markdown de README,
+AGENTS, doc, .agents e .github, sem destino/ancora ausente; links externos nao foram
+revalidados. Test-TaskInputs, Test-Implementation e Test-PlanningEvidence: PASS em
+Windows PowerShell 5.1 com ExecutionPolicy Bypass apenas no processo de teste.
+git diff --check sem erros. As 13 suites da entrega anterior continuam registradas
+na secao seguinte; nao foram todas repetidas para alteracoes de texto/encaminhamento.
+
+Estado Git observado antes das corretivas documentais: main e main_jboss_eap74
+locais e remotas em de5975096d0848b91b0d45aad00d291787a89bb3; HEAD 2c6b6e6 com oito
+commits exclusivos e zero commits exclusivos das principais. Consulta real:
+git ls-remote --heads origin; remoto so possui aquelas duas branches. Um worktree,
+na branch do harness. Diff de exemplos entre principais e HEAD vazio; .harness,
+config/harness.local.json e workspace local nao sao versionados.
+
+Risco de conflito Git baixo no estado observado: principais podem avancar sem
+reescrever historico. Isso nao comprova comportamento dos clientes nem autoriza
+integracao. Recomenda-se publicar primeiro a branch de trabalho, concluir o ensaio
+nativo e integrar a evolucao aceita em main; depois, etapa explicita para EAP 7.4.
+Consultar novamente o remoto antes da integracao e recusar divergencia em vez de
+forcar branches. Nenhum push, merge, reset ou alinhamento foi executado nesta auditoria.
+
 ## Simplificacao da conducao da migracao - 2026-10-04
 
 Ensaio interrompido a pedido do desenvolvedor para consolidar os ajustes antes de

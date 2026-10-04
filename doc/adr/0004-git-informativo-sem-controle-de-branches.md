@@ -11,6 +11,11 @@ Status: aceita pelo desenvolvedor em 2026-09-28.
 Substitui os requisitos de cadastro e bloqueio Git da ADR-0003. Preserva a
 separacao entre evolucao do harness e corretivas da aplicacao da ADR-0002.
 
+Complemento de 2026-10-04: a [ADR-0005](0005-planejamento-orientado-pelo-registro.md)
+admite planejamento com base EVIDENCIAS, sem RunId/artefatos MTA inexistentes.
+As exigencias de integridade MTA abaixo se aplicam quando essa base esta presente;
+identidade do projeto, historico, destinos e Git informativo continuam preservados.
+
 ## Contexto
 
 O cadastro de principal/migracao/trabalho, responsavel e coordenacao tornou o

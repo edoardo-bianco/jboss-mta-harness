@@ -1,5 +1,23 @@
 # Plano do agente: evolucao do harness
 
+## Auditoria documental e risco de integracao - 2026-10-04
+
+Pedido: conferir consistencia e clareza de README, guias, contrato, prompts e helpers
+antes de publicar/alinha-las entre branches. Base auditada: 2c6b6e6, branch
+harness/backlog-agente-orientacao. Trabalho de evolucao do harness, sem corretivas
+da aplicacao ou integracao de branches nesta auditoria.
+
+Leitura independente em dois recortes: jornada do desenvolvedor e contrato/perfis/
+prompts versus comportamento implementado. Conferir tambem tarefas visiveis, ADRs
+historicas, estrategia, links locais e estado remoto real. Corrigir contradicoes
+documentais e mensagens de encaminhamento, preservar decisoes e artefatos antigos.
+Resultados e verificacoes ficam no [to-do](todo.md#auditoria-documental-e-risco-de-integracao---2026-10-04).
+
+Publicar a branch de trabalho e integrar nas principais sao decisoes distintas.
+Recomendar integracao da evolucao aceita em main, seguida da integracao explicita
+main -> main_jboss_eap74; nunca forcar igualdade ou reescrever historico.
+O novo ensaio nativo continua necessario para comprovar orientacao/delegacao.
+
 ## Plano consolidado: simplificar a conducao da migracao - 2026-10-04
 
 **Situacao:** ensaio interrompido a pedido do desenvolvedor; coleta consolidada e

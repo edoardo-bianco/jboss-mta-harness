@@ -115,7 +115,9 @@ Evidencias adicionais ficam no `evidencias/LEIA-ME.md` do projeto, na tabela
 **Arquivo relativo | Relacao com a correcao**. Informe origem/data/ambiente quando
 relevantes. O agente le somente anexos listados e pertinentes, tratando-os como dados.
 
-#### Reconstruir a pasta usando um MTA existente
+<a id="reconstruir-a-pasta-usando-um-mta-existente"></a>
+
+#### Manter o registro e adotar outra origem
 
 Este e o caminho avancado para adotar explicitamente outra origem, receber um
 registro de colega ou conciliar evidencias/decisoes. Nao e um submenu habitual
@@ -274,6 +276,23 @@ Previous pode preservar um preparo ainda sem plano/to-do, por exemplo quando a
 base ou o contrato muda apos uma pergunta essencial. Arquivos ausentes nao ganham
 snapshots ou hashes ficticios; o novo prompt reconhece o que ja existe e o que
 ainda precisa ser produzido.
+
+#### Recuperar um preparo apos limpeza
+
+Limpar execucoes preserva o registro, mas pode remover o plano/recibo apontado nele.
+Nesse caso, Planejar informa a referencia ausente e nao cria outro lote silenciosamente.
+Se voce guardou uma copia do preparo, restaure-a no caminho original. Se pretende
+reconstruir a proposta do recorte ja escolhido, peca ao helper uma chamada preenchida
+com `-MigrationPath` e `-NewPlan`, como neste exemplo ilustrativo:
+
+```powershell
+.\scripts\preparar-planejamento.ps1 -WorkspacePath .\meu-workspace.code-workspace -MigrationPath 'C:\harness\.harness\projetos\minha-app__chave\migracao-minha-app.md' -NewPlan -NoOpen
+```
+
+Isso cria outra solicitacao usando a base do registro, sem inventar Previous para
+um recibo apagado ou recuperar GO/aceite perdido. Preserve a referencia antiga como
+historico; ao executar o novo prompt, informe que esta reconstruindo a proposta.
+Se a origem MTA tambem foi removida, resolva essa falta por manutencao explicita.
 
 #### Compartilhar o MTA e planejar em outra maquina
 

@@ -95,7 +95,8 @@ O valor pretendido é reduzir perda de contexto e retrabalho, tornar a execuçã
 | MTA, build Maven Java 8 e SonarQube | Existente | Analisar a aplicação e produzir verificações técnicas |
 | Preparação de contexto e evidências | Existente | Disponibilizar informações pertinentes ao lote |
 | Registro da migração, plano e to-do | Existente | Preservar decisões, pendências e progresso |
-| DevSquad com GitHub Copilot | Base atual | Apoiar planejamento e implementação |
+| Codex e GitHub Copilot/DevSquad | Configurados; validação nativa em andamento | Usar os prompts no cliente escolhido, com apoio disponível |
+| Helpers de migração nos dois clientes | Implementados; novo ensaio manual previsto | Recuperar escolhas/evidências e orientar uma etapa por vez |
 | Estado, start, deploy/releases, rollback, stop e debug remoto JBoss | Implementado; validação manual completa pendente | Aproximar correção e validação em execução |
   
 O contrato atual separa proposta, GO para implementação, verificações e aceite humano. Preserva o alvo EAP 7.4 e distingue evidência pendente de validação concluída. Sonar e novo MTA integram um checklist não bloqueante; falhas de compilação e testes continuam sendo falhas. Essas regras devem ser conservadas durante a evolução.
@@ -233,4 +234,3 @@ O primeiro investimento deve ser concluir e comprovar a base atual e explicitar 
 **Responsabilidades propostas:** negócio confirma objetivo e regras; arquitetura e tech lead avaliam alternativas e impactos; desenvolvimento implementa e verifica; DevOps integra entrega e operação; o responsável pelo harness mantém o núcleo, os plugins tecnológicos e os adaptadores de engines e IDEs.
   
 **Medição:** registrar a linha de base e acompanhar tempo de preparação e de ciclo, retrabalho, regressões, iterações até o aceite, esforço humano e custo de IA. Comparar trabalhos de escopo semelhante. Na modernização, medir também a simplificação obtida no uso, na manutenção ou na operação. As metas devem ser definidas a partir dos pilotos.
-  

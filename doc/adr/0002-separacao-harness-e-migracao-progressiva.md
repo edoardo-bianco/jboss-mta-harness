@@ -9,6 +9,11 @@ html:
 
 Status: aceita pelo desenvolvedor em 2026-09-27.
 
+Complemento em 2026-10-04: a [ADR-0005](0005-planejamento-orientado-pelo-registro.md)
+define o registro como entrada do planejamento e admite base por evidencias sem
+pacote MTA completo. No ciclo abaixo, partir de MTA e uma das bases possiveis;
+preservam-se lote delimitado, separacao de escopos, GO e aceite humano.
+
 Atualizacao em 2026-09-28: para identidade e Git, a
 [ADR-0004](0004-git-informativo-sem-controle-de-branches.md) substitui os controles
 de branches da ADR-0003. Mantidos os escopos, integridade MTA e GO/aceite separados.
