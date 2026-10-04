@@ -10,7 +10,7 @@ html:
 Migrar uma aplicacao exige relacionar diagnosticos com o codigo, escolher o que
 corrigir, verificar o resultado e preservar as decisoes entre uma rodada e outra.
 O **JBoss MTA Harness** organiza esse trabalho em um ambiente no VS Code, com
-apoio do GitHub Copilot/DevSquad e controle do desenvolvedor.
+apoio do Codex ou GitHub Copilot/DevSquad e controle do desenvolvedor.
 
 O harness conecta ferramentas de analise e execucao — MTA, Maven, SonarQube e
 JBoss — a contexto, prompts e evidencias. A proposta e transformar achados em
@@ -45,6 +45,17 @@ Ele explica a primeira configuracao e conduz o fluxo completo, da analise ao
 planejamento, implementacao, verificacao, aceite e reconciliacao. Em cada etapa,
 indica o guia de ferramenta adequado para os comandos, opcoes e caminhos de
 retomada.
+
+Para comecar com orientacao, use o [helper de migracao](doc/guias/tools/workspace.md#orientacao-com-codex-ou-github-copilot)
+e diga apenas o objetivo, por exemplo: "Quero priorizar as issues mandatory dos
+projetos deste workspace". Ele confere a situacao e conduz uma etapa por vez.
+
+No planejamento, a entrada e **Planejamento: planejar**: usa a escolha e as
+evidencias do registro para criar ou atualizar a proposta. Se faltar registro,
+**Workspace: atualizar indice dos projetos** o prepara. Nao e necessario repetir
+projeto, rodada e escolhas em menus sucessivos. Evidencias suficientes permitem
+planejar sem pacote MTA completo; duvidas essenciais sao esclarecidas antes de
+concluir o plano. Veja [entradas e resultados](doc/guias/tools/planejamento-migracao.md#preparar-e-executar-o-prompt).
 
 Para contribuir com a evolucao do harness, consulte [AGENTS.md](AGENTS.md) e as
 [decisoes arquiteturais](doc/adr/). O [contrato de planejamento](doc/especificacoes/planejamento-copilot.md)

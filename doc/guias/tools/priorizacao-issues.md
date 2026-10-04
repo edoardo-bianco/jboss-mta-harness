@@ -31,6 +31,8 @@ O indice precisa existir; se necessario, execute antes
 Registros ou evidencias ausentes/conflitantes aparecem como lacunas por projeto;
 os projetos utilizaveis podem continuar. O preparador nao inicializa registros,
 altera prioridades ou atualiza o indice.
+Uma reconciliacao antiga PENDENTE nao e pre-requisito generico para esta etapa;
+o agente confere o motivo e registra o impacto real nas candidatas.
 
 Entram por padrao issues `mandatory`, `PRESENTE`, com decisao `A DEFINIR` ou
 `ANALISAR AGORA` e andamento `NAO ANALISADA` ou `ANALISADA`. Issues adiadas, fora
@@ -44,18 +46,20 @@ sem inventar classificacao MTA. Lotes ativos e decisoes anteriores sao preservad
 2. Escolha **5** ou **10**; Enter usa 5 e **q** cancela sem preparar arquivos.
 3. Confira os projetos e os avisos no terminal. A tarefa mostra os caminhos reais
    do contexto, prompt e destino da lista, e abre `priorizar-issues.prompt.md`.
-4. Acrescente preferencias ou restricoes no campo **Direcionamento do desenvolvedor**,
-   por exemplo evitar alteracoes de contrato publico ou enfatizar uma aplicacao.
-   Execute o prompt preparado no Chat do Copilot. Ele usa o agente padrao e nao
-   depende do DevSquad.
-5. Alternativamente, no Codex, anexe o prompt preparado e peca: "Leia e execute
-   este prompt de priorizacao usando o contexto indicado nele". A autorizacao
-   abrange salvar a lista no destino informado pelo contexto.
+4. Preferencias/restricoes sao opcionais. O prompt ja contem objetivo, limites e
+   contexto; nao precisa escrever instrucoes adicionais de governanca.
+5. Execute no cliente atual: no **Copilot**, use **Executar Prompt**, com DevSquad
+   e apoio compativel de planejamento. No **Codex**, envie **Execute o prompt deste
+   arquivo:** seguido do caminho completo exibido no terminal, ou anexe o arquivo.
+   O helper deve fornecer a mensagem preenchida. O agente principal aplica skills
+   e subagentes disponiveis; o front matter do Copilot nao seleciona agente no Codex.
 6. Revise `priorizacao.md`, suas fontes, lacunas e justificativas antes de escolher.
 
 A tarefa **prepara** o contexto; a analise e a escrita ocorrem quando voce
 executa o prompt. Use o `context.json` cuja localizacao a tarefa mostrou;
 o prompt ja contem essa referencia, sem precisar preencher caminho ficticio.
+Voce pode executar em novo chat e depois pedir orientacao ali mesmo. O helper
+recupera os arquivos; nao e obrigatorio voltar ao chat anterior ou regenerar contexto.
 
 Pelo terminal na raiz do harness, substituindo o nome pelo workspace que salvou:
 
@@ -79,8 +83,9 @@ antes de escolher uma. Oriente a priorizacao por risco, repetibilidade e alcance
 No Copilot, selecione **migracao_helper** e faca o mesmo pedido. Veja a
 [entrada e selecao dos helpers](workspace.md#orientacao-com-codex-ou-github-copilot).
 O orquestrador pode consultar `migracao_planejamento_helper` para a comparacao
-e `migracao_impacto_helper` para amostras das candidatas. Informe o workspace;
-na retomada, anexe o contexto ou a lista da solicitacao que deseja revisar.
+e `migracao_impacto_helper` para amostras das candidatas. Um pedido curto basta;
+informe o workspace/contexto somente se o helper nao puder distingui-lo pelos
+arquivos. Na retomada ele localiza a solicitacao vinculada, sem escolher por recencia.
 
 Os helpers explicam a tarefa, examinam evidencias e recomendam no chat. Para
 salvar a lista, execute separadamente o prompt preparado conforme o procedimento
@@ -115,15 +120,19 @@ nao equivale ao estado atual. A limpeza de execucoes preserva essa pasta.
 
 ## Levar uma candidata ao planejamento
 
-1. Escolha **projeto, IDs e recorte**. No `migracao.md` desse projeto, registre
-   `ANALISAR AGORA` para a issue escolhida e o motivo/recorte conforme o registro.
-2. Referencie a lista e a candidata no registro ou no indice de evidencias
-   `evidencias/LEIA-ME.md` do projeto, usando o caminho real mostrado pela tarefa.
-3. Prepare o contexto de planejamento habitual. No direcionamento do prompt,
-   explicite a escolha e suas lacunas. Exemplo: "Planejar a issue que marquei
-   ANALISAR AGORA neste projeto; usar a lista referenciada no registro e limitar
-   a proposta aos modulos indicados".
-4. Revise a proposta e decida o GO. O planejamento revalida o recorte escolhido;
+1. Abra o **link ao registro** fornecido na candidata. O resultado deve trazer
+   IDs exatos e uma sugestao da **linha completa**, preservando as oito colunas.
+   Coloque `ANALISAR AGORA` em **Decisao**; **Andamento** reflete o trabalho real.
+2. Nas observacoes, registre recorte e referencia da candidata, usando o link
+   preparado. Se houver sobreposicao, preserve a relacao entre os IDs; escolher
+   uma issue nao inclui nem declara resolvida outra automaticamente. O helper
+   explica a conveniencia de cada escolha, que continua sendo sua.
+3. Execute **Planejamento: planejar**. A tarefa recupera escolha, referencias e
+   base do registro. Nao repita a intencao no prompt nem atualize manualmente o
+   ranking so para retirar "Escolha PENDENTE": esse trecho e historico, e a decisao
+   atual esta no registro. Pode dizer ao helper apenas "Escolhi a issue; me conduza".
+4. Execute o prompt preparado, esclareca perguntas essenciais quando houver e
+   revise a proposta antes de decidir o GO. O planejamento revalida o recorte escolhido;
    a posicao na lista nao autoriza planejamento de todas as candidatas.
 
 O fluxo segue no [guia de planejamento](planejamento-migracao.md). Na futura

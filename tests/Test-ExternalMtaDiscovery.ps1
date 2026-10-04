@@ -51,61 +51,74 @@ $index = New-HarnessProjectIndex $context
 $text = [IO.File]::ReadAllText($index.IndexPath)
 Assert ($text.Contains('CATALOGO NAO CARREGADO') -and $text.Contains('b'*32) -and -not $text.Contains('c'*32)) 'Indice nao mostra MTA externo/registro pendente isolado.'
 Assert ($text.Contains('**Total MTA contabilizado: 1 issues / 1 ocorrencias**') -and (Read-ProjectSummary $index.IndexPath).Contains('| 1 / 1 |')) 'MTA deve mostrar contagens antes de carregar registro.'
-Assert ($text.Contains('**Total MTA contabilizado: 1 issues / 1 ocorrencias**') -and (Read-ProjectSummary $index.IndexPath).Contains('| 1 / 1 |')) 'MTA deve mostrar contagens antes de carregar registro.'
-Assert (-not (Test-Path "$fixture/.harness/projetos/Aplicacao")) 'Indice nao deve inicializar registro.'
-# A tarefa agora sincroniza registros e deixa reconciliacao explicitamente pendente.
+$migrationPaths = Get-HarnessMigrationPaths $fixture $context.Active
+Assert (-not (Test-Path -LiteralPath $migrationPaths.MigrationPath)) 'Consulta do indice nao deve inicializar registro.'
+# A tarefa cria registro ausente/carrega catalogo inicial sem manutencao obrigatoria.
 $automatic = New-HarnessProjectIndex $context -UpdateMigration
 $autoRegister = Initialize-HarnessMigration $fixture $context.Active
 $autoText = [IO.File]::ReadAllText($autoRegister.MigrationPath)
-Assert ($autoText.Contains('Rodada MTA: ' + ('b'*32)) -and $autoText.Contains('Estado: PENDENTE')) 'Sincronizacao deve carregar MTA e exigir reconciliacao.'
-Assert ((Read-ProjectSummary $automatic.IndexPath).Contains('PENDENTE - executar prompt')) 'Indice deve indicar que falta executar o prompt.'
-$requests = @(Get-ChildItem "$fixture/.harness/planning" -Recurse -Filter 'manter-migracao.prompt.md')
-Assert ($requests.Count -eq 1) 'Sincronizacao deve preparar um prompt.'
+Assert ($autoText.Contains('Rodada MTA: ' + ('b'*32)) -and -not $autoText.Contains('Estado: PENDENTE')) 'Carga inicial deve vincular MTA sem criar pendencia de reconciliacao.'
+$initialOrigin = [regex]::Match($autoText, '<!-- MTA (.*?) -->').Groups[1].Value | ConvertFrom-Json
+Assert ($initialOrigin.RunId -ceq ('b'*32) -and $initialOrigin.Project -ceq 'origem' -and $initialOrigin.Source -ieq $app -and $initialOrigin.Run -ieq $latest) 'Carga inicial perdeu identidade ou origem externa.'
+Assert (-not (Test-Path "$fixture/.harness/planning")) 'Atualizar indice nao deve preparar prompt de manutencao por rotina.'
+Assert (-not (Read-ProjectSummary $automatic.IndexPath).Contains('PENDENTE (historico')) 'Indice criou pendencia sem conflito ou pedido de manutencao.'
 $autoText = $autoText.Replace('| A DEFINIR | NAO ANALISADA |', '| ADIAR | ANALISADA |') + "`nNota humana: preservar a decisao.`n"
 [IO.File]::WriteAllText($autoRegister.MigrationPath,$autoText)
+$humanHash = (Get-FileHash $autoRegister.MigrationPath).Hash
 $null = New-HarnessProjectIndex $context -UpdateMigration
-Assert (@(Get-ChildItem "$fixture/.harness/planning" -Recurse -Filter 'manter-migracao.prompt.md').Count -eq 1) 'Repetir tarefa sem nova rodada/contexto nao deve duplicar prompt.'
-Assert ([IO.File]::ReadAllText($autoRegister.MigrationPath).Contains('Estado: PENDENTE')) 'Atualizar indice nao pode concluir reconciliacao.'
-[IO.File]::WriteAllText($autoRegister.MigrationPath,$autoText.Replace('Estado: PENDENTE','Estado: CONCLUIDA'))
-$completed = New-HarnessProjectIndex $context -UpdateMigration
-Assert ((Read-ProjectSummary $completed.IndexPath).Contains('CONCLUIDA (declarada no registro)')) 'Conclusao explicita deve continuar visivel, sem nova pendencia artificial.'
-Assert (@(Get-ChildItem "$fixture/.harness/planning" -Recurse -Filter 'manter-migracao.prompt.md').Count -eq 1) 'Registro reconciliado nao deve provocar loop de prompts.'
-Assert ([IO.File]::ReadAllText($autoRegister.MigrationPath).Contains('Nota humana: preservar a decisao.')) 'Sincronizacao perdeu texto humano.'
-Add-Content -LiteralPath $autoRegister.EvidenceIndexPath -Value 'Nova evidencia listada pelo desenvolvedor.'
+Assert ((Get-FileHash $autoRegister.MigrationPath).Hash -eq $humanHash -and -not (Test-Path "$fixture/.harness/planning")) 'Repetir indice deve preservar integralmente registro humano e nao gerar prompt.'
+Set-Content -LiteralPath (Join-Path (Split-Path $autoRegister.EvidenceIndexPath -Parent) 'nova-evidencia.txt') -Value 'Evidencia complementar do comportamento observado.'
+Add-Content -LiteralPath $autoRegister.EvidenceIndexPath -Value '| nova-evidencia.txt | Comportamento observado para a issue escolhida pelo desenvolvedor. |'
 $evidenceUpdate = New-HarnessProjectIndex $context -UpdateMigration
-Assert (@(Get-ChildItem "$fixture/.harness/planning" -Recurse -Filter 'manter-migracao.prompt.md').Count -eq 2) 'Indice de evidencias alterado deve preparar contexto novo.'
-Assert ((Read-ProjectSummary $evidenceUpdate.IndexPath).Contains('PENDENTE - executar prompt')) 'Novo contexto deve exigir reconciliacao novamente.'
+Assert ((Get-FileHash $autoRegister.MigrationPath).Hash -eq $humanHash -and -not (Test-Path "$fixture/.harness/planning")) 'Nova evidencia complementar nao deve criar contexto, trocar base ou reconciliacao automaticamente.'
 # Preparar manutencao carrega catalogo sem executar agente, mesmo com Project de origem diferente.
 $prepared = New-MtaMigrationPrompt $context -RunId ('b'*32)
 $md = [IO.File]::ReadAllText($prepared.MigrationPath)
-Assert ($md.Contains('Rodada MTA: ' + ('b'*32)) -and $md.Contains('Total MTA: 1 issues')) 'Preparo nao carregou catalogo externo.'
+Assert ($md.Contains('Rodada MTA: ' + ('b'*32)) -and $md.Contains('Total MTA: 1 issues') -and $md.Contains('Estado: PENDENTE')) 'Manutencao explicita deve carregar catalogo externo e registrar a reconciliacao solicitada.'
+Assert ((Test-Path $prepared.PromptPath) -and @(Get-ChildItem "$fixture/.harness/planning" -Recurse -Filter 'manter-migracao.prompt.md').Count -eq 1) 'Pedido explicito deve preparar exatamente um prompt de manutencao.'
 $md = $md.Replace('| A DEFINIR | NAO ANALISADA |', '| ADIAR | ANALISADA |')
 [IO.File]::WriteAllText($prepared.MigrationPath, $md)
 $registerHash = (Get-FileHash $prepared.MigrationPath).Hash
 $index = New-HarnessProjectIndex $context
 Assert ((Read-ProjectSummary $index.IndexPath).Contains('MESMA RODADA')) 'Registro carregado nao reconhecido.'
+$pending = New-HarnessProjectIndex $context -UpdateMigration
+Assert ((Get-FileHash $prepared.MigrationPath).Hash -eq $registerHash -and (Read-ProjectSummary $pending.IndexPath).Contains('PENDENTE (historico; conferir motivo)')) 'Atualizar indice nao deve concluir reconciliacao solicitada nem tornar o estado gate generico.'
+[IO.File]::WriteAllText($prepared.MigrationPath,$md.Replace('Estado: PENDENTE','Estado: CONCLUIDA'))
+$completedHash = (Get-FileHash $prepared.MigrationPath).Hash
+$completed = New-HarnessProjectIndex $context -UpdateMigration
+Assert ((Read-ProjectSummary $completed.IndexPath).Contains('CONCLUIDA (declarada no registro)') -and (Get-FileHash $prepared.MigrationPath).Hash -eq $completedHash) 'Conclusao declarada deve permanecer visivel sem nova pendencia artificial.'
+Assert (@(Get-ChildItem "$fixture/.harness/planning" -Recurse -Filter 'manter-migracao.prompt.md').Count -eq 1) 'Registro concluido nao deve gerar novo prompt por rotina.'
+$registerHash = $completedHash
 $new = Add-External 'Aplicacao/261001-110000' ('d'*32) '2026-10-01T14:00:00Z' $app
 $index = New-HarnessProjectIndex $context
 Assert ((Read-ProjectSummary $index.IndexPath).Contains('RODADA DIFERENTE')) 'Nova copia externa nao gerou aviso.'
 Assert ((Get-FileHash $prepared.MigrationPath).Hash -eq $registerHash) 'Indice atualizou registro silenciosamente.'
 $automaticNew = New-HarnessProjectIndex $context -UpdateMigration
 $afterNew = [IO.File]::ReadAllText($prepared.MigrationPath)
-Assert ($afterNew.Contains('Rodada MTA: ' + ('d'*32)) -and $afterNew.Contains('Estado: PENDENTE') -and $afterNew.Contains('| ADIAR | ANALISADA |')) 'Nova rodada deve gerar pendencia preservando escolhas.'
-$hashBeforeFailure = (Get-FileHash $prepared.MigrationPath).Hash
+Assert ((Get-FileHash $prepared.MigrationPath).Hash -eq $registerHash -and $afterNew.Contains('Rodada MTA: ' + ('b'*32)) -and $afterNew.Contains('Estado: CONCLUIDA') -and $afterNew.Contains('| ADIAR | ANALISADA |')) 'Nova rodada descoberta deve preservar base, decisao, conclusao e todo conteudo do registro.'
+Assert ((Read-ProjectSummary $automaticNew.IndexPath).Contains('RODADA DIFERENTE') -and (Read-ProjectSummary $automaticNew.IndexPath).Contains('troca somente por escolha explicita')) 'Outra rodada deve ser informada sem eleicao automatica.'
+Assert (@(Get-ChildItem "$fixture/.harness/planning" -Recurse -Filter 'manter-migracao.prompt.md').Count -eq 1) 'Descobrir novo MTA nao deve preparar manutencao automaticamente.'
 $prepared = New-MtaMigrationPrompt $context -RunId ('d'*32)
-Assert ([IO.File]::ReadAllText($prepared.MigrationPath).Contains('| ADIAR | ANALISADA |')) 'Atualizacao perdeu decisao humana.'
+$adopted = [IO.File]::ReadAllText($prepared.MigrationPath)
+Assert ($adopted.Contains('| ADIAR | ANALISADA |') -and $adopted.Contains('Rodada MTA: ' + ('d'*32)) -and $adopted.Contains('Estado: PENDENTE') -and $adopted.Contains('Nota humana: preservar a decisao.')) 'Adocao explicita deve atualizar rodada preservando decisao/notas e registrar reconciliacao real.'
 $failed = Add-External 'Aplicacao/261001-120000' ('e'*32) '2026-10-01T15:00:00Z' $app 'FAILED'
 $hashBeforeFailure = (Get-FileHash $prepared.MigrationPath).Hash
 $syncFailed = New-HarnessProjectIndex $context -UpdateMigration
 Assert ((Get-FileHash $prepared.MigrationPath).Hash -eq $hashBeforeFailure) 'Ultima falha nao deve modificar o registro.'
 $otherSource = Join-Path $area 'outra-app'
 $null = [IO.Directory]::CreateDirectory($otherSource)
-$secondProject = [pscustomobject]@{name='outra';label='Outra';path=$otherSource}
+Set-Content (Join-Path $otherSource 'pom.xml') '<project />'
+Write-HarnessJson $workspace @{folders=@(@{name='Aplicacao';path=$app},@{name='Outra';path=$otherSource})}
+# Read-HarnessConfig pode criar um registro vazio antes do indice: ainda e carga inicial.
+$autoInitialized = Read-HarnessConfig $configPath $fixture -WorkspacePath $workspace -Target $otherSource
+$secondProject = $autoInitialized.Active
 $context.Projects += $secondProject
 $otherRun = Add-External 'Outra/261001-120000' ('9'*32) '2026-10-01T15:00:00Z' $otherSource
+$otherRegister = Get-HarnessMigrationPaths $fixture $secondProject
+Assert ((Test-Path $otherRegister.MigrationPath) -and [IO.File]::ReadAllText($otherRegister.MigrationPath).Contains('AGUARDANDO MTA')) 'Fixture deve iniciar registro vazio criado pela leitura da configuracao.'
 $mixed = New-HarnessProjectIndex $context -UpdateMigration
-$otherRegister = Initialize-HarnessMigration $fixture $secondProject
-Assert ([IO.File]::ReadAllText($otherRegister.MigrationPath).Contains('Estado: PENDENTE')) 'Um projeto com falha nao pode impedir a carga de outro.'
+$otherText = [IO.File]::ReadAllText($otherRegister.MigrationPath)
+Assert ($otherText.Contains('Rodada MTA: ' + ('9'*32)) -and $otherText.Contains('Total MTA: 1 issues') -and -not $otherText.Contains('Estado: PENDENTE')) 'Registro vazio inicializado deve receber catalogo sem pendencia; falha de outro projeto nao pode impedir sua carga.'
 Assert ((Get-FileHash $prepared.MigrationPath).Hash -eq $hashBeforeFailure) 'Carga do outro projeto alterou o registro preservado.'
 $index = New-HarnessProjectIndex $context
 Assert ((Read-ProjectSummary $index.IndexPath).Contains('ULTIMA TENTATIVA FAILED')) 'Falha recente nao ficou explicita.'

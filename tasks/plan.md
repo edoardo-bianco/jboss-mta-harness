@@ -1,5 +1,432 @@
 # Plano do agente: evolucao do harness
 
+## Plano consolidado: simplificar a conducao da migracao - 2026-10-04
+
+**Situacao:** ensaio interrompido a pedido do desenvolvedor; coleta consolidada e
+implementacao autorizada de SIM-01 a SIM-13 realizada. Auditoria e regressao tecnica
+registradas no to-do; SIM-14/VAL-01 aguardam o novo ensaio nativo nos dois clientes.
+O planejamento e a corretiva da aplicacao nao foram executados nesta evolucao.
+Base conferida: e328df2, branch harness/backlog-agente-orientacao. Skills aplicadas:
+using-agent-skills, planning-and-task-breakdown, documentation-and-adrs,
+incremental-implementation, test-driven-development e code-review-and-quality.
+Delegacao: guias/contrato e prompts/helpers em responsabilidades distintas;
+auditoria de codigo somente leitura, com achados corrigidos antes da entrega.
+
+### Resultado do ensaio e objetivo
+
+Codex e Copilot localizaram o registro e reconheceram a escolha humana com pedido
+curto. A priorizacao produziu uma oportunidade fundamentada, distinguiu sobreposicao
+e lacunas. Ainda nao foram demonstradas delegacao nativa completa, geracao/aceite
+do lote nem implementacao. O Copilot voltou a responder apos relato de desativacao
+do MCP Azure; causa tecnica nao foi comprovada.
+
+Problemas reproduzidos: reconciliacao antes do planejamento sem conflito concreto,
+varias etapas entregues juntas, direcionamento Codex para Copilot, repeticao da
+escolha nos documentos e nos menus, e selecao MTA pelo historico antes do registro.
+A versao ensaiada do indice tambem podia trocar o catalogo pelo ultimo MTA reconhecido.
+Nova necessidade explicita: planejar com evidencias suficientes mesmo sem pacote
+MTA completo e fazer perguntas essenciais antes de concluir plano/to-do.
+
+Objetivo: o desenvolvedor registra uma vez sua intencao, evidencias e prioridades;
+o helper recupera o contexto, orienta uma acao e pergunta somente o que falta.
+Rastreabilidade, integridade, escopo, GO e aceite permanecem, sem burocracia repetida.
+Cobertura dos achados ENS-01 a ENS-17 no [to-do](todo.md#ensaio-acompanhado-do-helper-no-codex---2026-10-04).
+
+Preservar os artefatos do ensaio:
+
+- Priorizacao: RequestId 2ff39907a87d4101a7a7c21f7d2397d2.
+- Preparo de planejamento: RequestId 86e35d8af7d54f9d8fecb500121be590.
+- Origem MTA: RunId 161c1bd4ce7a4da78641091c58557e44.
+- Escolha atual: 00400 ANALISAR AGORA; 00401 A DEFINIR, com vinculos reciprocos.
+- Na ultima conferencia, somente prompt/recibo preparados; plan.md/todo.md ausentes.
+Nao sobrescrever recibos, snapshots ou prompts antigos para torna-los atuais.
+Reteste futuro usa artefatos do contrato corrigido, mantendo o historico original.
+
+### Fluxo e responsabilidades definidos para a implementacao
+
+1. Preparar o indice e os registros necessarios em uma entrada; registro existente
+   nao exige nova criacao. Descobrir uma rodada nao significa adota-la num lote ativo.
+2. No registro escolhido, informar observacoes, referencias de evidencias e issues.
+   Priorizar e opcional; escolha direta tambem e valida. Issue manual usa DEV-...
+   com origem/objetivo, sem categoria mandatory ou regra MTA inventada.
+3. Executar a tarefa existente, renomeada para **Planejamento: planejar**, sem menu
+   de operacoes. Ela prepara/retoma a solicitacao usando o registro. Se faltar
+   migracao.md, orientar **Workspace: atualizar indice dos projetos**, que cria
+   os registros necessarios; nao exigir criacao manual nem abrir um menu extenso.
+   Havendo necessidade concreta de reconciliacao, indicar o prompt pertinente ou
+   uma chamada pronta do preparador de manutencao. Importar/trocar MTA pertence a
+   esse encaminhamento quando solicitado, nao a uma selecao obrigatoria do planejamento.
+4. Preparador resolve o registro, identifica a base MTA ou evidencias e gera o
+   prompt com recibo e destinos. Mostra resumo e acionamento pronto para o cliente.
+5. Ao executar o prompt, agente le as fontes, avalia viabilidade e pergunta o
+   indispensavel se faltar decisao essencial. Depois persiste proposta e to-do
+   coerentes; humano revisa e concede GO na etapa apropriada.
+6. Corretiva autorizada, verificacoes e aceite continuam separados. Replanejamento
+   atualiza o mesmo lote quando aplicavel; nao reinicia priorizacao automaticamente.
+
+**Humano:** prioridades/recorte, informacoes que nao estao nas fontes, respostas a
+conflitos de intencao, GO e aceite. Pode acrescentar observacoes/issues/evidencias.
+**Helper:** leitura, conferencias e orientacao; fornece caminho/comando real pronto
+e resultado esperado, usa especialistas pertinentes e aguarda retorno de cada passo.
+**Preparadores/executores:** persistem somente os artefatos autorizados da etapa.
+Orquestrar orientacao nao amplia o helper leitor para executar ou escrever.
+
+### Regras comuns e fronteiras
+
+- MigrationPath atual concentra escolhas. Indice localiza/resume; ranking recomenda;
+  context.json conserva identidade, base e snapshots. O desenvolvedor nao precisa
+  repetir a mesma decisao nesses arquivos ou aprender nomes internos de campos.
+- ANALISAR AGORA resolve a escolha. Snapshot/indice/ranking antigos nao a tornam
+  pendente novamente. Andamento e escolha sao independentes; preservar os valores
+  existentes, sem criar outro sistema de status.
+- Conferir consistencia em cada retomada. PENDENTE so identifica acao concreta,
+  com motivo e efeito no recorte; nao carimbar todo documento como pendente.
+  Nota nova ou escolha posterior ao snapshot nao e conflito por si so.
+- Reconciliacao separada exige necessidade identificada: intencoes conflitantes,
+  mudanca de base a incorporar, evidencias que contradizem andamento ou escopo.
+  Gerar prompt/carregar catalogo nao cria por si so nova obrigacao humana.
+  Pendencias historicas permanecem explicitas sem bloquear automaticamente nem
+  serem marcadas CONCLUIDA por inferencia.
+- Planejamento usual le a base ja vinculada; nao chama atualizacao de catalogo
+  para eleger outra rodada. Manutencao/troca de base exige escolha explicita,
+  preservando escolhas, issues manuais, contagens historicas e artefatos anteriores.
+- Ausencia de pacote MTA nao impede preparar analise por evidencias. Ausencia de
+  evidencia suficiente pode exigir pergunta antes de uma proposta coerente.
+  MTA corrompido/conflitante nao vira silenciosamente modo evidencias.
+- Sem selecao humana ou com estado incompativel, pedir somente a decisao necessaria.
+  Nao planejar todas as issues/projetos nem incluir 00401 por estar relacionada.
+- Java 8/javax/EAP 7.4 e Hibernate 5.3 quando aplicavel permanecem. JaCoCo: 85% das
+  linhas do recorte corrigido, aviso abaixo sem reprovar build por percentual;
+  falha de compilacao/teste continua falha. Sonar global permanece separado.
+- Git informativo conforme ADR-0004. Nenhuma mudanca no DevSquad instalado, Maven
+  da maquina ou configuracao MCP faz parte desta simplificacao.
+
+### Contrato tecnico do contexto
+
+Entrada nova -MigrationPath referencia o registro existente; nao reutilizar
+-MigrationSourcePath, que significa documento recebido para manutencao.
+-ContextPath/RequestId explicitos retomam uma solicitacao ja preparada. Sem referencia,
+a tarefa pode resolver um unico registro elegivel no workspace; se houver varios,
+pergunta uma vez qual registro/frente. Nao depende do historico do chat, do ultimo
+arquivo por data ou de qualquer Markdown que estiver aberto. Source e identidade
+devem ser conferidos antes de escrita; nomes legiveis aparecem nas mensagens.
+Parametro legado -Target continua caminho avancado compativel.
+
+Introduzir no novo recibo um discriminador **PlanningBasis=MTA|EVIDENCIAS**:
+
+- MTA: preservar MtaOrigin/RunId, snapshot, manifest/result e hashes existentes,
+  resolvendo a rodada do registro e conferindo sua integridade.
+- EVIDENCIAS: Project/Source/RequestId e destinos continuam obrigatorios; MtaOrigin,
+  RunId, Run e caminhos de artefatos MTA ficam nulos se indisponiveis. AnalysisSource
+  nao finge snapshot MTA. Guardar indice e entradas pertinentes com origem, caminho,
+  relacao com a issue e hashes de arquivos realmente disponiveis. Relatorio parcial,
+  trecho de codigo, log, teste ou documento fornecido pode ser evidencia; nao
+  fabricar identidade/categoria/contagem/recomendacao MTA.
+- Falta de localizacao/solucao numa evidencia MTA gera pergunta/limite proporcional.
+  Issue manual usa sua evidencia e ponto local, sem exigir recomendacao MTA ficticia.
+- Recibos legados sem discriminador continuam reconhecidos no formato MTA atual.
+  Evidencias armazenadas sob .harness/planning/<projeto>/evidencias/plano_<data>__<id>/,
+  mantendo profundidade de solicitacao e sem RunId sintetico.
+- Historicidade de evidencia, atualidade do registro e autorizacao sao dimensoes
+  separadas. Conferir hashes com ferramenta real; nao alegar verificacao inexistente.
+- Leitores de historico, indice, abertura, revisao, implementacao e limpeza devem
+  entender os dois modos. Implementacao verifica a base efetivamente usada pelo
+  plano, sem depender dos quatro arquivos MTA no modo EVIDENCIAS.
+- Preservar mudancas esperadas do registro. Mudanca relevante de base apos preparo
+  requer reavaliacao explicita e novo recibo quando apropriado, nunca edicao do antigo.
+
+Preparar um prompt nao exige antecipar as conclusoes da analise. Com registro,
+escolha e referencias acessiveis, prepara-se a solicitacao; suficiência semantica
+das evidencias cabe ao agente. Referencias ausentes/invalidas sao comunicadas com
+precisao. Fonte ou identidade ambiguas precisam ser resolvidas antes de fixar destinos.
+
+### Conversa antes de concluir a proposta
+
+O agente primeiro consulta fontes e as respostas ja existentes. Havendo uma lacuna
+essencial, pergunta de forma curta: qual decisao/informacao falta, por que altera a
+solucao e onde o desenvolvedor pode obte-la; oferecer opcoes quando houver.
+Perguntas nao sao formulario fixo nem sao exigidas em todo planejamento.
+
+- Escopo, comportamento ou criterio essencial indefinido: perguntar antes de
+  gravar plano/to-do como proposta completa; nao produzir par ficticio so para
+  preencher os destinos. Retomar a mesma solicitacao quando houver resposta.
+- Rascunho anterior valido: preservar, indicar o ponto aberto e atualizar o mesmo
+  lote; nao regenerar documentos nem perder tarefas verificadas.
+- Lacuna nao impeditiva: proposta pode explicitar limite e verificacao pertinente,
+  sem criar aprovacao manual redundante. Falta de MTA por si so nao impede esse modo.
+- Respostas humanas pertinentes entram nas decisoes/fundamentos da proposta;
+  nao exigir copia manual delas em indice, ranking e prompt.
+- Com informacao suficiente: escrever/reler PlanPath/TodoPath, registrar somente
+  andamento/cobertura/referencias permitidas no registro, e apresentar a revisao/GO
+  como proxima decisao. Pergunta respondida nao concede GO ou aceite.
+
+### Entregas ordenadas
+
+Cada item inclui ajustes e verificacao focados; documentos de uso entram nas
+fatias documentais antes do reteste nativo. Arquivos indicados sao alvos previstos,
+nao mudancas realizadas. Manter alteracoes na branch harness e preservar o ensaio.
+
+**SIM-01 — Unificar o contrato e as decisoes.** Sem dependencia.
+Arquivos: doc/especificacoes/planejamento-copilot.md, nova ADR-0005 no padrao de
+doc/adr, AGENTS.md e .github/copilot-instructions.md.
+Aceite: modo EVIDENCIAS e perguntas previas definidos; regra de selecao/reconciliacao
+unica; limites de escrita/GO e compatibilidade MTA preservados. Nova ADR complementa
+ADR-0002/0004 apenas nos pontos alterados, sem apagar decisoes historicas.
+Verificacao: revisar cenarios deste plano contra as quatro fontes e links locais.
+
+**SIM-02 — Resolver o registro e a escolha antes de preparar.** Depende de SIM-01.
+Arquivos: scripts/Harness.psm1, scripts/HarnessPlanning.psm1,
+scripts/HarnessPrioritization.psm1, tests/Test-MigrationRegister.ps1 e
+tests/Test-Prioritization.ps1.
+Aceite: leitura compartilhada de registro/identidade/selecao/referencias sem
+inicializacao mutante; escolha atual prevalece sobre resumo antigo; unica selecao
+ou ambiguidade explicita, sem recencia e sem expandir escopo.
+Verificacao: registro inexistente/invalido, multiplos registros, DEV, estados,
+sobreposicao, nome/Source e origem recebida de outra maquina.
+
+**SIM-03 — Preparar MTA a partir da origem registrada.** Depende de SIM-02.
+Arquivos: scripts/HarnessPlanning.psm1, scripts/preparar-planejamento.ps1,
+tests/Test-Planning.ps1 e tests/Test-PlanningPortable.ps1.
+Aceite: -MigrationPath reutiliza base e escolhas sem atualizar catalogo; rodada
+mais nova no historico nao e adotada; recibo anterior explicito retoma sem duplicar.
+Verificacao: MTA local/recebido, base ausente/conflitante, escolha preservada,
+nenhuma escrita antes de validar entradas/destinos; comportamento legado explicito.
+
+**SIM-04 — Preparar planejamento por evidencias.** Depende de SIM-02/03.
+Arquivos: scripts/HarnessPlanning.psm1, scripts/preparar-planejamento.ps1,
+tests/Test-PlanningCli.ps1 e novo tests/Test-PlanningEvidence.ps1.
+Aceite: base EVIDENCIAS produz prompt/recibo sem exigir MTA; entradas e hashes reais,
+sem RunId/contagens ficticios; integridade MTA invalida nao e contornada por fallback.
+CLI NonInteractive aceita registro/base explicitos, informa somente entradas
+realmente ausentes, preserva JSON/exit codes e nao abre menus.
+Verificacao: DEV com codigo/log, relatorio parcial, evidencia insuficiente,
+arquivos ausentes/alterados e selecao ausente; modo legado MTA continua funcionando.
+
+**SIM-05 — Retomar e consumir os dois modos.** Depende de SIM-04.
+Arquivos: scripts/HarnessPlanning.psm1, scripts/abrir-planejamento.ps1,
+scripts/preparar-implementacao.ps1, tests/Test-Implementation.ps1 e
+tests/Test-PlanningEvidence.ps1.
+Aceite: historico/abertura/Previous reconhecem EVIDENCIAS; preparo de implementacao
+e revisao valida base real e preserva GO; origem antiga nao e reescrita quando novo
+MTA chega. Auditar HarnessImplementation e alterar somente se houver dependencia.
+Verificacao: abrir/retomar proposta, gerar prompts posteriores com e sem MTA,
+hash divergente, GO ausente e nova base vinculada por Previous.
+
+**SIM-06 — Corrigir indice, manutencao e avisos.** Depende de SIM-03/04/05.
+Arquivos: scripts/HarnessProjectIndex.psm1, scripts/atualizar-indice-projetos.ps1,
+scripts/HarnessPlanning.psm1, tests/Test-ProjectIndex.ps1 e
+tests/Test-MigrationRegister.ps1.
+Aceite: indice inicial cria registros necessarios; atualizacao de trabalho escolhido
+nao troca MTA silenciosamente; selecao valida e evidencias podem direcionar plano
+mesmo sem catalogo; reconciliacao com motivo nao sobrepoe escolha sem conflito.
+Verificacao: indice atrasado, novo MTA, notas esperadas, conflito real por ID,
+registros antigos com PENDENTE, aviso de historico ausente separado da base valida.
+Conferir limpeza em tests/Test-Cleanup.ps1; novos formatos nao ampliam destinos.
+
+**Marco A:** SIM-01 a SIM-06 coerentes, regressao do caminho MTA preservada e
+percurso EVIDENCIAS coberto ate o preparo de implementacao; ainda sem reteste do app.
+
+**SIM-07 — Entrada direta Planejar.** Depende de SIM-06.
+Arquivos: .vscode/tasks.json, scripts/preparar-planejamento.ps1,
+tests/Test-TaskInputs.ps1 e tests/Test-PlanningCli.ps1.
+Aceite: Planejamento: planejar entra diretamente no preparo/retomada, sem
+SelectOperation e sem submenu de MTA. Zero reselecao quando registro/base ja
+resolvidos; uma escolha de registro somente quando houver ambiguidade real.
+Registro ausente aponta Workspace: atualizar indice dos projetos; necessidade
+concreta de reconciliacao retorna encaminhamento pronto, sem carimbar tudo PENDENTE.
+Preservar -Operation manter-migracao e escolhas avancadas na CLI por compatibilidade,
+fora da entrada cotidiana. Sem exigir editor ativo, tarefa por projeto ou recencia.
+Verificacao: unico/multiplos registros, registro ausente, reconciliacao pertinente,
+cancelamento, sem arquivo aberto, caminho com espacos, execucao manual e CLI.
+Conferir Test-Workspace para referencias/geracao.
+
+**SIM-08 — Planejar e reconciliar com perguntas pertinentes.** Depende de SIM-01/04.
+Arquivos: .github/prompts/planejar-lotes.prompt.md, manter-migracao.prompt.md e
+revisar-lote.prompt.md; tests/Test-Planning.ps1 e tests/Test-MigrationRegister.ps1.
+Aceite: escolher base do recibo; nao repetir dados do registro; perguntas essenciais
+antes de concluir plano/to-do e retomada estavel; ausencia de MTA nao bloqueia por
+regra generica, pendencia de reconciliacao nao e gate automatico. Aplicar roteamento
+por cliente definido em SIM-09: corpo comum nao exige DevSquad no Codex.
+Verificacao: fixtures com resposta ja no registro, duvida real de comportamento,
+evidencia suficiente/insuficiente, edicao esperada versus conflito e rascunho existente.
+
+**SIM-09 — Tornar acionamentos e priorizacao coerentes por cliente.** Depende de SIM-08.
+Arquivos: .github/prompts/priorizar-issues.prompt.md, scripts/HarnessPrioritization.psm1,
+scripts/HarnessPlanning.psm1 e testes Test-Prioritization/Test-PlanningCli.
+Aceite: regras comuns e adaptacao explicita: Codex usa using-agent-skills/apoio nativo
+pertinente; Copilot usa DevSquad na execucao quando disponivel e autorizado. Skill
+nao e agente; invocacao deve ser real. Disponibilidade ausente e relatada sem simular.
+Saida oferece mensagem curta com caminho real; nao infere cliente por EditorPath.
+Sem cliente informado ao preparador, oferecer acionamentos curtos identificados
+para Codex e Copilot, sem acrescentar menu obrigatorio; helper usa o cliente da sessao.
+Essa regra tambem rege os templates tratados em SIM-08/10 e suas delegacoes.
+Ranking inclui link/ID/campos para escolha e vinculos de sobreposicao, sem escolher
+pelo humano. Mandatory requer categoria comprovada; manual so se pedido expresso.
+Verificacao: nomes/frontmatter/tools, mensagem Copilot versus Codex, menos candidatas
+que Top, contagem deduplicada e escolha atual posterior ao ranking.
+
+**SIM-10 — Alinhar implementacao e revisao do resultado.** Depende de SIM-05/08/09.
+Arquivos: .github/prompts/implementar-lote.prompt.md, revisar-resultado.prompt.md,
+scripts/HarnessPlanning.psm1 e tests/Test-Implementation.ps1.
+Aceite: consumir os dois modos e plano/GO reais; perguntas e verificacoes
+proporcionais, sem inventar MTA; instrucoes de build/testes/JaCoCo/Sonar e roteiro
+funcional/EAP quando aplicavel, meta 85% com aviso e falhas reais preservadas.
+Verificacao: prompts gerados, reports presentes/ausentes, escopo de escrita e
+hashes; regressao Test-ImplementationBranch e Test-BuildCoverage quando afetados.
+
+**SIM-11 — Helper como condutor de uma etapa.** Depende de SIM-07/08/09/10.
+Arquivos centrais: .agents/skills/orientar-migracao/SKILL.md e references/papeis.md.
+Conferir seis perfis .codex/agents e seis .github/agents; ajustar somente adaptadores
+que precisarem, em subfatias separadas por cliente, sem duplicar regras comuns.
+Aceite: pedido curto recupera contexto e proximo passo; selecao registrada nao pede
+nova confirmacao; caminho pronto, pergunta minima e retorno humano. Distinguir
+adotar o papel helper de chamar um subagente; permitir consulta direta simples.
+Verificacao: fixtures de leitura com ambos modos, cliente conhecido/desconhecido,
+handoff entre clientes e apoio presente/ausente, sem scripts/escrita pelo helper.
+
+**SIM-12 — Guias do fluxo e README.** Depende de SIM-07/08/10/11.
+Arquivos: README.md, doc/guias/harness-migracao-desenvolvedor.md e
+doc/guias/tools/planejamento-migracao.md.
+Aceite: entrada curta para iniciante, Planejar direto, evidencias sem MTA e perguntas antes
+da proposta; GO/aceite no momento certo; guia do desenvolvedor remete ao uso do helper,
+sem duplicar instrucoes tecnicas ou apresentar PENDENTE generico.
+Verificacao: links, tarefas/parametros reais e leitura do percurso completo com os
+exemplos MTA e DEV. Registrar informacao automatica versus escolha humana.
+
+**SIM-13 — Guias de cliente, priorizacao e preparo.** Depende de SIM-09/11/12.
+Arquivos: doc/guias/tools/workspace.md, priorizacao-issues.md e mta.md; revisar
+configuracao/documentacao de tarefas geradas somente se referencias forem afetadas.
+Aceite: selecao nativa Copilot e entrada por skill Codex, retomada por arquivos,
+distincao preparar/executar e registro pronto da escolha; MTA opcional no planejamento
+por evidencias, sem prometer ranking mandatory para dados sem categoria comprovada.
+Verificacao: exemplos copiados por iniciante, referencias e ausencia de instrucoes
+conflitantes entre README, guias, skill, contrato e templates.
+
+**Marco B:** entrada, prompts, helper e guias contam a mesma historia; desenvolvedor nao
+precisa conhecer ContextPath/RankingPath/RunId para usar o fluxo habitual.
+
+**SIM-14 — Validacao integrada e retomada manual.** Depende de SIM-01 a SIM-13.
+Arquivos: suites afetadas em tests/, fixtures em .harness/tests/, tasks/plan.md e todo.md.
+Aceite: testes focados aprovados, regressao proporcional e cenarios abaixo nos dois
+clientes; delegacao registrada por chamada real onde pertinente. Teste simples sem
+delegacao nao e falha. Artefatos historicos do ensaio preservados; nenhum aceite global
+de aplicacao inferido do sucesso de scripts. Esta fatia nao entrega novos executores
+SDLC-04/05: conclui/retesta helpers e adapta os preparadores/prompts ja existentes.
+Verificacao: comparar entradas/saidas e diff; registrar comandos/resultados realmente
+obtidos, sem preencher [x] apenas por existencia de arquivos.
+
+### Matriz de aceite e regressao
+
+| Cenario | Resultado observavel |
+| --- | --- |
+| Registro com 00400 escolhida, MTA vinculado e reconciliacao historica PENDENTE | Orienta preparo/execucao da proposta; exige reconciliacao antes somente com conflito explicado. |
+| Indice/ranking antigos; escolha atual valida | Reconhece escolha; nao pede repetir status nem editar todos os documentos. |
+| Duas issues no mesmo ponto | Mantem IDs/vinculo e uma oportunidade; secundaria nao entra sem escolha. |
+| Um registro elegivel versus varios projetos/frentes | Resolve o unico contexto consistente ou pede uma escolha; nunca planeja todos. |
+| Entrada Planejar com registro existente versus ausente | Sem menu de operacoes; usa registro ou orienta Workspace: atualizar indice dos projetos. |
+| Historico tem MTA mais novo que o vinculado | Mantem a base do registro; troca somente quando solicitada. |
+| Sem MTA completo, issue DEV e evidencias pertinentes | Prepara prompt e permite proposta fundamentada sem rodada/categoria ficticia. |
+| Sem MTA e evidencia ainda insuficiente para definir comportamento | Agente faz pergunta especifica antes de fechar proposta; respostas retomam mesma solicitacao. |
+| Pergunta respondida no registro ou no chat atual | Nao pergunta novamente; incorpora fundamento na proposta. |
+| Falta de evidencia de runtime ou cobertura nao impede definir a solucao | Registra limite/verificacao pertinente, sem criar dispensa ou GO redundantes. |
+| Source/registro ambiguo, MTA conflitante ou arquivo adulterado | Explica problema concreto; nao escolhe recencia nem muda modo para contornar verificacao. |
+| Nova evidencia confirma estado versus contradiz escopo/andamento | Atualiza leitura no primeiro caso; reconcilia o conflito delimitado no segundo. |
+| Recibo antigo e novo recibo por evidencias | Abre, retoma, indexa e prepara fases seguintes nos respectivos formatos. |
+| Codex e Copilot com o mesmo pedido curto | Mesma decisao de etapa, acionamento apropriado ao cliente; apoio real identificado. |
+| JaCoCo abaixo de 85%; teste/compilacao falho | Percentual gera aviso; falha tecnica continua falha. |
+
+Rodar suites pertinentes em Windows PowerShell 5.1:
+Test-MigrationRegister, Test-ProjectIndex, Test-Prioritization, Test-Planning,
+Test-PlanningPortable, Test-PlanningCli, novo Test-PlanningEvidence,
+Test-Implementation, Test-ImplementationBranch, Test-TaskInputs, Test-Workspace
+e Test-Cleanup. Test-BuildCoverage se templates/comandos de cobertura forem afetados.
+Comando por suite: powershell.exe -NoProfile -File tests/Test-<nome>.ps1.
+Nao rodar builds da aplicacao apenas para validar texto/menu; testes de fixtures e
+ensaios de agentes cobrem seus limites. Revisao de sintaxe, links, TOML/frontmatter e
+git diff --check complementa, sem substituir a validacao nativa.
+
+### Riscos e ordem de execucao
+
+- Sem MTA e mudanca de contrato, nao apenas remover menu: adaptar todos os leitores
+  antes de considerar o fluxo entregue; conferir ausencia de campos opcionais.
+- Perguntas excessivas repetiriam o problema: conferir fontes primeiro e separar
+  decisao essencial de verificacao futura; nao impor questionario padrao.
+- Simplificar menus sem fixar origem pode trocar contexto: resolver registro/base
+  antes de qualquer escrita e preservar escolha/destinos.
+- Templates antigos congelam regras antigas: preservar historico e preparar novo
+  artefato para reteste, sem alegar que uma alteracao no template mudou um recibo antigo.
+- Reconciliacao automatica nao pode decidir pelo humano: executor registra somente
+  fatos/autorizacoes do escopo; helper permanece leitor.
+- Copilot/DevSquad podem ter capacidades diferentes: validar disponibilidade e
+  limites, sem modificar o plugin instalado nem transferir configuracao ao iniciante.
+
+Ordem: SIM-01 -> SIM-02 -> SIM-03 -> SIM-04 -> SIM-05 -> SIM-06 -> Marco A;
+SIM-07/08/09/10 -> SIM-11 -> SIM-12/13 -> Marco B -> SIM-14.
+HarnessPlanning e compartilhado por varias fatias: executar suas edicoes
+sequencialmente. Documentacao pode ser preparada apos estabilizar o contrato,
+mas revisao final depende do comportamento entregue. Nenhuma estimativa em horas
+ou nova decisao de infraestrutura e necessaria para iniciar a implementacao.
+
+
+## Direcao de simplificacao registrada no ensaio - 2026-10-04
+
+Registro historico das discussoes durante o ensaio; o plano consolidado acima
+passa a orientar a proxima implementacao. Evidencias e criterios iniciais em ENS-01 a
+ENS-15 do [to-do](todo.md#ensaio-acompanhado-do-helper-no-codex---2026-10-04).
+Este registro nao altera contratos, prompts, tarefas ou recibos ja emitidos.
+
+Entrada humana central: migracao.md do projeto escolhido, com prioridades,
+observacoes, recorte, issues adicionais e referencias das evidencias. Indice
+localiza e resume; recibo preserva identidade/snapshots/destinos da solicitacao.
+Relatorios MTA, codigo e anexos continuam fontes externas a conferir. Preparacao
+inicial pelo indice ja pode criar/carregar registros; nao impor uma segunda
+tarefa de criacao do migracao.md quando ele ja existe.
+
+Percurso proposto: preparar entradas necessarias -> priorizar opcionalmente ->
+registrar escolha -> preparar/executar proposta -> revisao/GO -> corretiva ->
+verificacoes -> aceite. Escolha direta dispensa ranking; pre-planejamento e
+priorizacao, enquanto replanejamento revisa uma proposta existente. Operacoes
+tecnicas de preparo/execucao continuam distintas, apresentadas pelo helper apenas
+quando chegarem a vez, com entrada curta pronta para o cliente em uso.
+
+Helper acompanha situacao, confere escolhas/evidencias, identifica mudancas com
+impacto e orienta uma proxima acao; usa especialistas quando pertinente. Mantem
+limites atuais de leitura/orientacao. Preparadores e executores da etapa autorizada
+persistem artefatos/andamento permitidos. Humano escolhe prioridades/recorte,
+resolve conflitos de intencao e concede GO/aceite; helper nao assume essas decisoes.
+Se futuramente for desejada escrita automatica pelo condutor, isso pertence ao
+executor com escopo explicito, sem ampliar silenciosamente o perfil helper.
+
+Conferencia de consistencia integra a retomada; reconciliacao separada e uma rota
+por necessidade concreta, nao pedaggio de toda proposta. Nota explicativa, escolha
+registrada apos um snapshot ou evidencia que apenas confirma estado nao sao
+automaticamente conflitos. Novo MTA, mudanca de escopo, divergencia entre colegas
+ou evidencia que contradiz andamento exigem avaliar impacto e conciliar o recorte;
+revisar o mesmo lote quando aplicavel. Dependencia impeditiva deve ser demonstrada.
+Preservar pendencias historicas e nao marcar CONCLUIDA sem executar a manutencao.
+
+Rever juntos atualizacao do indice, preparo de planejamento/manutencao, templates,
+guia e helpers: Sync-IndexMigration tambem carrega o ultimo MTA reconhecido quando
+UpdateMigration esta ativo. Separar descoberta inicial de adocao de outra rodada
+em um trabalho ja selecionado; impedir troca implicita da base por atualizar indice
+ou preparar proposta. Nao criar registro duplicado, novo sistema de status ou novas
+Run Tasks por arquivo/projeto. Observacoes no prompt sao complementos opcionais;
+nao repetir selecao e links ja registrados. Lacunas e ambiguidade pedem somente o
+dado indispensavel, sem planejar automaticamente todos os projetos/issues.
+
+Refinamento humano: ANALISAR AGORA ja satisfaz a decisao de incluir a issue na
+analise. Consumidores devem reconhecer essa escolha no registro atual e parar de
+apresenta-la como PENDENTE porque ranking/indice/snapshot anterior assim dizia.
+Nao exigir edicao manual coordenada de varios documentos para repetir a escolha.
+Preservar snapshots historicos; no resumo atual, mostrar decisao registrada e
+proxima acao. Evitar estado generico de "documento pendente": distinguir escolha,
+execucao do planejamento, verificacoes especificas e futuras decisoes de GO/aceite.
+Evidencia nao examinada pede verificacao pertinente pelo agente da fase antes de
+virar pergunta ao humano; somente lacuna concreta que dependa dele pede retorno.
+Esse reconhecimento nao marca reconciliacao historica CONCLUIDA nem presume
+corretiva, verificacao ou GO. Revisar quando gerar avisos/pendencias para que o
+simples preparo de arquivos nao produza uma nova obrigacao humana sem necessidade.
+
 ## Pre-planejamento: priorizar issues - 2026-10-04
 
 Implementacao autorizada apos a avaliacao de viabilidade, sobre 3eed059 na branch
@@ -71,10 +498,10 @@ antes dos executores; COMP-01, CORE-01 e SERV-01 continuam no backlog vigente.
 
 | Ambiente | Observado | Situacao para retomar |
 | --- | --- | --- |
-| Codex no VS Code | Na consolidacao final, o desenvolvedor confirmou que `orientar-migracao` ja aparece na extensao. | Descoberta confirmada por relato humano. Falta validar orientacao e delegacao; nao manter a ausencia no seletor como pendencia. |
-| GitHub Copilot | Desenvolvedor tentou usar a orientacao, mas recebeu `Error: (query) No response was returned`. Tambem falhou com mensagem simples, Agent padrao e outro workspace. | Logs registram falha dos hooks globais do DevSquad instalado; falta testar com o plugin efetivamente desativado. Selecionar Agent nao desativa hooks de plugin. |
+| Codex no VS Code | Descoberta de `orientar-migracao` confirmada pelo desenvolvedor; respostas do ensaio reconheceram projeto e escolha atual. Evento 10 no to-do registra comparacao com Copilot. | Orientacao parcialmente validada: recomendou reconciliacao primeiro sem conflito concreto e encaminhou a execucao ao Copilot durante sessao Codex. Harmonizar transicao e entrada por cliente; delegacao nativa ainda nao demonstrada. |
+| GitHub Copilot | Inicialmente falhou com `Error: (query) No response was returned`. Em 2026-10-04, o desenvolvedor relatou aparente recuperacao ao desativar o MCP do Azure e depois trouxe resposta com chamadas Read, uso de orientar-migracao e reconhecimento da escolha atual (evento 9 no to-do). | Chat respondeu nessa sessao; causa exata da falha anterior nao confirmada. Avaliar ambiguidade na transicao ao planejamento e validar delegacao, ainda nao demonstrada. Nao exigir desativar DevSquad para continuar nem atribuir a falta de resposta aos hooks apenas pelo log historico. |
 
-Diagnostico local: VS Code 1.140.0 / Copilot Chat 0.68.0. No log
+Diagnostico local historico: VS Code 1.140.0 / Copilot Chat 0.68.0. No log
 `%USERPROFILE%/.copilot/logs/process-1791024209527-256024.log`, a tentativa de
 2026-10-03 21:24:16 (UTC-03, registrada como 2026-10-04T00:24:16Z) mostra:
 
@@ -100,6 +527,13 @@ teste leitor; ADO esta no plugin DevSquad. O status oficial consultado as 21:23
 informava Copilot/provedores operacionais, sem incidentes abertos. Isso nao
 substitui diagnostico local nem garante disponibilidade na retomada.
 
+Atualizacao de 2026-10-04: o desenvolvedor relatou aparente recuperacao apos
+desativar o MCP do Azure. O servidor MCP exato e novos logs nao foram fornecidos;
+nao equiparar automaticamente esse MCP ao ADO/Foundry acima. As falhas de hooks
+permanecem evidencias historicas, sem causalidade demonstrada para a ausencia de
+resposta. Nao sao pre-requisito de investigacao para continuar um chat funcional.
+Validar a retomada pelo uso do helper; aprofundar o diagnostico se o erro reaparecer.
+
 A suspeita de "24 arquivos alterados pelo helper" foi conferida: Git limpo,
 HEAD ainda `4a7fcb1` e exatamente 24 arquivos no diff acumulado `main...HEAD`.
 Na area `.harness` e nas configuracoes locais examinadas nao havia arquivos
@@ -108,10 +542,10 @@ teste; a quantidade exibida pelo Copilot coincidia com o diff acumulado da branc
 
 **Ordem de retomada:**
 
-1. Isolar o chat: Extensions > `@agentPlugins` > DevSquad > Disable (Workspace),
-   recarregar a janela e abrir conversa nova com Agent e "Responda apenas OK".
-   Confirmar a desativacao real e o resultado; se falhar, consultar o log da nova
-   tentativa antes de atribuir a mesma causa ou mudar outras configuracoes.
+1. Retomar com o MCP do Azure desativado, conforme a configuracao informada pelo
+   desenvolvedor. Confirmar resposta durante o teste do helper abaixo. Se a falha
+   reaparecer, consultar o log da nova tentativa antes de atribuir causa ou alterar
+   outras configuracoes; desativar DevSquad deixou de ser o primeiro passo obrigatorio.
 2. Com chat funcional, testar `migracao_helper` no Copilot pelo
    [guia de orientacao](../doc/guias/tools/workspace.md#orientacao-com-codex-ou-github-copilot),
    com leitura simples e depois contexto escolhido; conferir ausencia de escrita.

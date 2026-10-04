@@ -72,7 +72,7 @@ Assert ($text.Contains('**Total MTA contabilizado: 2 issues / 10 ocorrencias**')
 Assert ($text.Contains('Categorias do ultimo MTA: mandatory: 1 issues / 6 ocorrencias; optional: 1 issues / 4 ocorrencias')) 'Categorias MTA ausentes.'
 $summaryLine = @($text -split '\r?\n' | Where-Object { $_.StartsWith('| ') -and $_.Contains($app) })
 Assert ($summaryLine.Count -eq 1 -and $summaryLine[0].Contains('| mandatory: 1 / 6; optional: 1 / 4 |')) 'Resumo deve separar issues e ocorrencias por categoria.'
-Assert ($text.Contains('Conferir rodada MTA do registro')) 'Proxima acao deve mostrar divergencia do catalogo.'
+Assert ($summaryLine[0].Contains('base do registro preservada') -and $summaryLine[0].Contains('Planejamento: planejar')) 'Divergencia do catalogo deve ser visivel sem impedir a escolha atual ou substituir sua base.'
 Assert ($text.Contains('- MTA:') -and $text.Contains($id)) 'MTA externo nao foi indexado.'
 Assert (-not $text.Contains('ID: b1') -and -not $text.Contains('registro(s)')) 'Resumo nao deve listar nem contar historico de execucoes.'
 Assert ((Get-FileHash $first.SnapshotPath).Hash -eq $firstHash -and $first.SnapshotPath -ne $second.SnapshotPath) 'Snapshot anterior foi alterado.'
@@ -122,14 +122,22 @@ $text = [IO.File]::ReadAllText($fifth.IndexPath)
 Assert ($text.Contains('Limites da leitura') -and $text.Contains('NAO VERIFICADO')) 'Falhas de leitura ficaram invisiveis.'
 Assert (@(Get-ChildItem "$fixture/.harness/projetos" -Recurse -File | Where-Object Name -like 'migracao*.md').Count -eq 1) 'Indice criou registro inesperado.'
 # Entrada CLI: nenhuma selecao de projeto; abre somente indice, sem analisar.
+# Consultas anteriores exercitam formato legado sem comentario MTA. Para a chamada
+# com UpdateMigration, tornar a origem explicita evita confundir erro de fixture
+# com a preservacao de um registro ja preenchido.
+$legacyOrigin = @{RunId=('a'*32);Project=$project.name;Source=$app;Run=(Join-Path $area 'origem-historica-nao-adotada');CatalogSha256=('A'*64)} | ConvertTo-Json -Compress
+$cliRegister = [IO.File]::ReadAllText($register.MigrationPath).Replace('<!-- mta:inicio -->', ('<!-- mta:inicio -->' + "`n<!-- MTA $legacyOrigin -->"))
+[IO.File]::WriteAllText($register.MigrationPath,$cliRegister)
+$cliRegisterHash = (Get-FileHash $register.MigrationPath).Hash
 $null = [IO.Directory]::CreateDirectory("$fixture/scripts")
-foreach ($file in @('Harness.psm1','HarnessPlanning.psm1','HarnessProjectIndex.psm1','atualizar-indice-projetos.ps1')) {
+foreach ($file in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessProjectIndex.psm1','atualizar-indice-projetos.ps1')) {
     Copy-Item -LiteralPath (Join-Path $root "scripts/$file") -Destination "$fixture/scripts/$file"
 }
 $editor = "$fixture/scripts/editor.ps1"
 Set-Content -LiteralPath $editor -Value '$args | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $PSScriptRoot "editor.json")'
 $cli = & powershell.exe -NoProfile -File "$fixture/scripts/atualizar-indice-projetos.ps1" -ConfigPath $configPath -WorkspacePath $workspace -EditorPath $editor 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0 -and $cli.Contains('Copia datada:') -and $cli.Contains('Leitura parcial')) ('CLI falhou: ' + $cli)
+Assert ((Get-FileHash $register.MigrationPath).Hash -eq $cliRegisterHash) 'CLI de indice nao deve substituir catalogo existente nem escolhas humanas.'
 $editorArgs = Get-Content "$fixture/scripts/editor.json" -Raw | ConvertFrom-Json
 Assert ($editorArgs[0] -eq '--reuse-window' -and $editorArgs[1] -eq $fifth.IndexPath) 'Editor nao recebeu indice atual.'
 Import-Module (Join-Path $root 'scripts/HarnessCleanup.psm1') -Force -DisableNameChecking
@@ -159,13 +167,14 @@ Assert ($text.Contains('confirmar GO humano antes de implementar')) 'Issue plane
 $secondLine = @($text -split '\r?\n' | Where-Object { $_.StartsWith('| ') -and $_.Contains($other) })
 Assert ($secondLine.Count -eq 1 -and $secondLine[0].Contains('18') -and $secondLine[0].Contains('PLANEJADA: 1')) 'Faltou uma unica linha consolidada por projeto.'
 foreach ($case in @(
-    @{Status='ANALISADA';Expected='Planejar issues ANALISAR AGORA'},
+    @{Status='ANALISADA';Expected='Planejamento: planejar usa as issues ANALISAR AGORA'},
     @{Status='IMPLEMENTADA';Expected='Verificar implementacao e registrar evidencias'},
-    @{Status='VERIFICADA';Expected='Revisar decisoes e evidencias para definir continuidade'}
+    @{Status='VERIFICADA';Expected='Revisar evidencias e aceite do resultado antes de definir continuidade'}
 )) {
     [IO.File]::WriteAllText($secondRegister.MigrationPath, $secondMd.Replace('PLANEJADA', $case.Status))
     $check = New-HarnessProjectIndex $context
-    Assert ([IO.File]::ReadAllText($check.IndexPath).Contains($case.Expected)) ('Sugestao incorreta para ' + $case.Status)
+    $caseLine = @([IO.File]::ReadAllText($check.IndexPath) -split '\r?\n' | Where-Object { $_.StartsWith('| ') -and $_.Contains($other) })
+    Assert ($caseLine.Count -eq 1 -and $caseLine[0].Contains($case.Expected)) ('Sugestao incorreta para o projeto com andamento ' + $case.Status)
 }
 [IO.File]::WriteAllText($secondRegister.MigrationPath, '<!-- mta:inicio -->invalido<!-- mta:fim -->')
 $invalid = New-HarnessProjectIndex $context
@@ -190,4 +199,29 @@ Write-TestCatalog $missingCatalog @(1,2,3)
 $unknownCategory = New-HarnessProjectIndex $context
 $text = [IO.File]::ReadAllText($unknownCategory.IndexPath)
 Assert ($text.Contains('Totais por categoria (issues / ocorrencias): future-category: 1 / 3; mandatory: 2 / 7; optional: 2 / 6')) 'Categorias adicionais devem ser preservadas, sem reduzir a obrigatoria/opcional.'
-Write-Output 'PASS: indice por Source, ausencias, tentativas, MTA externo, planos, registro e snapshots preservados.'
+# Registro com escolhas manuais e sem origem tambem e existente: MTA descoberto
+# posteriormente nao deve ser adotado automaticamente ou deslocar o recorte humano.
+$manualApp = Join-Path $area 'app manual'
+$null = [IO.Directory]::CreateDirectory($manualApp)
+Set-Content (Join-Path $manualApp 'pom.xml') '<project />'
+$manualProject = [pscustomobject]@{name='manual';label='Manual';path=$manualApp}
+$manualRegister = Initialize-HarnessMigration $fixture $manualProject
+$manualText = [IO.File]::ReadAllText($manualRegister.MigrationPath).Replace('<!-- mta:fim -->', "| DEV-CACHE | Corrigir por evidencia | manual | - | MANUAL | ANALISAR AGORA | NAO ANALISADA | Evidencia humana suficiente para investigar. |`n<!-- mta:fim -->")
+[IO.File]::WriteAllText($manualRegister.MigrationPath,$manualText)
+$manualHash = (Get-FileHash $manualRegister.MigrationPath).Hash
+$manualRun = "$fixture/.harness/runs/manual/12121212121212121212121212121212"
+Write-HarnessJson "$manualRun/manifest.json" @{Source=$manualApp;Project='manual';RunId=('12'*16);CreatedAtUtc='2026-09-09T10:00:00Z'}
+Write-HarnessJson "$manualRun/result.json" @{Project='manual';RunId=('12'*16);Status='SUCCEEDED';ExitCode=0;SourceUnchanged=$true;SnapshotOriginalFilesUnchanged=$true;RulesUnchanged=$true;UnexpectedAddedFiles=@()}
+foreach ($manualArtifact in @('input/pom.xml','output/output.yaml','output/dependencies.yaml','output/static-report/index.html','rules/regra.yaml')) {
+    $manualArtifactPath = Join-Path $manualRun $manualArtifact
+    $null = [IO.Directory]::CreateDirectory((Split-Path $manualArtifactPath -Parent))
+    Set-Content -LiteralPath $manualArtifactPath 'fixture'
+}
+Write-TestCatalog $manualRun @(3)
+$context.Projects += $manualProject
+$manualIndex = New-HarnessProjectIndex $context -UpdateMigration
+$manualLine = @([IO.File]::ReadAllText($manualIndex.IndexPath) -split '\r?\n' | Where-Object { $_.StartsWith('| ') -and $_.Contains($manualApp) })
+Assert ((Get-FileHash $manualRegister.MigrationPath).Hash -eq $manualHash) 'Indexacao adotou MTA novo em registro manual ja preenchido.'
+Assert (@($manualIndex.Warnings | Where-Object { $_ -like ('Registro ' + $manualApp + ':*') }).Count -eq 0) 'Preservacao do registro manual nao pode ser um falso positivo causado por falha de atualizacao.'
+Assert ($manualLine.Count -eq 1 -and $manualLine[0].Contains('ANALISAR AGORA: 1') -and $manualLine[0].Contains('Planejamento: planejar') -and -not $manualLine[0].Contains('PENDENTE (historico')) 'Issue manual escolhida deve seguir ao planejamento sem reconciliacao inventada.'
+Write-Output 'PASS: indice por Source, ausencias, tentativas, MTA externo, planos, escolhas manuais, registro e snapshots preservados.'

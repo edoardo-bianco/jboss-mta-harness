@@ -29,13 +29,14 @@ try {
     } else {
         Write-Host "Projetos: $($prepared.Projects.Count) | Top: $Top"
         foreach ($project in $prepared.Projects) {
-            Write-Host "Projeto: $($project.Project) | Source: $($project.Source)"
-            foreach ($diagnostic in $project.Diagnostics) { Write-Warning $diagnostic }
+            Write-Host "Projeto: $($project.Label) | ID: $($project.Project) | Source: $($project.Source)"
+            foreach ($diagnostic in $project.Diagnostics) { Write-Warning ("$($project.Label): " + $diagnostic) }
         }
         Write-Host "Prompt preparado: $($prepared.PromptPath)"
         Write-Host "Contexto: $($prepared.ContextPath)"
         Write-Host "Ranking a ser escrito pelo agente: $($prepared.RankingPath)"
-        Write-Host 'Execute o prompt no chat do Copilot ou peca ao Codex para ler o arquivo preparado. Preparo nao executa o agente.'
+        Write-Host ('Codex: Execute o prompt deste arquivo: ' + $prepared.PromptPath)
+        Write-Host 'Copilot: abra o arquivo e use Executar Prompt. Preparo nao executa o agente.'
         Write-Host 'Depois escolha projeto/IDs/recorte, registre ANALISAR AGORA e indique a lista no planejamento usual. Ranking nao concede GO.'
         if (-not $NoOpen -and $EditorPath) {
             try { Open-HarnessEditor -EditorPath $EditorPath -FilePaths $prepared.PromptPath -Root $root }

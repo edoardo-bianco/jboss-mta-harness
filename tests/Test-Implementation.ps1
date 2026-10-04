@@ -100,7 +100,7 @@ Write-Output 'PASS: preparo de implementacao vinculado, sem GO inferido, isolado
 # Entrada real, sem Maven/MTA/Copilot: ferramentas deliberadamente nao configuradas.
 $scripts = Join-Path $fixture 'scripts'
 $null = [IO.Directory]::CreateDirectory($scripts)
-foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessGit.psm1','HarnessImplementation.psm1','preparar-implementacao.ps1')) {
+foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessGit.psm1','HarnessImplementation.psm1','preparar-implementacao.ps1')) {
     Copy-Item -LiteralPath (Join-Path $root ('scripts/' + $name)) -Destination $scripts
 }
 $config = Get-Content -LiteralPath (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json

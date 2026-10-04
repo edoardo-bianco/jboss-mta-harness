@@ -4,6 +4,7 @@ param(
     [string]$ConfigPath, [string]$WorkspacePath, [string]$Target, [switch]$SelectTarget,
     [string]$RunId, [string]$RunPath, [string]$EditorPath, [switch]$NoOpen,
     [string]$PreviousRequestId, [switch]$NewPlan,
+    [string]$MigrationPath, [string]$ContextPath, [string]$RequestId,
     [ValidateSet('planejar-lotes','revisar-lote','manter-migracao')][string]$Operation = 'planejar-lotes',
     [switch]$SelectOperation, [string]$EvidenceIndexPath, [string]$MigrationSourcePath, [switch]$WithoutMta,
     [switch]$NonInteractive, [ValidateSet('Text','Json')][string]$OutputFormat = 'Text'
@@ -31,7 +32,27 @@ try {
     Import-Module (Join-Path $PSScriptRoot 'HarnessPlanning.psm1') -Force -DisableNameChecking
     $harnessRoot = Split-Path -Parent $PSScriptRoot
     if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
-    $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
+    $registered = $Operation -eq 'planejar-lotes' -and ($MigrationPath -or $ContextPath -or $RequestId -or (-not $RunId -and -not $RunPath -and -not $SelectTarget -and -not $SelectOperation))
+    $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget -SkipMigrationInitialization:$registered
+    if ($registered) {
+        if ($WithoutMta -or $MigrationSourcePath -or $RunId -or $RunPath) { throw 'Planejar pelo registro usa sua base atual. Para trocar MTA, use manter-migracao explicitamente.' }
+        $prepared = Invoke-HarnessRegisteredPlanning $context -MigrationPath $MigrationPath -ContextPath $ContextPath -RequestId $RequestId -Target $Target -EvidenceIndexPath $EvidenceIndexPath -PreviousRequestId $PreviousRequestId -NewPlan:$NewPlan -Interactive
+        $promptToOpen=$prepared.PromptPath
+        Write-Host "Projeto: $($context.Active.label) | Fonte: $($context.Active.path)"
+        Write-Host "Registro: $((Get-HarnessMigrationPaths $harnessRoot $context.Active).MigrationPath)"
+        Write-Host "Prompt preparado: $promptToOpen"
+        Write-Host "Plano: $($prepared.PlanPath)"
+        Write-Host "To-do: $($prepared.TodoPath)"
+        Write-Host "Contexto: $($prepared.ContextPath)"
+        Write-Host 'O prompt cria ou atualiza a proposta; se faltar decisao essencial, o agente pergunta antes de concluir. Preparar nao executa o agente.'
+        Write-Host ('Codex: Execute o prompt deste arquivo: ' + $promptToOpen)
+        Write-Host 'Copilot: abra o arquivo acima e use Executar Prompt (nova conversa no Chat/Copilot).'
+        if (-not $NoOpen -and $EditorPath) {
+            try { Open-HarnessEditor -EditorPath $EditorPath -FilePaths $promptToOpen -Root $harnessRoot }
+            catch { Write-Warning ('Contexto salvo; abra pelo caminho acima. ' + $_.Exception.Message) }
+        }
+        exit 0
+    }
     if ($SelectOperation) {
         Write-Host '1. Planejar ou atualizar lote (/planejar-lotes): fluxo usual; atualiza o registro e prepara o planejamento.'
         Write-Host '2. Atualizar somente migracao.md (/manter-migracao): sem planejar lote; ajuda do Copilot opcional.'
@@ -65,8 +86,9 @@ try {
         Write-Host "Prompt preparado: $promptToOpen"
         Write-Host "Recibo de contexto: $($prepared.ContextPath)"
         Write-Host 'Se selecionou MTA, o catalogo ja foi atualizado no migracao.md; sem rodada nova, a referencia existente foi preservada.'
-        Write-Host 'RECONCILIACAO PENDENTE: execute o prompt no Copilot para reconciliar decisoes/evidencias. Carga MTA nao conclui essa etapa; ele nao gera plan.md/todo.md.'
-        Write-Host 'Depois da execucao, confira Estado na secao Reconciliacao do registro. Para planejar um lote, use a opcao 1.'
+        Write-Host 'Manutencao solicitada: execute o prompt para conferir decisoes/evidencias. A carga MTA nao conclui reconciliacao; ele nao gera plan.md/todo.md.'
+        Write-Host ('Codex: Execute o prompt deste arquivo: ' + $promptToOpen)
+        Write-Host 'Copilot: abra o arquivo e use Executar Prompt. Para produzir ou atualizar uma proposta, use Planejamento: planejar.'
     } else {
         if ($RunPath) { $selected = Get-MtaPlanningRunFromPath -RunPath $RunPath -Root $harnessRoot }
         else { $selected = Select-MtaPlanningRun $context -RunId $RunId -Interactive:(-not $RunId) }

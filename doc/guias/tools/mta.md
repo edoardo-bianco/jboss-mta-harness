@@ -176,9 +176,17 @@ O caminho acima e ilustrativo: informe a pasta que contem `manifest.json`,
 `result.json`, `input`, `rules` e `output`. O leitor confere resultado, identidade
 interna e evidencias e abre `output/static-report/index.html` na localizacao atual.
 Nao altera origem, indices nem ultimo sucesso local. Para planejar a partir dessa
-rodada, use a opcao `p` da tarefa de planejamento. Nao basta copiar so o HTML;
+rodada, adote-a explicitamente no registro pelo [caminho de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente)
+e depois use **Planejamento: planejar**. A entrada habitual recupera a origem
+vinculada; nao oferece menu de rodadas nem escolhe a mais recente. Nao basta copiar so o HTML
+para comprovar a integridade de uma rodada completa;
 para compartilhar apenas a visualizacao, envie `static-report` inteira e abra
 seu `index.html` diretamente no navegador.
+
+Quando voce so possui trechos/relatorios ou outras evidencias do problema, pode
+referencia-los no registro/LEIA-ME e planejar pela base EVIDENCIAS. O agente confere
+o codigo e explicita os limites, sem inventar manifestos, RunId, categoria mandatory
+ou resultado MTA. Pergunta apenas o essencial para uma proposta coerente.
 
 ### Acompanhar a analise MTA
 

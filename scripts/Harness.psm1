@@ -266,11 +266,13 @@ Registro local de escolhas e andamento por issue; reconciliar entre colegas por 
 
 ## Como usar este registro
 
-Workspace: atualizar indice dos projetos carrega o ultimo MTA reconhecido neste
-registro, preserva anotacoes e prepara o prompt. Execute-o se a secao Reconciliacao
-estiver PENDENTE; carga do catalogo nao conclui essa etapa. Para outra rodada/origem,
-use Preparar planejamento > 2 Manter registro. Numeros do indice vem do MTA;
-decisoes e andamento vem deste registro.
+Workspace: atualizar indice dos projetos cria registros ausentes e pode carregar
+o MTA inicial. Registros existentes preservam escolhas e origem vinculada.
+Escolha Decisao=ANALISAR AGORA e use Planejamento: planejar. A tarefa prepara ou
+retoma a proposta com as evidencias disponiveis, mesmo sem pacote MTA completo.
+Reconciliacao separada so quando houver conflito concreto ou troca de base desejada;
+peca ao helper o encaminhamento pronto. PENDENTE historico nao invalida sua escolha.
+Numeros do indice vem do MTA; decisoes e andamento vem deste registro.
 Edite Decisao, Andamento e Observacao; mantenha os marcadores e as oito colunas.
 Use &#124; para barras verticais nas celulas.
 

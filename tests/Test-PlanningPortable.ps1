@@ -88,7 +88,7 @@ foreach ($file in $before) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash
 # Run Task real: entrada p funciona mesmo sem nenhuma rodada no historico local.
 $scriptFolder = Join-Path $fixture 'scripts'
 $null = New-Item -ItemType Directory -Path $scriptFolder -Force
-foreach ($file in @('Harness.psm1','HarnessPlanning.psm1','preparar-planejamento.ps1','abrir-relatorio-mta.ps1')) { Copy-Item (Join-Path $root "scripts/$file") $scriptFolder }
+foreach ($file in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','preparar-planejamento.ps1','abrir-relatorio-mta.ps1')) { Copy-Item (Join-Path $root "scripts/$file") $scriptFolder }
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @(@{name='app';path=$localSource})
 $config.activeProject = 'app'

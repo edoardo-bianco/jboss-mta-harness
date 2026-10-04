@@ -271,18 +271,16 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
-      "label": "Planejamento: preparar contexto para Copilot",
-      "detail": "1: planejar/atualizar lote a partir do registro; 2: atualizar somente migracao.md, com ajuda opcional do Copilot. Aceita MTA local ou pasta recebida.",
+      "label": "Planejamento: planejar",
+      "detail": "Cria ou retoma a proposta pelas escolhas e evidencias do migracao.md. Sem registro, orienta atualizar o indice; pergunta somente quando o contexto for ambiguo.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
         "-NoProfile",
         "-File",
         "${workspaceFolder}/scripts/preparar-planejamento.ps1",
-        "-SelectOperation",
         "-WorkspacePath",
         "${input:harnessWorkspacePath}",
-        "-SelectTarget",
         "-EditorPath",
         "${execPath}"
       ],

@@ -25,6 +25,21 @@ Escreve apenas RankingPath sob .harness/priorizacao; nao escolhe pelo humano,
 nao altera registros nem planeja lotes. Escolha humana precede o planejamento usual.
 Helpers explicam/revisam a lista no chat; executar o prompt e etapa separada.
 
+Siga a [ADR-0005](../doc/adr/0005-planejamento-orientado-pelo-registro.md).
+Planejamento: planejar cria, retoma ou atualiza a proposta pelo registro existente;
+nao exigir menu de operacao ou selecao repetida de projeto/rodada. Sem registro,
+orientar Workspace: atualizar indice dos projetos. Indice localiza, registro atual
+concentra escolha/recorte/evidencias; ranking antigo nao revoga escolha atual.
+PlanningBasis=MTA|EVIDENCIAS permite proposta por evidencias humanas sem fabricar
+MTA. Conferir integridade da base real. Origem/evidencias/contrato/template iguais
+retomam a solicitacao; mudancas nessas entradas geram recibo com Previous. Escolhas
+e observacoes atuais sao lidas sem reescrever historico. Link antigo segue Previous
+ate o unico sucessor; bifurcacao pede escolha. Nao escolher plano/rodada por recencia.
+Reconciliar so por motivo concreto; PENDENTE historico nao e gate generico.
+Perguntas essenciais antecedem a proposta completa, sem par ficticio plan/to-do.
+Helpers continuam leitores e orientam uma etapa com caminho pronto no Copilot;
+execucao usa DevSquad compativel. GO vigente no mesmo escopo nao e pedido novamente.
+
 Siga o [contrato vigente](../doc/especificacoes/planejamento-copilot.md): decisoes
 Java 8/javax/EAP 7.4 e Hibernate permanecem. planejar-lotes atende proposta e revisao.
 MigrationPath explicito permite somente andamento/cobertura/referencias das issues

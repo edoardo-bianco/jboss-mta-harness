@@ -42,7 +42,7 @@ Use uma pasta local permitida pela empresa, com Git, VS Code e Windows PowerShel
 5.1 disponiveis. Para build, tenha Maven e JDK 8; para executar MTA, tenha a
 distribuicao Windows completa e seu JDK (JDK 25 no ensaio), conforme a
 [configuracao MTA](mta.md#configuracao). Use as instalacoes existentes.
-Para o planejamento assistido, configure [Copilot/DevSquad](planejamento-migracao.md#configuracao)
+Para o planejamento assistido, configure [Codex ou Copilot/DevSquad](planejamento-migracao.md#configuracao)
 em sessao Local. Quem vai somente planejar com uma rodada recebida segue o caminho
 de reutilizacao da etapa 3, sem repetir a analise apenas para preparar a proposta.
 
@@ -237,7 +237,8 @@ Para o Java de um novo comando Maven, salve as configuracoes e crie um terminal 
 A skill [orientar-migracao](../../../.agents/skills/orientar-migracao/SKILL.md)
 ajuda a localizar a etapa atual e decidir o proximo passo. Ela consulta o indice,
 registro, recibos, planos, prompts preparados e evidencias pertinentes; responde
-com os caminhos conferidos e um roteiro baseado no guia da etapa. Voce executa
+com **uma proxima acao**, motivo, caminho/mensagem prontos e o resultado a conferir.
+Nao precisa conhecer nomes de campos do contexto para pedir ajuda. Voce executa
 as tarefas e toma as decisoes de prioridade, GO e aceite.
 
 O arquivo fica em .agents/skills no repositorio, local reconhecido por
@@ -255,12 +256,12 @@ aberta. Nao e necessario regenerar o workspace para acrescentar esta skill.
    Se nao aparecer, confira os arquivos no clone e se as customizacoes estao
    habilitadas no cliente; no Copilot, a lista de skills fica em **/skills**.
    No Codex, reinicie o cliente se a descoberta nao refletir os novos arquivos.
-3. Informe o objetivo e o projeto/caminho. Na retomada, acrescente o context.json,
-   prompt preparado ou RequestId da solicitacao escolhida. Exemplo de pedido:
-   "Oriente a retomada do projeto C:/repos/minha-app usando este context.json.
-   Qual e o proximo passo, por que e em qual guia encontro o procedimento?"
-4. Confira as fontes citadas e siga o roteiro indicado. Quando houver mais de
-   um contexto possivel, escolha a solicitacao; a skill nao assume a mais recente.
+3. Diga apenas o objetivo. Exemplos: "Quero priorizar issues mandatory deste
+   workspace" ou "Escolhi uma issue no registro; me conduza ao proximo passo".
+   O helper le indice/registro e localiza a solicitacao vinculada. Pede caminho,
+   projeto ou ID somente quando existir ambiguidade que os arquivos nao resolvam.
+4. Execute a unica acao indicada e retorne com o resultado. O helper confere a
+   saida e orienta a seguinte; nao assume solicitacao/rodada mais recente.
 
 Sem descoberta automatica, voce pode referenciar o SKILL.md pelo caminho e pedir
 ao cliente que leia e aplique suas instrucoes; isso nao comprova a integracao nativa.
@@ -268,13 +269,30 @@ O apoio using-agent-skills/subagentes no Codex e DevSquad no Copilot depende das
 capacidades instaladas e permitidas. Se faltar apoio compativel com leitura e
 orientacao, a skill informa a limitacao e continua pelos guias.
 
+`$` seleciona uma **skill** no Codex. Usar orientar-migracao significa aplicar
+essas instrucoes; nao comprova que migracao_helper ou outro subagente foi invocado.
+O cliente deve mostrar a delegacao real quando ocorrer. Para pedir especificamente
+esse apoio no Codex, diga "Use o subagente migracao_helper para me orientar" quando
+o perfil estiver disponivel. Mencionar/anexar migracao_helper.toml so fornece o arquivo.
+
+Na passagem da orientacao para a execucao, o helper entrega a mensagem pronta
+para o cliente atual. No Codex: `Execute o prompt deste arquivo:` com o caminho
+real. No Copilot: abrir o prompt preparado e usar **Executar Prompt**, com DevSquad
+nas fases pertinentes. A autorizacao de executar esse prompt e uma etapa distinta
+da orientacao; helpers nao passam a escritores. Preferencias extras sao opcionais.
+
+Pode trocar de chat ou cliente durante o trabalho. O novo helper rele os mesmos
+registros/solicitacao e reconhece escolhas e GO vigentes, sem exigir reconstrucao
+do historico da conversa. ContextPath significa simplesmente o caminho do recibo
+context.json; o helper deve localiza-lo e apresenta-lo, nao exigir que voce o invente.
+
 O orquestrador consulta somente o helper pertinente; uma duvida simples pode ser
 respondida diretamente pelo guia. Tambem e possivel pedir ajuda a uma etapa especifica:
 
 | Nome do agente | Quando usar |
 | --- | --- |
 | migracao_helper | Entender a situacao atual e decidir o proximo passo. |
-| migracao_preparo_helper | Escolher projeto, origem MTA e entradas para preparar o contexto. |
+| migracao_preparo_helper | Localizar/criar registro, conferir base e orientar preparo com MTA ou evidencias. |
 | migracao_reconciliacao_helper | Entender divergencias entre registro, decisoes e evidencias. |
 | migracao_planejamento_helper | Comparar candidatas entre projetos antes da escolha e revisar cobertura, proposta e GO. |
 | migracao_impacto_helper | Conferir amostras de candidatas na priorizacao ou codigo, dependencias, configuracoes e testes da issue escolhida. |
@@ -305,19 +323,18 @@ e orientar pelo guia/helpers locais. Instalar o plugin nao comprova integracao
 compativel. Nao e necessario alterar o plugin ou regenerar o workspace para usar
 os helpers locais.
 
-**Validacao nas extensoes ainda pendente:** arquivos e ensaios simulados foram
-verificados; descoberta e delegacao nativas precisam ser conferidas no seu VS Code.
-Em cada cliente, abra o mesmo contexto e peca o proximo passo; confira projeto,
-solicitacao, decisao pendente, guia e apoio realmente utilizado. Reabra os documentos
-ao retomar, sem rodar tarefas somente para testar o helper. Os prompts de execucao
-existentes continuam no fluxo Copilot/DevSquad do
-[guia de planejamento](planejamento-migracao.md); o helper apenas explica seu uso.
+**Ensaio nas extensoes:** conferir novamente descoberta/delegacao e o fluxo apos
+a simplificacao. Em cada cliente, use a mesma escolha/solicitacao e peca o proximo
+passo; confira que a resposta reconhece a decisao atual, oferece uma acao pronta
+para esse cliente e relata somente o apoio realmente utilizado. Testes dos arquivos
+nao comprovam obediencia do agente. A execucao segue o [guia de planejamento](planejamento-migracao.md);
+o helper explica seu uso e mantem o papel de leitor.
 
 ### Escolher o projeto em cada tarefa
 
 Use **File > Add Folder to Workspace...** para adicionar os projetos Java/Maven e salve o workspace. **Nao e preciso cadastra-los em `repositories` no JSON do harness.** Cada pasta do workspace que contenha `pom.xml` aparece na selecao, incluindo agregadores e projetos com packaging `pom`, `jar` ou `war`. Para escolher um modulo separadamente, adicione tambem a pasta dele ao workspace. Pastas sem POM e a pasta do harness ficam fora da lista.
 
-Em **Terminal > Run Task**, escolha a tarefa da pasta `harness`. Na entrada **Arquivo .code-workspace em uso**, confirme `jboss-mta-harness.local.code-workspace` se esse for o arquivo aberto. Se usar outro, informe seu caminho completo ou relativo a raiz do harness, sem aspas. No build, escolha tambem as fases na lista do VS Code. Em seguida, o terminal mostra uma lista numerada com nome e caminho dos projetos: digite o numero e pressione Enter. Isso vale para conferir ambiente, build, executar MTA, consultar o historico, abrir relatorio e preparar planejamento. Digite `q` no menu do terminal para cancelar sem executar. As duas tarefas **MTA: acompanhar...** localizam a analise em execucao automaticamente, sem essas perguntas.
+Em **Terminal > Run Task**, escolha a tarefa da pasta `harness`. Na entrada **Arquivo .code-workspace em uso**, confirme `jboss-mta-harness.local.code-workspace` se esse for o arquivo aberto. Se usar outro, informe seu caminho completo ou relativo a raiz do harness, sem aspas. No build, escolha tambem as fases na lista do VS Code. Para conferir ambiente, build, executar MTA, consultar historico e abrir relatorio, o terminal oferece uma lista numerada de projetos: digite o numero e pressione Enter; `q` cancela. As duas tarefas **MTA: acompanhar...** localizam a analise em execucao automaticamente. **Planejamento: planejar** recupera o registro existente e so pergunta qual usar quando houver varios candidatos; nao repete menus de operacao ou rodada.
 
 Por exemplo, se `simtr-api` e `simtr-outsourcing-api` estiverem no workspace, ambos aparecem. Escolher um agregador executa o Maven no POM dele e inclui os modulos declarados; escolher um modulo usa o POM desse modulo. O nome da pasta nao determina seu papel.
 
@@ -338,7 +355,7 @@ Historicos de projetos selecionados pelo workspace sao identificados pelo caminh
 
 As duas pastas incluem POM, fontes e testes Java 8. Sao projetos independentes para selecionar um por vez, nao modulos de um reactor comum. Foram preservados `javax.*`, WAR e contratos. No exemplo DEPOIS, `hibernate-core` permanece `provided` e `hibernate-ehcache` fica em `test`, ambos na versao do destino local; o POM declara o repositorio Red Hat GA. Na empresa, o repositorio Maven aprovado deve disponibilizar esses artefatos; confira a versao do EAP instalado. Ao corrigir ANTES numa branch, seu conteudo deixa de ser o baseline original: compare pelos snapshots das rodadas. A distribuicao MTA, caches Maven e resultados antigos nao sao publicados aqui.
 
-Comece pelo `migracao-cache-antes`: selecione-o nas tarefas, execute o build, depois o MTA, abra o relatorio e use **Planejamento: preparar contexto para Copilot**. Para comparar com o exemplo ja corrigido, selecione `migracao-cache-depois`, conclua o build desse projeto e execute MTA novamente; cada projeto recebe suas proprias rodadas. Para um ensaio independente, o Copilot deve se limitar ao projeto selecionado, sem consultar a solucao do outro exemplo.
+Comece pelo `migracao-cache-antes`: selecione-o nas tarefas de build/MTA, confira o relatorio e use **Workspace: atualizar indice dos projetos** para localizar/criar o registro. Escolha a issue e execute **Planejamento: planejar**. Para comparar com o exemplo ja corrigido, selecione `migracao-cache-depois` nas tarefas de build/MTA; cada projeto recebe suas proprias rodadas. Para um ensaio independente, o agente deve se limitar ao projeto selecionado, sem consultar a solucao do outro exemplo.
 
 **Apos o ensaio, para manter apenas os projetos corporativos:**
 
@@ -377,8 +394,10 @@ pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas s
 recibo identificavel permanecem. A opcao todos remove as tres areas por inteiro.
 Para MTA externo, somente o indice local `location.json` e seus ponteiros entram
 na limpeza. O destino externo nao e consultado e pode estar indisponivel.
-Depois, o historico/ultimo relatorio perde a referencia local; use **p** no preparo
-ou informe a pasta quando **MTA: abrir ultimo relatorio** solicitar.
+Depois, o historico/ultimo relatorio perde a referencia local; informe a pasta quando
+**MTA: abrir ultimo relatorio** solicitar. Para adotar outra origem no registro,
+peca ao helper o [encaminhamento de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente)
+com o caminho pronto; Planejar usa a origem vinculada sem menu de rodadas.
 O `migracao.md` mantem decisoes e referencias anteriores; limpa-se o historico de
 execucoes, sem zerar o registro. A opcao 3 continua restrita aos backups temporarios locais.
 
@@ -406,7 +425,7 @@ podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 | `.harness/builds/` | Registro de cada build Maven: `console.log` e `result.json`, com projeto, comando/fases, ferramentas, estado Git coletado, datas, status e exit code. O WAR/JAR e os relatorios de testes continuam no `target/` da aplicacao. |
 | `.harness/runs/` | Rodadas MTA locais ou indices `location.json` das rodadas externas: `manifest.json` identifica entrada, argumentos, hashes e estado Git; `result.json` registra resultado/integridade; `console.log` guarda a saida. Cada rodada possui `input/` (copia dos fontes analisados), `rules/` (regras usadas) e `output/` (achados, dependencias e relatorio HTML com seus arquivos). A copia `input/` e evidencia, nao checkout para corretivas. |
 | `.harness/sonar/` | Resultados Sonar por projeto/data, com RESUMO.md, metricas, criterios e Gate; preservados pela limpeza de execucoes. |
-| `.harness/planning/` | Contextos e prompts preparados. Planejamento vincula MTA e proposta anterior quando selecionada; o Copilot grava `plan.md`/`todo.md`. Manutencao usa `registro/solicitacao_<id>`, com ou sem MTA, e so reconcilia `migracao.md`. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
+| `.harness/planning/` | Contextos e prompts preparados com base MTA ou EVIDENCIAS, solicitacao retomada ou Previous explicito. O agente executor grava `plan.md`/`todo.md`. Manutencao usa `registro/solicitacao_<id>` e so reconcilia o registro. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
 | `.harness/priorizacao/` | Contexto e prompt por solicitacao para comparar issues entre projetos; `priorizacao.md` e produzido ao executar o prompt. Preservada pela limpeza de execucoes. A lista nao e plano nem escolha humana. |
 | `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
 | `.harness/projetos/` | Registro por raiz local e evidencias/LEIA-ME.md; criacao idempotente, sem duplicar por rodada. Preservados pela limpeza, locais e ausentes no clone. |
@@ -458,7 +477,7 @@ Referencia de consulta; para escolher a operacao e a ordem, use o
 | [MTA: consultar log de execucao anterior](mta.md#acompanhar-a-analise-mta) | `acompanhar-log-mta.ps1 -SelectTarget -SelectRun -Once` (com workspace informado) |
 | [MTA: abrir ultimo relatorio](mta.md#uso) | `abrir-relatorio-mta.ps1` |
 | [Workspace: conferir configuracao ao abrir](#comecar-na-maquina-de-trabalho) | `conferir-ambiente.ps1 -AoAbrir` |
-| [Planejamento: preparar contexto para Copilot](planejamento-migracao.md#preparar-e-executar-o-prompt) | `preparar-planejamento.ps1` |
+| [Planejamento: planejar](planejamento-migracao.md#preparar-e-executar-o-prompt) | `preparar-planejamento.ps1` |
 | [Planejamento: priorizar issues](priorizacao-issues.md#uso-manual-pela-run-task) | `preparar-priorizacao.ps1` |
 | [Planejamento: criar pasta de evidencias](planejamento-migracao.md#revisar-um-lote-com-evidencias-complementares) | `criar-pasta-evidencias.ps1` |
 | [Planejamento: abrir plano e to-do](planejamento-migracao.md#localizar-documentos-e-identificar-o-historico) | `abrir-planejamento.ps1` |

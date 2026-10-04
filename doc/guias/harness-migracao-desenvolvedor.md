@@ -10,13 +10,13 @@ html:
 O **JBoss MTA Harness** e um ambiente de trabalho no VS Code que organiza a
 migracao de aplicacoes JBoss EAP 7.1 para EAP 7.4, com Java 8 e `javax.*`.
 Seu objetivo e ajudar o desenvolvedor a transformar diagnosticos em corretivas
-delimitadas, implementadas e verificadas, com apoio do GitHub Copilot e controle
+delimitadas, implementadas e verificadas, com apoio do Codex ou GitHub Copilot e controle
 humano sobre o escopo e o resultado.
 
 Aqui, **harness** significa o conjunto de mecanismos que prepara, orienta e
 verifica esse trabalho: scripts, tarefas da IDE, configuracao, instrucoes,
 prompts e registros de evidencias. Ele conecta analise MTA, build Maven, SonarQube,
-planejamento com Copilot/DevSquad e operacao do JBoss. Com isso, voce pode investigar
+planejamento assistido e operacao do JBoss. Com isso, voce pode investigar
 achados, escolher prioridades, preparar um lote de correcao, implementar o escopo
 autorizado, testar e depurar a aplicacao e retomar a migracao preservando o historico.
 
@@ -28,7 +28,7 @@ perda de contexto e repeticao de trabalho, mantendo visivel o que foi verificado
 e o que continua pendente.
 
 **Voce escolhe o projeto, define prioridades, revisa o plano, autoriza a
-implementacao e aceita o resultado.** O Copilot apoia o raciocinio e a execucao
+implementacao e aceita o resultado.** O agente apoia o raciocinio e a execucao
 autorizada; as ferramentas produzem evidencias. Preparar um prompt nao executa
 o agente, e sucesso de build ou reducao de achados nao concede aceite.
 Branches e integracoes continuam sob responsabilidade da equipe.
@@ -45,11 +45,18 @@ ela participa e qual resultado permite continuar. Cada etapa destaca o guia
 que a detalha. Configuracao, menus, comandos e alternativas de execucao ficam
 nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 
+**Para ser conduzido, comece pelo [helper de migracao](tools/workspace.md#orientacao-com-codex-ou-github-copilot).**
+Diga apenas o objetivo: "Quero priorizar as issues mandatory deste workspace" ou
+"Escolhi uma issue no registro; me conduza ao proximo passo". O helper localiza
+o contexto, explica uma proxima acao e fornece tarefa/caminho/mensagem prontos.
+Ele pede informacao somente quando os arquivos nao resolvem uma ambiguidade real.
+
 | Sua situacao | Por onde entrar |
 | --- | --- |
 | Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Os dois exemplos acompanham o clone. |
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
+| Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
 | Quero comparar oportunidades mandatory entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): lista de ate 5 a 10 candidatas por risco, repetibilidade e alcance. |
 | Proposta pronta, ainda em revisao ou sem GO | [5. Planejar e revisar um lote](#5-planejar-e-revisar-um-lote). |
@@ -112,7 +119,10 @@ para reutilizar uma rodada. Esse segundo caminho dispensa repetir a analise
 apenas para preparar uma proposta.
 
 **Resultado esperado e continuidade:** diagnostico identificado, com divergencias
-e limites conhecidos. A etapa 4 transforma esses achados em prioridades.
+e limites conhecidos. A etapa 4 transforma esses achados em prioridades. Se voce
+tem evidencias suficientes de um problema sem pacote MTA completo, pode registra-lo
+e planejar pela base de evidencias; nao e preciso executar MTA apenas para abrir
+essa possibilidade. A analise deve explicitar os limites do diagnostico.
 
 ### 4. Conferir o registro e escolher prioridades
 
@@ -120,6 +130,14 @@ A ferramenta de **planejamento e reconciliacao** oferece um indice da situacao
 dos projetos e um registro de migracao por projeto. O indice resume evidencias
 e pendencias; o registro preserva decisoes, prioridades e andamento.
 O desenvolvedor decide o que merece analise agora e o que fica para depois.
+
+Se faltar o registro, execute **Workspace: atualizar indice dos projetos** e
+confira o link criado. No registro, marque **Decisao = ANALISAR AGORA** e descreva
+recorte/evidencias nas observacoes. **Andamento** continua refletindo o trabalho
+real; nao recebe ANALISAR AGORA. Sem regra MTA, use issue manual DEV-... conforme
+o [exemplo de registro](tools/planejamento-migracao.md#registro-de-migracao-por-projeto).
+O indice localiza os documentos; sua escolha atual fica no registro, sem precisar
+ser repetida no indice, ranking e prompt.
 
 **Guia da etapa:** [Planejamento: indice, registro e caminhos de retomada](tools/planejamento-migracao.md#qual-caminho-seguir).
 Ele explica como consultar o historico, interpretar os estados e atualizar o registro.
@@ -136,10 +154,24 @@ o escopo atual pode retomar a etapa 6.
 
 ### 5. Planejar e revisar um lote
 
-O **planejamento com Copilot/DevSquad** relaciona diagnostico, codigo, prioridades
+O **planejamento com Codex ou Copilot/DevSquad** relaciona diagnostico, codigo, prioridades
 e evidencias para propor um lote consistente de corretivas. Plano e to-do
 delimitam escopo, cobertura, verificacoes e criterios de aceite.
 A revisao humana decide se a proposta esta pronta para receber GO.
+
+Use apenas **Terminal > Run Task > Planejamento: planejar**. A tarefa recupera
+registro e referencias; cria a proposta inicial ou retoma a solicitacao vinculada.
+Se evidencias, origem MTA, contrato ou template mudaram, prepara um contexto
+sucessor preservando o anterior; use o prompt que a tarefa indicar. Observacoes
+e escolhas atuais sao recuperadas sem pedir que voce atualize o historico.
+Nao ha menu para escolher "planejar/replanejar" ou repetir a rodada. Havendo varios
+registros possiveis, pergunta somente qual usar. Sem MTA completo, usa evidencias
+disponiveis sem inventar origem ou resultado MTA.
+
+Execute o prompt preparado no cliente atual. Se faltar uma decisao essencial,
+o agente pergunta antes de concluir plan.md/todo.md. Responda no mesmo chat; nao
+e preciso preencher documentos paralelos. Limites nao impeditivos ficam claros
+na proposta. Veja os [passos e a mensagem curta por cliente](tools/planejamento-migracao.md#preparar-e-executar-o-prompt).
 
 **Guia da etapa:** [Planejamento: proposta, revisao e GO](tools/planejamento-migracao.md#planejar-lotes-de-correcao-com-copilot).
 Ele detalha o preparo do contexto, a execucao do prompt e a revisao do mesmo lote.
@@ -185,9 +217,15 @@ do codigo integrado; a etapa 8 trata da continuidade.
 
 ### 8. Reconciliar e decidir a continuidade
 
-A **reconciliacao** relaciona novo MTA, evidencias e resultados de integracao
+A **reconciliacao**, quando houver motivo concreto, relaciona novo MTA, evidencias e resultados de integracao
 com o registro e o plano existentes. Ela preserva decisoes e historico e torna
 visiveis a cobertura parcial, os conflitos e o trabalho ainda pendente.
+
+Ela nao e uma etapa obrigatoria antes de cada planejamento. Marcar uma escolha
+ou acrescentar observacao coerente permite seguir para **Planejar**. Um bloco
+antigo PENDENTE exige conferir o motivo, sem invalidar a escolha atual nem ser
+marcado CONCLUIDA automaticamente. Nova origem/catalogo ou contradicao relevante
+recebe encaminhamento especifico do helper, com o prompt/comando pronto.
 
 **Guia da etapa:** [Planejamento: reconciliacao e atualizacao do plano](tools/planejamento-migracao.md#reconciliar-status-antes-de-atualizar-o-plano).
 Ele distingue atualizar somente o registro, revisar o lote atual e preparar
@@ -204,17 +242,20 @@ concluir suas verificacoes e obter aceite humano final, com as pendencias resolv
 
 ## Orientar o proximo passo
 
-Para retomar o trabalho, sozinho ou com apoio de um agente, confirme quatro pontos:
-**projeto e caminho dos fontes; objetivo atual; evidencias e pendencias; lote,
-GO e aceite existentes**. Use a [entrada correspondente](#como-usar-este-guia)
-e escolha a operacao que produz a proxima saida esperada do roteiro.
+Para retomar com apoio, informe sua intencao em uma frase. Exemplo: "Acrescentei
+evidencias no registro e quero revisar o planejamento". O helper confere projeto,
+fontes, escolhas, evidencias e solicitacao vinculada; so pergunta um caminho/ID
+se houver mais de uma possibilidade. Retomar em outro chat ou trocar entre Codex
+e Copilot usa os mesmos arquivos, sem repetir a escolha ou GO vigente.
 
 Os guias abaixo sao a referencia operacional para desenvolvedor e agentes:
 descrevem entradas, comandos, resultados e limites de cada ferramenta. O agente
 pode usa-los para recomendar o proximo passo com base nas evidencias disponiveis;
 a decisao humana continua nos pontos do fluxo. Os [helpers de migracao](tools/workspace.md#orientacao-com-codex-ou-github-copilot)
 consultam esses guias e o contexto; o orquestrador encaminha duvidas aos helpers
-pertinentes. A validacao manual da descoberta/delegacao nos clientes segue pendente.
+pertinentes quando necessario. Skill aplicada nao significa subagente invocado:
+a resposta deve identificar somente o apoio realmente utilizado. O novo ensaio
+nos clientes confere descoberta, delegacao e orientacao de uma etapa por vez.
 
 ## Guias de ferramentas
 

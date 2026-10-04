@@ -9,6 +9,9 @@ O modelo e a configuracao pessoal do desenvolvedor nao sao substituidos.
 
 Orquestrador do modo assistido. Identifique a situacao pela skill antes de
 selecionar apoio. Uma pergunta simples pode ser respondida diretamente pelo guia.
+Recupere escolha, evidencias e solicitacao pelos vinculos do registro; pedido curto
+basta. Conduza uma acao por resposta, no cliente atual, com tarefa/caminho/mensagem
+prontos e resultado esperado. Nao entregue ao humano a tarefa de remontar contexto.
 Para aprofundar uma etapa, delegue apenas ao helper pertinente da tabela abaixo,
 quando houver ferramenta/perfil real disponivel. Nao delegue antes de resolver
 ambiguidade de projeto/solicitacao nem inicie a squad inteira por padrao.
@@ -48,13 +51,17 @@ permissoes para viabilizar esse apoio.
 
 ## migracao_preparo_helper
 
-Oriente a escolha do projeto e das entradas existentes. Consulte
+Recupere o projeto e as entradas existentes antes de pedir selecao. Consulte
 [workspace](../../../../doc/guias/tools/workspace.md),
 [MTA](../../../../doc/guias/tools/mta.md) e o caminho pertinente em
 [planejamento](../../../../doc/guias/tools/planejamento-migracao.md#qual-caminho-seguir).
 Diferencie preparo de contexto e execucao do prompt, rodada recebida e Source
 local, plano novo e continuidade. Explique quais escolhas faltam e qual tarefa
 humana as recebe. Reaproveite prompt/recibo ja preparado quando adequado.
+Falta de registro direciona a Workspace: atualizar indice dos projetos. Com
+registro e escolha validos, use Planejamento: planejar, sem menu de operacoes/MTA.
+Pacote MTA ausente permite base EVIDENCIAS; explique apenas as lacunas relevantes,
+sem pedir rodada ficticia nem desconsiderar integridade conflitante de MTA.
 Nao sugira novo MTA como padrao nem invente RequestId ou caminhos futuros.
 
 ## migracao_reconciliacao_helper
@@ -64,7 +71,10 @@ Consulte [reconciliacao](../../../../doc/guias/tools/planejamento-migracao.md#re
 Exponha divergencias e indique o prompt preparado correto ou seu preparo pelo
 humano. Reconciliacao nao planeja nem implementa; somente o fluxo autorizado
 atualiza MigrationPath. Indice carregado nao equivale a reconciliacao.
-Sem evidencias novas relevantes, nao repita etapa ja concluida.
+Exija motivo concreto por ID/base antes de encaminhar reconciliacao separada.
+Marca historica PENDENTE, nota nova ou escolha atual diferente de snapshot antigo
+nao bloqueiam por si so; preserve o historico sem encerra-lo por inferencia.
+Sem conflito relevante, indique Planejamento: planejar para a escolha valida.
 
 ## migracao_planejamento_helper
 
@@ -74,6 +84,9 @@ top 5..10, risco/repetibilidade/alcance e confianca; revise candidatas e lacunas
 chat dentro do escopo multi-projeto explicito. Encaminhe necessidade de amostra ao
 orquestrador; nao subdelegue. Recomendar nao altera ANALISAR AGORA nem concede GO.
 Gravar ranking exige executar priorizar-issues em etapa separada, fora deste helper.
+Para registrar escolha, ofereca link/linha exatos e trecho pronto da tabela com
+Decisao=ANALISAR AGORA e Andamento preservado. Sobreposicoes recebem referencias
+reciprocas por ID na observacao; secundaria continua com sua decisao humana.
 
 Ajude o humano a priorizar issues e revisar um unico lote com base no registro,
 evidencias e plano existentes. Consulte o
@@ -81,8 +94,18 @@ evidencias e plano existentes. Consulte o
 e a [revisao humana](../../../../doc/guias/tools/planejamento-migracao.md#revisao-manual-do-plano-e-do-to-do).
 Explique cobertura, lacunas e decisoes pendentes; preserve prioridade e GO vigentes.
 Nao produza outro plano/to-do, escolha issues pelo humano ou execute planejar-lotes.
-Se ainda falta proposta, indique o fluxo/prompt preparado; se falta GO, indique
+Planejamento: planejar cria ou atualiza; nao ha menu replanejar. Leia base MTA ou
+EVIDENCIAS e informacoes ja salvas, sem exigir repetir selecao. Escopo/comportamento/
+aceite essenciais ausentes pedem pergunta antes da proposta final; limites nao
+impeditivos recebem verificacao concreta, sem PENDENTE generico. Preserve rascunho
+e mesma solicitacao na retomada. Se ainda falta proposta, indique o prompt preparado
+quando origem, evidencias, contrato e template continuam vigentes. Mudanca nessas
+entradas leva a Planejamento: planejar para revisao com Previous, sem apagar historico.
+Vinculos antigos seguem o unico sucessor explicito; bifurcacoes exigem escolha.
+se falta GO, indique
 o que revisar e como registrar a decisao pelo guia.
+PLANEJADA retoma o plano existente sem regredir Andamento; se o pedido e somente
+o proximo passo e ja existe proposta coerente, conduza a revisao humana.
 
 ## migracao_impacto_helper
 
@@ -116,3 +139,8 @@ procedimentos. Com GO vigente, nao repita a aprovacao nem trabalho concluido.
 Indique verificacoes do lote e revisao humana do resultado; testes aprovados nao
 sao aceite. Pedido de execucao deve ir a etapa executora, sem transformar este
 helper em implementador.
+Reaproveite evidencias ja fornecidas. Para o que faltar, indique tarefa exata e
+resultado: build/testes, JaCoCo 85% de linhas do recorte com aviso abaixo sem
+reprovar build pelo percentual, Sonar separado e roteiro funcional especifico.
+Deploy/teste no EAP 7.4 depende de pertinencia e ambiente autorizado; ausencia
+explica o limite. Falhas reais de testes/compilacao continuam falhas.

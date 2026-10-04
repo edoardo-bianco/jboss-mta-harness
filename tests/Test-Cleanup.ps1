@@ -10,6 +10,8 @@ $other = Join-Path $fixture 'other'
 $run = Join-Path $fixture '.harness/runs/old/11111111111111111111111111111111'
 $build = Join-Path $fixture '.harness/builds/readable/build_2026-09-27_10-00-00-0300__222222222222'
 $planning = Join-Path $fixture '.harness/planning/readable/mta_date/plano_date'
+$evidencePlanning = Join-Path $fixture '.harness/planning/readable/evidencias/plano_evidence'
+Write-HarnessJson "$evidencePlanning/context.json" @{Project='new';Source=$source;RunId=$null;PlanningBasis='EVIDENCIAS';RequestId='eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'}
 Write-HarnessJson "$run/manifest.json" @{Project='old';Source=$source;RunId='11111111111111111111111111111111'}
 Write-HarnessJson "$run/result.json" @{Status='SUCCEEDED'}
 Write-HarnessJson "$build/result.json" @{Project='new';Source=$source;RunId='22222222222222222222222222222222'}
@@ -32,14 +34,14 @@ Write-HarnessJson "$fixture/.harness/last-other.json" @{RunId='44444444444444444
 Write-HarnessJson "$fixture/.harness/active-mta.json" @{Project='old';RunId='11111111111111111111111111111111'}
 $before = @(Get-ChildItem -LiteralPath $fixture -Recurse -File | Get-FileHash)
 $selection = @(Get-HarnessCleanupPaths $fixture -Source $source)
-Assert ($selection.Count -eq 5) 'Selecao deve incluir MTA/build/planning e ponteiros do mesmo Source nos dois formatos.'
+Assert ($selection.Count -eq 6 -and $selection -contains $evidencePlanning) 'Selecao deve incluir MTA/build/planejamento MTA e EVIDENCIAS e ponteiros do mesmo Source.'
 foreach ($file in $before) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash -eq $file.Hash) 'Preview alterou arquivo.' }
 Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'cancelar' | Out-Null
 Assert (Test-Path -LiteralPath $run) 'Cancelamento removeu historico.'
 Write-HarnessJson "$fixture/.harness/runs/old/55555555555555555555555555555555/manifest.json" @{Project='old';Source=$other;RunId='55555555555555555555555555555555'}
 Write-HarnessJson "$fixture/.harness/last-old.json" @{RunId='55555555555555555555555555555555'}
 Write-HarnessJson "$fixture/.harness/active-mta.json" @{Project='old';RunId='55555555555555555555555555555555'}
-Assert (@(Get-HarnessCleanupPaths $fixture -Source $source).Count -eq 3) 'Ponteiros de outro Source com mesmo Project nao podem ser removidos.'
+Assert (@(Get-HarnessCleanupPaths $fixture -Source $source).Count -eq 4) 'Ponteiros de outro Source com mesmo Project nao podem ser removidos.'
 Write-HarnessJson "$fixture/.harness/last-old.json" @{RunId='11111111111111111111111111111111'}
 Write-HarnessJson "$fixture/.harness/active-mta.json" @{Project='old';RunId='11111111111111111111111111111111'}
 foreach ($lock in @('mta.lock','planning.lock')) {
@@ -63,6 +65,7 @@ try {
 }
 Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null
 Assert (-not (Test-Path -LiteralPath $run) -and -not (Test-Path -LiteralPath $build) -and -not (Test-Path -LiteralPath $planning)) 'Limpeza de projeto incompleta.'
+Assert (-not (Test-Path -LiteralPath $evidencePlanning)) 'Limpeza de planejamento por evidencias incompleta.'
 Assert (Test-Path "$fixture/.harness/runs/other/44444444444444444444444444444444/manifest.json") 'Limpeza atingiu outro projeto.'
 Assert (Test-Path "$fixture/.harness/runs/old/55555555555555555555555555555555/manifest.json") 'Limpeza atingiu outro Source com mesmo Project.'
 foreach ($file in $preservedData) {

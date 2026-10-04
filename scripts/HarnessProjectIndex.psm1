@@ -222,28 +222,29 @@ function Get-IndexNextSteps {
     $migration = $Project.Migration
     $steps = @()
     $latest = @($Project.Builds) + @($Project.Mta) + @($Project.Plans) + @($Project.Sonar) + @($Project.Maintenance)
-    if (@($latest | Where-Object Problem).Count -or $Project.MtaCatalog.Problem -or $migration.Status -eq 'REVISAR REGISTRO') {
+    if ($migration.Status -eq 'REVISAR REGISTRO') {
         return 'Revisar limites da leitura e registros incompletos'
     }
+    if (@($latest | Where-Object Problem).Count -or $Project.MtaCatalog.Problem) { $steps += 'Leitura parcial de execucoes; conferir limites sem substituir a base do registro' }
     if ($Project.Builds.Count -and $Project.Builds[0].Status -ne 'SUCCEEDED') { $steps += 'Conferir ultimo build' }
     if ($Project.Mta.Count -and $Project.Mta[0].Status -ne 'SUCCEEDED') { $steps += 'Conferir ultima execucao MTA' }
     if ($Project.Sonar.Count -and $Project.Sonar[0].Status -notlike 'SUCCEEDED*') { $steps += 'Conferir ultimo Sonar' }
-    if ($migration.Reconciliation -eq 'PENDENTE') { return (($steps + 'RECONCILIACAO PENDENTE: executar o prompt indicado antes de considerar decisoes reconciliadas') -join '; ') }
-    if ($migration.Status -in @('NAO GERADO','AGUARDANDO MTA')) {
-        $steps += 'Preparar planejamento > 2 Manter registro > selecionar MTA concluido; catalogo atualizado sem executar prompt'
-    } elseif ($Project.Mta.Count -and $migration.RunId -cne $Project.Mta[0].Id) {
-        $steps += 'Conferir rodada MTA do registro; para trocar, Preparar planejamento > 2 Manter registro > selecionar MTA concluido (sem executar prompt)'
+    if ($migration.Status -eq 'NAO GERADO') {
+        $steps += 'Workspace: atualizar indice dos projetos cria o registro; informe escolhas e evidencias'
     } else {
         $rows = @($migration.ActiveRows)
         $chosen = @($rows | Where-Object Decision -eq 'ANALISAR AGORA')
         if (@($chosen | Where-Object Progress -in @('NAO ANALISADA','ANALISADA')).Count) {
-            $steps += 'Planejar issues ANALISAR AGORA; conferir plano existente'
+            $steps += 'Planejamento: planejar usa as issues ANALISAR AGORA e evidencias; retoma proposta existente'
         }
         if (@($chosen | Where-Object Progress -eq 'PLANEJADA').Count) { $steps += 'Revisar plano e confirmar GO humano antes de implementar' }
         if (@($chosen | Where-Object Progress -eq 'IMPLEMENTADA').Count) { $steps += 'Verificar implementacao e registrar evidencias' }
+        if (@($chosen | Where-Object Progress -eq 'VERIFICADA').Count) { $steps += 'Revisar evidencias e aceite do resultado antes de definir continuidade' }
         if (@($rows | Where-Object Decision -eq 'A DEFINIR').Count) { $steps += 'Definir prioridades no registro' }
-        if (-not $steps.Count) { $steps += 'Revisar decisoes e evidencias para definir continuidade; aceite humano pendente de conferencia' }
+        if (-not $steps.Count) { $steps += 'Registrar a escolha e evidencias; pedir orientacao ao helper sobre a proxima etapa' }
     }
+    if ($Project.Mta.Count -and $migration.RunId -and $migration.RunId -cne $Project.Mta[0].Id) { $steps += 'Ha outra rodada MTA no historico; base do registro preservada, troca somente por escolha explicita' }
+    if ($migration.Reconciliation -eq 'PENDENTE') { $steps += 'Reconciliacao historica PENDENTE: conferir motivo e impacto; nao bloqueia planejamento sem conflito concreto' }
     $steps -join '; '
 }
 
@@ -275,19 +276,30 @@ function Get-IndexReconciliationPrompt {
 
 function Sync-IndexMigration {
     param($Context, $Project, [object[]]$Mta, $Catalog, [Collections.Generic.List[string]]$Warnings)
-    $result = [pscustomobject]@{Message='NAO ATUALIZADO: sem MTA reconhecido';PromptPath=$null;ContextPath=$null}
-    if (-not $Mta.Count) { return $result }
-    if (-not $Catalog.Available) { $result.Message = 'NAO ATUALIZADO: ultimo MTA falhou, e ambiguo ou tem catalogo indisponivel'; return $result }
+    $result = [pscustomobject]@{Message='REGISTRO PRESERVADO';PromptPath=$null;ContextPath=$null}
+    $lease=$null
     try {
+        $state=Resolve-HarnessPath (Join-Path $Context.Root '.harness') $Context.Root
+        $null=[IO.Directory]::CreateDirectory($state)
+        try { $lease=[IO.File]::Open((Join-Path $state 'planning.lock'),'OpenOrCreate','ReadWrite','None') }
+        catch { throw 'Existe preparacao de contexto ou limpeza em andamento.' }
         $projectContext = [pscustomobject]@{Root=$Context.Root;Config=$Context.Config;ConfigPath=$Context.ConfigPath;WorkspacePath=$Context.WorkspacePath;Projects=$Context.Projects;Active=$Project}
-        $prepared = New-MtaMigrationPrompt $projectContext -RunPath (Split-Path -Parent $Mta[0].Path) -ReuseUnchanged
-        $result.PromptPath = $prepared.PromptPath
-        $result.ContextPath = $prepared.ContextPath
-        $result.Message = if ($prepared.Reused) { 'CATALOGO ATUALIZADO; prompt existente reutilizado' } else { 'CATALOGO ATUALIZADO; novo prompt de reconciliacao preparado' }
+        $paths=Get-HarnessMigrationPaths $Context.Root $Project
+        if (Test-Path -LiteralPath $paths.MigrationPath -PathType Leaf) {
+            $existing=Read-HarnessMigrationInput $Context.Root $Project $paths.MigrationPath
+            if ($existing.Origin -or $existing.Rows.Count) { return $result }
+        }
+        $null=Initialize-HarnessMigration $Context.Root $Project
+        $result.Message='REGISTRO CRIADO; informe escolhas e evidencias; MTA indisponivel nao impede planejamento por evidencias'
+        if ($Mta.Count -and $Catalog.Available) {
+            $selected=Get-MtaPlanningRunFromPath (Split-Path -Parent $Mta[0].Path) $Context.Root
+            $null=Update-HarnessMigration $projectContext $selected
+            $result.Message='CATALOGO INICIAL CARREGADO; escolha as issues no registro e use Planejamento: planejar'
+        }
     } catch {
-        $result.Message = 'ATUALIZACAO INCOMPLETA: ' + $_.Exception.Message
+        $result.Message = 'CONFERIR REGISTRO: ' + $_.Exception.Message
         $Warnings.Add("Registro $($Project.path): $($result.Message)")
-    }
+    } finally { if ($lease) { $lease.Dispose() } }
     $result
 }
 
@@ -356,7 +368,7 @@ function New-HarnessProjectIndex {
         $lines = @('# Situacao dos projetos', '', ('Gerado em: ' + $now.ToString('yyyy-MM-dd HH:mm:ss zzz')), '')
         if ($warnings.Count) { $lines += @('**LEITURA PARCIAL: consulte Limites da leitura antes de interpretar os status.**', '') }
         $lines += 'Escopo: ' + (ConvertTo-IndexText $(if ($Context.WorkspacePath) { $Context.WorkspacePath } else { $Context.ConfigPath }))
-        $mode = if ($UpdateMigration) { 'Registros sincronizados quando possivel; prompts preparados/reutilizados. Execute as reconciliacoes PENDENTES no Copilot.' } else { 'Consulta tecnica somente leitura; registros nao sincronizados nesta chamada.' }
+        $mode = if ($UpdateMigration) { 'Registros ausentes criados; registros existentes e suas bases preservados. Reconciliar somente divergencias concretas ou troca de base desejada.' } else { 'Consulta tecnica somente leitura; registros nao sincronizados nesta chamada.' }
         $lines += @('', $mode, 'Execute Workspace: atualizar indice dos projetos apos novas execucoes ou edicoes do registro.',
             'Somente a ultima rodada de cada acao por projeto, inclusive falha/incompleta; sem somar historico. SEM REGISTRO significa ausencia de evidencia local disponivel.',
             'O indice nao valida o codigo atual, nao concede GO/aceite e nao comprova conclusao da migracao. Contagens de andamento podem ter cobertura parcial.',
@@ -369,7 +381,7 @@ function New-HarnessProjectIndex {
             $register = if ($migration.Path) {
                 (New-IndexLink (Split-Path -Leaf $migration.Path) $migration.Path $directory) + ' - ' + (ConvertTo-IndexText $migration.Status)
             } else { $migration.Status }
-            $reconciliationLabel = if ($migration.Reconciliation -eq 'PENDENTE') { 'PENDENTE - executar prompt' } elseif ($migration.Reconciliation -eq 'CONCLUIDA') { 'CONCLUIDA (declarada no registro)' } else { $migration.Reconciliation }
+            $reconciliationLabel = if ($migration.Reconciliation -eq 'PENDENTE') { 'PENDENTE (historico; conferir motivo)' } elseif ($migration.Reconciliation -eq 'CONCLUIDA') { 'CONCLUIDA (declarada no registro)' } else { $migration.Reconciliation }
             $reconciliation = $reconciliationLabel
             $reconciliationPrompt = Get-IndexReconciliationPrompt $project
             if ($reconciliationPrompt) { $reconciliation = New-IndexLink $reconciliationLabel $reconciliationPrompt $directory }
@@ -399,15 +411,15 @@ function New-HarnessProjectIndex {
             'Categorias MTA: cada par indica issues / ocorrencias (ex.: mandatory: 2 / 138). A classificacao do MTA nao e a prioridade escolhida pelo desenvolvedor; categorias ausentes nao sao listadas.',
             'A coluna MTA x registro compara a ultima tentativa encontrada com o RunId carregado no registro. Ela nao valida o conteudo do catalogo nem o codigo atual.', '',
             '| Indicacao | Significado | O que fazer |', '| --- | --- | --- |',
-            '| CATALOGO NAO CARREGADO | Nao foi possivel carregar o MTA no registro; seus numeros podem estar disponiveis no indice. | Conferir Atualizacao do registro e Limites da leitura; para outra origem, informar p no preparo. |',
+            '| CATALOGO NAO CARREGADO | O registro ainda nao possui catalogo MTA; seus numeros podem estar disponiveis no indice. | Pode planejar pelas evidencias; para incorporar MTA, pedir ao helper o encaminhamento de manutencao. |',
             '| MESMA RODADA | O registro e a ultima tentativa encontrada referenciam o mesmo RunId. | Conferir prioridades e seguir os proximos passos sugeridos; nao significa migracao concluida. |',
-            '| RODADA DIFERENTE | O registro ainda usa outra rodada. | Conferir os RunIds e o motivo da carga nao concluida nos detalhes. |',
+            '| RODADA DIFERENTE | O registro usa outra rodada, preservada por escolha. | Conferir os RunIds; incorporar outra base somente quando desejado. |',
             '| ULTIMA TENTATIVA FAILED (ou outro estado sem sucesso) | A tentativa mais recente nao terminou com sucesso. | Conferir a tentativa; preservar o catalogo ou selecionar outra rodada concluida. |',
-            '| SEM MTA LOCALIZADO | Nenhuma rodada associavel foi encontrada para comparar com o registro. | Conferir mta.runsPath; para origem de outra maquina/caminho, informar a pasta com p no preparo. |',
+            '| SEM MTA LOCALIZADO | Nenhuma rodada associavel foi encontrada para comparar com o registro. | Conferir mta.runsPath; para origem recebida, pedir ao helper a chamada pronta com RunPath. |',
             '| COMPARACAO INDISPONIVEL | MTA ou registro invalido, incompleto ou ambiguo. | Conferir Limites da leitura e corrigir os dados antes de interpretar a comparacao. |', '',
-            '**RECONCILIACAO PENDENTE: execute o prompt vinculado no Copilot.** MESMA RODADA e catalogo atualizado nao significam reconciliacao concluida.',
-            'O campo Estado na secao Reconciliacao do registro e explicito: PENDENTE ate executar o prompt e tratar os conflitos; CONCLUIDA somente depois disso. A tarefa nunca conclui essa etapa nem concede GO/aceite.',
-            'Copiar o MTA e executar esta tarefa basta para carregar o catalogo reconhecido e preparar o prompt. Para escolher outra rodada, origem ou evidencias, use Preparar planejamento > 2 Manter registro.',
+            'Reconciliacao historica PENDENTE nao impede planejar por si so. Confira o conflito e seu impacto no recorte; o helper fornece o encaminhamento quando necessario.',
+            'Escolha atual no registro prevalece sobre resumos antigos. A tarefa nao conclui reconciliacoes historicas por inferencia nem concede GO/aceite.',
+            'A tarefa cria registros e carrega catalogo inicial quando disponivel; preserva bases e escolhas existentes. Para trocar a origem MTA, solicite manutencao explicita ao helper. Escolhas e evidencias atuais seguem por Planejamento: planejar.',
             'SEM REGISTRO nas colunas de acoes significa ausencia de evidencia local disponivel, nao que a acao nunca foi executada. Indisponivel nas contagens nao equivale a zero.')
         foreach ($project in $projects) {
             if ($project.Migration.Status -eq 'NAO GERADO' -and ($project.Builds.Count + $project.Mta.Count + $project.Plans.Count + $project.Sonar.Count + $project.Maintenance.Count) -eq 0) { continue }
@@ -418,7 +430,7 @@ function New-HarnessProjectIndex {
             if ($project.Sync) { $lines += '- Atualizacao do registro: ' + (ConvertTo-IndexText $project.Sync.Message) }
             $lines += '- Reconciliacao: ' + $project.Migration.Reconciliation
             $reconciliationPrompt = Get-IndexReconciliationPrompt $project
-            if ($reconciliationPrompt) { $lines += '- ' + (New-IndexLink 'Prompt de reconciliacao (executar se PENDENTE)' $reconciliationPrompt $directory) }
+            if ($reconciliationPrompt) { $lines += '- ' + (New-IndexLink 'Prompt de reconciliacao (conferir necessidade no recorte)' $reconciliationPrompt $directory) }
             if ($project.MtaCatalog.Available) {
                 $lines += '- Ultimo MTA: ' + $project.MtaCatalog.Issues + ' issues / ' + $project.MtaCatalog.Occurrences + ' ocorrencias'
                 if ($project.MtaCatalog.Categories) { $lines += '- Categorias do ultimo MTA: ' + (ConvertTo-IndexText $project.MtaCatalog.Categories) }

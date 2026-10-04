@@ -11,7 +11,7 @@ foreach ($path in @($app,$other)) {
     $null = [IO.Directory]::CreateDirectory($path)
     Set-Content -LiteralPath (Join-Path $path 'pom.xml') '<project />'
 }
-foreach ($file in @('scripts/Harness.psm1','scripts/HarnessGit.psm1','scripts/HarnessPlanning.psm1','scripts/preparar-planejamento.ps1',
+foreach ($file in @('scripts/Harness.psm1','scripts/HarnessGit.psm1','scripts/HarnessPlanning.psm1','scripts/HarnessPlanningInput.ps1','scripts/preparar-planejamento.ps1',
     'doc/especificacoes/planejamento-copilot.md','.github/prompts/planejar-lotes.prompt.md','.github/prompts/revisar-lote.prompt.md','.github/prompts/manter-migracao.prompt.md')) {
     $destination = Join-Path $fixture $file
     $null = [IO.Directory]::CreateDirectory((Split-Path $destination -Parent))

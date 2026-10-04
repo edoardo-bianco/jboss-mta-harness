@@ -25,7 +25,7 @@ Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -notcontain
 Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|Servidor|MTA|Planejamento): ' }).Count -eq 0) 'Run Tasks devem ser classificadas pelo prefixo da etapa.'
 $prioritization = @($tasks.tasks | Where-Object label -eq 'Planejamento: priorizar issues')
 Assert ($prioritization.Count -eq 1 -and $prioritization[0].args -contains '${workspaceFolder}/scripts/preparar-priorizacao.ps1' -and $prioritization[0].args -contains '${input:harnessWorkspacePath}' -and $prioritization[0].args -contains '${execPath}' -and $prioritization[0].args -notcontains '-SelectTarget') 'Priorizacao deve usar o workspace inteiro e abrir prompt.'
-$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -ne 'Planejamento: priorizar issues' })
+$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -notin @('Planejamento: priorizar issues','Planejamento: planejar') })
 foreach ($monitor in @($tasks.tasks | Where-Object label -like 'MTA: acompanhar*')) {
     Assert ($monitor.args -contains '-Active' -and $monitor.args -notcontains '-SelectTarget' -and -not ($monitor.args | Where-Object { $_ -like '${input:*}' })) 'Observabilidade nao deve solicitar workspace/projeto.'
 }
@@ -38,9 +38,11 @@ foreach ($task in $projectTasks) {
     Assert ($task.args -contains '${input:harnessWorkspacePath}' -and $task.args -contains '-SelectTarget') 'Tarefa de projeto sem workspace/selecao.'
 }
 $automatic = @($tasks.tasks | Where-Object label -eq 'Workspace: conferir configuracao ao abrir')[0]
-$planning = @($tasks.tasks | Where-Object label -eq 'Planejamento: preparar contexto para Copilot')
+$planning = @($tasks.tasks | Where-Object label -eq 'Planejamento: planejar')
 Assert ($planning.Count -eq 1 -and $planning[0].args -contains '-EditorPath' -and $planning[0].args -contains '${execPath}') 'Planejamento deve abrir o prompt no editor da tarefa.'
-Assert ($planning[0].args -contains '-SelectOperation') 'Task deve oferecer planejamento ou revisao explicitamente.'
+Assert ($planning[0].args -contains '${workspaceFolder}/scripts/preparar-planejamento.ps1' -and $planning[0].args -contains '-WorkspacePath' -and $planning[0].args -contains '${input:harnessWorkspacePath}') 'Planejar deve receber o workspace para localizar o registro.'
+Assert ($planning[0].args -notcontains '-SelectOperation' -and $planning[0].args -notcontains '-SelectTarget' -and $planning[0].args -notcontains '-RunId' -and $planning[0].args -notcontains '-RunPath') 'Planejar nao deve repetir menus de operacao/projeto/rodada ou fixar MTA.'
+Assert ($labels -notcontains 'Planejamento: preparar contexto para Copilot' -and @($labels | Where-Object { $_ -match '(?i)replanejar|reconciliar' }).Count -eq 0) 'Entrada habitual unica nao deve deixar menus redundantes no catalogo.'
 $openPlanning = @($tasks.tasks | Where-Object label -eq 'Planejamento: abrir plano e to-do')
 $evidenceTask = @($tasks.tasks | Where-Object label -eq 'Planejamento: criar pasta de evidencias')
 Assert ($evidenceTask.Count -eq 1 -and $evidenceTask[0].args -contains '${workspaceFolder}/scripts/criar-pasta-evidencias.ps1' -and $evidenceTask[0].args -contains '${execPath}') 'Falta tarefa para criar evidencias e abrir indice.'

@@ -19,32 +19,15 @@ function Read-PrioritizationProject {
         $entry.MigrationPath = $paths.MigrationPath
         $entry.MigrationSnapshot = [IO.File]::ReadAllText($paths.MigrationPath)
         $entry.MigrationSha256 = (Get-FileHash -LiteralPath $paths.MigrationPath -Algorithm SHA256).Hash
-        $source = [regex]::Matches($entry.MigrationSnapshot, '(?m)^Source:\s*([^\r\n]+)')
-        if ($source.Count -ne 1 -or (Resolve-HarnessPath $source[0].Groups[1].Value.Trim() $Context.Root) -ine $Project.path) {
-            throw 'Source do registro difere do projeto; excluir da recomendacao ate esclarecer.'
-        }
+        $register = Read-HarnessMigrationInput $Context.Root $Project $paths.MigrationPath
+        foreach ($warning in $register.Warnings) { $entry.Diagnostics += $warning }
         if (Test-Path -LiteralPath $paths.EvidenceIndexPath -PathType Leaf) { $entry.EvidenceIndexPath = $paths.EvidenceIndexPath }
         else { $entry.Diagnostics += 'Indice de evidencias complementares ausente.' }
-        # A rodada vem do registro, nunca da recencia do indice ou do filesystem.
-        $origins = [regex]::Matches($entry.MigrationSnapshot, '(?m)^<!-- MTA (\{[^\r\n]+\}) -->\s*$')
-        if ($origins.Count -ne 1) { throw 'Origem MTA ausente ou ambigua no registro; fornecer/reconciliar referencia.' }
-        $origin = $origins[0].Groups[1].Value | ConvertFrom-Json
-        $run = Get-MtaPlanningRunFromPath $origin.Run $Context.Root
-        $recordRun = [regex]::Matches($entry.MigrationSnapshot, '(?m)^Rodada MTA: ([a-f0-9]{32})\.')
-        if ($recordRun.Count -ne 1 -or $recordRun[0].Groups[1].Value -cne $origin.RunId -or
-            $run.RunId -cne $origin.RunId -or $run.Manifest.Project -cne $origin.Project -or
-            $run.Manifest.Source.Replace('\','/') -ine $origin.Source.Replace('\','/')) {
-            throw 'Origem/RunId do registro diverge dos artefatos MTA; excluir ate esclarecer.'
-        }
+        if (-not $register.Origin) { throw 'Origem MTA ausente no registro; este projeto nao tem catalogo mandatory comprovado.' }
+        $origin = $register.Origin
+        $run = Get-HarnessRegisteredMtaRun $register $Context.Root
         $analysisSource = Resolve-HarnessPath (Join-Path $run.Run 'input') $Context.Root
-        if (-not (Test-Path -LiteralPath $analysisSource -PathType Container)) { throw 'Snapshot MTA input ausente.' }
         $catalog = Resolve-HarnessPath (Join-Path $run.Run 'output/static-report/output.js') $Context.Root
-        if ($origin.PSObject.Properties['CatalogSha256'] -and $origin.CatalogSha256) {
-            if (-not (Test-Path -LiteralPath $catalog -PathType Leaf) -or
-                (Get-FileHash -LiteralPath $catalog -Algorithm SHA256).Hash -cne $origin.CatalogSha256) {
-                throw 'Catalogo MTA diverge do hash registrado; excluir ate esclarecer.'
-            }
-        }
         $evidence = [ordered]@{}
         $hashes = [ordered]@{}
         foreach ($pair in @(@('Manifest','manifest.json'),@('Result','result.json'),@('Findings','output/output.yaml'),@('Dependencies','output/dependencies.yaml'))) {

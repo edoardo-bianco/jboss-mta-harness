@@ -6,6 +6,8 @@ Antes de planejar ou editar, identifique se o pedido e **evolucao do harness** o
 Para identidade do projeto e Git informativo, siga a
 [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-branches.md), que substitui
 o controle de branches da ADR-0003.
+Para a entrada unica de planejamento orientada pelo registro, siga a
+[ADR-0005](doc/adr/0005-planejamento-orientado-pelo-registro.md).
 
 - Evolucao do harness inclui scripts, prompts, preparacao de contexto, Run Tasks,
   configuracao, testes e documentacao. Use `tasks/plan.md` e `tasks/todo.md`.
@@ -42,12 +44,33 @@ o controle de branches da ADR-0003.
 - Migracao usa `PlanPath` e `TodoPath` do contexto selecionado, sob
   `.harness/planning/`, na pasta da solicitacao identificada pelo recibo. Nunca use `tasks/` do harness
   para corretivas da aplicacao, nem altere o harness como parte de um lote.
+- A entrada habitual e `Planejamento: planejar`: cria, retoma ou atualiza a proposta
+  a partir do registro. Nao exigir selecao repetida de operacao/projeto/MTA nem
+  copiar novamente escolhas para o prompt. Registro ausente direciona a
+  `Workspace: atualizar indice dos projetos`; varios candidatos exigem escolha
+  somente do registro/frente. Indice localiza; registro atual concentra a decisao.
+  Planejar nao recarrega catalogo nem elege rodada/plano por recencia.
+- Contexto declara `PlanningBasis=MTA|EVIDENCIAS`. Evidencias humanas podem
+  sustentar planejamento sem pacote MTA completo, sem inventar RunId, snapshot,
+  categoria ou resultado MTA. Contextos antigos sem o campo continuam MTA.
+  Corrupcao/conflito de origem exige esclarecimento, sem fallback silencioso.
+  Origem/evidencias/contrato/template iguais retomam a solicitacao vinculada;
+  mudancas nessas entradas produzem novo recibo com Previous e preservam o anterior.
+  Escolhas/observacoes atuais sao lidas sem reescrever historico. Referencia antiga
+  segue Previous ate o unico sucessor; varios sucessores exigem escolha, nao recencia.
+- Antes da proposta completa, perguntar somente o essencial ainda ausente que
+  afete escopo, solucao ou aceite; preservar rascunho/ID, sem par plan/to-do ficticio.
+  Reconciliacao exige motivo concreto. Estado PENDENTE historico nao bloqueia
+  planejamento por si so nem autoriza marcar CONCLUIDA. Escolha ja registrada
+  nao fica pendente em razao de ranking/indice antigos. Helpers orientam uma
+  etapa com caminho e mensagem prontos para o cliente atual; continuam leitores.
 - Vincule cada ciclo a Project/Source e as evidencias/saidas da solicitacao.
   Para MTA recebido, MtaOrigin preserva a origem e RunId; AnalysisSource e o
   snapshot e Source e o projeto local. Caminhos/branches podem diferir.
   Identidade Maven e diferencas de codigo geram alertas, sem bloquear a proposta;
   conferir pontos locais e recomendar novo MTA se o diagnostico estiver desatualizado.
-  Planejamento referencia MtaOrigin/RunId, sem coletar Git do checkout local.
+  Planejamento com base MTA referencia MtaOrigin/RunId; com EVIDENCIAS, referencia
+  as entradas realmente fornecidas. Nao coletar Git do checkout local no planejamento.
   Git e informativo: registre branch/commit observados quando disponiveis.
   O desenvolvedor escolhe e informa a branch de trabalho; o harness nao cadastra
   papeis, responsavel ou coordenacao, nem bloqueia por branch/HEAD/estado local.

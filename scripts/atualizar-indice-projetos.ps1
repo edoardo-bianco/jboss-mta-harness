@@ -12,8 +12,8 @@ try {
     Write-Host "Indice dos projetos: $($result.IndexPath)"
     Write-Host "Copia datada: $($result.SnapshotPath)"
     if ($result.Warnings.Count) { Write-Warning 'Leitura parcial. Confira Limites da leitura no indice.' }
-    Write-Host 'Registros possiveis atualizados a partir do ultimo MTA; decisoes e anotacoes preservadas. Confira pendencias por projeto no indice.'
-    Write-Host 'RECONCILIACAO PENDENTE: execute no Copilot os prompts indicados no indice/registro. A tarefa nao executa o agente nem conclui reconciliacao.'
+    Write-Host 'Registros ausentes criados; escolhas e bases dos registros existentes preservadas. Confira avisos por projeto no indice.'
+    Write-Host 'Escolha Decisao=ANALISAR AGORA no registro e use Planejamento: planejar. Reconciliacao separada somente se houver conflito concreto ou troca de base desejada; o helper fornece o encaminhamento.'
     if (-not $NoOpen -and $EditorPath) {
         try { Open-HarnessEditor -EditorPath $EditorPath -FilePaths $result.IndexPath -Root $root }
         catch { Write-Warning ('Indice salvo; abra pelo caminho acima. ' + $_.Exception.Message) }
