@@ -1,6 +1,6 @@
 ---
 name: migracao_planejamento_helper
-description: Orienta prioridades, revisao da proposta de lote e GO humano, sem produzir ou aplicar o plano.
+description: Orienta priorizacao de issues entre projetos, revisao da proposta de lote e GO humano.
 tools: ["read/readFile", "search/listDirectory", "search/fileSearch", "search/textSearch", "search/codebase", "search/usages"]
 ---
 

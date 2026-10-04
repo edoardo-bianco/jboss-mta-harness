@@ -276,8 +276,8 @@ respondida diretamente pelo guia. Tambem e possivel pedir ajuda a uma etapa espe
 | migracao_helper | Entender a situacao atual e decidir o proximo passo. |
 | migracao_preparo_helper | Escolher projeto, origem MTA e entradas para preparar o contexto. |
 | migracao_reconciliacao_helper | Entender divergencias entre registro, decisoes e evidencias. |
-| migracao_planejamento_helper | Priorizar issues e revisar cobertura, proposta e GO. |
-| migracao_impacto_helper | Localizar codigo, dependencias, configuracoes e testes da issue escolhida. |
+| migracao_planejamento_helper | Comparar candidatas entre projetos antes da escolha e revisar cobertura, proposta e GO. |
+| migracao_impacto_helper | Conferir amostras de candidatas na priorizacao ou codigo, dependencias, configuracoes e testes da issue escolhida. |
 | migracao_implementacao_helper | Seguir as pendencias autorizadas, build, debug, testes e aceite. |
 
 No Copilot, os perfis ficam em `.github/agents`; escolha o helper na lista de
@@ -291,6 +291,12 @@ Os perfis Copilot oferecem leitura/busca, com delegacao somente no orquestrador.
 Os perfis Codex pedem sandbox read-only e desabilitam subdelegacao dos especialistas;
 as permissoes efetivas tambem dependem da sessao. A skill isolada nao configura
 sandbox. Confira as ferramentas/acoes exibidas pelo cliente.
+
+Para comparar oportunidades mandatory antes de escolher, siga o
+[guia de priorizacao de issues](priorizacao-issues.md). O helper orienta a
+Run Task **Planejamento: priorizar issues** e pode revisar as candidatas no chat.
+A escrita da lista ocorre ao executar separadamente o prompt preparado; a
+escolha humana antecede o planejamento habitual.
 
 O apoio opcional DevSquad usa `devsquad.plan` apenas quando seu perfil real permite
 leitura sem terminal, escrita ou subdelegacao. O perfil instalado examinado nesta
@@ -363,7 +369,8 @@ Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha
    contexto. Planos apagados deixam de aparecer como proposta anterior.
 
 A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, templates
-versionados dos prompts, cache Maven, backups, `.harness/evidencias/` e `.harness/projetos/`.
+versionados dos prompts, cache Maven, backups, `.harness/evidencias/`, `.harness/projetos/`
+e `.harness/priorizacao/`.
 Nao apaga `target/` da aplicacao nem qualquer conteudo MTA externo, registrado ou recebido.
 No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
 pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
@@ -400,6 +407,7 @@ podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 | `.harness/runs/` | Rodadas MTA locais ou indices `location.json` das rodadas externas: `manifest.json` identifica entrada, argumentos, hashes e estado Git; `result.json` registra resultado/integridade; `console.log` guarda a saida. Cada rodada possui `input/` (copia dos fontes analisados), `rules/` (regras usadas) e `output/` (achados, dependencias e relatorio HTML com seus arquivos). A copia `input/` e evidencia, nao checkout para corretivas. |
 | `.harness/sonar/` | Resultados Sonar por projeto/data, com RESUMO.md, metricas, criterios e Gate; preservados pela limpeza de execucoes. |
 | `.harness/planning/` | Contextos e prompts preparados. Planejamento vincula MTA e proposta anterior quando selecionada; o Copilot grava `plan.md`/`todo.md`. Manutencao usa `registro/solicitacao_<id>`, com ou sem MTA, e so reconcilia `migracao.md`. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
+| `.harness/priorizacao/` | Contexto e prompt por solicitacao para comparar issues entre projetos; `priorizacao.md` e produzido ao executar o prompt. Preservada pela limpeza de execucoes. A lista nao e plano nem escolha humana. |
 | `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
 | `.harness/projetos/` | Registro por raiz local e evidencias/LEIA-ME.md; criacao idempotente, sem duplicar por rodada. Preservados pela limpeza, locais e ausentes no clone. |
 | `.harness/projetos/indice-projetos.md` e `indices/` | Ultima acao por projeto e copias datadas dessas consultas, geradas pela tarefa de indice e preservadas pela limpeza. |
@@ -451,6 +459,7 @@ Referencia de consulta; para escolher a operacao e a ordem, use o
 | [MTA: abrir ultimo relatorio](mta.md#uso) | `abrir-relatorio-mta.ps1` |
 | [Workspace: conferir configuracao ao abrir](#comecar-na-maquina-de-trabalho) | `conferir-ambiente.ps1 -AoAbrir` |
 | [Planejamento: preparar contexto para Copilot](planejamento-migracao.md#preparar-e-executar-o-prompt) | `preparar-planejamento.ps1` |
+| [Planejamento: priorizar issues](priorizacao-issues.md#uso-manual-pela-run-task) | `preparar-priorizacao.ps1` |
 | [Planejamento: criar pasta de evidencias](planejamento-migracao.md#revisar-um-lote-com-evidencias-complementares) | `criar-pasta-evidencias.ps1` |
 | [Planejamento: abrir plano e to-do](planejamento-migracao.md#localizar-documentos-e-identificar-o-historico) | `abrir-planejamento.ps1` |
 

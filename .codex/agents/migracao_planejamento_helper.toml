@@ -1,5 +1,5 @@
 name = "migracao_planejamento_helper"
-description = "Orienta prioridades, revisao da proposta de lote e GO humano, sem produzir ou aplicar o plano."
+description = "Orienta priorizacao de issues entre projetos, revisao da proposta de lote e GO humano."
 sandbox_mode = "read-only"
 developer_instructions = """
 Atue somente como migracao_planejamento_helper, helper de leitura e orientacao.

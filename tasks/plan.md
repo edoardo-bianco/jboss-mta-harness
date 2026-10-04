@@ -1,5 +1,34 @@
 # Plano do agente: evolucao do harness
 
+## Pre-planejamento: priorizar issues - 2026-10-04
+
+Implementacao autorizada apos a avaliacao de viabilidade, sobre 3eed059 na branch
+harness/backlog-agente-orientacao. Objetivo: recomendar top 5 (ate 10) de issues
+mandatory com equilibrio entre risco, repetibilidade e alcance, com evidencias
+MTA e amostra representativa do Source. Recomendacao nao escolhe pelo humano.
+
+Entrega: preparador PowerShell 5.1 e prompt priorizar-issues; tarefa unica
+Planejamento: priorizar issues para todos os projetos do workspace/config escolhido;
+helper comum e papeis existentes; guia especifico ligado ao guia do desenvolvedor.
+Reusar descoberta do registro sem inicializa-lo; usar rodada explicitamente
+referenciada no registro, preservando origem. Indice e registros sao entradas;
+ausencias/conflitos reduzem cobertura, sem eleger a ultima rodada automaticamente.
+Recibo, prompt e destino priorizacao.md ficam em .harness/priorizacao/<RequestId>/;
+preparador nao gera ranking, agente so pode escrever esse destino. Helpers orientam
+no chat. Escolha humana gera ANALISAR AGORA no registro e direcionamento no prompt
+normal, com uma issue/recorte/projeto por lote consistente, sem GO automatico.
+
+Aceite automatico: fixtures multi-projeto, identidade/rodada recebida, erros por
+projeto, ausencias, limites 5..10, isolamento/historico, lock e CLI/editor; nenhuma
+escrita nos registros, fontes, indice ou evidencias. Verificacao:
+powershell.exe -NoProfile -File tests/Test-Prioritization.ps1; regressao de
+Test-MigrationRegister, Test-ProjectIndex, Test-Planning, Test-TaskInputs e Test-Workspace.
+Entrega implementada, com as suites acima e Test-PlanningPortable/Test-PlanningCli
+aprovadas. Revisao do diff/contrato/referencias concluida; validacao automatizada
+cobre preparo e preservacao, sem simular qualidade de ranking ou delegacao nativa.
+Validacao manual posterior: qualidade do ranking, amostragem/risco, lacunas MTA,
+respeito a adiamentos, escolha humana e passagem ao planejamento nos dois clientes.
+
 ## Ajuste dos prompts ao contexto preparado - 2026-10-04
 
 Autorizado pelo desenvolvedor nesta sessao, na branch harness/backlog-agente-orientacao

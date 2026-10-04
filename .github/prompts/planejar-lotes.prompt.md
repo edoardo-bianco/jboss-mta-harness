@@ -12,6 +12,7 @@ Objetivo desta rodada:
 Planejar um lote a partir das issues marcadas ANALISAR AGORA no migracao.md.
 
 Observacoes ou mudancas em relacao ao registro/plano:
+Se usou priorizacao: indique caminho da lista, projeto/IDs escolhidos e recorte.
 
 ## Trabalho solicitado
 
@@ -33,6 +34,9 @@ Planeje issues NAO ANALISADA/ANALISADA. PLANEJADA exige revisar o plano existent
 IMPLEMENTADA/VERIFICADA exige revisar resultado. Reabrir etapa ou incluir outro
 estado exige direcionamento humano explicito por ID. Respeite ADIAR/FORA DO ESCOPO.
 Issues DEV-... podem integrar o recorte com origem, objetivo e evidencias humanas.
+Se houver lista de priorizacao explicitamente indicada no registro/indice de
+evidencias, leia a candidata escolhida e suas lacunas. Ranking e evidencia, nao
+selecao nem GO: revalide no codigo e aprofunde somente o recorte humano deste projeto.
 Varios IDs so formam um lote se compartilharem causa, solucao, aceite e reversao.
 Dependencia em issue adiada/excluida exige decisao explicita, sem inclusao silenciosa.
 

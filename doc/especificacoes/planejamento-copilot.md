@@ -7,13 +7,62 @@ html:
 
 # Contrato do fluxo de migracao com Copilot
 
-Contrato vigente dos prompts planejar-lotes, manter-migracao e implementar-lote.
+Contrato vigente dos prompts priorizar-issues, planejar-lotes, manter-migracao,
+implementar-lote e revisar-resultado.
 A ADR-0001 define contexto explicito; a ADR-0002 separa harness e aplicacao;
 a ADR-0004 substitui os controles Git da ADR-0003. O historico nao cria novos gates.
 Este documento concentra as decisoes antes repetidas nos prompts. Cada preparo
 guarda ContractSnapshot no recibo (ou no prompt de implementacao), preservando as
 instrucoes mesmo apos atualizar o harness; ContractPath indica a fonte versionada. O guia do
 desenvolvedor explica operacao; o registro local concentra escolhas por projeto.
+
+## Pre-planejamento
+
+priorizar-issues e opcional, mediante pedido humano, antes de escolher o recorte.
+Pode comparar todos os projetos Maven do workspace/config explicitamente escolhido.
+Purpose=issue-prioritization; ProjectIndexPath e Projects identificam o escopo;
+cada item preserva Source, MigrationPath/Snapshot, EvidenceIndexPath, MtaOrigin,
+RunId, AnalysisSource e hashes das evidencias quando disponiveis. O indice e
+localizador, nunca autoridade para substituir a rodada do registro pela mais recente.
+Ausencias/conflitos ficam em Diagnostics por projeto; preparador nao inicializa
+registros, atualiza indice ou executa MTA. Indice ausente exige preparo pelo humano.
+
+Recibo/prompt ficam em .harness/priorizacao/<RequestId>/. RankingPath e o unico
+destino de escrita do agente de priorizacao; nao e PlanPath/TodoPath nem GO.
+Preparar nao gera ranking. Snapshots preservam entradas; o agente confere mudancas
+nos registros/indice e integridade MTA antes de recomendar, sem usar hashes como
+lock humano. Divergencia de rodada/escopo/evidencia exige esclarecer ou novo preparo;
+notas/decisoes atuais sao consideradas com origem explicita. Git nao e consultado.
+
+Triagem ampla de candidatas e permitida somente nesta etapa; aprofundar por amostra
+as promissoras, sem planejar varios lotes. Elegiveis por padrao: mandatory/PRESENTE,
+A DEFINIR ou ANALISAR AGORA, NAO ANALISADA/ANALISADA. ADIAR/FORA DO ESCOPO e demais
+andamentos exigem pedido expresso por projeto/ID/recorte para reconsiderar; preservar
+justificativas e trabalho ativo. Issues DEV so por inclusao humana explicita, sem
+classificacao MTA inventada. Nenhuma decisao no migracao.md e alterada pela lista.
+
+Top 5 por padrao, limite configuravel de 5 a 10; entregar menos se faltarem candidatas
+com evidencia. Conferir localizacao e solucao MTA, snapshot, Source, POMs, consumidores
+e testes. Amostrar variacoes de uso/API/versao/modulo/projeto e negativos; declarar
+n/total, deduplicacao observada, limites e nao analisado. Sem localizacao/solucao MTA,
+alertar e pedir trecho/relatorio. Mesma regra nao comprova mesma transformacao.
+
+Ordenar por risco controlado, repetibilidade demonstrada, testes/reversao e alcance;
+justificar comparativamente. Risco e confianca separados; desconhecido nao e baixo
+risco. Distinguir ocorrencias MTA, pontos observados e potencial condicional; nao
+somar sobreposicoes como ganho garantido nem inventar pontuacao/horas. Lista contem
+projetos/IDs, solucao candidata, alcance, risco, repetibilidade, confianca, potencial,
+amostra, fontes/linhas e lacunas. Nao declara corretiva aplicada ou conclusao global.
+
+Humano pode escolher diretamente sem ranking, ou escolher projeto/IDs/recorte na
+lista, registrar ANALISAR AGORA e referencia no migracao.md, e informar intencao
+no prompt de planejamento. Lista entra como evidencia no LEIA-ME pertinente.
+Planejamento revalida o recorte e detalha um lote consistente por projeto/frente;
+ranking nao concede GO, nao herda aceite e nao inicia automaticamente outro lote.
+Helpers podem explicar/revisar a priorizacao no chat e conferir amostras, sem
+gravar RankingPath ou executar preparador/prompt. A escrita usa etapa explicita
+com priorizar-issues, separada da orientacao.
+Guia: [priorizacao de issues](../guias/tools/priorizacao-issues.md).
 
 ## Registro e evidencias
 

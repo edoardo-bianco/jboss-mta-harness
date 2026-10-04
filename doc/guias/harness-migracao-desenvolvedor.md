@@ -51,6 +51,7 @@ nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
+| Quero comparar oportunidades mandatory entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): lista de ate 5 a 10 candidatas por risco, repetibilidade e alcance. |
 | Proposta pronta, ainda em revisao ou sem GO | [5. Planejar e revisar um lote](#5-planejar-e-revisar-um-lote). |
 | Plano revisado com GO, inclusive implementacao parcial | [6. Implementar o lote autorizado](#6-implementar-o-lote-autorizado). |
 | Corretiva pronta para conferir | [7. Verificar e aceitar o resultado](#7-verificar-e-aceitar-o-resultado). |
@@ -122,6 +123,12 @@ O desenvolvedor decide o que merece analise agora e o que fica para depois.
 
 **Guia da etapa:** [Planejamento: indice, registro e caminhos de retomada](tools/planejamento-migracao.md#qual-caminho-seguir).
 Ele explica como consultar o historico, interpretar os estados e atualizar o registro.
+
+Se ainda nao escolheu a issue, use o [guia de priorizacao de issues](tools/priorizacao-issues.md).
+A Run Task **Planejamento: priorizar issues** prepara uma comparacao opcional
+entre projetos, com verificacao de amostras no MTA e no codigo. O helper tambem
+orienta essa etapa. A lista recomenda candidatas; voce registra sua escolha
+como `ANALISAR AGORA` antes de planejar um lote.
 
 **Resultado esperado e continuidade:** prioridades e pendencias compreendidas.
 A etapa 5 produz ou revisa a proposta. Um lote existente com GO valido para
@@ -205,8 +212,9 @@ e escolha a operacao que produz a proxima saida esperada do roteiro.
 Os guias abaixo sao a referencia operacional para desenvolvedor e agentes:
 descrevem entradas, comandos, resultados e limites de cada ferramenta. O agente
 pode usa-los para recomendar o proximo passo com base nas evidencias disponiveis;
-a decisao humana continua nos pontos do fluxo. Um conjunto de agentes orientadores
-e uma evolucao pretendida, sem orquestracao autonoma implementada por estes guias.
+a decisao humana continua nos pontos do fluxo. Os [helpers de migracao](tools/workspace.md#orientacao-com-codex-ou-github-copilot)
+consultam esses guias e o contexto; o orquestrador encaminha duvidas aos helpers
+pertinentes. A validacao manual da descoberta/delegacao nos clientes segue pendente.
 
 ## Guias de ferramentas
 
@@ -216,6 +224,7 @@ e os procedimentos. Cada guia tambem indica o retorno ao fluxo principal.
 
 | Guia | Quando abrir | Configuracao e operacao |
 | --- | --- | --- |
+| [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas mandatory entre projetos antes da escolha; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-pelos-helpers), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
 | <a id="comecar-na-maquina-de-trabalho"></a><a id="extensoes-java-no-vs-code"></a><a id="escolher-o-projeto-em-cada-tarefa"></a><a id="ensaiar-e-depois-usar-os-projetos-corporativos"></a><a id="configuracao-da-maquina"></a><a id="duas-opcoes-para-configurar-o-workspace"></a><a id="opcao-a-editar-o-json-local-e-gerar-novamente"></a><a id="opcao-b-configurar-o-workspace-manualmente"></a><a id="limpar-execucoes-locais"></a><a id="pastas-locais-e-backups-temporarios"></a><a id="tarefa-e-script-correspondente"></a>[Workspace](tools/workspace.md) | Preparar ou ajustar o ambiente; selecionar projetos. | [Configuracao](tools/workspace.md#configuracao), [uso](tools/workspace.md#uso), [limpeza e dados locais](tools/workspace.md#limpar-execucoes-locais), [catalogo de tarefas](tools/workspace.md#tarefa-e-script-correspondente). |
 | <a id="build-maven-da-aplicacao-com-java-8"></a><a id="usar-a-extensao-maven-padrao-do-vs-code"></a>[Build da aplicacao](tools/maven.md) | Executar a Run Task de build ou usar Maven direto; etapas 2 e 7. | [Configuracao](tools/maven.md#configuracao), [Run Task do harness](tools/maven.md#opcao-a-run-task-do-harness), [painel Maven/terminal](tools/maven.md#opcao-b-maven-direto). |
 | <a id="analise-e-resultados"></a><a id="acompanhar-a-analise-mta"></a>[MTA](tools/mta.md) | Produzir diagnostico ou reanalisar; etapas 3 e 7. | [Instalacao/perfil](tools/mta.md#configuracao), [analise, relatorios e logs](tools/mta.md#uso). |

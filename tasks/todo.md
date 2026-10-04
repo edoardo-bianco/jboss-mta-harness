@@ -1,5 +1,20 @@
 # To-do do agente: evolucao do harness
 
+## Pre-planejamento: priorizar issues - 2026-10-04
+
+- [x] Preparar contexto multi-projeto sem modificar indice/registros/evidencias.
+- [x] Entregar prompt top 5..10 por risco, repetibilidade, alcance e confianca.
+- [x] Integrar Run Task, helpers, guia especifico e entrada no guia do desenvolvedor.
+- [x] Testar isolamento, historico, identidades, lacunas e regressao; revisar diff.
+  Test-Prioritization, Test-MigrationRegister, Test-ProjectIndex, Test-Planning,
+  Test-PlanningPortable, Test-PlanningCli, Test-TaskInputs e Test-Workspace
+  passaram em Windows PowerShell 5.1. TOML e referencias locais conferidos;
+  frontmatter da skill preservado e corpo revisado. quick_validate.py nao executou
+  por ausencia de PyYAML; nenhuma dependencia instalada para esse check auxiliar.
+- [ ] Validar manualmente priorizacao e passagem da escolha humana ao planejamento.
+  Usar o [guia especifico](../doc/guias/tools/priorizacao-issues.md#validacao-manual),
+  incluindo qualidade das amostras/contagens e delegacao real dos helpers.
+
 ## Ajuste dos prompts ao contexto preparado - 2026-10-04
 
 - [x] Conferir branch harness/backlog-agente-orientacao, HEAD 39c96b8 e checkout limpo.
@@ -37,7 +52,8 @@ novos coletores e preparo automatizado de servidor permanecem pendentes.
 
 ### Ponto de retomada - 2026-10-04
 
-Trabalho pausado a pedido do desenvolvedor. Continuar pelo
+Retomada autorizada: ajustes dos prompts e priorizacao implementados antes do
+teste manual. Para a validacao dos clientes, continuar pelo
 [registro de retomada e diagnostico](plan.md#retomada-apos-a-pausa-de-2026-10-03),
 na branch `harness/backlog-agente-orientacao`, sem reiniciar as entregas prontas.
 
@@ -53,7 +69,7 @@ na branch `harness/backlog-agente-orientacao`, sem reiniciar as entregas prontas
 | --- | --- | --- |
 | SDLC-01 | Concluida | Preparo de planejamento/reconciliacao por CLI com escolhas explicitas, validacao antes de escrita e saida estruturada. |
 | SDLC-02 | Concluida | Skill compartilhada de orientacao pelo estado efetivo e pelos guias. |
-| SDLC-03 | Implementada; aguarda VAL-01 | Orquestrador helper e helpers de preparo, reconciliacao, planejamento, impacto e implementacao; humano executor nos dois clientes. |
+| SDLC-03 | Implementada; aguarda VAL-01 | Orquestrador helper e helpers de preparo, reconciliacao, planejamento, impacto e implementacao; inclui orientacao da priorizacao entre projetos. Humano executor nos dois clientes. |
 | SDLC-04 | Apos SDLC-03 / VAL-01 | Orquestrador executor e especialista de preparo; modo delegado e retorno ao humano. |
 | SDLC-05 | Apos SDLC-04 | Executores das demais etapas, reutilizando os helpers ja entregues; consumir matriz COMP-01 e coleta Java opcional. |
 | SDLC-06 | Conforme necessidade | Adequar uma acao existente por vez: branch explicita, Sonar assistido, build/MTA/JBoss e limpeza. |

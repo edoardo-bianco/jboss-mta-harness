@@ -257,6 +257,20 @@
       }
     },
     {
+      "label": "Planejamento: priorizar issues",
+      "detail": "Prepara contexto para ranking top 5..10 de issues mandatory dos projetos do workspace, para escolha humana antes do planejamento.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": [
+        "-NoProfile", "-File", "${workspaceFolder}/scripts/preparar-priorizacao.ps1",
+        "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTop",
+        "-EditorPath", "${execPath}"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Planejamento: preparar contexto para Copilot",
       "detail": "1: planejar/atualizar lote a partir do registro; 2: atualizar somente migracao.md, com ajuda opcional do Copilot. Aceita MTA local ou pasta recebida.",
       "type": "process",

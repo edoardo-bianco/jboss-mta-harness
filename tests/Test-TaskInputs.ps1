@@ -4,7 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 23 -and @($labels | Sort-Object -Unique).Count -eq 23) 'Manter 23 tarefas distintas, incluindo operacoes JBoss separadas.'
+Assert ($labels.Count -eq 24 -and @($labels | Sort-Object -Unique).Count -eq 24) 'Manter 24 tarefas distintas, incluindo priorizacao multi-projeto.'
 $serverLabels=@('Servidor: iniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
@@ -23,7 +23,9 @@ $sonarTask = @($tasks.tasks | Where-Object label -eq 'Aplicacao: analisar SonarQ
 Assert ($sonarTask.Count -eq 1 -and $sonarTask[0].args -contains '${workspaceFolder}/scripts/analisar-sonar.ps1' -and -not (($sonarTask[0].args -join ' ') -match '(?i)token')) 'Sonar deve ter tarefa unica, sem token nos argumentos.'
 Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -notcontains 'Planejamento: conferir Git do lote') 'Limpeza deve permanecer; controle Git deve sair do catalogo.'
 Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|Servidor|MTA|Planejamento): ' }).Count -eq 0) 'Run Tasks devem ser classificadas pelo prefixo da etapa.'
-$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels })
+$prioritization = @($tasks.tasks | Where-Object label -eq 'Planejamento: priorizar issues')
+Assert ($prioritization.Count -eq 1 -and $prioritization[0].args -contains '${workspaceFolder}/scripts/preparar-priorizacao.ps1' -and $prioritization[0].args -contains '${input:harnessWorkspacePath}' -and $prioritization[0].args -contains '${execPath}' -and $prioritization[0].args -notcontains '-SelectTarget') 'Priorizacao deve usar o workspace inteiro e abrir prompt.'
+$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -ne 'Planejamento: priorizar issues' })
 foreach ($monitor in @($tasks.tasks | Where-Object label -like 'MTA: acompanhar*')) {
     Assert ($monitor.args -contains '-Active' -and $monitor.args -notcontains '-SelectTarget' -and -not ($monitor.args | Where-Object { $_ -like '${input:*}' })) 'Observabilidade nao deve solicitar workspace/projeto.'
 }

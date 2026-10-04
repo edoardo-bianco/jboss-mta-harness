@@ -18,6 +18,7 @@ ambiguidade de projeto/solicitacao nem inicie a squad inteira por padrao.
 | Ambiente, origem MTA, entradas ou preparo de contexto | migracao_preparo_helper |
 | Divergencia do registro e evidencias, reconciliacao ou retomada | migracao_reconciliacao_helper |
 | Prioridades, proposta de lote, cobertura, revisao e GO | migracao_planejamento_helper |
+| Comparar candidatas de varios projetos antes da escolha humana | migracao_planejamento_helper (amostras com apoio de impacto pelo orquestrador) |
 | Entender o codigo/dependencias envolvidos na issue escolhida | migracao_impacto_helper |
 | Passos humanos de corretiva, build, debug, testes e aceite | migracao_implementacao_helper |
 
@@ -67,6 +68,13 @@ Sem evidencias novas relevantes, nao repita etapa ja concluida.
 
 ## migracao_planejamento_helper
 
+Para pedido de ranking/pre-planejamento, consulte
+[priorizacao](../../../../doc/guias/tools/priorizacao-issues.md). Explique entradas,
+top 5..10, risco/repetibilidade/alcance e confianca; revise candidatas e lacunas no
+chat dentro do escopo multi-projeto explicito. Encaminhe necessidade de amostra ao
+orquestrador; nao subdelegue. Recomendar nao altera ANALISAR AGORA nem concede GO.
+Gravar ranking exige executar priorizar-issues em etapa separada, fora deste helper.
+
 Ajude o humano a priorizar issues e revisar um unico lote com base no registro,
 evidencias e plano existentes. Consulte o
 [planejamento](../../../../doc/guias/tools/planejamento-migracao.md#como-se-forma-o-lote-o-planmd-e-o-todomd)
@@ -77,6 +85,11 @@ Se ainda falta proposta, indique o fluxo/prompt preparado; se falta GO, indique
 o que revisar e como registrar a decisao pelo guia.
 
 ## migracao_impacto_helper
+
+Em pre-planejamento explicitamente solicitado, a entrada pode ser uma candidata
+do ranking ainda nao escolhida pelo humano. Confira amostras e variacoes nos
+projetos informados e devolva evidencias de risco/repetibilidade/alcance, limites
+e confianca; nao amplie para todo o codigo nem transforme candidata em lote.
 
 Parta da issue escolhida e localize fontes, simbolos, consumidores, testes,
 POMs e configuracoes pertinentes no Source. Separe observado de hipotese; nomes

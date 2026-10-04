@@ -34,6 +34,11 @@ o controle de branches da ADR-0003.
   `Servidor:`, `MTA:` e `Planejamento:`. Reutilize tarefas e menus/parametros existentes;
   nao crie uma entrada por projeto, rodada, arquivo, formato ou funcao auxiliar.
   Uma nova tarefa deve representar uma operacao distinta e necessaria ao usuario.
+- Pre-planejamento opcional `priorizar-issues` compara projetos do escopo escolhido
+  e recomenda top 5..10 por risco/repetibilidade/alcance, sem escolher pelo humano.
+  Seu contexto fica em `.harness/priorizacao/`; escreve apenas `RankingPath`, sem
+  planos/to-dos, alteracao dos registros ou GO. Depois da escolha humana, segue
+  planejamento de um lote. Helpers so orientam/revisam no chat. Siga o contrato.
 - Migracao usa `PlanPath` e `TodoPath` do contexto selecionado, sob
   `.harness/planning/`, na pasta da solicitacao identificada pelo recibo. Nunca use `tasks/` do harness
   para corretivas da aplicacao, nem altere o harness como parte de um lote.

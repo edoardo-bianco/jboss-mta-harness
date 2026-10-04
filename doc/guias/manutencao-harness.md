@@ -85,6 +85,12 @@ reais do desenvolvedor.
 
 Para testar o planejamento, execute `powershell.exe -NoProfile -File .\tests\Test-Planning.ps1`. Verifica selecao de rodadas, isolamento por projeto, evidencia invalida, contexto fixo, pastas legiveis e compatibilidade com o historico antigo. Testa abertura de plano/to-do com editor simulado e cancelamento pela entrada real, sem iniciar Maven, MTA ou Copilot.
 
+`tests/Test-Prioritization.ps1` verifica o preparo de priorizacao entre projetos:
+escopo do workspace, registros/rodadas recebidas, lacunas/conflitos, integridade,
+limites, historico, preservacao das entradas, lock, CLI/JSON e editor simulado.
+A qualidade da lista e a orientacao/delegacao nativas seguem para a
+[validacao manual](tools/priorizacao-issues.md#validacao-manual).
+
 `tests/Test-PlanningPortable.ps1` verifica MTA recebido de outra maquina, alertas
 do POM e continuidade sem indice local. `tests/Test-LongPaths.ps1` verifica copia,
 hashes e armazenamento externo em fixtures de caminhos longos.

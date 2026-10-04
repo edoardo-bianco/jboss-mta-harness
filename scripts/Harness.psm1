@@ -237,7 +237,7 @@ function Resolve-HarnessMigrationPath {
     Join-Path $Folder ('migracao-' + $label + '.md')
 }
 
-function Initialize-HarnessMigration {
+function Get-HarnessMigrationPaths {
     param([string]$Root, $Project)
     $base = Resolve-HarnessPath (Join-Path $Root '.harness/projetos') $Root
     # Mesma raiz usa o mesmo registro, por config.repositories ou pelo workspace.
@@ -248,6 +248,14 @@ function Initialize-HarnessMigration {
     $folder = if ($existing.Count) { $existing[0].FullName } else { Join-Path $base (Get-HarnessProjectFolder ([pscustomobject]@{name=$identity;label=$Project.label})) }
     $path = Resolve-HarnessPath (Resolve-HarnessMigrationPath $folder) $Root
     $index = Resolve-HarnessPath (Join-Path $folder 'evidencias/LEIA-ME.md') $Root
+    [pscustomobject]@{MigrationPath=$path;EvidenceIndexPath=$index}
+}
+
+function Initialize-HarnessMigration {
+    param([string]$Root, $Project)
+    $paths = Get-HarnessMigrationPaths $Root $Project
+    $path = $paths.MigrationPath
+    $index = $paths.EvidenceIndexPath
     $content = @"
 # Migracao: $($Project.label)
 
@@ -802,4 +810,5 @@ Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-Ha
 Export-ModuleMember -Function Initialize-HarnessMigration, Get-HarnessMtaCatalog, Update-HarnessMigration
 Export-ModuleMember -Function Get-HarnessExternalMtaRuns
 Export-ModuleMember -Function Resolve-HarnessMigrationPath
+Export-ModuleMember -Function Get-HarnessMigrationPaths
 Export-ModuleMember -Function Open-HarnessEditor

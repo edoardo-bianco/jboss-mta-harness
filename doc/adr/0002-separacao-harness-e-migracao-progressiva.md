@@ -61,6 +61,14 @@ A [ADR-0004](0004-git-informativo-sem-controle-de-branches.md) define Git como
 informativo; os controles de branch/HEAD da ADR-0003 sao historicos e superados.
 Um lote ativo e por frente, nao um bloqueio global a outros desenvolvedores.
 
+Complemento autorizado em 2026-10-04: o pre-planejamento opcional
+`priorizar-issues` compara candidatas entre projetos e registra ate 5 a 10
+oportunidades por risco, repetibilidade e alcance, com amostras MTA/codigo e
+cobertura parcial. A lista fica em `.harness/priorizacao/`, sem alterar registros,
+criar planos ou antecipar lotes. O desenvolvedor escolhe projeto/IDs/recorte e
+registra `ANALISAR AGORA` antes de iniciar a proposta abaixo. Helpers orientam
+essa escolha no chat. Consulte o [guia de priorizacao](../guias/tools/priorizacao-issues.md).
+
 1. Partir da rodada MTA selecionada e de evidencia identificada da aplicacao.
    Fazer triagem delimitada para identificar um lote consistente, com objetivo,
    transformacao, dependencias, criterios de aceite e reversao comuns. Mesma regra

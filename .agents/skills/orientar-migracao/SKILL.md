@@ -44,6 +44,8 @@ necessario para a etapa selecionada, sem acionar toda a squad automaticamente.
    MtaOrigin identifica a rodada recebida; AnalysisSource e seu snapshot; Source
    e a aplicacao local. Nao substitua um pelo outro nem use tasks/ como plano da app.
    Consulte apenas evidencias e trechos de codigo necessarios a duvida atual.
+   Em pre-planejamento Purpose=issue-prioritization, confira Projects do recibo e
+   seus registros/rodadas; escopo pode conter varios projetos, sem eleger lote.
 4. Respeite o ContractSnapshot do recibo e as instrucoes do prompt selecionado
    como contexto historico da operacao. Sem snapshot historico, consulte o
    [contrato vigente](../../../doc/especificacoes/planejamento-copilot.md).
@@ -61,6 +63,13 @@ necessario para a etapa selecionada, sem acionar toda a squad automaticamente.
 Use o caminho aplicavel no
 [guia de planejamento](../../../doc/guias/tools/planejamento-migracao.md#qual-caminho-seguir).
 Aprofunde somente a etapa atual; preserve um lote consistente por frente.
+
+- Se o humano pedir ajuda para escolher issues por risco/repetibilidade/alcance,
+  indique [Priorizar issues](../../../doc/guias/tools/priorizacao-issues.md).
+  Oriente a tarefa Planejamento: priorizar issues ou revise contexto/lista explicitos
+  no chat. O orquestrador pode apoiar-se nos helpers de planejamento e impacto para
+  comparar candidatas/amostras. Nao execute preparador/prompt nem grave ranking;
+  preserve A DEFINIR ate a escolha humana e nao inicie planejamento automaticamente.
 
 - Prompt/recibo preparado sem plan.md e todo.md significa preparo, nao planejamento
   executado. Reconciliacao PENDENTE exige conferir o prompt e as evidencias; carregar
@@ -97,6 +106,7 @@ selecao. Os guias concentram os procedimentos; esta skill nao os replica.
 | --- | --- |
 | Ambiente, projetos e descoberta desta skill | [Workspace](../../../doc/guias/tools/workspace.md) |
 | Build e artefato Maven | [Maven](../../../doc/guias/tools/maven.md) |
+| Escolher candidatas por risco, repetibilidade e alcance | [Priorizacao](../../../doc/guias/tools/priorizacao-issues.md) |
 | Diagnostico novo ou existente | [MTA](../../../doc/guias/tools/mta.md) |
 | Indice, registro, preparo, reconciliacao, plano, GO e implementacao | [Planejamento](../../../doc/guias/tools/planejamento-migracao.md) |
 | Analise de qualidade e evidencias | [Sonar](../../../doc/guias/tools/sonar.md) |

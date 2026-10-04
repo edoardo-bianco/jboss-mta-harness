@@ -19,6 +19,12 @@ Depois, com aceite e pedido de continuidade, reconcilie as evidencias disponivei
 comparacao com novo MTA fica pendente se nao houver rodada. Nao declarar conclusao
 global sem evidencia. O prompt de planejamento nao autoriza executar corretivas.
 
+Pre-planejamento opcional priorizar-issues compara os projetos explicitamente
+incluidos no contexto e recomenda top 5..10 por risco/repetibilidade/alcance.
+Escreve apenas RankingPath sob .harness/priorizacao; nao escolhe pelo humano,
+nao altera registros nem planeja lotes. Escolha humana precede o planejamento usual.
+Helpers explicam/revisam a lista no chat; executar o prompt e etapa separada.
+
 Siga o [contrato vigente](../doc/especificacoes/planejamento-copilot.md): decisoes
 Java 8/javax/EAP 7.4 e Hibernate permanecem. planejar-lotes atende proposta e revisao.
 MigrationPath explicito permite somente andamento/cobertura/referencias das issues
