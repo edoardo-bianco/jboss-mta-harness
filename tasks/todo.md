@@ -19,6 +19,18 @@ Este arquivo concentra estado e ordem das entregas; os guias mantem os procedime
 Os perfis da squad helper estao no repositorio; validacao nas extensoes, executores,
 novos coletores e preparo automatizado de servidor permanecem pendentes.
 
+### Ponto de retomada - 2026-10-04
+
+Trabalho pausado a pedido do desenvolvedor. Continuar pelo
+[registro de retomada e diagnostico](plan.md#retomada-apos-a-pausa-de-2026-10-03),
+na branch `harness/backlog-agente-orientacao`, sem reiniciar as entregas prontas.
+
+- [ ] Isolar os hooks do DevSquad e confirmar resposta do Copilot em conversa padrao.
+- [ ] Retomar teste leitor do `migracao_helper` no Copilot, conferindo fontes e ausencia de escrita.
+- [x] Confirmar descoberta de `orientar-migracao` no Codex do VS Code: desenvolvedor informou que ja aparece.
+- [ ] Validar orientacao e delegacao no Codex com a skill ja disponivel.
+- [ ] Completar VAL-01 nos dois clientes antes dos executores. Testes simulados nao substituem essa validacao.
+
 ## Backlog vigente
 
 | ID | Estado / ordem | Proxima entrega |
@@ -32,7 +44,7 @@ novos coletores e preparo automatizado de servidor permanecem pendentes.
 | COMP-01 | Capacidade solicitada | Coletor deterministico das dependencias Maven e prompt especifico de matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. |
 | CORE-01 | Piloto opcional transversal | Navegacao/coleta de contexto Java para compreensao pelo desenvolvedor e apoio ao SDLC, independente de MTA/engine. |
 | SERV-01 | Capacidade solicitada; validar rota primeiro | Migrar configuracao/subsistemas e inventariar drivers, modulos e recursos necessarios; ferramenta oficial/CLI e prompt/helper com evidencias, acoes e validacao no destino isolado. |
-| VAL-01 | Ensaio obrigatorio de SDLC-03 nos dois clientes | Descoberta e orientacao pelo mesmo contexto; apoio using-agent-skills/subagentes no Codex e DevSquad no Copilot, presente/ausente/inadequado, sem efeitos operacionais; casos do plano. |
+| VAL-01 | Iniciada; chat Copilot com falha, em pausa | Descoberta da skill confirmada no Codex; isolar falha dos hooks DevSquad no Copilot e validar orientacao/delegacao nos dois clientes pelo mesmo contexto, capacidades presentes/ausentes/inadequadas e ausencia de efeitos operacionais; casos do plano. |
 | VAL-02 | Ensaio operacional existente pendente | Prompts Copilot: reconciliacao/delegacao, issues, persistencia, retomada, GO, implementacao e continuidade com Previous/novo MTA. |
 | VAL-03 | Ensaio Sonar real pendente | Criterios Blocker/High, avisos de cobertura e comparacao com baseline, separados do Quality Gate. |
 | DEC-01 | Decisao futura | Decidir preparo de deploy com servidor parado; deploy atual exige servidor ativo. |
@@ -51,8 +63,8 @@ SDLC-03: 12 perfis para seis papeis, YAML/TOML e limites estruturais aprovados;
 e skill-creator/quick_validate validos. Revisao independente dos perfis sem achados.
 Evidencia estrutural: .harness/tests/orientacao-sdlc03/structural.json. DevSquad
 instalado inspecionado: perfil plan com ferramentas de escrita/terminal/delegacao,
-incompativel com o apoio leitor; fallback documentado. Descoberta nativa segue
-pendente, sem afirmar compatibilidade pela mera presenca dos arquivos.
+incompativel com o apoio leitor; fallback documentado. Validacao nativa completa
+segue pendente, sem afirmar compatibilidade pela mera presenca dos arquivos.
 
 Ensaios de instrucoes SDLC-03: orquestrador delegou uma leitura ao helper de
 implementacao, preservou GO/solicitacao e orientou runtime/aceite sem executar;
@@ -69,8 +81,8 @@ independentes confirmaram indice atrasado/reconciliacao pendente, contexto escol
 com GO/trabalho parcial e solicitacoes ambiguas sem DevSquad. O caso com GO continha
 instrucao indevida na evidencia, que nao foi executada. Os 34 arquivos das fixtures
 permaneceram intactos. Evidencias: .harness/tests/orientacao-sdlc02/results.json e
-before.json. Somente leitura simulada; descoberta nativa e delegacao nas extensoes
-seguem pendentes em VAL-01. Scripts/prompts operacionais nao foram alterados nesta
+before.json. Somente leitura simulada; confirmacao nativa completa dos dois clientes
+continua em VAL-01. Scripts/prompts operacionais nao foram alterados nesta
 fatia; permanecem as evidencias de regressao abaixo.
 
 SDLC-01 passou em sete suites: Test-PlanningCli, Test-Planning,

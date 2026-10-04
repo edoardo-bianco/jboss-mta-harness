@@ -8,6 +8,82 @@ o desenho, corrige um template e entrega a primeira interface CLI, a skill e os 
 de orientacao. Validacao nativa e demais entregas estao no
 [backlog vigente](todo.md#backlog-vigente). Historico e evidencias ficam preservados.
 
+### Retomada apos a pausa de 2026-10-03
+
+Pausa pedida pelo desenvolvedor; retomada prevista para 2026-10-04. Esta secao
+registra o diagnostico e o proximo teste, sem retomar implementacao ou alterar
+plugins. Evolucao do harness na branch `harness/backlog-agente-orientacao`.
+Implementacao preservada em `4a7fcb1`, precedido por `58695e6`, `e723858` e
+`ad868fd`. Principais locais `main` e `main_jboss_eap74` permanecem em `de59750`;
+esta entrega ainda nao foi integrada nem publicada por esta sessao.
+
+SDLC-01/02 entregues; perfis SDLC-03 implementados. Sete suites aprovadas e
+ensaios simulados registrados no [to-do](todo.md#verificacoes-e-reconciliacao-do-historico).
+Essas evidencias nao encerram VAL-01. Manter prioridade de validar os helpers
+antes dos executores; COMP-01, CORE-01 e SERV-01 continuam no backlog vigente.
+
+**Resultado do teste manual iniciado:**
+
+| Ambiente | Observado | Situacao para retomar |
+| --- | --- | --- |
+| Codex no VS Code | Na consolidacao final, o desenvolvedor confirmou que `orientar-migracao` ja aparece na extensao. | Descoberta confirmada por relato humano. Falta validar orientacao e delegacao; nao manter a ausencia no seletor como pendencia. |
+| GitHub Copilot | Desenvolvedor tentou usar a orientacao, mas recebeu `Error: (query) No response was returned`. Tambem falhou com mensagem simples, Agent padrao e outro workspace. | Logs registram falha dos hooks globais do DevSquad instalado; falta testar com o plugin efetivamente desativado. Selecionar Agent nao desativa hooks de plugin. |
+
+Diagnostico local: VS Code 1.140.0 / Copilot Chat 0.68.0. No log
+`%USERPROFILE%/.copilot/logs/process-1791024209527-256024.log`, a tentativa de
+2026-10-03 21:24:16 (UTC-03, registrada como 2026-10-04T00:24:16Z) mostra:
+
+```text
+Hook from "devsquad" execution failed: Error: Hook command failed with code 126
+/bin/bash: hooks/detect-repo-platform.sh: /bin/bash^M: bad interpreter: No such file or directory
+accepted turn ended without visible output; emitted session.error
+```
+
+Tambem falharam `detect-branching-strategy.sh`, `detect-tool-extensions.sh` e
+`detect-lsp-servers.sh`. Leitura binaria confirmou CRLF nos nove `.sh` de
+`%USERPROFILE%/.copilot/installed-plugins/devsquad-copilot/devsquad/hooks/`.
+`hooks.json` registra os quatro detectores em `sessionStart`. Conversao para LF
+e uma correcao candidata na instalacao local; nao foi aplicada. Nao foi
+determinada a origem desses finais de linha. Nenhum arquivo do plugin foi
+alterado pelo assistente, e nao houve confirmacao de teste com ele desativado.
+Esse problema de execucao e separado da incompatibilidade de capacidades do
+perfil `devsquad.plan` com o papel helper, registrada mais adiante.
+
+O Copilot obteve token as 21:15:53; avisos anteriores de ausencia de token eram
+de inicializacao. ADO/Foundry pediram autenticacao MCP, desnecessaria para este
+teste leitor; ADO esta no plugin DevSquad. O status oficial consultado as 21:23
+informava Copilot/provedores operacionais, sem incidentes abertos. Isso nao
+substitui diagnostico local nem garante disponibilidade na retomada.
+
+A suspeita de "24 arquivos alterados pelo helper" foi conferida: Git limpo,
+HEAD ainda `4a7fcb1` e exatamente 24 arquivos no diff acumulado `main...HEAD`.
+Na area `.harness` e nas configuracoes locais examinadas nao havia arquivos
+mais novos que esse commit. Nao foi encontrada evidencia de novas edicoes pelo
+teste; a quantidade exibida pelo Copilot coincidia com o diff acumulado da branch.
+
+**Ordem de retomada:**
+
+1. Isolar o chat: Extensions > `@agentPlugins` > DevSquad > Disable (Workspace),
+   recarregar a janela e abrir conversa nova com Agent e "Responda apenas OK".
+   Confirmar a desativacao real e o resultado; se falhar, consultar o log da nova
+   tentativa antes de atribuir a mesma causa ou mudar outras configuracoes.
+2. Com chat funcional, testar `migracao_helper` no Copilot pelo
+   [guia de orientacao](../doc/guias/tools/workspace.md#orientacao-com-codex-ou-github-copilot),
+   com leitura simples e depois contexto escolhido; conferir ausencia de escrita.
+3. No Codex do VS Code, usar `$orientar-migracao`, ja visivel, em conversa na raiz
+   do harness com contexto escolhido. Conferir fontes, proximo passo, guia e apoio
+   realmente utilizado, sem efeitos operacionais; nao repetir a investigacao de
+   descoberta encerrada pelo relato do desenvolvedor.
+4. Completar os casos de VAL-01 nos dois clientes, registrando contexto, apoio
+   realmente utilizado, resultado e limites. Somente depois avancar a SDLC-04/05.
+
+Referencias verificadas durante o diagnostico:
+[skills Codex](https://learn.chatgpt.com/docs/build-skills),
+[skills Copilot](https://code.visualstudio.com/docs/agent-customization/agent-skills),
+[desativar plugins e hooks](https://code.visualstudio.com/docs/agent-customization/agent-plugins#enable-or-disable-plugins)
+e [status GitHub](https://www.githubstatus.com/). Logs locais podem conter dados
+da sessao; este registro preserva somente o trecho necessario, sem credenciais.
+
 ### Referencias e arquitetura
 
 Este plano complementa as fontes abaixo; procedimentos continuam nos guias.
