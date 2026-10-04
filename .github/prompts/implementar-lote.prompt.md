@@ -13,6 +13,13 @@ Observacoes para a execucao do lote aprovado:
 ## Trabalho solicitado
 
 Leia o bloco JSON final e ContextPath, PlanPath e TodoPath integralmente.
+PlanSnapshot/TodoSnapshot consolidam os documentos no preparo; confira os arquivos
+pelos hashes antes de usar essas copias. Leia MigrationPath atual e EvidenceIndexPath
+quando informados; ProjectIndexPath e referencia informativa quando existente.
+Antes de editar, explicite lote/IDs, tarefas pendentes, arquivos, transformacao,
+GO/dispensas, precondicoes, comandos, testes e criterios de aceite do plano.
+Direcionamento humano ausente para comportamento/API/ambiente ambiguo exige
+pergunta especifica; nao complete o escopo por inferencia.
 Leia ContractSnapshot do bloco de implementacao, copia de ContractPath;
 em prompts antigos sem essa copia, use
 doc/especificacoes/planejamento-copilot.md do harness. Respeite especialmente
@@ -37,7 +44,12 @@ Nao chamar finalize/refine/sprint, board, outra fase ou lote. Informe agente/ski
 Execute incrementalmente tarefas pendentes e testes pertinentes. Lote Hibernate exige
 POMs de compilacao/testes alinhados ao ORM 5.3 do destino, patch comprovado; build 5.1
 nao valida 5.3. Lacuna no plano exige decisao de escopo, sem ampliar GO.
-Cobertura meta 85% gera aviso; usar -Djacoco.haltOnFailure=false, sem ignorar testes.
+Crie/ajuste testes unitarios do comportamento corrigido, incluindo regressao e erros.
+Meta minima de referencia: 85% de linhas no recorte corrigido, via relatorio JaCoCo.
+Identifique classes/metodos, linhas cobertas/perdidas, percentual e caminho do report;
+se o report nao permitir esse recorte, declare a limitacao, sem usar o total como prova.
+Abaixo de 85% gera WARNING, sem bloquear build; report ausente fica PENDENTE.
+Use -Djacoco.haltOnFailure=false, sem ignorar testes ou falhas de compilacao.
 MTA/Sonar/rede/EAP/deploy exigem autorizacao explicita de destino/finalidade.
 Nao sobrescrever baseline ANTES nem executar commit, push, merge, PR ou mensagens.
 
@@ -48,3 +60,5 @@ recibos, Previous, snapshots, regras, memoria ou documentos paralelos.
 Registre comandos reais, resultados e limitacoes, sem marcar pendencias como sucesso.
 Releia os documentos, confira diff contra GO, informe links e mantenha ACEITE HUMANO
 PENDENTE. Nao integre, publique, escolha proximo lote ou declare conclusao global.
+Oriente a revisao do resultado pelo ResultReviewPromptPath preparado, quando presente,
+com evidencias reais e roteiro funcional especifico da parte corrigida.

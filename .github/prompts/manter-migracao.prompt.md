@@ -18,6 +18,8 @@ o destino deve ficar sob .harness/projetos do harness. Divergencia exige esclare
 Leia em ContractSnapshot do recibo, copia de ContractPath, as secoes Registro e evidencias e Decisoes tecnicas vigentes.
 Sem contexto explicito, solicite o arquivo preparado; nao procure o mais recente.
 Confira projeto e IDs por conteudo; caminhos da maquina de um colega sao historicos.
+ProjectIndexPath, quando existente, permite conferir referencias do projeto;
+MigrationPath permanece autoridade das escolhas, nao o resumo do indice.
 
 O harness ja extraiu o catalogo da rodada escolhida quando fornecida. Reconcilie
 as decisoes, o documento-base e somente as evidencias listadas em EvidenceIndexPath.

@@ -1,5 +1,21 @@
 # Plano do agente: evolucao do harness
 
+## Ajuste dos prompts ao contexto preparado - 2026-10-04
+
+Autorizado pelo desenvolvedor nesta sessao, na branch harness/backlog-agente-orientacao
+(base local 39c96b8). Ajustar selecao humana por issue/etapa, referencia informativa
+ao indice, evidencias/localizacao/recomendacao MTA, consolidacao de plano/to-do no
+preparo de implementacao e revisao do resultado com roteiro funcional. JaCoCo do
+recorte corrigido: 85% de linhas, aviso sem bloquear build; Sonar global permanece
+politica separada. Nao alterar DevSquad instalado nem aplicar corretivas da aplicacao.
+
+Verificar geradores, identidade, preservacao historica e retomada; atualizar guias.
+Validacao manual posterior: selecao ausente, issue DEV com evidencias, estados
+PLANEJADA/IMPLEMENTADA/VERIFICADA, relatorio MTA incompleto, conflitos entre registro
+atual e snapshot, direcionamento ambiguo, cobertura abaixo/igual/acima de 85%,
+revisao com build/testes/Sonar/MTA/runtime ausentes e presentes. Ensaios nativos de
+helpers/delegacao continuam pendentes antes dos executores; automatizados nao os substituem.
+
 ## Trabalho atual: backlog e squad de migracao - 2026-10-03
 
 Consolidacao da revisao de prompts e do desenho da squad, na branch

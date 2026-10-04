@@ -184,12 +184,22 @@ aceite e reversao comuns; pode ser um unico problema complexo. Nao equivale a re
 categoria, ocorrencia ou receita. Preservar IDs historicos, inclusive termo "fatia".
 O catalogo pode conter todo MTA; a analise detalha apenas o recorte selecionado.
 
-Respeitar escolhas do registro e direcionamento do humano. Sem selecao/objetivo claro,
-recomendar brevemente e pedir escolha; nao iniciar triagem global. Dependencia fora
+Exigir ao menos uma issue ANALISAR AGORA escolhida pelo desenvolvedor no registro
+atual. Sem selecao, pedir IDs/decisao no registro; objetivo generico nao autoriza
+triagem global. Planejar NAO ANALISADA/ANALISADA; PLANEJADA direciona a revisao do
+plano, IMPLEMENTADA/VERIFICADA a verificacao do resultado. Reabrir etapa ou outro
+estado exige direcionamento humano explicito por ID. Issues DEV-... exigem origem,
+objetivo e evidencias. ProjectIndexPath e referencia informativa quando existente,
+sem substituir MigrationPath ou escolher projeto/issue pela recencia. Dependencia fora
 de escopo exige decisao. Nao criar varios lotes por selecionar varias issues.
 Cruzar regra, API/overload, uso, versao e teste: aplicavel com evidencia, risco a
 investigar, nao aplicavel ou duplicado. Contagem bruta MTA, cobertura analisada e
 pontos de alteracao deduplicados sao distintos. Nao extrapolar amostras.
+Por issue MTA, registrar arquivo/classe/metodo e trecho MTA, recomendacao/solucao do
+relatorio quando presente e conferencia do Source. Localizacao/recomendacao ausente
+exige alerta e pedido do trecho/relatorio ao desenvolvedor, sem inventar solucao MTA.
+Para DEV-..., usar pontos locais/evidencias humanas, sem exigir regra/solucao MTA.
+Conferir consistencia entre indice, registro, evidencias, fontes, plano e to-do.
 
 Complexidade baixa/media/alta considera variacao semantica, acoplamento, dependencias,
 runtime, testes e reversao; risco e confianca ficam separados, sem estimativa por
@@ -289,13 +299,33 @@ integracao, proximo lote ou conclusao global automatica.
 
 ## Verificacoes e continuidade
 
+O preparo de implementacao incorpora PlanSnapshot/TodoSnapshot e caminhos do
+registro/indice de evidencias quando disponiveis, alem do contrato e hashes.
+Executor confere arquivos/hashes e explicita tarefas, arquivos, GO/dispensas,
+transformacao, comandos, testes e criterios. Ambiguidade de comportamento/API/
+ambiente exige direcionamento humano especifico antes da escrita.
+O mesmo preparo gera revisar-resultado, sem nova Run Task. Esse prompt somente
+le o plano/to-do atual e evidencias pertinentes; copias/hashes do preparo sao
+historicos, nao lock do andamento. Solicita logs/exit code do build, testes e
+JaCoCo, Sonar/MTA comparaveis e artefato/recibo/logs de deploy EAP 7.4 quando
+possivel. Deriva roteiro funcional com precondicoes, dados, passos concretos,
+resultado esperado/observado, negativos e regressao; lacunas pedem direcionamento.
+Nao executa ferramentas nem escreve ou concede aceite. revisar-lote permanece
+compatibilidade de revisao de proposta, sem trocar seu significado historico.
+
 Build Maven Java 8 com POM alinhado, testes/consumidores e validacao funcional do
-artefato identificado no EAP 7.4. Cobertura meta 85%, aviso abaixo, sem reprovar
+artefato identificado no EAP 7.4 quando possivel e pertinente; ambiente indisponivel
+fica PENDENTE para avaliacao humana. Testes unitarios da parte corrigida cobrem
+regressao e erros. JaCoCo: meta minima de referencia 85% de linhas no recorte
+corrigido, com classes/metodos, linhas cobertas/perdidas e caminho do report.
+Recorte nao mensuravel ou report ausente fica PENDENTE; total global nao prova
+o recorte. Cobertura abaixo de 85% gera aviso, sem reprovar
 build ou bloquear entrega. Manter instrumentacao/relatorios; JaCoCo haltOnFailure=false
 e -Djacoco.haltOnFailure=false no Maven direto. Se POM fixa gate prevalente, relatar
 origem/ajuste no escopo, nunca converter exit code em sucesso. Nao skipTests,
 reduzir meta ou ignorar falhas; compilacao/testes falhos continuam FALHOU.
-Sonar: Blocker/High reprovam avaliacao; cobertura/aumento de issues sao avisos;
+Sonar: cobertura global permanece politica separada de 85%; nao mede por si so
+o recorte JaCoCo da corretiva. Blocker/High reprovam avaliacao; cobertura/aumento de issues sao avisos;
 Quality Gate do servidor separado. UNVERIFIED nao e conformidade.
 
 Plano/to-do separam "Checklist do desenvolvedor (nao bloqueante)": Sonar ANTES

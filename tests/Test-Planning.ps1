@@ -128,6 +128,7 @@ Assert ($prepared.PlanPath -eq (Join-Path $requestFolder 'plan.md') -and $prepar
 Assert (-not (Test-Path -LiteralPath $prepared.PlanPath) -and -not (Test-Path -LiteralPath $prepared.TodoPath)) 'Harness nao deve simular um plano produzido pelo Copilot.'
 $jsonBlock = [regex]::Match($promptText, '(?s)```json\s*(\{.*?\})\s*```').Groups[1].Value | ConvertFrom-Json
 Assert ($jsonBlock.PlanPath -eq $prepared.PlanPath.Replace('\','/') -and $jsonBlock.TodoPath -eq $prepared.TodoPath.Replace('\','/')) 'Prompt nao informa as saidas autorizadas.'
+Assert ($jsonBlock.ProjectIndexPath -eq (Join-Path $fixture '.harness/projetos/indice-projetos.md').Replace('\','/')) 'Prompt nao referencia indice do harness selecionado.'
 # Simular documentos existentes para provar que preparar outra solicitacao nao os sobrescreve.
 Set-Content -LiteralPath $prepared.PlanPath 'PLANO-DE-CORRETIVAS-EXISTENTE'
 Set-Content -LiteralPath $prepared.TodoPath 'TAREFAS-DE-CORRETIVAS-EXISTENTES'

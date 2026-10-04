@@ -1,5 +1,21 @@
 # To-do do agente: evolucao do harness
 
+## Ajuste dos prompts ao contexto preparado - 2026-10-04
+
+- [x] Conferir branch harness/backlog-agente-orientacao, HEAD 39c96b8 e checkout limpo.
+- [x] Ajustar selecao por issue/etapa, indice, evidencias e recomendacao MTA.
+- [x] Consolidar plano/to-do e preparar revisao do resultado sem nova Run Task.
+- [x] Definir JaCoCo 85% do recorte corrigido com aviso, separado do Sonar global.
+- [x] Alinhar guias e validar geradores, preservacao/retomada e diff.
+  Test-Planning, Test-Implementation, Test-PlanningCli, Test-PlanningPortable,
+  Test-ProjectIndex, Test-ImplementationBranch e Test-TaskInputs passaram em
+  Windows PowerShell 5.1. Test-BuildCoverage real passou com meta 85%, cobertura
+  20%/aviso/exit 0 e falhas intencionais de teste/compilacao preservadas.
+  Evidencias: .harness/tests/coverage-5bba2f1f4a9a4b1a905bcd7c69953c43.
+  Restricao de rede inicial resolvida pela execucao autorizada fora do sandbox;
+  Maven/cache/settings da maquina preservados. Revisao do diff sem bloqueantes.
+- [ ] Validar manualmente prompts e helpers/delegacao nos clientes apos esta entrega.
+
 ## Trabalho atual: backlog e squad de migracao - 2026-10-03
 
 - [x] Reconciliar backlog com entregas posteriores e preservar historico.

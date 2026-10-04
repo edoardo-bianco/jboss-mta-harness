@@ -535,13 +535,23 @@ Documentos antigos com decisao nos dois arquivos continuam aceitos, sem exigir
 preencher GO duplicado. O agente nao responde pelo humano.
 
 Sonar ANTES/DEPOIS e novo MTA sao checklist nao bloqueante; nao precisam de dispensa.
-Nao fabricar baseline ANTES depois da corretiva. Cobertura meta 85% gera aviso;
+Nao fabricar baseline ANTES depois da corretiva. JaCoCo: meta de referencia 85%
+de linhas do recorte corrigido, com report e classes/metodos identificados; abaixo
+gera aviso, report ausente fica pendente. Sonar global continua separado em 85%;
 falha de compilacao/testes continua falha. Confira diff, build Java 8, dependencias,
 WAR e runtime EAP 7.4, distinguindo realizado de pendente. O desenvolvedor decide
 aceite com esses limites visiveis. Proximo lote exige aceite e pedido de continuidade;
 sem novo MTA, comparacao fica pendente, sem afirmar conclusao global.
 
 #### Preparar implementacao do lote
+
+Antes de planejar, marque ao menos uma issue `ANALISAR AGORA` no registro do
+projeto escolhido, inclusive `DEV-...` com origem e evidencias quando necessario.
+`NAO ANALISADA`/`ANALISADA` seguem para planejamento; `PLANEJADA` para revisao
+do plano e `IMPLEMENTADA`/`VERIFICADA` para verificacao do resultado. Para reabrir
+uma etapa, indique explicitamente os IDs e a finalidade. Objetivo generico nao
+seleciona todo o catalogo. Se faltarem ponto de codigo ou recomendacao MTA,
+forneca o trecho/relatorio solicitado; mantenha evidencias pertinentes no LEIA-ME.
 
 1. Salve o GO no plano da solicitacao escolhida. Execute **Aplicacao:
    preparar implementacao do lote**, confirme workspace/projeto e selecione a
@@ -552,12 +562,28 @@ sem novo MTA, comparacao fica pendente, sem afirmar conclusao global.
 3. Confira `implementar-lote_<id12>.prompt.md`: fixa recibo/plano/to-do e hashes,
    sem criar outro planejamento ou acionar Copilot. A task nao interpreta Markdown
    como aprovacao; essa verificacao cabe ao agente e ao desenvolvedor.
+   O prompt incorpora copias do plano/to-do e referencia registro e evidencias;
+   arquivos/hashes continuam conferidos antes da corretiva. O mesmo preparo salva
+   `revisar-resultado_<id12>.prompt.md`, cujo caminho aparece na task e no prompt.
 4. Use **Executar Prompt** em nova conversa Local com **devsquad**, com
    `devsquad.implement`, leitura, edicao, terminal e ferramenta de subagente disponiveis.
    A alternativa `/implementar-lote` preenchida aparece no terminal.
 5. O condutor confere contexto, GO, alcance e precondicoes nao dispensadas,
    delega apenas o lote autorizado e registra resultados nos mesmos PlanPath/TodoPath.
    Confira diff, comandos, verificacoes e pendencias antes de dar aceite humano.
+
+Depois da corretiva, execute o arquivo `revisar-resultado_<id12>.prompt.md`
+indicado no preparo, informando evidencias no LEIA-ME. Ele le os documentos atuais,
+analisa criterios e orienta o que falta; nao executa comandos ou altera arquivos.
+`revisar-lote` continua revisao da proposta, para contextos antigos.
+
+Forneca log/exit code do [build e testes](maven.md), report JaCoCo do recorte,
+[Sonar](sonar.md) e MTA comparavel quando possivel, sem fabricar baseline ANTES.
+Para runtime, informe ambiente EAP 7.4, artefato/hash, recibo e logs de deploy.
+O roteiro funcional deve identificar precondicoes/dados, tela/endpoint/operacao,
+passos, resultado esperado/observado, casos negativos/regressao e evidencias.
+Use somente ambiente autorizado; se indisponivel, registre pendencia. O humano
+avalia resultado e limites antes do aceite; sucesso do build nao prova resolucao.
 
 Mantenha `Lote ativo: <ID>` igual no inicio dos dois documentos; `ID do lote:`
 tambem e aceito. Sem ID confiavel ou com divergencia, o menu oferece somente 2/3.

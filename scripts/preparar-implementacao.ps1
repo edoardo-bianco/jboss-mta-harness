@@ -19,6 +19,7 @@ try {
     Write-Host "Plano: $($prepared.PlanPath)"
     Write-Host "To-do: $($prepared.TodoPath)"
     Write-Host "Prompt preparado: $($prepared.PromptPath)"
+    Write-Host "Revisao do resultado (apos corretiva): $($prepared.ResultReviewPromptPath)"
     $null = Select-ImplementationBranch $context $prepared
     Write-Host 'Confira o GO humano registrado no plano/to-do e use Executar Prompt em nova conversa Copilot Local com devsquad.'
     Write-Host 'Preparar/abrir nao aciona o agente, nao concede GO e nao aplica corretivas. O agente confere o GO antes de editar.'

@@ -45,18 +45,34 @@ $templates = Join-Path $fixture '.github/prompts'
 $null = [IO.Directory]::CreateDirectory($templates)
 $template = Join-Path $root '.github/prompts/implementar-lote.prompt.md'
 if (Test-Path -LiteralPath $template) { Copy-Item -LiteralPath $template -Destination $templates }
+Copy-Item -LiteralPath (Join-Path $root '.github/prompts/revisar-resultado.prompt.md') -Destination $templates
 $before = @(Get-ChildItem -LiteralPath $area -Recurse -File | Get-FileHash)
 $prepared = New-MtaImplementationPrompt $context -RequestId $requestId
 $content = Get-Content -LiteralPath $prepared.PromptPath -Raw -Encoding UTF8
 $data = [regex]::Match($content, '(?s)```json\s*(\{.*?\})\s*```').Groups[1].Value | ConvertFrom-Json
 Assert ($data.ContractSnapshot -is [string] -and $data.ContractSnapshot -ceq [IO.File]::ReadAllText($contractDestination)) 'Contrato deve ser texto puro, sem metadados do provider PowerShell.'
+Assert ($data.PlanSnapshot -ceq [IO.File]::ReadAllText($plan) -and $data.TodoSnapshot -ceq [IO.File]::ReadAllText($todo)) 'Plano/to-do nao consolidados no prompt.'
+Assert ($data.ProjectIndexPath -eq (Join-Path $fixture '.harness/projetos/indice-projetos.md').Replace('\','/')) 'Indice de outro harness.'
+Assert ($data.MigrationPath -eq $null -and $data.EvidenceIndexPath -eq $null) 'Contexto historico inventou registro/evidencias.'
+Assert (Test-Path -LiteralPath $prepared.ResultReviewPromptPath) 'Revisao do resultado nao preparada.'
+$reviewContent = [IO.File]::ReadAllText($prepared.ResultReviewPromptPath)
+$reviewData = [regex]::Match($reviewContent, '(?s)```json\s*(\{.*?\})\s*```').Groups[1].Value | ConvertFrom-Json
+Assert ($reviewData.Operation -eq 'revisar-resultado' -and $reviewData.RequestId -eq $requestId -and $reviewData.PlanSnapshot -ceq $data.PlanSnapshot) 'Revisao nao pertence ao lote/contexto preparado.'
+Assert ($reviewData.TemplateSha256 -eq (Get-FileHash (Join-Path $templates 'revisar-resultado.prompt.md')).Hash) 'Revisao registra hash de template errado.'
 Assert ($data.RequestId -eq $requestId -and $data.RunId -eq $runId -and $data.Project -eq 'app') 'Identidade da proposta perdida.'
 Assert ($data.PlanPath -eq $plan.Replace('\','/') -and $data.TodoPath -eq $todo.Replace('\','/')) 'Destinos divergentes.'
 Assert ($data.ContextSha256 -eq (Get-FileHash $receipt).Hash -and $data.PlanSha256 -eq (Get-FileHash $plan).Hash -and $data.TodoSha256 -eq (Get-FileHash $todo).Hash) 'Versao dos documentos nao vinculada.'
 Assert ((Split-Path -Parent $prepared.PromptPath) -eq $folder) 'Prompt fora da solicitacao.'
 Assert ($content.StartsWith((Get-Content -LiteralPath $template -Raw -Encoding UTF8).TrimEnd())) 'Contrato nao propagado.'
 foreach ($file in $before) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash -eq $file.Hash) 'Preparo alterou fonte, evidencias ou documentos.' }
+$register = Initialize-HarnessMigration $fixture $context.Active
+$record.MigrationPath = $register.MigrationPath
+$record.EvidenceIndexPath = $register.EvidenceIndexPath
+Write-HarnessJson $receipt $record
 $again = New-MtaImplementationPrompt $context -RequestId $requestId
+$againData = [regex]::Match([IO.File]::ReadAllText($again.PromptPath), '(?s)```json\s*(\{.*?\})\s*```').Groups[1].Value | ConvertFrom-Json
+Assert ($againData.MigrationPath -eq $register.MigrationPath -and $againData.EvidenceIndexPath -eq $register.EvidenceIndexPath) 'Registro/evidencias selecionados nao propagados.'
+Assert ($again.ResultReviewPromptPath -ne $prepared.ResultReviewPromptPath -and (Test-Path $prepared.ResultReviewPromptPath)) 'Revisao sobrescrita na retomada.'
 Assert ($again.PromptPath -ne $prepared.PromptPath -and (Test-Path $prepared.PromptPath)) 'Repeticao sobrescreveu prompt.'
 Assert ((Get-Content $plan -Raw).Contains('NAO APROVADA')) 'Preparo concedeu GO.'
 $promptCount = @(Get-ChildItem $folder -Filter '*.prompt.md').Count
@@ -115,7 +131,7 @@ $branchBefore = & git -C $app symbolic-ref --short HEAD
 $countBeforeCancel = @(Get-ChildItem $folder -Filter '*.prompt.md').Count
 $output = @('1','') | & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -Target app -EditorPath $editor 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Escolha de branch cancelada')) 'Enter escolheu branch implicitamente.'
-Assert (@(Get-ChildItem $folder -Filter '*.prompt.md').Count -eq ($countBeforeCancel+1)) 'Cancelamento Git nao preservou o prompt ja salvo.'
+Assert (@(Get-ChildItem $folder -Filter '*.prompt.md').Count -eq ($countBeforeCancel+2)) 'Cancelamento Git nao preservou implementacao e revisao ja salvas.'
 Assert ((Get-FileHash -LiteralPath (Join-Path $scripts 'editor-args.json')).Hash -eq $editorHash) 'Cancelamento Git abriu editor.'
 Assert ((& git -C $app symbolic-ref --short HEAD) -eq $branchBefore) 'Cancelamento Git trocou branch.'
 $output = '2' | & powershell.exe @cliArgs -RequestId $requestId 2>&1 | Out-String

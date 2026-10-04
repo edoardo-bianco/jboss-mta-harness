@@ -67,9 +67,12 @@ powershell.exe -NoProfile -File .\scripts\construir-aplicacao.ps1 -WorkspacePath
 O padrao da tarefa e do script sem `-Goals` continua sendo `clean verify`; para seguir a preparacao descrita neste guia, selecione ou informe `clean install`. `clean` remove as saidas conforme o POM;
 `install` percorre o ciclo ate instalar o artefato no repositorio Maven local.
 Veja o [ciclo oficial do Maven](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html).
-O harness passa `-Djacoco.haltOnFailure=false`: cobertura abaixo da meta de 85%
+O harness passa `-Djacoco.haltOnFailure=false`: cobertura abaixo da meta de referencia
+de 85% de linhas do recorte corrigido (classes/metodos identificados no report JaCoCo)
 gera aviso, sem quebrar o build. Testes, instrumentacao e relatorios continuam
 ativos; erros de compilacao e testes reprovados continuam retornando falha.
+Report ausente ou recorte nao mensuravel fica pendente; cobertura total nao prova
+o recorte. A cobertura global do Sonar segue politica separada de 85%.
 Se o POM fixar `haltOnFailure=true` ou outro plugin impuser um gate, ajuste essa
 configuracao no escopo aprovado do projeto; a task nao edita o POM nem mascara erros.
 Ao configurar JaCoCo no POM, preserve os limites e use `haltOnFailure=false`,

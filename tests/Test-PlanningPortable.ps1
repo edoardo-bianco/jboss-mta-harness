@@ -52,7 +52,7 @@ $localSource = Join-Path $area 'checkout-local/repositorio'
 $null = New-Item -ItemType Directory -Path $localSource -Force
 Set-Content (Join-Path $localSource 'pom.xml') '<project><groupId>org.exemplo</groupId><artifactId>app</artifactId><version>2</version></project>'
 $context = [pscustomobject]@{Root=$fixture;Active=[pscustomobject]@{name='projeto-local';label='app';path=$localSource}}
-foreach ($name in @('planejar-lotes','revisar-lote','implementar-lote','manter-migracao')) {
+foreach ($name in @('planejar-lotes','revisar-lote','implementar-lote','revisar-resultado','manter-migracao')) {
     $destination = Join-Path $fixture ('.github/prompts/' + $name + '.prompt.md')
     $null = New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force
     Copy-Item (Join-Path $root ('.github/prompts/' + $name + '.prompt.md')) $destination
