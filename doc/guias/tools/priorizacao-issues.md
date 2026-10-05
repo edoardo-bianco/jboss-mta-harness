@@ -172,13 +172,72 @@ original e depois progredir; para usar imediatamente as instrucoes novas, escolh
 recriar, sabendo que isso inicia outra base. A tarefa nao substitui silenciosamente
 prompts antigos. Contextos Top anteriores ao percentual exigem recriacao.
 
+### Incidentes preparados para leitura
+
+A tarefa prepara, junto ao recibo, `Mta.IncidentEvidence.IndexPath` por projeto.
+Esse indice liga cada issue disponivel a paginas de ate dez incidentes, com
+URI original, linha, mensagem/recomendacao, trecho e caminhos candidatos no
+snapshot e no Source atual. Todos os incidentes sao preservados; preparar as
+paginas nao significa que o agente leu todos ou confirmou aplicabilidade.
+`Files` registra os caminhos/hashes dos derivados. Retomada os confere; recriar
+produz outra solicitacao e preserva os anteriores. `UNAVAILABLE` traz o erro de
+extracao e exige conferir os artefatos originais; nao significa zero achados.
+
+O agente deve abrir os caminhos literalmente, inclusive em `.harness`, normalmente
+ignorada pelas buscas. O MTA pode preservar URI da maquina/pasta antiga: o trecho
+relativo a `input` aponta candidatos em `AnalysisSource` e `Source`. Conferir
+arquivo/metodo/conteudo antes de usar a linha antiga. Referencias externas ou
+ambiguas ficam explicitas, sem procurar indiscriminadamente em caches.
+
+Se uma execucao antiga concluiu a fatia com falhas de leitura, escolha **recriar**
+apos atualizar o harness. Progredir continuaria excluindo as issues ja declaradas
+em `AnalyzedIssues`; recriar permite reexamina-las com as paginas de incidentes e
+o prompt atualizado, preservando o recibo e o ranking antigos como historico.
+
+### Acesso a rodada externa
+
+Quando o agente precisar ler o MTA fora das pastas ja autorizadas, deve solicitar
+permissao de leitura para `Mta.Run` e indicar os arquivos necessarios. Uma
+autorizacao vigente para a raiz MTA inclui suas rodadas e nao precisa ser pedida
+novamente. Apos a concessao, deve
+tentar novamente o caminho literal e confirmar a leitura, inclusive pelo apoio
+quando ele precisar do arquivo. A leitura efetiva depende de o cliente reconhecer
+e aplicar essa permissao.
+
+O workspace gerado inicializa o acesso de leitura com `mta.runsPath`, preservando
+listas que o desenvolvedor ja definiu. Para usar `C:/mta-runs` em todas as rodadas
+deste workspace, a propriedade em `settings` e:
+
+```json
+"github.copilot.chat.additionalReadAccessPaths": [
+  "C:/mta-runs"
+]
+```
+
+Veja [como aplicar, alterar ou revogar no workspace](workspace.md#acesso-do-copilot-a-pasta-mta),
+incluindo a diferenca de nome entre a referencia do VS Code e o manifesto atual
+do Copilot. Se a pasta nao estiver autorizada, aprove a solicitacao apresentada
+pela ferramenta, quando disponivel, ou configure a pasta no workspace.
+Se a configuracao nao estiver disponivel ou houver politica corporativa impeditiva,
+informar versao, caminho, ferramenta e erro para ajustar o acesso suportado. Nao
+habilitar aprovacao global, editar configuracao pelo prompt ou trocar de ferramenta
+para contornar uma negativa. No Codex, usar a aprovacao/escalacao real da sessao
+quando necessaria e permitida. Concessao no chat nao substitui a permissao tecnica.
+
+Sem acesso essencial, o ranking permanece `IN_PROGRESS`; as issues cujo exame foi
+impedido nao entram em `AnalyzedIssues`. O agente retoma depois da autorizacao.
+Isso difere de uma issue efetivamente examinada que ficou `SEM POSICAO` por uma
+incerteza tecnica. Nao exigir que o humano extraia trechos que o agente ja pode ler.
+
 ### Como avaliar a lista
 
 A analise comeca pelos registros e aprofunda as candidatas promissoras no MTA,
 nas regras/recomendacoes e no codigo atual. Amostras devem representar variacoes
 de uso, modulos, projetos e dependencias, incluindo casos adversos. A lista
 declara pontos lidos, amostra/total e o que permanece nao analisado.
-Se faltar localizacao ou solucao no relatorio MTA, deve pedir essa evidencia.
+Se faltar localizacao ou solucao apos a leitura efetiva do relatorio MTA, deve
+pedir essa evidencia. Busca vazia, arquivo externo ou resposta truncada exigem
+recuperar o acesso/leitura primeiro.
 
 | Criterio | O que conferir |
 | --- | --- |
@@ -306,8 +365,10 @@ tratamento de lacunas/conflitos; amostras e contagens da lista; e passagem ao
 planejamento somente apos sua escolha explicita. Confira se cada linha abre uma
 ficha com titulo compreensivel, evidencia da avaliacao e proxima acao manual concreta,
 inclusive SEM POSICAO. Compare indice, registros,
-fontes e planos antes/depois: a priorizacao so deve produzir contexto/prompt e
-lista da solicitacao. Preparacao automatizada testada nao comprova a qualidade
+fontes e planos antes/depois: o preparo produz contexto/prompt e paginas de
+incidentes; o agente escreve somente a lista da solicitacao. Teste acesso externo
+concedido e negado: leitura deve retomar apos concessao; negativa preserva parcial
+sem consumir quota. Preparacao automatizada testada nao comprova a qualidade
 da recomendacao nem a integracao nativa do chat.
 
 Voltar ao [roteiro do desenvolvedor](../harness-migracao-desenvolvedor.md#4-conferir-o-registro-e-escolher-prioridades).

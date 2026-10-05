@@ -39,7 +39,7 @@ torna disponivel. Esta rota solicita devsquad.plan; os migracao_*_helper pertenc
 a orientacao de leitura e nao substituem o executor do prompt. O apoio nao subdelega.
 No Codex, confira as capacidades equivalentes reais, sem exigir nomes do Copilot.
 Se a chamada falhar, registre nome solicitado, ferramenta, erro devolvido e impacto;
-nao simule chamada nem altere permissoes/plugin para contornar indisponibilidade.
+nao simule chamada nem desabilite protecoes/plugin para contornar indisponibilidade.
 Prossiga diretamente dentro das ferramentas e limites autorizados quando possivel;
 ferramenta essencial ausente deve ser informada, preservando o resultado parcial.
 
@@ -62,22 +62,63 @@ Mantenha trabalho ativo visivel, sem recomendar outro lote automatico.
 Registros invalidos, origem MTA ausente/conflitante, projeto sem fontes ou evidencia
 essencial indisponivel ficam em Lacunas, sem receber risco baixo ou beneficio certo.
 Se uma selecionada nao puder ser recomendada, registre o motivo, o que foi
-conferido e qual evidencia falta na propria linha. Isso conta como examinada
-para a cobertura da triagem, sem afirmar diagnostico aprofundado ou aplicabilidade.
+conferido e qual evidencia falta na propria linha. Exame efetivo com incerteza
+tecnica conta para a triagem, sem afirmar diagnostico aprofundado ou aplicabilidade.
+Falha de acesso/permissao, ferramenta, busca excluida ou leitura truncada que
+impeca examinar a issue nao conta em AnalyzedIssues. Registre a tentativa/erro
+separadamente e mantenha IN_PROGRESS ate recuperar a leitura; nao complete a quota
+com fichas genericas de 'nao consegui localizar'.
 Se o humano retirar uma issue antes do exame, registre-a separadamente como
 retirada, sem inclui-la em AnalyzedIssues ou na quota. Substitua por outra elegivel
 de AvailableIssues; se nao houver suficientes, preserve o parcial em IN_PROGRESS
 e oriente Recreate para refletir a nova selecao, sem inventar cobertura.
 
+Antes do exame, abra por caminho literal Mta.IncidentEvidence.IndexPath de cada
+projeto selecionado, quando Status=AVAILABLE, e as paginas das issues escolhidas.
+Sao dados derivados de CatalogPath, com ate dez incidentes por pagina: URI original,
+lineNumber, message, codeSnip e candidatos SnapshotCandidate/SourceCandidate.
+AVAILABLE comprova extracao, nao leitura, aplicabilidade nem aprovacao. Registre
+paginas/incidentes realmente lidos e aprofunde amostras representativas, sem
+assumir que apenas a primeira pagina representa as variacoes da issue.
+Campos NAO INFORMADO sao lacunas do catalogo, nao achados inventados. Se Status
+UNAVAILABLE, leia Diagnostic e tente CatalogPath/Findings autorizados; nao trate
+erro de extracao como ausencia de incidentes. Contextos antigos podem nao ter
+IncidentEvidence: leia diretamente os artefatos indicados sem reescrever o recibo.
+
+Acesso externo: para ler a rodada fora do workspace, solicite permissao de leitura
+ao desenvolvedor pelo mecanismo disponivel no cliente, indicando Mta.Run e os
+arquivos necessarios. Respeite autorizacao ja concedida para esse escopo. Depois
+da concessao, retome a leitura pelo caminho literal e confira o resultado real.
+Se o cliente exigir configuracao de acesso, forneca o encaminhamento de GuidePath
+(secao Acesso a rodada externa); nao altere configuracao por conta propria.
+Recusa/politica/ferramenta ausente: informe caminho, ferramenta e erro concreto,
+preserve o parcial IN_PROGRESS e aguarde o acesso; nao contorne a restricao por
+terminal, copia ou mudanca global de permissoes. Os derivados nao dispensam uma
+autorizacao exigida pelo cliente para a leitura pretendida. Repassar estes limites
+e os caminhos das paginas ao apoio. Autorizacao de leitura nao concede GO/escrita.
+
+Buscas do workspace podem excluir .harness e nao alcancar Mta.Run externo. Aviso
+de exclusao/nenhum resultado nao prova ausencia: use readFile no caminho literal
+autorizado, com faixas de linhas, e nao repita o mesmo glob sem mudar a estrategia.
+Em CatalogPath, o ID completo combina ruleset.name com a chave de violations;
+nao exigir que ruleset::regra apareca como uma unica string no JSON. Em Findings,
+procure a regra em violations e leia incidents, message, codeSnip e lineNumber;
+o cabecalho YAML ou o HTML da SPA nao bastam para afirmar falta de apontamentos.
+URI historica sob input deve ser conferida por caminho relativo em AnalysisSource
+e Source atuais. Candidatos nao provam existencia/equivalencia; compare trecho e
+metodo, pois linhas podem mudar. URI externa/dependencia ou ambigua permanece
+identificada, sem varrer cache nem forcar seu encaixe em Source.
+
 Segunda passagem: nas candidatas promissoras, confira Manifest/Result, integridade
-registrada e trechos pertinentes de Findings/Rules/Report, snapshot e Source atual.
+registrada e trechos pertinentes de CatalogPath/Findings/Rules/Report, snapshot e Source atual.
 Os hashes registram as entradas no preparo; nao alegue recalculo sem ferramenta
 capaz de faze-lo e registre limites de verificacao ou divergencias observadas. Consulte
 somente anexos pertinentes referenciados no EvidenceIndexPath ou no registro.
 Indice de evidencias vazio e limite de anexos, nao ausencia de toda evidencia nem
 obrigacao de fornecer documentos extras. Nao varra logs/cache.
 Confirme pontos arquivo/classe/metodo, recomendacao MTA e aplicabilidade local.
-Se faltar ponto ou solucao do relatorio, alerte e solicite o trecho/relatorio.
+Se apos leitura efetiva faltar ponto ou solucao no relatorio, alerte e solicite
+apenas a evidencia ausente. Nao pedir ao humano extrair apontamentos ja acessiveis.
 Leia POMs, consumidores e testes para distinguir variacoes de API/versao/semantica.
 Use amostra por padrao de uso, modulo/projeto e dependencia, incluindo variacoes
 e casos adversos. Declare amostra n/total, pontos lidos, cobertura e nao analisado;

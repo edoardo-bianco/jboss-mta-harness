@@ -90,6 +90,7 @@ function Get-PrioritizationBasis {
 
 function Read-PrioritizationResult {
     param($Receipt)
+    Assert-PrioritizationIncidentEvidence $Receipt
     $text = [IO.File]::ReadAllText($Receipt.RankingPath)
     $matches = [regex]::Matches($text, '(?s)<!-- priorizacao:resultado -->\s*```json\s*(.*?)\s*```\s*<!-- /priorizacao:resultado -->')
     if ($matches.Count -ne 1) { throw 'Ranking incompleto/antigo: falta bloco unico priorizacao:resultado. Complete a solicitacao ou recrie.' }

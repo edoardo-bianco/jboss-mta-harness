@@ -36,6 +36,29 @@ nos registros/indice e integridade MTA antes de recomendar, sem usar hashes como
 lock humano. Divergencia de rodada/escopo/evidencia exige esclarecer ou novo preparo;
 notas/decisoes atuais sao consideradas com origem explicita. Git nao e consultado.
 
+O preparo inclui Mta.IncidentEvidence por projeto: Status, IndexPath, Files
+(Path/Sha256) e Diagnostic. Para as AvailableIssues, exporta os incidentes de
+CatalogPath em paginas Markdown de ate dez, sob a propria solicitacao; nenhum
+incidente e deduplicado/truncado. Preserva URI, linha, mensagem e codeSnip; campos
+ausentes ficam explicitos. AVAILABLE significa extracao, nunca exame ou aplicabilidade.
+UNAVAILABLE explicita falha de leitura/formato; NOT_REQUESTED indica nenhuma
+issue disponivel nesse projeto. Nao troca o MTA pelo derivado nem altera o indice,
+registro ou fonte. Retomada confere hashes dos derivados; alteracao exige recriar,
+sem regravar historico. Recibos anteriores sem esse campo continuam legiveis.
+URI historica sob input oferece caminhos candidatos em AnalysisSource e Source,
+sem afirmar existencia ou equivalencia. URI externa/ambigua/travessia nao recebe
+candidato; conservar origem e limites, sem varrer cache ou inferir arquivo local.
+
+Acesso a MTA externo exige permissao de leitura pelo mecanismo real do cliente
+quando necessaria, delimitada a pasta Mta.Run e aos artefatos pertinentes.
+Autorizacao vigente nao se pede de novo; depois de concedida, retomar leitura
+literal e conferir retorno real. Se exigir configuracao, orientar o desenvolvedor
+conforme o guia, sem ampliar permissoes globalmente ou editar configuracao no prompt.
+Negativa/politica/ferramenta indisponivel permanece erro de acesso com caminho e
+mensagem, nao ausencia de achados. Nao usar terminal ou copias para contornar recusa.
+Derivados facilitam leitura e nao revogam restricoes do cliente. Helpers recebem
+o mesmo escopo e limites; permissao de leitura nao concede escrita, GO ou aceite.
+
 Triagem ampla de candidatas e permitida somente nesta etapa; aprofundar por amostra
 as promissoras, sem planejar varios lotes. Elegiveis por padrao: mandatory/PRESENTE,
 A DEFINIR ou ANALISAR AGORA, NAO ANALISADA/ANALISADA. ADIAR/FORA DO ESCOPO e demais
@@ -54,6 +77,11 @@ motivo, leitura efetiva, limites e evidencia necessaria. Aprofundar as promissor
 nao confundir cobertura da triagem com diagnostico completo. Recomendar menos ou
 nenhuma se faltar evidencia. Declarar quota, examinadas/propostas, lacunas e
 cobertura acumulada distinta. 100% de issues nao comprova ocorrencias nem resolucao.
+
+Falha de acesso/permissao, ferramenta, busca excluida ou truncamento impeditivo
+nao constitui exame: registrar tentativa/erro fora de AnalyzedIssues e manter
+IN_PROGRESS ate recuperar a leitura. Incerteza tecnica apos exame efetivo pode
+receber SEM POSICAO e consumir quota. Nao converter falha operacional em cobertura.
 
 SchemaVersion=3 identifica a continuidade por cobertura, corrigida em 2026-10-05.
 Sem historico do escopo, iniciar sequencia.
@@ -101,10 +129,17 @@ Issues DEV/reconsideracao fora do inventario exigem novo preparo/contrato explic
 o agente nao amplia a lista. Preparo pendente com template/contrato alterado exige
 recriar para adotar instrucoes novas.
 
+Ler IncidentEvidence.IndexPath e paginas pertinentes por caminho literal antes
+de declarar falta de apontamentos. Contexto antigo/derivado indisponivel exige
+consultar CatalogPath/Findings autorizados. Em output.js o ID combina ruleset.name
+e chave de violations; em YAML conferir incidents e nao apenas cabecalho/regras.
+Busca excluida/fora do workspace nao prova ausencia; HTML SPA pode ser so a interface.
 Conferir localizacao e solucao MTA, snapshot, Source, POMs, consumidores
 e testes. Amostrar variacoes de uso/API/versao/modulo/projeto e negativos; declarar
-n/total, deduplicacao observada, limites e nao analisado. Sem localizacao/solucao MTA,
-alertar e pedir trecho/relatorio. Mesma regra nao comprova mesma transformacao.
+n/total, paginas/incidentes lidos, deduplicacao observada, limites e nao analisado.
+Sem localizacao/solucao apos leitura efetiva, alertar e pedir somente o que falta;
+nao devolver ao humano extracao de dados ja acessiveis. Mesma regra nao comprova
+mesma transformacao nem cada incidente representa uma corretiva.
 
 Ordenar por risco controlado, repetibilidade demonstrada, testes/reversao e alcance;
 justificar comparativamente. Risco e confianca separados; desconhecido nao e baixo
