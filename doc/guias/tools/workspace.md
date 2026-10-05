@@ -235,6 +235,10 @@ quando e gerado ou editado. O gerador atualiza caminhos dos projetos cadastrados
 Java/Maven e os dois attaches JBoss; preserva pastas extras, demais settings e
 launches manuais. Guarda o arquivo anterior em `.harness/workspace-backups/`.
 Settings Maven null removem os overrides gerados, mantendo os padroes da maquina.
+Pastas adicionadas pelo VS Code podem conter somente `path`; `name` e opcional
+no [formato de workspace](https://code.visualstudio.com/docs/editing/workspaces/multi-root-workspaces#workspace-file-schema).
+O gerador reconhece caminhos equivalentes sem duplicar pastas, preserva aliases
+das aplicacoes e garante o nome `harness` na raiz usada pelas tarefas.
 
 #### Opcao B: configurar o workspace manualmente
 

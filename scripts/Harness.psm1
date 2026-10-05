@@ -202,9 +202,20 @@ function New-HarnessWorkspace {
     if (Test-Path -LiteralPath $path) {
         $document = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
         foreach ($folder in $folders) {
-            $existing=@($document.folders | Where-Object name -eq $folder.name)
+            $existing=@($document.folders | Where-Object { $_.PSObject.Properties['name'] -and $_.name -eq $folder.name })
+            if ($existing.Count) { $existing[0].path=$folder.path; continue }
+            # O VS Code pode importar somente path; aliases humanos tambem sao opcionais.
+            $folderPath = Resolve-HarnessPath $folder.path $Context.Root
+            $existing=@($document.folders | Where-Object {
+                if (-not $_.PSObject.Properties['path']) { return $false }
+                try { (Resolve-HarnessPath $_.path $Context.Root) -ieq $folderPath }
+                catch { $false } # Pasta extra nao gerenciada: preservar sem validar seu destino.
+            })
             if (-not $existing.Count) { $document.folders += [pscustomobject]$folder }
-            else { $existing[0].path=$folder.path }
+            elseif ($folder.name -eq 'harness') {
+                # As Run Tasks referenciam workspaceFolder:harness.
+                $existing[0] | Add-Member NoteProperty name 'harness' -Force
+            }
         }
         if (-not $document.PSObject.Properties['settings']) { $document | Add-Member NoteProperty settings ([pscustomobject]@{}) }
         foreach ($name in @('java.configuration.runtimes','maven.terminal.useJavaHome','maven.terminal.customEnv','java.jdt.ls.java.home','maven.executable.path','java.configuration.maven.userSettings','maven.settingsFile')) {
