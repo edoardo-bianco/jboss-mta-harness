@@ -16,6 +16,12 @@ oito etapas no mapa central. Revisao independente sem achados materiais.
 Sem execucao de runtime ou novo aceite de descoberta/delegacao nas extensoes.
 O mapa da skill mudou somente as referencias; scripts/permissoes preservados.
 
+Publicacao e alinhamento solicitados pelo mantenedor: commit/push, PR para main
+e fast-forward de main_jboss_eap74. Conferencia previa: checkout limpo, principais
+em `95dff4a`, nenhum PR aberto e regra de main ativa, com excecao somente por PR.
+Registrar o encerramento em `.harness/tests/guias-orientacao-20261005/encerramento.json`,
+apos conferir merge, refs locais/remotas, conteudo revisado e limpeza da branch.
+
 ## Publicacao e alinhamento da conciliacao - 2026-10-05
 
 - [x] Confirmar pedido do mantenedor, checkout limpo e principais locais/remotas

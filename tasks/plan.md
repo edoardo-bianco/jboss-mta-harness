@@ -25,6 +25,11 @@ seleciona o cliente uma vez e encontra exemplos e resultado esperado na etapa.
 Oito etapas cobertas, mesmos titulos de navegacao nos sete guias operacionais,
 historico preservado e nenhuma alegacao de nova validacao nativa dos agentes.
 
+Publicacao solicitada pelo mantenedor apos a revisao: commit/push e PR em main,
+seguido do alinhamento de main_jboss_eap74. Integrar a revisao exata por PR com a
+excecao administrativa existente; atualizar principais por fast-forward e remover
+a branch de trabalho somente apos comprovar integracao. Preservar protecao de main.
+
 ## Publicacao e alinhamento da conciliacao - 2026-10-05
 
 O mantenedor solicitou commit, push, PR e alinhamento de main e main_jboss_eap74
