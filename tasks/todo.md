@@ -1,5 +1,20 @@
 # To-do do agente: evolucao do harness
 
+## Publicacao e alinhamento da conciliacao - 2026-10-05
+
+- [x] Confirmar pedido do mantenedor, checkout limpo e principais locais/remotas
+  em `d48cf6a`; nenhum PR aberto e somente este worktree.
+- [x] Revisar `082f581` e `287f6fb`: apenas documentacao, revisoes independentes
+  sem achados; links/ancoras conferidos e diff sem erros de espacos indevidos
+  (quebras Markdown do documento recebido preservadas).
+- [x] Conferir regra ativa: PR, aprovacao/CODEOWNERS e excecao administrativa
+  somente por PR; sem liberacao de push direto em main.
+
+Sequencia autorizada: publicar o PR, conferir a revisao exata, integrar, alinhar
+as principais e remover a branch integrada. Evidencia final local prevista em
+`.harness/tests/integracao-capacidades-20261005/encerramento.json`.
+Esta integracao documental nao concede aceite de migracao nem de pilotos futuros.
+
 ## Referencia explicita a orientacao no guia principal - 2026-10-05
 
 - [x] Conferir raiz, branch e estado limpo em `082f581`; comparar o guia principal

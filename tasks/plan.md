@@ -1,5 +1,14 @@
 # Plano do agente: evolucao do harness
 
+## Publicacao e alinhamento da conciliacao - 2026-10-05
+
+O mantenedor solicitou commit, push, PR e alinhamento de main e main_jboss_eap74
+apos a entrega documental. Publicar a branch de conciliacao, conferir o PR e
+integrar por merge com a excecao administrativa restrita a PR. Depois atualizar
+main local e avancar main_jboss_eap74 por fast-forward, sem push direto em main,
+force ou alteracao das regras. Conferir refs, conteudo documental e estado limpo.
+Remover a branch de trabalho somente apos comprovar sua integracao.
+
 ## Referencia explicita a orientacao no guia principal - 2026-10-05
 
 Complemento solicitado: explicar `orientar-migracao` e sua relacao com
