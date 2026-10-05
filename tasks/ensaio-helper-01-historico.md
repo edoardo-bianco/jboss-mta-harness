@@ -9,6 +9,11 @@ da auditoria em 4ff6c68. O encerramento da coleta nao equivale a aprovar todos o
 cenarios de validacao nativa ou a aceitar uma corretiva da aplicacao.
 Estado atual e novo ensaio: [to-do](todo.md). Direcao de trabalho: [plano](plan.md).
 
+Em 2026-10-05, o desenvolvedor autorizou reiniciar o playground do zero e descartar
+suas analises locais, inclusive o arquivo em .harness/ensaios/ensaio-01-2026-10-04.
+Os caminhos/recibos mencionados neste relato sao referencias historicas, sem garantia
+de disponibilidade atual. Este texto documenta achados da evolucao do harness.
+
 ### Ensaio acompanhado do helper no Codex - 2026-10-04
 
 Orientacao inicial do desenvolvedor: acumular observacoes durante o ensaio e

@@ -1,3 +1,0 @@
-<ehcache updateCheck="false" monitoring="off" dynamicConfig="false">
-  <defaultCache maxEntriesLocalHeap="1000" eternal="true" overflowToDisk="false"/>
-</ehcache>

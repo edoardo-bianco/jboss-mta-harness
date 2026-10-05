@@ -1,5 +1,45 @@
 # To-do do agente: evolucao do harness
 
+## Playground externo e priorizacao percentual - 2026-10-05
+
+Escopo autorizado no [plano](plan.md#playground-externo-e-priorizacao-percentual---2026-10-05).
+O preparo anterior do ensaio 02 foi substituido pelo reinicio sem historico do playground.
+
+- [x] EXT-01: workspace/config sem exemplos; fixtures independentes. Verificar
+  Test-Workspace e Test-TaskInputs; nenhuma ferramenta local alterada.
+- [x] PCT-01: percentual validado, inventario por Source/ID e quota arredondada.
+  Verificar Test-Prioritization, incluindo 0,01/100,00 e valores invalidos.
+- [x] PCT-02: recriar/progredir/retomar, base fixa e exclusao acumulada de propostas.
+  Verificar sequencia 200/10%, arquivos incompletos, ambiguidade e isolamento.
+- [x] PCT-03: menu/CLI, prompt, contrato, instrucoes e guias coerentes. Verificar
+  testes de entrada real, JSON, editor, cancelamento e links afetados.
+- [x] EXT-02: mover antes, remover depois e zerar dados locais desses playgrounds.
+  Verificar inventario de caminhos, hashes dos fontes e ausencia de vinculos ativos.
+- [x] VAL-02: revisao de codigo/documentos e regressao final; registrar evidencias.
+  Novo ensaio nativo e novas analises da aplicacao ficam para apos sua importacao.
+
+Validacao em 2026-10-05: 36 scripts Test-*.ps1 passaram em Windows PowerShell 5.1;
+Test-JbossReal foi SKIP (exige RunReal, nao acionado). A primeira chamada generica
+de Test-BuildCoverage omitiu parametros obrigatorios; a chamada corrigida encontrou
+bloqueio de rede do sandbox. Reexecucao autorizada com JDK/Maven da maquina passou:
+20% JaCoCo gera warning sem reprovar; falhas intencionais de teste/compilacao mantem
+exit de erro. Nenhum build/MTA novo foi feito no playground externo.
+
+Evidencias locais: .harness/tests/validacao-percentual-20261005-080325/results-final.json
+(preserva referencia a tentativa inicial) e .harness/tests/coverage-178e86d32cf74ece8172a05d4222c7d9/.
+Sintaxe dos scripts/testes, 142 destinos de links locais e git diff --check passaram.
+Revisao independente de codigo e documentos sem bloqueantes; testes adicionais
+cobrem pontas ambiguas, sucessor unico, Source/ID, ranking ancestral alterado e
+arrays invalidos. Precisao textual de EXHAUSTED e de issues disponiveis corrigida.
+
+Movimentacao conferiu SHA-256 identico dos nove arquivos versionados de ANTES no
+destino C:/desenvolvimento/repositorio/migracao-cache-antes. DEPOIS e target antigo
+removidos. Dados locais do playground removidos: builds/runs, registros/indices,
+arquivo local do ensaio 01 e C:/mta-runs/migracao-cache-antes. Planning/priorizacao
+ativos estavam vazios. Config/workspace locais ficaram sem exemplos; ferramentas
+e configuracoes de servidor preservadas. Nenhum novo registro/indice foi criado;
+o desenvolvedor importara o playground e iniciara a nova analise.
+
 ## Validacao para integracao nas principais - 2026-10-04
 
 Commit e push autorizados pelo desenvolvedor em main e main_jboss_eap74, nesta
@@ -22,7 +62,9 @@ pelo pedido atual de integracao; as pendencias tecnicas/documentais continuam vi
 
 ## Ensaio 02: fluxo simplificado - 2026-10-04
 
-Estado: PREPARADO PARA INICIAR. Nenhuma resposta dos clientes foi avaliada nesta rodada.
+Estado historico: PREPARADO PARA INICIAR em 2026-10-04; substituido em 2026-10-05
+pelo reinicio do playground externo, descrito no inicio deste arquivo. Nenhuma
+resposta dos clientes foi avaliada nesta rodada.
 Base: 4ff6c68, publicada em origin/harness/backlog-agente-orientacao.
 Workspace: jboss-mta-harness.local.code-workspace. Clientes: Codex e GitHub Copilot.
 

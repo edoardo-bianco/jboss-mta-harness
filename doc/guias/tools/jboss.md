@@ -315,9 +315,9 @@ servidor preparado; nao habilita JDWP, recompila nem faz deploy pelo harness.
    mantem o JBoss ativo; **Servidor: parar JBoss** encerra o servidor.
 
 **Ensaio no exemplo ANTES:** no EAP 7.1 com `migracao-cache.war` implantado,
-abra [CacheServlet.java](../../../exemplos/migracao-cache-antes/src/main/java/lab/migracao/CacheServlet.java)
+abra `src/main/java/lab/migracao/CacheServlet.java` no playground externo importado
 e coloque o breakpoint na chamada `new LimpezaCache().limpar(...)` de `doPost`.
-Use o arquivo de `migracao-cache-antes`, pois DEPOIS tem classes com os mesmos nomes.
+Este roteiro pressupoe o playground `migracao-cache-antes`, mantido fora do harness.
 No terminal PowerShell, execute:
 
 ```powershell
@@ -360,7 +360,7 @@ this.entityManagerFactory.isOpen()
 O Watch reavalia quando o debugger pausa, no contexto selecionado; uma variavel
 fora do escopo pode aparecer indisponivel. O **Console de Depuracao**
 (`Ctrl+Shift+Y`) tambem avalia expressoes, por exemplo `request.getMethod()`.
-No [LimpezaCache.java](../../../exemplos/migracao-cache-antes/src/main/java/lab/migracao/LimpezaCache.java),
+No `src/main/java/lab/migracao/LimpezaCache.java` do playground externo,
 um breakpoint em `if (cache != null)` permite inspecionar `cache` depois
 da atribuicao. Veja os [controles e a inspecao no VS Code](https://code.visualstudio.com/docs/debugtest/debugging).
 

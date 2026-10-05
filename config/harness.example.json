@@ -1,10 +1,7 @@
 {
   "schemaVersion": 1,
-  "activeProject": "migracao-cache-antes",
-  "repositories": [
-    {"name": "migracao-cache-antes", "path": "exemplos/migracao-cache-antes"},
-    {"name": "migracao-cache-depois", "path": "exemplos/migracao-cache-depois"}
-  ],
+  "activeProject": null,
+  "repositories": [],
   "tools": {
     "mtaExecutable": null,
     "mtaJdkHome": null,

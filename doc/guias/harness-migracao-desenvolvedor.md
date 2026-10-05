@@ -53,12 +53,12 @@ Ele pede informacao somente quando os arquivos nao resolvem uma ambiguidade real
 
 | Sua situacao | Por onde entrar |
 | --- | --- |
-| Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Os dois exemplos acompanham o clone. |
+| Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Importe uma aplicacao externa no workspace. |
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
 | Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
-| Quero comparar oportunidades mandatory entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): lista de ate 5 a 10 candidatas por risco, repetibilidade e alcance. |
+| Quero comparar oportunidades mandatory entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): fatia percentual por risco, repetibilidade e alcance, com recriacao ou avanco. |
 | Proposta pronta, ainda em revisao ou sem GO | [5. Planejar e revisar um lote](#5-planejar-e-revisar-um-lote). |
 | Plano revisado com GO, inclusive implementacao parcial | [6. Implementar o lote autorizado](#6-implementar-o-lote-autorizado). |
 | Corretiva pronta para conferir | [7. Verificar e aceitar o resultado](#7-verificar-e-aceitar-o-resultado). |

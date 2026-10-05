@@ -135,8 +135,7 @@ function Read-HarnessConfig {
         $names[$repo.name] = $true
         $repo.path = Resolve-HarnessPath $repo.path $Root
         if (-not $repo.path -or -not (Test-Path -LiteralPath $repo.path -PathType Container)) { throw "Pasta ausente para o repositorio $($repo.name). Ajuste config/harness.local.json." }
-        $bundledExamples = @((Join-Path $Root 'exemplos/migracao-cache-antes'), (Join-Path $Root 'exemplos/migracao-cache-depois')) | ForEach-Object { [IO.Path]::GetFullPath($_) }
-        if ($repo.path -ieq $Root -or $Root.StartsWith($repo.path + '\', [StringComparison]::OrdinalIgnoreCase) -or ($repo.path.StartsWith($Root + '\', [StringComparison]::OrdinalIgnoreCase) -and $repo.path -notin $bundledExamples)) { throw 'Use os dois exemplos incluidos ou mantenha os repositorios de aplicacao fora da pasta do harness.' }
+        if ($repo.path -ieq $Root -or $Root.StartsWith($repo.path + '\', [StringComparison]::OrdinalIgnoreCase) -or $repo.path.StartsWith($Root + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Mantenha os repositorios de aplicacao fora da pasta do harness.' }
     }
     $active = Select-HarnessProject $projects $config.activeProject $Target -Interactive:$SelectTarget
     if (-not $WorkspacePath -and -not $Target -and -not $SelectTarget -and $config.activeProject -and -not $active) { throw 'activeProject deve corresponder ao name de um repositorio.' }

@@ -1,5 +1,64 @@
 # Plano do agente: evolucao do harness
 
+## Playground externo e priorizacao percentual - 2026-10-05
+
+Planejamento e implementacao autorizados pelo desenvolvedor apos analise no chat.
+Branch harness/priorizacao-percentual-playground, derivada de main a29001f; checkout
+limpo no inicio. Esta entrega substitui o preparo anterior do ensaio 02: o playground
+reinicia do zero, sem transferir registro, escolhas, MTA ou historico de analise.
+
+### Escopo e criterios de aceite
+
+- Mover exemplos/migracao-cache-antes para C:/desenvolvimento/repositorio/migracao-cache-antes;
+  remover migracao-cache-depois e os dados locais identificados desses playgrounds.
+  Conferir caminhos absolutos, ausencia de destino e integridade dos fontes movidos.
+  O desenvolvedor importa a aplicacao no workspace e inicia novas analises depois.
+- Workspace inicial e configuracao de exemplo sem aplicacoes embutidas; ferramentas
+  locais preservadas, sem settings/repositorio Maven proprios. Testes usam fixtures.
+- Substituir Top por Percentage (0,01 a 100,00; virgula/ponto, ate duas casas).
+  A unidade e Source + ID completo da issue, nunca ocorrencias ou oportunidades.
+  Total inicial fixo por sequencia; quota = teto(total inicial * percentual / 100),
+  limitada as elegiveis restantes. O agente escolhe a fatia por risco/repetibilidade/
+  alcance, registra examinadas e propostas; pode recomendar menos por evidencias.
+- Ao encontrar solicitacao anterior, escolher recriar ou progredir. Recriar inicia
+  sequencia com nova base sem apagar a anterior; progredir exclui a uniao dos IDs
+  explicitamente propostos. Mencoes/overlaps nao contam. Sem ranking, retomar a
+  preparacao ainda pendente sem consumir fatia. Varias pontas exigem escolha.
+- Recibos imutaveis com Previous e SequenceId; resultado estruturado no proprio
+  RankingPath (unico destino do agente), validado antes do proximo preparo. Sem
+  escolha por recencia, sem inferir conclusao de analise pela existencia de arquivo.
+  Mudanca de projetos/origem/catalogo exige recriar; decisoes humanas atuais filtram
+  a disponibilidade sem alterar o denominador. Contextos Top antigos ficam historicos
+  e orientam recriacao, sem conversao silenciosa.
+- Priorizacao nao altera registro, indice, plano, fonte, GO ou aceite. Nenhuma tarefa
+  nova; menus e CLI mantem cancelamento e JSON sem interacao. Sem build/MTA real
+  da aplicacao, commit/push de corretivas ou integracao automatica nas principais.
+
+### Incrementos e verificacao
+
+1. Desacoplar workspace/config/testes dos exemplos. Tests/Test-Workspace.ps1 e
+   Test-TaskInputs.ps1 (fixtures externas ao harness simulado, dentro de .harness/tests).
+2. Percentual, inventario elegivel e quota. Test-Prioritization.ps1 cobre parsing,
+   arredondamento, identidades por projeto, lacunas e preservacao das entradas.
+3. Historico e avancos. Testar base 200/10%=20 por rodada, uniao sem duplicatas,
+   recriacao, retomada, ranking incompleto/invalido, ambiguidade, esgotamento e origem.
+4. CLI/menu/prompt/contrato. Testar entradas reais com editor simulado e cancelamento;
+   alinhar guias, instrucoes e ADR-0002 sem reescrever os documentos historicos.
+5. Mover playground e limpar somente dados identificados, atualizar config/workspace
+   locais e registrar resultados. Escritas fora do workspace usam aprovacao do sandbox.
+6. Revisar diff e executar regressao apropriada, sintaxe PS 5.1 e links afetados.
+   Comando dos testes: powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+   .\tests\Test-<Nome>.ps1 (Bypass limitado ao processo, sem mudar politica da maquina).
+
+Estilo: PowerShell 5.1, funcoes com verbos, PSCustomObject/ordered hashtable,
+Resolve-HarnessPath para caminhos, Write-HarnessJson para recibos, testes Assert/Reject.
+Validar antes de gravar, sem dependencia nova e sem alterar outros fluxos do harness.
+Revisao humana nativa Codex/Copilot do ensaio continua posterior a estes testes.
+
+Implementacao e validacao concluidas em 2026-10-05; resultados no to-do. Entrega
+local na branch de evolucao, sem integrar/push nas principais. Ensaio 02 passa a
+comecar pela importacao do playground externo e nova analise, sem vinculos antigos.
+
 ## Integracao nas principais autorizada - 2026-10-04
 
 Pedido do desenvolvedor: fazer commit e push nas branches principais. Entrega do
