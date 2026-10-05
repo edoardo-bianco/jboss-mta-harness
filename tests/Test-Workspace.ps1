@@ -11,6 +11,7 @@ function Assert($condition, $message) { if (-not $condition) { throw $message } 
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @(@{name='api'; path=$app}, @{name='biblioteca'; path=$other})
 $config.activeProject = 'api'
+$config.mta.runsPath = Join-Path $area 'mta externo'
 $configPath = Join-Path $fixture 'config.json'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
 $context = Read-HarnessConfig $configPath $fixture
@@ -23,6 +24,9 @@ $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.folders.Count -eq 3) 'Workspace deve conter harness e dois repos.'
 Assert ($workspace.folders[0].name -eq 'harness') 'Raiz de tarefas ausente.'
 Assert ($workspace.folders[1].path -eq $app) 'Path com espacos alterado.'
+$readAccessKey = 'github.copilot.chat.additionalReadAccessPaths'
+Assert ($workspace.settings.PSObject.Properties[$readAccessKey] -and @($workspace.settings.$readAccessKey).Count -eq 1 -and $workspace.settings.$readAccessKey[0] -eq $context.Config.mta.runsPath.Replace('\','/')) 'Workspace deve autorizar leitura da raiz MTA configurada.'
+$workspace.settings.$readAccessKey = @('D:/evidencias escolhidas')
 $workspace.settings | Add-Member NoteProperty 'editor.fontSize' 17
 $workspace | ConvertTo-Json -Depth 8 | Set-Content $path -Encoding UTF8
 $config.activeProject = 'biblioteca'
@@ -31,6 +35,14 @@ $context = Read-HarnessConfig $configPath $fixture
 Assert ($context.Active.path -eq $other) 'Troca de projeto nao foi lida da configuracao.'
 $null = New-HarnessWorkspace $context
 Assert (@(Get-ChildItem (Join-Path $fixture '.harness/workspace-backups') -File).Count -eq 1) 'Workspace anterior nao preservado.'
+$workspace = Get-Content $path -Raw | ConvertFrom-Json
+Assert (@($workspace.settings.$readAccessKey).Count -eq 1 -and $workspace.settings.$readAccessKey[0] -eq 'D:/evidencias escolhidas') 'Gerador alterou permissao escolhida no workspace.'
+Assert ($workspace.settings.'editor.fontSize' -eq 17) 'Gerador alterou outra configuracao do usuario.'
+$workspace.settings.$readAccessKey = @()
+Write-HarnessJson $path $workspace
+$null = New-HarnessWorkspace $context
+$workspace = Get-Content $path -Raw | ConvertFrom-Json
+Assert ($workspace.settings.PSObject.Properties[$readAccessKey] -and @($workspace.settings.$readAccessKey).Count -eq 0) 'Gerador deve respeitar revogacao por lista vazia.'
 $config.activeProject = 'inexistente'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
 $rejected = $false
@@ -54,6 +66,7 @@ Assert ($context.Config.tools.mtaExecutable -eq $null) 'Clone nao deve carregar 
 $path = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.folders.Count -eq 1 -and $workspace.folders[0].name -eq 'harness') 'Workspace inicial deve conter somente o harness.'
+Assert (-not $workspace.settings.PSObject.Properties[$readAccessKey]) 'RunsPath null nao deve conceder acesso externo por padrao.'
 $starter = Get-Content (Join-Path $root 'iniciar-harness.code-workspace') -Raw | ConvertFrom-Json
 Assert ($starter.folders.Count -eq 1 -and $starter.folders[0].path -eq '.') 'Workspace versionado deve conter somente o harness.'
 Set-Content (Join-Path $app 'pom.xml') '<project/>'

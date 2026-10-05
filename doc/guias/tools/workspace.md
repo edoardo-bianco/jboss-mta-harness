@@ -18,6 +18,7 @@ e quando precisar ajustar o ambiente durante o trabalho.
 | --- | --- |
 | Comecar em uma maquina | [Primeira configuracao](#comecar-na-maquina-de-trabalho) |
 | Alterar caminhos ou escolhas da IDE | [JSON local](#configuracao-da-maquina) e [workspace gerado/manual](#duas-opcoes-para-configurar-o-workspace) |
+| Permitir leitura dos relatorios MTA pelo Copilot | [Acesso a pasta MTA](#acesso-do-copilot-a-pasta-mta) |
 | Selecionar ou adicionar aplicacoes | [Projetos](#escolher-o-projeto-em-cada-tarefa) e [exemplos/corporativos](#ensaiar-e-depois-usar-os-projetos-corporativos) |
 | Localizar ou limpar saidas | [Pastas locais](#pastas-locais-e-backups-temporarios) e [limpeza](#limpar-execucoes-locais) |
 | Identificar o script de uma Run Task | [Catalogo de tarefas](#tarefa-e-script-correspondente) |
@@ -163,6 +164,44 @@ Trecho comum para preencher no passo 3 de [Comecar na maquina de trabalho](#come
 | `tools.mta*`, `tools.mavenHome`, `tools.mavenSettingsPath`, `mta` | Veja a [configuracao MTA](mta.md#configuracao), incluindo perfil, regras e destino das rodadas. |
 
 **Trocar projeto:** escolha outro alvo no menu, execute seu build e, apos sucesso, selecione-o no MTA. **Adicionar projetos:** use Add Folder to Workspace e salve. **Mudar ferramentas:** ajuste `tools` no JSON e sincronize as configuracoes da IDE pela opcao A ou B. O gerador sincroniza os projetos de `repositories` e preserva pastas extras, com backup em `.harness/workspace-backups/`; nao e necessario executa-lo para adicionar projetos ao workspace. Uma biblioteca visivel nao e compilada nem analisada automaticamente junto com outro repo.
+
+### Acesso do Copilot a pasta MTA
+
+O gerador preenche `github.copilot.chat.additionalReadAccessPaths` em `settings`
+do workspace local com `mta.runsPath`, quando este caminho esta configurado e a
+permissao ainda nao existe no workspace. A lista autoriza leitura da pasta e suas
+subpastas pelas ferramentas do Copilot; com `C:/mta-runs`, abrange as rodadas dos
+projetos nessa raiz. A configuracao pertence ao workspace, sem editar User Settings.
+
+Para aplicar em outra maquina, confira `mta.runsPath` em
+`config/harness.local.json`, execute **Workspace: gerar workspace** e abra
+`jboss-mta-harness.local.code-workspace`. Esse arquivo e local e nao acompanha
+o clone/atualizacao por Git. O gerador preserva projetos e ajustes existentes.
+
+Para alterar manualmente, use **Ctrl+Shift+P > Preferences: Open Workspace
+Settings (JSON)** e edite a lista dentro de `settings`, preservando os demais campos:
+
+```json
+"github.copilot.chat.additionalReadAccessPaths": [
+  "C:/mta-runs"
+]
+```
+
+Substitua pelo caminho desta maquina ou informe varias pastas. Para limitar a
+uma rodada, use sua pasta completa. Para revogar o acesso configurado aqui,
+deixe `[]`: o gerador preserva listas existentes, inclusive vazias. Remover a
+chave permite que a proxima geracao volte a inicializa-la com `mta.runsPath`.
+Se mudar a pasta de saida MTA, confira tambem esta lista; uma permissao existente
+nao e trocada automaticamente. Com `mta.runsPath=null`, nenhuma nova permissao
+externa e acrescentada. Listas ja definidas permanecem sob controle do usuario.
+
+O [manifesto oficial do Copilot](https://github.com/microsoft/vscode-copilot-chat/blob/main/package.json)
+registra `additionalReadAccessPaths` com escopo `window`, compativel com workspace.
+A referencia de settings do VS Code consultada citava `additionalReadAccessFolders`;
+use a chave reconhecida pela extensao instalada. Se `Paths` aparecer como
+desconhecida, confira a versao e a configuracao exposta pelo Copilot antes de
+afirmar que o acesso foi concedido. A leitura real continua sendo conferida pelo
+agente; veja [permissao e retomada](priorizacao-issues.md#acesso-a-rodada-externa).
 
 ### Duas opcoes para configurar o workspace
 

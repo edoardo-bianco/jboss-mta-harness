@@ -183,6 +183,9 @@ function New-HarnessWorkspace {
         'java.import.generatesMetadataFilesAtProjectRoot'=$false
         'files.exclude'=@{ '**/.harness'=$true }
     }
+    if ($Context.Config.mta.runsPath) {
+        $settings['github.copilot.chat.additionalReadAccessPaths'] = @($Context.Config.mta.runsPath.Replace('\','/'))
+    }
     if ($Context.Config.tools.applicationJdk8Home) {
         $settings['java.configuration.runtimes'] = @(@{name='JavaSE-1.8'; path=$Context.Config.tools.applicationJdk8Home; default=$true})
         $settings['maven.terminal.useJavaHome'] = $false

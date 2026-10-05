@@ -196,26 +196,28 @@ o prompt atualizado, preservando o recibo e o ranking antigos como historico.
 
 ### Acesso a rodada externa
 
-Quando o agente precisar ler o MTA fora do workspace, deve solicitar permissao
-de leitura para a pasta exata `Mta.Run` e indicar os arquivos necessarios. Uma
-autorizacao vigente para esse escopo continua valida. Apos a concessao, deve
+Quando o agente precisar ler o MTA fora das pastas ja autorizadas, deve solicitar
+permissao de leitura para `Mta.Run` e indicar os arquivos necessarios. Uma
+autorizacao vigente para a raiz MTA inclui suas rodadas e nao precisa ser pedida
+novamente. Apos a concessao, deve
 tentar novamente o caminho literal e confirmar a leitura, inclusive pelo apoio
-quando ele precisar do arquivo. O harness nao consegue conceder acesso pelo cliente.
+quando ele precisar do arquivo. A leitura efetiva depende de o cliente reconhecer
+e aplicar essa permissao.
 
-No Copilot/VS Code, aprove a solicitacao apresentada pela ferramenta, quando
-disponivel. Se a versao instalada limitar as ferramentas ao workspace, confira
-nos Settings a opcao `github.copilot.chat.additionalReadAccessFolders`, documentada
-para acesso adicional somente de leitura. Apos concordar com o escopo, o proprio
-desenvolvedor pode acrescentar a pasta da rodada a lista existente, preservando
-as outras entradas. Exemplo de formato, com caminho a substituir pelo `Mta.Run`:
+O workspace gerado inicializa o acesso de leitura com `mta.runsPath`, preservando
+listas que o desenvolvedor ja definiu. Para usar `C:/mta-runs` em todas as rodadas
+deste workspace, a propriedade em `settings` e:
 
 ```json
-"github.copilot.chat.additionalReadAccessFolders": [
-  "C:/mta-runs/MinhaAplicacao/261005-120000"
+"github.copilot.chat.additionalReadAccessPaths": [
+  "C:/mta-runs"
 ]
 ```
 
-Referencia: [Settings de IA do VS Code — permissoes e seguranca](https://code.visualstudio.com/docs/agents/reference/ai-settings).
+Veja [como aplicar, alterar ou revogar no workspace](workspace.md#acesso-do-copilot-a-pasta-mta),
+incluindo a diferenca de nome entre a referencia do VS Code e o manifesto atual
+do Copilot. Se a pasta nao estiver autorizada, aprove a solicitacao apresentada
+pela ferramenta, quando disponivel, ou configure a pasta no workspace.
 Se a configuracao nao estiver disponivel ou houver politica corporativa impeditiva,
 informar versao, caminho, ferramenta e erro para ajustar o acesso suportado. Nao
 habilitar aprovacao global, editar configuracao pelo prompt ou trocar de ferramenta

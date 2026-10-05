@@ -1,5 +1,17 @@
 # Plano do agente: evolucao do harness
 
+## Acesso de leitura a raiz MTA no workspace - 2026-10-05
+
+Pedido humano: autorizar C:/mta-runs neste workspace e explicar como alterar.
+Retomar harness/incidentes-mta-priorizacao, HEAD 667d113, checkout limpo.
+Manifesto oficial atual do Copilot registra additionalReadAccessPaths, scope
+window; corrigir o nome Folders citado na referencia de settings do VS Code.
+Gerador inicializa a lista com mta.runsPath quando configurado, apenas se a chave
+estiver ausente; preservar listas humanas, inclusive vazias. Aplicar ao workspace
+local atual e documentar edicao/revogacao no settings do .code-workspace.
+Conferir geracao, preservacao e ausencia de permissao quando runsPath=null;
+configuracao JSON verificada nao comprova leitura no cliente da maquina de trabalho.
+
 ## Recuperacao dos incidentes MTA na priorizacao - 2026-10-05
 
 Bugfix na branch `harness/incidentes-mta-priorizacao`, a partir de main

@@ -1,5 +1,21 @@
 # To-do do agente: evolucao do harness
 
+## Acesso de leitura a raiz MTA no workspace - 2026-10-05
+
+- [x] Conferir branch/estado e chave/escopo no manifesto oficial do Copilot.
+- [x] Testar geracao a partir de mta.runsPath e preservacao da lista humana.
+- [x] Aplicar ao workspace local e documentar como alterar/remover o acesso.
+- [x] Validar e revisar o incremento; preservar limite do ensaio nativo pendente.
+
+RED: Test-Workspace falhou por ausencia da permissao da raiz MTA. GREEN apos
+inicializacao no gerador; Test-Workspace, Test-JbossWorkspace e Test-BuildConfig
+PASS em Windows PowerShell 5.1. Workspace local validado como JSON com somente
+C:/mta-runs na lista adicional. Guias explicam escopo local, outra maquina,
+edicao/revogacao e preservacao da lista pelo gerador. Configuracao local ignorada
+no Git; gerador e guias sao versionados. Leitura nativa Copilot continua pendente.
+Revisao independente sem bloqueadores; git diff --check sem erros. Evidencia em
+`.harness/tests/incidentes-mta-20261005/workspace-read-access.json`.
+
 ## Recuperacao dos incidentes MTA na priorizacao - 2026-10-05
 
 - [x] Conferir diagnostico, raiz/HEAD/estado e criar branch propria a partir de main.
