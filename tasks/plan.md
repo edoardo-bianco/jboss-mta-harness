@@ -1,5 +1,37 @@
 # Plano do agente: evolucao do harness
 
+## Integracao nas principais autorizada - 2026-10-04
+
+Pedido do desenvolvedor: fazer commit e push nas branches principais. Entrega do
+harness preparada em harness/backlog-agente-orientacao: nove commits apos de59750
+e documentacao pendente do encerramento do ensaio 01/preparo do ensaio 02.
+Integrar por avanco direto em main e depois, explicitamente, em main_jboss_eap74;
+publicar ambas sem force, preservando a branch deste checkout e os artefatos locais.
+Revisao e verificacoes desta preparacao registradas no [to-do](todo.md).
+SIM-14/VAL-01 e E02-P01 permanecem pendentes; a autorizacao de integracao nao
+declara validacao nativa dos clientes nem GO/aceite de corretiva da aplicacao.
+
+## Ensaio 02: fluxo simplificado - 2026-10-04
+
+Pedido atual: encerrar/limpar o ensaio anterior e registrar nova rodada sobre a base
+4ff6c68 ja publicada. Trata-se da validacao do harness, com acompanhamento no
+[to-do](todo.md#ensaio-02-fluxo-simplificado---2026-10-04).
+
+Coleta e discussoes do ensaio 01 foram movidas para um
+[registro historico](ensaio-helper-01-historico.md). Preservar suas evidencias e
+rastreabilidade; encerramento da rodada nao afirma migracao ou validacao global.
+Reinicio escolhido pelo desenvolvedor: voltar a primeira instrucao, pela
+priorizacao, com o registro original sem escolhas. As duas issues de antes voltam
+a A DEFINIR / NAO ANALISADA; depois continua AGUARDANDO MTA. Regenerar os registros
+com as instrucoes atuais, preservando a rodada MTA original, fontes e configuracao.
+Artefatos locais anteriores ficam em .harness/ensaios/ensaio-01-2026-10-04/,
+com inventario de integridade, fora das pastas de solicitacoes ativas.
+
+O humano executa as etapas no cliente e traz resultados; avaliar uma resposta por
+vez, identificar cliente/apoio efetivo e registrar eventos E02 sem misturar os ENS
+anteriores. Aplicar os criterios SIM-14/VAL-01 existentes. Nenhum planejamento,
+corretiva, build, MTA ou deploy da aplicacao comeca automaticamente nesta preparacao.
+
 ## Auditoria documental e risco de integracao - 2026-10-04
 
 Pedido: conferir consistencia e clareza de README, guias, contrato, prompts e helpers
@@ -55,10 +87,12 @@ Preservar os artefatos do ensaio:
 - Priorizacao: RequestId 2ff39907a87d4101a7a7c21f7d2397d2.
 - Preparo de planejamento: RequestId 86e35d8af7d54f9d8fecb500121be590.
 - Origem MTA: RunId 161c1bd4ce7a4da78641091c58557e44.
-- Escolha atual: 00400 ANALISAR AGORA; 00401 A DEFINIR, com vinculos reciprocos.
+- Escolha no ensaio 01: 00400 ANALISAR AGORA; 00401 A DEFINIR, com vinculos reciprocos.
 - Na ultima conferencia, somente prompt/recibo preparados; plan.md/todo.md ausentes.
 Nao sobrescrever recibos, snapshots ou prompts antigos para torna-los atuais.
 Reteste futuro usa artefatos do contrato corrigido, mantendo o historico original.
+Atualizacao no preparo do ensaio 02: esses artefatos e escolhas foram arquivados;
+os registros ativos foram reiniciados por pedido humano, conforme secao inicial.
 
 ### Fluxo e responsabilidades definidos para a implementacao
 
@@ -388,62 +422,10 @@ ou nova decisao de infraestrutura e necessaria para iniciar a implementacao.
 
 ## Direcao de simplificacao registrada no ensaio - 2026-10-04
 
-Registro historico das discussoes durante o ensaio; o plano consolidado acima
-passa a orientar a proxima implementacao. Evidencias e criterios iniciais em ENS-01 a
-ENS-15 do [to-do](todo.md#ensaio-acompanhado-do-helper-no-codex---2026-10-04).
-Este registro nao altera contratos, prompts, tarefas ou recibos ja emitidos.
-
-Entrada humana central: migracao.md do projeto escolhido, com prioridades,
-observacoes, recorte, issues adicionais e referencias das evidencias. Indice
-localiza e resume; recibo preserva identidade/snapshots/destinos da solicitacao.
-Relatorios MTA, codigo e anexos continuam fontes externas a conferir. Preparacao
-inicial pelo indice ja pode criar/carregar registros; nao impor uma segunda
-tarefa de criacao do migracao.md quando ele ja existe.
-
-Percurso proposto: preparar entradas necessarias -> priorizar opcionalmente ->
-registrar escolha -> preparar/executar proposta -> revisao/GO -> corretiva ->
-verificacoes -> aceite. Escolha direta dispensa ranking; pre-planejamento e
-priorizacao, enquanto replanejamento revisa uma proposta existente. Operacoes
-tecnicas de preparo/execucao continuam distintas, apresentadas pelo helper apenas
-quando chegarem a vez, com entrada curta pronta para o cliente em uso.
-
-Helper acompanha situacao, confere escolhas/evidencias, identifica mudancas com
-impacto e orienta uma proxima acao; usa especialistas quando pertinente. Mantem
-limites atuais de leitura/orientacao. Preparadores e executores da etapa autorizada
-persistem artefatos/andamento permitidos. Humano escolhe prioridades/recorte,
-resolve conflitos de intencao e concede GO/aceite; helper nao assume essas decisoes.
-Se futuramente for desejada escrita automatica pelo condutor, isso pertence ao
-executor com escopo explicito, sem ampliar silenciosamente o perfil helper.
-
-Conferencia de consistencia integra a retomada; reconciliacao separada e uma rota
-por necessidade concreta, nao pedaggio de toda proposta. Nota explicativa, escolha
-registrada apos um snapshot ou evidencia que apenas confirma estado nao sao
-automaticamente conflitos. Novo MTA, mudanca de escopo, divergencia entre colegas
-ou evidencia que contradiz andamento exigem avaliar impacto e conciliar o recorte;
-revisar o mesmo lote quando aplicavel. Dependencia impeditiva deve ser demonstrada.
-Preservar pendencias historicas e nao marcar CONCLUIDA sem executar a manutencao.
-
-Rever juntos atualizacao do indice, preparo de planejamento/manutencao, templates,
-guia e helpers: Sync-IndexMigration tambem carrega o ultimo MTA reconhecido quando
-UpdateMigration esta ativo. Separar descoberta inicial de adocao de outra rodada
-em um trabalho ja selecionado; impedir troca implicita da base por atualizar indice
-ou preparar proposta. Nao criar registro duplicado, novo sistema de status ou novas
-Run Tasks por arquivo/projeto. Observacoes no prompt sao complementos opcionais;
-nao repetir selecao e links ja registrados. Lacunas e ambiguidade pedem somente o
-dado indispensavel, sem planejar automaticamente todos os projetos/issues.
-
-Refinamento humano: ANALISAR AGORA ja satisfaz a decisao de incluir a issue na
-analise. Consumidores devem reconhecer essa escolha no registro atual e parar de
-apresenta-la como PENDENTE porque ranking/indice/snapshot anterior assim dizia.
-Nao exigir edicao manual coordenada de varios documentos para repetir a escolha.
-Preservar snapshots historicos; no resumo atual, mostrar decisao registrada e
-proxima acao. Evitar estado generico de "documento pendente": distinguir escolha,
-execucao do planejamento, verificacoes especificas e futuras decisoes de GO/aceite.
-Evidencia nao examinada pede verificacao pertinente pelo agente da fase antes de
-virar pergunta ao humano; somente lacuna concreta que dependa dele pede retorno.
-Esse reconhecimento nao marca reconciliacao historica CONCLUIDA nem presume
-corretiva, verificacao ou GO. Revisar quando gerar avisos/pendencias para que o
-simples preparo de arquivos nao produza uma nova obrigacao humana sem necessidade.
+Discussao historica arquivada no
+[ensaio 01](ensaio-helper-01-historico.md#direcao-de-simplificacao-registrada-no-ensaio---2026-10-04).
+As decisoes foram implementadas e auditadas; o plano consolidado acima preserva
+os criterios. Esta secao permanece como destino dos links anteriores.
 
 ## Pre-planejamento: priorizar issues - 2026-10-04
 
