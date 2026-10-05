@@ -1,5 +1,21 @@
 # To-do do agente: evolucao do harness
 
+## Guia proprio de orientacao e padrao por etapa - 2026-10-05
+
+- [x] Conferir raiz, branch, HEAD e estado limpo; mapear secoes e referencias.
+- [x] Criar guia central e ligar README, desenvolvedor e Workspace.
+- [x] Padronizar os sete guias operacionais, com exemplos por etapa e resultado esperado.
+- [x] Atualizar mapa da skill e convencao de manutencao; preservar links antigos.
+- [x] Validar links/ancoras, oito etapas, limites dos helpers e revisao documental.
+
+Verificacao: 14 documentos, 346 links/ancoras locais validos e 151 ancoras
+anteriores dos guias preservadas; sete guias com as quatro secoes padrao e
+oito etapas no mapa central. Revisao independente sem achados materiais.
+`git diff --check` sem erros. Evidencia local em
+`.harness/tests/guias-orientacao-20261005/validacao-documental.json`.
+Sem execucao de runtime ou novo aceite de descoberta/delegacao nas extensoes.
+O mapa da skill mudou somente as referencias; scripts/permissoes preservados.
+
 ## Publicacao e alinhamento da conciliacao - 2026-10-05
 
 - [x] Confirmar pedido do mantenedor, checkout limpo e principais locais/remotas

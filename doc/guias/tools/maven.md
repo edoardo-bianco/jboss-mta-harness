@@ -25,8 +25,30 @@ Os comandos das tarefas partem da raiz do harness; o executor atua no projeto
 selecionado. Para criar o workspace ou adicionar projetos, use o
 [guia do workspace](workspace.md).
 
-Navegacao: [configuracao](#configuracao) · [A: Run Task](#opcao-a-run-task-do-harness) ·
-[B: Maven direto](#opcao-b-maven-direto) · [continuar](#resultado-e-proximo-passo).
+Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
+[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
+
+## Orientacao com o helper
+
+No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
+
+```text
+Quero fazer o build Java 8 do projeto X antes do MTA.
+Confira o alvo e a configuracao disponivel e me oriente na tarefa e nas fases
+Maven adequadas. Indique qual resultado devo conferir antes de continuar.
+```
+
+Para verificar uma corretiva, informe a etapa real:
+
+```text
+Quero conferir build, testes e cobertura do lote atual do projeto X.
+Leia os criterios do plano e as evidencias existentes e me oriente na proxima
+verificacao, distinguindo falhas, avisos e pendencias para o aceite.
+```
+
+**Resultado esperado:** orientacao sobre projeto/modulo, fases e evidencias do
+build; o helper nao executa Maven. A conclusao das fases nao concede aceite do lote.
 
 ## Configuracao
 

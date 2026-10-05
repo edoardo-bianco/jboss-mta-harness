@@ -52,9 +52,11 @@ planejamento, implementacao, verificacao, aceite e reconciliacao. Em cada etapa,
 indica o guia de ferramenta adequado para os comandos, opcoes e caminhos de
 retomada.
 
-Para comecar com orientacao, use o [helper de migracao](doc/guias/tools/workspace.md#orientacao-com-codex-ou-github-copilot)
+Para comecar com orientacao, siga o [guia de orientacao da migracao com Codex ou GitHub Copilot](doc/guias/orientacao-migracao.md)
 e diga apenas o objetivo, por exemplo: "Quero priorizar as issues mandatory dos
-projetos deste workspace". Ele confere a situacao e conduz uma etapa por vez.
+projetos deste workspace". O guia explica `orientar-migracao`, `migracao_helper`,
+retomada e passagem a execucao; cada guia de etapa oferece pedidos de exemplo e
+o resultado esperado. O helper confere a situacao e conduz uma etapa por vez.
 
 O [pre-planejamento opcional](doc/guias/tools/priorizacao-issues.md) examina uma
 fatia de **0,01% a 100,00%** das issues elegiveis sobre o total inicial fixo.

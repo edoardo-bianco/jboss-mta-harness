@@ -14,7 +14,32 @@ recomendacoes sustentadas por evidencias e amostras, a partir de uma **fatia de
 Voce escolhe qual levar ao planejamento. Quem ja escolheu a issue pode seguir
 direto ao [planejamento do lote](planejamento-migracao.md#planejar-lotes-de-correcao-com-copilot).
 
-## Entradas e escopo
+Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
+[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
+
+<a id="orientacao-pelos-helpers"></a>
+
+## Orientacao com o helper
+
+No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
+
+```text
+Quero comparar issues mandatory dos projetos deste workspace antes de escolher uma.
+Gostaria de examinar uma fatia de 10%. Confira se existe priorizacao anterior e
+me oriente na retomada ou na escolha entre recriar e progredir, considerando risco,
+repetibilidade e alcance.
+```
+
+**Resultado esperado:** orientacao para preparar/retomar a fatia e a mensagem
+para executar o prompt no cliente atual. O helper pode examinar evidencias e
+recomendar no chat, com apoio de planejamento/impacto quando pertinente. A lista
+so e salva ao executar separadamente o prompt; a escolha da candidata e sua.
+Na retomada, o helper localiza a solicitacao vinculada, sem escolher por recencia.
+
+## Configuracao
+
+### Entradas e escopo
 
 O preparador usa o indice existente `.harness/projetos/indice-projetos.md`, os
 `migracao.md` dos projetos selecionados e as rodadas MTA referenciadas nesses
@@ -41,7 +66,9 @@ do escopo ou ja planejadas/implementadas/verificadas exigem pedido explicito por
 projeto/ID e recorte para reconsideracao. Issues `DEV-...` exigem pedido expresso,
 sem inventar classificacao MTA. Lotes ativos e decisoes anteriores sao preservados.
 
-## Uso manual pela Run Task
+## Uso
+
+### Uso manual pela Run Task
 
 1. Salve o workspace e abra **Terminal > Run Task > Planejamento: priorizar issues**.
 2. Se houver priorizacao anterior, escolha **1 recriar** ou **2 progredir**.
@@ -99,27 +126,7 @@ Mudancas de projetos, origem MTA/catalogo ou evidencias exigem recriar a base.
 Decisoes humanas atuais filtram as disponiveis, sem mudar o denominador da sequencia.
 Projetos com diagnostico indisponivel aparecem como lacunas, fora dessa base.
 
-## Orientacao pelos helpers
-
-No Codex, comece pela skill:
-
-```text
-$orientar-migracao Quero comparar issues mandatory dos projetos deste workspace
-antes de escolher uma. Oriente a priorizacao por risco, repetibilidade e alcance.
-```
-
-No Copilot, selecione **migracao_helper** e faca o mesmo pedido. Veja a
-[entrada e selecao dos helpers](workspace.md#orientacao-com-codex-ou-github-copilot).
-O orquestrador pode consultar `migracao_planejamento_helper` para a comparacao
-e `migracao_impacto_helper` para amostras das candidatas. Um pedido curto basta;
-informe o workspace/contexto somente se o helper nao puder distingui-lo pelos
-arquivos. Na retomada ele localiza a solicitacao vinculada, sem escolher por recencia.
-
-Os helpers explicam a tarefa, examinam evidencias e recomendam no chat. Para
-salvar a lista, execute separadamente o prompt preparado conforme o procedimento
-acima. Nenhum helper escolhe sua prioridade, concede GO ou inicia corretivas.
-
-## Como avaliar a lista
+### Como avaliar a lista
 
 A analise comeca pelos registros e aprofunda as candidatas promissoras no MTA,
 nas regras/recomendacoes e no codigo atual. Amostras devem representar variacoes
@@ -146,7 +153,7 @@ preserva snapshots do indice/registros, caminhos e hashes das entradas.
 Mudancas relevantes posteriores precisam ser explicitadas na analise; snapshot
 nao equivale ao estado atual. A limpeza de execucoes preserva essa pasta.
 
-## Levar uma candidata ao planejamento
+### Levar uma candidata ao planejamento
 
 1. Abra o **link ao registro** fornecido na candidata. O resultado deve trazer
    IDs exatos e uma sugestao da **linha completa**, preservando as oito colunas.
@@ -167,7 +174,7 @@ O fluxo segue no [guia de planejamento](planejamento-migracao.md). Na futura
 corretiva, a meta continua **85% de cobertura unitaria da parte corrigida via
 JaCoCo**; abaixo da meta gera warning e nao bloqueia o build por si so.
 
-## Validacao manual
+### Validacao manual
 
 Confira no seu cliente: descoberta da tarefa; orientacao/delegacao dos helpers;
 contexto contendo apenas os projetos do workspace; rodada vinculada ao registro;
@@ -178,3 +185,11 @@ lista da solicitacao. Preparacao automatizada testada nao comprova a qualidade
 da recomendacao nem a integracao nativa do chat.
 
 Voltar ao [roteiro do desenvolvedor](../harness-migracao-desenvolvedor.md#4-conferir-o-registro-e-escolher-prioridades).
+
+## Resultado e proximo passo
+
+Revise `priorizacao.md`, fontes, quota, cobertura efetiva e lacunas. Escolha a
+candidata e siga [como levar a escolha ao planejamento](#levar-uma-candidata-ao-planejamento).
+Se quiser outra fatia, use [continuidade](#fatias-e-continuidade): preservar a base
+ou recriar depende das entradas e da sua escolha. Ranking nao altera decisoes
+no registro, nao cria lote e nao concede GO.

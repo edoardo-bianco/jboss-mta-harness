@@ -71,7 +71,7 @@ do harness. Os demais documentos possuem finalidades distintas:
 
 | Local | Conteudo |
 | --- | --- |
-| `doc/guias/` | Fluxo do desenvolvedor, [comparacao de branches](diagnostico-branches-git-tortoisegit.md) e [modelo de evidencias](modelo-evidencias-complementares.md). |
+| `doc/guias/` | Fluxo do desenvolvedor, [orientacao com Codex/Copilot](orientacao-migracao.md), [comparacao de branches](diagnostico-branches-git-tortoisegit.md) e [modelo de evidencias](modelo-evidencias-complementares.md). |
 | `doc/guias/tools/` | Configuracao e uso de [workspace](tools/workspace.md), [Maven](tools/maven.md), [MTA](tools/mta.md), [planejamento/reconciliacao](tools/planejamento-migracao.md), [JBoss](tools/jboss.md) e [SonarQube](tools/sonar.md). |
 | `doc/estrategia/` | [Objetivos, fundamentos e evolucao proposta do harness](../estrategia/estrategia-harness_.md); distingue a base atual dos pilotos futuros. |
 | `doc/adr/` | Decisoes e justificativas, como [contexto local e acionamento do Copilot](../adr/0001-contexto-copilot.md). |
@@ -80,6 +80,27 @@ do harness. Os demais documentos possuem finalidades distintas:
 | `tasks/` | [Plano](../../tasks/plan.md) e [to-do](../../tasks/todo.md) do agente de codificacao para a evolucao atual do harness. |
 
 Crie documentos apenas quando houver conteudo proprio: atualizar o guia responsavel pela etapa em vez de duplicar seu roteiro nem repetir o checklist de trabalho em uma especificacao. Os prompts em `.github/prompts/` sao instrucoes operacionais do agente; `.harness/` guarda artefatos locais de execucao. O plano do agente que evolui o harness e separado das propostas de corretivas das aplicacoes.
+
+### Padrao dos guias operacionais
+
+Os sete guias de `tools/` usam o mesmo cabecalho de exportacao e uma abertura
+curta: finalidade, etapa do fluxo, link de retorno ao desenvolvedor e navegacao.
+Preserve a ordem das secoes principais abaixo; detalhes proprios ficam em subsecoes.
+
+| Secao | Conteudo |
+| --- | --- |
+| Orientacao com o helper | Link para o guia central, entrada Codex/Copilot, pedido de exemplo em bloco `text` e **Resultado esperado**. Um pedido por etapa quando o guia cobre varias. |
+| Configuracao | Entradas, ambiente e preparo necessario. Referenciar configuracao comum no Workspace. |
+| Uso | Run Tasks, escolhas e procedimentos da etapa, com limites e verificacoes pertinentes. |
+| Resultado e proximo passo | Evidencia a conferir, pendencias possiveis e link para continuar o fluxo. |
+
+O [guia de orientacao](orientacao-migracao.md) concentra descoberta, selecao de
+cliente, retomada, papeis e passagem para execucao. Exemplos especificos ficam
+nos guias das etapas, ligados pelo mapa central. Pedidos de orientacao nao mandam
+o helper executar tarefas, gravar planos, conceder GO ou aceitar resultados.
+Use `projeto X` como exemplo substituivel; evite IDs/caminhos ficticios de recibos.
+Ao mover secoes, atualize os links de entrada e preserve ancoras antigas como
+encaminhamento, incluindo referencias historicas e links salvos pelo desenvolvedor.
 
 ## Testar os scripts do harness
 

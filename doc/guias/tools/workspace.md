@@ -22,6 +22,24 @@ e quando precisar ajustar o ambiente durante o trabalho.
 | Localizar ou limpar saidas | [Pastas locais](#pastas-locais-e-backups-temporarios) e [limpeza](#limpar-execucoes-locais) |
 | Identificar o script de uma Run Task | [Catalogo de tarefas](#tarefa-e-script-correspondente) |
 
+Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
+[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
+
+## Orientacao com o helper
+
+No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
+
+```text
+Quero preparar o ambiente para migrar o projeto X nesta maquina.
+Confira o workspace salvo, a configuracao e os registros existentes.
+Me oriente na proxima acao necessaria.
+```
+
+**Resultado esperado:** indicacao da configuracao, selecao de projeto ou atualizacao
+inicial do indice que falta, com o caminho e a tarefa corretos. Voce executa a acao
+e retorna com o resultado; o helper preserva configuracao e evidencias existentes.
+
 ## Configuracao
 
 ### Comecar na maquina de trabalho
@@ -33,7 +51,7 @@ no uso diario, abra seu workspace local e retome a [etapa em que parou](../harne
 
 | Arquivo | Quando usar |
 | --- | --- |
-| `iniciar-harness.code-workspace` | Somente na primeira configuracao, apos clonar. Modelo portavel com o harness e os exemplos. |
+| `iniciar-harness.code-workspace` | Somente na primeira configuracao, apos clonar. Modelo portavel somente com o harness; adicione aplicacoes externas. |
 | `jboss-mta-harness.local.code-workspace` | No dia a dia, apos configurar. Contem seus caminhos e os projetos adicionados ao workspace; nao e versionado. |
 
 **Se voce ja tem o workspace local configurado, continue abrindo `jboss-mta-harness.local.code-workspace`.** Nao precisa repetir a configuracao inicial nem gerar novamente para adicionar projetos. O arquivo inicial foi renomeado de `jboss-mta-harness.code-workspace` para `iniciar-harness.code-workspace`; seu workspace local permanece o mesmo.
@@ -42,7 +60,7 @@ Use uma pasta local permitida pela empresa, com Git, VS Code e Windows PowerShel
 5.1 disponiveis. Para build, tenha Maven e JDK 8; para executar MTA, tenha a
 distribuicao Windows completa e seu JDK (JDK 25 no ensaio), conforme a
 [configuracao MTA](mta.md#configuracao). Use as instalacoes existentes.
-Para o planejamento assistido, configure [Codex ou Copilot/DevSquad](planejamento-migracao.md#configuracao)
+Para o planejamento assistido, consulte [Codex ou GitHub Copilot](../orientacao-migracao.md#configuracao)
 em sessao Local. Quem vai somente planejar com uma rodada recebida segue o caminho
 de reutilizacao da etapa 3, sem repetir a analise apenas para preparar a proposta.
 Tambem pode planejar com issues e evidencias fornecidas, sem pacote MTA completo;
@@ -229,101 +247,8 @@ Para o Java de um novo comando Maven, salve as configuracoes e crie um terminal 
 
 ### Orientacao com Codex ou GitHub Copilot
 
-A skill [orientar-migracao](../../../.agents/skills/orientar-migracao/SKILL.md)
-ajuda a localizar a etapa atual e decidir o proximo passo. Ela consulta o indice,
-registro, recibos, planos, prompts preparados e evidencias pertinentes; responde
-com **uma proxima acao**, motivo, caminho/mensagem prontos e o resultado a conferir.
-Nao precisa conhecer nomes de campos do contexto para pedir ajuda. Voce executa
-as tarefas e toma as decisoes de prioridade, GO e aceite.
-
-O arquivo fica em .agents/skills no repositorio, local reconhecido por
-[Codex](https://learn.chatgpt.com/docs/build-skills) e
-[Copilot no VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills).
-As instrucoes sao compartilhadas; a descoberta depende do cliente e da pasta
-aberta. Nao e necessario regenerar o workspace para acrescentar esta skill.
-
-1. Abra o workspace que inclui a pasta harness. No Codex, inicie a conversa com
-   a raiz do harness como pasta de trabalho; uma aplicacao em repositorio irmao
-   nao herda automaticamente as skills do harness.
-2. No Codex, selecione **$orientar-migracao** no chat. Ela assume o papel de
-   orquestrador helper. No Copilot, abra a lista de agentes do Chat e selecione
-   **migracao_helper**. A skill tambem pode ser usada por **/orientar-migracao**.
-   Se nao aparecer, confira os arquivos no clone e se as customizacoes estao
-   habilitadas no cliente; no Copilot, a lista de skills fica em **/skills**.
-   No Codex, reinicie o cliente se a descoberta nao refletir os novos arquivos.
-3. Diga apenas o objetivo. Exemplos: "Quero priorizar issues mandatory deste
-   workspace" ou "Escolhi uma issue no registro; me conduza ao proximo passo".
-   O helper le indice/registro e localiza a solicitacao vinculada. Pede caminho,
-   projeto ou ID somente quando existir ambiguidade que os arquivos nao resolvam.
-4. Execute a unica acao indicada e retorne com o resultado. O helper confere a
-   saida e orienta a seguinte; nao assume solicitacao/rodada mais recente.
-
-Sem descoberta automatica, voce pode referenciar o SKILL.md pelo caminho e pedir
-ao cliente que leia e aplique suas instrucoes; isso nao comprova a integracao nativa.
-O apoio using-agent-skills/subagentes no Codex e DevSquad no Copilot depende das
-capacidades instaladas e permitidas. Se faltar apoio compativel com leitura e
-orientacao, a skill informa a limitacao e continua pelos guias.
-
-`$` seleciona uma **skill** no Codex. Usar orientar-migracao significa aplicar
-essas instrucoes; nao comprova que migracao_helper ou outro subagente foi invocado.
-O cliente deve mostrar a delegacao real quando ocorrer. Para pedir especificamente
-esse apoio no Codex, diga "Use o subagente migracao_helper para me orientar" quando
-o perfil estiver disponivel. Mencionar/anexar migracao_helper.toml so fornece o arquivo.
-
-Na passagem da orientacao para a execucao, o helper entrega a mensagem pronta
-para o cliente atual. No Codex: `Execute o prompt deste arquivo:` com o caminho
-real. No Copilot: abrir o prompt preparado e usar **Executar Prompt**, com DevSquad
-nas fases pertinentes. A autorizacao de executar esse prompt e uma etapa distinta
-da orientacao; helpers nao passam a escritores. Preferencias extras sao opcionais.
-
-Pode trocar de chat ou cliente durante o trabalho. O novo helper rele os mesmos
-registros/solicitacao e reconhece escolhas e GO vigentes, sem exigir reconstrucao
-do historico da conversa. ContextPath significa simplesmente o caminho do recibo
-context.json; o helper deve localiza-lo e apresenta-lo, nao exigir que voce o invente.
-
-O orquestrador consulta somente o helper pertinente; uma duvida simples pode ser
-respondida diretamente pelo guia. Tambem e possivel pedir ajuda a uma etapa especifica:
-
-| Nome do agente | Quando usar |
-| --- | --- |
-| migracao_helper | Entender a situacao atual e decidir o proximo passo. |
-| migracao_preparo_helper | Localizar/criar registro, conferir base e orientar preparo com MTA ou evidencias. |
-| migracao_reconciliacao_helper | Entender divergencias entre registro, decisoes e evidencias. |
-| migracao_planejamento_helper | Comparar candidatas entre projetos antes da escolha e revisar cobertura, proposta e GO. |
-| migracao_impacto_helper | Conferir amostras de candidatas na priorizacao ou codigo, dependencias, configuracoes e testes da issue escolhida. |
-| migracao_implementacao_helper | Seguir as pendencias autorizadas, build, debug, testes e aceite. |
-
-No Copilot, os perfis ficam em `.github/agents`; escolha o helper na lista de
-agentes. No Codex, `.codex/agents` fornece perfis para subagentes; solicite ao
-chat que use o nome desejado, com o projeto e a pergunta. Nao sao comandos de
-terminal nem novas Run Tasks. As duas entradas leem a mesma skill e sua referencia
-de papeis. Formatos: [agentes VS Code](https://code.visualstudio.com/docs/agent-customization/custom-agents)
-e [subagentes Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents).
-
-Os perfis Copilot oferecem leitura/busca, com delegacao somente no orquestrador.
-Os perfis Codex pedem sandbox read-only e desabilitam subdelegacao dos especialistas;
-as permissoes efetivas tambem dependem da sessao. A skill isolada nao configura
-sandbox. Confira as ferramentas/acoes exibidas pelo cliente.
-
-Para comparar oportunidades mandatory antes de escolher, siga o
-[guia de priorizacao de issues](priorizacao-issues.md). O helper orienta a
-Run Task **Planejamento: priorizar issues** e pode revisar as candidatas no chat.
-A escrita da lista ocorre ao executar separadamente o prompt preparado; a
-escolha humana antecede o planejamento habitual.
-
-O apoio opcional DevSquad usa `devsquad.plan` apenas quando seu perfil real permite
-leitura sem terminal, escrita ou subdelegacao. O perfil instalado examinado nesta
-entrega oferece essas capacidades adicionais; o helper deve informar a limitacao
-e orientar pelo guia/helpers locais. Instalar o plugin nao comprova integracao
-compativel. Nao e necessario alterar o plugin ou regenerar o workspace para usar
-os helpers locais.
-
-**Ensaio nas extensoes:** conferir novamente descoberta/delegacao e o fluxo apos
-a simplificacao. Em cada cliente, use a mesma escolha/solicitacao e peca o proximo
-passo; confira que a resposta reconhece a decisao atual, oferece uma acao pronta
-para esse cliente e relata somente o apoio realmente utilizado. Testes dos arquivos
-nao comprovam obediencia do agente. A execucao segue o [guia de planejamento](planejamento-migracao.md);
-o helper explica seu uso e mantem o papel de leitor.
+O passo a passo foi reunido no [guia de orientacao da migracao](../orientacao-migracao.md).
+Para preparar o ambiente, use o [pedido ao helper deste guia](#orientacao-com-o-helper).
 
 ### Escolher o projeto em cada tarefa
 
