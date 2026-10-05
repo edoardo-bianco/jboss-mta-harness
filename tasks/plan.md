@@ -1,5 +1,48 @@
 # Plano do agente: evolucao do harness
 
+## Cobertura progressiva da priorizacao - 2026-10-05
+
+Correcao do harness solicitada apos ensaio na maquina de trabalho: continuar
+20% repetia issues examinadas sem recomendacao, pois so excluia ProposedIssues.
+Branch `harness/priorizacao-cobertura-progressiva`, derivada de main `4cf9335`,
+com checkout inicialmente limpo. Dados corporativos permanecem na origem.
+
+1. Reproduzir a repeticao e cobrir 44 issues em cinco fatias de 20%: 9+9+9+9+8,
+   mesmo com uma ou nenhuma recomendacao por rodada.
+2. Consumir a uniao de AnalyzedIssues da cadeia, preservando Source + ID,
+   base fixa, hashes, decisoes humanas e resultados anteriores. Novos recibos
+   usam SchemaVersion=3; resultados concluidos da versao 2 continuam legiveis
+   e contribuem com suas examinadas distintas, sem editar o historico.
+3. Exigir quota completa para COMPLETED na versao 3; parcial fica IN_PROGRESS.
+   Falta de evidencia gera linha com motivo/limite e proxima verificacao,
+   sem inventar aplicabilidade ou recomendacao. Toda examinada aparece na tabela,
+   com posicao quando sustentada ou SEM POSICAO e justificativa. Complementos do
+   desenvolvedor: TODAS as examinadas, inclusive recomendadas, recebem ficha de
+   achados/evidencias, referencias e roteiro para planejamento/implementacao manual
+   independente da IA. Explicitar fatos, hipoteses, lacunas e como obter o que falta.
+4. Alinhar prompt, contrato, guia, helpers e referencias vigentes; documentar
+   atualizacao para sequencias antigas e preservar instrucoes historicas.
+5. Validar regressao, integridade/compatibilidade e suite PowerShell; revisar diff.
+6. Pedido adicional: investigar falha eventual de chamada DevSquad. Conferir perfis
+   locais e documentacao oficial, orientar coleta do erro na maquina afetada e
+   registrar apoio real/erro no ranking. Nao presumir causa sem o trecho de erro
+   nem alterar o plugin/permissoes. Preservar separacao entre helper e executor.
+7. Revisao solicitada de autonomia e legibilidade: explicitar entrada sem helper no
+   README e guia principal; orientar helper a oferecer caminhos manual/assistido.
+   Compactar tabela e padronizar ficha em quatro blocos, com titulos descritivos,
+   referencias navegaveis e identidade tecnica preservada sem repeticao na narrativa.
+   Manter o guia existente como referencia do formato, com exemplo didatico.
+8. Publicacao autorizada pelo mantenedor: commit/push da branch de trabalho,
+   PR para main e alinhamento explicito de main_jboss_eap74 por fast-forward.
+   Conferir regras do PR, refs locais/remotas e checkout limpo ao concluir.
+
+Aceite: cinco rodadas completas cobrem as 44 issues da base inalterada, sem
+repeticao; incertezas continuam visiveis, cobertura nao vira resolucao/GO, e
+Continue aproveita analises anteriores. Preparos antigos ainda incompletos
+mantem suas instrucoes historicas; a adocao nova ocorre no proximo preparo.
+Nao alterar registros, evidencias ou codigo das aplicacoes. Publicacao e
+integracao das principais seguem a etapa explicita autorizada acima.
+
 ## Guia proprio de orientacao e padrao por etapa - 2026-10-05
 
 Evolucao documental solicitada: separar a orientacao Codex/Copilot do Workspace

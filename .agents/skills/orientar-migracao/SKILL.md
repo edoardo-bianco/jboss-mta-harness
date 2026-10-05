@@ -59,7 +59,7 @@ nao um perfil de agente; anexar um .toml tambem nao seleciona o agente.
    Consulte apenas evidencias e trechos de codigo necessarios a duvida atual.
    Em pre-planejamento Purpose=issue-prioritization, confira Projects do recibo e
    seus registros/rodadas; escopo pode conter varios projetos, sem eleger lote.
-   Em SchemaVersion=2, confira SequenceId, Percentage, InitialTotal, SliceSize,
+   Em SchemaVersion=3 (ou historico 2), confira SequenceId, Percentage, InitialTotal, SliceSize,
    AvailableIssues, ExcludedIssues e Previous. O guia de priorizacao explica
    a base fixa e o resultado estruturado no proprio RankingPath.
 4. Respeite o ContractSnapshot do recibo e as instrucoes do prompt selecionado
@@ -98,7 +98,16 @@ Aprofunde somente a etapa atual; preserve um lote consistente por frente.
   comparar candidatas/amostras. Nao execute preparador/prompt nem grave ranking;
   preserve A DEFINIR ate a escolha humana e nao inicie planejamento automaticamente.
   Explique o percentual sobre o total inicial fixo e as opcoes recriar/progredir;
-  progresso exclui apenas IDs explicitamente propostos, nao mencoes/sobreposicoes.
+  progresso exclui todos os IDs examinados (AnalyzedIssues), com ou sem proposta.
+  Resultados v2 concluidos contribuem com sua uniao distinta; novos recibos v3
+  exigem quota completa. Nao inferir exame de mencoes/sobreposicoes.
+  Toda examinada tem ficha de achados, evidencias, referencias tecnicas e roteiro
+  para planejamento/corretiva manual; SEM POSICAO exige motivo concreto. Ajude o
+  desenvolvedor a investigar lacunas e continuar independentemente da IA,
+  mantendo helper leitor, escolhas humanas e limites de cobertura.
+  Use o [formato da ficha](../../../doc/guias/tools/priorizacao-issues.md#como-ler-a-ficha):
+  titulo projeto + problema, links descritivos, achados sem repeticao. Apresente
+  IDs somente para localizar/referenciar a linha exata, nunca como unico rotulo.
   Sem ranking, retome o preparo vinculado; resultado incompleto requer completar
   a mesma analise ou recriar. Confira o estado pelo recibo/resultado e siga o guia.
   Escolha humana ja registrada continua vigente; a priorizacao nao reinicia decisoes.
@@ -113,8 +122,9 @@ Aprofunde somente a etapa atual; preserve um lote consistente por frente.
   indique atualizar quando isso for pedido ou houver mudanca relevante. PLANEJADA
   retoma o plano vinculado, sem regredir Andamento nem repetir a escolha.
 - Prompt/recibo preparado sem plan.md e todo.md significa preparo, nao planejamento
-  executado. Se esta e a solicitacao vinculada e a base continua vigente, ofereca
-  sua execucao no cliente atual. Se as entradas mudaram, indique Planejamento:
+  executado. Se esta e a solicitacao vinculada e a base continua vigente, indique
+  a elaboracao manual ou a execucao do prompt conforme a intencao do humano.
+  Se as entradas mudaram, indique Planejamento:
   planejar; nao gere outra apenas porque o chat mudou. Vinculo antigo pode ter
   sucessor explicito por Previous: siga o unico sucessor ou esclareca bifurcacao,
   sem escolher por data. Observacoes/escolhas atuais sao lidas do registro e nao
@@ -202,7 +212,19 @@ escolher. Nao execute preparadores para obter caminhos que ainda nao existem.
   permissoes. Pedido de execucao pertence a etapa executora autorizada, separada
   do helper; GO de um lote nao muda o papel desta skill.
 
-## Passagem para execucao no cliente atual
+## Continuidade manual ou assistida
+
+Se o humano quiser investigar, planejar ou implementar manualmente, parta da ficha
+e das evidencias, inclusive SEM POSICAO. Ofereca uma proxima verificacao concreta,
+seu resultado esperado e o link para o arquivo/guia pertinente. Nao exija outro
+ranking, prompt ou recomendacao da IA. Para proposta manual, recupere os destinos
+PlanPath/TodoPath do contexto; preserve planos existentes e oriente revisao, GO,
+verificacoes e aceite conforme a etapa. Consulte o
+[roteiro manual](../../../doc/guias/tools/priorizacao-issues.md#continuar-o-trabalho-manual).
+Se quiser elaboracao/execucao assistida, use a passagem abaixo. Nao pergunte de
+novo qual caminho seguir quando a intencao ja estiver clara.
+
+### Passagem para execucao no cliente atual
 
 Preparar contexto, orientar e executar um prompt sao acoes diferentes. Mantenha
 o cliente da conversa. Se nao for identificavel e isso mudar a proxima instrucao,
@@ -225,7 +247,8 @@ O helper oferece esse encaminhamento e aguarda o resultado; nao executa o prompt
 ## Entregar orientacao verificavel
 
 Responda em portugues com uma situacao curta comprovada e **uma proxima acao**:
-motivo, tarefa ou mensagem pronta com caminho real, e o resultado a conferir/trazer.
+motivo, verificacao manual, tarefa ou mensagem pronta com caminho real, e o
+resultado a conferir/trazer.
 Inclua o link pertinente do guia. Detalhe somente os passos dessa acao; nao entregue
 reconciliacao, planejamento e GO como lista de tarefas para fazer de uma vez.
 Se faltar decisao essencial, pergunte somente ela e explique sua consequencia.

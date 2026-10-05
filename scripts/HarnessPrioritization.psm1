@@ -81,7 +81,7 @@ function New-HarnessPrioritizationContext {
         }
         if ($Mode -eq 'Continue') {
             if (-not $previous) { throw 'Nao ha priorizacao anterior para progredir.' }
-            if (-not $previous.PSObject.Properties['SchemaVersion'] -or $previous.SchemaVersion -ne 2) { throw 'Priorizacao antiga com Top: use Recreate para iniciar por percentual.' }
+            if (-not $previous.PSObject.Properties['SchemaVersion'] -or $previous.SchemaVersion -notin @(2,3)) { throw 'Versao de priorizacao nao suportada (incluindo Top antigo): use Recreate para iniciar por percentual.' }
             if ((Get-PrioritizationBasis $projects) -cne (Get-PrioritizationBasis $previous.Projects)) { throw 'Escopo/origem/evidencias mudaram. Use Recreate para recalcular a base inicial.' }
             if (-not (Test-Path -LiteralPath $previous.RankingPath -PathType Leaf)) {
                 if (-not (Test-Path -LiteralPath $previous.PromptPath -PathType Leaf)) { throw 'Prompt anterior ausente; confira esta solicitacao.' }
@@ -116,7 +116,7 @@ function New-HarnessPrioritizationContext {
         $folder = Resolve-HarnessPath (Join-Path $state ('priorizacao/' + $requestId)) $Context.Root
         $data = [ordered]@{
             Purpose='issue-prioritization'; Operation='priorizar-issues'; RequestId=$requestId
-            SchemaVersion=2; PreparedAtUtc=[DateTime]::UtcNow.ToString('o'); Percentage=$percent
+            SchemaVersion=3; PreparedAtUtc=[DateTime]::UtcNow.ToString('o'); Percentage=$percent
             Mode=if ($previous) { $Mode } else { 'Start' }; SequenceId=if ($Mode -eq 'Continue') { $previous.SequenceId } else { $requestId }
             Previous=if ($previous) { [ordered]@{RequestId=$previous.RequestId;RankingSha256=if ($Mode -eq 'Continue') { (Get-FileHash -LiteralPath $previous.RankingPath -Algorithm SHA256).Hash } else { $null }} } else { $null }
             InitialTotal=$baseline.Count; SliceSize=$quota; BaselineIssues=@($baseline); AvailableIssues=$available; ExcludedIssues=$excluded

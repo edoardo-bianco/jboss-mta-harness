@@ -39,8 +39,10 @@ Para a entrada unica de planejamento orientada pelo registro, siga a
 - Pre-planejamento opcional `priorizar-issues` compara projetos do escopo escolhido
   e examina fatia de 0,01%..100,00% das issues elegiveis do total inicial fixo,
   recomendando por risco/repetibilidade/alcance, sem escolher pelo humano.
-  Com historico, perguntar recriar ou progredir; progresso exclui propostas
-  anteriores por Source/ID, sem inferir proposta de mencao ou sobreposicao.
+  Com historico, perguntar recriar ou progredir; progresso exclui todas as examinadas
+  anteriores por Source/ID (AnalyzedIssues), com ou sem proposta. Cada examinada
+  recebe linha com posicao ou motivo e ficha de evidencias/referencias/roteiro
+  para planejamento e corretiva manual. Mencao/sobreposicao nao comprova exame.
   Seu contexto fica em `.harness/priorizacao/`; escreve apenas `RankingPath`, sem
   planos/to-dos, alteracao dos registros ou GO. Depois da escolha humana, segue
   planejamento de um lote. Helpers so orientam/revisam no chat. Siga o contrato.

@@ -110,6 +110,9 @@ function Read-PrioritizationResult {
         }
     }
     if ($examined.Count -gt $Receipt.SliceSize) { throw 'Resultado examina mais issues que a quota da fatia.' }
+    if ($Receipt.SchemaVersion -ge 3 -and $examined.Count -ne $Receipt.SliceSize) {
+        throw 'Resultado COMPLETED exige todas as issues da fatia em AnalyzedIssues, inclusive sem recomendacao com motivo no relatorio. Complete a analise; parcial permanece IN_PROGRESS.'
+    }
     $result
 }
 
@@ -121,7 +124,9 @@ function Get-PrioritizationExcludedIssues {
     while ($cursor) {
         if (-not $requests.Add($cursor.RequestId) -or $cursor.SequenceId -cne $Previous.SequenceId) { throw 'Ciclo ou sequencia divergente no historico.' }
         $result = Read-PrioritizationResult $cursor
-        foreach ($issue in $result.ProposedIssues) {
+        # Cobertura independe de recomendacao. Resultados v2 podem se sobrepor;
+        # consumir sua uniao sem reescrever recibos ou inventar analise ausente.
+        foreach ($issue in $result.AnalyzedIssues) {
             if ($issues.Add((Get-PrioritizationIssueKey $issue))) { $issue }
         }
         if ($cursor.Mode -ne 'Continue') { break }
