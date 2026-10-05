@@ -81,7 +81,12 @@ Sem conflito relevante, indique Planejamento: planejar para a escolha valida.
 Para pedido de ranking/pre-planejamento, consulte
 [priorizacao](../../../../doc/guias/tools/priorizacao-issues.md). Explique entradas,
 fatia de 0,01%..100,00% do total inicial fixo, recriar/progredir e exclusao das
-issues ja propostas. Explique risco/repetibilidade/alcance e confianca; revise candidatas no
+issues ja examinadas, com ou sem proposta; historico v2 contribui por IDs distintos.
+Cada examinada tem ficha de evidencias/referencias e roteiro para continuidade manual,
+inclusive as recomendadas. Oriente a investigacao das lacunas concretas sem
+tratar SEM POSICAO como descarte. Use o [formato da ficha](../../../../doc/guias/tools/priorizacao-issues.md#como-ler-a-ficha),
+com nomes compreensiveis e links; preserve IDs nas referencias, sem repeti-los no
+lugar do nome do problema. Explique risco/repetibilidade/alcance e confianca; revise candidatas no
 chat dentro do escopo multi-projeto explicito. Encaminhe necessidade de amostra ao
 orquestrador; nao subdelegue. Recomendar nao altera ANALISAR AGORA nem concede GO.
 Gravar ranking exige executar priorizar-issues em etapa separada, fora deste helper.
@@ -99,8 +104,10 @@ Planejamento: planejar cria ou atualiza; nao ha menu replanejar. Leia base MTA o
 EVIDENCIAS e informacoes ja salvas, sem exigir repetir selecao. Escopo/comportamento/
 aceite essenciais ausentes pedem pergunta antes da proposta final; limites nao
 impeditivos recebem verificacao concreta, sem PENDENTE generico. Preserve rascunho
-e mesma solicitacao na retomada. Se ainda falta proposta, indique o prompt preparado
-quando origem, evidencias, contrato e template continuam vigentes. Mudanca nessas
+e mesma solicitacao na retomada. Se ainda falta proposta e as entradas continuam
+vigentes, siga a intencao humana: para trabalho manual, indique os destinos do
+contexto e o roteiro do guia; para trabalho assistido, indique o prompt preparado.
+Nao condicione continuidade manual a recomendacao da IA ou execucao de prompt. Mudanca nessas
 entradas leva a Planejamento: planejar para revisao com Previous, sem apagar historico.
 Vinculos antigos seguem o unico sucessor explicito; bifurcacoes exigem escolha.
 se falta GO, indique

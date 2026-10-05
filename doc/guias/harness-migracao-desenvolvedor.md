@@ -52,6 +52,13 @@ uma proxima acao; voce executa e toma as decisoes de prioridade, GO e aceite.
 Os [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa) levam aos exemplos
 nos guias especificos, com resultado esperado e retorno ao fluxo.
 
+**Sem helper:** localize sua situacao na tabela abaixo e siga a secao **Uso** do
+guia indicado. Execute as Run Tasks diretamente. Quando houver prompt preparado,
+pode executa-lo no cliente de IA sem passar pelo agente de orientacao; a tarefa
+so prepara os arquivos. As fichas de priorizacao tambem permitem continuar
+manualmente: investigar lacunas, redigir plano/to-do e implementar o lote escolhido.
+Veja [o roteiro manual e o formato das fichas](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao).
+
 | Sua situacao | Por onde entrar |
 | --- | --- |
 | Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Importe uma aplicacao externa no workspace. |
@@ -60,6 +67,7 @@ nos guias especificos, com resultado esperado e retorno ao fluxo.
 | Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
 | Quero comparar oportunidades mandatory entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): fatia percentual por risco, repetibilidade e alcance, com recriacao ou avanco. |
+| Tenho uma ficha e quero seguir manualmente, com ou sem recomendacao | [Continuar a partir da ficha](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao): conferir achados, obter o que falta e escolher o recorte. |
 | Proposta pronta, ainda em revisao ou sem GO | [5. Planejar e revisar um lote](#5-planejar-e-revisar-um-lote). |
 | Plano revisado com GO, inclusive implementacao parcial | [6. Implementar o lote autorizado](#6-implementar-o-lote-autorizado). |
 | Corretiva pronta para conferir | [7. Verificar e aceitar o resultado](#7-verificar-e-aceitar-o-resultado). |
@@ -148,6 +156,10 @@ A Run Task **Planejamento: priorizar issues** prepara uma comparacao opcional
 entre projetos, com verificacao de amostras no MTA e no codigo. O helper tambem
 orienta essa etapa. A lista recomenda candidatas; voce registra sua escolha
 como `ANALISAR AGORA` antes de planejar um lote.
+Cada issue examinada, recomendada ou sem posicao, inclui achados, evidencias,
+referencias e [roteiro para planejamento e implementacao manual](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao).
+Voce pode continuar com esse material independentemente da IA, complementando as
+lacunas indicadas. Progredir examina novas issues e preserva as fichas anteriores.
 
 **Resultado esperado e continuidade:** prioridades e pendencias compreendidas.
 A etapa 5 produz ou revisa a proposta. Um lote existente com GO valido para
@@ -155,13 +167,13 @@ o escopo atual pode retomar a etapa 6.
 
 ### 5. Planejar e revisar um lote
 
-O **planejamento com Codex ou Copilot/DevSquad** relaciona diagnostico, codigo, prioridades
+O **planejamento do lote** relaciona diagnostico, codigo, prioridades
 e evidencias para propor um lote consistente de corretivas. Plano e to-do
 delimitam escopo, cobertura, verificacoes e criterios de aceite.
 A revisao humana decide se a proposta esta pronta para receber GO.
 
 Use apenas **Terminal > Run Task > Planejamento: planejar**. A tarefa recupera
-registro e referencias; cria a proposta inicial ou retoma a solicitacao vinculada.
+registro e referencias; prepara o contexto da proposta ou retoma a solicitacao vinculada.
 Se evidencias, origem MTA, contrato ou template mudaram, prepara um contexto
 sucessor preservando o anterior; use o prompt que a tarefa indicar. Observacoes
 e escolhas atuais sao recuperadas sem pedir que voce atualize o historico.
@@ -169,10 +181,13 @@ Nao ha menu para escolher "planejar/replanejar" ou repetir a rodada. Havendo var
 registros possiveis, pergunta somente qual usar. Sem MTA completo, usa evidencias
 disponiveis sem inventar origem ou resultado MTA.
 
-Execute o prompt preparado no cliente atual. Se faltar uma decisao essencial,
+Para elaborar com IA, execute o prompt preparado no cliente atual. Se faltar uma decisao essencial,
 o agente pergunta antes de concluir plan.md/todo.md. Responda no mesmo chat; nao
 e preciso preencher documentos paralelos. Limites nao impeditivos ficam claros
 na proposta. Veja os [passos e a mensagem curta por cliente](tools/planejamento-migracao.md#preparar-e-executar-o-prompt).
+Para elaborar manualmente, use as fichas/evidencias e redija plano e to-do nos
+caminhos indicados pelo contexto do lote. Siga o [roteiro manual](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao)
+e os mesmos criterios de escopo, revisao e GO.
 
 **Guia da etapa:** [Planejamento: proposta, revisao e GO](tools/planejamento-migracao.md#planejar-lotes-de-correcao-com-copilot).
 Ele detalha o preparo do contexto, a execucao do prompt e a revisao do mesmo lote.
@@ -187,6 +202,10 @@ O **preparo da implementacao** vincula o plano aprovado a um prompt de execucao.
 A implementacao assistida aplica o escopo autorizado e registra o realizado
 e o pendente. Preparar esse prompt e executa-lo sao momentos distintos.
 A escolha da base de codigo e a gestao Git pertencem ao desenvolvedor.
+Se implementar manualmente, siga o plano aprovado, preserve o recorte e registre
+alteracoes/verificacoes no plano, to-do e registro do projeto. O prompt de execucao
+e usado quando houver implementacao assistida; a verificacao e o aceite continuam
+necessarios nas duas formas de trabalho.
 
 **Guias da etapa:** [Planejamento: implementacao e retomada](tools/planejamento-migracao.md#preparar-implementacao-do-lote)
 e [Git: base de trabalho e branches](diagnostico-branches-git-tortoisegit.md#branches-e-conferencia-git).

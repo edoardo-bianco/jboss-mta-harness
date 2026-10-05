@@ -15,7 +15,7 @@ Preferencias, restricoes ou projetos a enfatizar:
 ## Trabalho solicitado
 
 Leia o JSON final e ContextPath. Sem contexto explicito, solicite o arquivo preparado.
-Confira Purpose=issue-prioritization, SchemaVersion=2, RequestId, SequenceId,
+Confira Purpose=issue-prioritization, SchemaVersion=3, RequestId, SequenceId,
 Percentage (0,01..100,00), InitialTotal, SliceSize, AvailableIssues, ExcludedIssues,
 Previous, RankingPath e Projects. Contexto antigo com Top exige novo preparo.
 Use ContractSnapshot, secao Pre-planejamento, e GuidePath; nao procure outra solicitacao.
@@ -33,13 +33,24 @@ reais do cliente. Forneca escopo, caminhos, contrato e pergunta delimitada; o ap
 somente le/busca, sem escrita ou subdelegacao, e devolve evidencias ao condutor.
 Sem apoio compativel, prossiga diretamente e informe o limite; nao simule delegacao
 nem exija trocar de cliente. Somente o condutor escreve RankingPath.
+No Copilot, antes de delegar, confira o nome exato e a disponibilidade do destinatario
+na sessao, a ferramenta agent e a lista agents do condutor; citar um perfil nao o
+torna disponivel. Esta rota solicita devsquad.plan; os migracao_*_helper pertencem
+a orientacao de leitura e nao substituem o executor do prompt. O apoio nao subdelega.
+No Codex, confira as capacidades equivalentes reais, sem exigir nomes do Copilot.
+Se a chamada falhar, registre nome solicitado, ferramenta, erro devolvido e impacto;
+nao simule chamada nem altere permissoes/plugin para contornar indisponibilidade.
+Prossiga diretamente dentro das ferramentas e limites autorizados quando possivel;
+ferramenta essencial ausente deve ser informada, preservando o resultado parcial.
 
 Primeira passagem: confira AvailableIssues, limitado a BaselineIssues e sem
 ExcludedIssues. InitialTotal e fixo na sequencia; SliceSize e o teto do percentual
 sobre essa base, limitado as disponiveis. A unidade e Source + ID completo, nao
 ocorrencias ou oportunidades agrupadas. Triagem do inventario nao e diagnostico
-de todas as issues. Selecione ate SliceSize para aprofundar por risco/repetibilidade/
-alcance. Mencoes de apoio nao consomem quota. Confira elegibilidade atual:
+de todas as issues. Selecione SliceSize issues novas para esta fatia, justificando
+a selecao por risco/repetibilidade/alcance no inventario; a ordem de AvailableIssues
+nao e um ranking. Examine cada selecionada e registre seu resultado, aprofundando
+as promissoras. Mencoes de apoio nao consomem quota. Confira elegibilidade atual:
 candidatas mandatory/PRESENTE dos registros, com
 decisao A DEFINIR ou ANALISAR AGORA e andamento NAO ANALISADA/ANALISADA.
 ADIAR/FORA DO ESCOPO e PLANEJADA/IMPLEMENTADA/VERIFICADA ficam fora por padrao;
@@ -50,6 +61,13 @@ exige novo preparo/contrato explicito, sem ampliar o universo por conta propria.
 Mantenha trabalho ativo visivel, sem recomendar outro lote automatico.
 Registros invalidos, origem MTA ausente/conflitante, projeto sem fontes ou evidencia
 essencial indisponivel ficam em Lacunas, sem receber risco baixo ou beneficio certo.
+Se uma selecionada nao puder ser recomendada, registre o motivo, o que foi
+conferido e qual evidencia falta na propria linha. Isso conta como examinada
+para a cobertura da triagem, sem afirmar diagnostico aprofundado ou aplicabilidade.
+Se o humano retirar uma issue antes do exame, registre-a separadamente como
+retirada, sem inclui-la em AnalyzedIssues ou na quota. Substitua por outra elegivel
+de AvailableIssues; se nao houver suficientes, preserve o parcial em IN_PROGRESS
+e oriente Recreate para refletir a nova selecao, sem inventar cobertura.
 
 Segunda passagem: nas candidatas promissoras, confira Manifest/Result, integridade
 registrada e trechos pertinentes de Findings/Rules/Report, snapshot e Source atual.
@@ -77,14 +95,60 @@ Java 8/javax/EAP 7.4 e Hibernate 5.3 quando aplicavel; receita nao testada e can
 
 Grave somente RankingPath, sob a solicitacao .harness/priorizacao do recibo:
 - Identidade, data, escopo/projetos/RunIds, fontes e limites da leitura.
-- Recomendacoes dentre as ate SliceSize issues examinadas, menos se faltar evidencia.
+- Apoio utilizado: cliente/condutor, subagente solicitado e realmente executado,
+  status da chamada e erro concreto se houver. Diferencie indisponivel, recusado,
+  incompativel e nao solicitado; nao alegue falha quando nao houve tentativa.
+- Relatorio de todas as SliceSize issues examinadas; recomendacoes podem ser menos
+  ou nenhuma. Nao omita uma issue examinada porque nao recebeu recomendacao.
 - Percentual solicitado, base inicial, quota, examinadas/propostas desta fatia,
-  propostas anteriores excluidas e cobertura efetiva por IDs distintos / InitialTotal.
+  examinadas anteriores excluidas (ExcludedIssues) e cobertura acumulada pela uniao
+  de ExcludedIssues com AnalyzedIssues / InitialTotal. Separe novas disponiveis,
+  ainda nao examinadas da base e retiradas por decisao atual; nao conte exclusao
+  humana como analise. Linke os relatorios anteriores via Previous.
   100% das issues nao comprova 100% das ocorrencias validadas/corrigidas.
-- Tabela: posicao, projeto(s)/ID, solucao candidata, ocorrencias/pontos observados,
-  alcance por arquivos/modulos, repetibilidade, risco, confianca e potencial condicional.
-- Por candidata: evidencias/linhas, amostra e variacoes, dependencias, testes/reversao,
-  justificativa de prioridade e lacunas. Nao detalhar tarefas de implementacao.
+- Tabela curta com uma linha por issue examinada: Prioridade | Projeto |
+  Issue (titulo com link para a ficha) | Avaliacao | Motivo / proxima acao.
+  Use posicao numerica para recomendacoes sustentadas (incluindo condicionais
+  explicitadas); SEM POSICAO para as demais, com motivo concreto na coluna.
+  Falta de evidencia, aplicabilidade nao demonstrada e sobreposicao nao eliminam
+  a linha. Nao atribua prioridade artificial ou conclua falso positivo por amostra.
+- Para CADA issue examinada, recomendada ou SEM POSICAO, inclua uma ficha ligada
+  a sua linha, com titulo descritivo (projeto + problema) e estes quatro blocos:
+  - **O que encontramos:** comportamento atual e esperado pela regra, achado e
+    recomendacao MTA, arquivo/classe/metodo/linha, links ao relatorio/codigo local,
+    pontos efetivamente lidos e amostra/total. Separe ocorrencias MTA, pontos unicos
+    observados e alcance por arquivos/modulos. Distinga fato, hipotese e nao verificado.
+    Busca vazia informa caminho/padrao/limites; referencia ausente fica explicita.
+  - **Por que recebeu essa avaliacao:** motivo concreto da prioridade comparativa
+    ou da nao recomendacao; risco e confianca separados, repetibilidade demonstrada,
+    potencial condicional e impacto das lacunas para a corretiva.
+    Evite apenas 'faltam evidencias'; detalhe dependencia/propriedade, binding,
+    API, versao ou comportamento ainda nao confirmado, conforme o caso.
+  - **Como prosseguir:** passos manuais especificos em ordem, onde comecar, o que
+    comparar e qual resultado confirma ou afasta a hipotese. Indique evidencia a
+    guardar (trecho, versao resolvida, log sem segredos, teste ou configuracao).
+    Diga a direcao candidata sustentada e pontos de alteracao identificados,
+    dependencias/consumidores, precondicoes/decisoes, verificacao observavel e
+    cuidados de reversao. Sem solucao sustentada, indique a informacao necessaria
+    para defini-la. Nao invente patch nem execute comandos.
+  - **Referencias e registro:** documentos do projeto e documentacao oficial
+    pertinente a regra/API/versao alvo, com titulo/link, secao e relacao com o achado.
+    Separe referencias consultadas das apenas indicadas pelo MTA; indique limites
+    de acesso/versao. Nao invente fonte, leitura ou compatibilidade de receita.
+    Inclua links ao registro e indice de evidencias, ID completo e referencia a
+    Source/RunId na identidade do projeto, sem repetir caminhos longos em cada bloco.
+  Use nomes compreensiveis nos titulos/links; nao use hashes ou IDs como unico rotulo
+  nem crie codigos auxiliares que obriguem consultar uma legenda. Detalhe cada achado
+  uma vez na ficha; a tabela apenas resume. Centralize contexto/referencias comuns
+  e linke-os, mantendo evidencia e limites por issue. Preserve IDs completos no
+  bloco JSON e no trecho copiavel do registro; legibilidade nao altera identidade.
+  Seja proporcional a complexidade: nao repita o mesmo paragrafo nos quatro blocos.
+  A ficha deve ser compreensivel sem o chat, sem prometer base completa por leitura
+  parcial. Nao crie plano/to-do por issue. SEM POSICAO nao significa descarte ou resolucao.
+- Explique uma vez a continuidade manual: o humano pode escolher a issue mesmo
+  SEM POSICAO, complementar evidencias e preparar o contexto do lote. Pode redigir
+  PlanPath/TodoPath conforme o contrato e implementar manualmente, registrando
+  cobertura/verificacoes e mantendo revisao, GO e aceite. Linke o roteiro em GuidePath.
 - Issues excluidas/nao analisadas, projetos indisponiveis e cobertura parcial.
 - Escolha humana conforme registro atual: se ainda nao ocorreu, diga que falta
   escolher; se ocorreu, cite a escolha, sem voltar a marca-la PENDENTE.
@@ -103,17 +167,21 @@ Grave somente RankingPath, sob a solicitacao .harness/priorizacao do recibo:
 Na retomada, preserve identidade e decisoes humanas anotadas; atualize analise com
 origem explicita, sem apagar historico. Releia a saida e confira consistencia.
 Este resultado contem somente a fatia atual; consulte anteriores via Previous.
-Examinadas sem proposta continuam disponiveis; mencao/overlap nao e proposta.
+Todas as examinadas saem dos proximos avancos desta sequencia, com ou sem proposta.
+As lacunas ficam nos relatorios para revisao explicita; nao reexaminar automaticamente.
+Mencao/overlap de outra issue nao comprova exame nem recomendacao dessa outra.
 Ao finalizar, inclua exatamente um bloco abaixo em RankingPath. Os arrays contem
 objetos com Source e Id copiados de AvailableIssues, sem duplicatas. AnalyzedIssues
-tem no maximo SliceSize elementos; ProposedIssues e um subconjunto. Arrays podem
-ser vazios; explique analise parcial/ausencia de recomendacoes no texto.
-Use IN_PROGRESS enquanto incompleto e COMPLETED quando terminar esta fatia,
+tem exatamente SliceSize elementos em COMPLETED; ProposedIssues e um subconjunto
+e pode estar vazio. AnalyzedIssues vazio so conclui uma fatia de quota zero.
+Use IN_PROGRESS enquanto parcial; retome o mesmo arquivo para completar a fatia,
+sem inventar leituras para atingir quota. COMPLETED exige uma linha de resultado
+por issue examinada, mesmo que registre impossibilidade de recomendar e seu motivo,
 sem significar GO/aceite. O preparador valida o bloco antes de progredir.
 
 <!-- priorizacao:resultado -->
 ```json
-{"RequestId":"ID-DESTA-SOLICITACAO","Status":"COMPLETED","AnalyzedIssues":[],"ProposedIssues":[]}
+{"RequestId":"ID-DESTA-SOLICITACAO","Status":"IN_PROGRESS","AnalyzedIssues":[],"ProposedIssues":[]}
 ```
 <!-- /priorizacao:resultado -->
 

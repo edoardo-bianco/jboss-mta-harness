@@ -51,6 +51,30 @@ o helper informa a limitacao e continua pelos guias/helpers locais.
 
 ## Uso
 
+### Se a chamada de subagente falhar
+
+Registre cliente/sessao, condutor, nome exato solicitado, ferramenta e mensagem
+de erro. Na priorizacao pelo Copilot, o prompt usa `devsquad` com apoio de `devsquad.plan`;
+na orientacao, `migracao_helper` coordena os helpers leitores do repositorio.
+O ranking deve informar qual apoio foi realmente usado e eventuais falhas.
+
+Em sessao Local do Copilot, confira **Run Subagent** em **Configure Tools**,
+o nome (inclusive maiusculas/minusculas), a lista `agents` do condutor e
+`disable-model-invocation` do destinatario. Aparecer no seletor nao comprova
+permissao de chamada; ocultacao por `user-invocable` e uma propriedade diferente.
+Veja [diagnostico de subagentes no VS Code](https://code.visualstudio.com/docs/agents/run/subagents#troubleshooting).
+
+Se preciso, use **Developer: Open Agent Debug Logs** e localize a chamada/erro;
+compartilhe somente o trecho pertinente sem credenciais ou dados sensiveis.
+Veja [depuracao do chat](https://code.visualstudio.com/docs/agents/agent-troubleshooting/chat-debug-view).
+
+Perfis de plugins podem permitir somente seus proprios subagentes. Confira o
+perfil efetivamente instalado na maquina afetada; a configuracao de outro
+computador nao prova a causa. Nao amplie permissoes nem edite o plugin como
+primeiro recurso. Sem apoio compativel, o condutor pode continuar diretamente
+conforme o prompt e suas ferramentas; informe a limitacao. Helpers permanecem
+leitores. Falta de ferramenta essencial deve ser resolvida explicitamente.
+
 ### Iniciar no Codex ou no Copilot
 
 | Cliente | Como entrar na orientacao |
@@ -86,10 +110,28 @@ Quando a tarefa preparar um prompt:
   indicado e DevSquad nas fases pertinentes, em conversa Local.
 
 A execucao desse prompt e uma etapa distinta da orientacao; helpers continuam
-leitores. Preparar o contexto nao executa o agente. Salvar ranking/plano exige
-executar o prompt correspondente; aplicar corretivas exige GO para o escopo.
+leitores. Preparar o contexto nao executa o agente. Para o agente salvar o ranking
+ou plano, execute o prompt correspondente; aplicar corretivas exige GO para o escopo.
 Verificacoes tecnicas e aceite do resultado continuam separados.
 Veja o [procedimento de planejamento e execucao](tools/planejamento-migracao.md#preparar-e-executar-o-prompt).
+
+### Continuar manualmente a partir de uma ficha
+
+O helper e opcional e tambem orienta trabalho manual. Diga, por exemplo:
+
+```text
+Quero investigar manualmente a issue de email do projeto X, que ficou SEM POSICAO.
+Use a ficha do relatorio para indicar a primeira verificacao, os arquivos a ler
+e a evidencia que devo guardar.
+```
+
+Ele deve recuperar a ficha, explicar o achado e encaminhar uma acao concreta, com
+links e resultado esperado. SEM POSICAO nao impede sua escolha nem exige outro
+ranking. A mesma orientacao vale para uma issue recomendada com lacunas.
+Para planejar manualmente, o helper indica os destinos do contexto e os criterios
+do guia; se ja houver proposta, parte dela. Se voce pedir trabalho assistido,
+encaminha o prompt preparado. Nao deve exigir execucao pela IA para seguir manualmente.
+Veja [a ficha e o roteiro manual](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao).
 
 ### Retomar em outro chat ou cliente
 

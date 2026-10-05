@@ -48,13 +48,19 @@ e % opcional, sem padrao. A unidade e Source + ID completo, nao ocorrencias nem
 oportunidades agrupadas. InitialTotal fixa as issues elegiveis no inicio da sequencia;
 SliceSize = teto(InitialTotal * Percentage / 100), limitado as elegiveis restantes.
 AvailableIssues delimita a selecao; BaselineIssues preserva o universo inicial.
-Triagem do inventario e distinta do aprofundamento de ate SliceSize issues.
-Recomendar menos se faltar evidencia; declarar quota, examinadas/propostas, lacunas
-e cobertura efetiva. 100% de issues nao comprova todas as ocorrencias nem resolucao.
+Triagem do inventario e distinta do exame das SliceSize issues selecionadas.
+Cada selecionada recebe resultado no relatorio, mesmo sem recomendacao: registrar
+motivo, leitura efetiva, limites e evidencia necessaria. Aprofundar as promissoras;
+nao confundir cobertura da triagem com diagnostico completo. Recomendar menos ou
+nenhuma se faltar evidencia. Declarar quota, examinadas/propostas, lacunas e
+cobertura acumulada distinta. 100% de issues nao comprova ocorrencias nem resolucao.
 
-SchemaVersion=2 identifica este contrato. Sem historico do escopo, iniciar sequencia.
+SchemaVersion=3 identifica a continuidade por cobertura, corrigida em 2026-10-05.
+Sem historico do escopo, iniciar sequencia.
 Com historico, escolher Recreate (nova SequenceId/base) ou Continue (mesma base,
-excluindo a uniao das propostas anteriores). Recriar preserva solicitacoes antigas.
+excluindo a uniao das examinadas anteriores em AnalyzedIssues, com ou sem proposta).
+ExcludedIssues guarda essa uniao por Source/ID; ProposedIssues continua somente
+recomendacao. Recriar preserva solicitacoes antigas.
 Previous vincula a anterior; em Continue inclui RankingSha256. Ponta unica pode
 ser localizada; varias exigem PreviousRequestId/escolha humana, nunca recencia.
 Referencia antiga segue sucessor unico; bifurcacao exige escolha. Contextos Top
@@ -68,14 +74,29 @@ O agente grava no proprio RankingPath um unico bloco delimitado por
 `<!-- priorizacao:resultado -->` e `<!-- /priorizacao:resultado -->`, com JSON em
 cerca json: RequestId, Status=COMPLETED, AnalyzedIssues e ProposedIssues. Os arrays
 contem objetos Source/Id de AvailableIssues, sem duplicatas; propostas sao
-subconjunto das examinadas, cujo total nao excede SliceSize. IN_PROGRESS nao
-autoriza avanco. Mencoes/overlaps nao sao propostas por inferencia; examinadas sem
-proposta continuam disponiveis. O preparador valida identidade, quota e hashes
-da cadeia antes de consumir resultado; arquivo existente nao prova conclusao.
+subconjunto das examinadas. Em SchemaVersion=3, COMPLETED exige exatamente
+SliceSize examinadas; quota zero admite arrays vazios, e a ausencia de recomendacoes
+e valida em qualquer fatia. IN_PROGRESS nao autoriza avanco; retomar o mesmo resultado
+parcial, sem inventar leituras. Mencoes/overlaps nao comprovam exame ou proposta.
+Examinadas sem proposta saem da fila de continuidade, mantendo lacunas visiveis
+para revisao explicita. O preparador valida identidade, quota e hashes da cadeia
+antes de consumir resultado; arquivo existente nao prova conclusao.
+
+Resultados concluidos de SchemaVersion=2 podem anteceder os novos recibos: aproveitar
+a uniao de AnalyzedIssues ja declaradas, deduplicando repeticoes entre rodadas.
+Preservar recibos, contratos, prompts e rankings antigos; a versao 2 admitia exame
+parcial em COMPLETED, que nao pode ser ampliado por inferencia. O novo recibo usa
+versao 3 na mesma SequenceId/base, sem exigir reinicio de analises concluidas.
+Preparos antigos pendentes conservam suas instrucoes: concluir pelo prompt original
+e depois progredir, ou recriar para iniciar outra base com o contrato atual.
 
 Mudanca de projetos, origem MTA/catalogo ou evidencias exige recriar a base.
 Decisoes atuais filtram disponibilidade, preservando InitialTotal. Registro sem MTA
 utilizavel fica em Diagnostics fora do denominador, nunca contado como zero achados.
+Retirada humana depois do preparo e antes do exame nao entra em AnalyzedIssues:
+registrar separadamente e substituir por outra elegivel de AvailableIssues. Se
+nao houver suficientes para a quota, manter IN_PROGRESS e orientar Recreate para
+a nova selecao, preservando o parcial; nao consumir decisao como exame.
 Issues DEV/reconsideracao fora do inventario exigem novo preparo/contrato explicito;
 o agente nao amplia a lista. Preparo pendente com template/contrato alterado exige
 recriar para adotar instrucoes novas.
@@ -90,7 +111,41 @@ justificar comparativamente. Risco e confianca separados; desconhecido nao e bai
 risco. Distinguir ocorrencias MTA, pontos observados e potencial condicional; nao
 somar sobreposicoes como ganho garantido nem inventar pontuacao/horas. Lista contem
 projetos/IDs, solucao candidata, alcance, risco, repetibilidade, confianca, potencial,
-amostra, fontes/linhas e lacunas. Nao declara corretiva aplicada ou conclusao global.
+amostra, fontes/linhas e lacunas. A tabela curta inclui todas as examinadas, uma linha
+por Source/ID: Prioridade, Projeto, Issue (titulo com link a ficha), Avaliacao e
+Motivo / proxima acao. Os detalhes ficam nas fichas. Recomendadas
+recebem posicao; demais recebem SEM POSICAO com justificativa, sem prioridade
+artificial. Separar cobertura anterior, desta fatia e acumulada (uniao de
+ExcludedIssues e AnalyzedIssues), recomendacoes, disponiveis e ainda nao examinadas
+retiradas por decisao humana. Nao contar decisao como exame. Relatorios anteriores
+ficam acessiveis via Previous. Nao declara corretiva aplicada ou conclusao global.
+
+Cada issue examinada, recomendada ou SEM POSICAO, inclui uma ficha para continuidade
+manual ligada a sua linha: achado/recomendacao MTA e ponto inicial no Source (arquivo/classe/metodo/linha,
+RunId e links disponiveis); evidencias efetivamente lidas, amostra e limites;
+motivo concreto da prioridade ou da nao recomendacao e impacto da lacuna;
+passos especificos de inspecao/comparacao,
+resultados que confirmam/afastam a hipotese e evidencias a guardar. Separar fatos,
+hipoteses e nao verificado; busca vazia nao prova ausencia. Referencia inacessivel
+fica explicita, sem linha inventada. Incluir documentacao do projeto e oficial
+pertinente, com titulo/link/secao/versao e relacao com o achado; separar fontes
+consultadas das apenas indicadas, sem inventar leitura. Dar uma base para planejar
+e implementar manualmente: comportamento atual/esperado, direcao candidata quando
+sustentada, pontos identificados, dependencias/consumidores, precondicoes/decisoes,
+riscos, testes/verificacao e cuidados de reversao; senao, indicar a informacao ou
+decisao necessaria para defini-la. Linkar registro e indice de evidencias para a
+retomada. Nao criar planos/to-dos de implementacao por issue. SEM POSICAO nao
+descarta a issue nem comprova falso positivo/resolucao. O desenvolvedor pode
+escolher e implementar manualmente a corretiva no fluxo do lote, com verificacoes
+e revisao/aceite, sem depender de recomendacao ou capacidade de execucao da IA.
+A ficha usa quatro blocos: O que encontramos; Por que recebeu essa avaliacao;
+Como prosseguir; Referencias e registro. Deve ser compreensivel sem historico do
+chat, com titulo projeto + problema e links descritivos. Detalhar cada achado uma
+vez; tabela resume, referencias/contexto comuns sao linkados. Source/RunId ficam
+na identidade do projeto e ID completo na referencia da ficha, no JSON e na linha
+copiavel do registro, sem hashes/codigos como unico rotulo de leitura. Nao inventar
+codigos auxiliares. Leitura parcial nao promete base completa; toda lacuna informa
+como obter os elementos faltantes. O guia mantem o formato e exemplo didatico.
 
 Humano pode escolher diretamente sem ranking, ou escolher projeto/IDs/recorte na
 lista e registrar ANALISAR AGORA, recorte e referencia no migracao.md. O planejamento

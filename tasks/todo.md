@@ -1,5 +1,54 @@
 # To-do do agente: evolucao do harness
 
+## Cobertura progressiva da priorizacao - 2026-10-05
+
+- [x] Identificar causa e conferir raiz/main/HEAD/estado limpo; criar branch propria.
+- [x] Reproduzir repeticao de examinadas sem proposta e caso 44/20% em teste.
+- [x] Implementar progresso por examinadas e compatibilidade com resultados v2.
+- [x] Exigir quota completa nos resultados novos e relatorio de todas as examinadas.
+- [x] Harmonizar contrato, prompt, guias e orientacao dos helpers, incluindo ficha
+  de evidencias/referencias/roteiro manual para TODAS as examinadas.
+- [x] Validar suite, revisar diff e registrar resultados/limites.
+- [x] Revisar autonomia pelo README/guia, encaminhamento do helper e formato
+  legivel das fichas; conferir links e preparo apos alteracao do template.
+- [ ] Reproduzir falha eventual do DevSquad na maquina afetada quando houver erro.
+  Investigacao adiada pelo desenvolvedor: perfis locais conferidos, mas mensagem
+  da falha indisponivel. Prompt passa a registrar apoio real e erro; guia indica
+  diagnostico sem alterar plugin ou ampliar permissoes.
+
+Validacao em Windows PowerShell 5.1: 37 scripts, 36 PASS e 1 SKIP explicito
+do ensaio real JBoss. Regressao falhou antes da correcao ao repetir examinadas
+sem proposta; depois passou com 44/20% em 9+9+9+9+8, rodada sem recomendacao,
+historico v2 com sobreposicao/parcial, quota v3 e retirada humana apos preparo.
+Revisao independente identificou dois ajustes incorporados: retirada pos-preparo
+sem cobertura ficticia e delimitacao das instrucoes DevSquad ao Copilot.
+236 links locais conferidos em 14 Markdown; git diff --check sem erros.
+Evidencias em `.harness/tests/priorizacao-cobertura-20261005/suite.json` e
+`links.json`. Teste de cobertura usa JDK/Maven configurados e fixture local;
+demais integracoes usam os doubles existentes. Sem novo ensaio nativo Copilot:
+a qualidade das fichas/referencias geradas ainda deve ser conferida no cliente.
+Recibos/rankings da maquina de trabalho nao foram regravados; a continuacao v2
+foi validada com fixtures sinteticas. Estas verificacoes precedem a publicacao.
+
+Revisao de autonomia/legibilidade: guia existente atualizado, README e roteiro
+principal com entrada sem helper, planejamento/implementacao manuais explicitos.
+Ficha em quatro blocos, tabela curta, exemplo ficticio e IDs preservados nas
+referencias/JSON/linha copiavel. Helper encaminha conforme intencao manual ou
+assistida. Revisao independente encontrou um encaminhamento residual para chat
+na revisao manual; corrigido e conferido, sem outros achados materiais.
+Apos essas alteracoes, Test-Prioritization.ps1 e Test-PrioritizationProgress.ps1
+passaram em Windows PowerShell 5.1; 267 links/ancoras locais em 15 Markdown validos
+(excluidos exemplos em blocos de codigo), em `links-legibilidade.json` na area
+de evidencias acima. Diff sem erros de whitespace. Conferencia estatica do helper
+e formato; a qualidade do relatorio produzido no cliente permanece por ensaiar.
+
+Publicacao e alinhamento solicitados pelo mantenedor: commit/push, PR para main
+e fast-forward de main_jboss_eap74. Conferencia previa: principais locais/remotas
+em `4cf9335`, nenhum PR aberto e regra de main ativa, com excecao do mantenedor
+somente por PR. Registrar o resultado em
+`.harness/tests/priorizacao-cobertura-20261005/encerramento.json`, apos conferir
+merge, igualdade das refs locais/remotas, conteudo revisado e checkout limpo.
+
 ## Guia proprio de orientacao e padrao por etapa - 2026-10-05
 
 - [x] Conferir raiz, branch, HEAD e estado limpo; mapear secoes e referencias.

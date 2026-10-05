@@ -76,7 +76,7 @@ Os IDs anteriores são preservados para rastreabilidade. Sua correspondência co
 **Lacunas da baseline antiga já atendidas por entregas posteriores:**
 
 - HAR-04/OBJ-02 ainda descrevem uma entrada sem MTA como trabalho futuro. A ADR-0005 e a implementação atual já permitem planejamento EAP com `PlanningBasis=EVIDENCIAS`, sem fabricar RunId ou snapshot. A ampliação para outros objetivos/perfis continua proposta.
-- A priorização de issues da aplicação já usa 0,01% a 100,00% do total inicial fixo, com recriação ou progresso que exclui IDs já propostos. Ela é distinta da prioridade das capacidades do harness nesta proposta; não usar P1/P2/P3 para alterar esse fluxo.
+- A priorização de issues da aplicação já usa 0,01% a 100,00% do total inicial fixo, com recriação ou progresso. Correção após o ensaio de 05/10/2026: o progresso exclui todos os IDs examinados, inclusive sem recomendação, e cada examinada recebe evidências, referências e roteiro para continuidade manual. Isso substitui a exclusão anterior somente por propostas. Ela é distinta da prioridade das capacidades do harness nesta proposta; não usar P1/P2/P3 para alterar esse fluxo.
 - O workspace inicial agora contém apenas o harness; playgrounds/aplicações são externos. Referências históricas a exemplos internos e à branch encerrada do ensaio não são instruções para nova execução.
 - A afirmação de “validação manual completa com aplicação ainda pendente” na base estratégica de 02/10 deve ser lida com o aceite geral de 03/10 registrado em tasks/todo.md. Esse aceite não comprova cenários individuais não registrados e não encerra VAL-01/02/03 nem a futura migração de configuração JBS.
 

@@ -52,6 +52,13 @@ planejamento, implementacao, verificacao, aceite e reconciliacao. Em cada etapa,
 indica o guia de ferramenta adequado para os comandos, opcoes e caminhos de
 retomada.
 
+**O agente de orientacao e opcional.** Para trabalhar sem helper, use as Run Tasks
+e a secao **Uso** do guia de cada etapa. Na priorizacao, a tarefa prepara o prompt;
+voce pode executa-lo diretamente no Codex/Copilot para produzir o relatorio.
+Depois, siga as [fichas e o caminho manual](doc/guias/tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao)
+para investigar, planejar e implementar, com as mesmas revisoes e verificacoes.
+Quem ja sabe o que corrigir pode escolher a issue no registro e ir direto a Planejar.
+
 Para comecar com orientacao, siga o [guia de orientacao da migracao com Codex ou GitHub Copilot](doc/guias/orientacao-migracao.md)
 e diga apenas o objetivo, por exemplo: "Quero priorizar as issues mandatory dos
 projetos deste workspace". O guia explica `orientar-migracao`, `migracao_helper`,
@@ -61,7 +68,9 @@ o resultado esperado. O helper confere a situacao e conduz uma etapa por vez.
 O [pre-planejamento opcional](doc/guias/tools/priorizacao-issues.md) examina uma
 fatia de **0,01% a 100,00%** das issues elegiveis sobre o total inicial fixo.
 Com uma priorizacao existente, escolha recriar ou progredir; o avanco exclui as
-issues ja propostas na sequencia. Depois voce escolhe o recorte para planejar.
+issues ja examinadas na sequencia, com ou sem recomendacao. Cada issue examinada
+recebe evidencias, referencias e roteiro para continuidade manual. Depois voce
+escolhe o recorte para planejar.
 
 No planejamento, a entrada e **Planejamento: planejar**: usa a escolha e as
 evidencias do registro para criar ou atualizar a proposta. Se faltar registro,

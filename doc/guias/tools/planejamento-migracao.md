@@ -247,7 +247,7 @@ mera retomada ou explicacao adicional.
    de evidencias novamente. Com as mesmas entradas, retome a solicitacao vinculada;
    se evidencias, origem, contrato ou template mudaram, a tarefa prepara um sucessor
    com Previous e preserva o anterior. Use o caminho que ela informar.
-4. Execute o arquivo preparado no seu cliente:
+4. Para elaborar com IA, execute o arquivo preparado no seu cliente:
    - **Codex:** envie `Execute o prompt deste arquivo:` seguido do caminho completo
      mostrado pela tarefa. Pode anexar o arquivo. O helper deve devolver essa
      mensagem ja preenchida; nao e preciso escrever um prompt de governanca.
@@ -256,6 +256,12 @@ mera retomada ou explicacao adicional.
 5. Se a analise precisar de uma decisao essencial, responda a pergunta concreta
    no mesmo chat. Quando houver base suficiente, o agente grava/rele os destinos
    `plan.md` e `todo.md` e informa o que mudou e o que deve ser revisado.
+
+**Alternativa manual:** apos o passo 3, voce pode redigir ou completar `plan.md` e
+`todo.md` nos caminhos indicados pelo contexto, usando os achados/evidencias e o
+[roteiro manual](priorizacao-issues.md#continuar-o-trabalho-manual). Nesse caso,
+nao precisa executar o prompt dos passos 4 e 5. Preserve uma proposta existente;
+nas duas formas de elaboracao, siga a [revisao humana](#revisao-manual-do-plano-e-do-to-do).
 
 **Entradas:** registro atual; plano/to-do da solicitacao quando existem; anexos
 referenciados; codigo/POM/testes locais; base MTA vinculada, quando disponivel.
@@ -384,10 +390,13 @@ nao sao gates. Novo MTA e recomendado quando o diagnostico estiver desatualizado
 #### Revisao manual do plano e do to-do
 
 Confira recorte, comportamento esperado, dependencias, risco, testes, reversao
-e lacunas reais. Para ajustar, registre o direcionamento ou responda no chat e
-continue pela entrada **Planejar** e pelo prompt indicado na saida. Nao regenere os dois documentos
-apenas para corrigir omissoes. Mudanca de escopo exige rever a autorizacao;
-esclarecimento dentro do escopo mantem GO valido.
+e lacunas reais. Para ajustar manualmente, edite os documentos atuais da solicitacao,
+preservando identidade, historico e decisoes. Para ajustar com IA, registre o
+direcionamento ou responda no chat e continue pelo prompt da solicitacao.
+Se origem, evidencias, contrato ou template mudaram, use **Planejar** para preparar
+o contexto sucessor e revise a proposta nos destinos indicados, manualmente ou com IA.
+Nao regenere os dois documentos apenas para corrigir omissoes. Mudanca de escopo
+exige rever a autorizacao; esclarecimento dentro do escopo mantem GO valido.
 
 #### Revisar um lote com evidencias complementares
 
@@ -430,6 +439,11 @@ conclusoes, sem provar resolucao/globalidade. O humano avalia as evidencias para
 aceite. Novo lote exige aceite do atual e pedido de continuidade.
 
 #### Preparar implementacao do lote
+
+O procedimento abaixo prepara a **execucao assistida**. Para implementar
+manualmente, siga o plano aprovado e registre alteracoes, cobertura e verificacoes
+nos documentos do lote e registro do projeto. O prompt de implementacao e opcional
+nessa forma de trabalho; escopo, GO, verificacoes e aceite continuam os mesmos.
 
 Antes de planejar, marque ao menos uma issue `ANALISAR AGORA` no registro do
 projeto escolhido, inclusive `DEV-...` com origem e evidencias quando necessario.

@@ -76,9 +76,18 @@ essa escolha no chat. Consulte o [guia de priorizacao](../guias/tools/priorizaca
 
 Complemento autorizado em 2026-10-05: o antigo Top 5..10 foi substituido por fatia
 de 0,01%..100,00% sobre o total inicial fixo de issues elegiveis. Com historico,
-o humano escolhe recriar ou progredir; progresso exclui os IDs explicitamente
-propostos na sequencia, com rastreabilidade no proprio RankingPath. Workspace
+o humano escolhe recriar ou progredir. A regra inicial excluia somente os IDs
+propostos, substituida pela correcao abaixo. Workspace
 inicial contem somente o harness; aplicacoes e playgrounds ficam em pastas externas.
+
+Correcao solicitada em 2026-10-05 apos ensaio: progredir exclui a uniao das issues
+examinadas (AnalyzedIssues), inclusive sem recomendacao, evitando repetir lacunas
+em toda fatia. SchemaVersion=3 exige a quota completa para COMPLETED; resultados
+v2 contribuem com examinadas distintas, sem reescrever historico. Com base fixa de
+44 e 20%, cinco rodadas completas cobrem 9+9+9+9+8. Cada issue examinada tem linha
+com posicao ou motivo e ficha de achados, evidencias, referencias e roteiro para
+continuidade manual, sem dependencia de recomendacao/execucao da IA. Cobertura de
+triagem nao comprova resolucao nem cria planos ou autoriza corretivas automaticamente.
 
 1. Partir da rodada MTA selecionada e de evidencia identificada da aplicacao.
    Fazer triagem delimitada para identificar um lote consistente, com objetivo,

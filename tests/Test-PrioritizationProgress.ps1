@@ -56,8 +56,8 @@ Assert (@($next.AvailableIssues | Where-Object { $_.Id -in $seen }).Count -eq 0)
 Save-Ranking $second $next.AvailableIssues[0..19] $next.AvailableIssues[0..9]
 $third = New-HarnessPrioritizationContext $context -Mode Continue -Percentage '100%'
 $last = Read-Receipt $third
-Assert ($last.InitialTotal -eq 200 -and $last.SliceSize -eq 170 -and $last.ExcludedIssues.Count -eq 30) 'Somente propostas devem ser excluidas cumulativamente.'
-Assert (@($last.AvailableIssues | Where-Object Id -eq $next.AvailableIssues[10].Id).Count -eq 1) 'Examinada sem proposta deve continuar disponivel.'
+Assert ($last.InitialTotal -eq 200 -and $last.SliceSize -eq 160 -and $last.ExcludedIssues.Count -eq 40) 'Todas as examinadas devem ser excluidas cumulativamente, mesmo sem proposta.'
+Assert (@($last.AvailableIssues | Where-Object Id -eq $next.AvailableIssues[10].Id).Count -eq 0) 'Examinada sem proposta voltou para a fila.'
 Save-Ranking $third $last.AvailableIssues $last.AvailableIssues
 $count = @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count
 $done = New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10
@@ -90,6 +90,13 @@ Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10
 Set-Content (Join-Path $run 'output/output.yaml') 'fixture'
 $validation = New-HarnessPrioritizationContext $context -Mode Recreate -Percentage 10
 $validationReceipt = Read-Receipt $validation
+Save-Ranking $validation @() @()
+Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10 } 'Resultado vazio concluiu fatia nao vazia.'
+Save-Ranking $validation @($validationReceipt.AvailableIssues[0]) @()
+Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10 } 'COMPLETED com cobertura parcial aceito.'
+Save-Ranking $validation $validationReceipt.AvailableIssues[0..19] @()
+[IO.File]::WriteAllText($validation.RankingPath, ([IO.File]::ReadAllText($validation.RankingPath).Replace('COMPLETED','IN_PROGRESS')))
+Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10 } 'IN_PROGRESS consumiu fatia.'
 Save-Ranking $validation @($validationReceipt.AvailableIssues[0],$validationReceipt.AvailableIssues[0]) @()
 Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10 } 'Examinadas duplicadas aceitas.'
 Save-Ranking $validation @($validationReceipt.AvailableIssues[0]) @($validationReceipt.AvailableIssues[1])
@@ -123,7 +130,7 @@ $multi = New-HarnessPrioritizationContext $context -Percentage 1
 $multiReceipt = Read-Receipt $multi
 Assert ($multiReceipt.InitialTotal -eq 399 -and $multiReceipt.SliceSize -eq 4) 'Mesmo ID em Sources diferentes deve contar separadamente.'
 $one = @($multiReceipt.AvailableIssues | Where-Object { $_.Source -eq $source -and $_.Id -eq 'r::1' })
-Save-Ranking $multi $one $one
+Save-Ranking $multi $multiReceipt.AvailableIssues[0..3] $one
 $multiNext = Read-Receipt (New-HarnessPrioritizationContext $context -Mode Continue -Percentage 1)
 Assert (@($multiNext.AvailableIssues | Where-Object { $_.Id -eq 'r::1' -and $_.Source -eq $otherSource }).Count -eq 1) 'Proposta vazou para outro projeto.'
 # Arredondamento com universo pequeno.
@@ -134,4 +141,69 @@ foreach ($case in @(@('0,01',1),@('50',1),@('50,01',2),@('100,00',2))) {
     $small = Read-Receipt (New-HarnessPrioritizationContext $context -Mode Recreate -Percentage $case[0])
     Assert ($small.InitialTotal -eq 2 -and $small.SliceSize -eq $case[1]) ('Arredondamento incorreto para duas issues: ' + $case[0])
 }
-Write-Output 'PASS: percentual, base fixa, continuidade, propostas acumuladas, recriacao, retomada e integridade.'
+# Regressao do ensaio: 44 issues, 20%, poucas ou nenhuma proposta; 5 rodadas sem repeticao.
+$fortyFour = [regex]::Replace($otherText, '(?m)^\| r::(?:4[5-9]|[5-9]\d|[12]\d\d) \|.*\r?\n', '')
+[IO.File]::WriteAllText($otherPaths.MigrationPath, $fortyFour)
+$recordHash = (Get-FileHash $otherPaths.MigrationPath).Hash
+$covered = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+$sizes = @()
+foreach ($round in 1..5) {
+    $mode = if ($round -eq 1) { 'Recreate' } else { 'Continue' }
+    $batch = New-HarnessPrioritizationContext $context -Mode $mode -Percentage '20%'
+    $batchReceipt = Read-Receipt $batch
+    Assert ($batchReceipt.InitialTotal -eq 44 -and $batchReceipt.AvailableIssues.Count -eq (44 - $covered.Count)) 'Base/cobertura incorreta no caso 44/20%.'
+    $examined = @($batchReceipt.AvailableIssues | Select-Object -First $batchReceipt.SliceSize)
+    foreach ($issue in $examined) { Assert ($covered.Add(($issue.Source + '::' + $issue.Id))) 'Issue reexaminada entre rodadas.' }
+    $sizes += $examined.Count
+    $proposed = @(if ($round -ne 2) { $examined[0] })
+    Save-Ranking $batch $examined $proposed
+}
+Assert (($sizes -join ',') -eq '9,9,9,9,8' -and $covered.Count -eq 44) 'Cinco rodadas de 20% nao cobriram as 44 issues.'
+$folderCount = @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count
+Assert ((New-HarnessPrioritizationContext $context -Mode Continue).Status -eq 'EXHAUSTED') '44 issues examinadas nao esgotaram a base.'
+Assert (@(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count -eq $folderCount) 'Esgotamento criou pasta adicional.'
+Assert ((Get-FileHash $otherPaths.MigrationPath).Hash -eq $recordHash) 'Priorizacao alterou o registro da aplicacao.'
+
+# Historico v2 pode repetir examinadas: consumir uniao distinta sem editar recibos/resultados.
+$legacy = New-HarnessPrioritizationContext $context -Mode Recreate -Percentage 20
+$legacyReceipt = Read-Receipt $legacy
+$legacyReceipt.SchemaVersion = 2
+Write-HarnessJson $legacy.ContextPath $legacyReceipt
+Save-Ranking $legacy $legacyReceipt.AvailableIssues[0..8] @($legacyReceipt.AvailableIssues[0])
+$legacyNext = New-HarnessPrioritizationContext $context -Mode Continue -Percentage 20
+$legacyNextReceipt = Read-Receipt $legacyNext
+Assert ($legacyNextReceipt.SchemaVersion -eq 3 -and $legacyNextReceipt.ExcludedIssues.Count -eq 9 -and $legacyNextReceipt.AvailableIssues.Count -eq 35) 'Continue nao aproveitou examinadas v2.'
+# Emular a segunda rodada antiga, que retirava apenas a primeira proposta.
+$legacyNextReceipt.SchemaVersion = 2
+$legacyNextReceipt.ExcludedIssues = @($legacyReceipt.AvailableIssues[0])
+$legacyNextReceipt.AvailableIssues = @($legacyReceipt.AvailableIssues[1..43])
+Write-HarnessJson $legacyNext.ContextPath $legacyNextReceipt
+Save-Ranking $legacyNext $legacyNextReceipt.AvailableIssues[0..8] @($legacyNextReceipt.AvailableIssues[8])
+$historicalFiles = @($legacy.ContextPath,$legacy.RankingPath,$legacyNext.ContextPath,$legacyNext.RankingPath)
+$historicalHashes = @($historicalFiles | ForEach-Object { Get-FileHash -LiteralPath $_ })
+$upgraded = Read-Receipt (New-HarnessPrioritizationContext $context -Mode Continue -Percentage 20)
+Assert ($upgraded.SequenceId -eq $legacyReceipt.SequenceId -and $upgraded.InitialTotal -eq 44 -and $upgraded.ExcludedIssues.Count -eq 10 -and $upgraded.AvailableIssues.Count -eq 34) 'Uniao das examinadas v2 sobrepostas incorreta.'
+foreach ($file in $historicalHashes) { Assert ((Get-FileHash $file.Path).Hash -eq $file.Hash) 'Upgrade alterou evidencia historica.' }
+
+# COMPLETED parcial v2 continua historico valido; nao inventar cobertura para completar quota antiga.
+$partialLegacy = New-HarnessPrioritizationContext $context -Mode Recreate -Percentage 20
+$partialReceipt = Read-Receipt $partialLegacy
+$partialReceipt.SchemaVersion = 2
+Write-HarnessJson $partialLegacy.ContextPath $partialReceipt
+Save-Ranking $partialLegacy @($partialReceipt.AvailableIssues[0]) @()
+$afterPartial = Read-Receipt (New-HarnessPrioritizationContext $context -Mode Continue -Percentage 20)
+Assert ($afterPartial.ExcludedIssues.Count -eq 1 -and $afterPartial.AvailableIssues.Count -eq 43) 'Historico parcial v2 rejeitado ou cobertura inventada.'
+# Retirada humana depois do preparo nao pode completar artificialmente a quota.
+[IO.File]::WriteAllText($otherPaths.MigrationPath, $smallText)
+$withdrawal = New-HarnessPrioritizationContext $context -Mode Recreate -Percentage 100
+$withdrawalReceipt = Read-Receipt $withdrawal
+Assert ($withdrawalReceipt.SliceSize -eq 2) 'Cenario de retirada deve iniciar com quota dois.'
+[IO.File]::WriteAllText($otherPaths.MigrationPath, $smallText.Replace('r::2 | Regra 2 | mandatory | 500 | PRESENTE | A DEFINIR','r::2 | Regra 2 | mandatory | 500 | PRESENTE | ADIAR'))
+Save-Ranking $withdrawal @($withdrawalReceipt.AvailableIssues[0]) @()
+Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 100 } 'Retirada humana preencheu quota sem exame.'
+[IO.File]::WriteAllText($withdrawal.RankingPath, ([IO.File]::ReadAllText($withdrawal.RankingPath).Replace('COMPLETED','IN_PROGRESS')))
+$partialHash = (Get-FileHash $withdrawal.RankingPath).Hash
+$afterWithdrawal = Read-Receipt (New-HarnessPrioritizationContext $context -Mode Recreate -Percentage 100)
+Assert ($afterWithdrawal.InitialTotal -eq 1 -and $afterWithdrawal.SliceSize -eq 1 -and $afterWithdrawal.AvailableIssues[0].Id -eq 'r::1') 'Recriacao nao refletiu a nova selecao humana.'
+Assert ((Get-FileHash $withdrawal.RankingPath).Hash -eq $partialHash) 'Recriacao apagou parcial da selecao anterior.'
+Write-Output 'PASS: cobertura 44/20% em 9+9+9+9+8, zero propostas, historico v2, quota, continuidade e integridade.'
