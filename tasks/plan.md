@@ -1,5 +1,15 @@
 # Plano do agente: evolucao do harness
 
+## Referencia explicita a orientacao no guia principal - 2026-10-05
+
+Complemento solicitado: explicar `orientar-migracao` e sua relacao com
+`migracao_helper` no guia do desenvolvedor, mostrar a entrada por cliente e
+destacar o passo a passo existente no guia de Workspace. Retomar a branch
+`harness/conciliacao-evolucao-capacidades`, limpa em `082f581`.
+Aceite: descricao compreensivel, exemplo de primeiro uso, responsabilidades
+humanas preservadas e link direto valido. Conferir diff e referencias locais;
+sem alterar comportamento, skills ou guias operacionais de outras etapas.
+
 ## Conciliacao das evolucoes futuras - 2026-10-05
 
 Pedido: incorporar o catalogo de dominios/capacidades fornecido pelo desenvolvedor

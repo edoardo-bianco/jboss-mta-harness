@@ -1,5 +1,14 @@
 # To-do do agente: evolucao do harness
 
+## Referencia explicita a orientacao no guia principal - 2026-10-05
+
+- [x] Conferir raiz, branch e estado limpo em `082f581`; comparar o guia principal
+  com o passo a passo de Workspace.
+- [x] Explicar skill, papel do helper, entradas Codex/Copilot e primeiro pedido;
+  destacar o guia especifico e preservar orientacao, execucao e decisao humana.
+- [x] Revisar diff e conferir links/ancoras dos documentos alterados: 107
+  referencias locais validas nos tres documentos; `git diff --check` sem erros.
+
 ## Conciliacao das evolucoes futuras - 2026-10-05
 
 Escopo: [plano desta entrega](plan.md#conciliacao-das-evolucoes-futuras---2026-10-05).
