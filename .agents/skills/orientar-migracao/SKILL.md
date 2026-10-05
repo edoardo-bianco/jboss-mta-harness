@@ -170,7 +170,8 @@ selecao. Os guias concentram os procedimentos; esta skill nao os replica.
 
 | Necessidade | Fonte operacional |
 | --- | --- |
-| Ambiente, projetos e descoberta desta skill | [Workspace](../../../doc/guias/tools/workspace.md) |
+| Uso/descoberta desta skill, cliente, retomada e papeis | [Orientacao da migracao](../../../doc/guias/orientacao-migracao.md) |
+| Ambiente e projetos | [Workspace](../../../doc/guias/tools/workspace.md) |
 | Build e artefato Maven | [Maven](../../../doc/guias/tools/maven.md) |
 | Escolher candidatas por risco, repetibilidade e alcance | [Priorizacao](../../../doc/guias/tools/priorizacao-issues.md) |
 | Diagnostico novo ou existente | [MTA](../../../doc/guias/tools/mta.md) |

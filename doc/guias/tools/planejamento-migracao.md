@@ -13,9 +13,84 @@ Use **Planejamento: planejar** para criar, retomar ou atualizar a proposta de um
 lote. O registro de migracao concentra sua escolha, recorte e referencias; o
 preparador recupera essas entradas. "Replanejar" e atualizar pela mesma entrada.
 
-O helper pode conduzir uma etapa por vez: diga "Escolhi uma issue no registro.
-Me conduza ao proximo passo". Veja [como iniciar no seu cliente](workspace.md#orientacao-com-codex-ou-github-copilot).
-Ele confere os arquivos e oferece a tarefa ou mensagem pronta, com o caminho real.
+Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
+[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
+
+## Orientacao com o helper
+
+No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
+
+Escolha o pedido da etapa em que esta. O helper consulta os arquivos e entrega
+uma proxima acao; executar prompts, dar GO e aceitar o resultado sao passos distintos.
+
+### Orientar registro e escolha
+
+```text
+Quero conferir o registro do projeto X e escolher a issue que vou trabalhar.
+Localize o registro e as evidencias existentes. Se faltar registro, me oriente
+na atualizacao do indice; preserve as escolhas que ja estiverem registradas.
+```
+
+**Resultado esperado:** link do registro e orientacao sobre a decisao/recorte
+faltante. Se ainda quiser comparar candidatas, siga a [priorizacao opcional](priorizacao-issues.md#orientacao-com-o-helper).
+
+### Orientar planejamento e GO
+
+```text
+Escolhi uma issue no registro do projeto X. Quero preparar ou retomar a proposta
+do lote dessa escolha. Confira a solicitacao vinculada e me conduza ao proximo passo.
+```
+
+Com a proposta pronta:
+
+```text
+Quero revisar o plano e o to-do do lote atual do projeto X antes de decidir o GO.
+Confira escopo, riscos, testes, reversao e lacunas; me ajude a identificar o que
+preciso decidir, sem conceder a autorizacao por mim.
+```
+
+**Resultado esperado:** encaminhamento para Planejar e execucao do prompt, ou
+apoio a revisao da proposta existente. O helper nao escreve o plano nem concede GO.
+
+### Orientar implementacao
+
+Use este exemplo quando o GO do escopo ja estiver registrado:
+
+```text
+O lote atual do projeto X tem GO registrado. Quero preparar a implementacao.
+Confira o escopo autorizado, o trabalho ja realizado e as pendencias e me oriente
+na tarefa e no prompt corretos para continuar a execucao.
+```
+
+**Resultado esperado:** orientacao para o preparo/retomada da implementacao com
+os caminhos reais. Escolha de branch e sua; helper nao aplica corretivas e o
+GO do lote nao amplia as permissoes do helper.
+
+### Orientar verificacoes e aceite
+
+```text
+Quero conferir o resultado do lote atual do projeto X antes de decidir o aceite.
+Leia os criterios e as evidencias existentes. Diferencie o que foi verificado,
+o que falhou e o que permanece pendente; me oriente na proxima verificacao.
+```
+
+**Resultado esperado:** roteiro baseado no plano, com evidencias de
+[build/testes](maven.md#orientacao-com-o-helper), [Sonar](sonar.md#orientacao-com-o-helper),
+[MTA](mta.md#orientacao-com-o-helper) e [runtime JBoss](jboss.md#orientacao-com-o-helper)
+quando pertinentes. Aceite permanece humano; evidencia ausente nao vira sucesso.
+
+### Orientar reconciliacao e continuidade
+
+```text
+Tenho novas evidencias para o projeto X e quero decidir como continuar.
+Confira o registro, o lote e as evidencias, identifique divergencias concretas e
+me oriente na reconciliacao ou retomada necessaria, preservando decisoes anteriores.
+```
+
+**Resultado esperado:** motivo e encaminhamento de reconciliacao quando necessario,
+ou retomada da solicitacao atual. Outro lote so pode ser proposto depois do aceite
+do atual e do pedido de continuidade; PENDENTE historico nao cria um bloqueio generico.
 
 ## Configuracao
 
@@ -24,11 +99,10 @@ em uso: Codex com acesso ao harness e skills disponiveis, ou GitHub Copilot em
 conversa Local com DevSquad e ferramentas pertinentes habilitadas. Os helpers
 locais orientam; os prompts de execucao produzem os documentos autorizados.
 
-No Codex, `$orientar-migracao` inicia a orientacao; `$using-agent-skills` e uma
-skill de apoio quando disponivel. No Copilot, selecione `migracao_helper` para
-orientacao e `devsquad` para executar os prompts de planejamento. Anexar um
-arquivo de perfil nao equivale a selecionar ou delegar a um agente. Falta de
-agente/ferramenta deve ser informada; nao simular delegacao.
+A selecao do helper e a descoberta das skills ficam no [guia de orientacao](../orientacao-migracao.md#configuracao).
+Para executar os prompts de planejamento no Copilot, use `devsquad` conforme o
+prompt preparado; no Codex, envie o arquivo ao cliente com capacidades de execucao
+compativeis. Falta de agente/ferramenta deve ser informada; nao simular delegacao.
 
 ## Uso
 
@@ -428,3 +502,13 @@ powershell.exe -NoProfile -File .\scripts\preparar-implementacao.ps1 -WorkspaceP
 `-RequestId <id-completo>` seleciona a solicitacao; `-EditorPath <editor>` abre
 o prompt. `-NoOpen` suprime a abertura, mantendo a decisao explicita de branch.
 Falha do editor preserva o arquivo salvo. Limpar planejamento remove esses prompts.
+
+## Resultado e proximo passo
+
+Confira os documentos e recibos da solicitacao vinculada e a decisao que falta.
+Proposta pronta segue para revisao/GO; GO vigente permite preparar a execucao do
+escopo autorizado; corretiva verificada segue para aceite humano. Pendencias
+ficam visiveis. A continuidade para outro lote exige aceite do atual e pedido
+explicito; nao decorre apenas de haver plano, testes ou um novo MTA.
+Retorne ao [roteiro do desenvolvedor](../harness-migracao-desenvolvedor.md#roteiro-onde-estou-e-o-que-escolho)
+ou peca ao helper a proxima acao com base nas evidencias atuais.

@@ -19,8 +19,24 @@ Com a rodada conferida, siga para [registro e prioridades na etapa 4](../harness
 Se for uma nova analise de um trabalho em andamento, volte a
 [reconciliacao da etapa 8](../harness-migracao-desenvolvedor.md#8-reconciliar-e-decidir-a-continuidade).
 
-Navegacao: [configuracao](#configuracao) · [pasta das rodadas](#pasta-de-rodadas-e-caminhos-longos) ·
-[uso](#uso) · [resultados](#analise-e-resultados) · [logs](#acompanhar-a-analise-mta).
+Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
+[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
+
+## Orientacao com o helper
+
+No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
+
+```text
+Quero obter ou reutilizar o diagnostico MTA do projeto X.
+Confira o registro, o build e as evidencias disponiveis e me oriente no proximo
+passo, preservando a origem ja vinculada e indicando as lacunas.
+```
+
+**Resultado esperado:** orientacao para reutilizar a rodada vinculada, adotar
+explicitamente outra origem ou preparar uma nova analise quando necessaria.
+O helper fornece tarefa/caminho reais; voce executa a operacao. Se estiver
+reavaliando uma corretiva, informe o lote e peca a verificacao da comparabilidade.
 
 ## Configuracao
 
@@ -197,3 +213,12 @@ ou resultado MTA. Pergunta apenas o essencial para uma proposta coerente.
 Para escolher uma rodada explicitamente, use `powershell.exe -NoProfile -File .\scripts\acompanhar-log-mta.ps1 -WorkspacePath .\jboss-mta-harness.local.code-workspace -SelectTarget -RunId <id>`. Adicione `-Once` para mostrar somente as ultimas linhas, sem esperar. O leitor nao inicia/cancela MTA nem altera arquivos; nao acompanha os logs internos do JDT.
 
 **Console sem novas mensagens:** use **MTA: acompanhar atividade interna**. No mesmo script, `-Active -Detalhado` identifica a analise em execucao e consulta `.metadata/.log` da rodada a cada 5 segundos, mostrando horario/idade da ultima gravacao e ate quatro linhas resumidas de mensagens/classes/consultas. Le no maximo 16 KiB por consulta e reabre o arquivo para tolerar rotacao, sem despejar o log inteiro. Nao altera o nivel de log nem a analise. Encerra ao encontrar `result.json` legivel ou com `Ctrl+C`; acrescente `-Once` para fazer apenas uma consulta. Logs atualizados indicam atividade, nao porcentagem/progresso garantido; silencio sozinho tambem nao comprova travamento. Esta visao usa o formato JDT observado na CLI ensaiada e pode ficar indisponivel em outra versao.
+
+## Resultado e proximo passo
+
+Confira o resultado da rodada, origem, projeto analisado, relatorio e eventuais
+lacunas. Use a rodada vinculada ao registro ou adote outra explicitamente pelo
+[fluxo de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente).
+Depois siga para [registro e prioridades](planejamento-migracao.md#registro-de-migracao-por-projeto).
+Se estiver verificando um lote, registre a comparacao possivel e suas limitacoes;
+nao reencontrar um achado nao comprova sozinho sua resolucao nem concede aceite.

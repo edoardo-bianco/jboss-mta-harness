@@ -19,13 +19,36 @@ e confira a qualidade DEPOIS na
 Ao terminar, volte a etapa correspondente com as evidencias e pendencias;
 o resultado do Sonar compoe a revisao do lote e nao concede aceite humano.
 
-Navegacao: [configuracao](#configuracao) · [uso](#uso) ·
-[criterios e comparacao](#criterios-do-harness-e-comparacao) · [evidencias](#usar-como-evidencia-na-revisao).
+Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
+[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
 
 Use **Terminal > Run Task > Aplicacao: analisar SonarQube**, da pasta `harness`.
 A mesma tarefa atende ao servidor Docker local e ao corporativo: o endpoint
 muda no JSON local. O harness nao instala/inicia Docker, cria projetos no Sonar
 nem altera a politica de qualidade do servidor.
+
+## Orientacao com o helper
+
+No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
+
+```text
+Quero coletar a referencia Sonar ANTES da corretiva do projeto X.
+Confira a configuracao e o contexto disponiveis e me oriente na proxima acao,
+com as evidencias que preciso guardar. Nao vou enviar credenciais ao chat.
+```
+
+Depois da corretiva:
+
+```text
+Quero comparar os resultados Sonar do projeto X antes e depois do lote atual.
+Confira as evidencias disponiveis, sua comparabilidade e as pendencias.
+Me oriente na proxima verificacao, separando criterios do harness e Quality Gate.
+```
+
+**Resultado esperado:** orientacao para coleta/consulta autorizada ou leitura dos
+resultados existentes, com lacunas explicitas. Sem baseline, o helper nao inventa
+comparacao. Token e informado no terminal apropriado, nunca no pedido ao helper.
 
 ## Configuracao
 
@@ -246,3 +269,12 @@ Testes: `tests/Test-Sonar.ps1` (Maven/API simulados), `tests/Test-SonarCriteria.
 `tests/Test-SonarConfig.ps1` e `tests/Test-SonarApi.ps1`
 (HTTP real em loopback com token sintetico). Nao equivalem a homologacao no
 Sonar Docker ou corporativo do operador.
+
+## Resultado e proximo passo
+
+Confira identidade da analise, resumo, criterios e limitacoes. Preserve a origem
+ANTES para uma comparacao futura ou relacione ANTES/DEPOIS quando comparaveis.
+Leve as evidencias a [revisao do lote](planejamento-migracao.md#revisar-um-lote-com-evidencias-complementares)
+e as pendencias ao [aceite humano](planejamento-migracao.md#da-proposta-revisada-a-execucao-e-ao-aceite).
+Coleta ou comparacao ausente permanece explicita; resultado Sonar nao concede GO
+ou aceite, nem substitui testes do recorte e verificacao funcional.

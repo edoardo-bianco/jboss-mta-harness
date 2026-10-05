@@ -45,31 +45,12 @@ ela participa e qual resultado permite continuar. Cada etapa destaca o guia
 que a detalha. Configuracao, menus, comandos e alternativas de execucao ficam
 nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 
-**Para receber orientacao, use a skill `orientar-migracao`.** Ela e o conjunto
-de instrucoes compartilhadas que ensina o agente a conduzir a migracao uma etapa
-por vez. O `migracao_helper` e o papel de orientador que aplica essas instrucoes:
-consulta indice, registro, planos e evidencias para identificar a etapa atual e
-indicar uma proxima acao, com tarefa, caminho ou mensagem prontos.
-
-Com a pasta do harness aberta no workspace, inicie assim:
-
-- **Codex:** abra a conversa na raiz do harness e selecione `$orientar-migracao`.
-- **GitHub Copilot:** selecione `migracao_helper` na lista de agentes do Chat.
-
-Informe o projeto e o objetivo, por exemplo:
-
-> Quero iniciar a migracao do projeto X, que ja esta no workspace. Confira o
-> contexto existente e me oriente no proximo passo.
-
-Tambem pode pedir para priorizar issues ou retomar uma issue ja escolhida no
-registro. O helper pede informacao quando os arquivos nao resolvem uma ambiguidade.
-Voce executa a acao indicada e retorna com o resultado; o helper orienta a seguinte.
-As escolhas de prioridade, a autorizacao de implementar (GO) e o aceite continuam
-com voce. Usar a skill nao comprova que um subagente foi delegado.
-
-**Passo a passo completo:** [guia de Workspace — Orientacao com Codex ou GitHub Copilot](tools/workspace.md#orientacao-com-codex-ou-github-copilot).
-Essa secao explica como iniciar, o que conferir se a skill ou o agente nao aparecer,
-como retomar em outro chat e como passar da orientacao para a execucao autorizada.
+**Para receber orientacao, siga o [guia de orientacao da migracao com Codex ou GitHub Copilot](orientacao-migracao.md).**
+Ele explica a skill `orientar-migracao`, o papel `migracao_helper`, como iniciar,
+retomar e passar a execucao autorizada. O helper consulta os arquivos e indica
+uma proxima acao; voce executa e toma as decisoes de prioridade, GO e aceite.
+Os [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa) levam aos exemplos
+nos guias especificos, com resultado esperado e retorno ao fluxo.
 
 | Sua situacao | Por onde entrar |
 | --- | --- |
@@ -84,7 +65,7 @@ como retomar em outro chat e como passar da orientacao para a execucao autorizad
 | Corretiva pronta para conferir | [7. Verificar e aceitar o resultado](#7-verificar-e-aceitar-o-resultado). |
 | Novo MTA, novas evidencias ou lote aceito para continuar | [8. Reconciliar e decidir a continuidade](#8-reconciliar-e-decidir-a-continuidade). |
 | Somente uma operacao, como iniciar JBoss, depurar ou analisar Sonar | [Guias de ferramentas](#guias-de-ferramentas); essas operacoes tambem podem ser usadas separadamente. |
-| Preciso de ajuda para identificar a etapa e o proximo passo | Use `orientar-migracao` / `migracao_helper`; veja o [passo a passo no guia de Workspace](tools/workspace.md#orientacao-com-codex-ou-github-copilot). |
+| Preciso de ajuda para identificar a etapa e o proximo passo | Use `orientar-migracao` / `migracao_helper`; veja o [guia de orientacao](orientacao-migracao.md). |
 
 O fluxo pertence ao projeto e ao codigo em analise. O workspace pode reunir
 varias aplicacoes; as evidencias e decisoes continuam vinculadas a cada uma.
@@ -271,7 +252,7 @@ e Copilot usa os mesmos arquivos, sem repetir a escolha ou GO vigente.
 Os guias abaixo sao a referencia operacional para desenvolvedor e agentes:
 descrevem entradas, comandos, resultados e limites de cada ferramenta. O agente
 pode usa-los para recomendar o proximo passo com base nas evidencias disponiveis;
-a decisao humana continua nos pontos do fluxo. Os [helpers de migracao](tools/workspace.md#orientacao-com-codex-ou-github-copilot)
+a decisao humana continua nos pontos do fluxo. Os [helpers de migracao](orientacao-migracao.md)
 consultam esses guias e o contexto; o orquestrador encaminha duvidas aos helpers
 pertinentes quando necessario. Skill aplicada nao significa subagente invocado:
 a resposta deve identificar somente o apoio realmente utilizado. O novo ensaio
@@ -281,11 +262,14 @@ nos clientes confere descoberta, delegacao e orientacao de uma etapa por vez.
 
 Esta tabela e uma consulta por ferramenta. O [roteiro acima](#roteiro-onde-estou-e-o-que-escolho)
 explica quando cada uma participa; os guias vinculados concentram a configuracao
-e os procedimentos. Cada guia tambem indica o retorno ao fluxo principal.
+e os procedimentos. Nos guias operacionais, siga a mesma organizacao:
+**Orientacao com o helper → Configuracao → Uso → Resultado e proximo passo**.
+Cada guia oferece mensagem de exemplo, resultado esperado e retorno ao fluxo principal.
 
 | Guia | Quando abrir | Configuracao e operacao |
 | --- | --- | --- |
-| [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas mandatory entre projetos antes da escolha; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-pelos-helpers), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
+| [Orientacao da migracao](orientacao-migracao.md) | Receber ajuda em qualquer etapa, no Codex ou Copilot. | [Iniciar](orientacao-migracao.md#iniciar-no-codex-ou-no-copilot), [retomar](orientacao-migracao.md#retomar-em-outro-chat-ou-cliente), [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa). |
+| [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas mandatory entre projetos antes da escolha; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-com-o-helper), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
 | <a id="comecar-na-maquina-de-trabalho"></a><a id="extensoes-java-no-vs-code"></a><a id="escolher-o-projeto-em-cada-tarefa"></a><a id="ensaiar-e-depois-usar-os-projetos-corporativos"></a><a id="configuracao-da-maquina"></a><a id="duas-opcoes-para-configurar-o-workspace"></a><a id="opcao-a-editar-o-json-local-e-gerar-novamente"></a><a id="opcao-b-configurar-o-workspace-manualmente"></a><a id="limpar-execucoes-locais"></a><a id="pastas-locais-e-backups-temporarios"></a><a id="tarefa-e-script-correspondente"></a>[Workspace](tools/workspace.md) | Preparar ou ajustar o ambiente; selecionar projetos. | [Configuracao](tools/workspace.md#configuracao), [uso](tools/workspace.md#uso), [limpeza e dados locais](tools/workspace.md#limpar-execucoes-locais), [catalogo de tarefas](tools/workspace.md#tarefa-e-script-correspondente). |
 | <a id="build-maven-da-aplicacao-com-java-8"></a><a id="usar-a-extensao-maven-padrao-do-vs-code"></a>[Build da aplicacao](tools/maven.md) | Executar a Run Task de build ou usar Maven direto; etapas 2 e 7. | [Configuracao](tools/maven.md#configuracao), [Run Task do harness](tools/maven.md#opcao-a-run-task-do-harness), [painel Maven/terminal](tools/maven.md#opcao-b-maven-direto). |
 | <a id="analise-e-resultados"></a><a id="acompanhar-a-analise-mta"></a>[MTA](tools/mta.md) | Produzir diagnostico ou reanalisar; etapas 3 e 7. | [Instalacao/perfil](tools/mta.md#configuracao), [analise, relatorios e logs](tools/mta.md#uso). |

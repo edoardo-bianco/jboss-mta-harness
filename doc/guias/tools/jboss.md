@@ -20,8 +20,27 @@ ou executar, depurar e validar a corretiva na
 Depois do ensaio, volte a etapa correspondente e registre o resultado como
 evidencia. Start, stop, console e debug tambem podem ser usados separadamente.
 
-Navegacao: [configuracao](#configuracao) · [console e usuarios](#console-administrativa-e-usuario-de-gerenciamento) ·
-[uso](#uso) · [deploy e rollback](#deploy-e-rollback) · [debug](#debug-java-no-vs-code).
+Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
+[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
+
+## Orientacao com o helper
+
+No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
+
+```text
+Quero verificar o lote atual do projeto X no EAP 7.4.
+Confira o plano, o artefato e as evidencias disponiveis. Me oriente na proxima
+acao de deploy, debug ou verificacao funcional e no resultado que devo registrar.
+```
+
+Para observar a aplicacao ANTES da corretiva, informe esse objetivo e o servidor
+origem. Para uma operacao isolada, informe a acao e o destino desejados.
+
+**Resultado esperado:** orientacao com servidor/artefato corretos e tarefa ou
+roteiro a conferir. Voce executa somente no ambiente autorizado; o helper nao
+inicia/para servidor nem faz deploy. Resultado funcional e aceite ficam registrados
+separadamente; iniciar o servidor nao comprova a corretiva.
 
 ## Configuracao
 
@@ -458,3 +477,11 @@ foram validados na instalacao do desenvolvedor.
 Referencias: [Red Hat EAP: comandos CLI](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html/management_cli_guide/how_to_cli)
 e [VS Code: debug Java e attach](https://code.visualstudio.com/docs/java/java-debugging).
 A compatibilidade 7.1 tambem e verificada contra a CLI instalada, que usa saida DMR.
+
+## Resultado e proximo passo
+
+Confira servidor, artefato implantado, recibos/logs e resultado funcional esperado
+versus observado. Registre tambem testes negativos/regressao e limitacoes.
+Para uma corretiva, volte a [verificacao e aceite do lote](planejamento-migracao.md#da-proposta-revisada-a-execucao-e-ao-aceite);
+para uma observacao ANTES, preserve as evidencias para a comparacao posterior.
+Start/deploy bem-sucedido e sessao de debug nao equivalem a aceite funcional.

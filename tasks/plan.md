@@ -1,5 +1,35 @@
 # Plano do agente: evolucao do harness
 
+## Guia proprio de orientacao e padrao por etapa - 2026-10-05
+
+Evolucao documental solicitada: separar a orientacao Codex/Copilot do Workspace
+e tornar os guias previsiveis para o desenvolvedor. Branch
+`harness/guias-orientacao-migracao`, derivada de main `95dff4a`, checkout limpo.
+
+1. Extrair a orientacao para `doc/guias/orientacao-migracao.md`, preservando
+   descoberta, papeis, retomada, delegacao real e passagem a execucao autorizada.
+   Ligar README, guia principal e Workspace; manter a ancora antiga como encaminhamento.
+2. Padronizar Workspace/Maven/MTA e depois priorizacao/planejamento: navegacao,
+   Orientacao com o helper, Configuracao, Uso e Resultado e proximo passo.
+   Exemplos cobrem preparo, build, diagnostico, registro/priorizacao, plano/GO,
+   implementacao, verificacao/aceite e reconciliacao. Preservar ancoras existentes.
+3. Completar JBoss/Sonar, mapa de etapas do guia central, convencao no guia de
+   manutencao e referencia operacional da skill. Procedimentos ficam no guia da
+   etapa; o guia central explica o uso comum do helper, sem duplicar comandos.
+4. Conferir links/ancoras, cobertura das oito etapas e compatibilidade dos links
+   antigos; revisar exemplos para manter helper leitor, GO e aceite separados.
+   Alteracao documental, sem mudar scripts/permissoes ou executar ensaios de runtime.
+
+Aceite: o desenvolvedor encontra o guia central nos tres pontos de entrada,
+seleciona o cliente uma vez e encontra exemplos e resultado esperado na etapa.
+Oito etapas cobertas, mesmos titulos de navegacao nos sete guias operacionais,
+historico preservado e nenhuma alegacao de nova validacao nativa dos agentes.
+
+Publicacao solicitada pelo mantenedor apos a revisao: commit/push e PR em main,
+seguido do alinhamento de main_jboss_eap74. Integrar a revisao exata por PR com a
+excecao administrativa existente; atualizar principais por fast-forward e remover
+a branch de trabalho somente apos comprovar integracao. Preservar protecao de main.
+
 ## Publicacao e alinhamento da conciliacao - 2026-10-05
 
 O mantenedor solicitou commit, push, PR e alinhamento de main e main_jboss_eap74
