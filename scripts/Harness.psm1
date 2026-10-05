@@ -318,7 +318,7 @@ Java 8, javax.*, destino EAP 7.4; Hibernate ORM 5.3 quando aplicavel, patch a co
 }
 
 function Get-HarnessMtaCatalog {
-    param([string]$Run, [string]$Root)
+    param([string]$Run, [string]$Root, [switch]$IncludeIncidents)
     $path = Resolve-HarnessPath (Join-Path $Run 'output/static-report/output.js') $Root
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw 'Catalogo estruturado ausente: output/static-report/output.js. Preserve o registro e forneca o relatorio completo.' }
     $raw = Get-Content -LiteralPath $path -Raw -Encoding UTF8
@@ -337,7 +337,9 @@ function Get-HarnessMtaCatalog {
             $seen[$id] = $true
             $value = $rule.Value
             if (-not $value.PSObject.Properties['description'] -or -not $value.PSObject.Properties['category'] -or -not $value.PSObject.Properties['incidents'] -or $value.incidents -isnot [Array]) { throw "Issue MTA incompleta: $id" }
-            [pscustomobject]@{Id=$id;Title=[string]$value.description;Category=[string]$value.category;Count=$value.incidents.Count}
+            $entry = [ordered]@{Id=$id;Title=[string]$value.description;Category=[string]$value.category;Count=$value.incidents.Count}
+            if ($IncludeIncidents) { $entry.Details = $value }
+            [pscustomobject]$entry
         }
     }
 }

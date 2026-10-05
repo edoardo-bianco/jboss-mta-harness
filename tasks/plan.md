@@ -1,5 +1,32 @@
 # Plano do agente: evolucao do harness
 
+## Recuperacao dos incidentes MTA na priorizacao - 2026-10-05
+
+Bugfix na branch `harness/incidentes-mta-priorizacao`, a partir de main
+`da99f27008132ffd4c6f2385292252e0cffc00b7`, checkout inicialmente limpo.
+O exemplo fornecido comprova 138 incidentes Hibernate com URI historica,
+linha, mensagem e codeSnip em output.js e output.yaml. O indice conta corretamente;
+o agente nao recuperou esses detalhes e consumiu a quota com lacunas de leitura.
+
+1. Reproduzir com fixture sintetica, sem versionar fontes corporativos: 138
+   incidentes, duas linhas no mesmo metodo, raiz antiga, dependencia externa,
+   campos ausentes e caminhos inseguros. Preservar fontes e entradas.
+2. Reutilizar o parser JSON do catalogo, mantendo a interface resumida existente;
+   preparar indice e paginas Markdown de ate dez incidentes das issues disponiveis
+   na pasta da solicitacao. Preservar URI, linha, mensagem e trecho integrais.
+   Candidatos de caminho sob input apontam a AnalysisSource/Source, sem provar
+   equivalencia, leitura ou aplicabilidade e sem abrir dependencias externas.
+3. Vincular arquivos derivados e hashes ao contexto; ausencia/formato inacessivel
+   fica explicito, sem converter indisponibilidade em zero ou regravar historico.
+4. Prompt/contrato/guia orientam leitura literal e permissao para a pasta externa
+   exata da rodada, retomada apos autorizacao e erro concreto se houver recusa.
+   O cliente controla acesso; nao ampliar permissoes globais ou simular leitura.
+   Falha de acesso nao consome AnalyzedIssues; preservar IN_PROGRESS. Incerteza
+   tecnica apos exame continua podendo terminar SEM POSICAO.
+5. Validar regressao, indice, preparo/continuidade e suite; revisar diff e registrar
+   limites. Ensaio nativo Copilot com permissao concedida/negada continua distinto
+   dos testes deterministas. Sem MTA novo ou corretiva da aplicacao.
+
 ## Cobertura progressiva da priorizacao - 2026-10-05
 
 Correcao do harness solicitada apos ensaio na maquina de trabalho: continuar

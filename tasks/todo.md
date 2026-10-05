@@ -1,5 +1,30 @@
 # To-do do agente: evolucao do harness
 
+## Recuperacao dos incidentes MTA na priorizacao - 2026-10-05
+
+- [x] Conferir diagnostico, raiz/HEAD/estado e criar branch propria a partir de main.
+- [x] Reproduzir perda dos detalhes na preparacao com teste falhando.
+- [x] Preparar incidentes paginados, caminhos candidatos seguros e hashes.
+- [x] Orientar permissao externa, leitura literal e continuidade sem cobertura ficticia.
+- [x] Validar regressao/suite, revisar e registrar evidencias e limites.
+- [ ] Ensaio nativo na maquina afetada: ler URI/linha/mensagem/trecho apos permissao;
+  recusa preserva parcial e nao consome quota. Nao inferir este ensaio dos testes.
+
+Windows PowerShell 5.1: suite de 38 scripts, 37 PASS e 1 SKIP do ensaio real
+JBoss; resumo/logs em `.harness/tests/incidentes-mta-20261005/suite.json`.
+Regressao RED antes da implementacao por falta de IncidentEvidence, depois GREEN:
+138 incidentes em 14 paginas, sem perda/duplicacao, campos ausentes explicitos,
+hashes, retomada/recriacao e preservacao das entradas. Revisao independente apontou
+fallback excessivo de URI com /input/: novo RED com dependencia/rodada distinta,
+correcao exige raiz conhecida ou estrutura historica com identidade da rodada.
+Regressao reexecutada apos esse ajuste: PASS; revisao confirmou o achado resolvido,
+sem outro bloqueador. Resultado adicional em `regressao-pos-revisao.json` nessa area.
+Git diff --check sem erros. Integracoes automatizadas usam fixtures/doubles;
+build/cobertura usam JDK/Maven configurados. Sem MTA corporativo ou ensaio nativo
+Copilot nesta maquina. A leitura externa e retomada dependem da autorizacao real
+do cliente; guia documenta acesso somente de leitura por pasta e reteste Recreate
+para fatias antigas concluidas com falha operacional.
+
 ## Cobertura progressiva da priorizacao - 2026-10-05
 
 - [x] Identificar causa e conferir raiz/main/HEAD/estado limpo; criar branch propria.
