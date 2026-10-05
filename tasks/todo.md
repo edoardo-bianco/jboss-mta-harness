@@ -17,6 +17,22 @@ O preparo anterior do ensaio 02 foi substituido pelo reinicio sem historico do p
   Verificar inventario de caminhos, hashes dos fontes e ausencia de vinculos ativos.
 - [x] VAL-02: revisao de codigo/documentos e regressao final; registrar evidencias.
   Novo ensaio nativo e novas analises da aplicacao ficam para apos sua importacao.
+- [x] DOC-03: conferir README, guia de pre-planejamento, skill comum e perfis;
+  corrigir lacunas de exemplos externos, encaminhamento e manutencao. Verificar
+  links, quick_validate da skill e diff documental, sem alterar runtime.
+
+Complemento documental: README e guia de manutencao deixaram de anunciar exemplos
+internos; skill comum agora distingue recriacao de priorizacao da revisao de plano,
+orienta percentual/base fixa e importacao externa. Guia de pre-planejamento e papeis
+reconferidos; seis perfis de cada cliente reutilizam a skill e suas referencias.
+228 destinos de links locais, seis perfis TOML, quick_validate.py e diff aprovados.
+O validador usou o Python instalado e PyYAML isolado pelo uv; nenhuma dependencia
+foi adicionada ao harness. Nenhum teste de runtime repetido nesta mudanca documental.
+
+Licenca e protecao pedidas em seguida: entregues separadamente no
+[PR 2](https://github.com/edoardo-bianco/jboss-mta-harness/pull/2), com regras remotas
+ativas (24499809). O mantenedor revisa e faz o merge; CODEOWNERS nominal depende
+da entrada do arquivo em main. Esta evolucao percentual permanece na sua branch.
 
 Validacao em 2026-10-05: 36 scripts Test-*.ps1 passaram em Windows PowerShell 5.1;
 Test-JbossReal foi SKIP (exige RunReal, nao acionado). A primeira chamada generica

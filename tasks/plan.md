@@ -59,6 +59,37 @@ Implementacao e validacao concluidas em 2026-10-05; resultados no to-do. Entrega
 local na branch de evolucao, sem integrar/push nas principais. Ensaio 02 passa a
 comecar pela importacao do playground externo e nova analise, sem vinculos antigos.
 
+### Complemento documental solicitado - 2026-10-05
+
+Conferir README, guia de pre-planejamento, SKILL.md e referencias/perfis dos dois
+clientes. Corrigir README ainda anunciando exemplos internos e distinguir na skill
+a recriacao de priorizacao da revisao de planejamento. Explicitar importacao quando
+o workspace estiver vazio e atualizar o guia de manutencao com a cobertura nova.
+Verificar referencias, consistencia com o codigo e quick_validate.py da skill;
+alteracao documental, sem repetir testes de runtime ja aprovados.
+
+## Licenca e protecao de main - 2026-10-05
+
+Pedido adicional: adotar MIT como no exemplo AdamBien/quarkus-microprofile, com
+Copyright (c) 2026 Edoardo Bianco, e exigir PR com aprovacao do mantenedor na main.
+Preparar LICENSE, link no README e .github/CODEOWNERS em branch harness separada,
+derivada de main, com PR para revisao humana. Publicar somente essa branch;
+nao integrar automaticamente as alteracoes anteriores de pre-planejamento.
+
+GitHub confirmou edoardo-bianco como unico administrador. O repositorio era
+privado, com HTTP 403 para protecoes por limite de plano; o desenvolvedor o tornou
+publico e nova consulta confirmou acesso, main sem protecao e ausencia de rulesets.
+Configurar main com PR obrigatorio, uma aprovacao/CODEOWNERS, descarte de aprovacoes
+apos alteracoes e bloqueio de force push/exclusao. O desenvolvedor escolheu excecao
+do administrador somente via PR: GitHub nao admite autoaprovacao. CODEOWNERS
+passa a selecionar o revisor quando o arquivo estiver na branch base do PR.
+Verificar configuracao remota efetiva e erros de CODEOWNERS apos publicar a branch.
+
+Ruleset 24499809 ativo, main protegida com SHA preservado. Licenca/CODEOWNERS e
+documentacao publicados separadamente no [PR 2](https://github.com/edoardo-bianco/jboss-mta-harness/pull/2),
+branch harness/licenca-protecao-main, commit 0eb2c71. Merge manual fica com o
+mantenedor; esta branch de priorizacao nao foi integrada nem publicada com o PR.
+
 ## Integracao nas principais autorizada - 2026-10-04
 
 Pedido do desenvolvedor: fazer commit e push nas branches principais. Entrega do
