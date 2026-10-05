@@ -1,5 +1,18 @@
 # To-do do agente: evolucao do harness
 
+## Licenca MIT e protecao de main - 2026-10-05
+
+- [x] Conferir MIT da referencia, conta administradora, branch e visibilidade.
+- [x] Preparar LICENSE em nome de Edoardo Bianco, CODEOWNERS e documentacao.
+- [x] Validar texto da licenca, referencias e diff: MIT identica a referencia,
+  alterando apenas ano/titular; 68 destinos de links locais validos.
+- [x] Ativar e conferir regras de main e excecao administrativa somente via PR.
+  Ruleset 24499809 ativo; API confirma main protected=true, sem alterar seu SHA.
+- [ ] Mantenedor revisar e integrar o PR da licenca/CODEOWNERS.
+
+Sem mudanca de runtime, sem novos testes de aplicacao. Revisao nominal por
+CODEOWNERS depende da integracao do arquivo em main. Nenhum merge autorizado.
+
 ## Validacao para integracao nas principais - 2026-10-04
 
 Commit e push autorizados pelo desenvolvedor em main e main_jboss_eap74, nesta
