@@ -1,5 +1,27 @@
 # Plano do agente: evolucao do harness
 
+## Licenca MIT e protecao de main - 2026-10-05
+
+Pedido do desenvolvedor: adotar MIT como no exemplo AdamBien/quarkus-microprofile,
+com Copyright (c) 2026 Edoardo Bianco, e exigir PR com sua aprovacao na main.
+Evolucao isolada em harness/licenca-protecao-main, derivada de main a29001f, em
+worktree separado; a branch de priorizacao percentual mantem seu trabalho local.
+
+1. Adicionar LICENSE com texto MIT, link no README e CODEOWNERS para todos os
+   arquivos atribuídos a @edoardo-bianco; documentar o fluxo no guia de manutencao.
+2. Configurar ruleset ativo somente em refs/heads/main: PR, uma aprovacao,
+   revisao CODEOWNERS, descarte de aprovacoes antigas, bloqueio de force/exclusao.
+3. Excecao escolhida explicitamente pelo desenvolvedor: administrador pode fazer
+   merge manual somente via PR, pois o GitHub nao permite autoaprovacao. Nao
+   liberar push direto. Unico administrador conferido: edoardo-bianco.
+4. Conferir licenca, diff, regras efetivas e CODEOWNERS; publicar a branch e abrir
+   PR para revisao humana, sem merge automatico nem alterar main_jboss_eap74.
+
+O repositorio era privado e a API recusou protecoes por limite do plano. O proprio
+desenvolvedor o tornou publico; nova consulta confirmou acesso as regras e main
+sem protecao anterior. CODEOWNERS precisa chegar a main via este PR para que o
+GitHub exija a aprovacao nominal nos PRs seguintes. Referencias tecnicas no guia.
+
 ## Integracao nas principais autorizada - 2026-10-04
 
 Pedido do desenvolvedor: fazer commit e push nas branches principais. Entrega do

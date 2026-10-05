@@ -31,6 +31,28 @@ completa do MTA, `KANTRA_DIR`, regras e JDK do analisador, siga o
 
 ## Documentacao e evolucao do harness
 
+### Contribuicoes via pull request
+
+Alteracoes destinadas a `main` passam por pull request. A regra de protecao exige
+uma aprovacao e revisao do responsavel definido em [.github/CODEOWNERS](../../.github/CODEOWNERS):
+`@edoardo-bianco` para todos os arquivos, incluindo o proprio CODEOWNERS. Novas
+alteracoes no PR invalidam aprovacoes anteriores. Push direto, force push e exclusao
+de `main` ficam bloqueados. A configuracao remota pode ser conferida em
+[Rules do repositorio](https://github.com/edoardo-bianco/jboss-mta-harness/rules).
+
+O administrador tem excecao **somente via PR**, para revisar e fazer merge manual
+quando for o autor: o GitHub nao permite aprovar o proprio PR. A excecao nao libera
+push direto. No momento da configuracao, o unico administrador e `edoardo-bianco`;
+adicionar outro administrador tambem concede essa excecao a ele. Agentes preparam
+a alteracao e o PR; a decisao de aprovacao/merge pertence ao mantenedor.
+
+O GitHub usa CODEOWNERS da branch base; a exigencia do revisor nominal passa a
+valer quando esse arquivo estiver em `main`. Consulte as regras oficiais de
+[CODEOWNERS](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners)
+e de [excecao somente via PR](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository).
+
+### Fontes e responsabilidades
+
 A [ADR-0002](../adr/0002-separacao-harness-e-migracao-progressiva.md) estabelece a
 separacao entre **evoluir o harness** (scripts, prompts, Run Tasks e documentacao,
 com plano/to-do em `tasks/`) e **migrar uma aplicacao** (lotes progressivos, com
