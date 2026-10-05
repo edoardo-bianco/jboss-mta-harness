@@ -48,8 +48,8 @@ de reutilizacao da etapa 3, sem repetir a analise apenas para preparar a propost
 Tambem pode planejar com issues e evidencias fornecidas, sem pacote MTA completo;
 nesse caso siga a etapa 4 do guia principal.
 
-Para o ensaio completo, nao precisa clonar outro repo: `exemplos/migracao-cache-antes`
-e `exemplos/migracao-cache-depois` ja acompanham este. JBoss 7.1/7.4 podem permanecer
+Aplicacoes e playgrounds ficam fora do repositorio do harness e sao adicionados
+ao workspace pelo desenvolvedor. JBoss 7.1/7.4 podem permanecer
 nas pastas onde foram extraidos; seus caminhos sao opcionais nesta primeira etapa.
 Build e analise sao tarefas separadas, executadas nas etapas 2 e 3 do roteiro.
 Prepare JBoss e Sonar quando for usar essas ferramentas.
@@ -62,10 +62,10 @@ git clone https://github.com/edoardo-bianco/jboss-mta-harness.git
 
 Os passos abaixo usam a **opcao A: configuracao pelo harness**. Para configurar a IDE diretamente, veja a [opcao B: configuracao manual do workspace](#opcao-b-configurar-o-workspace-manualmente).
 
-1. Na primeira configuracao, use **File > Open Workspace from File** e abra `iniciar-harness.code-workspace`, na raiz do clone. Ele ja mostra `harness`, `migracao-cache-antes` e `migracao-cache-depois`, com caminhos relativos. Use-o para configurar os caminhos e gerar seu workspace local nos passos seguintes.
+1. Na primeira configuracao, use **File > Open Workspace from File** e abra `iniciar-harness.code-workspace`, na raiz do clone. Ele mostra somente `harness`. Use-o para configurar os caminhos e gerar seu workspace local nos passos seguintes.
 2. Execute **Terminal > Run Task > Workspace: configurar caminhos**. A tarefa cria e abre `config/harness.local.json`. Em configuracoes existentes, acrescenta campos Sonar e EAP ausentes, preservando os valores ja informados; confira os [padroes Sonar](sonar.md#configurar-uma-vez-por-maquina) e [JBoss](jboss.md).
-3. Preencha em `tools` os caminhos **desta maquina** para as ferramentas que vai usar e salve; o build precisa de `applicationJdk8Home` e `applicationMavenHome`. Os dois exemplos e `activeProject: migracao-cache-antes` ja estao configurados; mantenha-os para o primeiro ensaio. Use a [configuracao comum](#configuracao-da-maquina) e os [guias de ferramentas](../harness-migracao-desenvolvedor.md#guias-de-ferramentas). Para repositorios Maven privados/proxy, informe o `settings.xml` aprovado em `tools.mavenSettingsPath` (MTA) e `tools.applicationMavenSettingsPath` (build); podem apontar para o mesmo arquivo. Nao copie o settings da demo pessoal.
-4. Execute **Terminal > Run Task > Workspace: gerar workspace**. Abra o arquivo gerado `jboss-mta-harness.local.code-workspace`, na raiz do clone, em **File > Open Workspace from File**. O Explorer deve mostrar `harness` e os projetos cadastrados. A partir daqui, use esse arquivo local para as tarefas e para adicionar seus projetos; quando Run Task pedir o arquivo de workspace, confirme esse nome.
+3. Preencha em `tools` os caminhos **desta maquina** para as ferramentas que vai usar e salve; o build precisa de `applicationJdk8Home` e `applicationMavenHome`. A configuracao inicial usa `repositories: []` e `activeProject: null`; importe as aplicacoes externas no workspace local. Use a [configuracao comum](#configuracao-da-maquina) e os [guias de ferramentas](../harness-migracao-desenvolvedor.md#guias-de-ferramentas). Para repositorios Maven privados/proxy, informe o `settings.xml` aprovado em `tools.mavenSettingsPath` (MTA) e `tools.applicationMavenSettingsPath` (build); podem apontar para o mesmo arquivo. Nao copie o settings da demo pessoal.
+4. Execute **Terminal > Run Task > Workspace: gerar workspace**. Abra o arquivo gerado `jboss-mta-harness.local.code-workspace`, na raiz do clone, em **File > Open Workspace from File**. O Explorer deve mostrar `harness` e os projetos cadastrados. Adicione suas aplicacoes externas com **File > Add Folder to Workspace...** e salve. A partir daqui, use esse arquivo local para as tarefas; quando Run Task pedir o arquivo de workspace, confirme esse nome.
 5. Se vai executar MTA nesta maquina, execute **MTA: conferir ambiente**, da pasta `harness`. Deve mostrar `OK`, o projeto certo, os caminhos locais, perfil `eap71-to-eap74-java8`, `Targets: eap7 | Modo: full` e filtro source nenhum. Se falhar, use **Workspace: configurar caminhos**, corrija o JSON e repita a conferencia.
 
 **Configuracao concluida:** volte a [etapa 2 para selecionar e construir a aplicacao](../harness-migracao-desenvolvedor.md#2-escolher-o-projeto-e-fazer-o-build),
@@ -123,17 +123,8 @@ Trecho comum para preencher no passo 3 de [Comecar na maquina de trabalho](#come
 ```json
 {
   "schemaVersion": 1,
-  "activeProject": "migracao-cache-antes",
-  "repositories": [
-    {
-      "name": "migracao-cache-antes",
-      "path": "exemplos/migracao-cache-antes"
-    },
-    {
-      "name": "migracao-cache-depois",
-      "path": "exemplos/migracao-cache-depois"
-    }
-  ],
+  "activeProject": null,
+  "repositories": [],
   "tools": {
     "applicationMavenHome": "D:/ferramentas/apache-maven",
     "applicationMavenSettingsPath": null,
@@ -352,23 +343,26 @@ Historicos de projetos selecionados pelo workspace sao identificados pelo caminh
 
 ### Ensaiar e depois usar os projetos corporativos
 
-| Projeto incluido | Conteudo e resultado esperado com MTA 8.2.1/regras ensaiadas |
-| --- | --- |
-| `migracao-cache-antes` | Codigo original, proveniente do commit `1bfbae96ebd39a3e996d07682ad88cd7af603cbf` da demo local. Regras `hibernate51-53-00400` e `00401` apontam a mesma chamada `getQueryCache()` em `LimpezaCache.java`; triagem precisa distinguir o overload e evitar dupla contagem. |
-| `migracao-cache-depois` | Mesma aplicacao com a correcao minima `factory.getCache().evictDefaultQueryRegion()` e POM alinhado ao Hibernate `5.3.20.Final-redhat-00001` do EAP 7.4 local. Confira a rodada e o conteudo efetivamente analisados; relatorio anterior ao alinhamento do POM nao valida o estado novo. Nao e comprovacao de homologacao no EAP 7.4. |
+O harness nao inclui aplicacoes de exemplo. Use um playground ou repositorio real
+em pasta externa ao harness e adicione-o com **File > Add Folder to Workspace...**.
+Salve o workspace local; as tarefas descobrem suas pastas Maven, incluindo agregadores.
+Para CLI sem WorkspacePath, cadastre os caminhos externos em `repositories`.
 
-As duas pastas incluem POM, fontes e testes Java 8. Sao projetos independentes para selecionar um por vez, nao modulos de um reactor comum. Foram preservados `javax.*`, WAR e contratos. No exemplo DEPOIS, `hibernate-core` permanece `provided` e `hibernate-ehcache` fica em `test`, ambos na versao do destino local; o POM declara o repositorio Red Hat GA. Na empresa, o repositorio Maven aprovado deve disponibilizar esses artefatos; confira a versao do EAP instalado. Ao corrigir ANTES numa branch, seu conteudo deixa de ser o baseline original: compare pelos snapshots das rodadas. A distribuicao MTA, caches Maven e resultados antigos nao sao publicados aqui.
+No ensaio local reiniciado em 2026-10-05, `migracao-cache-antes` foi separado para
+`C:/desenvolvimento/repositorio/migracao-cache-antes`. Esse caminho e particular da
+maquina do ensaio, nao um requisito de instalacao. O projeto DEPOIS foi removido.
+O desenvolvedor importa ANTES e inicia novos build/MTA e registros, sem reutilizar
+as analises anteriores do playground. Codigo movido nao foi corrigido nesta etapa.
 
-Comece pelo `migracao-cache-antes`: selecione-o nas tarefas de build/MTA, confira o relatorio e use **Workspace: atualizar indice dos projetos** para localizar/criar o registro. Escolha a issue e execute **Planejamento: planejar**. Para comparar com o exemplo ja corrigido, selecione `migracao-cache-depois` nas tarefas de build/MTA; cada projeto recebe suas proprias rodadas. Para um ensaio independente, o agente deve se limitar ao projeto selecionado, sem consultar a solucao do outro exemplo.
+Depois de importar o projeto, selecione-o nas tarefas de build/MTA, confira o
+relatorio e execute **Workspace: atualizar indice dos projetos**. Pode priorizar
+uma fatia percentual ou escolher uma issue diretamente no registro e usar
+**Planejamento: planejar**. A aplicacao tem versionamento separado do harness.
 
-**Apos o ensaio, para manter apenas os projetos corporativos:**
-
-1. Clone os repositorios reais em pastas externas ao harness, usando os meios aprovados pela empresa.
-2. Use **File > Add Folder to Workspace...** para incluir os projetos corporativos. Remova as pastas dos exemplos do workspace pelo Explorer e salve o `.local.code-workspace`.
-3. Execute as tarefas e selecione o projeto no terminal. Se desejar, ajuste `activeProject` para um padrao; o cadastro em `repositories` nao e necessario.
-4. As pastas em `exemplos/` podem entao ser removidas, se desejado. Para continuar usando o gerador ou a CLI legada, atualize tambem `repositories`; as tarefas que recebem o workspace usam diretamente suas pastas, mesmo que esse cadastro esteja desatualizado.
-
-Remover as entradas do workspace nao apaga codigo nem evidencias antigas. Nao ha exclusao automatica dos exemplos e nao e necessario mudar scripts para adicionar projetos corporativos.
+Para usar projetos corporativos, importe-os da mesma forma e remova do workspace
+as pastas que nao deseja considerar. Remover uma entrada do workspace nao apaga
+codigo nem evidencias; o gerador preserva entradas existentes. Se usa o gerador ou
+CLI sem WorkspacePath, mantenha `repositories` coerente com os projetos desejados.
 
 ### Limpar execucoes locais
 

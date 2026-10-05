@@ -20,8 +20,9 @@ o escopo, autoriza a implementacao e aceita o resultado.
 
 A base atual atende a migracao de **JBoss EAP 7.1 para EAP 7.4, preservando
 Java 8 e `javax.*`**. O repositorio inclui scripts, tarefas, configuracao,
-prompts e dois projetos de demonstracao para ensaiar o processo. O mesmo
-ambiente pode trabalhar com repositorios corporativos mantidos separadamente.
+prompts e guias. Aplicacoes, incluindo playgrounds de ensaio, ficam em pastas
+externas ao harness. O workspace inicial contem somente o harness; adicione os
+projetos desejados com **File > Add Folder to Workspace...** e salve o workspace local.
 
 ## Direcao estrategica
 
@@ -49,6 +50,11 @@ retomada.
 Para comecar com orientacao, use o [helper de migracao](doc/guias/tools/workspace.md#orientacao-com-codex-ou-github-copilot)
 e diga apenas o objetivo, por exemplo: "Quero priorizar as issues mandatory dos
 projetos deste workspace". Ele confere a situacao e conduz uma etapa por vez.
+
+O [pre-planejamento opcional](doc/guias/tools/priorizacao-issues.md) examina uma
+fatia de **0,01% a 100,00%** das issues elegiveis sobre o total inicial fixo.
+Com uma priorizacao existente, escolha recriar ou progredir; o avanco exclui as
+issues ja propostas na sequencia. Depois voce escolhe o recorte para planejar.
 
 No planejamento, a entrada e **Planejamento: planejar**: usa a escolha e as
 evidencias do registro para criar ou atualizar a proposta. Se faltar registro,

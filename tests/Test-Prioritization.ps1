@@ -32,26 +32,30 @@ foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/pr
 }
 $before = @(Get-ChildItem $area -Recurse -File | Get-FileHash)
 Import-Module (Join-Path $root 'scripts/HarnessPrioritization.psm1') -Force -DisableNameChecking
-$prepared = New-HarnessPrioritizationContext $context
+$prepared = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 $receipt = Get-Content $prepared.ContextPath -Raw | ConvertFrom-Json
-Assert ($receipt.Purpose -eq 'issue-prioritization' -and $receipt.Top -eq 5) 'Tipo/limite incorreto.'
+Assert ($receipt.Purpose -eq 'issue-prioritization' -and $receipt.Percentage -eq 10 -and $receipt.InitialTotal -eq 0 -and $receipt.SliceSize -eq 0) 'Tipo/limite incorreto.'
 Assert ($receipt.Projects.Count -eq 3 -and $receipt.Projects[2].MigrationSnapshot -eq $null) 'Projetos ausentes devem permanecer visiveis sem registro inventado.'
 Assert ($receipt.Projects[0].Source -eq $projects[0].path -and $receipt.Projects[0].MigrationSnapshot.Contains('r::1')) 'Registro nao vinculado ao Source.'
 Assert ($receipt.Projects[0].Diagnostics.Count -gt 0) 'Ausencia de origem MTA nao informada.'
 $promptText = [IO.File]::ReadAllText($prepared.PromptPath)
-$selection = [regex]::Match($promptText, '(?s)```json\s*(\{.*?\})\s*```\s*$').Groups[1].Value | ConvertFrom-Json
-Assert ($selection.RequestId -eq $receipt.RequestId -and $selection.ContextPath -eq $prepared.ContextPath -and $selection.RankingPath -eq $prepared.RankingPath -and $selection.Top -eq 5) 'Prompt nao espelha o recibo preparado.'
+$selection = [regex]::Match($promptText, '(?s)```json\s*(\{[^`]*\})\s*```\s*$').Groups[1].Value | ConvertFrom-Json
+Assert ($selection.RequestId -eq $receipt.RequestId -and $selection.ContextPath -eq $prepared.ContextPath -and $selection.RankingPath -eq $prepared.RankingPath -and $selection.Percentage -eq 10) 'Prompt nao espelha o recibo preparado.'
 Assert ($receipt.ProjectIndexSnapshot -eq [IO.File]::ReadAllText($index) -and $receipt.ContractSnapshot -eq [IO.File]::ReadAllText((Join-Path $fixture 'doc/especificacoes/planejamento-copilot.md'))) 'Snapshots nao preservam o contexto.'
 Assert (-not (Test-Path $prepared.RankingPath)) 'Preparo inventou ranking.'
 foreach ($file in $before) { Assert ((Get-FileHash $file.Path).Hash -eq $file.Hash) 'Preparo alterou entradas.' }
-$again = New-HarnessPrioritizationContext $context -Top 10
+$again = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 Assert ($again.RequestId -ne $prepared.RequestId -and (Test-Path $prepared.PromptPath)) 'Historico sobrescrito.'
-Reject { New-HarnessPrioritizationContext $context -Top 11 } 'Limite invalido aceito.'
-Reject { New-HarnessPrioritizationContext $context -Top 4 } 'Limite inferior invalido aceito.'
+foreach ($invalid in @('0','0,001','100.01','101','-1','NaN','1e1','1,000.00','')) {
+    Reject { New-HarnessPrioritizationContext $context -Percentage $invalid -Mode Recreate } ('Percentual invalido aceito: ' + $invalid)
+}
+foreach ($valid in @('0,01','0.01%','50','100,00%')) {
+    $null = New-HarnessPrioritizationContext $context -Percentage $valid -Mode Recreate
+}
 $lease = [IO.File]::Open((Join-Path $fixture '.harness/planning.lock'), 'OpenOrCreate','ReadWrite','None')
-try { Reject { New-HarnessPrioritizationContext $context } 'Lock ignorado.' } finally { $lease.Dispose() }
+try { Reject { New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate } 'Lock ignorado.' } finally { $lease.Dispose() }
 Move-Item $index ($index + '.saved')
-Reject { New-HarnessPrioritizationContext $context } 'Indice ausente aceito.'
+Reject { New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate } 'Indice ausente aceito.'
 Move-Item ($index + '.saved') $index
 Write-Output 'PASS: priorizacao multi-projeto, limites, lacunas, preservacao e historico.'
 
@@ -67,18 +71,18 @@ $original = [IO.File]::ReadAllText($paths.MigrationPath)
 $origin = @{RunId=$runId;Project='origem';Source='Z:/colega/app';Run=$run} | ConvertTo-Json -Compress
 $record = $original.Replace("`nAGUARDANDO MTA", ("`n<!-- MTA " + $origin + " -->`nRodada MTA: $runId."))
 [IO.File]::WriteAllText($paths.MigrationPath, $record)
-$received = New-HarnessPrioritizationContext $context
+$received = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 $receipt = Get-Content $received.ContextPath -Raw | ConvertFrom-Json
 Assert ($receipt.Projects[0].Mta.RunId -eq $runId -and $receipt.Projects[0].Mta.MtaOrigin.Source -eq 'Z:/colega/app') 'Origem recebida nao preservada.'
 Assert ($receipt.Projects[0].Mta.AnalysisSource -eq (Join-Path $run 'input') -and $receipt.Projects[0].Source -eq $projects[0].path) 'Snapshot confundido com Source.'
 Assert ($receipt.Projects[0].Mta.EvidenceHashes.Findings -eq (Get-FileHash (Join-Path $run 'output/output.yaml')).Hash) 'Hash ausente.'
 Assert ($receipt.Projects[1].Mta -eq $null) 'MTA do primeiro projeto vazou para outro.'
 [IO.File]::WriteAllText($paths.MigrationPath, $record.Replace('Rodada MTA: ' + $runId, ('Rodada MTA: ' + ('b' * 32))))
-$conflict = New-HarnessPrioritizationContext $context
+$conflict = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 $conflictReceipt = Get-Content $conflict.ContextPath -Raw | ConvertFrom-Json
 Assert ($conflictReceipt.Projects[0].Mta -eq $null -and ($conflictReceipt.Projects[0].Diagnostics -join ' ') -match 'diverge') 'Conflito de rodada foi aceito.'
 [IO.File]::WriteAllText($paths.MigrationPath, $record.Replace($projects[0].path, $projects[1].path))
-$conflict = New-HarnessPrioritizationContext $context
+$conflict = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 Assert (((Get-Content $conflict.ContextPath -Raw | ConvertFrom-Json).Projects[0].Diagnostics -join ' ') -match 'Source') 'Registro de outro projeto aceito.'
 [IO.File]::WriteAllText($paths.MigrationPath, $record)
 
@@ -88,12 +92,12 @@ $resultText = [IO.File]::ReadAllText($resultPath)
 $failedRun = $resultText | ConvertFrom-Json
 $failedRun.SourceUnchanged = $false
 Write-HarnessJson $resultPath $failedRun
-$conflict = New-HarnessPrioritizationContext $context
+$conflict = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 $conflictReceipt = Get-Content $conflict.ContextPath -Raw | ConvertFrom-Json
 Assert ($conflictReceipt.Projects[0].Mta -eq $null -and ($conflictReceipt.Projects[0].Diagnostics -join ' ') -match 'Integridade') 'Integridade invalida aceita.'
 [IO.File]::WriteAllText($resultPath, $resultText)
 Move-Item (Join-Path $run 'input') (Join-Path $run 'input.saved')
-$missing = New-HarnessPrioritizationContext $context
+$missing = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 Assert (((Get-Content $missing.ContextPath -Raw | ConvertFrom-Json).Projects[0].Diagnostics -join ' ') -match 'Snapshot') 'Snapshot ausente aceito.'
 Move-Item (Join-Path $run 'input.saved') (Join-Path $run 'input')
 $catalog = Join-Path $run 'output/static-report/output.js'
@@ -102,10 +106,10 @@ $hashedOrigin = $origin | ConvertFrom-Json
 $hashedOrigin | Add-Member NoteProperty CatalogSha256 (Get-FileHash $catalog).Hash
 $hashedRecord = $record.Replace($origin, ($hashedOrigin | ConvertTo-Json -Compress))
 [IO.File]::WriteAllText($paths.MigrationPath, $hashedRecord)
-$checked = New-HarnessPrioritizationContext $context
+$checked = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 Assert ((Get-Content $checked.ContextPath -Raw | ConvertFrom-Json).Projects[0].Mta.CatalogPath -eq $catalog) 'Catalogo integro recusado.'
 Set-Content $catalog 'catalogo alterado'
-$conflict = New-HarnessPrioritizationContext $context
+$conflict = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 $conflictReceipt = Get-Content $conflict.ContextPath -Raw | ConvertFrom-Json
 Assert ($conflictReceipt.Projects[0].Mta -eq $null -and ($conflictReceipt.Projects[0].Diagnostics -join ' ') -match 'hash') 'Catalogo alterado aceito.'
 [IO.File]::WriteAllText($paths.MigrationPath, $record)
@@ -113,27 +117,39 @@ Assert ($conflictReceipt.Projects[0].Mta -eq $null -and ($conflictReceipt.Projec
 # CLI real, workspace escolhido, JSON e editor simulado, sem agente ou ferramentas externas.
 $scripts = Join-Path $fixture 'scripts'
 $null = [IO.Directory]::CreateDirectory($scripts)
-foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessPrioritization.psm1','preparar-priorizacao.ps1')) { Copy-Item (Join-Path $root ('scripts/' + $name)) $scripts }
+foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessPrioritization.psm1','HarnessPrioritizationState.ps1','preparar-priorizacao.ps1')) { Copy-Item (Join-Path $root ('scripts/' + $name)) $scripts }
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = $projects; $config.activeProject = 'app-a'
 Write-HarnessJson $context.ConfigPath $config
 $workspace = Join-Path $area 'workspace com espacos.code-workspace'
 Write-HarnessJson $workspace @{folders=@(@{path=$projects[0].path},@{path=$projects[2].path})}
 $cli = Join-Path $scripts 'preparar-priorizacao.ps1'
-$output = & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -WorkspacePath $workspace -Top 10 -NoOpen -OutputFormat Json 2>&1 | Out-String
+$output = & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -WorkspacePath $workspace -Percentage 10 -Mode Recreate -NoOpen -OutputFormat Json 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0) ('CLI falhou: ' + $output)
 $response = $output | ConvertFrom-Json
 Assert ($response.Status -eq 'PREPARED' -and $response.Projects.Count -eq 2 -and $response.Projects[0].Source -eq $projects[0].path) 'CLI ignorou workspace.'
 $count = @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count
-$output = 'q' | & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -SelectTop 2>&1 | Out-String
+$output = 'q' | & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -Interactive 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('cancelada') -and @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count -eq $count) 'Cancelamento gravou contexto.'
-$output = & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -SelectTop -NoOpen -OutputFormat Json 2>&1 | Out-String
+$output = & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -Interactive -NoOpen -OutputFormat Json 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and ($output | ConvertFrom-Json).Status -eq 'FAILED' -and @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count -eq $count) 'JSON interativo aceito ou gravou contexto.'
 $editor = Join-Path $scripts 'editor.ps1'
 Set-Content $editor '$args | ConvertTo-Json | Set-Content (Join-Path $PSScriptRoot "editor-args.json")' -Encoding UTF8
-$output = & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -EditorPath $editor 2>&1 | Out-String
+$output = & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -Percentage 10 -Mode Recreate -EditorPath $editor 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0) ('Editor: ' + $output)
 $editorArgs = Get-Content (Join-Path $scripts 'editor-args.json') -Raw | ConvertFrom-Json
 Assert ($editorArgs.Count -eq 2 -and $editorArgs[0] -eq '--reuse-window' -and (Split-Path $editorArgs[1] -Leaf) -eq 'priorizar-issues.prompt.md') 'Editor nao abriu somente o prompt.'
 Assert (-not (Test-Path (Get-HarnessMigrationPaths $fixture $projects[2]).MigrationPath)) 'CLI inicializou registro ausente.'
+$beforeMenu = @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory | ForEach-Object Name)
+$output = '2' | & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -Interactive -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and $output.Contains('Retomando') -and -not $output.Contains('Percentual de issues a examinar:')) 'Menu progredir deve retomar preparo sem pedir percentual.'
+Assert (@(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count -eq $beforeMenu.Count) 'Retomada pelo menu duplicou preparo.'
+$output = @('1','0,01') | & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -Interactive -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0) ('Menu recriar: ' + $output)
+$added = @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory | Where-Object Name -NotIn $beforeMenu)
+Assert ($added.Count -eq 1) 'Recriacao pelo menu deve gerar somente um contexto.'
+$menuReceipt = Get-Content (Join-Path $added[0].FullName 'context.json') -Raw | ConvertFrom-Json
+Assert ($menuReceipt.Percentage -eq 0.01 -and $menuReceipt.Mode -eq 'Recreate') 'Menu ignorou percentual com virgula ou modo.'
+$output = @('1','q') | & powershell.exe -NoProfile -File $cli -ConfigPath $context.ConfigPath -Interactive -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count -eq ($beforeMenu.Count+1)) 'Cancelamento do percentual gravou preparo.'
 Write-Output 'PASS: origem MTA, conflitos, isolamento, CLI/workspace, cancelamento e editor.'

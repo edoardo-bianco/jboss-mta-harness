@@ -43,8 +43,44 @@ andamentos exigem pedido expresso por projeto/ID/recorte para reconsiderar; pres
 justificativas e trabalho ativo. Issues DEV so por inclusao humana explicita, sem
 classificacao MTA inventada. Nenhuma decisao no migracao.md e alterada pela lista.
 
-Top 5 por padrao, limite configuravel de 5 a 10; entregar menos se faltarem candidatas
-com evidencia. Conferir localizacao e solucao MTA, snapshot, Source, POMs, consumidores
+Desde 2026-10-05, Percentage aceita 0,01 a 100,00, com ate duas casas, virgula/ponto
+e % opcional, sem padrao. A unidade e Source + ID completo, nao ocorrencias nem
+oportunidades agrupadas. InitialTotal fixa as issues elegiveis no inicio da sequencia;
+SliceSize = teto(InitialTotal * Percentage / 100), limitado as elegiveis restantes.
+AvailableIssues delimita a selecao; BaselineIssues preserva o universo inicial.
+Triagem do inventario e distinta do aprofundamento de ate SliceSize issues.
+Recomendar menos se faltar evidencia; declarar quota, examinadas/propostas, lacunas
+e cobertura efetiva. 100% de issues nao comprova todas as ocorrencias nem resolucao.
+
+SchemaVersion=2 identifica este contrato. Sem historico do escopo, iniciar sequencia.
+Com historico, escolher Recreate (nova SequenceId/base) ou Continue (mesma base,
+excluindo a uniao das propostas anteriores). Recriar preserva solicitacoes antigas.
+Previous vincula a anterior; em Continue inclui RankingSha256. Ponta unica pode
+ser localizada; varias exigem PreviousRequestId/escolha humana, nunca recencia.
+Referencia antiga segue sucessor unico; bifurcacao exige escolha. Contextos Top
+antigos sao historicos e exigem recriar, sem conversao automatica. Sem RankingPath,
+retomar recibo/prompt pendente sem consumir fatia ou pedir percentual novamente.
+Resultado incompleto/invalido exige completar ou recriar. Ao progredir sem novas
+elegiveis, informar EXHAUSTED sem gravar solicitacao nem abrir prompt. Inicio ou
+recriacao com base zero pode preparar contexto para documentar as lacunas.
+
+O agente grava no proprio RankingPath um unico bloco delimitado por
+`<!-- priorizacao:resultado -->` e `<!-- /priorizacao:resultado -->`, com JSON em
+cerca json: RequestId, Status=COMPLETED, AnalyzedIssues e ProposedIssues. Os arrays
+contem objetos Source/Id de AvailableIssues, sem duplicatas; propostas sao
+subconjunto das examinadas, cujo total nao excede SliceSize. IN_PROGRESS nao
+autoriza avanco. Mencoes/overlaps nao sao propostas por inferencia; examinadas sem
+proposta continuam disponiveis. O preparador valida identidade, quota e hashes
+da cadeia antes de consumir resultado; arquivo existente nao prova conclusao.
+
+Mudanca de projetos, origem MTA/catalogo ou evidencias exige recriar a base.
+Decisoes atuais filtram disponibilidade, preservando InitialTotal. Registro sem MTA
+utilizavel fica em Diagnostics fora do denominador, nunca contado como zero achados.
+Issues DEV/reconsideracao fora do inventario exigem novo preparo/contrato explicito;
+o agente nao amplia a lista. Preparo pendente com template/contrato alterado exige
+recriar para adotar instrucoes novas.
+
+Conferir localizacao e solucao MTA, snapshot, Source, POMs, consumidores
 e testes. Amostrar variacoes de uso/API/versao/modulo/projeto e negativos; declarar
 n/total, deduplicacao observada, limites e nao analisado. Sem localizacao/solucao MTA,
 alertar e pedir trecho/relatorio. Mesma regra nao comprova mesma transformacao.

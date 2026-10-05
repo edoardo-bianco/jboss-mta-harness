@@ -20,7 +20,9 @@ comparacao com novo MTA fica pendente se nao houver rodada. Nao declarar conclus
 global sem evidencia. O prompt de planejamento nao autoriza executar corretivas.
 
 Pre-planejamento opcional priorizar-issues compara os projetos explicitamente
-incluidos no contexto e recomenda top 5..10 por risco/repetibilidade/alcance.
+incluidos no contexto e examina uma fatia de 0,01%..100,00% sobre o total inicial
+fixo, recomendando por risco/repetibilidade/alcance. Com historico, perguntar
+recriar/progredir; progresso exclui IDs explicitamente propostos na sequencia.
 Escreve apenas RankingPath sob .harness/priorizacao; nao escolhe pelo humano,
 nao altera registros nem planeja lotes. Escolha humana precede o planejamento usual.
 Helpers explicam/revisam a lista no chat; executar o prompt e etapa separada.

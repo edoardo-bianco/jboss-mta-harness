@@ -21,7 +21,12 @@ Navegacao: [conteudo do repositorio](#o-que-acompanha-o-clone) ·
 
 ## O que acompanha o clone
 
-Scripts, tarefas, prompts, exemplo de configuracao, workspace inicial, dois projetos de demonstracao, testes e documentacao entram no Git. `config/harness.local.json`, o workspace gerado e `.harness/` sao locais e ignorados. O clone no trabalho pede os caminhos dessa maquina, sem carregar caminhos pessoais. **Este repo nao depende de outro harness nem dos checkouts locais usados para criar os exemplos.**
+Scripts, tarefas, prompts, skills/perfis, exemplo de configuracao, workspace inicial,
+testes e documentacao entram no Git. Aplicacoes e playgrounds ficam fora do harness;
+o workspace inicial contem somente o harness. `config/harness.local.json`, o workspace
+gerado e `.harness/` sao locais e ignorados. O clone no trabalho pede os caminhos
+dessa maquina, sem carregar caminhos pessoais. Adicione suas aplicacoes ao workspace
+conforme o [guia de workspace](tools/workspace.md).
 
 Os programas precisam estar instalados/extraidos nessa maquina; o harness nao os
 instala nem altera ExecutionPolicy. As tarefas usam Windows PowerShell 5.1 e
@@ -116,7 +121,13 @@ JSON e compatibilidade dos parametros avancados. Ambos usam fixtures isoladas.
 
 `tests/Test-Prioritization.ps1` verifica o preparo de priorizacao entre projetos:
 escopo do workspace, registros/rodadas recebidas, lacunas/conflitos, integridade,
-limites, historico, preservacao das entradas, lock, CLI/JSON e editor simulado.
+percentual de 0,01 a 100,00, historico, preservacao das entradas, lock, CLI/JSON,
+menus recriar/progredir, retomada sem pedir percentual novamente e editor simulado.
+`tests/Test-PrioritizationProgress.ps1` verifica denominador inicial fixo, quota
+arredondada, exclusao acumulada somente de propostas, recriacao, esgotamento,
+resultados incompletos/duplicados, varias pontas e hash de ranking ancestral.
+Confere tambem o mesmo ID em Sources distintos e mudancas de decisoes/evidencias.
+Execute com `powershell.exe -NoProfile -File .\tests\Test-PrioritizationProgress.ps1`.
 A qualidade da lista e a orientacao/delegacao nativas seguem para a
 [validacao manual](tools/priorizacao-issues.md#validacao-manual).
 
@@ -134,7 +145,7 @@ as tres escolhas e o fallback, com criacao de branches somente em repositorios
 ficticios: nomes invalidos/existentes, cancelamento, HEAD destacado e preservacao
 de arquivos/indice. Nao altera branches da aplicacao real.
 
-Para testar configuracao e analise: execute `powershell.exe -NoProfile -File .\tests\Test-Workspace.ps1` e `powershell.exe -NoProfile -File .\tests\Test-Mta.ps1`. Criam fixtures em `.harness/tests/`; o segundo simula a chamada ao processo MTA.
+Para testar configuracao e analise: execute `powershell.exe -NoProfile -File .\tests\Test-Workspace.ps1` e `powershell.exe -NoProfile -File .\tests\Test-Mta.ps1`. Criam fixtures em `.harness/tests/`; o primeiro cobre workspace inicial vazio e importacao de aplicacoes externas, e o segundo simula a chamada ao processo MTA. Os testes independem de playgrounds reais ou exemplos internos ao harness.
 
 Para testar o build e sua configuracao: execute `powershell.exe -NoProfile -File .\tests\Test-Build.ps1` e `powershell.exe -NoProfile -File .\tests\Test-BuildConfig.ps1`. Verificam ferramentas separadas, Java 8, falhas, restauracao do ambiente e geracao do workspace, com chamadas de build simuladas.
 

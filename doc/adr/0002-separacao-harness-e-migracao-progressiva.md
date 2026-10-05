@@ -67,12 +67,18 @@ informativo; os controles de branch/HEAD da ADR-0003 sao historicos e superados.
 Um lote ativo e por frente, nao um bloqueio global a outros desenvolvedores.
 
 Complemento autorizado em 2026-10-04: o pre-planejamento opcional
-`priorizar-issues` compara candidatas entre projetos e registra ate 5 a 10
-oportunidades por risco, repetibilidade e alcance, com amostras MTA/codigo e
+`priorizar-issues` compara candidatas entre projetos por risco, repetibilidade
+e alcance, com amostras MTA/codigo e
 cobertura parcial. A lista fica em `.harness/priorizacao/`, sem alterar registros,
 criar planos ou antecipar lotes. O desenvolvedor escolhe projeto/IDs/recorte e
 registra `ANALISAR AGORA` antes de iniciar a proposta abaixo. Helpers orientam
 essa escolha no chat. Consulte o [guia de priorizacao](../guias/tools/priorizacao-issues.md).
+
+Complemento autorizado em 2026-10-05: o antigo Top 5..10 foi substituido por fatia
+de 0,01%..100,00% sobre o total inicial fixo de issues elegiveis. Com historico,
+o humano escolhe recriar ou progredir; progresso exclui os IDs explicitamente
+propostos na sequencia, com rastreabilidade no proprio RankingPath. Workspace
+inicial contem somente o harness; aplicacoes e playgrounds ficam em pastas externas.
 
 1. Partir da rodada MTA selecionada e de evidencia identificada da aplicacao.
    Fazer triagem delimitada para identificar um lote consistente, com objetivo,

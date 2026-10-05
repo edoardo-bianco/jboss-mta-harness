@@ -1,26 +1,115 @@
 # Plano do agente: evolucao do harness
 
-## Licenca MIT e protecao de main - 2026-10-05
+## Integracao e limpeza apos PR 2 - 2026-10-05
 
-Pedido do desenvolvedor: adotar MIT como no exemplo AdamBien/quarkus-microprofile,
-com Copyright (c) 2026 Edoardo Bianco, e exigir PR com sua aprovacao na main.
-Evolucao isolada em harness/licenca-protecao-main, derivada de main a29001f, em
-worktree separado; a branch de priorizacao percentual mantem seu trabalho local.
+PR 2 integrado pelo mantenedor, confirmado em origin/main 0921b6e. Restam os
+commits 713d795, 2bf5675 e 5f7cfdd, de priorizacao percentual, playground externo e
+documentacao. Atualizar a branch com main, conciliando somente os conflitos de
+plan/to-do e preservando LICENSE, CODEOWNERS e o fluxo de PR.
 
-1. Adicionar LICENSE com texto MIT, link no README e CODEOWNERS para todos os
-   arquivos atribuídos a @edoardo-bianco; documentar o fluxo no guia de manutencao.
-2. Configurar ruleset ativo somente em refs/heads/main: PR, uma aprovacao,
-   revisao CODEOWNERS, descarte de aprovacoes antigas, bloqueio de force/exclusao.
-3. Excecao escolhida explicitamente pelo desenvolvedor: administrador pode fazer
-   merge manual somente via PR, pois o GitHub nao permite autoaprovacao. Nao
-   liberar push direto. Unico administrador conferido: edoardo-bianco.
-4. Conferir licenca, diff, regras efetivas e CODEOWNERS; publicar a branch e abrir
-   PR para revisao humana, sem merge automatico nem alterar main_jboss_eap74.
+Conferir sintaxe, links e os testes de priorizacao/workspace/Run Tasks na base
+integrada. Publicar PR com o resultado completo para aprovacao do mantenedor.
+Depois da integracao aceita em main, alinhar explicitamente main_jboss_eap74 e
+confirmar igualdade do conteudo. Remover somente branches cujo HEAD esteja
+integrado e o worktree limpo da licenca, mantendo dados locais e playground externo.
+O merge do PR 2 nao concede aceite de migracao nem conclui o ensaio nativo.
 
-O repositorio era privado e a API recusou protecoes por limite do plano. O proprio
-desenvolvedor o tornou publico; nova consulta confirmou acesso as regras e main
-sem protecao anterior. CODEOWNERS precisa chegar a main via este PR para que o
-GitHub exija a aprovacao nominal nos PRs seguintes. Referencias tecnicas no guia.
+PR 3 preparado e validado. O mantenedor autorizou explicitamente no chat concluir
+o merge via excecao administrativa somente por PR, alinhar main_jboss_eap74 e
+remover branches integradas. Branches de licenca/backlog e worktree da licenca
+ja removidos; a execucao final confere os refs e registra evidencia local no to-do.
+
+## Playground externo e priorizacao percentual - 2026-10-05
+
+Planejamento e implementacao autorizados pelo desenvolvedor apos analise no chat.
+Branch harness/priorizacao-percentual-playground, derivada de main a29001f; checkout
+limpo no inicio. Esta entrega substitui o preparo anterior do ensaio 02: o playground
+reinicia do zero, sem transferir registro, escolhas, MTA ou historico de analise.
+
+### Escopo e criterios de aceite
+
+- Mover exemplos/migracao-cache-antes para C:/desenvolvimento/repositorio/migracao-cache-antes;
+  remover migracao-cache-depois e os dados locais identificados desses playgrounds.
+  Conferir caminhos absolutos, ausencia de destino e integridade dos fontes movidos.
+  O desenvolvedor importa a aplicacao no workspace e inicia novas analises depois.
+- Workspace inicial e configuracao de exemplo sem aplicacoes embutidas; ferramentas
+  locais preservadas, sem settings/repositorio Maven proprios. Testes usam fixtures.
+- Substituir Top por Percentage (0,01 a 100,00; virgula/ponto, ate duas casas).
+  A unidade e Source + ID completo da issue, nunca ocorrencias ou oportunidades.
+  Total inicial fixo por sequencia; quota = teto(total inicial * percentual / 100),
+  limitada as elegiveis restantes. O agente escolhe a fatia por risco/repetibilidade/
+  alcance, registra examinadas e propostas; pode recomendar menos por evidencias.
+- Ao encontrar solicitacao anterior, escolher recriar ou progredir. Recriar inicia
+  sequencia com nova base sem apagar a anterior; progredir exclui a uniao dos IDs
+  explicitamente propostos. Mencoes/overlaps nao contam. Sem ranking, retomar a
+  preparacao ainda pendente sem consumir fatia. Varias pontas exigem escolha.
+- Recibos imutaveis com Previous e SequenceId; resultado estruturado no proprio
+  RankingPath (unico destino do agente), validado antes do proximo preparo. Sem
+  escolha por recencia, sem inferir conclusao de analise pela existencia de arquivo.
+  Mudanca de projetos/origem/catalogo exige recriar; decisoes humanas atuais filtram
+  a disponibilidade sem alterar o denominador. Contextos Top antigos ficam historicos
+  e orientam recriacao, sem conversao silenciosa.
+- Priorizacao nao altera registro, indice, plano, fonte, GO ou aceite. Nenhuma tarefa
+  nova; menus e CLI mantem cancelamento e JSON sem interacao. Sem build/MTA real
+  da aplicacao, commit/push de corretivas ou integracao automatica nas principais.
+
+### Incrementos e verificacao
+
+1. Desacoplar workspace/config/testes dos exemplos. Tests/Test-Workspace.ps1 e
+   Test-TaskInputs.ps1 (fixtures externas ao harness simulado, dentro de .harness/tests).
+2. Percentual, inventario elegivel e quota. Test-Prioritization.ps1 cobre parsing,
+   arredondamento, identidades por projeto, lacunas e preservacao das entradas.
+3. Historico e avancos. Testar base 200/10%=20 por rodada, uniao sem duplicatas,
+   recriacao, retomada, ranking incompleto/invalido, ambiguidade, esgotamento e origem.
+4. CLI/menu/prompt/contrato. Testar entradas reais com editor simulado e cancelamento;
+   alinhar guias, instrucoes e ADR-0002 sem reescrever os documentos historicos.
+5. Mover playground e limpar somente dados identificados, atualizar config/workspace
+   locais e registrar resultados. Escritas fora do workspace usam aprovacao do sandbox.
+6. Revisar diff e executar regressao apropriada, sintaxe PS 5.1 e links afetados.
+   Comando dos testes: powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+   .\tests\Test-<Nome>.ps1 (Bypass limitado ao processo, sem mudar politica da maquina).
+
+Estilo: PowerShell 5.1, funcoes com verbos, PSCustomObject/ordered hashtable,
+Resolve-HarnessPath para caminhos, Write-HarnessJson para recibos, testes Assert/Reject.
+Validar antes de gravar, sem dependencia nova e sem alterar outros fluxos do harness.
+Revisao humana nativa Codex/Copilot do ensaio continua posterior a estes testes.
+
+Implementacao e validacao concluidas em 2026-10-05; resultados no to-do. Entrega
+local na branch de evolucao, sem integrar/push nas principais. Ensaio 02 passa a
+comecar pela importacao do playground externo e nova analise, sem vinculos antigos.
+
+### Complemento documental solicitado - 2026-10-05
+
+Conferir README, guia de pre-planejamento, SKILL.md e referencias/perfis dos dois
+clientes. Corrigir README ainda anunciando exemplos internos e distinguir na skill
+a recriacao de priorizacao da revisao de planejamento. Explicitar importacao quando
+o workspace estiver vazio e atualizar o guia de manutencao com a cobertura nova.
+Verificar referencias, consistencia com o codigo e quick_validate.py da skill;
+alteracao documental, sem repetir testes de runtime ja aprovados.
+
+## Licenca e protecao de main - 2026-10-05
+
+Pedido adicional: adotar MIT como no exemplo AdamBien/quarkus-microprofile, com
+Copyright (c) 2026 Edoardo Bianco, e exigir PR com aprovacao do mantenedor na main.
+Preparar LICENSE, link no README e .github/CODEOWNERS em branch harness separada,
+derivada de main, com PR para revisao humana. Publicar somente essa branch;
+nao integrar automaticamente as alteracoes anteriores de pre-planejamento.
+
+GitHub confirmou edoardo-bianco como unico administrador. O repositorio era
+privado, com HTTP 403 para protecoes por limite de plano; o desenvolvedor o tornou
+publico e nova consulta confirmou acesso, main sem protecao e ausencia de rulesets.
+Configurar main com PR obrigatorio, uma aprovacao/CODEOWNERS, descarte de aprovacoes
+apos alteracoes e bloqueio de force push/exclusao. O desenvolvedor escolheu excecao
+do administrador somente via PR: GitHub nao admite autoaprovacao. CODEOWNERS
+passa a selecionar o revisor quando o arquivo estiver na branch base do PR.
+Verificar configuracao remota efetiva e erros de CODEOWNERS apos publicar a branch.
+
+Ruleset 24499809 ativo, main protegida. Licenca/CODEOWNERS e
+documentacao publicados separadamente no [PR 2](https://github.com/edoardo-bianco/jboss-mta-harness/pull/2),
+branch harness/licenca-protecao-main, commit 0eb2c71, derivada de main a29001f em
+worktree isolado. O mantenedor integrou o PR em 2026-10-05 (merge 0921b6e):
+CODEOWNERS ja esta na base e seleciona @edoardo-bianco para todos os arquivos.
+Esta entrega inicial nao incluiu os commits de priorizacao nem alterou main_jboss_eap74.
 
 ## Integracao nas principais autorizada - 2026-10-04
 

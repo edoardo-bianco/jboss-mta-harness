@@ -258,12 +258,12 @@
     },
     {
       "label": "Planejamento: priorizar issues",
-      "detail": "Prepara contexto para ranking top 5..10 de issues mandatory dos projetos do workspace, para escolha humana antes do planejamento.",
+      "detail": "Prepara uma fatia percentual de issues mandatory; permite recriar ou progredir sem repetir propostas anteriores.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
         "-NoProfile", "-File", "${workspaceFolder}/scripts/preparar-priorizacao.ps1",
-        "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTop",
+        "-WorkspacePath", "${input:harnessWorkspacePath}", "-Interactive",
         "-EditorPath", "${execPath}"
       ],
       "problemMatcher": [],

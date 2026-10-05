@@ -1,5 +1,83 @@
 # To-do do agente: evolucao do harness
 
+## Integracao e limpeza apos PR 2 - 2026-10-05
+
+- [x] Confirmar PR 2 integrado, main protegida e CODEOWNERS presente na base.
+- [x] Conciliar plan/to-do ao incorporar main na branch de priorizacao.
+- [x] Validar a base integrada: Test-Prioritization, Test-PrioritizationProgress,
+  Test-Workspace e Test-TaskInputs passaram; sintaxe e 230 links locais validos.
+- [x] Mantenedor aprovar o merge do [PR 3](https://github.com/edoardo-bianco/jboss-mta-harness/pull/3),
+  o alinhamento de main_jboss_eap74 e a limpeza: autorizacao explicita no chat.
+- [x] Remover branches locais/remotas ja integradas de licenca e backlog, e o
+  worktree limpo da licenca, apos conferir ancestralidade e ausencia de pendencias.
+
+Encerramento autorizado: integrar PR 3 por merge, avancar main_jboss_eap74 a main,
+retornar o checkout a main e remover a branch integrada de priorizacao. Conferir
+refs locais/remotas, unico worktree, protecao e status limpo; evidencia final em
+.harness/tests/integracao-priorizacao-20261005/encerramento.json. Nenhum dado local
+de ferramentas nem o playground externo entra nessa limpeza Git.
+
+Revisao da conciliacao: runtime identico ao commit 5f7cfdd; apenas licenca,
+CODEOWNERS e documentacao recebidos de main. Conflitos limitados a plan/to-do,
+consolidados sem descartar evidencias de nenhuma entrega. A revisao independente
+anterior permanece aplicavel. Logs em .harness/tests/integracao-priorizacao-20261005/.
+
+## Playground externo e priorizacao percentual - 2026-10-05
+
+Escopo autorizado no [plano](plan.md#playground-externo-e-priorizacao-percentual---2026-10-05).
+O preparo anterior do ensaio 02 foi substituido pelo reinicio sem historico do playground.
+
+- [x] EXT-01: workspace/config sem exemplos; fixtures independentes. Verificar
+  Test-Workspace e Test-TaskInputs; nenhuma ferramenta local alterada.
+- [x] PCT-01: percentual validado, inventario por Source/ID e quota arredondada.
+  Verificar Test-Prioritization, incluindo 0,01/100,00 e valores invalidos.
+- [x] PCT-02: recriar/progredir/retomar, base fixa e exclusao acumulada de propostas.
+  Verificar sequencia 200/10%, arquivos incompletos, ambiguidade e isolamento.
+- [x] PCT-03: menu/CLI, prompt, contrato, instrucoes e guias coerentes. Verificar
+  testes de entrada real, JSON, editor, cancelamento e links afetados.
+- [x] EXT-02: mover antes, remover depois e zerar dados locais desses playgrounds.
+  Verificar inventario de caminhos, hashes dos fontes e ausencia de vinculos ativos.
+- [x] VAL-02: revisao de codigo/documentos e regressao final; registrar evidencias.
+  Novo ensaio nativo e novas analises da aplicacao ficam para apos sua importacao.
+- [x] DOC-03: conferir README, guia de pre-planejamento, skill comum e perfis;
+  corrigir lacunas de exemplos externos, encaminhamento e manutencao. Verificar
+  links, quick_validate da skill e diff documental, sem alterar runtime.
+
+Complemento documental: README e guia de manutencao deixaram de anunciar exemplos
+internos; skill comum agora distingue recriacao de priorizacao da revisao de plano,
+orienta percentual/base fixa e importacao externa. Guia de pre-planejamento e papeis
+reconferidos; seis perfis de cada cliente reutilizam a skill e suas referencias.
+228 destinos de links locais, seis perfis TOML, quick_validate.py e diff aprovados.
+O validador usou o Python instalado e PyYAML isolado pelo uv; nenhuma dependencia
+foi adicionada ao harness. Nenhum teste de runtime repetido nesta mudanca documental.
+
+Licenca e protecao foram integradas pelo mantenedor no
+[PR 2](https://github.com/edoardo-bianco/jboss-mta-harness/pull/2), merge 0921b6e,
+com regras remotas ativas (24499809) e CODEOWNERS na main. A evolucao percentual
+segue em PR separado; a conciliacao atual preserva ambos os resultados.
+
+Validacao em 2026-10-05: 36 scripts Test-*.ps1 passaram em Windows PowerShell 5.1;
+Test-JbossReal foi SKIP (exige RunReal, nao acionado). A primeira chamada generica
+de Test-BuildCoverage omitiu parametros obrigatorios; a chamada corrigida encontrou
+bloqueio de rede do sandbox. Reexecucao autorizada com JDK/Maven da maquina passou:
+20% JaCoCo gera warning sem reprovar; falhas intencionais de teste/compilacao mantem
+exit de erro. Nenhum build/MTA novo foi feito no playground externo.
+
+Evidencias locais: .harness/tests/validacao-percentual-20261005-080325/results-final.json
+(preserva referencia a tentativa inicial) e .harness/tests/coverage-178e86d32cf74ece8172a05d4222c7d9/.
+Sintaxe dos scripts/testes, 142 destinos de links locais e git diff --check passaram.
+Revisao independente de codigo e documentos sem bloqueantes; testes adicionais
+cobrem pontas ambiguas, sucessor unico, Source/ID, ranking ancestral alterado e
+arrays invalidos. Precisao textual de EXHAUSTED e de issues disponiveis corrigida.
+
+Movimentacao conferiu SHA-256 identico dos nove arquivos versionados de ANTES no
+destino C:/desenvolvimento/repositorio/migracao-cache-antes. DEPOIS e target antigo
+removidos. Dados locais do playground removidos: builds/runs, registros/indices,
+arquivo local do ensaio 01 e C:/mta-runs/migracao-cache-antes. Planning/priorizacao
+ativos estavam vazios. Config/workspace locais ficaram sem exemplos; ferramentas
+e configuracoes de servidor preservadas. Nenhum novo registro/indice foi criado;
+o desenvolvedor importara o playground e iniciara a nova analise.
+
 ## Licenca MIT e protecao de main - 2026-10-05
 
 - [x] Conferir MIT da referencia, conta administradora, branch e visibilidade.
@@ -8,10 +86,10 @@
   alterando apenas ano/titular; 68 destinos de links locais validos.
 - [x] Ativar e conferir regras de main e excecao administrativa somente via PR.
   Ruleset 24499809 ativo; API confirma main protected=true, sem alterar seu SHA.
-- [ ] Mantenedor revisar e integrar o PR da licenca/CODEOWNERS.
+- [x] Mantenedor revisar e integrar o PR da licenca/CODEOWNERS: PR 2, merge 0921b6e.
 
-Sem mudanca de runtime, sem novos testes de aplicacao. Revisao nominal por
-CODEOWNERS depende da integracao do arquivo em main. Nenhum merge autorizado.
+Sem mudanca de runtime, sem novos testes de aplicacao. CODEOWNERS agora esta na
+main; o merge foi realizado pelo mantenedor e confirmado na API.
 
 ## Validacao para integracao nas principais - 2026-10-04
 
@@ -35,7 +113,9 @@ pelo pedido atual de integracao; as pendencias tecnicas/documentais continuam vi
 
 ## Ensaio 02: fluxo simplificado - 2026-10-04
 
-Estado: PREPARADO PARA INICIAR. Nenhuma resposta dos clientes foi avaliada nesta rodada.
+Estado historico: PREPARADO PARA INICIAR em 2026-10-04; substituido em 2026-10-05
+pelo reinicio do playground externo, descrito no inicio deste arquivo. Nenhuma
+resposta dos clientes foi avaliada nesta rodada.
 Base: 4ff6c68, publicada em origin/harness/backlog-agente-orientacao.
 Workspace: jboss-mta-harness.local.code-workspace. Clientes: Codex e GitHub Copilot.
 

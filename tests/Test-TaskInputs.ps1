@@ -25,6 +25,7 @@ Assert ($labels -contains 'Workspace: limpar execucoes' -and $labels -notcontain
 Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|Servidor|MTA|Planejamento): ' }).Count -eq 0) 'Run Tasks devem ser classificadas pelo prefixo da etapa.'
 $prioritization = @($tasks.tasks | Where-Object label -eq 'Planejamento: priorizar issues')
 Assert ($prioritization.Count -eq 1 -and $prioritization[0].args -contains '${workspaceFolder}/scripts/preparar-priorizacao.ps1' -and $prioritization[0].args -contains '${input:harnessWorkspacePath}' -and $prioritization[0].args -contains '${execPath}' -and $prioritization[0].args -notcontains '-SelectTarget') 'Priorizacao deve usar o workspace inteiro e abrir prompt.'
+Assert ($prioritization[0].args -contains '-Interactive' -and $prioritization[0].args -notcontains '-SelectTop') 'Priorizacao deve oferecer percentual e recriar/progredir na mesma tarefa.'
 $projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -notin @('Planejamento: priorizar issues','Planejamento: planejar') })
 foreach ($monitor in @($tasks.tasks | Where-Object label -like 'MTA: acompanhar*')) {
     Assert ($monitor.args -contains '-Active' -and $monitor.args -notcontains '-SelectTarget' -and -not ($monitor.args | Where-Object { $_ -like '${input:*}' })) 'Observabilidade nao deve solicitar workspace/projeto.'
@@ -53,9 +54,12 @@ Assert (-not ($automatic.args | Where-Object { $_ -like '${input:*}' })) 'Tarefa
 # Cancelar no menu: nenhum Maven ou MTA deve ser iniciado neste teste.
 $area = Join-Path $root ('.harness/tests/task inputs ' + [guid]::NewGuid().ToString('N'))
 $fixture = Join-Path $area 'fixture'
-$project = Join-Path $root 'exemplos/migracao-cache-antes'
+$project = Join-Path $area 'aplicacao externa'
 $workspacePath = Join-Path $area 'workspace com espacos.code-workspace'
 $null = New-Item -ItemType Directory -Path $fixture -Force
+$null = New-Item -ItemType Directory -Path $project -Force
+Set-Content (Join-Path $project 'pom.xml') '<project/>'
+Copy-Item -LiteralPath (Join-Path $root 'scripts') -Destination $fixture -Recurse
 @{folders=@(@{name='Projeto do workspace'; path=$project})} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $workspacePath -Encoding UTF8
 $config = Get-Content -LiteralPath (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @()
@@ -66,7 +70,7 @@ $originalConfig = (Get-FileHash $configPath).Hash
 $originalWorkspace = (Get-FileHash $workspacePath).Hash
 $buildTask = @($projectTasks | Where-Object label -eq 'Aplicacao: build Maven (Java 8)')[0]
 $arguments = @($buildTask.args | ForEach-Object {
-    $_.Replace('${workspaceFolder}', $root).Replace('${input:harnessWorkspacePath}', $workspacePath).Replace('${input:applicationBuildGoals}', 'clean install')
+    $_.Replace('${workspaceFolder}', $fixture).Replace('${input:harnessWorkspacePath}', $workspacePath).Replace('${input:applicationBuildGoals}', 'clean install')
 })
 Assert (-not ($arguments | Where-Object { $_.Contains('${') })) 'Variavel nao resolvida enviada ao PowerShell.'
 $arguments += @('-ConfigPath', $configPath)
@@ -75,13 +79,13 @@ Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Projeto do workspace') -and $
 Assert (-not $output.Contains('Caminho invalido') -and -not $output.Contains('Comando: mvn')) 'Workspace invalido ou build iniciado apos cancelamento.'
 Assert ((Get-FileHash $configPath).Hash -eq $originalConfig -and (Get-FileHash $workspacePath).Hash -eq $originalWorkspace) 'Tarefa alterou configuracao/workspace.'
 $sonarArguments = @($sonarTask[0].args | ForEach-Object {
-    $_.Replace('${workspaceFolder}', $root).Replace('${input:harnessWorkspacePath}', $workspacePath)
+    $_.Replace('${workspaceFolder}', $fixture).Replace('${input:harnessWorkspacePath}', $workspacePath)
 })
 $sonarArguments += @('-ConfigPath', $configPath)
 $output = 'q' | & powershell.exe @sonarArguments 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Token Sonar')) 'Cancelamento Sonar deve preceder pedido de token e envio.'
 $implementationArguments = @($implementationTask[0].args | ForEach-Object {
-    $_.Replace('${workspaceFolder}', $root).Replace('${input:harnessWorkspacePath}', $workspacePath).Replace('${execPath}', (Join-Path $fixture 'editor-ausente.exe'))
+    $_.Replace('${workspaceFolder}', $fixture).Replace('${input:harnessWorkspacePath}', $workspacePath).Replace('${execPath}', (Join-Path $fixture 'editor-ausente.exe'))
 })
 $implementationArguments += @('-ConfigPath', $configPath)
 $output = 'q' | & powershell.exe @implementationArguments 2>&1 | Out-String

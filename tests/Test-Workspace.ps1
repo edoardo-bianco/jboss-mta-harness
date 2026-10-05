@@ -42,40 +42,33 @@ $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
 $rejected = $false
 try { Read-HarnessConfig $configPath $fixture | Out-Null } catch { $rejected = $true }
 Assert $rejected 'Analisar a propria raiz do harness deve ser recusado.'
-# Um clone novo ja inclui os exemplos e resolve seus caminhos a partir do harness.
-$null = New-Item -ItemType Directory -Path (Join-Path $fixture 'exemplos') -Force
-foreach ($name in @('migracao-cache-antes','migracao-cache-depois')) {
-    Copy-Item -LiteralPath (Join-Path $root "exemplos/$name") -Destination (Join-Path $fixture 'exemplos') -Recurse
-}
+# Clone novo sem aplicacoes; importar projetos externos continua funcionando.
+$emptyRoot = Join-Path $area 'harness-vazio'
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
-$config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
-$context = Read-HarnessConfig $configPath $fixture
-Assert ($context.Active.path -eq (Join-Path $fixture 'exemplos/migracao-cache-antes').Replace('/','\')) 'Exemplo ANTES deve resolver dentro do clone.'
+Assert (@($config.repositories).Count -eq 0 -and $null -eq $config.activeProject) 'Clone deve iniciar sem exemplos cadastrados.'
+$configPath = Join-Path $emptyRoot 'config.json'
+Write-HarnessJson $configPath $config
+$context = Read-HarnessConfig $configPath $emptyRoot
+Assert ($context.Projects.Count -eq 0 -and $null -eq $context.Active) 'Configuracao vazia deve ser valida.'
 Assert ($context.Config.tools.mtaExecutable -eq $null) 'Clone nao deve carregar ferramentas pessoais.'
 $path = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
-Assert ($workspace.folders.Count -eq 5 -and @($workspace.folders | Where-Object name -like 'migracao-cache-*').Count -eq 2) 'Regeneracao deve acrescentar exemplos e preservar projetos existentes.'
-$config.activeProject = 'migracao-cache-depois'
-$config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
-$context = Read-HarnessConfig $configPath $fixture
-Assert ($context.Active.path.EndsWith('exemplos\migracao-cache-depois')) 'Troca para exemplo DEPOIS falhou.'
-$config.repositories += @(@{name='corporativo'; path=$app})
-$config.activeProject = 'corporativo'
-$config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
-$context = Read-HarnessConfig $configPath $fixture
-Assert ($context.Active.path -eq $app) 'Repositorio real externo deve continuar suportado.'
-$config.repositories[2].path = Join-Path $fixture 'exemplos'
-$config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
-$rejected = $false
-try { Read-HarnessConfig $configPath $fixture | Out-Null } catch { $rejected = $true }
-Assert $rejected 'Excecao dos exemplos nao deve permitir analisar sua pasta pai.'
-$withoutExamples = Join-Path $area 'harness-sem-exemplos'
-$config.repositories = @(@{name='corporativo'; path=$app})
-$config.activeProject = 'corporativo'
-$configPath = Join-Path $withoutExamples 'config.json'
-Write-HarnessJson $configPath $config
-$context = Read-HarnessConfig $configPath $withoutExamples
-$path = New-HarnessWorkspace $context
+Assert ($workspace.folders.Count -eq 1 -and $workspace.folders[0].name -eq 'harness') 'Workspace inicial deve conter somente o harness.'
+$starter = Get-Content (Join-Path $root 'iniciar-harness.code-workspace') -Raw | ConvertFrom-Json
+Assert ($starter.folders.Count -eq 1 -and $starter.folders[0].path -eq '.') 'Workspace versionado deve conter somente o harness.'
+Set-Content (Join-Path $app 'pom.xml') '<project/>'
+$workspace.folders += [pscustomobject]@{name='Aplicacao importada';path=$app}
+Write-HarnessJson $path $workspace
+$context = Read-HarnessConfig $configPath $emptyRoot -WorkspacePath $path
+Assert ($context.Projects.Count -eq 1 -and $context.Projects[0].path -eq $app) 'Importacao manual nao foi descoberta.'
+$null = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
-Assert ($workspace.folders.Count -eq 2 -and $workspace.folders[1].name -eq 'corporativo') 'Workspace corporativo deve funcionar sem exemplos presentes.'
-Write-Output 'PASS: configuracao, troca de alvo, caminhos, workspace, backup e exemplos portaveis.'
+Assert ($workspace.folders.Count -eq 2) 'Regeneracao deve preservar importacao manual.'
+$nested = Join-Path $emptyRoot 'exemplos/migracao-cache-antes'
+$null = [IO.Directory]::CreateDirectory($nested)
+$config.repositories = @(@{name='interno';path=$nested}); $config.activeProject = 'interno'
+Write-HarnessJson $configPath $config
+$rejected = $false
+try { Read-HarnessConfig $configPath $emptyRoot | Out-Null } catch { $rejected = $true }
+Assert $rejected 'Aplicacao dentro do harness nao deve ter excecao por nome.'
+Write-Output 'PASS: configuracao, troca de alvo, caminhos, workspace vazio, importacao externa e backup.'
