@@ -9,7 +9,8 @@ html:
 
 Use esta etapa opcional para escolher uma corretiva mandatory equilibrando
 risco, repetibilidade da solucao e alcance no codigo. A saida e uma lista de
-**ate 5 candidatas por padrao, ou ate 10**, sustentada por evidencias e amostras.
+recomendacoes sustentadas por evidencias e amostras, a partir de uma **fatia de
+0,01% a 100,00% das issues elegiveis**, calculada sobre o total inicial fixo.
 Voce escolhe qual levar ao planejamento. Quem ja escolheu a issue pode seguir
 direto ao [planejamento do lote](planejamento-migracao.md#planejar-lotes-de-correcao-com-copilot).
 
@@ -43,7 +44,11 @@ sem inventar classificacao MTA. Lotes ativos e decisoes anteriores sao preservad
 ## Uso manual pela Run Task
 
 1. Salve o workspace e abra **Terminal > Run Task > Planejamento: priorizar issues**.
-2. Escolha **5** ou **10**; Enter usa 5 e **q** cancela sem preparar arquivos.
+2. Se houver priorizacao anterior, escolha **1 recriar** ou **2 progredir**.
+   Recriar inicia nova base, preservando o historico; progredir exclui as issues
+   ja propostas na sequencia. Um preparo ainda sem resultado e retomado.
+   Para uma nova fatia, informe **0,01 a 100,00**, com virgula ou ponto e ate duas
+   casas; `%` e opcional. **q** ou Enter cancela sem preparar arquivos.
 3. Confira os projetos e os avisos no terminal. A tarefa mostra os caminhos reais
    do contexto, prompt e destino da lista, e abre `priorizar-issues.prompt.md`.
 4. Preferencias/restricoes sao opcionais. O prompt ja contem objetivo, limites e
@@ -64,12 +69,35 @@ recupera os arquivos; nao e obrigatorio voltar ao chat anterior ou regenerar con
 Pelo terminal na raiz do harness, substituindo o nome pelo workspace que salvou:
 
 ```powershell
-powershell.exe -NoProfile -File .\scripts\preparar-priorizacao.ps1 -WorkspacePath .\meu-workspace.code-workspace -Top 10 -NoOpen
+powershell.exe -NoProfile -File .\scripts\preparar-priorizacao.ps1 -WorkspacePath .\meu-workspace.code-workspace -Percentage 10 -Mode Recreate -NoOpen
 ```
 
-`-Top` aceita inteiros de 5 a 10; `-SelectTop` oferece o menu. Para automacao,
-combine `-NoOpen -OutputFormat Json` com WorkspacePath ou ConfigPath explicito;
-nao use menu nem EditorPath nessa modalidade.
+`-Interactive` oferece os menus. Para avancar, use `-Mode Continue -Percentage 10`;
+para retomar preparo ainda sem resultado, `-Mode Continue` basta. Se houver varias
+frentes, informe `-PreviousRequestId` com o ID desejado; nao ha escolha por recencia.
+Uma referencia antiga segue seu unico sucessor. Para automacao, combine
+`-NoOpen -OutputFormat Json` com WorkspacePath ou ConfigPath explicito, sem
+Interactive/EditorPath. Top/SelectTop foram substituidos; contextos antigos exigem
+recriacao. Status EXHAUSTED indica que nao ha novas elegiveis e nenhum arquivo foi criado.
+
+### Fatias e continuidade
+
+O total inicial conta issues por **projeto/Source + ID completo**, nao ocorrencias.
+Com 200 issues, cada avanco de 10% examina ate 20 issues ainda disponiveis;
+nao calcula 10% do restante.
+Arredonda para cima e limita ao disponivel: com duas issues, 0,01% resulta em uma
+e 100% em duas. A lista informa percentual solicitado, quota e cobertura efetiva.
+O agente pode recomendar menos que a quota por lacunas ou sobreposicoes.
+
+Apenas IDs explicitamente propostos sao excluidos dos proximos avancos. Issues
+examinadas sem recomendacao continuam disponiveis; citacao/overlap nao e proposta.
+O prompt grava no proprio ranking um bloco estruturado com IDs examinados/propostos.
+O preparador valida esse resultado; arquivo incompleto nao equivale a fatia concluida.
+100% de issues examinadas nao significa todas as ocorrencias corrigidas/validadas.
+
+Mudancas de projetos, origem MTA/catalogo ou evidencias exigem recriar a base.
+Decisoes humanas atuais filtram as disponiveis, sem mudar o denominador da sequencia.
+Projetos com diagnostico indisponivel aparecem como lacunas, fora dessa base.
 
 ## Orientacao pelos helpers
 
@@ -107,7 +135,7 @@ Se faltar localizacao ou solucao no relatorio MTA, deve pedir essa evidencia.
 | Potencial | Reducao condicional, sem dupla contagem, promessa de resolucao ou extrapolacao da amostra para todos os usos. |
 | Confianca | Qualidade e atualidade das evidencias, separada do risco. |
 
-Pode haver menos de cinco candidatas quando a evidencia nao sustenta mais.
+Pode haver menos recomendacoes que issues examinadas quando a evidencia nao sustenta mais.
 Projetos ausentes e issues excluidas/nao analisadas continuam visiveis. Agrupar
 uma oportunidade comum nao cria um lote entre projetos. Java 8, `javax.*`,
 EAP 7.4 e Hibernate 5.3, quando aplicavel, continuam sendo os alvos.

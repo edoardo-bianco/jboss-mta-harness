@@ -15,7 +15,9 @@ Preferencias, restricoes ou projetos a enfatizar:
 ## Trabalho solicitado
 
 Leia o JSON final e ContextPath. Sem contexto explicito, solicite o arquivo preparado.
-Confira Purpose=issue-prioritization, RequestId, Top (5..10), RankingPath e Projects.
+Confira Purpose=issue-prioritization, SchemaVersion=2, RequestId, SequenceId,
+Percentage (0,01..100,00), InitialTotal, SliceSize, AvailableIssues, ExcludedIssues,
+Previous, RankingPath e Projects. Contexto antigo com Top exige novo preparo.
 Use ContractSnapshot, secao Pre-planejamento, e GuidePath; nao procure outra solicitacao.
 Leia indice e registros atuais, compare com os snapshots; exponha divergencias.
 Source identifica cada projeto local; MtaOrigin/RunId identificam sua rodada.
@@ -32,12 +34,20 @@ somente le/busca, sem escrita ou subdelegacao, e devolve evidencias ao condutor.
 Sem apoio compativel, prossiga diretamente e informe o limite; nao simule delegacao
 nem exija trocar de cliente. Somente o condutor escreve RankingPath.
 
-Primeira passagem: inventarie candidatas mandatory/PRESENTE dos registros, com
+Primeira passagem: confira AvailableIssues, limitado a BaselineIssues e sem
+ExcludedIssues. InitialTotal e fixo na sequencia; SliceSize e o teto do percentual
+sobre essa base, limitado as disponiveis. A unidade e Source + ID completo, nao
+ocorrencias ou oportunidades agrupadas. Triagem do inventario nao e diagnostico
+de todas as issues. Selecione ate SliceSize para aprofundar por risco/repetibilidade/
+alcance. Mencoes de apoio nao consomem quota. Confira elegibilidade atual:
+candidatas mandatory/PRESENTE dos registros, com
 decisao A DEFINIR ou ANALISAR AGORA e andamento NAO ANALISADA/ANALISADA.
 ADIAR/FORA DO ESCOPO e PLANEJADA/IMPLEMENTADA/VERIFICADA ficam fora por padrao;
 reconsiderar exige pedido humano explicito por projeto/ID/recorte e justificativa.
 DEV-... so entra por pedido expresso, identificado como manual, sem categoria MTA
-inventada. Mantenha trabalho ativo visivel, sem recomendar outro lote automatico.
+inventada; o preparo percentual atual nao as inclui. Pedido fora de AvailableIssues
+exige novo preparo/contrato explicito, sem ampliar o universo por conta propria.
+Mantenha trabalho ativo visivel, sem recomendar outro lote automatico.
 Registros invalidos, origem MTA ausente/conflitante, projeto sem fontes ou evidencia
 essencial indisponivel ficam em Lacunas, sem receber risco baixo ou beneficio certo.
 
@@ -67,7 +77,10 @@ Java 8/javax/EAP 7.4 e Hibernate 5.3 quando aplicavel; receita nao testada e can
 
 Grave somente RankingPath, sob a solicitacao .harness/priorizacao do recibo:
 - Identidade, data, escopo/projetos/RunIds, fontes e limites da leitura.
-- Ate Top candidatas, menos se nao houver evidencia suficiente, sem preencher quota.
+- Recomendacoes dentre as ate SliceSize issues examinadas, menos se faltar evidencia.
+- Percentual solicitado, base inicial, quota, examinadas/propostas desta fatia,
+  propostas anteriores excluidas e cobertura efetiva por IDs distintos / InitialTotal.
+  100% das issues nao comprova 100% das ocorrencias validadas/corrigidas.
 - Tabela: posicao, projeto(s)/ID, solucao candidata, ocorrencias/pontos observados,
   alcance por arquivos/modulos, repetibilidade, risco, confianca e potencial condicional.
 - Por candidata: evidencias/linhas, amostra e variacoes, dependencias, testes/reversao,
@@ -89,6 +102,21 @@ Grave somente RankingPath, sob a solicitacao .harness/priorizacao do recibo:
 
 Na retomada, preserve identidade e decisoes humanas anotadas; atualize analise com
 origem explicita, sem apagar historico. Releia a saida e confira consistencia.
+Este resultado contem somente a fatia atual; consulte anteriores via Previous.
+Examinadas sem proposta continuam disponiveis; mencao/overlap nao e proposta.
+Ao finalizar, inclua exatamente um bloco abaixo em RankingPath. Os arrays contem
+objetos com Source e Id copiados de AvailableIssues, sem duplicatas. AnalyzedIssues
+tem no maximo SliceSize elementos; ProposedIssues e um subconjunto. Arrays podem
+ser vazios; explique analise parcial/ausencia de recomendacoes no texto.
+Use IN_PROGRESS enquanto incompleto e COMPLETED quando terminar esta fatia,
+sem significar GO/aceite. O preparador valida o bloco antes de progredir.
+
+<!-- priorizacao:resultado -->
+```json
+{"RequestId":"ID-DESTA-SOLICITACAO","Status":"COMPLETED","AnalyzedIssues":[],"ProposedIssues":[]}
+```
+<!-- /priorizacao:resultado -->
+
 Nao altere migracao.md, indice, fontes, planos/to-dos ou recibos. Nao execute build,
 MTA, Sonar, Git, receitas ou deploy. Nao selecione issues pelo humano, conceda GO,
 planeje varios lotes, declare resolucao ou inicie automaticamente planejamento.

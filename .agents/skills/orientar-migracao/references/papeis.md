@@ -80,7 +80,8 @@ Sem conflito relevante, indique Planejamento: planejar para a escolha valida.
 
 Para pedido de ranking/pre-planejamento, consulte
 [priorizacao](../../../../doc/guias/tools/priorizacao-issues.md). Explique entradas,
-top 5..10, risco/repetibilidade/alcance e confianca; revise candidatas e lacunas no
+fatia de 0,01%..100,00% do total inicial fixo, recriar/progredir e exclusao das
+issues ja propostas. Explique risco/repetibilidade/alcance e confianca; revise candidatas no
 chat dentro do escopo multi-projeto explicito. Encaminhe necessidade de amostra ao
 orquestrador; nao subdelegue. Recomendar nao altera ANALISAR AGORA nem concede GO.
 Gravar ranking exige executar priorizar-issues em etapa separada, fora deste helper.
