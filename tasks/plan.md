@@ -1,5 +1,48 @@
 # Plano do agente: evolucao do harness
 
+## Publicacao e alinhamento da conciliacao - 2026-10-05
+
+O mantenedor solicitou commit, push, PR e alinhamento de main e main_jboss_eap74
+apos a entrega documental. Publicar a branch de conciliacao, conferir o PR e
+integrar por merge com a excecao administrativa restrita a PR. Depois atualizar
+main local e avancar main_jboss_eap74 por fast-forward, sem push direto em main,
+force ou alteracao das regras. Conferir refs, conteudo documental e estado limpo.
+Remover a branch de trabalho somente apos comprovar sua integracao.
+
+## Referencia explicita a orientacao no guia principal - 2026-10-05
+
+Complemento solicitado: explicar `orientar-migracao` e sua relacao com
+`migracao_helper` no guia do desenvolvedor, mostrar a entrada por cliente e
+destacar o passo a passo existente no guia de Workspace. Retomar a branch
+`harness/conciliacao-evolucao-capacidades`, limpa em `082f581`.
+Aceite: descricao compreensivel, exemplo de primeiro uso, responsabilidades
+humanas preservadas e link direto valido. Conferir diff e referencias locais;
+sem alterar comportamento, skills ou guias operacionais de outras etapas.
+
+## Conciliacao das evolucoes futuras - 2026-10-05
+
+Pedido: incorporar o catalogo de dominios/capacidades fornecido pelo desenvolvedor
+e relaciona-lo com todas as pendencias, sem escolher prazo, prioridade ou piloto.
+Escopo desta entrega: documentacao do harness, na branch
+`harness/conciliacao-evolucao-capacidades`, derivada de main `d48cf6a`.
+O unico arquivo local pendente na abertura era a proposta do desenvolvedor.
+
+1. Comparar a proposta (baseline `de5975096d`) com ADRs, backlog, estrategia e
+   entregas posteriores; distinguir detalhamento, novidade e lacuna ja atendida.
+2. Registrar a correspondencia das 23 capacidades e dos IDs anteriores na
+   [conciliacao](../doc/estrategia/conciliacao-evolucao-harness.md), preservando
+   a proposta original, as decisoes humanas e as verificacoes pendentes.
+3. Ligar catalogo, conciliacao e backlog a partir do README, das duas versoes
+   da estrategia e do guia de manutencao; corrigir orientacoes de retomada antigas.
+4. Revisar links, cobertura dos IDs e diff. A alteracao e documental; nao executa
+   pilotos, instala ferramentas, altera skills/scripts ou concede aceite de ensaio.
+
+Aceite documental: cada capacidade tem relacao explicita com o existente;
+COMP/CORE/SERV nao viram entregas duplicadas; VAL-01/02/03, DEC-01 e EVO-01 continuam
+visiveis. Prioridades P1/P2/P3 e pilotos do catalogo sao sugestoes, sem ordem global
+escolhida. Preservar VAL-01 antes dos executores como dependencia ja registrada.
+Uma futura escolha abre apenas o incremento pertinente, com escopo e aceite proprios.
+
 ## Integracao e limpeza apos PR 2 - 2026-10-05
 
 PR 2 integrado pelo mantenedor, confirmado em origin/main 0921b6e. Restam os
@@ -997,6 +1040,12 @@ Correcao vale para novos preparos; recibos/prompts historicos nao foram reescrit
 Revisao estatica e testes de preparadores nao comprovam comportamento dos agentes.
 
 ### Sequencia e verificacao
+
+Leitura atualizada em 2026-10-05: a [conciliacao das capacidades](../doc/estrategia/conciliacao-evolucao-harness.md)
+detalha COMP/CORE/SERV e relaciona as demais propostas a este plano. A sequencia
+historica abaixo preserva dependencias, especialmente VAL-01 antes dos executores;
+nao escolhe prioridade global ou data para o novo catalogo. Planejar somente o
+incremento selecionado, reutilizando a base atual em vez de repetir entregas.
 
 Fatia SDLC-03 implementada, aguardando VAL-01: perfis finos nos dois clientes, sem modelo fixado,
 com uma referencia de papeis na skill existente. Subfatias: (a) referencia comum,

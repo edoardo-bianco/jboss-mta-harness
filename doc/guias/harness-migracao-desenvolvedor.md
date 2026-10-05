@@ -45,11 +45,31 @@ ela participa e qual resultado permite continuar. Cada etapa destaca o guia
 que a detalha. Configuracao, menus, comandos e alternativas de execucao ficam
 nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 
-**Para ser conduzido, comece pelo [helper de migracao](tools/workspace.md#orientacao-com-codex-ou-github-copilot).**
-Diga apenas o objetivo: "Quero priorizar as issues mandatory deste workspace" ou
-"Escolhi uma issue no registro; me conduza ao proximo passo". O helper localiza
-o contexto, explica uma proxima acao e fornece tarefa/caminho/mensagem prontos.
-Ele pede informacao somente quando os arquivos nao resolvem uma ambiguidade real.
+**Para receber orientacao, use a skill `orientar-migracao`.** Ela e o conjunto
+de instrucoes compartilhadas que ensina o agente a conduzir a migracao uma etapa
+por vez. O `migracao_helper` e o papel de orientador que aplica essas instrucoes:
+consulta indice, registro, planos e evidencias para identificar a etapa atual e
+indicar uma proxima acao, com tarefa, caminho ou mensagem prontos.
+
+Com a pasta do harness aberta no workspace, inicie assim:
+
+- **Codex:** abra a conversa na raiz do harness e selecione `$orientar-migracao`.
+- **GitHub Copilot:** selecione `migracao_helper` na lista de agentes do Chat.
+
+Informe o projeto e o objetivo, por exemplo:
+
+> Quero iniciar a migracao do projeto X, que ja esta no workspace. Confira o
+> contexto existente e me oriente no proximo passo.
+
+Tambem pode pedir para priorizar issues ou retomar uma issue ja escolhida no
+registro. O helper pede informacao quando os arquivos nao resolvem uma ambiguidade.
+Voce executa a acao indicada e retorna com o resultado; o helper orienta a seguinte.
+As escolhas de prioridade, a autorizacao de implementar (GO) e o aceite continuam
+com voce. Usar a skill nao comprova que um subagente foi delegado.
+
+**Passo a passo completo:** [guia de Workspace — Orientacao com Codex ou GitHub Copilot](tools/workspace.md#orientacao-com-codex-ou-github-copilot).
+Essa secao explica como iniciar, o que conferir se a skill ou o agente nao aparecer,
+como retomar em outro chat e como passar da orientacao para a execucao autorizada.
 
 | Sua situacao | Por onde entrar |
 | --- | --- |
@@ -64,7 +84,7 @@ Ele pede informacao somente quando os arquivos nao resolvem uma ambiguidade real
 | Corretiva pronta para conferir | [7. Verificar e aceitar o resultado](#7-verificar-e-aceitar-o-resultado). |
 | Novo MTA, novas evidencias ou lote aceito para continuar | [8. Reconciliar e decidir a continuidade](#8-reconciliar-e-decidir-a-continuidade). |
 | Somente uma operacao, como iniciar JBoss, depurar ou analisar Sonar | [Guias de ferramentas](#guias-de-ferramentas); essas operacoes tambem podem ser usadas separadamente. |
-| Preciso de ajuda para identificar a etapa e o proximo passo | [Orientacao com Codex ou GitHub Copilot](tools/workspace.md#orientacao-com-codex-ou-github-copilot); a skill consulta o contexto existente e indica o guia da etapa. |
+| Preciso de ajuda para identificar a etapa e o proximo passo | Use `orientar-migracao` / `migracao_helper`; veja o [passo a passo no guia de Workspace](tools/workspace.md#orientacao-com-codex-ou-github-copilot). |
 
 O fluxo pertence ao projeto e ao codigo em analise. O workspace pode reunir
 varias aplicacoes; as evidencias e decisoes continuam vinculadas a cada uma.

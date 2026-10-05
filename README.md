@@ -39,6 +39,11 @@ e engines alternativos dependem de implementacao e pilotos.
 A [estrategia do harness](doc/estrategia/estrategia-harness_.md) distingue
 as capacidades existentes das propostas e seus criterios de avanco.
 
+O [catalogo de dominios e capacidades](doc/features/evolucao-harness-dominios-capacidades-priorizacao.md)
+detalha propostas futuras. A [conciliacao com o backlog](doc/estrategia/conciliacao-evolucao-harness.md)
+identifica sobreposicoes, entregas ja atendidas e pendencias preservadas;
+prazo, prioridade e piloto permanecem a definir.
+
 ## Como usar
 
 **Siga o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md).**
