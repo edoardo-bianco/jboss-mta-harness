@@ -14,6 +14,11 @@ confirmar igualdade do conteudo. Remover somente branches cujo HEAD esteja
 integrado e o worktree limpo da licenca, mantendo dados locais e playground externo.
 O merge do PR 2 nao concede aceite de migracao nem conclui o ensaio nativo.
 
+PR 3 preparado e validado. O mantenedor autorizou explicitamente no chat concluir
+o merge via excecao administrativa somente por PR, alinhar main_jboss_eap74 e
+remover branches integradas. Branches de licenca/backlog e worktree da licenca
+ja removidos; a execucao final confere os refs e registra evidencia local no to-do.
+
 ## Playground externo e priorizacao percentual - 2026-10-05
 
 Planejamento e implementacao autorizados pelo desenvolvedor apos analise no chat.

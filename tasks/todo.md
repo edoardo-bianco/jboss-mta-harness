@@ -6,8 +6,16 @@
 - [x] Conciliar plan/to-do ao incorporar main na branch de priorizacao.
 - [x] Validar a base integrada: Test-Prioritization, Test-PrioritizationProgress,
   Test-Workspace e Test-TaskInputs passaram; sintaxe e 230 links locais validos.
-- [ ] Mantenedor revisar e integrar o PR restante de priorizacao/playground.
-- [ ] Apos o merge aceito, alinhar main/main_jboss_eap74 e limpar branches integradas.
+- [x] Mantenedor aprovar o merge do [PR 3](https://github.com/edoardo-bianco/jboss-mta-harness/pull/3),
+  o alinhamento de main_jboss_eap74 e a limpeza: autorizacao explicita no chat.
+- [x] Remover branches locais/remotas ja integradas de licenca e backlog, e o
+  worktree limpo da licenca, apos conferir ancestralidade e ausencia de pendencias.
+
+Encerramento autorizado: integrar PR 3 por merge, avancar main_jboss_eap74 a main,
+retornar o checkout a main e remover a branch integrada de priorizacao. Conferir
+refs locais/remotas, unico worktree, protecao e status limpo; evidencia final em
+.harness/tests/integracao-priorizacao-20261005/encerramento.json. Nenhum dado local
+de ferramentas nem o playground externo entra nessa limpeza Git.
 
 Revisao da conciliacao: runtime identico ao commit 5f7cfdd; apenas licenca,
 CODEOWNERS e documentacao recebidos de main. Conflitos limitados a plan/to-do,
