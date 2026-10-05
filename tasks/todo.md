@@ -1,5 +1,19 @@
 # To-do do agente: evolucao do harness
 
+## Integracao e limpeza apos PR 2 - 2026-10-05
+
+- [x] Confirmar PR 2 integrado, main protegida e CODEOWNERS presente na base.
+- [x] Conciliar plan/to-do ao incorporar main na branch de priorizacao.
+- [x] Validar a base integrada: Test-Prioritization, Test-PrioritizationProgress,
+  Test-Workspace e Test-TaskInputs passaram; sintaxe e 230 links locais validos.
+- [ ] Mantenedor revisar e integrar o PR restante de priorizacao/playground.
+- [ ] Apos o merge aceito, alinhar main/main_jboss_eap74 e limpar branches integradas.
+
+Revisao da conciliacao: runtime identico ao commit 5f7cfdd; apenas licenca,
+CODEOWNERS e documentacao recebidos de main. Conflitos limitados a plan/to-do,
+consolidados sem descartar evidencias de nenhuma entrega. A revisao independente
+anterior permanece aplicavel. Logs em .harness/tests/integracao-priorizacao-20261005/.
+
 ## Playground externo e priorizacao percentual - 2026-10-05
 
 Escopo autorizado no [plano](plan.md#playground-externo-e-priorizacao-percentual---2026-10-05).
@@ -29,10 +43,10 @@ reconferidos; seis perfis de cada cliente reutilizam a skill e suas referencias.
 O validador usou o Python instalado e PyYAML isolado pelo uv; nenhuma dependencia
 foi adicionada ao harness. Nenhum teste de runtime repetido nesta mudanca documental.
 
-Licenca e protecao pedidas em seguida: entregues separadamente no
-[PR 2](https://github.com/edoardo-bianco/jboss-mta-harness/pull/2), com regras remotas
-ativas (24499809). O mantenedor revisa e faz o merge; CODEOWNERS nominal depende
-da entrada do arquivo em main. Esta evolucao percentual permanece na sua branch.
+Licenca e protecao foram integradas pelo mantenedor no
+[PR 2](https://github.com/edoardo-bianco/jboss-mta-harness/pull/2), merge 0921b6e,
+com regras remotas ativas (24499809) e CODEOWNERS na main. A evolucao percentual
+segue em PR separado; a conciliacao atual preserva ambos os resultados.
 
 Validacao em 2026-10-05: 36 scripts Test-*.ps1 passaram em Windows PowerShell 5.1;
 Test-JbossReal foi SKIP (exige RunReal, nao acionado). A primeira chamada generica
@@ -55,6 +69,19 @@ arquivo local do ensaio 01 e C:/mta-runs/migracao-cache-antes. Planning/prioriza
 ativos estavam vazios. Config/workspace locais ficaram sem exemplos; ferramentas
 e configuracoes de servidor preservadas. Nenhum novo registro/indice foi criado;
 o desenvolvedor importara o playground e iniciara a nova analise.
+
+## Licenca MIT e protecao de main - 2026-10-05
+
+- [x] Conferir MIT da referencia, conta administradora, branch e visibilidade.
+- [x] Preparar LICENSE em nome de Edoardo Bianco, CODEOWNERS e documentacao.
+- [x] Validar texto da licenca, referencias e diff: MIT identica a referencia,
+  alterando apenas ano/titular; 68 destinos de links locais validos.
+- [x] Ativar e conferir regras de main e excecao administrativa somente via PR.
+  Ruleset 24499809 ativo; API confirma main protected=true, sem alterar seu SHA.
+- [x] Mantenedor revisar e integrar o PR da licenca/CODEOWNERS: PR 2, merge 0921b6e.
+
+Sem mudanca de runtime, sem novos testes de aplicacao. CODEOWNERS agora esta na
+main; o merge foi realizado pelo mantenedor e confirmado na API.
 
 ## Validacao para integracao nas principais - 2026-10-04
 

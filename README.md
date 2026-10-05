@@ -66,3 +66,7 @@ concluir o plano. Veja [entradas e resultados](doc/guias/tools/planejamento-migr
 Para contribuir com a evolucao do harness, consulte [AGENTS.md](AGENTS.md) e as
 [decisoes arquiteturais](doc/adr/). O [contrato de planejamento](doc/especificacoes/planejamento-copilot.md)
 define os limites do trabalho assistido e os registros de cada etapa.
+
+## Licenca
+
+Distribuido sob a [licenca MIT](LICENSE). Copyright (c) 2026 Edoardo Bianco.

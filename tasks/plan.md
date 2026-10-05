@@ -1,5 +1,19 @@
 # Plano do agente: evolucao do harness
 
+## Integracao e limpeza apos PR 2 - 2026-10-05
+
+PR 2 integrado pelo mantenedor, confirmado em origin/main 0921b6e. Restam os
+commits 713d795, 2bf5675 e 5f7cfdd, de priorizacao percentual, playground externo e
+documentacao. Atualizar a branch com main, conciliando somente os conflitos de
+plan/to-do e preservando LICENSE, CODEOWNERS e o fluxo de PR.
+
+Conferir sintaxe, links e os testes de priorizacao/workspace/Run Tasks na base
+integrada. Publicar PR com o resultado completo para aprovacao do mantenedor.
+Depois da integracao aceita em main, alinhar explicitamente main_jboss_eap74 e
+confirmar igualdade do conteudo. Remover somente branches cujo HEAD esteja
+integrado e o worktree limpo da licenca, mantendo dados locais e playground externo.
+O merge do PR 2 nao concede aceite de migracao nem conclui o ensaio nativo.
+
 ## Playground externo e priorizacao percentual - 2026-10-05
 
 Planejamento e implementacao autorizados pelo desenvolvedor apos analise no chat.
@@ -85,10 +99,12 @@ do administrador somente via PR: GitHub nao admite autoaprovacao. CODEOWNERS
 passa a selecionar o revisor quando o arquivo estiver na branch base do PR.
 Verificar configuracao remota efetiva e erros de CODEOWNERS apos publicar a branch.
 
-Ruleset 24499809 ativo, main protegida com SHA preservado. Licenca/CODEOWNERS e
+Ruleset 24499809 ativo, main protegida. Licenca/CODEOWNERS e
 documentacao publicados separadamente no [PR 2](https://github.com/edoardo-bianco/jboss-mta-harness/pull/2),
-branch harness/licenca-protecao-main, commit 0eb2c71. Merge manual fica com o
-mantenedor; esta branch de priorizacao nao foi integrada nem publicada com o PR.
+branch harness/licenca-protecao-main, commit 0eb2c71, derivada de main a29001f em
+worktree isolado. O mantenedor integrou o PR em 2026-10-05 (merge 0921b6e):
+CODEOWNERS ja esta na base e seleciona @edoardo-bianco para todos os arquivos.
+Esta entrega inicial nao incluiu os commits de priorizacao nem alterou main_jboss_eap74.
 
 ## Integracao nas principais autorizada - 2026-10-04
 
