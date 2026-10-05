@@ -1,5 +1,28 @@
 # To-do do agente: evolucao do harness
 
+## Conciliacao das evolucoes futuras - 2026-10-05
+
+Escopo: [plano desta entrega](plan.md#conciliacao-das-evolucoes-futuras---2026-10-05).
+
+- [x] Conferir raiz, main `d48cf6a` e estado local; preservar a proposta recebida
+  e criar `harness/conciliacao-evolucao-capacidades`.
+- [x] Comparar catalogo, backlog vigente, estrategia e ADRs, incluindo entregas
+  posteriores a baseline da proposta.
+- [x] Registrar correspondencias, escopos superados e propostas adicionais.
+- [x] Atualizar referencias e separar retomadas historicas de pendencias atuais.
+- [x] Revisar documentos e validar links, IDs e preservacao do texto original.
+
+Prazo, prioridade e piloto permanecem a definir pelo desenvolvedor. Esta entrega
+nao implementa capacidades nem encerra VAL-01/02/03 por revisao documental.
+
+Verificacao: 8 documentos, 136 links/ancoras locais validos; 23 capacidades
+relacionadas uma vez na matriz e 23 prioridades escolhidas ainda `A definir`.
+Revisao independente sem achados materiais; sem execucao de runtime nesta entrega.
+Texto recebido preservado, exceto a nota de incorporacao: ao retirar essa nota e
+normalizar finais de linha, o SHA-256 confere com o original
+`be1195f7b168e48d4ddd7a40296a7ef7ef5b25cb43de13e476c30754b57c4a13`.
+Quebras Markdown com dois espacos do documento recebido foram preservadas.
+
 ## Integracao e limpeza apos PR 2 - 2026-10-05
 
 - [x] Confirmar PR 2 integrado, main protegida e CODEOWNERS presente na base.
@@ -382,13 +405,15 @@ novos coletores e preparo automatizado de servidor permanecem pendentes.
 
 ### Ponto de retomada - 2026-10-04
 
-Retomada atual: ensaio 02 preparado para iniciar, conforme registro no inicio deste arquivo.
+Registro historico: o ensaio 02 estava preparado em 04/10. O playground foi
+externalizado e reiniciado em 05/10; o estado atual das pendencias esta no
+[backlog vigente](#backlog-vigente) e na [conciliacao](../doc/estrategia/conciliacao-evolucao-harness.md).
 Simplificacao SIM-01 a SIM-13 implementada e auditada; SIM-14/VAL-01 sao verificados
 na nova rodada, mantendo o ensaio 01 arquivado.
 Os ajustes anteriores de prompts/priorizacao ja foram implementados; preservar
 essas entregas. O [registro de retomada e diagnostico](plan.md#retomada-apos-a-pausa-de-2026-10-03)
-permanece historico. Voltar a validacao nativa apos a simplificacao, na branch
-`harness/backlog-agente-orientacao`.
+permanece historico. A branch `harness/backlog-agente-orientacao` foi integrada e
+removida; nao e destino de retomada. A validacao nativa permanece pendente.
 
 - [x] Atualizar diagnostico pelo relato humano: Copilot aparentemente voltou apos desativar o MCP do Azure; causa exata nao confirmada. Investigar novamente se a falha reaparecer, sem exigir isolamento previo do DevSquad.
 - [ ] Retestar orientacao do `migracao_helper` no Copilot apos SIM-11/13, conferindo fontes e ausencia de escrita; o chat ja respondeu no evento 9.
@@ -397,6 +422,13 @@ permanece historico. Voltar a validacao nativa apos a simplificacao, na branch
 - [ ] Completar VAL-01 nos dois clientes antes dos executores. Testes simulados nao substituem essa validacao.
 
 ## Backlog vigente
+
+Conciliado em 2026-10-05 com o [catalogo de capacidades](../doc/features/evolucao-harness-dominios-capacidades-priorizacao.md).
+A [matriz de correspondencias](../doc/estrategia/conciliacao-evolucao-harness.md)
+relaciona todas as frentes e as 23 capacidades, incluindo sobreposicoes e lacunas
+ja atendidas. IDs anteriores permanecem rastreaveis; capacidades detalham demandas,
+sem duplicar entregas. Novas prioridades, datas e pilotos continuam a definir.
+As dependencias de validacao ja registradas permanecem; nao fixam uma ordem global.
 
 | ID | Estado / ordem | Proxima entrega |
 | --- | --- | --- |
@@ -407,20 +439,23 @@ permanece historico. Voltar a validacao nativa apos a simplificacao, na branch
 | SDLC-04 | Apos SDLC-03 / VAL-01 | Orquestrador executor e especialista de preparo; modo delegado e retorno ao humano. |
 | SDLC-05 | Apos SDLC-04 | Executores das demais etapas, reutilizando os helpers ja entregues; consumir matriz COMP-01 e coleta Java opcional. |
 | SDLC-06 | Conforme necessidade | Adequar uma acao existente por vez: branch explicita, Sonar assistido, build/MTA/JBoss e limpeza. |
-| COMP-01 | Capacidade solicitada | Coletor deterministico das dependencias Maven e prompt especifico de matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. |
-| CORE-01 | Piloto opcional transversal | Navegacao/coleta de contexto Java para compreensao pelo desenvolvedor e apoio ao SDLC, independente de MTA/engine. |
-| SERV-01 | Capacidade solicitada; validar rota primeiro | Migrar configuracao/subsistemas e inventariar drivers, modulos e recursos necessarios; ferramenta oficial/CLI e prompt/helper com evidencias, acoes e validacao no destino isolado. |
+| COMP-01 | Capacidade solicitada; detalhada por DEP-01/02 | Coletor deterministico Maven e matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. DEP-03 e extensao a avaliar separadamente. |
+| CORE-01 | Piloto opcional transversal; detalhado por SRC | Navegacao/coleta de contexto Java independente de MTA/engine, principalmente SRC-01/03/06. SRC-02/04/05 ampliam opcoes, sem se tornarem requisitos do primeiro piloto. Adaptador ainda a escolher. |
+| SERV-01 | Capacidade solicitada; detalhada por JBS-01..05 | Inventario, rota comprovada, assistencia, transformacao de configuracao e validacao no destino isolado. Reutilizar operacoes existentes; nao duplicar a demanda nem declarar rota 7.1 direta suportada. |
 | VAL-01 | Ensaio parcial interrompido para simplificacao; eventos 9/10 | Uso da skill e reconhecimento da escolha demonstrados no material trazido pelo desenvolvedor; reconciliacao primeiro sem conflito apontado nos dois clientes, Codex direcionou execucao ao Copilot. Delegacao ainda nao validada. Retestar em SIM-14: orientacao/delegacao, capacidades presentes/ausentes/inadequadas e ausencia de efeitos operacionais; casos do plano. |
 | VAL-02 | Ensaio operacional existente pendente | Prompts Copilot: reconciliacao/delegacao, issues, persistencia, retomada, GO, implementacao e continuidade com Previous/novo MTA. |
 | VAL-03 | Ensaio Sonar real pendente | Criterios Blocker/High, avisos de cobertura e comparacao com baseline, separados do Quality Gate. |
 | DEC-01 | Decisao futura | Decidir preparo de deploy com servidor parado; deploy atual exige servidor ativo. |
-| EVO-01 | Futuro, apos priorizacao | Demais fatias da estrategia: nucleo, Node.js/TypeScript, IntelliJ, Quarkus, outros engines e entrega/operacao. |
+| EVO-01 | Futuro, apos priorizacao | Demais fatias da estrategia: nucleo, Node.js/TypeScript, IntelliJ, Quarkus, outros engines e entrega/operacao. Relacionar HAR-04 e demais propostas novas do catalogo, sem considerar todos os incrementos ja aprovados. |
 
 Criterios, dependencias e arquivos por fatia estao na
 [sequencia de implementacao](plan.md#sequencia-e-verificacao). COMP-01 e independente
 do explorador CORE-01; ambos fornecem evidencias, sem ampliar ferramentas do
 planejador atual. SERV-01 nao e deploy offline nem autorizacao para migrar o EAP
-local. Os prompts existentes seguem Copilot/DevSquad ate adaptacao e ensaio Codex.
+local. A orientacao e a entrada pelo registro ja contemplam Codex e Copilot,
+conforme ADR-0005; isso nao comprova delegacao/execucao nativa. VAL-01/02 preservam
+os ensaios ainda necessarios. O item VAL-02 concluido na secao de priorizacao
+percentual e uma verificacao daquela entrega, nao o ensaio operacional VAL-02 daqui.
 
 ### Verificacoes e reconciliacao do historico
 

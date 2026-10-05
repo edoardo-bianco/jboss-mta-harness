@@ -76,7 +76,7 @@ do harness. Os demais documentos possuem finalidades distintas:
 | `doc/estrategia/` | [Objetivos, fundamentos e evolucao proposta do harness](../estrategia/estrategia-harness_.md); distingue a base atual dos pilotos futuros. |
 | `doc/adr/` | Decisoes e justificativas, como [contexto local e acionamento do Copilot](../adr/0001-contexto-copilot.md). |
 | `doc/especificacoes/` | Contratos duradouros do harness e criterios verificaveis, como [planejamento Copilot](../especificacoes/planejamento-copilot.md). |
-| `doc/features/` | Registro historico dos primeiros ensaios, explicitamente datado; nao e outro guia de uso nem fonte de pendencias atuais. |
+| `doc/features/` | Propostas de evolucao e registros historicos, com baseline e situacao explicitas. O [catalogo de capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) e relacionado ao backlog pela [conciliacao](../estrategia/conciliacao-evolucao-harness.md); nao substitui contratos nem aprova prioridades. |
 | `tasks/` | [Plano](../../tasks/plan.md) e [to-do](../../tasks/todo.md) do agente de codificacao para a evolucao atual do harness. |
 
 Crie documentos apenas quando houver conteudo proprio: atualizar o guia responsavel pela etapa em vez de duplicar seu roteiro nem repetir o checklist de trabalho em uma especificacao. Os prompts em `.github/prompts/` sao instrucoes operacionais do agente; `.harness/` guarda artefatos locais de execucao. O plano do agente que evolui o harness e separado das propostas de corretivas das aplicacoes.

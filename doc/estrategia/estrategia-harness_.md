@@ -12,6 +12,8 @@ O **JBoss MTA Harness** é um ambiente de trabalho padronizado que construí no 
 ## Objetivo do documento
   
 Orientar a evolução do harness já construído para a migração JBoss em uma base reutilizável para o SDLC e a modernização das aplicações. O documento alinha expectativas sobre IA, distingue capacidades existentes de propostas e define como combinar contexto, ferramentas determinísticas e revisão humana. Deve apoiar decisões de investimento e pilotos, mantendo explícita a responsabilidade por domínio, arquitetura, qualidade e resultado de negócio.
+
+Complemento de 05/10/2026: o [catálogo de domínios e capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) detalha incrementos desta direção. A [conciliação com o backlog e as entregas posteriores](conciliacao-evolucao-harness.md) identifica sobreposições e atualiza a leitura das pendências históricas abaixo, sem substituir a estratégia. Prazo, prioridade e piloto permanecem a definir; as sequências sugeridas não são um cronograma aprovado.
   
 ## A engenharia de software na adoção de IA
   
