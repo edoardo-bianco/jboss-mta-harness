@@ -1,5 +1,17 @@
 # Plano do agente: evolucao do harness
 
+## Regeneracao com pastas sem nome - 2026-10-05
+
+Bugfix em harness/workspace-sem-nome, derivada de main 360442a, checkout limpo.
+O relato da maquina de trabalho indica falha ao resolver a propriedade name.
+Reproduzir no Windows PowerShell 5.1 com pastas importadas somente por path,
+formato valido do VS Code. Corrigir a identificacao das pastas, preservando
+aliases, imports manuais, settings e backup; nao duplicar caminhos equivalentes.
+Cobrir tambem raiz harness sem alias e atualizacao de caminho por nome cadastrado.
+Validar os testes de workspace, debug e build e a Run Task local; revisar o diff.
+Publicacao solicitada apos a validacao: commit e push da branch de bugfix,
+com PR para main. Integracao e alinhamento das principais ficam para outra etapa.
+
 ## Acesso de leitura a raiz MTA no workspace - 2026-10-05
 
 Pedido humano: autorizar C:/mta-runs neste workspace e explicar como alterar.

@@ -43,6 +43,41 @@ Write-HarnessJson $path $workspace
 $null = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.settings.PSObject.Properties[$readAccessKey] -and @($workspace.settings.$readAccessKey).Count -eq 0) 'Gerador deve respeitar revogacao por lista vazia.'
+# Add Folder to Workspace pode salvar somente path, sem o alias opcional name.
+$workspace.folders[0].PSObject.Properties.Remove('name')
+$workspace.folders[1].PSObject.Properties.Remove('name')
+$workspace.folders[1].path = '../APP COM ESPACO/'
+$workspace.folders[2].name = 'Biblioteca escolhida no Explorer'
+$workspace.folders += [pscustomobject]@{path='../fontes manuais'}
+Write-HarnessJson $path $workspace
+$beforeUnnamed = Get-Content -LiteralPath $path -Raw
+$backupCount = @(Get-ChildItem (Join-Path $fixture '.harness/workspace-backups') -File).Count
+$null = New-HarnessWorkspace $context
+$workspace = Get-Content $path -Raw | ConvertFrom-Json
+Assert ($workspace.folders.Count -eq 4) 'Pastas sem name ou com alias proprio nao devem ser duplicadas.'
+Assert ($workspace.folders[0].name -eq 'harness' -and $workspace.folders[0].path -eq '.') 'Raiz sem nome deve recuperar o alias das tarefas sem duplicacao.'
+Assert (-not $workspace.folders[1].PSObject.Properties['name'] -and $workspace.folders[1].path -eq '../APP COM ESPACO/') 'Importacao por caminho equivalente deve preservar seu formato.'
+Assert ($workspace.folders[2].name -eq 'Biblioteca escolhida no Explorer' -and $workspace.folders[2].path -eq $other) 'Alias humano deve ser preservado ao reconhecer o caminho cadastrado.'
+Assert (-not $workspace.folders[3].PSObject.Properties['name'] -and $workspace.folders[3].path -eq '../fontes manuais') 'Pasta extra sem name deve permanecer intacta.'
+Assert ($workspace.settings.'editor.fontSize' -eq 17 -and @($workspace.settings.$readAccessKey).Count -eq 0) 'Regeneracao sem name deve preservar settings e permissoes humanas.'
+$backups = @(Get-ChildItem (Join-Path $fixture '.harness/workspace-backups') -File)
+Assert ($backups.Count -eq $backupCount + 1 -and @($backups | Where-Object { (Get-Content -LiteralPath $_.FullName -Raw) -ceq $beforeUnnamed }).Count -eq 1) 'Backup deve preservar o workspace anterior, inclusive pastas sem nome.'
+$null = New-HarnessWorkspace $context
+$workspace = Get-Content $path -Raw | ConvertFrom-Json
+Assert ($workspace.folders.Count -eq 4) 'Regeneracao repetida deve manter as mesmas pastas.'
+# A correspondencia por nome continua atualizando caminhos cadastrados.
+$workspace.folders[2].name = 'biblioteca'
+$workspace.folders[2].path = '../local-antigo'
+Write-HarnessJson $path $workspace
+$null = New-HarnessWorkspace $context
+$workspace = Get-Content $path -Raw | ConvertFrom-Json
+Assert ($workspace.folders.Count -eq 4 -and $workspace.folders[2].path -eq $other) 'Caminho cadastrado deve ser atualizado quando o nome coincide.'
+# Pasta extra nao gerenciada deve ser preservada, mesmo fora dos caminhos locais do harness.
+$workspace.folders += [pscustomobject]@{name='Documentacao';path='\\servidor\docs'}
+Write-HarnessJson $path $workspace
+$null = New-HarnessWorkspace $context
+$workspace = Get-Content $path -Raw | ConvertFrom-Json
+Assert ($workspace.folders.Count -eq 5 -and $workspace.folders[4].path -eq '\\servidor\docs') 'Pasta UNC extra deve ser preservada sem bloquear a regeneracao.'
 $config.activeProject = 'inexistente'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
 $rejected = $false
@@ -70,10 +105,11 @@ Assert (-not $workspace.settings.PSObject.Properties[$readAccessKey]) 'RunsPath 
 $starter = Get-Content (Join-Path $root 'iniciar-harness.code-workspace') -Raw | ConvertFrom-Json
 Assert ($starter.folders.Count -eq 1 -and $starter.folders[0].path -eq '.') 'Workspace versionado deve conter somente o harness.'
 Set-Content (Join-Path $app 'pom.xml') '<project/>'
-$workspace.folders += [pscustomobject]@{name='Aplicacao importada';path=$app}
+$workspace.folders += [pscustomobject]@{path=$app}
 Write-HarnessJson $path $workspace
 $context = Read-HarnessConfig $configPath $emptyRoot -WorkspacePath $path
 Assert ($context.Projects.Count -eq 1 -and $context.Projects[0].path -eq $app) 'Importacao manual nao foi descoberta.'
+Assert ($context.Projects[0].label -eq 'app com espaco') 'Importacao sem name deve usar o nome da pasta.'
 $null = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.folders.Count -eq 2) 'Regeneracao deve preservar importacao manual.'
@@ -84,4 +120,4 @@ Write-HarnessJson $configPath $config
 $rejected = $false
 try { Read-HarnessConfig $configPath $emptyRoot | Out-Null } catch { $rejected = $true }
 Assert $rejected 'Aplicacao dentro do harness nao deve ter excecao por nome.'
-Write-Output 'PASS: configuracao, troca de alvo, caminhos, workspace vazio, importacao externa e backup.'
+Write-Output 'PASS: configuracao, caminhos, pastas sem name, aliases, importacao externa e backup.'

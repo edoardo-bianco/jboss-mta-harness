@@ -1,5 +1,24 @@
 # To-do do agente: evolucao do harness
 
+## Regeneracao com pastas sem nome - 2026-10-05
+
+- [x] Conferir estado e criar branch de bugfix a partir de main.
+- [x] Reproduzir o erro com pastas sem name no Windows PowerShell 5.1.
+- [x] Corrigir regeneracao e preservar imports, aliases, settings e backups.
+- [x] Validar regressao, Run Task local e revisar o resultado.
+
+RED reproduziu exatamente PropertyNotFound em Where-Object name, Harness.psm1:205.
+GREEN com correspondencia por nome opcional e caminho normalizado. Test-Workspace,
+Test-JbossWorkspace e Test-BuildConfig PASS em Windows PowerShell 5.1. A chamada
+real scripts/gerar-workspace.ps1 tambem terminou com exit code 0 neste checkout.
+Revisao independente apontou rejeicao indevida de pasta UNC extra: regressao
+adicionada, RED observado e GREEN apos preservar caminhos extras nao gerenciados.
+A revisao do agente foi interrompida por limite de uso; conferencia final do diff
+feita pelo condutor. Sem acesso ao workspace da maquina de trabalho; reproducao
+com fixture do formato valido path-only, sem dados corporativos.
+Publicacao solicitada pelo desenvolvedor apos a validacao: commit/push da branch
+e PR para main. Sem merge ou novo alinhamento das principais nesta etapa.
+
 ## Acesso de leitura a raiz MTA no workspace - 2026-10-05
 
 - [x] Conferir branch/estado e chave/escopo no manifesto oficial do Copilot.
