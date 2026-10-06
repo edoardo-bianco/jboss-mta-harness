@@ -83,6 +83,16 @@ Start/estado/stop, CLI/JVM e socket JDWP reais ficam para a maquina de trabalho.
 
 ## Consultas de issues - implementacao 2026-10-06
 
+Segundo incremento: planejamento ORIGINAL/CONSOLIDATED/importado e EVIDENCIAS,
+CLI JSON e falhas explicitas implementados. Test-IssueQueryPlanning, Edges e Cli
+passaram em PowerShell 5.1; testes novos Bounds e regressao PrioritizationIncidents
+tambem PASS apos revisao. CLI: catalogo sintetico 31061 bytes, lista de duas issues
+2215 e detalhe de um incidente 2895; nao mede tokens nem acerto no cliente.
+Revisao detectou e corrigiu acesso a origem historica ao calcular caminhos,
+UNC antes da validacao, campos sem limite e buscas quadraticas. Consulta usa
+mapeamento lexical, dicionarios por ID e teto JSON de 256 KiB. Falta concluir
+documentacao/avaliacao MCP e repetir os testes afetados para revisao final.
+
 Retomada autorizada: primeiro incremento valida auditoria, lista e detalhe em
 recibos de priorizacao, filtros literais, 138 incidentes paginados/por ordinal,
 truncamento declarado, origem completa, hashes e leitura sem escrita. Teste

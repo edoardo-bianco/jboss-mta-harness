@@ -5,6 +5,7 @@ Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
 Import-Module (Join-Path $PSScriptRoot 'HarnessPlanning.psm1') -DisableNameChecking
 . (Join-Path $PSScriptRoot 'HarnessPrioritizationEvidence.ps1')
 . (Join-Path $PSScriptRoot 'HarnessIssueQueryInput.ps1')
+. (Join-Path $PSScriptRoot 'HarnessIssueQueryPlanning.ps1')
 . (Join-Path $PSScriptRoot 'HarnessIssueQueryView.ps1')
 
 function Invoke-HarnessIssueQuery {
@@ -17,6 +18,10 @@ function Invoke-HarnessIssueQuery {
     $response=[ordered]@{SchemaVersion=1;Action=$Action;Status='ERROR';ReadOnly=$true;Provenance=$null;Data=$null;Paging=$null;Diagnostics=@();Error=$null}
     try {
         if ($Action -notin @('auditar_base','listar_issues','obter_issue')) { Stop-QueryError INVALID_INPUT 'Operacao desconhecida.' }
+        foreach ($filter in @('Category','Decision','Progress','Text','Label')) {
+            if ($Action -ne 'listar_issues' -and $PSBoundParameters.ContainsKey($filter)) { Stop-QueryError INVALID_INPUT ("$filter exige listar_issues.") }
+        }
+        if ($Action -ne 'obter_issue' -and $PSBoundParameters.ContainsKey('Id')) { Stop-QueryError INVALID_INPUT 'Id exige obter_issue.' }
         $Page=ConvertTo-QueryNumber $Page 'Page' 1 ([int]::MaxValue)
         $maximum=if ($Action -eq 'obter_issue') {10} else {50}
         $PageSize=ConvertTo-QueryNumber $PageSize 'PageSize' 1 $maximum
@@ -40,18 +45,17 @@ function Invoke-HarnessIssueQuery {
             $detail=Get-QueryDetail $base $Id $Page $PageSize $Incident $MaxTextChars
             $response.Data=$detail.Data; $response.Paging=$detail.Paging
         } else {
-        $differences=@(foreach ($issue in $base.Items) {
-            $row=@($base.Register.Rows | Where-Object Id -CEQ $issue.Id)
-            if ($row.Count -ne 1) { [pscustomobject]@{Id=$issue.Id;Reason='ISSUE_NOT_IN_REGISTER'}; continue }
-            if ($row[0].Category -cne $issue.Category -or [string]$row[0].Count -cne [string]$issue.Count -or $row[0].Presence -ne 'PRESENTE') {
-                [pscustomobject]@{Id=$issue.Id;Reason='CATALOG_REGISTER_DIFFERENCE'}
-            }
-        })
-        $response.Data=[ordered]@{CatalogIssues=$base.Items.Count;CatalogIncidents=($base.Items | Measure-Object Count -Sum).Sum;RegisterIssues=@($base.Register.Rows).Count;Differences=$differences;CodeApplicability='NOT_CHECKED';IndexComparison='HASH_ONLY'}
+            $audit=Get-QueryAudit $base $Page $PageSize
+            $response.Data=$audit.Data; $response.Paging=$audit.Paging
         }
         Assert-QueryFiles $base.Files
         $response.Status='OK'
     } catch { $response.Error=Get-QueryError $_; $response.Data=$null; $response.Paging=$null }
+    # Identificadores/caminhos nao podem ser cortados silenciosamente. O teto
+    # cobre tambem diagnosticos, mensagens de erro e extensoes livres do recibo.
+    if ([Text.Encoding]::UTF8.GetByteCount((ConvertTo-Json -InputObject $response -Depth 50 -Compress)) -gt 256KB) {
+        $response=[ordered]@{SchemaVersion=1;Action=if ($Action -in @('auditar_base','listar_issues','obter_issue')) {$Action} else {$null};Status='ERROR';ReadOnly=$true;Provenance=$null;Data=$null;Paging=$null;Diagnostics=@();Error=[ordered]@{Code='LIMIT_EXCEEDED';Message='Resposta excede 256 KiB; reduza PageSize/MaxTextChars ou confira campos extensos no contexto.'}}
+    }
     [pscustomobject]$response
 }
 Export-ModuleMember -Function Invoke-HarnessIssueQuery

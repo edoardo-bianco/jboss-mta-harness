@@ -14,7 +14,7 @@ function Get-IncidentValue {
 }
 
 function Get-IncidentLocation {
-    param([string]$OriginalUri, $Project)
+    param([string]$OriginalUri, $Project, [switch]$LexicalPaths)
     $location = [ordered]@{RelativePath=$null;SnapshotCandidate=$null;SourceCandidate=$null;PathStatus='URI fora do input ou nao reconhecida; conferir origem/dependencia.'}
     try {
         # Conferir antes de Uri/GetFullPath, que normalizam e ocultam segmentos .. .
@@ -42,8 +42,15 @@ function Get-IncidentLocation {
         }
         if (-not $relative -or [IO.Path]::IsPathRooted($relative) -or $relative.Contains(':')) { return [pscustomobject]$location }
         $candidates = @(foreach ($base in @($Project.Mta.AnalysisSource, $Project.Source)) {
-            $rootPath = Resolve-HarnessPath $base $base
-            $candidate = Resolve-HarnessPath (Join-Path $rootPath $relative) $rootPath
+            if ($LexicalPaths) {
+                # Consultas nao acessam a maquina/origem historica nem provam existencia.
+                if ($base -notmatch '^[A-Za-z]:[\\/]') { throw 'Candidato exige raiz local absoluta.' }
+                $rootPath = [IO.Path]::GetFullPath($base).TrimEnd('\','/')
+                $candidate = [IO.Path]::GetFullPath([IO.Path]::Combine($rootPath,$relative))
+            } else {
+                $rootPath = Resolve-HarnessPath $base $base
+                $candidate = Resolve-HarnessPath (Join-Path $rootPath $relative) $rootPath
+            }
             if (-not $candidate.StartsWith(($rootPath + '\'), [StringComparison]::OrdinalIgnoreCase)) { throw 'Caminho fora da raiz permitida.' }
             $candidate
         })

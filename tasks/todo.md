@@ -28,8 +28,9 @@
 - [x] Definir contrato e escrever testes de leitura/auditoria antes do codigo.
 - [x] Validar nucleo para priorizacao: lista/detalhe, filtros, 138 incidentes,
   ordinal, truncamento, escolhas atuais, identidade, hashes e ausencia de escrita.
-- [ ] Implementar listagem/detalhe paginados, filtros e CLI JSON somente leitura.
-- [ ] Cobrir consolidado/importado, identidade, hashes, falhas e preservacao.
+- [x] Implementar listagem/detalhe paginados, filtros e CLI JSON somente leitura.
+- [x] Cobrir consolidado/importado, identidade, hashes, falhas e preservacao.
+- [x] Corrigir achados da revisao: UNC, caminhos lexicais, teto de resposta e indices por ID.
 - [ ] Alinhar guias/prompts/helper e avaliar adaptador MCP nas fontes oficiais.
 - [ ] Executar regressao dirigida, revisao independente e salvar commits.
 - [ ] Comparar no cliente a mesma fatia de 10%: omissoes, tempo e tokens reais.

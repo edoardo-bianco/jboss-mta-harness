@@ -62,7 +62,7 @@ $audit=Query auditar_base
 Assert ($audit.Status -eq 'OK') ('Auditoria falhou: '+($audit | ConvertTo-Json -Depth 10))
 Assert ($audit.ReadOnly -and $audit.SchemaVersion -eq 1) 'Contrato de leitura ausente.'
 Assert ($audit.Data.CatalogIssues -eq 3 -and $audit.Data.CatalogIncidents -eq 140) 'Contagens MTA incorretas.'
-Assert ($audit.Data.RegisterIssues -eq 4 -and $audit.Data.Differences.Count -eq 0) 'Registro divergiu sem motivo.'
+Assert ($audit.Data.RegisterIssues -eq 4 -and $audit.Data.DifferencesCount -eq 0) 'Registro divergiu sem motivo.'
 Assert ($audit.Provenance.Source -eq $source -and $audit.Provenance.RunId -eq $runId) 'Origem ausente.'
 $list=Query listar_issues @{PageSize=2}
 Assert ($list.Status -eq 'OK' -and $list.Paging.Total -eq 4 -and $list.Paging.HasMore) 'Lista deve incluir catalogo e issue manual, paginada.'
