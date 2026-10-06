@@ -98,7 +98,8 @@ function Invoke-HarnessJbossRelease {
         if ($current.State -ne 'RUNNING' -or $current.Identity -ne 'MATCHED') { throw 'Servidor mudou antes do deploy.' }
         $before=Get-JbossDeployment $Server $DeploymentName
         if (($null -eq $existing) -ne ($null -eq $before) -or ($existing -and $before.Hash -ine $existing.Hash)) { throw 'Deployment mudou antes do deploy.' }
-        $command='deploy "'+$snapshot.Replace('\','/')+'" --name='+$DeploymentName+' --runtime-name='+$DeploymentName
+        # A CLI Windows antiga reconhece C:\ como raiz, mas trata C:/ como relativo.
+        $command='deploy "'+$snapshot+'" --name='+$DeploymentName+' --runtime-name='+$DeploymentName
         if ($existing) { $command+=' --force' }
         # Nao permitir escrita no snapshot enquanto a CLI o le.
         $held=[IO.File]::Open($snapshot,'Open','Read','Read')
