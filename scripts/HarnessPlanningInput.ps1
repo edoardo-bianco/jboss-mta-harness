@@ -1,8 +1,9 @@
 # Funcoes privadas do modulo HarnessPlanning; entradas sao dados, nunca comandos.
 function Read-HarnessMigrationInput {
-    param([string]$Root, $Project, [string]$MigrationPath)
-    $paths = Get-HarnessMigrationPaths $Root $Project
-    if ($MigrationPath -and (Resolve-HarnessPath $MigrationPath $Root) -ine $paths.MigrationPath) {
+    param([string]$Root, $Project, [string]$MigrationPath,
+        [scriptblock]$PathResolver={param($p,$r) Resolve-HarnessPath $p $r})
+    $paths = Get-HarnessMigrationPaths $Root $Project -PathResolver $PathResolver
+    if ($MigrationPath -and (& $PathResolver $MigrationPath $Root) -ine $paths.MigrationPath) {
         throw 'MigrationPath nao corresponde ao registro deste projeto no indice local.'
     }
     if (-not (Test-Path -LiteralPath $paths.MigrationPath -PathType Leaf)) {
@@ -12,7 +13,7 @@ function Read-HarnessMigrationInput {
     $source = [regex]::Matches($text, '(?m)^Source:\s*([^\r\n]+)')
     $identity = [regex]::Matches($text, '(?m)^Project:\s*([^\r\n]+)')
     if ($source.Count -ne 1 -or $identity.Count -ne 1 -or
-        (Resolve-HarnessPath $source[0].Groups[1].Value.Trim() $Root) -ine $Project.path) {
+        (& $PathResolver $source[0].Groups[1].Value.Trim() $Root) -ine $Project.path) {
         throw 'Identidade/Source do registro ambiguo ou divergente; confira o registro antes de planejar.'
     }
     $blocks = [regex]::Matches($text, '(?s)<!-- mta:inicio -->.*?<!-- mta:fim -->')

@@ -25,10 +25,32 @@ function Get-QueryProperty {
     $Default
 }
 
+function Get-QueryAbsolutePath {
+    param([string]$Path,[string]$Root)
+    if (-not $Path) { Stop-QueryError INVALID_CONTEXT 'Caminho vazio.' }
+    if (-not [IO.Path]::IsPathRooted($Path)) { $Path=[IO.Path]::Combine($Root,$Path) }
+    if ($Path -notmatch '^[A-Za-z]:[\\/]' -or $Path.Substring(2).Contains(':')) { Stop-QueryError INVALID_CONTEXT 'Caminho local absoluto esperado; UNC/dispositivo/ADS nao aceitos.' }
+    [IO.Path]::GetFullPath($Path).TrimEnd('\','/')
+}
+
+function Resolve-QueryPath {
+    param([string]$Path,[string]$Root)
+    $absolute=Get-QueryAbsolutePath $Path $Root
+    if ($null -ne $script:QueryAllowedRoots) {
+        $permitted=$false
+        foreach ($allowed in $script:QueryAllowedRoots) {
+            $prefix=$allowed.TrimEnd('\','/')
+            if ($absolute -ieq $prefix -or $absolute.StartsWith($prefix+'\',[StringComparison]::OrdinalIgnoreCase)) { $permitted=$true; break }
+        }
+        if (-not $permitted) { Stop-QueryError ACCESS_DENIED 'Caminho fora das raizes de leitura configuradas para esta consulta.' }
+    }
+    Resolve-HarnessPath $absolute $Root
+}
+
 function Read-QueryFile {
     param([string]$Path,$Files,[string]$ExpectedHash)
     if ($Path -notmatch '^[A-Za-z]:[\\/]') { Stop-QueryError INVALID_CONTEXT 'Arquivo exige caminho local absoluto; UNC/rede nao sao aceitos.' }
-    $Path=[IO.Path]::GetFullPath($Path)
+    $Path=Resolve-QueryPath $Path ([IO.Path]::GetDirectoryName($Path))
     $item=Get-Item -LiteralPath $Path -Force -ErrorAction Stop
     if ($item.PSIsContainer) { Stop-QueryError INVALID_CONTEXT 'Esperado arquivo, recebido diretorio.' }
     for ($parent=$item; $null -ne $parent; $parent=$parent.Parent) {
@@ -75,9 +97,9 @@ function Read-QueryBase {
     param([string]$Root,[string]$ContextPath,[string]$Source)
     if (-not $ContextPath) { Stop-QueryError INVALID_INPUT 'Informe ContextPath.' }
     $files=@{}; $diagnostics=@()
-    $path=Resolve-HarnessPath $ContextPath $Root
+    $path=Resolve-QueryPath $ContextPath $Root
     $receipt=Read-QueryFile $path $files | ConvertFrom-Json
-    if ($receipt.RequestId -cnotmatch '^[a-f0-9]{32}$' -or (Resolve-HarnessPath $receipt.ContextPath $Root) -ine $path) { Stop-QueryError IDENTITY_CONFLICT 'ContextPath/RequestId divergente.' }
+    if ($receipt.RequestId -cnotmatch '^[a-f0-9]{32}$' -or (Resolve-QueryPath $receipt.ContextPath $Root) -ine $path) { Stop-QueryError IDENTITY_CONFLICT 'ContextPath/RequestId divergente.' }
     $planning=$receipt.Purpose -eq 'application-remediation'
     if (-not $planning -and ($receipt.Purpose -ne 'issue-prioritization' -or $receipt.SchemaVersion -notin @(2,3,4))) { Stop-QueryError UNSUPPORTED_CONTEXT 'Tipo/versao de contexto nao suportado.' }
     $basis=if ($planning) {Get-QueryProperty $receipt 'PlanningBasis' 'MTA'} else {'MTA'}
@@ -85,20 +107,20 @@ function Read-QueryBase {
     if ($basis -notin @('MTA','EVIDENCIAS') -or $mode -notin @('ORIGINAL','CONSOLIDATED')) { Stop-QueryError INVALID_CONTEXT 'Base/modo de evidencia invalido.' }
     $projects=@(if ($planning) {$receipt} else {$receipt.Projects})
     if (-not $Source -and $projects.Count -ne 1) { Stop-QueryError INPUT_REQUIRED 'Informe Source de um projeto do contexto.' }
-    $projects=@($projects | Where-Object { -not $Source -or (Resolve-HarnessPath $_.Source $Root) -ieq (Resolve-HarnessPath $Source $Root) })
+    $projects=@($projects | Where-Object { -not $Source -or (Get-QueryAbsolutePath $_.Source $Root) -ieq (Get-QueryAbsolutePath $Source $Root) })
     if ($projects.Count -ne 1) { Stop-QueryError IDENTITY_CONFLICT 'Source ausente/duplicado no contexto.' }
     $selected=$projects[0]
     $mta=if ($basis -ne 'MTA') {$null} elseif ($planning) {$receipt} else {$selected.Mta}
-    $project=[pscustomobject]@{Project=$selected.Project;Source=(Resolve-HarnessPath $selected.Source $Root);MigrationPath=$selected.MigrationPath;MigrationSha256=$selected.MigrationSha256;Mta=$mta}
+    $project=[pscustomobject]@{Project=$selected.Project;Source=(Resolve-QueryPath $selected.Source $Root);MigrationPath=$selected.MigrationPath;MigrationSha256=$selected.MigrationSha256;Mta=$mta}
     $null=Read-QueryFile $project.MigrationPath $files
-    $register=Read-HarnessMigrationInput $Root ([pscustomobject]@{name=$project.Project;path=$project.Source}) $project.MigrationPath
+    $register=Read-HarnessMigrationInput $Root ([pscustomobject]@{name=$project.Project;path=$project.Source}) $project.MigrationPath -PathResolver { param($p,$r) Resolve-QueryPath $p $r }
     if ($basis -eq 'MTA') {
         if (-not $mta -or -not $register.Origin -or $register.Origin.RunId -cne $mta.RunId) { Stop-QueryError IDENTITY_CONFLICT 'Origem MTA do registro diverge do contexto.' }
         Assert-QueryOrigin $register.Origin $mta.MtaOrigin
         $originHash=Get-QueryProperty $register.Origin 'CatalogSha256'
         if ($originHash -and $originHash -ine $mta.CatalogSha256) { Stop-QueryError IDENTITY_CONFLICT 'Catalogo do registro diverge da origem declarada.' }
     } elseif ($register.Origin -or (Get-QueryProperty $receipt 'RunId') -or (Get-QueryProperty $receipt 'MtaOrigin')) { Stop-QueryError IDENTITY_CONFLICT 'Base EVIDENCIAS conflita com origem MTA.' }
-    if ($files[(Resolve-HarnessPath $project.MigrationPath $Root)] -cne $project.MigrationSha256) { $diagnostics+='REGISTER_CHANGED: escolhas atuais foram lidas; snapshot permanece historico.' }
+    if ($files[(Resolve-QueryPath $project.MigrationPath $Root)] -cne $project.MigrationSha256) { $diagnostics+='REGISTER_CHANGED: escolhas atuais foram lidas; snapshot permanece historico.' }
     $items=@(if ($mode -eq 'CONSOLIDATED') { Read-QueryConsolidated $receipt $Root $files $basis }
         elseif ($basis -eq 'MTA') { Read-QueryOriginalMta $mta $Root $files })
     if ($planning -and $mode -eq 'ORIGINAL') {
@@ -120,10 +142,10 @@ function Read-QueryBase {
         try {
             $null=Read-QueryFile $receipt.ProjectIndexPath $files
             $indexHash=Get-QueryProperty $receipt 'ProjectIndexSha256'
-            if ($indexHash -and $files[(Resolve-HarnessPath $receipt.ProjectIndexPath $Root)] -ine $indexHash) { $diagnostics+='INDEX_CHANGED: indice nao substitui escolhas atuais.' }
+            if ($indexHash -and $files[(Resolve-QueryPath $receipt.ProjectIndexPath $Root)] -ine $indexHash) { $diagnostics+='INDEX_CHANGED: indice nao substitui escolhas atuais.' }
         } catch { $diagnostics+=('INDEX_UNAVAILABLE: '+(Get-QueryError $_).Code) }
     }
-    $provenance=[ordered]@{ContextPath=$path;ContextSha256=$files[$path];RequestId=$receipt.RequestId;Source=$project.Source;Project=$project.Project;PlanningBasis=$basis;EvidenceMode=$mode;RunId=(Get-QueryProperty $mta 'RunId');MtaOrigin=(Get-QueryProperty $mta 'MtaOrigin');CatalogPath=(Get-QueryProperty $mta 'CatalogPath');CatalogSha256=(Get-QueryProperty $mta 'CatalogSha256');ConsolidatedPath=if ($mode -eq 'CONSOLIDATED') {$receipt.Consolidated.MtaIssuePath} else {$null};RegisterPath=$project.MigrationPath;RegisterSha256=$files[(Resolve-HarnessPath $project.MigrationPath $Root)]}
+    $provenance=[ordered]@{ContextPath=$path;ContextSha256=$files[$path];RequestId=$receipt.RequestId;Source=$project.Source;Project=$project.Project;PlanningBasis=$basis;EvidenceMode=$mode;RunId=(Get-QueryProperty $mta 'RunId');MtaOrigin=(Get-QueryProperty $mta 'MtaOrigin');CatalogPath=(Get-QueryProperty $mta 'CatalogPath');CatalogSha256=(Get-QueryProperty $mta 'CatalogSha256');ConsolidatedPath=if ($mode -eq 'CONSOLIDATED') {$receipt.Consolidated.MtaIssuePath} else {$null};RegisterPath=$project.MigrationPath;RegisterSha256=$files[(Resolve-QueryPath $project.MigrationPath $Root)]}
     $itemsById=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
     foreach ($item in $items) { $itemsById.Add($item.Id,$item) }
     $rowsById=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)

@@ -1,5 +1,41 @@
 # Plano do agente: evolucao do harness
 
+## Consultas MCP nas fases com agentes - 2026-10-06
+
+Pedido humano: disponibilizar as consultas diretamente aos agentes das varias
+fases; escolha explicita MCP para Codex e Copilot. Retomar harness/consultas-issues
+limpa em e9d37a1, mantendo os commits anteriores e as corretivas integradas da main.
+Skills de interfaces, testes, seguranca, documentacao e revisao aplicadas.
+
+Entrega: servidor local stdio com SDK oficial, exatamente auditar_base,
+listar_issues e obter_issue; adapter chama o nucleo PowerShell existente. Sem
+terminal geral para helpers, sem endpoint HTTP, sem alterar GO/aceite ou papeis.
+Raiz do harness e raizes permitidas sao configuracao local do servidor; tool args
+nao podem amplia-las. Validar entradas e caminhos internos antes de leitura,
+rejeitar junctions/UNC, timeout/cancelamento e saida limitada; evidencias sao dados.
+Subprocesso fixo sem shell recebe JSON por stdin, para preservar Unicode e quoting.
+
+Requisito confirmado pelo humano apos informar Node 18.20.8 no trabalho: prever
+Node da linha 20. Manter SDK oficial v2, requisito Node >=20, configuracao com
+executavel explicito para coexistir com Node18. Nao alterar Node/PATH global.
+Validar com runtime 20 isolado; CLI permanece independente de Node/MCP.
+
+Incrementos: (1) restricao de raizes com testes; (2) adapter/schema/stdio com SDK
+fixado e testes reais de discovery/call; (3) configuracao de ambos clientes,
+instrucoes por fase, skill/helpers e guias; (4) regressao e revisao independente.
+Usar contexto de priorizacao ou planejamento vinculado; implementacao/revisao
+reutilizam recibo-base. Reconciliacao sem contexto suportado continua leitura
+direta; nao gerar preparo/rodada para habilitar uma consulta.
+
+Aceite: somente tres tools descobertas, paridade CLI/MCP, identidade/paginacao,
+erros, Unicode/espacos, cancelamento e recusa de parametros/arquivos fora das
+raizes; nenhuma escrita nas evidencias. Helpers mantem sandbox read-only e suas
+capacidades anteriores, acrescidas apenas das consultas MCP. Configuracao local
+preserva servidores existentes e requer confianca/permissoes normais dos clientes.
+Sem modificar configuracao pessoal global ou executar MTA/build/deploy de aplicacao.
+Reversao: remover configuracao do servidor e reverter commits deste incremento;
+CLI e contexto existentes continuam utilizaveis. Ensaio real de 10% permanece.
+
 ## Corretiva: caminho do WAR na CLI Windows legada - 2026-10-06
 
 Evolucao do harness. Relato humano: deploy de SIMTR-api no EAP 7.0 iniciado em

@@ -251,16 +251,17 @@ function Resolve-HarnessMigrationPath {
 }
 
 function Get-HarnessMigrationPaths {
-    param([string]$Root, $Project)
-    $base = Resolve-HarnessPath (Join-Path $Root '.harness/projetos') $Root
+    param([string]$Root, $Project, [scriptblock]$PathResolver={param($p,$r) Resolve-HarnessPath $p $r})
+    $base = & $PathResolver (Join-Path $Root '.harness/projetos') $Root
     # Mesma raiz usa o mesmo registro, por config.repositories ou pelo workspace.
-    $identity = (Resolve-HarnessPath $Project.path $Root).ToLowerInvariant()
+    $identity = (& $PathResolver $Project.path $Root).ToLowerInvariant()
     $key = Get-HarnessProjectKey $identity
     $existing = @(if (Test-Path -LiteralPath $base) { Get-ChildItem -LiteralPath $base -Directory | Where-Object Name -Like "*__$key" })
     if ($existing.Count -gt 1) { throw 'Registro de migracao ambiguo para este projeto.' }
     $folder = if ($existing.Count) { $existing[0].FullName } else { Join-Path $base (Get-HarnessProjectFolder ([pscustomobject]@{name=$identity;label=$Project.label})) }
-    $path = Resolve-HarnessPath (Resolve-HarnessMigrationPath $folder) $Root
-    $index = Resolve-HarnessPath (Join-Path $folder 'evidencias/LEIA-ME.md') $Root
+    $folder = & $PathResolver $folder $Root
+    $path = & $PathResolver (Resolve-HarnessMigrationPath $folder) $Root
+    $index = & $PathResolver (Join-Path $folder 'evidencias/LEIA-ME.md') $Root
     [pscustomobject]@{MigrationPath=$path;EvidenceIndexPath=$index}
 }
 

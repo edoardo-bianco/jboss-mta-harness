@@ -1,5 +1,17 @@
 # To-do do agente: evolucao do harness
 
+## Consultas MCP nas fases com agentes - 2026-10-06
+
+- [x] Confirmar forma de exposicao: usuario escolheu MCP para Codex e Copilot.
+- [x] Conferir checkout e fontes oficiais; registrar fronteiras de leitura e fases.
+- [x] Testar e implementar raizes permitidas no nucleo de leitura; selecao
+  multi-projeto corrigida por teste RED/GREEN e oito regressoes PASS.
+- [ ] Implementar SDK/stdio, schemas restritos e subprocesso fixo via JSON stdin.
+- [ ] Validar discovery, chamadas, paridade, erros, Unicode, timeout/cancelamento.
+- [ ] Configurar clientes e alinhar fases, prompts, helpers, skill e guias.
+- [ ] Rodar regressao, audit de dependencias, revisao independente e salvar commits.
+- [ ] Homologar descoberta e uso pelos agentes no cliente da maquina de trabalho.
+
 ## Corretiva deploy Windows legado - 2026-10-06
 
 - [x] Preservar consultas e criar branch isolada da main com PR #11 integrado.

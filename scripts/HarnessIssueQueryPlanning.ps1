@@ -4,10 +4,10 @@ function Read-QueryConsolidated {
     if ($Receipt.LayoutVersion -ne 2 -or @($Receipt.SelectedIssues).Count -ne 1 -or $Receipt.SelectedIssues[0].Id -cne $Receipt.IssueId) {
         Stop-QueryError IDENTITY_CONFLICT 'Selecao/layout da issue consolidada divergente.'
     }
-    $folder=Resolve-HarnessPath (Split-Path $Receipt.ContextPath -Parent) $Root
+    $folder=Resolve-QueryPath (Split-Path $Receipt.ContextPath -Parent) $Root
     foreach ($file in $Receipt.Consolidated.Files) {
         if ([IO.Path]::IsPathRooted($file.RelativePath) -or $file.RelativePath -match '(^|[\\/])\.\.([\\/]|$)') { Stop-QueryError INVALID_CONTEXT 'Caminho consolidado invalido.' }
-        $path=Resolve-HarnessPath (Join-Path $folder $file.RelativePath) $Root
+        $path=Resolve-QueryPath (Join-Path $folder $file.RelativePath) $Root
         if (-not $path.StartsWith($folder+'\',[StringComparison]::OrdinalIgnoreCase) -or $file.Sha256 -notmatch '^[A-Fa-f0-9]{64}$') { Stop-QueryError INVALID_CONTEXT 'Arquivo/hash consolidado invalido.' }
         $null=Read-QueryFile $path $Files $file.Sha256
     }
@@ -16,6 +16,8 @@ function Read-QueryConsolidated {
     $local=$Receipt.PSObject.Copy()
     $local | Add-Member NoteProperty SourceEvidenceInputs @() -Force
     $local | Add-Member NoteProperty PlanningBasis $Basis -Force
+    foreach ($pointer in @($Receipt.FichaPath,$Receipt.EvidenceIndexPath)) { $null=Resolve-QueryPath $pointer $Root }
+    if ($Basis -eq 'MTA') { $null=Resolve-QueryPath $Receipt.Consolidated.MtaIssuePath $Root }
     Assert-HarnessPlanningEvidence $local $Root
     if ($Basis -ne 'MTA') { return }
     $mta=Read-QueryFile $Receipt.Consolidated.MtaIssuePath $Files | ConvertFrom-Json
@@ -33,6 +35,8 @@ function Read-QueryConsolidated {
 
 function Read-QueryOriginalMta {
     param($Mta,[string]$Root,$Files)
+    $null=Resolve-QueryPath $Mta.Run $Root
+    foreach ($relative in @('rules','output/static-report/index.html')) { $null=Resolve-QueryPath (Join-Path $Mta.Run $relative) $Root }
     foreach ($pair in @(@('Manifest','manifest.json'),@('Result','result.json'),@('Findings','output/output.yaml'),@('Dependencies','output/dependencies.yaml'))) {
         if ($Mta.EvidenceHashes.($pair[0]) -notmatch '^[A-Fa-f0-9]{64}$') { Stop-QueryError INVALID_CONTEXT 'Hash obrigatorio de evidencia MTA ausente/invalido.' }
         $null=Read-QueryFile (Join-Path $Mta.Run $pair[1]) $Files $Mta.EvidenceHashes.($pair[0])
@@ -40,8 +44,8 @@ function Read-QueryOriginalMta {
     $run=Get-MtaPlanningRunFromPath $Mta.Run $Root
     Assert-QueryOrigin $run.Manifest $Mta.MtaOrigin
     if ($run.RunId -cne $Mta.RunId) { Stop-QueryError IDENTITY_CONFLICT 'RunId difere dos artefatos.' }
-    $catalog=Resolve-HarnessPath (Join-Path $Mta.Run 'output/static-report/output.js') $Root
-    if ((Resolve-HarnessPath $Mta.CatalogPath $Root) -ine $catalog -or $Mta.CatalogSha256 -notmatch '^[A-Fa-f0-9]{64}$') { Stop-QueryError INVALID_CONTEXT 'Caminho/hash do catalogo invalido.' }
+    $catalog=Resolve-QueryPath (Join-Path $Mta.Run 'output/static-report/output.js') $Root
+    if ((Resolve-QueryPath $Mta.CatalogPath $Root) -ine $catalog -or $Mta.CatalogSha256 -notmatch '^[A-Fa-f0-9]{64}$') { Stop-QueryError INVALID_CONTEXT 'Caminho/hash do catalogo invalido.' }
     $null=Read-QueryFile $catalog $Files $Mta.CatalogSha256
     try { Get-HarnessMtaCatalog $Mta.Run $Root -IncludeIncidents }
     catch { Stop-QueryError UNSUPPORTED_FORMAT $_.Exception.Message }
