@@ -18,7 +18,8 @@ Nao exija instalar Node/MCP, executar consultas manuais ou copiar JSON para cont
 
 Quando MCP harnessIssues estiver exposto, use auditar_base/obter_issue com o
 ContextPath do planejamento vinculado a esta etapa, conforme o
-[guia de consultas](../../doc/guias/tools/consultas-issues.md#consultas-por-etapa).
+guia `doc/guias/tools/consultas-issues.md`, secao Consultas por etapa, localizado
+na raiz do harness e nao na pasta deste prompt preparado.
 As respostas recuperam evidencias do diagnostico; nao comprovam codigo corrigido,
 GO ou aceite. Confira identidade, paginas/hashes e codigo local. Sem MCP,
 continue pelos arquivos e permissoes ja autorizadas; nao amplie poderes de helpers.

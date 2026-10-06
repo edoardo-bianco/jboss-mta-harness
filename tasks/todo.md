@@ -1,5 +1,17 @@
 # To-do do agente: evolucao do harness
 
+## Auditoria de coerencia da entrega - 2026-10-06
+
+- [x] Conferir raiz/branch/HEAD e registrar escopo da auditoria.
+- [x] Confrontar codigo e configuracao MCP com contrato/guia.
+- [x] Auditar README, guias, instrucoes gerais, skill, agentes e prompts por etapa.
+- [x] Corrigir quatro achados: referencias de guias nos prompts copiados, leitura
+  duplicada de incidentes, TOML inline invalidado e configuracao ausente silenciosa.
+- [x] Validar: seis testes MCP Node20 PASS, preparadores sem MCP PASS, 18 perfis/prompts,
+  380 links, tarefas/comandos e skill; revisoes independentes sem bloqueadores.
+- [x] Registrar conclusao e limites no plano; separar corretivas e documentos em
+  commits locais na branch de trabalho.
+
 ## Consultas MCP nas fases com agentes - 2026-10-06
 
 - [x] Confirmar forma de exposicao: usuario escolheu MCP para Codex e Copilot.

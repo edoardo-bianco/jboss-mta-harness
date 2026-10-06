@@ -19,7 +19,8 @@ Nao exija instalar Node/MCP, executar consultas manuais ou copiar JSON para cont
 Purpose=migration-register nao e entrada das consultas MCP. Se houver recibo
 de priorizacao/planejamento explicitamente vinculado e pertinente a mesma base,
 harnessIssues pode recuperar evidencias dele, conforme o
-[guia de consultas](../../doc/guias/tools/consultas-issues.md#consultas-por-etapa).
+guia `doc/guias/tools/consultas-issues.md`, secao Consultas por etapa, localizado
+na raiz do harness e nao na pasta deste prompt preparado.
 Sem essa base ou sem MCP, leia os arquivos diretamente. Nao crie outro contexto
 para consultar nem trate retorno como reconciliacao executada/aceite.
 

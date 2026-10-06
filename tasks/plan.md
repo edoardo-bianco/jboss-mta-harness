@@ -1,5 +1,46 @@
 # Plano do agente: evolucao do harness
 
+## Auditoria de coerencia da entrega - 2026-10-06
+
+Pedido: auditar implementacao, README, guias, agentes e skill. Retomar branch
+harness/consultas-issues limpa em d05a083; evolucao do harness, sem migrar aplicacao.
+Confrontar instrucoes com comportamento em seis cenarios: MCP disponivel/ausente,
+categoria/percentual, ficha para plano/todo por issue, pacote recebido, implementacao
+e revisao. Conferir configuracao, caminhos e limites do MCP, links/permissoes,
+distincao preparo/proposta/GO/aceite e pendencias reais de homologacao.
+Usar revisoes independentes de codigo/documentacao. Corrigir divergencias concretas
+com teste de reproducao quando houver comportamento; validar somente verificacoes
+afetadas, reaproveitando regressoes aprovadas. Preservar engineering-harness-vscode.md
+adiado e historico dos recibos. Reversao: reverter commits desta auditoria.
+
+Resultado: quatro achados corrigidos. Os seis prompts identificam o guia MCP
+pela raiz do harness, preservando a referencia quando copiados ao dossie.
+Priorizacao/contrato/guia aceitam incidentes recuperados por MCP com identidade,
+hashes, paginacao e truncamentos conferidos, sem impor releitura dos derivados.
+Sem MCP, permanece a leitura dos arquivos e conferencia do codigo local.
+Configurador valida TOML antes de escrever, preservando configuracao inline
+incompativel para ajuste manual; smol-toml 1.9.0 fixado no manifesto/lockfile.
+Arquivo HARNESS_MCP_CONFIG explicitamente indicado e ausente agora impede iniciar
+o servidor, sem assumir outras raizes. Ambos os erros reproduzidos por teste
+antes das corretivas. README, instrucoes gerais e guias alinhados.
+
+Verificacoes: seis testes MCP PASS em Node20.20.2, incluindo correspondencia real
+de argumento/titulo Unicode e paridade do envelope, limites e cancelamento.
+Test-PlanningWithoutMcp PASS em Windows PowerShell 5.1: categorias, planos por
+issue, anexos e preparo de implementacao sem Node/npm/npx e sem MCP configurado.
+Conferidos 18 perfis/prompts, sem ampliar sandbox/delegacao/permissoes; 380 links
+locais dos documentos alterados/guias, 25 tarefas e 25 referencias de comandos.
+Skill orientar-migracao aprovada pelo validador oficial; diff sem whitespace.
+Revisoes independentes de codigo e documentacao aprovaram o delta sem bloqueadores.
+Instalacao da dependencia auditada pelo npm: zero vulnerabilidades reportadas.
+Reutilizada a regressao anterior de oito scripts, incluindo compartilhamento;
+nenhuma alteracao no formato de pacotes, fichas ou planos por issue.
+
+Limites: testes comprovam preparadores/consultas, nao o comportamento das interfaces
+Codex/Copilot corporativas. Descoberta real e ensaio de 10% com qualidade/tempo/tokens
+continuam pendentes. Teste de desconexao do cliente com consulta ativa permanece
+melhoria de cobertura; cancelamento do subprocesso e espera por close estao testados.
+
 ## Consultas MCP nas fases com agentes - 2026-10-06
 
 Pedido humano: disponibilizar as consultas diretamente aos agentes das varias

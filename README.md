@@ -66,6 +66,11 @@ execucao do prompt no Codex/Copilot.
 Com plano revisado e GO, outro colega pode implementar manualmente ou com agente.
 Testes e revisao humana do resultado continuam necessarios nas duas formas.
 
+As consultas MCP sao opcionais: quando configuradas e disponiveis, os agentes as
+usam para recuperar a base e os incidentes. Sem MCP, priorizacao e planejamento
+continuam pela leitura dos arquivos, sem exigir consulta manual ou JSON copiado.
+Node >=20 e npm sao necessarios somente para ativar MCP; veja o [guia de consultas](doc/guias/tools/consultas-issues.md).
+
 O [pre-planejamento opcional](doc/guias/tools/priorizacao-issues.md) separa as
 categorias `mandatory`, `optional`, `potential` e outras recebidas. Examina uma
 fatia de **0,01% a 100,00%** das issues elegiveis sobre o total inicial fixo.
