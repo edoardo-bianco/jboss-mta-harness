@@ -1,3 +1,7 @@
 /config/harness.local.json
 /*.local.code-workspace
 /.harness/
+/mcp/issues/node_modules/
+/config/mcp.local.json
+/.codex/config.toml
+/.vscode/mcp.json
