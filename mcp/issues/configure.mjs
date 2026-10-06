@@ -2,6 +2,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync, realpathSync, lstat
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
+import { parse as parseToml } from 'smol-toml';
 import { harnessRoot } from './bridge.mjs';
 
 const names=['auditar_base','listar_issues','obter_issue'];
@@ -25,10 +26,13 @@ export function configureClients(root,nodePath) {
     'startup_timeout_sec = 20\ntool_timeout_sec = 130\n'+
     `enabled_tools = ${JSON.stringify(names)}\n`+
     `[mcp_servers.harnessIssues.env]\nHARNESS_MCP_CONFIG = ${JSON.stringify(config)}\n`;
-  const oldCodex=existsSync(codex) ? readFileSync(codex,'utf8').replace(/^\uFEFF/,'') : '';
+  const oldCodex=existsSync(codex) ? readFileSync(codex,'utf8') : '';
   if (/harnessIssues/.test(oldCodex) && !oldCodex.includes(section.trim())) {
     throw new Error('harnessIssues ja configurado no Codex com valores diferentes; revise a secao existente.');
   }
+  const newCodex=oldCodex.includes(section.trim()) ? oldCodex : oldCodex+section;
+  try { parseToml(newCodex.replace(/^\uFEFF/,''),{integersAsBigInt:'asNeeded'}); }
+  catch { throw new Error('Configuracao TOML nao permite acrescentar harnessIssues dessa forma. Arquivos preservados; revise a tabela mcp_servers manualmente.'); }
   let json=existsSync(vscode) ? JSON.parse(readFileSync(vscode,'utf8').replace(/^\uFEFF/,'')) : {};
   if (!json || Array.isArray(json) || typeof json!=='object' || (json.servers && (typeof json.servers!=='object' || Array.isArray(json.servers)))) {
     throw new Error('mcp.json exige objeto servers. Arquivo preservado.');
@@ -38,7 +42,7 @@ export function configureClients(root,nodePath) {
     throw new Error('harnessIssues ja configurado no VS Code com valores diferentes; revise a entrada existente.');
   }
   json.servers.harnessIssues=server;
-  const outputs=[[codex,oldCodex.includes(section.trim()) ? oldCodex : oldCodex+section],[vscode,JSON.stringify(json,null,2)+'\n']];
+  const outputs=[[codex,newCodex],[vscode,JSON.stringify(json,null,2)+'\n']];
   if (!existsSync(config)) outputs.push([config,JSON.stringify({allowedRoots:['.'],timeoutMs:60000},null,2)+'\n']);
   // Todos os conflitos sao detectados antes da primeira gravacao.
   for (const [file,content] of outputs) {

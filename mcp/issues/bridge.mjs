@@ -9,7 +9,9 @@ export const harnessRoot = path.resolve(path.dirname(fileURLToPath(import.meta.u
 const bridgePath = path.join(harnessRoot, 'scripts/invocar-consulta-mcp.ps1');
 const settingsSchema = z.strictObject({ root: z.string().min(1).optional(), allowedRoots: z.array(z.string().min(1)).min(1).max(100), timeoutMs: z.number().int().min(1000).max(120000).default(60000) });
 
-export function loadSettings(configPath = path.join(harnessRoot, 'config/mcp.local.json')) {
+export function loadSettings(configPath) {
+  if (configPath !== undefined && !existsSync(configPath)) throw new Error('Arquivo de configuracao MCP nao encontrado: '+configPath);
+  configPath ??= path.join(harnessRoot, 'config/mcp.local.json');
   const settings = settingsSchema.parse(existsSync(configPath) ? JSON.parse(readFileSync(configPath,'utf8').replace(/^\uFEFF/,'')) : { allowedRoots: [harnessRoot] });
   const root = path.resolve(harnessRoot, settings.root ?? '.');
   const allowedRoots = [root,...settings.allowedRoots.map(value => path.resolve(harnessRoot, value))];

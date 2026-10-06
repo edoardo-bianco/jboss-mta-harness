@@ -117,6 +117,9 @@ preserva outros servidores e recusa uma entrada harnessIssues diferente.
 Arquivos locais nao sao versionados nem vao no pacote de contexto. Se mover o
 clone ou o Node, atualize os caminhos dessas duas entradas. Nao duplique servidores.
 JSONC com comentarios em mcp.json exige edicao manual; erro de leitura preserva o arquivo.
+O TOML resultante e validado antes de gravar. Se `mcp_servers` estiver em uma
+tabela inline que nao admite acrescentar a secao, o configurador preserva os
+arquivos e pede ajuste manual dessa tabela; nao sobrescreve outros servidores.
 
 Abra `config/mcp.local.json` criado pelo configurador e acrescente somente as
 pastas necessarias ao trabalho. `.` ja permite o clone do harness; fontes e MTA
@@ -135,6 +138,9 @@ estar acessivel. Nao libere um disco inteiro para contornar um erro.
 Root e raizes permitidas sao configuracao do desenvolvedor; o agente nao pode
 amplia-las pelos argumentos da consulta. `root` opcional no JSON muda a raiz
 dos registros; omitido, usa este clone. Normalmente mantenha o padrao.
+Se `HARNESS_MCP_CONFIG` apontar para arquivo inexistente ou invalido, o servidor
+nao inicia: corrija o caminho/arquivo na configuracao do cliente. Apenas sem essa
+variavel e sem o arquivo padrao o servidor assume leitura restrita ao clone.
 
 Reinicie a sessao do Codex na raiz do harness e reabra/recarregue o workspace
 do VS Code. Aceite a confianca/permissao normal de MCP quando o cliente solicitar.
@@ -199,7 +205,7 @@ sao ignoradas; as ferramentas anteriores de leitura/escrita autorizada permanece
 
 | Sintoma | Conferencia |
 | --- | --- |
-| Servidor nao inicia | Caminho do Node >=20, npm ci concluido e caminho do server.mjs na configuracao do cliente. |
+| Servidor nao inicia | Caminho do Node >=20, npm ci concluido, caminho do server.mjs e arquivo HARNESS_MCP_CONFIG existente/valido na configuracao do cliente. |
 | ACCESS_DENIED | Pastas operacionais do recibo em allowedRoots; corrigir com o desenvolvedor, sem burlar pela CLI. |
 | RUNTIME_ERROR | Windows PowerShell 5.1 disponivel e politica de scripts autorizada pela equipe; nao alterar ExecutionPolicy pelo agente. |
 | TIMEOUT ou BUSY | Consulta limitada ao tempo configurado (1..120 segundos) e a dois processos simultaneos; reduza o recorte e aguarde. |

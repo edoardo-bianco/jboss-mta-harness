@@ -5,6 +5,6 @@
   "type": "module",
   "engines": { "node": ">=20" },
   "scripts": { "start": "node server.mjs", "test": "node --test tests/contract.test.mjs tests/lifecycle.test.mjs tests/configure.test.mjs tests/integration.test.mjs" },
-  "dependencies": { "@modelcontextprotocol/server": "2.3.1", "zod": "4.6.5" },
+  "dependencies": { "@modelcontextprotocol/server": "2.3.1", "smol-toml": "1.9.0", "zod": "4.6.5" },
   "devDependencies": { "@modelcontextprotocol/client": "2.3.1" }
 }

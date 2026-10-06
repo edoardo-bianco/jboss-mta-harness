@@ -37,6 +37,10 @@ test('SDK stdio: tres consultas, paridade, limites, cancelamento e nenhuma escri
   const list=await call('listar_issues',{ContextPath:fixture.context,Text:'Hibernate'});
   assert.equal(list.isError,false,JSON.stringify(list));
   assert.ok(list.structuredContent.Paging.Total>0);
+  const unicode=await call('listar_issues',{ContextPath:fixture.context,Text:fixture.unicodeTitle});
+  assert.equal(unicode.structuredContent.Paging.Total,1);
+  assert.equal(unicode.structuredContent.Data.Items[0].Id,'DEV-LOG');
+  assert.equal(unicode.structuredContent.Data.Items[0].Title,fixture.unicodeTitle);
   const literal=await call('listar_issues',{ContextPath:fixture.context,Text:'ação "$(Write-Output atacado)"'});
   assert.equal(literal.isError,false,JSON.stringify(literal));
   assert.equal(literal.structuredContent.Paging.Total,0);

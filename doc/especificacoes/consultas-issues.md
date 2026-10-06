@@ -108,7 +108,7 @@ Decisao implementada apos escolha humana: adaptador local stdio com SDK oficial
 TypeScript e subprocesso Windows PowerShell 5.1 chamando o mesmo nucleo. O SDK
 resolve o protocolo; regras, hashes e parsers permanecem em HarnessIssueQuery.
 TypeScript consta como Tier 1 no [catalogo oficial de SDKs](https://modelcontextprotocol.io/docs/2026-07-28/sdk).
-SDK servidor/cliente 2.3.1 e Zod 4.6.5 fixados no package-lock, com Node >=20
+SDK servidor/cliente 2.3.1, Zod 4.6.5 e smol-toml 1.9.0 fixados no package-lock, com Node >=20
 confirmado pelo desenvolvedor. Dependencias ficam em mcp/issues; sem instalacao
 global, Python, endpoint HTTP ou alteracao de Node/PATH da maquina.
 npm ci --ignore-scripts reproduz a instalacao. A configuracao pode apontar
@@ -137,7 +137,9 @@ Annotations declaram leitura/idempotencia e ausencia de escrita/acesso remoto;
 nao sao controle de acesso. config/mcp.local.json define root, allowedRoots e
 timeoutMs (1000..120000, padrao 60000). HARNESS_MCP_CONFIG permite selecionar outro
 arquivo pelo processo cliente; argumentos das tools nao podem mudar configuracao.
-O padrao permite somente a raiz do harness. O nucleo recebe AllowedRoots apenas
+Arquivo explicitamente indicado ausente/invalido impede iniciar o servidor, sem
+assumir padroes silenciosamente. Sem a variavel e sem config/mcp.local.json,
+o padrao permite somente a raiz do harness. O nucleo recebe AllowedRoots apenas
 pelo adaptador e confere caminhos operacionais internos antes do acesso. Escolha
 multi-projeto e lexical; Source nao selecionado nao exige permissao. Referencias
 historicas e candidatos de codigo nao sao abertos.
@@ -157,7 +159,11 @@ essa limpeza. Raizes, UNC/junctions e hashes sao verificacoes da aplicacao,
 Erro nao causa fallback para outra origem, preparador ou permissao mais ampla.
 
 Configurador local preserva outros servidores, e idempotente e recusa entradas
-harnessIssues conflitantes antes de gravar. Nao altera configuracao pessoal global.
+harnessIssues conflitantes antes de gravar. Valida o TOML completo com
+[smol-toml](https://github.com/squirrelchat/smol-toml), preservando o texto original;
+nao reserializa configuracoes existentes. Tabelas inline que impedem acrescentar
+a secao exigem ajuste manual, sem gravacao parcial por esse conflito.
+Nao altera configuracao pessoal global.
 Templates atuais e skill permitem somente as tres consultas; recibos/prompts
 historicos permanecem intactos. Ver [instalacao e uso por etapa](../guias/tools/consultas-issues.md#configurar-mcp-no-codex-e-no-copilot).
 
