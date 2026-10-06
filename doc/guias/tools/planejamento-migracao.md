@@ -69,14 +69,18 @@ MTA original: o recorte e os anexos usados ja estao copiados e possuem hashes.
 Uma nova rodada MTA pode ser recomendada se o codigo mudou; ausencia da comparacao
 nao comprova resolucao. Contexto legado ainda exige suas evidencias originais.
 
-Para evidencia nova, edite o indice da issue e execute **Planejamento: planejar**;
-entradas diferentes geram novo recibo com Previous e preservam o anterior. Criar
-ou revisar o recorte MTA ainda consulta sua origem registrada. Nao edite copias
-consolidadas de um recibo. Limpeza de execucoes preserva esses dossies.
+Para evidencia nova em contexto local, edite o indice da issue e execute
+**Planejamento: planejar**; entradas diferentes geram novo recibo com Previous.
+Em plano importado, a retomada e interrompida para reavaliacao explicita; veja os
+[limites da importacao](compartilhamento-contextos.md#na-maquina-de-quem-recebe).
+Criar ou revisar recorte MTA ainda consulta sua origem registrada. Nao edite copias
+consolidadas. Limpeza de execucoes preserva os novos dossies por issue.
 
-Nesta entrega e possivel compartilhar a leitura dos documentos; **exportar/importar
-e remapear caminhos automaticamente entre maquinas ainda nao foi implementado**.
-Copiar uma pasta nao torna seus recibos automaticamente operacionais em outra raiz.
+Use **Planejamento: compartilhar contexto** para exportar analise concluida ou
+plano/to-do e importar com associacao aos Sources locais. Consulte o
+[roteiro entre maquinas](compartilhamento-contextos.md), incluindo conflitos e
+retomada de proposta consolidada sem o MTA original. Copiar uma pasta avulsa nao
+substitui essa importacao.
 
 No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
 Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
@@ -298,7 +302,7 @@ mera retomada ou explicacao adicional.
 
 #### Preparar e executar o prompt
 
-1. Salve a escolha/recorte e as referencias no registro.
+1. Salve a escolha de uma issue, seu recorte e as referencias no registro.
 2. Execute **Terminal > Run Task > Planejamento: planejar**. A tarefa localiza o
    registro elegivel no workspace; se houver varios, pergunta somente qual usar.
    Sem registro, orienta **Workspace: atualizar indice dos projetos**. Sem escolha,
@@ -306,8 +310,9 @@ mera retomada ou explicacao adicional.
 3. Confira o resumo de projeto, registro, base e solicitacao. O prompt preparado
    referencia o contexto necessario; voce nao precisa copiar IDs, RunId ou caminhos
    de evidencias novamente. Com as mesmas entradas, retome a solicitacao vinculada;
-   se evidencias, origem, contrato ou template mudaram, a tarefa prepara um sucessor
-   com Previous e preserva o anterior. Use o caminho que ela informar.
+   em contexto local, se evidencias, origem, contrato ou template mudaram, a tarefa
+   prepara um sucessor com Previous. Plano importado com entradas diferentes exige
+   reavaliacao explicita antes da retomada. Use o caminho que a tarefa informar.
 4. Para elaborar com IA, execute o arquivo preparado no seu cliente:
    - **Codex:** envie `Execute o prompt deste arquivo:` seguido do caminho completo
      mostrado pela tarefa. Pode anexar o arquivo. O helper deve devolver essa
@@ -316,16 +321,18 @@ mera retomada ou explicacao adicional.
      com `devsquad`, ou a chamada preenchida mostrada no terminal.
 5. Se a analise precisar de uma decisao essencial, responda a pergunta concreta
    no mesmo chat. Quando houver base suficiente, o agente grava/rele os destinos
-   `plan.md` e `todo.md` e informa o que mudou e o que deve ser revisado.
+   PlanPath e TodoPath e informa o que mudou e o que deve ser revisado.
 
-**Alternativa manual:** apos o passo 3, voce pode redigir ou completar `plan.md` e
-`todo.md` nos caminhos indicados pelo contexto, usando os achados/evidencias e o
+**Alternativa manual:** apos o passo 3, voce pode redigir ou completar o plano e
+o to-do nos caminhos indicados pelo contexto, usando os achados/evidencias e o
 [roteiro manual](priorizacao-issues.md#continuar-o-trabalho-manual). Nesse caso,
 nao precisa executar o prompt dos passos 4 e 5. Preserve uma proposta existente;
 nas duas formas de elaboracao, siga a [revisao humana](#revisao-manual-do-plano-e-do-to-do).
 
-**Entradas:** registro atual; plano/to-do da solicitacao quando existem; anexos
-referenciados; codigo/POM/testes locais; base MTA vinculada, quando disponivel.
+**Entradas:** escolha/recorte no registro; ficha da issue quando fornecida;
+plano/to-do da solicitacao quando existem; anexos referenciados; codigo/POM/testes
+locais; base MTA vinculada ou evidencias humanas declaradas. Recibo consolidado
+recebido utiliza as copias locais, conforme seu modo explicito.
 **Saida do preparo:** prompt e recibo, ou caminhos da solicitacao retomada.
 **Saida da execucao:** proposta coerente e tarefas, ou perguntas essenciais antes
 de sua consolidacao. Preparar sozinho nao escreve a proposta.
@@ -355,7 +362,7 @@ Exemplos com caminhos ilustrativos, na raiz do harness:
 
 ```powershell
 .\scripts\preparar-planejamento.ps1 -WorkspacePath .\meu-workspace.code-workspace -MigrationPath 'C:\harness\.harness\projetos\minha-app__chave\migracao-minha-app.md' -NoOpen
-.\scripts\preparar-planejamento.ps1 -WorkspacePath .\meu-workspace.code-workspace -ContextPath 'C:\harness\.harness\planning\minha-app__chave\evidencias\plano_data__id\context.json' -NoOpen
+.\scripts\preparar-planejamento.ps1 -WorkspacePath .\meu-workspace.code-workspace -ContextPath 'C:\harness\.harness\planning\meu-servico\issues\regra__chave\p_id\contexto-meu-servico-regra-chave.json' -NoOpen
 ```
 
 O projeto vem do registro/recibo conferido contra o workspace; nao repetir Target.
@@ -375,13 +382,17 @@ para criar solicitacoes em sequencia.
 
 #### Como se forma o lote, o plan.md e o todo.md
 
-Um lote agrupa pontos com objetivo, solucao, aceite e reversao comuns. A mesma
-regra MTA nao garante essa unidade. Varios IDs escolhidos nao autorizam varios
-lotes independentes nem inclusao silenciosa de issues adiadas/excluidas.
+Um lote agrupa pontos com objetivo, solucao, aceite e reversao comuns. Nos novos
+preparos, escolha uma issue de um projeto por solicitacao. Pode haver cobertura
+parcial dos incidentes dessa issue; a mesma regra MTA nao garante uma unica
+solucao para todos. Contextos antigos com varios IDs continuam legiveis, sem
+autorizar novos lotes simultaneos ou incluir issues adiadas/excluidas.
 
-`plan.md` contem identidade/base, `Lote ativo: <ID>`, recorte/contagens, evidencias,
+O arquivo informado em PlanPath contem identidade/base, `Lote ativo: <ID>`, recorte/contagens, evidencias,
 transformacao/rota, risco/confianca, dependencias, POMs, testes, aceite observavel
-e reversao. `todo.md` referencia o plano e ordena tarefas com evidencia de conclusao.
+e reversao. TodoPath referencia o plano e ordena tarefas com evidencia de conclusao.
+Use os [modelos padronizados](#dossie-por-issue-e-passagem-entre-colegas), iguais
+para todas as issues; os nomes dos arquivos identificam o projeto e a issue.
 Andamento concluido e preservado quando sustentado; nova evidencia pode exigir
 revisao de uma conclusao com justificativa, nunca apagar historico.
 
@@ -406,9 +417,11 @@ Destinos legados ainda aceitos sob `.harness/planning/<nome>__<chave>/`
 Contextos antigos continuam legiveis; ausencia de PlanningBasis significa MTA.
 Recibo/prompt sem plan/to-do significa preparo existente, nao proposta concluida.
 Use **Planejar** para conferir a retomada: entradas iguais reutilizam a solicitacao;
-mudancas no indice/anexos referenciados, origem MTA, contrato ou template geram
+em contexto local, mudancas no indice/anexos, origem MTA, contrato ou template geram
 novo prompt/recibo com Previous, preservando o anterior. A tarefa faz essa distincao
 sem outro menu. Use o prompt indicado na saida, que pode ser o sucessor do anterior.
+Em plano importado, essas mudancas exigem reavaliacao explicita; nao ha sucessor
+automatico pela retomada.
 Escolhas e observacoes atuais do registro continuam lidas na execucao, sem reescrever
 o recibo historico. Nao edite RunId, hashes ou destinos de um recibo historico.
 Se o registro ainda aponta ao preparo antigo, o vinculo Previous permite seguir
@@ -421,7 +434,8 @@ ainda precisa ser produzido.
 
 #### Recuperar um preparo apos limpeza
 
-Limpar execucoes preserva o registro, mas pode remover o plano/recibo apontado nele.
+Limpar execucoes preserva registros e novos dossies por issue. Planos/recibos de
+layouts legados podem ser removidos, deixando no registro uma referencia ausente.
 Nesse caso, Planejar informa a referencia ausente e nao cria outro lote silenciosamente.
 Se voce guardou uma copia do preparo, restaure-a no caminho original. Se pretende
 reconstruir a proposta do recorte ja escolhido, peca ao helper uma chamada preenchida
@@ -437,6 +451,9 @@ historico; ao executar o novo prompt, informe que esta reconstruindo a proposta.
 Se a origem MTA tambem foi removida, resolva essa falta por manutencao explicita.
 
 #### Compartilhar o MTA e planejar em outra maquina
+
+Esta secao trata de uma pasta MTA completa avulsa. Para ZIP de analise ou plano
+exportado pelo harness, siga a [importacao de contexto](compartilhamento-contextos.md).
 
 Preserve a pasta completa: manifest.json, result.json, input, rules e output.
 O destino pode ter caminho diferente; MtaOrigin preserva Project/Source/RunId
@@ -455,8 +472,9 @@ Confira recorte, comportamento esperado, dependencias, risco, testes, reversao
 e lacunas reais. Para ajustar manualmente, edite os documentos atuais da solicitacao,
 preservando identidade, historico e decisoes. Para ajustar com IA, registre o
 direcionamento ou responda no chat e continue pelo prompt da solicitacao.
-Se origem, evidencias, contrato ou template mudaram, use **Planejar** para preparar
-o contexto sucessor e revise a proposta nos destinos indicados, manualmente ou com IA.
+Em contexto local, se origem, evidencias, contrato ou template mudaram, use
+**Planejar** para preparar o sucessor e revise a proposta nos destinos indicados.
+Para plano importado, siga a [reavaliacao explicita](compartilhamento-contextos.md#na-maquina-de-quem-recebe).
 Nao regenere os dois documentos apenas para corrigir omissoes. Mudanca de escopo
 exige rever a autorizacao; esclarecimento dentro do escopo mantem GO valido.
 
@@ -466,15 +484,17 @@ exige rever a autorizacao; esclarecimento dentro do escopo mantem GO valido.
 sem escolha unica, preserva o fluxo geral ou solicita IssueId se houver ambiguidade.
 Acrescente arquivos pertinentes ao LEIA-ME e explique sua relacao com o recorte.
 O planejamento le essas referencias e o registro atual; nao varre caches/logs.
-Uma evidencia complementar nao obriga reconciliacao separada. Execute **Planejar**:
-se o indice/anexos referenciados mudaram, a tarefa emite novo recibo com Previous;
-se as entradas continuam iguais, retoma o existente. O desenvolvedor nao precisa
+Uma evidencia complementar nao obriga reconciliacao separada. Em contexto local,
+execute **Planejar**: entradas alteradas produzem recibo com Previous; entradas
+iguais retomam o existente. Em plano importado, mudancas interrompem a retomada
+para reavaliacao explicita. O desenvolvedor nao precisa
 escolher entre preparar e replanejar nem repetir projeto, rodada ou recorte.
 
 Pedido suficiente ao helper: "Acrescentei evidencias no registro. Quero revisar
 o planejamento existente". Ele localiza a solicitacao e orienta a proxima acao.
-O preparo preserva a base anterior por Previous quando precisa atualiza-la. Respostas essenciais
-sao incorporadas ao plano; nao precisam ser transcritas em todos os documentos.
+No contexto local, o preparo preserva a base anterior por Previous quando precisa
+atualiza-la. Respostas essenciais sao incorporadas ao plano; nao precisam ser
+transcritas em todos os documentos.
 
 #### Da proposta revisada a execucao e ao aceite
 

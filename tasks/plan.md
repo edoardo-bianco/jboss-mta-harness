@@ -1,5 +1,113 @@
 # Plano do agente: evolucao do harness
 
+## Revisao de documentacao e orientacao - 2026-10-06
+
+Pedido humano: revisar README, guia do desenvolvedor, guias, helpers e skills
+para coerencia e clareza. Retomar harness/exportacao-importacao, limpa em eead84b,
+para revisar a documentacao da entrega e seu encaixe no fluxo completo.
+Skills aplicadas: using-agent-skills, documentation-and-adrs, skill-creator e
+git-workflow-and-versioning e code-review-and-quality; revisao independente das instrucoes.
+
+Fonte de comportamento: contratos/ADRs vigentes, scripts e Run Tasks locais.
+Revisar entradas/saidas por etapa, categorias independentes, nomes por issue,
+anexos, retomada local/importada, passagem manual/assistida e limites do helper.
+Corrigir instrucoes antigas (ranking como unica saida, exclusao apenas de
+propostas e compartilhamento futuro), reduzir repeticoes na skill comum e
+preservar diferencas entre preparo, elaboracao, GO, execucao e aceite.
+README apresenta caminhos iniciais; guia principal explica o ciclo; guias de
+etapa concentram os procedimentos; perfis dos clientes apontam para a skill comum.
+
+Escopo: documentacao e instrucoes, sem alterar comportamento dos scripts,
+permissoes/modelos dos perfis, configuracao local ou evidencias da aplicacao.
+engineering-harness-vscode.md, ferramentas/MCP e propostas futuras ficam adiados.
+Preservar ancoras e historico das ADRs; nova decisao arquitetural nao e necessaria.
+Verificar links locais, nomes de tarefas/scripts, frontmatter e skill com o
+validador; ensaiar orientacao por cenarios com arquivos, sem executar migracao.
+Reversao: reverter o commit documental, preservando a entrega e os dados locais.
+
+Resultado: README, AGENTS.md, guia principal e guias de etapas alinhados ao fluxo por
+categoria/issue e ao compartilhamento entregue. Skill e papeis simplificados;
+perfis de preparo/planejamento dos dois clientes seguem a mesma orientacao.
+Corrigidas referencias a compartilhamento futuro, RankingPath como unica saida,
+exclusao apenas de propostas, menu Sonar antigo e exemplos JBoss presumidos.
+Retomada local com Previous foi diferenciada da reavaliacao de plano importado;
+ZIP recebido deve ser importado antes de inicializar registros de destino.
+
+Validacao documental: 401 links locais, 25 nomes de Run Tasks e 22 referencias
+a scripts conferidos; 12 perfis validos, com metadados/permissoes preservados.
+Validador oficial da skill aprovado com PyYAML isolado em .harness/tests/, sem
+alterar dependencias globais. Revisao independente conferiu guias de ferramentas;
+ensaio independente da skill cobriu ZIP sem registro, proposta manual incompleta
+e plano MTA importado com anexos alterados. Orientacoes respeitaram etapa, base,
+destinos e GO. Evidencias dos checks em .harness/tests/docs-coerencia-20261006/.
+
+Limites: revisao de documentos/instrucoes e cenarios de leitura; nao executou
+importacao, corretiva ou descoberta/delegacao nativa nos clientes. Links externos
+nao foram validados. Scripts e testes de runtime permaneceram inalterados; a
+regressao da entrega anterior nao foi repetida. Ensaio corporativo de 10% e
+validacao nativa Codex/Copilot continuam pendentes para o desenvolvedor.
+
+## Exportacao/importacao de contextos - implementacao 2026-10-06
+
+Continuidade autorizada apos PR #9 integrado (main 4516916). Trabalho de evolucao
+na branch harness/exportacao-importacao. Ensaio corporativo de 10% da entrega 1
+permanece pendente; autorizacao para este incremento nao comprova aquele ensaio.
+engineering-harness-vscode.md e ferramentas/MCP continuam para depois.
+
+Entregar ZIP versionado em dois pontos: priorizacao concluida (com cadeia,
+registros, fichas e diagnostico necessario a continuidade) e plano/to-do de uma
+issue com evidencias consolidadas. Exportar conserva o estado e declara lacunas;
+nao concede GO. Reutilizar validadores de integridade, identidade e historico.
+
+Importar exige associacao explicita entre cada Source de origem e projeto local
+do workspace. Conservar originais byte a byte em importacoes/<PackageId>/original;
+materializar documentos locais derivados, com caminhos locais e ImportedFrom.
+Preservar origem MTA/RunId e rastrear RequestId. Recalcular somente hashes dos
+derivados, nunca dos originais. GO/aceite recebidos sao fatos de origem: verificar
+alcance local antes da execucao. Indexar registros locais apos importacao.
+
+Incrementos: (1) manifesto/ZIP e exportacao de plano consolidado; (2) importacao
+com mapeamento, preview, conflitos e reimportacao; (3) pacote de priorizacao com
+Previous/cobertura e passagem da ficha ao planejamento; (4) CLI/Run Task, guias,
+orientador e regressao. Cada incremento recebe teste de comportamento antes do
+codigo. Uma operacao de compartilhamento com menu exportar/importar.
+
+Aceite: duas raizes com espacos; plano recebido prepara implementacao sem MTA
+original; analise recebida permite continuar categoria e planejar uma issue;
+reimportacao identica nao sobrescreve edicoes locais; conflitos sao explicitos.
+ZIP adulterado, entrada duplicada, caminho absoluto/traversal, link/junction e
+versao desconhecida sao recusados antes de gravar destinos. Nao levar configuracao
+da maquina, caches, permissoes ou credenciais; arquivos da analise entram apenas
+no pacote de analise explicitamente escolhido. Pacote de plano e restrito ao recorte.
+
+Reversao: reverter scripts/contratos desta entrega preservando ZIPs e originais
+recebidos. Nao desfazer decisoes, apagar evidencias ou alterar aplicacoes.
+
+Resultado local: operacao implementada por HarnessTransfer e compartilhar-contexto,
+com ADR-0007, contrato, guias e skill comum do orientador alinhados. ZIP SchemaVersion=1;
+analise exige v4 concluida e MTA completo, plano exige LayoutVersion=2 CONSOLIDATED.
+SourceMap e obrigatorio. Importacao materializa destinos novos; nao mescla registros
+existentes ou pacotes incrementais. Mesmo ZIP/mapa reutiliza sem sobrescrever.
+Publicacao inclui marker/arquivos/diretorios sob lock; rollback remove somente os
+criados. Atualizacao de indice falha separadamente como PENDING, sem ocultar importacao.
+
+Retomada de proposta recebida compara origem, entradas e contrato/template sem
+abrir MTA original. Mudanca exige reavaliacao; novas analises/recortes MTA dependem
+de diagnostico completo. Revisoes anteriores mantem suas proprias bases. Os originais
+permanecem byte a byte; remapeamento e hashes novos pertencem apenas aos derivados.
+
+Validacao 2026-10-06: 20 scripts PASS em Windows PowerShell 5.1 (planejamento/CLI/
+evidencias/portabilidade/issues, implementacao/branch, priorizacao/categorias/
+progresso/incidentes, indice/registro/MTA externo, limpeza/workspace/caminhos,
+Run Tasks e pacote). Sintaxe PowerShell e git diff --check OK; 262 links locais
+verificados sem erro. Logs locais em .harness/tests/entrega2-20261006/.
+Revisao independente em tres rodadas; achados corrigidos e nenhum bloqueante
+residual no recorte final. Teste de pacote inclui duas raizes com espacos e
+artifactId diferente, dois projetos, Previous, origem alterada, hashes adulterados,
+caminho absoluto/traversal/duplicado, papel sem vinculo, versao desconhecida,
+symlink ZIP, preview/CLI, conflitos, idempotencia e falha antes da publicacao.
+Nao executado: ensaio corporativo humano de 10%, corretivas ou aceite de aplicacao.
+
 ## Categorias, planejamento por issue e portabilidade - proposta 2026-10-06
 
 Status: Entrega 1 implementada localmente apos autorizacao humana; validacao e

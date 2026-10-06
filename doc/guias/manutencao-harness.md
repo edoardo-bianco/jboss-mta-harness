@@ -72,7 +72,7 @@ do harness. Os demais documentos possuem finalidades distintas:
 | Local | Conteudo |
 | --- | --- |
 | `doc/guias/` | Fluxo do desenvolvedor, [orientacao com Codex/Copilot](orientacao-migracao.md), [comparacao de branches](diagnostico-branches-git-tortoisegit.md) e [modelo de evidencias](modelo-evidencias-complementares.md). |
-| `doc/guias/tools/` | Configuracao e uso de [workspace](tools/workspace.md), [Maven](tools/maven.md), [MTA](tools/mta.md), [planejamento/reconciliacao](tools/planejamento-migracao.md), [JBoss](tools/jboss.md) e [SonarQube](tools/sonar.md). |
+| `doc/guias/tools/` | Configuracao e uso de [workspace](tools/workspace.md), [Maven](tools/maven.md), [MTA](tools/mta.md), [priorizacao](tools/priorizacao-issues.md), [planejamento/reconciliacao](tools/planejamento-migracao.md), [compartilhamento](tools/compartilhamento-contextos.md), [JBoss](tools/jboss.md) e [SonarQube](tools/sonar.md). |
 | `doc/estrategia/` | [Objetivos, fundamentos e evolucao proposta do harness](../estrategia/estrategia-harness_.md); distingue a base atual dos pilotos futuros. |
 | `doc/adr/` | Decisoes e justificativas, como [contexto local e acionamento do Copilot](../adr/0001-contexto-copilot.md). |
 | `doc/especificacoes/` | Contratos duradouros do harness e criterios verificaveis, como [planejamento Copilot](../especificacoes/planejamento-copilot.md). |
@@ -145,12 +145,20 @@ escopo do workspace, registros/rodadas recebidas, lacunas/conflitos, integridade
 percentual de 0,01 a 100,00, historico, preservacao das entradas, lock, CLI/JSON,
 menus recriar/progredir, retomada sem pedir percentual novamente e editor simulado.
 `tests/Test-PrioritizationProgress.ps1` verifica denominador inicial fixo, quota
-arredondada, exclusao acumulada somente de propostas, recriacao, esgotamento,
+arredondada, exclusao acumulada de todas as examinadas, recriacao, esgotamento,
 resultados incompletos/duplicados, varias pontas e hash de ranking ancestral.
 Confere tambem o mesmo ID em Sources distintos e mudancas de decisoes/evidencias.
 Execute com `powershell.exe -NoProfile -File .\tests\Test-PrioritizationProgress.ps1`.
 A qualidade da lista e a orientacao/delegacao nativas seguem para a
 [validacao manual](tools/priorizacao-issues.md#validacao-manual).
+
+`tests/Test-PrioritizationCategories.ps1` verifica sequencias independentes por
+categoria e fichas por Source/Id. `tests/Test-IssuePlanning.ps1` cobre pasta pelo
+artifactId, nomes por issue, anexos, revisoes e implementacao consolidada sem MTA
+original. `tests/Test-ContextPackage.ps1` exporta/importa analise e plano entre
+raizes isoladas, confere SourceMap, Previous, originais, links, preview, CLI,
+conflitos, idempotencia, integridade e rollback. Nao comprova a qualidade do plano
+nem o aceite da aplicacao.
 
 `tests/Test-PlanningPortable.ps1` verifica MTA recebido de outra maquina, alertas
 do POM e continuidade sem indice local. `tests/Test-LongPaths.ps1` verifica copia,

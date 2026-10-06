@@ -244,8 +244,10 @@ Pela task **Planejamento: criar pasta de evidencias**, organize copias dos JSONs
 pertinentes e do resumo, listando cada arquivo real no LEIA-ME. Registre servidor,
 chave/branch, analysisId, data de coleta, estado dos fontes, configuracao relevante
 e limitacoes. Data de copia nao substitui data de coleta. Nao copie logs brutos,
-settings privados, credenciais ou scanner-work. Depois prepare **1. Planejar ou
-atualizar lote**, com Previous quando houver e esse LEIA-ME. O agente apenas le os resultados.
+settings privados, credenciais ou scanner-work. Vincule as evidencias a issue
+escolhida e use **Planejamento: planejar**, que recupera a solicitacao pelo registro.
+Em contexto local, entradas alteradas geram revisao com Previous; em plano
+importado, exigem reavaliacao explicita. O agente le os resultados referenciados.
 Siga o [roteiro de reconciliacao e atualizacao do plano](planejamento-migracao.md#reconciliar-status-antes-de-atualizar-o-plano)
 para alinhar registro, cobertura e proposta com essas evidencias.
 

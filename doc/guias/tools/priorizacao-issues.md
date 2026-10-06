@@ -265,6 +265,11 @@ individuais por projeto/issue, sob `.harness/planning/<artifactId>/issues/`.
 O agente cria fichas somente das examinadas; o ranking aponta para esses arquivos.
 Mesmo ID em projetos diferentes mantem fichas distintas, com contexto suficiente
 para compartilhar cada uma. Contextos v2/v3 continuam mandatory e conservam layout.
+
+Uma analise v4 concluida pode ser exportada por **Planejamento: compartilhar
+contexto**. O pacote leva a cadeia da categoria e o diagnostico para continuar a
+sequencia ou planejar uma ficha em outro workspace. Veja o
+[roteiro de exportacao/importacao](compartilhamento-contextos.md).
 CLI aceita `-Category optional` (ou outra recebida); omitida, preserva mandatory.
 Ao passar PreviousRequestId sem Category, a categoria daquela sequencia e retomada.
 Mudancas relevantes posteriores precisam ser explicitadas na analise; snapshot
@@ -352,15 +357,17 @@ investigacao da issue explicitamente indicada a partir da ficha e dos arquivos.
 1. Abra o **link ao registro** fornecido na candidata. O resultado deve trazer
    IDs exatos e uma sugestao da **linha completa**, preservando as oito colunas.
    Coloque `ANALISAR AGORA` em **Decisao**; **Andamento** reflete o trabalho real.
-2. Nas observacoes, registre recorte e referencia da candidata, usando o link
+2. Nas observacoes, registre recorte e referencia da ficha da issue, usando o link
    preparado. Se houver sobreposicao, preserve a relacao entre os IDs; escolher
    uma issue nao inclui nem declara resolvida outra automaticamente. O helper
    explica a conveniencia de cada escolha, que continua sendo sua.
-3. Execute **Planejamento: planejar**. A tarefa recupera escolha, referencias e
+3. Se precisar complementar a ficha, use **Planejamento: criar pasta de evidencias**
+   para listar os anexos da issue e a relacao de cada um com a corretiva.
+4. Execute **Planejamento: planejar**. A tarefa recupera escolha, referencias e
    base do registro. Nao repita a intencao no prompt nem atualize manualmente o
    ranking so para retirar "Escolha PENDENTE": esse trecho e historico, e a decisao
    atual esta no registro. Pode dizer ao helper apenas "Escolhi a issue; me conduza".
-4. Para elaborar com IA, execute o prompt preparado e esclareca perguntas essenciais.
+5. Para elaborar com IA, execute o prompt preparado e esclareca perguntas essenciais.
    Para elaborar manualmente, siga [o roteiro da ficha](#continuar-o-trabalho-manual)
    nos mesmos destinos do contexto. Nas duas formas, revalide o recorte e revise a
    proposta antes do GO. A posicao na lista nao autoriza planejar todas as candidatas.
@@ -378,7 +385,8 @@ planejamento somente apos sua escolha explicita. Confira se cada linha abre uma
 ficha com titulo compreensivel, evidencia da avaliacao e proxima acao manual concreta,
 inclusive SEM POSICAO. Compare indice, registros,
 fontes e planos antes/depois: o preparo produz contexto/prompt e paginas de
-incidentes; o agente escreve somente a lista da solicitacao. Teste acesso externo
+incidentes; a execucao do prompt escreve o ranking e as fichas examinadas nos
+destinos declarados. O helper permanece leitor. Teste acesso externo
 concedido e negado: leitura deve retomar apos concessao; negativa preserva parcial
 sem consumir quota. Preparacao automatizada testada nao comprova a qualidade
 da recomendacao nem a integracao nativa do chat.

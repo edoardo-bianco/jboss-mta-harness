@@ -18,6 +18,28 @@ guarda ContractSnapshot no recibo (ou no prompt de implementacao), preservando a
 instrucoes mesmo apos atualizar o harness; ContractPath indica a fonte versionada. O guia do
 desenvolvedor explica operacao; o registro local concentra escolhas por projeto.
 
+## Contextos recebidos de outro workspace
+
+Conforme a [ADR-0007](../adr/0007-compartilhamento-de-contextos.md), a operacao de
+compartilhamento transporta priorizacao v4 concluida ou plano/to-do consolidado
+LayoutVersion=2 de uma issue, com a cadeia necessaria. Importar exige Source local
+explicito por projeto; preserva originais e cria derivados rastreaveis por
+ImportedFrom. O indice local aponta registros locais; o recebido e historico.
+MtaOrigin/RunId preservam a origem da analise, mesmo com caminhos diferentes.
+
+Plano importado CONSOLIDATED retoma pela entrada habitual sem abrir o MTA original,
+desde que origem declarada, anexos e contrato/template continuem iguais. Mudanca
+dessas entradas exige reavaliacao; nao se presume nova evidencia examinada nem se
+troca a base para EVIDENCIAS. Criar/revisar recorte MTA exige diagnostico completo.
+Cada revisao anterior conserva seu snapshot e suas entradas. Copias historicas nao
+sao editadas; a entrada atual da issue tem indice editavel separado.
+
+Importar nao autoriza execucao, nao integra codigo e nao transfere aceite para o
+checkout local. Decisoes/evidencias da origem sao preservadas e seu alcance deve
+ser conferido. O orientador continua leitor: indica a tarefa de compartilhamento
+e, depois, uma proxima etapa com base no ContextPath recebido e na escolha humana.
+Conflitos nao sao resolvidos por sobrescrita ou escolha do arquivo mais recente.
+
 ## Pre-planejamento
 
 priorizar-issues e opcional, mediante pedido humano, antes de escolher o recorte.

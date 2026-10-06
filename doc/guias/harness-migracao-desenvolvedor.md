@@ -64,6 +64,7 @@ Veja [o roteiro manual e o formato das fichas](tools/priorizacao-issues.md#plane
 | Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Importe uma aplicacao externa no workspace. |
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
+| ZIP de analise ou plano recebido de um colega | [Compartilhar contextos](tools/compartilhamento-contextos.md): importar, associar Sources locais e continuar da etapa recebida. |
 | Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
 | Quero comparar oportunidades de uma categoria entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): categoria, fatia percentual por risco, repetibilidade e alcance, com recriacao ou avanco. |
@@ -78,6 +79,22 @@ Veja [o roteiro manual e o formato das fichas](tools/priorizacao-issues.md#plane
 O fluxo pertence ao projeto e ao codigo em analise. O workspace pode reunir
 varias aplicacoes; as evidencias e decisoes continuam vinculadas a cada uma.
 O guia de workspace explica a configuracao do ambiente e a selecao dos projetos.
+
+### Termos e documentos do fluxo
+
+| Termo | O que significa |
+| --- | --- |
+| Projeto / Source | Aplicacao e sua raiz de codigo local; o artifactId Maven nomeia a pasta dos dossies. |
+| Issue | Regra MTA ou problema manual DEV-... identificado dentro de um projeto. A mesma regra em dois projetos tem fichas e planos separados. |
+| Categoria | Classificacao do MTA, como mandatory, optional ou potential; organiza sequencias independentes, sem decidir a prioridade humana. |
+| Fatia | Quantidade de issues a examinar, calculada pelo percentual do total inicial fixo da sequencia. |
+| Ranking e ficha | Ranking compara as examinadas; a ficha de cada issue detalha achados, evidencias, lacunas e roteiro. |
+| Registro de migracao | Guarda a escolha atual, observacoes e andamento por issue. O indice localiza esse registro. |
+| Contexto / recibo | Arquivo que identifica as entradas e os destinos de uma solicitacao; seu caminho e informado como ContextPath. |
+| Plano, to-do e lote | A proposta da corretiva, suas tarefas e o recorte coerente a executar. Novos planejamentos pertencem a uma issue de um projeto. |
+
+Os nomes concretos dos arquivos vem da tarefa/recibo. Nao crie `plan.md` e
+`todo.md` avulsos: use os caminhos informados, que identificam a issue.
 
 ## Roteiro: onde estou e o que escolho
 
@@ -153,7 +170,8 @@ Ele explica como consultar o historico, interpretar os estados e atualizar o reg
 
 Se ainda nao escolheu a issue, use o [guia de priorizacao de issues](tools/priorizacao-issues.md).
 A Run Task **Planejamento: priorizar issues** prepara uma comparacao opcional
-entre projetos, com verificacao de amostras no MTA e no codigo. O helper tambem
+entre projetos. Voce escolhe categoria e percentual; a analise examina amostras
+no MTA e no codigo, mantendo cobertura separada por categoria. O helper tambem
 orienta essa etapa. A lista recomenda candidatas; voce registra sua escolha
 como `ANALISAR AGORA` antes de planejar um lote.
 Cada issue examinada, recomendada ou sem posicao, inclui achados, evidencias,
@@ -174,12 +192,14 @@ A revisao humana decide se a proposta esta pronta para receber GO.
 
 Use apenas **Terminal > Run Task > Planejamento: planejar**. A tarefa recupera
 registro e referencias; prepara o contexto da proposta ou retoma a solicitacao vinculada.
-Se evidencias, origem MTA, contrato ou template mudaram, prepara um contexto
-sucessor preservando o anterior; use o prompt que a tarefa indicar. Observacoes
+Em contexto local, se evidencias, origem MTA, contrato ou template mudaram,
+prepara um contexto sucessor preservando o anterior; use o prompt indicado. Observacoes
 e escolhas atuais sao recuperadas sem pedir que voce atualize o historico.
 Nao ha menu para escolher "planejar/replanejar" ou repetir a rodada. Havendo varios
-registros possiveis, pergunta somente qual usar. Sem MTA completo, usa evidencias
-disponiveis sem inventar origem ou resultado MTA.
+registros possiveis, pergunta somente qual usar. Uma proposta com base EVIDENCIAS
+usa as entradas humanas, sem inventar MTA. A falta do MTA de uma proposta existente
+nao muda sua base. Em [plano importado](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe),
+entradas alteradas interrompem a retomada para reavaliacao explicita.
 
 Para elaborar com IA, execute o prompt preparado no cliente atual. Se faltar uma decisao essencial,
 o agente pergunta antes de concluir PlanPath/TodoPath. Responda no mesmo chat; nao
@@ -198,6 +218,11 @@ Ele detalha o preparo do contexto, a execucao do prompt e a revisao do mesmo lot
 **Resultado esperado e continuidade:** proposta revisada e decisao humana
 registrada. O GO autoriza a etapa 6; sem ele, a proposta permanece em revisao.
 Preparar documentos nao autoriza corretivas, e GO nao e aceite do resultado.
+
+Para passar o trabalho a outro colega, exporte a analise concluida ou o plano/to-do
+pela tarefa **Planejamento: compartilhar contexto**. O
+[guia de compartilhamento](tools/compartilhamento-contextos.md) explica qual ponto
+escolher, a associacao aos projetos locais e os limites da retomada.
 
 ### 6. Implementar o lote autorizado
 
@@ -292,6 +317,7 @@ Cada guia oferece mensagem de exemplo, resultado esperado e retorno ao fluxo pri
 | --- | --- | --- |
 | [Orientacao da migracao](orientacao-migracao.md) | Receber ajuda em qualquer etapa, no Codex ou Copilot. | [Iniciar](orientacao-migracao.md#iniciar-no-codex-ou-no-copilot), [retomar](orientacao-migracao.md#retomar-em-outro-chat-ou-cliente), [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa). |
 | [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas da categoria escolhida entre projetos; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-com-o-helper), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
+| [Compartilhamento de contextos](tools/compartilhamento-contextos.md) | Entregar analise ou plano a outro colega; continuar em outra maquina. | [Ponto de exportacao](tools/compartilhamento-contextos.md#qual-ponto-compartilhar), [importacao](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe), [limites](tools/compartilhamento-contextos.md#conflitos-e-limites). |
 | <a id="comecar-na-maquina-de-trabalho"></a><a id="extensoes-java-no-vs-code"></a><a id="escolher-o-projeto-em-cada-tarefa"></a><a id="ensaiar-e-depois-usar-os-projetos-corporativos"></a><a id="configuracao-da-maquina"></a><a id="duas-opcoes-para-configurar-o-workspace"></a><a id="opcao-a-editar-o-json-local-e-gerar-novamente"></a><a id="opcao-b-configurar-o-workspace-manualmente"></a><a id="limpar-execucoes-locais"></a><a id="pastas-locais-e-backups-temporarios"></a><a id="tarefa-e-script-correspondente"></a>[Workspace](tools/workspace.md) | Preparar ou ajustar o ambiente; selecionar projetos. | [Configuracao](tools/workspace.md#configuracao), [uso](tools/workspace.md#uso), [limpeza e dados locais](tools/workspace.md#limpar-execucoes-locais), [catalogo de tarefas](tools/workspace.md#tarefa-e-script-correspondente). |
 | <a id="build-maven-da-aplicacao-com-java-8"></a><a id="usar-a-extensao-maven-padrao-do-vs-code"></a>[Build da aplicacao](tools/maven.md) | Executar a Run Task de build ou usar Maven direto; etapas 2 e 7. | [Configuracao](tools/maven.md#configuracao), [Run Task do harness](tools/maven.md#opcao-a-run-task-do-harness), [painel Maven/terminal](tools/maven.md#opcao-b-maven-direto). |
 | <a id="analise-e-resultados"></a><a id="acompanhar-a-analise-mta"></a>[MTA](tools/mta.md) | Produzir diagnostico ou reanalisar; etapas 3 e 7. | [Instalacao/perfil](tools/mta.md#configuracao), [analise, relatorios e logs](tools/mta.md#uso). |

@@ -31,3 +31,5 @@ nomes distintos nesta mesma pasta.
 Indices antigos continuam aceitos por EvidenceIndexPath.
 O preparo copia as entradas por solicitacao: acrescente novos anexos ao indice
 editavel da issue e use Planejamento: planejar. Nao altere copias consolidadas.
+Em plano importado, novas entradas interrompem a retomada para reavaliacao
+explicita; siga o [guia de compartilhamento](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe).

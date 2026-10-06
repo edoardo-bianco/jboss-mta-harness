@@ -692,6 +692,7 @@ Export-ModuleMember -Function Get-MtaPlanningRunFromPath, Get-MtaPlanningRuns, S
 Export-ModuleMember -Function New-MtaMigrationPrompt
 Export-ModuleMember -Function Read-HarnessMigrationInput, Select-HarnessPlanningRegister, Get-HarnessRegisteredMtaRun
 Export-ModuleMember -Function Invoke-HarnessRegisteredPlanning
+Export-ModuleMember -Function Assert-HarnessPlanningEvidence, Get-HarnessPlanningEvidenceInputs
 
 # Recibos/prompts anteriores sao imutaveis: basta inventariar nomes. Calcular hash
 # apenas do registro/indice que o preparo pode atualizar, nunca de anexos de evidencia.

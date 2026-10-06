@@ -64,18 +64,24 @@ Para categorias e dossies padronizados por issue, siga a
   os dossies em planning/<projeto>/issues, inclusive fichas e anexos oficiais.
 - A entrada habitual e `Planejamento: planejar`: cria, retoma ou atualiza a proposta
   a partir do registro. Nao exigir selecao repetida de operacao/projeto/MTA nem
-  copiar novamente escolhas para o prompt. Registro ausente direciona a
-  `Workspace: atualizar indice dos projetos`; varios candidatos exigem escolha
+  copiar novamente escolhas para o prompt. Sem pacote a importar, registro ausente
+  direciona a `Workspace: atualizar indice dos projetos`; varios candidatos exigem escolha
   somente do registro/frente. Indice localiza; registro atual concentra a decisao.
   Planejar nao recarrega catalogo nem elege rodada/plano por recencia.
 - Contexto declara `PlanningBasis=MTA|EVIDENCIAS`. Evidencias humanas podem
   sustentar planejamento sem pacote MTA completo, sem inventar RunId, snapshot,
   categoria ou resultado MTA. Contextos antigos sem o campo continuam MTA.
   Corrupcao/conflito de origem exige esclarecimento, sem fallback silencioso.
-  Origem/evidencias/contrato/template iguais retomam a solicitacao vinculada;
-  mudancas nessas entradas produzem novo recibo com Previous e preservam o anterior.
+  Em contexto local, origem/evidencias/contrato/template iguais retomam a solicitacao
+  vinculada; mudancas nessas entradas produzem recibo com Previous e preservam o anterior.
   Escolhas/observacoes atuais sao lidas sem reescrever historico. Referencia antiga
   segue Previous ate o unico sucessor; varios sucessores exigem escolha, nao recencia.
+- Para ZIP recebido, siga o [guia de compartilhamento](doc/guias/tools/compartilhamento-contextos.md)
+  antes de inicializar registros: importar exige associacao explicita ao Source local
+  e destinos livres. Originais sao preservados; use o ContextPath devolvido.
+  Plano importado com entradas iguais retoma a proposta consolidada; mudancas de
+  origem/evidencias/contrato/template exigem reavaliacao explicita, sem sucessor
+  automatico ou troca de base. Importar nao concede GO nem aceite local.
 - Antes da proposta completa, perguntar somente o essencial ainda ausente que
   afete escopo, solucao ou aceite; preservar rascunho/ID, sem par plan/to-do ficticio.
   Reconciliacao exige motivo concreto. Estado PENDENTE historico nao bloqueia
@@ -117,6 +123,13 @@ Para categorias e dossies padronizados por issue, siga a
   .harness e local: nao e lock compartilhado. Politicas Git antigas sao historicas,
   nao pendencias a renovar. Preserve trabalho local e revalide o codigo integrado
   conforme os criterios do lote. GO e aceite humano continuam separados.
+- Compartilhamento usa `Planejamento: compartilhar contexto`, conforme
+  [ADR-0007](doc/adr/0007-compartilhamento-de-contextos.md). Source local exige
+  associacao explicita. Preserve originais e cadeia recebida; derivados usam
+  ImportedFrom. Conflitos nao autorizam sobrescrita. Analise recebida segue para
+  escolha/planejamento; plano consolidado recebido permite retomada e preparo de
+  implementacao sem MTA original, conferindo escopo/GO e codigo local. Mudanca de
+  origem/anexos/contrato exige reavaliacao, sem fallback silencioso.
 
 Consulte o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md)
 para uso e os documentos de `doc/` para contratos
