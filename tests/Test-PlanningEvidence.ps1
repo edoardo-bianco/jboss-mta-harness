@@ -85,7 +85,7 @@ $context.Projects=@($project)
 # Entrada real sem menus, com registro e retomada por recibo.
 $scripts=Join-Path $fixture 'scripts'
 $null=New-Item -ItemType Directory -Path $scripts -Force
-foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','preparar-planejamento.ps1')) { Copy-Item (Join-Path $root ('scripts/'+$name)) $scripts }
+foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessIssuePlanning.ps1','HarnessPrioritizationEvidence.ps1','preparar-planejamento.ps1')) { Copy-Item (Join-Path $root ('scripts/'+$name)) $scripts }
 $config=Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories=@(@{name='app';path=$app}); $config.activeProject=$null
 $configPath=Join-Path $fixture 'config.json'
@@ -131,7 +131,7 @@ Add-Content $register.EvidenceIndexPath '| [Cenario](cenario%20com%20espaco.txt)
 $incomplete=Invoke-HarnessRegisteredPlanning $context -ContextPath $updated.ContextPath -Target app
 $incompleteReceipt=Get-Content -Raw -Encoding UTF8 $incomplete.ContextPath | ConvertFrom-Json
 Assert ($incompleteReceipt.Previous.RequestId -eq $updated.RequestId -and $null -eq $incompleteReceipt.Previous.PlanSha256) 'Resposta com evidencia exigiu concluir proposta antiga ou inventou hash.'
-Assert (@($incompleteReceipt.EvidenceInputs | Where-Object { $_.Path -eq $evidence -and $_.Sha256 }).Count -eq 1) 'Link com %20 nao recebeu hash.'
+Assert (@($incompleteReceipt.EvidenceInputs | Where-Object { $_.OriginPath -eq $evidence -and $_.Sha256 -and (Test-Path -LiteralPath $_.Path) }).Count -eq 1) 'Link com %20 nao recebeu copia/hash.'
 
 # Identidade do registro e contextos e sempre conferida, mesmo em modo EVIDENCIAS.
 $receiptOriginal=[IO.File]::ReadAllText($incomplete.ContextPath)

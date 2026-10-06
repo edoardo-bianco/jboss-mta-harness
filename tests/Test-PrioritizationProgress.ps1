@@ -39,6 +39,17 @@ function Save-Ranking($prepared, $examined, $proposed) {
     $result = @{RequestId=$prepared.RequestId;Status='COMPLETED';AnalyzedIssues=@($examined);ProposedIssues=@($proposed)} | ConvertTo-Json -Depth 6
     $body = '# Ranking de teste' + "`n<!-- priorizacao:resultado -->`n" + '```json' + "`n$result`n" + '```' + "`n<!-- /priorizacao:resultado -->`n"
     [IO.File]::WriteAllText($prepared.RankingPath, $body)
+    $receipt=Read-Receipt $prepared
+    if ($receipt.PSObject.Properties['FichaPaths']) {
+        foreach ($issue in $examined) {
+            $fichas=@($receipt.FichaPaths | Where-Object { $_.Source -eq $issue.Source -and $_.Id -ceq $issue.Id })
+            if ($fichas.Count -eq 1) {
+                $identity=@{Source=$issue.Source;Id=$issue.Id}|ConvertTo-Json -Compress
+                $null=[IO.Directory]::CreateDirectory((Split-Path $fichas[0].Path -Parent))
+                [IO.File]::WriteAllText($fichas[0].Path,"# Ficha de teste`n<!-- issue: $identity -->`nEvidencia da fixture.")
+            }
+        }
+    }
 }
 $first = New-HarnessPrioritizationContext $context -Percentage '10,00'
 $initial = Read-Receipt $first
@@ -111,6 +122,7 @@ $forkFolder = Join-Path $fixture ('.harness/priorizacao/' + $fork.RequestId)
 $fork.ContextPath = Join-Path $forkFolder 'context.json'
 $fork.PromptPath = Join-Path $forkFolder 'priorizar-issues.prompt.md'
 $fork.RankingPath = Join-Path $forkFolder 'priorizacao.md'
+foreach ($entry in $fork.FichaPaths) { $entry.Path=$entry.Path.Replace($validation.RequestId.Substring(0,12),$fork.RequestId.Substring(0,12)) }
 Write-HarnessJson $fork.ContextPath $fork
 Copy-Item $validation.PromptPath $fork.PromptPath
 Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10 } 'Varias pontas foram escolhidas por recencia.'
@@ -172,7 +184,7 @@ Write-HarnessJson $legacy.ContextPath $legacyReceipt
 Save-Ranking $legacy $legacyReceipt.AvailableIssues[0..8] @($legacyReceipt.AvailableIssues[0])
 $legacyNext = New-HarnessPrioritizationContext $context -Mode Continue -Percentage 20
 $legacyNextReceipt = Read-Receipt $legacyNext
-Assert ($legacyNextReceipt.SchemaVersion -eq 3 -and $legacyNextReceipt.ExcludedIssues.Count -eq 9 -and $legacyNextReceipt.AvailableIssues.Count -eq 35) 'Continue nao aproveitou examinadas v2.'
+Assert ($legacyNextReceipt.SchemaVersion -eq 4 -and $legacyNextReceipt.ExcludedIssues.Count -eq 9 -and $legacyNextReceipt.AvailableIssues.Count -eq 35) 'Continue nao aproveitou examinadas v2.'
 # Emular a segunda rodada antiga, que retirava apenas a primeira proposta.
 $legacyNextReceipt.SchemaVersion = 2
 $legacyNextReceipt.ExcludedIssues = @($legacyReceipt.AvailableIssues[0])

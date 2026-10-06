@@ -1,5 +1,141 @@
 # To-do do agente: evolucao do harness
 
+## Categorias, planejamento por issue e portabilidade - proposta 2026-10-06
+
+Status: **Entrega 1 implementada localmente**, conforme autorizacao posterior do desenvolvedor. Ensaio humano na maquina de trabalho pendente.
+Prioridade e criterios detalhados na secao de mesma data em tasks/plan.md.
+
+- [x] Conferir raiz, branch, HEAD e alteracoes locais; preservar proposta anterior.
+- [x] Localizar filtro mandatory, continuidade, fichas, leitura de referencias
+  pelo planejamento e limites da portabilidade existente.
+- [x] Consolidar entrega 1 com categorias separadas, compatibilidade e passagem
+  da ficha ao plano/to-do por issue ou recorte coerente.
+- [x] Registrar roteiro de teste na maquina de trabalho e seus limites.
+- [x] Delimitar exportacao/importacao por etapa como entrega posterior; preservar
+  a proposta de auditar_base/listar_issues/obter_issue e a avaliacao futura de MCP.
+- [x] Conferir diff, referencias citadas e preservacao do historico documental.
+- [x] Registrar ferramentas/MCP como ultima etapa e mapear encaixe inicial
+  nas capacidades ja documentadas em doc/features/ e na conciliacao existente.
+- [x] Refinar entrada por ficha e anexos da issue, fluxo do desenvolvedor,
+  saidas e atualizacao do planejamento com evidencias novas.
+- [x] Incluir limpeza e alinhamento do orientador, perfis dos clientes, prompts
+  e guias no aceite da primeira entrega, com cinco cenarios de clareza.
+- [x] Refinar pastas e nomes por projeto + issue, fichas separadas por projeto
+  mesmo com regra igual e contexto consolidado para implementar sem MTA original.
+- [x] Registrar passagem entre colegas como cenario principal: analise/proposta
+  de A, execucao manual ou por agente de B e apoio do orientador em cada etapa.
+- [ ] ADIADO por pedido humano: avaliar doc/features/engineering-harness-vscode.md
+  e conciliar com as capacidades existentes somente em retomada futura.
+  Documento adicionado pelo desenvolvedor; conteudo nao examinado nesta etapa.
+
+Entrega 1 - implementacao e validacao local:
+
+- [x] Criar fixtures/testes de categorias e continuidade, incluindo historico v2/v3.
+- [x] Parametrizar categoria e isolar base, SequenceId, Previous e cobertura;
+  manter exclusao das examinadas por Source + ID dentro da sequencia.
+- [x] Atualizar CLI/menu/contexto/prompt/resposta na Run Task existente, com
+  cancelamento e escolha preservada na retomada; testar entrada nao interativa.
+- [x] Definir layout versionado projeto/issues/issue/solicitacao e nomes de
+  ficha/contexto/plan/todo identificaveis; preservar leitura de nomes/layouts legados.
+- [x] Adaptar historico, referencias, indice, abertura, implementacao e limpeza
+  aos destinos declarados, sem renomear arquivos historicos.
+- [x] Evoluir novas priorizacoes para ranking + fichas individuais por projeto/issue;
+  validar FichaPaths e testar mesma regra em projetos distintos com dados separados.
+- [x] Estender a operacao de evidencias existente para pasta/LEIA-ME por issue,
+  com identidade, nomes seguros e preservacao dos anexos/indices legados.
+- [x] Resolver ficha e indice de anexos da issue como entradas explicitas do
+  planejamento; preservar ancora, Source/ID e associacoes dos anexos compartilhados.
+- [x] Comprovar categorias optional/potential independentes e passagem de optional
+  com ficha e anexos ao planejamento; testar isolamento de outra issue,
+  ausencia/ambiguidade e referencia incorreta.
+- [x] Testar retomada sem duplicar e novo anexo gerando revisao com Previous;
+  preservar recibos/propostas anteriores e explicitar conflitos com a ficha.
+- [x] Explicitar plano legivel para execucao manual ou agente, com recorte,
+  dependencias, passos, verificacoes, reversao e GO/aceite separados.
+- [x] Consolidar ficha/extratos MTA/anexos utilizados por solicitacao, com origem,
+  cobertura e hashes; manter referencias ao codigo por caminho relativo/simbolo/trecho.
+- [x] Definir modo explicito de execucao com evidencias consolidadas; adaptar
+  validacao/prompts e testar origem MTA indisponivel sem fallback silencioso.
+- [x] Comprovar falha de derivado ausente/alterado, independencia do caminho
+  historico e preservacao das exigencias de recibos legados de base MTA.
+- [x] Alinhar skill comum de orientacao e papeis a categoria/ficha/anexos;
+  conferir perfis Codex/Copilot, mantendo regras comuns e helper leitor.
+- [x] Simplificar guias central, orientacao, priorizacao, planejamento e modelo
+  de evidencias: termos unicos, passos claros e referencias sem duplicacao.
+- [x] Alinhar contrato, prompts, Run Tasks e entradas vigentes atingidas;
+  preservar recibos/documentos historicos e atualizar somente novos preparos.
+- [x] Conferir concordancia entre guia e orientador: escolha de categoria, ficha
+  escolhida, novo anexo, revisao do plano e passagem a execucao manual/assistida.
+- [x] Ensaiar colega recebendo analise ou plano de outro: orientador identifica
+  etapa, lacunas e Source local; distingue executor manual/agente e nao implementa.
+- [x] Executar regressao dirigida no Windows PowerShell 5.1 e revisar a entrega.
+- [x] Registrar escolha humana de iniciar do zero na maquina de trabalho e
+  alinhar roteiro de reinicio completo no guia de workspace.
+- [x] Preparar entrega revisada para commit/push e PR para main, autorizados pelo humano.
+- [ ] Atualizar o harness na maquina de trabalho apos receber a entrega por Git.
+- [ ] Reiniciar a .harness de ensaio nessa maquina; preservar configuracao,
+  workspace, fontes e MTA externo. Reconstruir indice/registros e conferir origem.
+- [ ] Ensaiar mandatory -> optional/potential -> retomar mandatory na maquina
+  de trabalho, iniciando com 10%; conferir denominadores, exclusoes, ficha/anexos e plano da issue
+  escolhida, incluindo atualizacao posterior de evidencia.
+- [ ] Registrar avaliacao humana da primeira entrega antes de avancar.
+
+Depois do ensaio:
+
+- [ ] Detalhar pacote de priorizacao e pacote de planejamento: manifesto,
+  fechamento das referencias, identidade/origem, hashes e estado da etapa.
+- [ ] Definir importacao com mapeamento de Source/caminhos, preservacao do
+  historico, indice local, reimportacao e conciliacao de conflitos.
+- [ ] Implementar exportacao/importacao e testar em duas raizes distintas, com
+  A analisando/planejando e B implementando sem acesso ao MTA original quando
+  houver contexto consolidado suficiente; devolucao nao implica integracao/aceite.
+- [ ] Por ultimo, apos exportacao/importacao e a conciliacao documental, retomar
+  contrato das consultas auditar_base/listar_issues/obter_issue e avaliar MCP
+  em incremento proprio, reaproveitando as capacidades existentes.
+
+Implementacao, testes locais e revisao independente executados. A passagem entre
+colegas foi conferida por fixtures e revisao documental de cinco cenarios; ensaio
+nativo do orientador e teste corporativo continuam pendentes. Export/import,
+ferramentas/MCP e engineering-harness-vscode.md permanecem adiados.
+O quick_validate.py da skill nao executou por ausencia de PyYAML; frontmatter e
+referencias foram conferidos diretamente, sem instalar dependencias na maquina.
+
+Validacao local em 2026-10-06: 39 scripts de teste PASS e Test-JbossReal SKIP
+(servidor real nao solicitado), em Windows PowerShell 5.1. Inclui regressao de
+categorias/historico, dossie por issue, anexos, preparacao de implementacao sem
+o MTA original e rejeicao de evidencia consolidada alterada. Test-BuildCoverage
+validou JaCoCo com JDK 8/Maven reais. Relatorio e logs locais em
+`.harness/tests/entrega1-20261006/suite.json`; 264 links documentais conferidos
+sem erro em `links.json` da mesma pasta. `git diff --check` sem erros.
+Modelo comum confirmado no contrato e no prompt: nove secoes de plano, cinco
+de to-do, tarefas ligadas a E1/E2 e justificativa para secoes nao aplicaveis.
+Publicacao da branch `harness/tools-analise-issues` autorizada: commit de todo o
+conteudo pendente e PR para main, sem merge nesta etapa. Por pedido posterior,
+incluir tambem `doc/features/engineering-harness-vscode.md` como foi fornecido;
+seu conteudo continua sem analise ou planejamento nesta entrega.
+
+## Ferramentas para analise de issues e pre-planejamento - retomada 2026-10-05
+
+Ordem revista pela proposta de 2026-10-06 acima. Itens abaixo permanecem backlog
+das ferramentas; nao sao o primeiro incremento atual.
+
+- [x] Conferir componentes existentes e registrar analise inicial em tasks/plan.md.
+- [ ] Na retomada, delimitar auditar_base, listar_issues e obter_issue; definir
+  entradas, saidas, paginacao, proveniencia e erros sem duplicar o parser existente.
+- [ ] Definir acesso/autorizacao das origens do contexto e avaliar o adaptador MCP
+  local, com configuracao compativel com os clientes usados pelo desenvolvedor.
+- [ ] Planejar regressao de contagens/IDs, detalhes de incidentes, paginas, hashes,
+  caminho historico, acesso negado, arquivo ausente e formato nao suportado.
+- [ ] Implementar e testar o incremento quando o trabalho for retomado; revisar
+  integracao com prompts e Run Tasks, mantendo classificacao tecnica separada
+  da categoria MTA e sem consumir cobertura pela mera consulta.
+- [ ] Avaliar depois comparar_ocorrencias, inspecionar_dependencias e
+  validar_priorizacao conforme os resultados do primeiro incremento.
+
+Somente documentacao salva nesta etapa; nenhuma ferramenta nova implementada,
+nenhuma instalacao MCP ou mudanca de permissoes. Commit/PR deste trabalho ainda
+nao realizados. Para continuar, ler a secao correspondente de tasks/plan.md.
+
 ## Regeneracao com pastas sem nome - 2026-10-05
 
 - [x] Conferir estado e criar branch de bugfix a partir de main.

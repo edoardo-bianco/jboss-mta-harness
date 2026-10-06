@@ -3,6 +3,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
 . (Join-Path $PSScriptRoot 'HarnessPlanningInput.ps1')
+. (Join-Path $PSScriptRoot 'HarnessPrioritizationEvidence.ps1')
+. (Join-Path $PSScriptRoot 'HarnessIssuePlanning.ps1')
 
 function Get-MtaPlanningRunFromPath {
     param([string]$RunPath, [string]$Root)
@@ -48,6 +50,10 @@ function Get-HarnessPlanningBasis {
 
 function Assert-HarnessPlanningEvidence {
     param($Receipt, [string]$Root, [switch]$Historical)
+    if ($Receipt.PSObject.Properties['EvidenceMode']) {
+        if ($Receipt.EvidenceMode -eq 'CONSOLIDATED') { Assert-IssuePlanningEvidence $Receipt $Root -Historical:$Historical; return }
+        if ($Receipt.EvidenceMode -ne 'ORIGINAL') { throw 'Modo de evidencias desconhecido.' }
+    }
     if ((Get-HarnessPlanningBasis $Receipt) -eq 'MTA') {
         $run = Get-MtaPlanningRunFromReceipt $Receipt $Root
         foreach ($pair in @(@('Manifest','manifest.json'),@('Result','result.json'),@('Findings','output/output.yaml'),@('Dependencies','output/dependencies.yaml'))) {
@@ -207,7 +213,8 @@ function Get-MtaPlanningHistory {
     $projects = @(Get-ChildItem -LiteralPath $base -Directory | Where-Object {
         $_.Name -ceq $Context.Active.name -or $_.Name.EndsWith(('__' + $projectKey), [StringComparison]::Ordinal)
     })
-    $records = foreach ($project in $projects) {
+    $records = @(Get-IssuePlanningHistory $Context -IncludePrepared:$IncludePrepared)
+    $records += @(foreach ($project in $projects) {
       $projectPath = Resolve-HarnessPath $project.FullName $Context.Root
       foreach ($runDirectory in Get-ChildItem -LiteralPath $projectPath -Directory) {
         if ($runDirectory.Name -cnotmatch '^(?:evidencias|[a-f0-9]{32}|mta_\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}[+-]\d{4}__[a-f0-9]{12})$') { continue }
@@ -237,7 +244,7 @@ function Get-MtaPlanningHistory {
             } catch { Write-Warning "Planejamento ignorado ($($request.Name)): $($_.Exception.Message)" }
         }
       }
-    }
+    })
     @($records | Sort-Object { [DateTimeOffset]::Parse($_.PreparedAtUtc) } -Descending)
 }
 
@@ -314,7 +321,7 @@ function New-MtaPlanningContextCore {
         $selected = Get-HarnessRegisteredMtaRun $register $Context.Root
         if (($RunId -and (-not $selected -or $selected.RunId -cne $RunId)) -or ($RunPath -and (-not $selected -or (Resolve-HarnessPath $RunPath $Context.Root) -ine $selected.Run))) { throw 'Rodada informada difere do registro. Troque a base explicitamente com manter-migracao.' }
         $RunId = if ($selected) { $selected.RunId } else { $null }
-        if (-not $EvidenceIndexPath -and (Test-Path $register.EvidenceIndexPath -PathType Leaf)) { $EvidenceIndexPath=$register.EvidenceIndexPath }
+        $EvidenceIndexPath=Get-IssueEvidenceIndex $Context $register $EvidenceIndexPath
         $evidenceInputs = @(Get-HarnessPlanningEvidenceInputs $Context.Root $register $EvidenceIndexPath)
     } elseif ($RunPath) {
         $selected = Get-MtaPlanningRunFromPath -RunPath $RunPath -Root $Context.Root
@@ -328,11 +335,13 @@ function New-MtaPlanningContextCore {
     $hashes = [ordered]@{}
     if ($selected) { foreach ($key in $evidenceFiles.Keys) { $hashes[$key] = (Get-FileHash -LiteralPath (Join-Path $selected.Run $evidenceFiles[$key]) -Algorithm SHA256).Hash } }
     $previous = $null
+    $prior = $null
     if ($PreviousRequestId) {
         if ($PreviousRequestId -cnotmatch '^[a-f0-9]{32}$') { throw 'Identidade de planejamento anterior invalida.' }
         $matches = @(Get-MtaPlanningHistory $Context -IncludePrepared | Where-Object RequestId -CEQ $PreviousRequestId)
         if ($matches.Count -ne 1) { throw 'Planejamento anterior ausente ou ambiguo para este projeto.' }
         $prior = $matches[0]
+        if ($prior.PSObject.Properties['LayoutVersion'] -and ($selectedIssues.Count -ne 1 -or $selectedIssues[0].Id -cne $prior.IssueId)) { throw 'Previous pertence a outra issue/recorte. Novo planejamento por issue exige uma unica escolha correspondente.' }
         Assert-HarnessPlanningEvidence $prior $Context.Root -Historical
         $previous = [ordered]@{
             RequestId=$prior.RequestId; RunId=$prior.RunId; ContextPath=$prior.ContextPath
@@ -341,6 +350,9 @@ function New-MtaPlanningContextCore {
             PlanSha256=if (Test-Path -LiteralPath $prior.PlanPath -PathType Leaf) { (Get-FileHash -LiteralPath $prior.PlanPath).Hash } else { $null }
             TodoSha256=if (Test-Path -LiteralPath $prior.TodoPath -PathType Leaf) { (Get-FileHash -LiteralPath $prior.TodoPath).Hash } else { $null }
         }
+    }
+    if ($selectedIssues.Count -gt 1 -and (-not $prior -or $prior.PSObject.Properties['LayoutVersion'])) {
+        throw 'Delimite uma issue por projeto para o novo planejamento; preserve dependencias nas observacoes. Revisao por issue nao pode virar lote multi-issue legado.'
     }
     $templatePath = Resolve-HarnessPath (Join-Path $Context.Root '.github/prompts/planejar-lotes.prompt.md') $Context.Root
     $template = Get-Content -LiteralPath $templatePath -Raw -Encoding UTF8
@@ -359,16 +371,23 @@ function New-MtaPlanningContextCore {
         foreach ($warning in $pomComparison.Warnings) { Write-Warning $warning }
     }
     $projectFolder = Get-HarnessProjectFolder $Context.Active
+    $issuePaths = if ($selectedIssues.Count -eq 1) { Get-HarnessIssuePaths $Context.Root $Context.Active $selectedIssues[0].Id } else { $null }
     $runFolder = if ($selected) { 'mta_' + (Format-HarnessDate $selected.CreatedAtUtc.ToString('o') -ForPath) + '__' + $RunId.Substring(0,12) } else { 'evidencias' }
     do {
         $requestId = [guid]::NewGuid().ToString('N')
         $requestFolder = 'plano_' + (Format-HarnessDate $preparedAt -ForPath) + '__' + $requestId.Substring(0,12)
         $requestPath = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/planning/' + $projectFolder + '/' + $runFolder + '/' + $requestFolder)) $Context.Root
+        if ($issuePaths) { $requestPath=Resolve-HarnessPath (Join-Path $issuePaths.Folder ('p_'+$requestId.Substring(0,12))) $Context.Root }
     } while (Test-Path -LiteralPath $requestPath)
     $promptPath = Join-Path $requestPath 'planejar-lotes.prompt.md'
     $planPath = Join-Path $requestPath 'plan.md'
     $todoPath = Join-Path $requestPath 'todo.md'
     $contextPath = Join-Path $requestPath 'context.json'
+    if ($issuePaths) {
+        $planPath=Join-Path $requestPath ('plan-'+$issuePaths.Stem+'.md')
+        $todoPath=Join-Path $requestPath ('todo-'+$issuePaths.Stem+'.md')
+        $contextPath=Join-Path $requestPath ('contexto-'+$issuePaths.Stem+'.json')
+    }
     if (-not $register) { $register = Initialize-HarnessMigration $Context.Root $Context.Active }
     $catalogPath = if ($selected) { Join-Path $selected.Run 'output/static-report/output.js' } else { $null }
     $catalogStatus = 'INDISPONIVEL'
@@ -406,6 +425,11 @@ function New-MtaPlanningContextCore {
     if ($Operation -eq 'revisar-lote') {
         $data.Operation = $Operation
         $data.EvidenceIndexPath = $EvidenceIndexPath.Replace('\','/')
+    }
+    if ($issuePaths) {
+        $data.LayoutVersion=2
+        $data.IssueId=$selectedIssues[0].Id
+        New-IssuePlanningEvidence $Context $data $selected $issuePaths
     }
     # O contexto e dado, nao instrucao. Escapar delimitadores evita romper o bloco JSON.
     # O snapshot do registro fica no recibo, sem duplicar sua tabela no prompt.
@@ -674,18 +698,20 @@ Export-ModuleMember -Function Invoke-HarnessRegisteredPlanning
 function Get-MtaPreparationFileState {
     param($Context)
     $files = @{}
+    $issueProject=Split-Path (Split-Path (Get-HarnessIssuePaths $Context.Root $Context.Active '_localizar').Folder -Parent) -Parent
     $keys = @(
         @('planning', (Get-HarnessProjectKey $Context.Active.name)),
+        @('planning', (Get-HarnessProjectKey $Context.Active.path.ToLowerInvariant())),
         @('projetos', (Get-HarnessProjectKey $Context.Active.path.ToLowerInvariant()))
     )
     foreach ($pair in $keys) {
         $base = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/' + $pair[0])) $Context.Root
         if (-not (Test-Path -LiteralPath $base -PathType Container)) { continue }
         foreach ($folder in Get-ChildItem -LiteralPath $base -Directory) {
-            if ($folder.Name -cne $Context.Active.name -and -not $folder.Name.EndsWith('__' + $pair[1], [StringComparison]::Ordinal)) { continue }
+            if ($folder.FullName -ine $issueProject -and $folder.Name -cne $Context.Active.name -and -not $folder.Name.EndsWith('__' + $pair[1], [StringComparison]::Ordinal)) { continue }
             $path = Resolve-HarnessPath $folder.FullName $Context.Root
             $documents = if ($pair[0] -eq 'planning') {
-                Get-ChildItem -LiteralPath $path -Recurse -File | Where-Object { $_.Name -eq 'context.json' -or $_.Name -like '*.prompt.md' }
+                Get-ChildItem -LiteralPath $path -Recurse -File
             } else {
                 Get-ChildItem -LiteralPath $path -File | Where-Object { $_.Name -match '^migracao(?:-.+)?\.md$' }
                 $index = Join-Path $path 'evidencias/LEIA-ME.md'

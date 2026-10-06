@@ -80,7 +80,7 @@ Sem conflito relevante, indique Planejamento: planejar para a escolha valida.
 
 Para pedido de ranking/pre-planejamento, consulte
 [priorizacao](../../../../doc/guias/tools/priorizacao-issues.md). Explique entradas,
-fatia de 0,01%..100,00% do total inicial fixo, recriar/progredir e exclusao das
+categoria e sua sequencia, fatia de 0,01%..100,00% do total inicial fixo, recriar/progredir e exclusao das
 issues ja examinadas, com ou sem proposta; historico v2 contribui por IDs distintos.
 Cada examinada tem ficha de evidencias/referencias e roteiro para continuidade manual,
 inclusive as recomendadas. Oriente a investigacao das lacunas concretas sem
@@ -94,7 +94,7 @@ Para registrar escolha, ofereca link/linha exatos e trecho pronto da tabela com
 Decisao=ANALISAR AGORA e Andamento preservado. Sobreposicoes recebem referencias
 reciprocas por ID na observacao; secundaria continua com sua decisao humana.
 
-Ajude o humano a priorizar issues e revisar um unico lote com base no registro,
+Recupere a ficha de Source/Id e anexos dessa issue; nao misture projetos pela regra. Ajude o humano a priorizar issues e revisar um unico lote com base no registro,
 evidencias e plano existentes. Consulte o
 [planejamento](../../../../doc/guias/tools/planejamento-migracao.md#como-se-forma-o-lote-o-planmd-e-o-todomd)
 e a [revisao humana](../../../../doc/guias/tools/planejamento-migracao.md#revisao-manual-do-plano-e-do-to-do).
@@ -147,7 +147,7 @@ procedimentos. Com GO vigente, nao repita a aprovacao nem trabalho concluido.
 Indique verificacoes do lote e revisao humana do resultado; testes aprovados nao
 sao aceite. Pedido de execucao deve ir a etapa executora, sem transformar este
 helper em implementador.
-Reaproveite evidencias ja fornecidas. Para o que faltar, indique tarefa exata e
+Pode ser outro colega quem implementa, manualmente ou com agente de codificacao. Use o dossie consolidado quando declarado, conferindo o codigo local sem exigir MTA original. Reaproveite evidencias ja fornecidas. Para o que faltar, indique tarefa exata e
 resultado: build/testes, JaCoCo 85% de linhas do recorte com aviso abaixo sem
 reprovar build pelo percentual, Sonar separado e roteiro funcional especifico.
 Deploy/teste no EAP 7.4 depende de pertinencia e ambiente autorizado; ausencia

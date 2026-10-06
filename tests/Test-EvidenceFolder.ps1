@@ -14,6 +14,7 @@ foreach ($path in @($scripts,$docs,$app,$other)) { $null = New-Item -ItemType Di
 foreach ($path in @($app,$other)) { Set-Content -LiteralPath (Join-Path $path 'pom.xml') '<project />' }
 Copy-Item -LiteralPath $entrySource -Destination $scripts
 Copy-Item -LiteralPath (Join-Path $root 'scripts/Harness.psm1') -Destination $scripts
+Copy-Item -LiteralPath (Join-Path $root 'scripts/HarnessPlanningInput.ps1') -Destination $scripts
 Copy-Item -LiteralPath (Join-Path $root 'doc/guias/modelo-evidencias-complementares.md') -Destination $docs
 $config = Get-Content -LiteralPath (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @()
@@ -25,7 +26,7 @@ $config | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $configPath -Encodi
 $configBefore = Get-Content -Raw $configPath
 $workspaceBefore = Get-Content -Raw $workspacePath
 $entry = Join-Path $scripts 'criar-pasta-evidencias.ps1'
-$entryArgs = @('-NoProfile','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-SelectTarget','-NoOpen')
+$entryArgs = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-SelectTarget','-NoOpen')
 $output = 'q' | & powershell.exe @entryArgs 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada')) 'Cancelamento nao respeitado.'
 Assert (-not (Test-Path -LiteralPath (Join-Path $fixture '.harness'))) 'Cancelar criou estrutura.'
@@ -46,7 +47,7 @@ Assert ((Get-Content -Raw $first[0].FullName) -ceq $preserved) 'Repeticao sobres
 Assert (@(Get-ChildItem -LiteralPath $base -Directory).Count -eq 2 -and @(Get-ChildItem -LiteralPath $base -Recurse -File).Count -eq 4) 'Repeticao duplicou arquivos do projeto.'
 $editor = Join-Path $scripts 'editor.ps1'
 Set-Content -LiteralPath $editor -Encoding UTF8 -Value '$args | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $PSScriptRoot "editor-args.json")'
-$output = & powershell.exe -NoProfile -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -EditorPath $editor 2>&1 | Out-String
+$output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -EditorPath $editor 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 0) ('Criacao com editor falhou: ' + $output)
 Assert (@(Get-ChildItem -LiteralPath $base -Directory).Count -eq 2) 'Projetos homonimos misturados.'
 $editorArgs = Get-Content -Raw (Join-Path $scripts 'editor-args.json') | ConvertFrom-Json
@@ -55,3 +56,20 @@ Assert ((Get-Content -Raw -Encoding UTF8 $editorArgs[1]).Contains($app)) 'Editor
 Assert ((Get-Content -Raw $configPath) -ceq $configBefore -and (Get-Content -Raw $workspacePath) -ceq $workspaceBefore) 'Alterou configuracao/workspace.'
 Assert (@(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness') -Directory).Count -eq 1) 'Criou area de MTA/planejamento indevida.'
 Write-Output "PASS: selecao/cancelamento reais, homonimos isolados, repeticao preservada, indice com instrucoes e editor. Fixture: $area"
+
+# Escolha registrada abre a pasta especifica da issue sem duplicar seletores.
+Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force -DisableNameChecking
+$context=Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target $app
+$register=Get-HarnessMigrationPaths $fixture $context.Active
+$text=[IO.File]::ReadAllText($register.MigrationPath).Replace('Total MTA:', "| DEV-CACHE | Cache | manual | - | MANUAL | ANALISAR AGORA | NAO ANALISADA | |`nTotal MTA:")
+[IO.File]::WriteAllText($register.MigrationPath,$text)
+$output=& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0) ('Pasta da issue falhou: '+$output)
+$issue=Get-HarnessIssuePaths $fixture $context.Active 'DEV-CACHE'
+Assert (Test-Path -LiteralPath $issue.EvidenceIndexPath) 'Escolha nao direcionou anexos para a issue.'
+Assert-HarnessIssueFicha $issue.EvidenceIndexPath $app 'DEV-CACHE'
+Add-Content $issue.EvidenceIndexPath '| log.txt | Erro da issue |'
+$hash=(Get-FileHash $issue.EvidenceIndexPath).Hash
+$output=& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -IssueId 'DEV-CACHE' -NoOpen 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 0 -and (Get-FileHash $issue.EvidenceIndexPath).Hash -eq $hash) 'Reabrir issue alterou anexos.'
+Write-Output 'PASS: selecao da issue, identidade e preservacao do indice de anexos.'

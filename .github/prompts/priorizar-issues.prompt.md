@@ -1,6 +1,6 @@
 ---
 name: priorizar-issues
-description: Recomenda issues mandatory por risco, repetibilidade e alcance antes da escolha humana.
+description: Recomenda issues da categoria escolhida por risco, repetibilidade e alcance antes da escolha humana.
 argument-hint: Use o contexto preparado para os projetos do workspace; indique preferencias.
 agent: devsquad
 tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'search/usages', 'edit/createFile', 'edit/editFiles']
@@ -8,16 +8,18 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 
 ## Direcionamento do desenvolvedor
 
-Objetivo: recomendar as melhores oportunidades de corretiva mandatory nos projetos
+Objetivo: recomendar as melhores oportunidades de corretiva da categoria escolhida nos projetos
 selecionados, equilibrando risco e repetibilidade com alcance potencial.
 Preferencias, restricoes ou projetos a enfatizar:
 
 ## Trabalho solicitado
 
 Leia o JSON final e ContextPath. Sem contexto explicito, solicite o arquivo preparado.
-Confira Purpose=issue-prioritization, SchemaVersion=3, RequestId, SequenceId,
+Confira Purpose=issue-prioritization, SchemaVersion=4, Category, RequestId, SequenceId,
 Percentage (0,01..100,00), InitialTotal, SliceSize, AvailableIssues, ExcludedIssues,
 Previous, RankingPath e Projects. Contexto antigo com Top exige novo preparo.
+Recibos v2/v3 continuam mandatory e seguem seus destinos historicos. Em v4, confira
+FichaPaths: um destino por Source/Id. Cada categoria tem base e cobertura proprias.
 Use ContractSnapshot, secao Pre-planejamento, e GuidePath; nao procure outra solicitacao.
 Leia indice e registros atuais, compare com os snapshots; exponha divergencias.
 Source identifica cada projeto local; MtaOrigin/RunId identificam sua rodada.
@@ -32,7 +34,7 @@ using-agent-skills quando disponivel e skills pertinentes lidas; apoio usa subag
 reais do cliente. Forneca escopo, caminhos, contrato e pergunta delimitada; o apoio
 somente le/busca, sem escrita ou subdelegacao, e devolve evidencias ao condutor.
 Sem apoio compativel, prossiga diretamente e informe o limite; nao simule delegacao
-nem exija trocar de cliente. Somente o condutor escreve RankingPath.
+nem exija trocar de cliente. Somente o condutor escreve RankingPath e FichaPaths.
 No Copilot, antes de delegar, confira o nome exato e a disponibilidade do destinatario
 na sessao, a ferramenta agent e a lista agents do condutor; citar um perfil nao o
 torna disponivel. Esta rota solicita devsquad.plan; os migracao_*_helper pertencem
@@ -51,7 +53,7 @@ de todas as issues. Selecione SliceSize issues novas para esta fatia, justifican
 a selecao por risco/repetibilidade/alcance no inventario; a ordem de AvailableIssues
 nao e um ranking. Examine cada selecionada e registre seu resultado, aprofundando
 as promissoras. Mencoes de apoio nao consomem quota. Confira elegibilidade atual:
-candidatas mandatory/PRESENTE dos registros, com
+candidatas da Category selecionada/PRESENTE dos registros, com
 decisao A DEFINIR ou ANALISAR AGORA e andamento NAO ANALISADA/ANALISADA.
 ADIAR/FORA DO ESCOPO e PLANEJADA/IMPLEMENTADA/VERIFICADA ficam fora por padrao;
 reconsiderar exige pedido humano explicito por projeto/ID/recorte e justificativa.
@@ -134,7 +136,12 @@ Separe ocorrencias MTA, pontos de alteracao deduplicados observados e potencial
 condicional. Nao some ocorrencias sobrepostas como ganho adicional comprovado.
 Java 8/javax/EAP 7.4 e Hibernate 5.3 quando aplicavel; receita nao testada e candidata.
 
-Grave somente RankingPath, sob a solicitacao .harness/priorizacao do recibo:
+Grave o resumo em RankingPath e uma ficha por examinada no destino FichaPaths
+exato de Source/Id. Inclua na ficha o marcador `<!-- issue: {"Source":"...","Id":"..."} -->`
+com os valores reais. Mesmo ID em projetos diferentes exige fichas independentes,
+com o contexto necessario repetido para leitura isolada. Nao escreva fichas de
+issues apenas mencionadas. No legado sem FichaPaths, preserve fichas no ranking.
+O resumo, sob a solicitacao .harness/priorizacao do recibo, contem:
 - Identidade, data, escopo/projetos/RunIds, fontes e limites da leitura.
 - Apoio utilizado: cliente/condutor, subagente solicitado e realmente executado,
   status da chamada e erro concreto se houver. Diferencie indisponivel, recusado,
@@ -180,8 +187,8 @@ Grave somente RankingPath, sob a solicitacao .harness/priorizacao do recibo:
     Source/RunId na identidade do projeto, sem repetir caminhos longos em cada bloco.
   Use nomes compreensiveis nos titulos/links; nao use hashes ou IDs como unico rotulo
   nem crie codigos auxiliares que obriguem consultar uma legenda. Detalhe cada achado
-  uma vez na ficha; a tabela apenas resume. Centralize contexto/referencias comuns
-  e linke-os, mantendo evidencia e limites por issue. Preserve IDs completos no
+  uma vez na ficha; a tabela apenas resume. Repita na ficha o contexto necessario
+  para compartilha-la isoladamente, mantendo evidencia e limites por projeto. Preserve IDs completos no
   bloco JSON e no trecho copiavel do registro; legibilidade nao altera identidade.
   Seja proporcional a complexidade: nao repita o mesmo paragrafo nos quatro blocos.
   A ficha deve ser compreensivel sem o chat, sem prometer base completa por leitura

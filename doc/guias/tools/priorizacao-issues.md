@@ -7,7 +7,7 @@ html:
 
 # Priorizacao de issues: pre-planejamento entre projetos
 
-Use esta etapa opcional para escolher uma corretiva mandatory equilibrando
+Use esta etapa opcional para comparar corretivas da categoria escolhida, equilibrando
 risco, repetibilidade da solucao e alcance no codigo. A saida e um relatorio de
 todas as issues examinadas, com recomendacoes, motivos e fichas de continuidade
 manual sustentadas por evidencias e amostras, a partir de uma **fatia de
@@ -61,7 +61,7 @@ altera prioridades ou atualiza o indice.
 Uma reconciliacao antiga PENDENTE nao e pre-requisito generico para esta etapa;
 o agente confere o motivo e registra o impacto real nas candidatas.
 
-Entram por padrao issues `mandatory`, `PRESENTE`, com decisao `A DEFINIR` ou
+Entram issues da categoria escolhida, `PRESENTE`, com decisao `A DEFINIR` ou
 `ANALISAR AGORA` e andamento `NAO ANALISADA` ou `ANALISADA`. Issues adiadas, fora
 do escopo ou ja planejadas/implementadas/verificadas exigem pedido explicito por
 projeto/ID e recorte para reconsideracao. Issues `DEV-...` exigem pedido expresso,
@@ -72,6 +72,9 @@ sem inventar classificacao MTA. Lotes ativos e decisoes anteriores sao preservad
 ### Uso manual pela Run Task
 
 1. Salve o workspace e abra **Terminal > Run Task > Planejamento: priorizar issues**.
+   Escolha a categoria recebida no catalogo: `mandatory`, `optional`, `potential`
+   ou outra. Cada categoria tem sequencia e cobertura separadas. Voltar a mandatory
+   permite progredir sua propria sequencia, sem consumir examinadas de optional.
 2. Se houver priorizacao anterior, escolha **1 recriar** ou **2 progredir**.
    Recriar inicia nova base, preservando o historico; progredir exclui as issues
    ja examinadas na sequencia, com ou sem recomendacao. Um preparo ainda sem
@@ -126,7 +129,7 @@ inclusive os sem recomendacao. Cada um aparece na tabela com posicao ou
 investigacao/corretiva quando cabivel; sair da fila de triagem nao resolve a issue.
 Citacao/overlap de outra issue nao comprova exame dessa outra.
 O prompt grava no proprio ranking um bloco estruturado com IDs examinados/propostos.
-O preparador valida esse resultado. Nos novos recibos (SchemaVersion=3), COMPLETED
+O preparador valida esse resultado. Nos novos recibos (SchemaVersion=4), COMPLETED
 exige exatamente a quota em AnalyzedIssues; uma analise parcial fica IN_PROGRESS
 e deve ser completada no mesmo arquivo. ProposedIssues pode estar vazio.
 100% de issues examinadas nao significa todas as ocorrencias corrigidas/validadas.
@@ -257,6 +260,13 @@ EAP 7.4 e Hibernate 5.3, quando aplicavel, continuam sendo os alvos.
 Cada solicitacao fica em `.harness/priorizacao/<RequestId>/`, com `context.json`,
 prompt preparado e, depois da execucao pelo agente, `priorizacao.md`. O recibo
 preserva snapshots do indice/registros, caminhos e hashes das entradas.
+Nos novos recibos, Category separa as sequencias e FichaPaths declara arquivos
+individuais por projeto/issue, sob `.harness/planning/<artifactId>/issues/`.
+O agente cria fichas somente das examinadas; o ranking aponta para esses arquivos.
+Mesmo ID em projetos diferentes mantem fichas distintas, com contexto suficiente
+para compartilhar cada uma. Contextos v2/v3 continuam mandatory e conservam layout.
+CLI aceita `-Category optional` (ou outra recebida); omitida, preserva mandatory.
+Ao passar PreviousRequestId sem Category, a categoria daquela sequencia e retomada.
 Mudancas relevantes posteriores precisam ser explicitadas na analise; snapshot
 nao equivale ao estado atual. A limpeza de execucoes preserva essa pasta.
 
@@ -268,6 +278,8 @@ de outro agente ou do historico do chat. **SEM POSICAO nao significa descartada.
 O relatorio comeca com uma tabela curta: **Prioridade | Projeto | Issue |
 Avaliacao | Motivo / proxima acao**. Clique no titulo da issue para abrir a ficha.
 A tabela resume; as evidencias e orientacoes ficam na ficha, sem repetir a analise.
+Para levar ficha e anexos ao plano/to-do padronizados por issue, siga o
+[dossie por issue e passagem entre colegas](planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas).
 
 #### Como ler a ficha
 

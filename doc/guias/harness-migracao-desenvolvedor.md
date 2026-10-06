@@ -66,7 +66,7 @@ Veja [o roteiro manual e o formato das fichas](tools/priorizacao-issues.md#plane
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
 | Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
-| Quero comparar oportunidades mandatory entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): fatia percentual por risco, repetibilidade e alcance, com recriacao ou avanco. |
+| Quero comparar oportunidades de uma categoria entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): categoria, fatia percentual por risco, repetibilidade e alcance, com recriacao ou avanco. |
 | Tenho uma ficha e quero seguir manualmente, com ou sem recomendacao | [Continuar a partir da ficha](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao): conferir achados, obter o que falta e escolher o recorte. |
 | Proposta pronta, ainda em revisao ou sem GO | [5. Planejar e revisar um lote](#5-planejar-e-revisar-um-lote). |
 | Plano revisado com GO, inclusive implementacao parcial | [6. Implementar o lote autorizado](#6-implementar-o-lote-autorizado). |
@@ -182,12 +182,15 @@ registros possiveis, pergunta somente qual usar. Sem MTA completo, usa evidencia
 disponiveis sem inventar origem ou resultado MTA.
 
 Para elaborar com IA, execute o prompt preparado no cliente atual. Se faltar uma decisao essencial,
-o agente pergunta antes de concluir plan.md/todo.md. Responda no mesmo chat; nao
+o agente pergunta antes de concluir PlanPath/TodoPath. Responda no mesmo chat; nao
 e preciso preencher documentos paralelos. Limites nao impeditivos ficam claros
 na proposta. Veja os [passos e a mensagem curta por cliente](tools/planejamento-migracao.md#preparar-e-executar-o-prompt).
 Para elaborar manualmente, use as fichas/evidencias e redija plano e to-do nos
 caminhos indicados pelo contexto do lote. Siga o [roteiro manual](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao)
 e os mesmos criterios de escopo, revisao e GO.
+Novas propostas usam [dossie e modelos padronizados por issue](tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas),
+com ficha/anexos de entrada e passos que outro colega pode executar manualmente
+ou com agente de codificacao. A pasta usa artifactId; o orientador continua leitor.
 
 **Guia da etapa:** [Planejamento: proposta, revisao e GO](tools/planejamento-migracao.md#planejar-lotes-de-correcao-com-copilot).
 Ele detalha o preparo do contexto, a execucao do prompt e a revisao do mesmo lote.
@@ -288,7 +291,7 @@ Cada guia oferece mensagem de exemplo, resultado esperado e retorno ao fluxo pri
 | Guia | Quando abrir | Configuracao e operacao |
 | --- | --- | --- |
 | [Orientacao da migracao](orientacao-migracao.md) | Receber ajuda em qualquer etapa, no Codex ou Copilot. | [Iniciar](orientacao-migracao.md#iniciar-no-codex-ou-no-copilot), [retomar](orientacao-migracao.md#retomar-em-outro-chat-ou-cliente), [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa). |
-| [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas mandatory entre projetos antes da escolha; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-com-o-helper), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
+| [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas da categoria escolhida entre projetos; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-com-o-helper), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
 | <a id="comecar-na-maquina-de-trabalho"></a><a id="extensoes-java-no-vs-code"></a><a id="escolher-o-projeto-em-cada-tarefa"></a><a id="ensaiar-e-depois-usar-os-projetos-corporativos"></a><a id="configuracao-da-maquina"></a><a id="duas-opcoes-para-configurar-o-workspace"></a><a id="opcao-a-editar-o-json-local-e-gerar-novamente"></a><a id="opcao-b-configurar-o-workspace-manualmente"></a><a id="limpar-execucoes-locais"></a><a id="pastas-locais-e-backups-temporarios"></a><a id="tarefa-e-script-correspondente"></a>[Workspace](tools/workspace.md) | Preparar ou ajustar o ambiente; selecionar projetos. | [Configuracao](tools/workspace.md#configuracao), [uso](tools/workspace.md#uso), [limpeza e dados locais](tools/workspace.md#limpar-execucoes-locais), [catalogo de tarefas](tools/workspace.md#tarefa-e-script-correspondente). |
 | <a id="build-maven-da-aplicacao-com-java-8"></a><a id="usar-a-extensao-maven-padrao-do-vs-code"></a>[Build da aplicacao](tools/maven.md) | Executar a Run Task de build ou usar Maven direto; etapas 2 e 7. | [Configuracao](tools/maven.md#configuracao), [Run Task do harness](tools/maven.md#opcao-a-run-task-do-harness), [painel Maven/terminal](tools/maven.md#opcao-b-maven-direto). |
 | <a id="analise-e-resultados"></a><a id="acompanhar-a-analise-mta"></a>[MTA](tools/mta.md) | Produzir diagnostico ou reanalisar; etapas 3 e 7. | [Instalacao/perfil](tools/mta.md#configuracao), [analise, relatorios e logs](tools/mta.md#uso). |

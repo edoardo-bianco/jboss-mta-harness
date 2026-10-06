@@ -97,7 +97,7 @@ function Get-HarnessPlanningEvidenceInputs {
     foreach ($reference in $references) {
         $value = ($reference.Value -split '#',2)[0]
         # Planos sao entradas mutaveis proprias, nao anexos que congelam o GO.
-        if (-not $value -or $value -match '(?:^|[\\/])(plan|todo|context)\.(md|json)$') { continue }
+        if (-not $value -or $value -match '(?:^|[\\/])(plan|todo|contexto?)(?:-[^\\/]*)?\.(md|json)$') { continue }
         $path = $value
         $status = 'REFERENCIA EXTERNA'; $hash = $null
         if ($value -notmatch '^https?://') {
@@ -106,7 +106,7 @@ function Get-HarnessPlanningEvidenceInputs {
             if (Test-Path -LiteralPath $path -PathType Leaf) { $hash=(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash; $status='DISPONIVEL' }
         }
         if ($seen.ContainsKey($path)) { continue }; $seen[$path]=$true
-        [pscustomobject]@{Path=$path;Relation=$reference.Relation;Status=$status;Sha256=$hash}
+        [pscustomobject]@{Path=$path;Reference=$reference.Value;Relation=$reference.Relation;Status=$status;Sha256=$hash}
     }
 }
 
@@ -150,10 +150,10 @@ function Invoke-HarnessRegisteredPlanningCore {
             $options=@($receipt)
         } else {
         $linkText=($chosen | ForEach-Object Observation) -join "`n"
-        if ($linkText -notmatch '(plan|todo|context)\.(md|json)') { $linkText=[regex]::Replace($register.Text,'(?s)<!-- mta:inicio -->.*?<!-- mta:fim -->','') }
+        if ($linkText -notmatch '(plan|todo|contexto?)(?:-[^\\/\)]*)?\.(md|json)') { $linkText=[regex]::Replace($register.Text,'(?s)<!-- mta:inicio -->.*?<!-- mta:fim -->','') }
         $links=@(foreach ($match in [regex]::Matches($linkText,'\[[^\]]*\]\(<?([^>\)]+)>?\)')) {
             $value=($match.Groups[1].Value -split '#',2)[0]
-            if ($value -match '(?:^|[\\/])(plan|todo|context)\.(md|json)$') { Resolve-HarnessPath ([Uri]::UnescapeDataString($value)) (Split-Path $register.MigrationPath -Parent) }
+            if ($value -match '(?:^|[\\/])(plan|todo|contexto?)(?:-[^\\/]*)?\.(md|json)$') { Resolve-HarnessPath ([Uri]::UnescapeDataString($value)) (Split-Path $register.MigrationPath -Parent) }
         })
         $linked=@($history | Where-Object { (Resolve-HarnessPath $_.ContextPath $Context.Root) -in $links -or (Resolve-HarnessPath $_.PlanPath $Context.Root) -in $links -or (Resolve-HarnessPath $_.TodoPath $Context.Root) -in $links })
         if ($links.Count -and -not $linked.Count) { throw 'Referencia de plano no registro nao localiza uma solicitacao valida. Confira o caminho indicado; nao sera criado outro lote silenciosamente.' }
@@ -189,14 +189,18 @@ function Invoke-HarnessRegisteredPlanningCore {
     }
     if ($receipt) {
         if ($receipt.Project -cne $Context.Active.name -or (Resolve-HarnessPath $receipt.Source $Context.Root) -ine $Context.Active.path) { throw 'Registro e solicitacao pertencem a projetos diferentes.' }
+        if ($receipt.PSObject.Properties['LayoutVersion'] -and ($chosen.Count -ne 1 -or $chosen[0].Id -cne $receipt.IssueId)) {
+            throw 'A solicitacao pertence a uma issue. Preserve essa escolha para revisar ou use NewPlan para a outra issue; nao misturar dossies.'
+        }
         $run=Get-HarnessRegisteredMtaRun $register $Context.Root
         $basis=if ($run) { 'MTA' } else { 'EVIDENCIAS' }
         $sameBase=(Get-HarnessPlanningBasis $receipt) -eq $basis -and
             (($basis -eq 'EVIDENCIAS') -or ($run.RunId -ceq $receipt.RunId -and (Resolve-HarnessPath $receipt.Run $Context.Root) -ieq $run.Run))
-        $index=if ($EvidenceIndexPath) { Resolve-HarnessPath $EvidenceIndexPath $Context.Root } else { $register.EvidenceIndexPath }
+        $index=Get-IssueEvidenceIndex $Context $register $EvidenceIndexPath
         $inputs=@(Get-HarnessPlanningEvidenceInputs $Context.Root $register $index)
         if ($receipt.PSObject.Properties['EvidenceInputs']) {
-            $sameBase=$sameBase -and (($inputs | ConvertTo-Json -Depth 5 -Compress) -ceq (@($receipt.EvidenceInputs) | ConvertTo-Json -Depth 5 -Compress))
+            $originalInputs=if ($receipt.PSObject.Properties['SourceEvidenceInputs']) { @($receipt.SourceEvidenceInputs) } else { @($receipt.EvidenceInputs) }
+            $sameBase=$sameBase -and (($inputs | ConvertTo-Json -Depth 5 -Compress) -ceq ($originalInputs | ConvertTo-Json -Depth 5 -Compress))
         }
         $sameBase=$sameBase -and $receipt.PSObject.Properties['PlanningBasis'] -and
             $receipt.ContractSnapshot -ceq [IO.File]::ReadAllText((Join-Path $Context.Root 'doc/especificacoes/planejamento-copilot.md')) -and

@@ -18,6 +18,66 @@ Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
 
 ## Orientacao com o helper
 
+### Dossie por issue e passagem entre colegas
+
+1. No registro do projeto, escolha uma issue com **ANALISAR AGORA**. Na observacao,
+   mantenha o link da ficha dessa issue e o recorte desejado. A categoria vem da
+   analise; optional/potential seguem o mesmo planejamento depois da escolha.
+2. Use **Planejamento: criar pasta de evidencias** para abrir o indice da issue
+   escolhida. Liste ficha-base e anexos (logs, testes, configuracao, documentos),
+   indicando a relacao com a corretiva. Sem escolha, a tarefa conserva o indice
+   geral do projeto. Pela CLI, `-IssueId` seleciona uma issue do registro.
+3. Use **Planejamento: planejar**. O preparo recupera escolha/ficha/anexos, copia
+   as entradas utilizadas e informa ContextPath, PlanPath e TodoPath. Execute o
+   prompt informado ou redija o plano manualmente nesses mesmos destinos.
+4. Revise alteracoes, dependencias, verificacoes, reversao e aceite. Registre GO
+   quando decidir executar. Outro colega pode implementar manualmente ou com
+   agente de codificacao; o orientador ajuda a conferir a etapa e suas pendencias.
+
+Exemplo ilustrativo (use sempre os caminhos informados pela tarefa):
+
+```text
+.harness/planning/meu-servico/issues/regra__<chave>/
+  evidencias/LEIA-ME.md                  # anexos editaveis da issue
+  fichas/p_<priorizacao>/ficha-meu-servico-regra-<chave>.md
+  p_<solicitacao>/
+    contexto-meu-servico-regra-<chave>.json
+    ficha-meu-servico-regra-<chave>.md    # copia da entrada
+    plan-meu-servico-regra-<chave>.md
+    todo-meu-servico-regra-<chave>.md
+    evidencias/LEIA-ME.md                # mapa das copias consolidadas
+```
+
+`meu-servico` e o **artifactId do POM raiz** do projeto. Source no recibo continua
+localizando o codigo. Nomes/layouts antigos permanecem validos. Mesmo achado em dois
+projetos recebe duas fichas e dois planos independentes, com o contexto repetido.
+O nome observado no primeiro preparo e preservado caso o artifactId mude. Nomes
+longos de arquivo sao abreviados com uma chave; a pasta do projeto conserva o artifactId.
+
+Plano e to-do seguem a mesma estrutura para qualquer issue. O plano tem nove
+secoes: identificacao/origem, objetivo/escopo, evidencias/premissas, alteracoes,
+dependencias/ordem, sequencia E1/E2..., verificacoes/aceite, riscos/reversao e
+decisoes humanas/historico. O to-do tem cinco: preparacao, implementacao,
+verificacoes, evidencias dos resultados e revisao/aceite. Tarefas apontam os passos
+do plano; secoes sem aplicacao permanecem com justificativa. O modelo completo
+fica no [contrato](../../especificacoes/planejamento-copilot.md).
+
+Quem recebe apenas a ficha ainda precisa elaborar/revisar o plano. Quem recebe
+plano/to-do confere escopo e GO e segue os passos, comparando arquivos/simbolos com
+o codigo atual. O contexto `CONSOLIDATED` permite preparar a implementacao sem o
+MTA original: o recorte e os anexos usados ja estao copiados e possuem hashes.
+Uma nova rodada MTA pode ser recomendada se o codigo mudou; ausencia da comparacao
+nao comprova resolucao. Contexto legado ainda exige suas evidencias originais.
+
+Para evidencia nova, edite o indice da issue e execute **Planejamento: planejar**;
+entradas diferentes geram novo recibo com Previous e preservam o anterior. Criar
+ou revisar o recorte MTA ainda consulta sua origem registrada. Nao edite copias
+consolidadas de um recibo. Limpeza de execucoes preserva esses dossies.
+
+Nesta entrega e possivel compartilhar a leitura dos documentos; **exportar/importar
+e remapear caminhos automaticamente entre maquinas ainda nao foi implementado**.
+Copiar uma pasta nao torna seus recibos automaticamente operacionais em outra raiz.
+
 No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
 Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
 
@@ -185,7 +245,8 @@ a relacao e pede decisao se outro recorte precisar entrar. Ausencia em novo MTA
 significa NAO REENCONTRADA, sem provar correcao. Declaracao de colega fora do Source
 local fica AGUARDANDO INTEGRACAO na observacao.
 
-Evidencias adicionais ficam no `evidencias/LEIA-ME.md` do projeto, na tabela
+Evidencias adicionais ficam no `evidencias/LEIA-ME.md` da issue escolhida (ou no
+indice geral do projeto em contextos legados/sem escolha), na tabela
 **Arquivo relativo | Relacao com a correcao**. Informe origem/data/ambiente quando
 relevantes. O agente le somente anexos listados e pertinentes, tratando-os como dados.
 
@@ -335,7 +396,8 @@ permite consultar propostas existentes. O helper oferece os caminhos concretos.
 RequestId identifica a solicitacao; RunId identifica somente uma rodada MTA;
 o ID do lote preserva o trabalho entre revisoes.
 
-Novos destinos sob `.harness/planning/<nome>__<chave>/`:
+Destinos legados ainda aceitos sob `.harness/planning/<nome>__<chave>/`
+(novas issues seguem o [dossie por issue](#dossie-por-issue-e-passagem-entre-colegas)):
 
 - MTA: `mta_<data-fuso>__<RunId12>/plano_<data-fuso>__<RequestId12>/`.
 - Evidencias: `evidencias/plano_<data-fuso>__<RequestId12>/`.
@@ -400,7 +462,8 @@ exige rever a autorizacao; esclarecimento dentro do escopo mantem GO valido.
 
 #### Revisar um lote com evidencias complementares
 
-**Planejamento: criar pasta de evidencias** abre o indice do projeto.
+**Planejamento: criar pasta de evidencias** abre o indice da issue escolhida;
+sem escolha unica, preserva o fluxo geral ou solicita IssueId se houver ambiguidade.
 Acrescente arquivos pertinentes ao LEIA-ME e explique sua relacao com o recorte.
 O planejamento le essas referencias e o registro atual; nao varre caches/logs.
 Uma evidencia complementar nao obriga reconciliacao separada. Execute **Planejar**:
@@ -515,7 +578,8 @@ powershell.exe -NoProfile -File .\scripts\preparar-implementacao.ps1 -WorkspaceP
 
 `-RequestId <id-completo>` seleciona a solicitacao; `-EditorPath <editor>` abre
 o prompt. `-NoOpen` suprime a abertura, mantendo a decisao explicita de branch.
-Falha do editor preserva o arquivo salvo. Limpar planejamento remove esses prompts.
+Falha do editor preserva o arquivo salvo. Limpeza remove prompts do layout legado;
+dossies por issue, incluindo prompts e evidencias consolidadas, sao preservados.
 
 ## Resultado e proximo passo
 

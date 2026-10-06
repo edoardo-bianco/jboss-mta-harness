@@ -46,7 +46,7 @@ nao um perfil de agente; anexar um .toml tambem nao seleciona o agente.
    de um, apresente nomes legiveis/caminhos e pergunte somente qual usar. Nao
    escolha pela data nem planeje todos. Falta de registro direciona a
    Workspace: atualizar indice dos projetos, que prepara indice e registros.
-3. Na selecao explicita, leia o registro migracao.md ou migracao-*.md, context.json,
+3. Na selecao explicita, leia o registro migracao.md ou migracao-*.md, ContextPath (contexto por issue ou context.json legado),
    PlanPath/TodoPath se existirem, Previous pertinente, indice de evidencias e os
    prompts realmente preparados. Confira Project/Source, RequestId e destinos.
    Em contextos de planejamento, PlanningBasis=MTA exige origem/RunId;
@@ -59,7 +59,7 @@ nao um perfil de agente; anexar um .toml tambem nao seleciona o agente.
    Consulte apenas evidencias e trechos de codigo necessarios a duvida atual.
    Em pre-planejamento Purpose=issue-prioritization, confira Projects do recibo e
    seus registros/rodadas; escopo pode conter varios projetos, sem eleger lote.
-   Em SchemaVersion=3 (ou historico 2), confira SequenceId, Percentage, InitialTotal, SliceSize,
+   Em SchemaVersion=4, confira Category e FichaPaths; v2/v3 permanecem mandatory. Confira SequenceId, Percentage, InitialTotal, SliceSize,
    AvailableIssues, ExcludedIssues e Previous. O guia de priorizacao explica
    a base fixa e o resultado estruturado no proprio RankingPath.
 4. Respeite o ContractSnapshot do recibo e as instrucoes do prompt selecionado
@@ -99,7 +99,7 @@ Aprofunde somente a etapa atual; preserve um lote consistente por frente.
   preserve A DEFINIR ate a escolha humana e nao inicie planejamento automaticamente.
   Explique o percentual sobre o total inicial fixo e as opcoes recriar/progredir;
   progresso exclui todos os IDs examinados (AnalyzedIssues), com ou sem proposta.
-  Resultados v2 concluidos contribuem com sua uniao distinta; novos recibos v3
+  Resultados v2 concluidos contribuem com sua uniao distinta; novos recibos v4
   exigem quota completa. Nao inferir exame de mencoes/sobreposicoes.
   Toda examinada tem ficha de achados, evidencias, referencias tecnicas e roteiro
   para planejamento/corretiva manual; SEM POSICAO exige motivo concreto. Ajude o
@@ -121,7 +121,7 @@ Aprofunde somente a etapa atual; preserve um lote consistente por frente.
   Se ja houver proposta e o pedido for o proximo passo, oriente sua revisao; so
   indique atualizar quando isso for pedido ou houver mudanca relevante. PLANEJADA
   retoma o plano vinculado, sem regredir Andamento nem repetir a escolha.
-- Prompt/recibo preparado sem plan.md e todo.md significa preparo, nao planejamento
+- Prompt/recibo preparado sem os arquivos declarados em PlanPath/TodoPath significa preparo, nao planejamento
   executado. Se esta e a solicitacao vinculada e a base continua vigente, indique
   a elaboracao manual ou a execucao do prompt conforme a intencao do humano.
   Se as entradas mudaram, indique Planejamento:
@@ -153,7 +153,7 @@ Aprofunde somente a etapa atual; preserve um lote consistente por frente.
 - Lote parcialmente implementado retoma pendencias do mesmo lote, sem repetir
   corretivas comprovadas. Testes aprovados com aceite pendente levam a revisao
   humana do resultado. Outro lote exige aceite e continuidade pedida.
-- Preserve ANALISAR AGORA, ADIAR e FORA DO ESCOPO; categoria mandatory nao decide a
+- Preserve ANALISAR AGORA, ADIAR e FORA DO ESCOPO; categoria MTA nao decide a
   prioridade humana. Branch/HEAD distintos sao informativos: confira conteudo
   pertinente, sem exigir contexto ou MTA novo apenas por diferenca Git.
 - Para MTA, apresente reuso da rodada escolhida, pasta completa recebida, nova
@@ -211,6 +211,32 @@ escolher. Nao execute preparadores para obter caminhos que ainda nao existem.
   continue diretamente pelos guias. Nao simule delegacao, instale plugins ou amplie
   permissoes. Pedido de execucao pertence a etapa executora autorizada, separada
   do helper; GO de um lote nao muda o papel desta skill.
+
+## Passagem por projeto e issue
+
+Novos dossies usam a pasta do artifactId Maven e arquivos identificaveis por issue.
+Source continua identificando a raiz local. Use os destinos do recibo; nomes
+legados continuam validos. Ficha, plano e to-do sao separados por projeto/issue,
+mesmo quando a regra for igual. Nao unir contexto de projetos pelo titulo da regra.
+
+Ao priorizar, retome a categoria escolhida e sua sequencia; cobertura de mandatory
+nao se transfere a optional/potential. Ao planejar, recupere FichaPath/IssueInputs e
+indice de anexos. Se houver evidencia nova, indique adiciona-la ao indice da issue
+e usar Planejamento: planejar para revisao com Previous. Nao repetir triagem geral.
+
+Em EvidenceMode=CONSOLIDATED, orientar pelas copias de Consolidated.Files e pelo
+mapa local EvidenceIndexPath. Run/AnalysisSource sao historicos; implementacao nao
+exige a pasta MTA original, mas exige comparar pontos relativos com Source atual.
+Sem esse modo explicito, preservar exigencias legadas; ausencia da origem nao e
+fallback. Lacuna essencial do recorte continua exigindo evidencia complementar.
+
+Se um colega entregar apenas ficha/analise, o proximo passo e preparar/elaborar o
+plano da issue. Se entregar plano/to-do, confira GO e escopo antes de orientar
+execucao manual ou por agente de codificacao, conforme a escolha ja feita. O helper
+continua leitor e auxilia verificacoes/aceite. Nao invente cadastro de responsaveis.
+Exportacao/importacao com remapeamento de caminhos ainda e etapa futura; nao
+prometa que copiar a pasta remapeia automaticamente os recibos para outra maquina.
+Veja o [roteiro por issue](../../../doc/guias/tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas).
 
 ## Continuidade manual ou assistida
 

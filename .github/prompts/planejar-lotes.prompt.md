@@ -48,13 +48,22 @@ Issues DEV-... podem integrar o recorte com origem, objetivo e evidencias humana
 Se houver lista de priorizacao explicitamente indicada no registro/indice de
 evidencias, leia a candidata escolhida e suas lacunas. Ranking e evidencia, nao
 selecao nem GO: revalide no codigo e aprofunde somente o recorte humano deste projeto.
-Varios IDs so formam um lote se compartilharem causa, solucao, aceite e reversao.
+Nos novos contextos LayoutVersion=2, planeje uma issue deste projeto. Outras issues
+sao dependencias/referencias, com ficha e plano proprios. Recibos legados com varios
+IDs preservam o lote existente quando causa, solucao, aceite e reversao forem comuns.
 Dependencia em issue adiada/excluida exige decisao explicita, sem inclusao silenciosa.
 Sobreposicao nao seleciona issue secundaria nem comprova resolucao: preserve os
 vinculos por ID, conte pontos deduplicados e explique o alcance real da proposta.
 
-Na base MTA, confira Manifest/Result, os trechos pertinentes de Findings/Dependencies/
-Rules e AnalysisSource. Na base EVIDENCIAS, leia EvidenceInputs, o indice e referencias
+Em EvidenceMode=CONSOLIDATED, leia FichaPath, IssueInputs, EvidenceIndexPath e os
+arquivos de Consolidated.Files. Confira hashes e identidade Source/Id; o recorte em
+Consolidated.MtaIssuePath preserva regra, detalhes, incidentes, referencias e caminhos
+relativos. MtaOrigin/RunId continuam sendo a origem; Run/AnalysisSource sao historicos
+e nao precisam estar acessiveis. Links dentro de copias preservam a origem: use o
+mapa local em EvidenceIndexPath. Extracao nao comprova exame de todos os incidentes.
+Sem EvidenceMode, preserve a verificacao original: na base MTA, confira Manifest/
+Result e trechos pertinentes de Findings/Dependencies/Rules e AnalysisSource.
+Na base EVIDENCIAS, leia EvidenceInputs, o indice e referencias
 do registro: use os arquivos presentes e suas origens, sem exigir artefatos MTA
 inexistentes. Em ambas, confira o codigo local Source e evidencias pertinentes
 referenciadas. Hashes documentam o preparo; nao alegue recalculo sem ferramenta real.
@@ -97,6 +106,16 @@ Lacunas nao impeditivas viram limites/verificacoes concretas, sem PENDENTE gener
 Identidade/destinos invalidos exigem esclarecimento antes de escrita.
 
 Com informacao suficiente, grave/releia PlanPath e TodoPath conforme o contrato;
+use os nomes declarados, que identificam projeto e issue.
+Siga o modelo fixo de nove secoes de PlanPath e cinco de TodoPath em ContractSnapshot;
+nao invente estrutura por issue. Mantenha secoes nao aplicaveis com justificativa.
+Vincule tarefas do to-do aos passos E1, E2... do plano. O plano deve servir a
+outro colega sem este chat: contexto e ficha de entrada, objetivo, recorte e fora
+do escopo, alteracoes por arquivo/classe/metodo, dependencias e ordem, passos manuais,
+verificacoes com resultados esperados, riscos, reversao e criterios de aceite.
+No to-do, tarefas verificaveis ligadas a esses passos; GO e aceite continuam humanos.
+Anexos complementam a ficha; divergencia exige explicacao e decisao, sem apagar
+evidencia anterior. Nao exigir um agente implementador para executar o plano.
 nao encerre somente no chat com uma proposta completa que deveria ser persistida.
 Na atualizacao, preserve tarefas comprovadas e GO vigente no mesmo escopo; mudanca
 de escopo exige revisao dessa autorizacao. GO de Previous nao autoriza nova proposta.

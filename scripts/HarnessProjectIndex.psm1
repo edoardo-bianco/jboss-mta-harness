@@ -29,8 +29,18 @@ function Read-IndexRecords {
         })
     }
     $folders = @($folders) + @($AdditionalRuns)
+    $issueReceipts=@{}
+    if ($Area -eq 'planning') {
+        $folders=@($folders | Where-Object { $_ -and (Split-Path (Split-Path $_ -Parent) -Leaf) -ne 'issues' })
+        foreach ($file in @(Get-HarnessIssueReceipts $Root)) {
+            $parent=Split-Path $file.FullName -Parent
+            $folders += $parent
+            $issueReceipts[$parent]=$file.FullName
+        }
+    }
     foreach ($folder in ($folders | Select-Object -Unique)) {
         $receipt = Join-Path $folder $(if ($Area -eq 'planning') { 'context.json' } elseif ($Area -eq 'runs') { 'manifest.json' } else { 'result.json' })
+        if ($issueReceipts.ContainsKey($folder)) { $receipt=$issueReceipts[$folder] }
         $bucket = Split-Path -Parent $folder
         $action = $Area
         if ($Area -eq 'planning') {
@@ -64,8 +74,10 @@ function Read-IndexRecords {
                 $action = $data.Purpose
                 $id = [string]$data.RequestId
                 $date = [DateTimeOffset]::Parse($data.PreparedAtUtc)
-                $hasPlan = Test-Path -LiteralPath (Join-Path $folder 'plan.md') -PathType Leaf
-                $hasTodo = Test-Path -LiteralPath (Join-Path $folder 'todo.md') -PathType Leaf
+                $planPath=if ($data.PSObject.Properties['PlanPath']) { Resolve-HarnessPath $data.PlanPath $Root } else { Join-Path $folder 'plan.md' }
+                $todoPath=if ($data.PSObject.Properties['TodoPath']) { Resolve-HarnessPath $data.TodoPath $Root } else { Join-Path $folder 'todo.md' }
+                $hasPlan = $planPath -and (Test-Path -LiteralPath $planPath -PathType Leaf)
+                $hasTodo = $todoPath -and (Test-Path -LiteralPath $todoPath -PathType Leaf)
                 $status = if ($hasPlan -and $hasTodo) { 'PLANO E TO-DO PRESENTES' } elseif ($hasPlan -or $hasTodo) { 'DOCUMENTOS INCOMPLETOS' } else { 'CONTEXTO PREPARADO' }
             } else {
                 $id = [string]$data.RunId
