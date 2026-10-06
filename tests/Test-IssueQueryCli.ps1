@@ -30,4 +30,3 @@ Assert ($empty.ExitCode -eq 0 -and $empty.Value.Paging.Total -eq 0) 'Consulta va
 Assert ((Inventory $area) -ceq $before) 'CLI alterou evidencias.'
 $rawBytes=(Get-Item -LiteralPath $catalog).Length
 Write-Host "PASS: CLI JSON/exit codes/parametros/leitura. Fixture: catalogo=$rawBytes bytes; lista de 2=$($listing.Bytes); detalhe de 1 incidente=$($detail.Bytes). Nao mede tokens/acerto."
-
