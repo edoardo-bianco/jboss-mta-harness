@@ -83,6 +83,23 @@ Start/estado/stop, CLI/JVM e socket JDWP reais ficam para a maquina de trabalho.
 
 ## Consultas de issues - implementacao 2026-10-06
 
+Entrega concluida localmente: auditar_base, listar_issues e obter_issue pelo
+nucleo PowerShell e CLI JSON. README, guias, prompts e skill alinhados. Helpers
+continuam leitores e recebem JSON do desenvolvedor; MCP foi avaliado com fontes
+oficiais, sem instalar servidor nem ampliar permissoes. Adaptador stdio/SDK e
+ensaio real de 10% permanecem proximos incrementos, nao operacoes disponiveis.
+
+Verificacao final: 10 scripts PASS em Windows PowerShell 5.1 (IssueQueries,
+IssueQueryPlanning, IssueQueryEdges, IssueQueryBounds, IssueQueryCli,
+PrioritizationIncidents, PrioritizationCategories, IssuePlanning, PlanningEvidence
+e ContextPackage). Sintaxe de 11 arquivos, diff e 376 links locais conferidos;
+skill validada, 12 perfis/25 tarefas preservados, 25 referencias a scripts validas.
+Revisao independente final sem bloqueadores; leituras/hashes preservados nas
+fixtures. Correcao adicional RED/GREEN preserva MtaOrigin.Run explicito para URI
+recebida fora do layout padrao. Nenhum MTA/build/deploy de aplicacao executado.
+
+Historico dos incrementos:
+
 Segundo incremento: planejamento ORIGINAL/CONSOLIDATED/importado e EVIDENCIAS,
 CLI JSON e falhas explicitas implementados. Test-IssueQueryPlanning, Edges e Cli
 passaram em PowerShell 5.1; testes novos Bounds e regressao PrioritizationIncidents
@@ -90,8 +107,8 @@ tambem PASS apos revisao. CLI: catalogo sintetico 31061 bytes, lista de duas iss
 2215 e detalhe de um incidente 2895; nao mede tokens nem acerto no cliente.
 Revisao detectou e corrigiu acesso a origem historica ao calcular caminhos,
 UNC antes da validacao, campos sem limite e buscas quadraticas. Consulta usa
-mapeamento lexical, dicionarios por ID e teto JSON de 256 KiB. Falta concluir
-documentacao/avaliacao MCP e repetir os testes afetados para revisao final.
+mapeamento lexical, dicionarios por ID e teto JSON de 256 KiB. A documentacao e
+avaliacao MCP foram concluidas na verificacao final registrada acima.
 
 Retomada autorizada: primeiro incremento valida auditoria, lista e detalhe em
 recibos de priorizacao, filtros literais, 138 incidentes paginados/por ordinal,

@@ -31,8 +31,10 @@
 - [x] Implementar listagem/detalhe paginados, filtros e CLI JSON somente leitura.
 - [x] Cobrir consolidado/importado, identidade, hashes, falhas e preservacao.
 - [x] Corrigir achados da revisao: UNC, caminhos lexicais, teto de resposta e indices por ID.
-- [ ] Alinhar guias/prompts/helper e avaliar adaptador MCP nas fontes oficiais.
-- [ ] Executar regressao dirigida, revisao independente e salvar commits.
+- [x] Alinhar guias/prompts/helper e avaliar adaptador MCP nas fontes oficiais.
+- [x] Executar regressao dirigida e revisao independente: 10 scripts PASS,
+  376 links, sintaxe/skill/diff OK; salvar incrementos em commits locais.
+- [ ] Proximo incremento: implementar e homologar adaptador MCP, conforme avaliacao.
 - [ ] Comparar no cliente a mesma fatia de 10%: omissoes, tempo e tokens reais.
 
 ## Revisao de documentacao e orientacao - 2026-10-06

@@ -151,6 +151,15 @@ da selecao; nao execute preparadores para descobrir destinos ainda inexistentes.
 Se guia e ferramenta divergirem, exponha a lacuna, sem inventar comando.
 Funcionalidades do backlog nao sao operacoes disponiveis.
 
+Para conferir uma base ou recuperar uma issue, leia o guia de
+[consultas de issues](../../../doc/guias/tools/consultas-issues.md). Forneca ao
+desenvolvedor o comando com ContextPath e Source selecionados e interprete o JSON
+retornado. Preserve o limite de leitura deste helper: nao execute a CLI nem
+importe seu modulo. Os perfis atuais nao recebem ferramentas MCP ou terminal
+adicional. Confira Status, Provenance, paginacao e TruncatedFields; erro nao e
+zero issues, Availability nao substitui escolhas atuais e candidato local nao
+comprova aplicabilidade. Consulta nao marca cobertura nem substitui exame.
+
 | Necessidade | Fonte operacional |
 | --- | --- |
 | Cliente, descoberta da skill e retomada | [Orientacao](../../../doc/guias/orientacao-migracao.md) |
