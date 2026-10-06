@@ -31,6 +31,13 @@ em legado sem FichaPaths, as fichas ficam no ranking. Nao escolhe pelo humano,
 nao altera registros nem planeja lotes. Escolha humana precede o planejamento usual.
 Helpers explicam/revisam a lista no chat; executar o prompt e etapa separada.
 
+Quando MCP harnessIssues estiver disponivel, use as tres consultas de leitura
+conforme o [guia por etapa](../doc/guias/tools/consultas-issues.md#consultas-por-etapa).
+Resposta verificada/paginada pode substituir a leitura dos mesmos incidentes em
+derivados; conferir codigo local continua necessario. Sem MCP, priorizacao e
+planejamento seguem pelos arquivos sem exigir Node, consulta manual ou JSON copiado.
+Consultas nao ampliam poderes dos helpers nem comprovam exame, GO ou aceite.
+
 Novos planos usam dossie por projeto/issue e os destinos identificaveis do recibo,
 sob a pasta do artifactId Maven. Ficha/anexos sao entradas; plano/to-do seguem os
 modelos do contrato. A mesma regra em projetos diferentes tem documentos separados.

@@ -13,6 +13,13 @@ Para categorias e dossies padronizados por issue, siga a
 
 - Evolucao do harness inclui scripts, prompts, preparacao de contexto, Run Tasks,
   configuracao, testes e documentacao. Use `tasks/plan.md` e `tasks/todo.md`.
+- Consultas MCP harnessIssues sao opcionais e somente leitura: use auditar_base,
+  listar_issues e obter_issue quando disponiveis, conforme o
+  [guia por etapa](doc/guias/tools/consultas-issues.md#consultas-por-etapa).
+  Sem MCP, mantenha priorizacao e planejamento pelos arquivos, sem exigir Node,
+  consultas manuais ou JSON copiado. Resposta validada/paginada dispensa releitura
+  dos mesmos incidentes em derivados, preservando conferencia do codigo local.
+  Helpers continuam orientadores; consulta nao marca exame, GO ou aceite.
 - Antes de alterar o harness, crie ou retome uma branch `harness/<objetivo>`
   derivada da principal do repositorio do harness. Nao implemente essas mudancas
   diretamente em main/develop, na integracao EAP 7.4 ou em branches de lote.

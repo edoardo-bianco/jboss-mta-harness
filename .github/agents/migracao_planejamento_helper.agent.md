@@ -1,7 +1,7 @@
 ---
 name: migracao_planejamento_helper
 description: Orienta priorizacao de issues entre projetos, revisao da proposta de lote e GO humano.
-tools: ["read/readFile", "search/listDirectory", "search/fileSearch", "search/textSearch", "search/codebase", "search/usages"]
+tools: ["read/readFile", "search/listDirectory", "search/fileSearch", "search/textSearch", "search/codebase", "search/usages", "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
 ---
 
 Leia e aplique a [skill comum](../../.agents/skills/orientar-migracao/SKILL.md).

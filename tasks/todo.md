@@ -1,5 +1,42 @@
 # To-do do agente: evolucao do harness
 
+## Guia de instalacao Node e apoio do helper - 2026-10-06
+
+- [x] Conferir checkout limpo e localizar guia e instrucoes comuns dos helpers.
+- [x] Detalhar ZIP/pasta fixa e vincular configuracao nos guias de entrada.
+- [x] Alinhar skill/papel de preparo para orientar Node/MCP sem exigir migracao.
+- [x] Conferir 382 links, comandos, 18 perfis/prompts e skill; salvar incremento
+  documental em commit local, mantendo pendente o ensaio na maquina de trabalho.
+
+## Auditoria de coerencia da entrega - 2026-10-06
+
+- [x] Conferir raiz/branch/HEAD e registrar escopo da auditoria.
+- [x] Confrontar codigo e configuracao MCP com contrato/guia.
+- [x] Auditar README, guias, instrucoes gerais, skill, agentes e prompts por etapa.
+- [x] Corrigir quatro achados: referencias de guias nos prompts copiados, leitura
+  duplicada de incidentes, TOML inline invalidado e configuracao ausente silenciosa.
+- [x] Validar: seis testes MCP Node20 PASS, preparadores sem MCP PASS, 18 perfis/prompts,
+  380 links, tarefas/comandos e skill; revisoes independentes sem bloqueadores.
+- [x] Registrar conclusao e limites no plano; separar corretivas e documentos em
+  commits locais na branch de trabalho.
+
+## Consultas MCP nas fases com agentes - 2026-10-06
+
+- [x] Confirmar forma de exposicao: usuario escolheu MCP para Codex e Copilot.
+- [x] Conferir checkout e fontes oficiais; registrar fronteiras de leitura e fases.
+- [x] Testar e implementar raizes permitidas no nucleo de leitura; selecao
+  multi-projeto corrigida por teste RED/GREEN e oito regressoes PASS.
+- [x] Implementar SDK/stdio, schemas restritos e subprocesso fixo via JSON stdin.
+- [x] Validar discovery, chamadas, paridade, erros, caminho Unicode e espacos,
+  timeout/cancelamento e espera pelo termino do filho no Node20.20.2.
+- [x] Configurar clientes localmente e alinhar fases, prompts, helpers, skill e guias;
+  Codex CLI reconhece configuracao; 18 perfis/prompts e 409 links conferidos.
+- [x] Comprovar preparadores sem Node/npm/npx e sem configuracao MCP; agentes
+  continuam pelo fluxo anterior, sem exigir consultas manuais/JSON copiado.
+- [x] Rodar regressao e revisao independente sem bloqueadores; npm audit sem
+  vulnerabilidades. Incrementos salvos em commits locais na branch de trabalho.
+- [ ] Homologar descoberta e uso pelos agentes no cliente da maquina de trabalho.
+
 ## Corretiva deploy Windows legado - 2026-10-06
 
 - [x] Preservar consultas e criar branch isolada da main com PR #11 integrado.
@@ -19,6 +56,24 @@
 - [x] Rodar regressao JBoss, revisar e salvar commit isolado: 10 scripts PASS;
   sintaxe/diff conferidos e revisao independente sem bloqueadores.
 - [ ] Validar start/estado/stop no EAP 7.0 real da maquina de trabalho.
+
+## Consultas de issues - implementacao 2026-10-06
+
+- [x] Confirmar main limpa/PR #10 e criar harness/consultas-issues.
+- [x] Recuperar proposta e mapear reuso, limites e capacidades relacionadas.
+- [x] Trazer corretivas dos PRs #11/#12 da main (fcee604), preservando trabalho parcial.
+- [x] Definir contrato e escrever testes de leitura/auditoria antes do codigo.
+- [x] Validar nucleo para priorizacao: lista/detalhe, filtros, 138 incidentes,
+  ordinal, truncamento, escolhas atuais, identidade, hashes e ausencia de escrita.
+- [x] Implementar listagem/detalhe paginados, filtros e CLI JSON somente leitura.
+- [x] Cobrir consolidado/importado, identidade, hashes, falhas e preservacao.
+- [x] Corrigir achados da revisao: UNC, caminhos lexicais, teto de resposta e indices por ID.
+- [x] Alinhar guias/prompts/helper e avaliar adaptador MCP nas fontes oficiais.
+- [x] Executar regressao dirigida e revisao independente: 10 scripts PASS,
+  376 links, sintaxe/skill/diff OK; salvar incrementos em commits locais.
+- [x] Implementar adaptador MCP no incremento acima; homologacao nativa corporativa
+  permanece separada do teste de integracao via SDK.
+- [ ] Comparar no cliente a mesma fatia de 10%: omissoes, tempo e tokens reais.
 
 ## Revisao de documentacao e orientacao - 2026-10-06
 
@@ -49,8 +104,8 @@
   Logs em .harness/tests/entrega2-20261006/; fixtures nao versionadas.
 - [ ] Ensaiar na maquina de trabalho: exportar analise de 10%, importar em outra
   raiz, continuar categoria, planejar uma ficha e compartilhar seu plano.
-- [ ] Integrar/publicar esta entrega apos revisao humana. Ferramentas/MCP e
-  engineering-harness-vscode.md continuam adiados.
+- [x] Integrar/publicar esta entrega: PR #10 aceita e integrada em 0e74925.
+  Consultas retomadas acima; engineering-harness-vscode.md continua adiado.
 
 ## Categorias, planejamento por issue e portabilidade - proposta 2026-10-06
 

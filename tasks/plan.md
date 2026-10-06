@@ -1,5 +1,121 @@
 # Plano do agente: evolucao do harness
 
+## Guia de instalacao Node e apoio do helper - 2026-10-06
+
+Pedido: detalhar a instalacao Node em pasta fixa na configuracao do guia e permitir
+que o helper acompanhe esse preparo. Evolucao documental do harness; retomar
+harness/consultas-issues limpa em 9d25965. Concentrar ZIP, estrutura da pasta,
+verificacao de versoes e configuracao MCP no guia de consultas. Workspace e
+orientacao encaminham a essa secao; skill comum e papel de preparo reconhecem
+duvidas de Node/MCP sem exigir projeto, MTA ou registro. O desenvolvedor executa
+os comandos; helper orienta uma etapa por vez. Manter MCP opcional e permissoes.
+Verificar links, comandos existentes, metadados dos perfis e validacao da skill.
+Reversao: reverter o commit documental; nenhuma instalacao local nesta entrega.
+
+Concluido: guia com ZIP oficial/arquitetura, estrutura da pasta, node/npm por
+caminho absoluto, dependencias e configurador, mais exemplo de pedido ao helper.
+Guias de workspace/orientacao vinculados; skill comum e papel de preparo ajustados
+sem alterar perfis/permissoes. Verificacao documental: 382 links locais sem erros,
+18 perfis/prompts preservados, 25 tarefas/comandos conferidos e skill aprovada
+pelo validador oficial. Diff sem erros; scripts/runtime permanecem inalterados.
+
+## Auditoria de coerencia da entrega - 2026-10-06
+
+Pedido: auditar implementacao, README, guias, agentes e skill. Retomar branch
+harness/consultas-issues limpa em d05a083; evolucao do harness, sem migrar aplicacao.
+Confrontar instrucoes com comportamento em seis cenarios: MCP disponivel/ausente,
+categoria/percentual, ficha para plano/todo por issue, pacote recebido, implementacao
+e revisao. Conferir configuracao, caminhos e limites do MCP, links/permissoes,
+distincao preparo/proposta/GO/aceite e pendencias reais de homologacao.
+Usar revisoes independentes de codigo/documentacao. Corrigir divergencias concretas
+com teste de reproducao quando houver comportamento; validar somente verificacoes
+afetadas, reaproveitando regressoes aprovadas. Preservar engineering-harness-vscode.md
+adiado e historico dos recibos. Reversao: reverter commits desta auditoria.
+
+Resultado: quatro achados corrigidos. Os seis prompts identificam o guia MCP
+pela raiz do harness, preservando a referencia quando copiados ao dossie.
+Priorizacao/contrato/guia aceitam incidentes recuperados por MCP com identidade,
+hashes, paginacao e truncamentos conferidos, sem impor releitura dos derivados.
+Sem MCP, permanece a leitura dos arquivos e conferencia do codigo local.
+Configurador valida TOML antes de escrever, preservando configuracao inline
+incompativel para ajuste manual; smol-toml 1.9.0 fixado no manifesto/lockfile.
+Arquivo HARNESS_MCP_CONFIG explicitamente indicado e ausente agora impede iniciar
+o servidor, sem assumir outras raizes. Ambos os erros reproduzidos por teste
+antes das corretivas. README, instrucoes gerais e guias alinhados.
+
+Verificacoes: seis testes MCP PASS em Node20.20.2, incluindo correspondencia real
+de argumento/titulo Unicode e paridade do envelope, limites e cancelamento.
+Test-PlanningWithoutMcp PASS em Windows PowerShell 5.1: categorias, planos por
+issue, anexos e preparo de implementacao sem Node/npm/npx e sem MCP configurado.
+Conferidos 18 perfis/prompts, sem ampliar sandbox/delegacao/permissoes; 380 links
+locais dos documentos alterados/guias, 25 tarefas e 25 referencias de comandos.
+Skill orientar-migracao aprovada pelo validador oficial; diff sem whitespace.
+Revisoes independentes de codigo e documentacao aprovaram o delta sem bloqueadores.
+Instalacao da dependencia auditada pelo npm: zero vulnerabilidades reportadas.
+Reutilizada a regressao anterior de oito scripts, incluindo compartilhamento;
+nenhuma alteracao no formato de pacotes, fichas ou planos por issue.
+
+Limites: testes comprovam preparadores/consultas, nao o comportamento das interfaces
+Codex/Copilot corporativas. Descoberta real e ensaio de 10% com qualidade/tempo/tokens
+continuam pendentes. Teste de desconexao do cliente com consulta ativa permanece
+melhoria de cobertura; cancelamento do subprocesso e espera por close estao testados.
+
+## Consultas MCP nas fases com agentes - 2026-10-06
+
+Pedido humano: disponibilizar as consultas diretamente aos agentes das varias
+fases; escolha explicita MCP para Codex e Copilot. Retomar harness/consultas-issues
+limpa em e9d37a1, mantendo os commits anteriores e as corretivas integradas da main.
+Skills de interfaces, testes, seguranca, documentacao e revisao aplicadas.
+
+Entrega: servidor local stdio com SDK oficial, exatamente auditar_base,
+listar_issues e obter_issue; adapter chama o nucleo PowerShell existente. Sem
+terminal geral para helpers, sem endpoint HTTP, sem alterar GO/aceite ou papeis.
+Raiz do harness e raizes permitidas sao configuracao local do servidor; tool args
+nao podem amplia-las. Validar entradas e caminhos internos antes de leitura,
+rejeitar junctions/UNC, timeout/cancelamento e saida limitada; evidencias sao dados.
+Subprocesso fixo sem shell recebe JSON por stdin, para preservar Unicode e quoting.
+
+Requisito confirmado pelo humano apos informar Node 18.20.8 no trabalho: prever
+Node da linha 20. Manter SDK oficial v2, requisito Node >=20, configuracao com
+executavel explicito para coexistir com Node18. Nao alterar Node/PATH global.
+Validar com runtime 20 isolado; CLI permanece independente de Node/MCP.
+
+Incrementos: (1) restricao de raizes com testes; (2) adapter/schema/stdio com SDK
+fixado e testes reais de discovery/call; (3) configuracao de ambos clientes,
+instrucoes por fase, skill/helpers e guias; (4) regressao e revisao independente.
+Usar contexto de priorizacao ou planejamento vinculado; implementacao/revisao
+reutilizam recibo-base. Reconciliacao sem contexto suportado continua leitura
+direta; nao gerar preparo/rodada para habilitar uma consulta.
+
+Aceite: somente tres tools descobertas, paridade CLI/MCP, identidade/paginacao,
+erros, Unicode/espacos, cancelamento e recusa de parametros/arquivos fora das
+raizes; nenhuma escrita nas evidencias. Helpers mantem sandbox read-only e suas
+capacidades anteriores, acrescidas apenas das consultas MCP. Configuracao local
+preserva servidores existentes e requer confianca/permissoes normais dos clientes.
+Sem modificar configuracao pessoal global ou executar MTA/build/deploy de aplicacao.
+Reversao: remover configuracao do servidor e reverter commits deste incremento;
+CLI e contexto existentes continuam utilizaveis. Ensaio real de 10% permanece.
+
+Aceite reforcado pelo humano: MCP e opcional. Sem MCP/Node, priorizacao e
+planejamento da implementacao por issue devem continuar como antes, pelo agente
+lendo os arquivos, sem exigir consultas manuais, copiar JSON ou instalar runtime.
+Testar preparadores com Node/npm/npx ausentes do PATH e conferir a orientacao.
+
+Resultado local: SDK stdio com 3 ferramentas, instalacao npm local e configurador
+Codex/Copilot preservando servidores existentes. Helpers continuam read-only e
+prompts mantem capacidades anteriores, acrescidas somente das consultas. Sem MCP,
+priorizacao e plano/todo por issue seguem pelos arquivos; export/import preservados.
+
+Verificado: suite MCP (schemas, configuracao, lifecycle e integracao real) no
+Node20.20.2/PowerShell5.1, incluindo caminho Unicode; AllowedRoots e oito scripts
+de regressao de consultas/priorizacao/planejamento/pacotes PASS. Prova adicional
+Test-PlanningWithoutMcp remove Node/npm/npx do PATH: categorias e planejamento
+por issue PASS. Codex CLI le harnessIssues da configuracao local; 18 perfis/prompts,
+409 links e skill validados. Audit npm: 0 vulnerabilidades. Revisoes independentes
+de codigo/documentacao sem bloqueadores apos corretivas de selecao e encerramento.
+Sem MTA, build ou JBoss reais. Descoberta/delegacao no cliente corporativo e
+comparacao de acerto/tempo/tokens em 10% continuam pendentes, sem alegar economia.
+
 ## Corretiva: caminho do WAR na CLI Windows legada - 2026-10-06
 
 Evolucao do harness. Relato humano: deploy de SIMTR-api no EAP 7.0 iniciado em
@@ -80,6 +196,94 @@ git diff --check aprovados. Revisao independente sem bloqueadores.
 Logs locais: .harness/tests/eap70-regressao*.log neste checkout. Nao iniciou
 JBoss real, nao criou usuario e nao alterou instalacoes/configuracoes locais.
 Start/estado/stop, CLI/JVM e socket JDWP reais ficam para a maquina de trabalho.
+
+## Consultas de issues - implementacao 2026-10-06
+
+Entrega concluida localmente: auditar_base, listar_issues e obter_issue pelo
+nucleo PowerShell e CLI JSON. README, guias, prompts e skill alinhados. Helpers
+continuam leitores e recebem JSON do desenvolvedor; MCP foi avaliado com fontes
+oficiais, sem instalar servidor nem ampliar permissoes. Adaptador stdio/SDK e
+ensaio real de 10% permanecem proximos incrementos, nao operacoes disponiveis.
+
+Verificacao final: 10 scripts PASS em Windows PowerShell 5.1 (IssueQueries,
+IssueQueryPlanning, IssueQueryEdges, IssueQueryBounds, IssueQueryCli,
+PrioritizationIncidents, PrioritizationCategories, IssuePlanning, PlanningEvidence
+e ContextPackage). Sintaxe de 11 arquivos, diff e 376 links locais conferidos;
+skill validada, 12 perfis/25 tarefas preservados, 25 referencias a scripts validas.
+Revisao independente final sem bloqueadores; leituras/hashes preservados nas
+fixtures. Correcao adicional RED/GREEN preserva MtaOrigin.Run explicito para URI
+recebida fora do layout padrao. Nenhum MTA/build/deploy de aplicacao executado.
+
+Historico dos incrementos:
+
+Segundo incremento: planejamento ORIGINAL/CONSOLIDATED/importado e EVIDENCIAS,
+CLI JSON e falhas explicitas implementados. Test-IssueQueryPlanning, Edges e Cli
+passaram em PowerShell 5.1; testes novos Bounds e regressao PrioritizationIncidents
+tambem PASS apos revisao. CLI: catalogo sintetico 31061 bytes, lista de duas issues
+2215 e detalhe de um incidente 2895; nao mede tokens nem acerto no cliente.
+Revisao detectou e corrigiu acesso a origem historica ao calcular caminhos,
+UNC antes da validacao, campos sem limite e buscas quadraticas. Consulta usa
+mapeamento lexical, dicionarios por ID e teto JSON de 256 KiB. A documentacao e
+avaliacao MCP foram concluidas na verificacao final registrada acima.
+
+Retomada autorizada: primeiro incremento valida auditoria, lista e detalhe em
+recibos de priorizacao, filtros literais, 138 incidentes paginados/por ordinal,
+truncamento declarado, origem completa, hashes e leitura sem escrita. Teste
+Test-IssueQueries PASS em PowerShell 5.1; RED observado antes de lista/detalhe e
+da validacao completa de origem. Ainda faltam recibos de planejamento, CLI,
+casos adicionais, documentacao operacional e avaliacao MCP. Contrato salvo
+descreve a entrega pretendida; este incremento ainda nao e a entrega completa.
+
+Atualizacao apos a interrupcao: PRs #11 e #12 integrados. Main local, origin/main
+e base de harness/consultas-issues alinhadas em fcee604; corretivas ja presentes
+neste checkout. Trabalho parcial abaixo preservado sem commit, sem ampliar
+implementacao nesta sincronizacao. Ensaio do deploy real continua pendente.
+
+Interrupcao solicitada para corretiva prioritaria EAP 7.0: trabalho preservado
+nesta branch. A primeira auditoria passou em Test-IssueQueries; listagem,
+detalhe, CLI e demais casos ainda faltam. Corretiva em branch separada
+harness/compatibilidade-eap70, checkout .harness/worktrees/eap70, derivada de main.
+Na retomada, trazer a corretiva aceita e continuar o contrato abaixo; nao tratar
+o nucleo parcial como entrega concluida.
+
+Continuidade autorizada depois da PR #10 integrada. Main limpa em 0e74925;
+branch harness/consultas-issues. Implementar auditar_base, listar_issues e
+obter_issue como consultas somente leitura, reutilizando parser/catalogo,
+leitor de registro e mapeamento de incidentes. Skills: using-agent-skills,
+incremental-implementation, test-driven-development, api-and-interface-design,
+git-workflow-and-versioning e code-review-and-quality.
+
+Entrada explicita ContextPath de priorizacao ou planejamento; Source obrigatorio
+quando houver varios projetos. Sem configurar toolchains, inicializar registro,
+buscar rodada por recencia ou executar preparadores. Saida JSON versionada com
+identidade, origem, hashes, escopo, paginacao, lacunas e erros distinguiveis.
+Categoria MTA, elegibilidade registrada e aplicabilidade no codigo sao distintas.
+Consulta/extracao nao consome cobertura nem altera ficha/plano/GO/aceite.
+
+Incrementos: (1) contrato, testes e leitura/auditoria da base; (2) listagem e
+detalhe paginados, filtros e CLI; (3) recibos consolidados/importados, falhas e
+preservacao; (4) guias/prompts/helper, avaliacao MCP e revisao independente.
+Reaproveitar Get-HarnessMtaCatalog, Read-HarnessMigrationInput e
+Get-IncidentLocation; evitar copiar parsers. Uma CLI com operacao explicita,
+sem uma Run Task por funcao. MCP e adaptador futuro, avaliado apos validar o
+nucleo; nenhuma instalacao ou ampliacao de permissoes nesta entrega.
+
+Encaixe: HAR-03/OBJ-01 para integridade e apontamentos, OBJ-02/SRC-06 para recorte
+por issue e HAR-01/04 para o contrato do adaptador. Nao implementar grafo Java,
+comparar_ocorrencias, dependencias resolvidas ou classificacao por IA.
+engineering-harness-vscode.md continua adiado e sem leitura.
+
+Aceite: 138 incidentes recuperaveis por pagina/ordinal sem omissoes, mesmo ID em
+projetos distintos, categorias isoladas, escolhas atuais preservadas, origem
+importada/consolidada sem MTA original, erros de acesso/ausencia/formato/hash
+distintos, nenhuma escrita nas entradas ou criacao de .harness pela consulta.
+Resultados longos declaram truncamento e caminho da evidencia completa; comparar
+tamanho de resposta com catalogo sintetico, sem alegar economia real de tokens.
+Teste corporativo compara mesma fatia de 10%, tempo, omissoes e consumo quando
+disponivel no cliente. Esse ensaio continua pendente.
+
+Reversao: reverter commits desta entrega. Consultas nao criam dados persistidos;
+preservar recibos, diagnosticos, propostas e escolhas existentes.
 
 ## Revisao de documentacao e orientacao - 2026-10-06
 

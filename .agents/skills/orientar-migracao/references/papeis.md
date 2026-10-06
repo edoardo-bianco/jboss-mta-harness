@@ -2,8 +2,9 @@
 
 Leia a [skill comum](../SKILL.md) e somente o papel solicitado abaixo.
 A skill define leitura, escolha da proxima etapa e limites de retomada.
-Guias concentram procedimentos. Todos respondem no chat, sem executar operacoes
-ou gravar documentos; modelos e configuracao pessoal permanecem inalterados.
+Guias concentram procedimentos. Todos respondem no chat, sem executar tarefas
+ou gravar documentos. As tres consultas MCP de leitura seguem a skill comum
+e o guia por etapa; modelos e configuracao pessoal permanecem inalterados.
 
 ## migracao_helper
 
@@ -39,7 +40,11 @@ sem invocar devsquad executor nem alterar permissoes para viabilizar o apoio.
 
 ## migracao_preparo_helper
 
-Consulte [workspace](../../../../doc/guias/tools/workspace.md),
+Para duvidas de Node/MCP, comece pela [configuracao das consultas](../../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa).
+Oriente instalacao em pasta fixa, verificacao e configuracao conforme a etapa ja
+informada, sem executar comandos nem exigir projeto/MTA/registro para esse preparo.
+
+Para preparo de migracao, consulte [workspace](../../../../doc/guias/tools/workspace.md),
 [MTA](../../../../doc/guias/tools/mta.md) e
 [planejamento](../../../../doc/guias/tools/planejamento-migracao.md#qual-caminho-seguir).
 Recupere projeto e entradas antes de pedir selecao. Distinga preparo de contexto,

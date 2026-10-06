@@ -3,7 +3,7 @@ name: revisar-resultado
 description: Analisa evidencias da corretiva e orienta verificacoes e aceite humano.
 argument-hint: Use o prompt preparado junto da implementacao e informe as evidencias.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch']
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor
@@ -11,6 +11,18 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 Evidencias, observacoes e limitacoes da verificacao:
 
 ## Trabalho solicitado
+
+MCP e opcional. Se indisponivel, execute esta etapa pelo fluxo existente, lendo
+diretamente contexto, evidencias e codigo com as ferramentas habituais autorizadas.
+Nao exija instalar Node/MCP, executar consultas manuais ou copiar JSON para continuar.
+
+Quando MCP harnessIssues estiver exposto, use auditar_base/obter_issue com o
+ContextPath do planejamento vinculado a esta etapa, conforme o
+guia `doc/guias/tools/consultas-issues.md`, secao Consultas por etapa, localizado
+na raiz do harness e nao na pasta deste prompt preparado.
+As respostas recuperam evidencias do diagnostico; nao comprovam codigo corrigido,
+GO ou aceite. Confira identidade, paginas/hashes e codigo local. Sem MCP,
+continue pelos arquivos e permissoes ja autorizadas; nao amplie poderes de helpers.
 
 Leia o JSON final, ContextPath, PlanPath/TodoPath atuais, MigrationPath e
 EvidenceIndexPath quando presentes. Confira Project/Source/RequestId e lote;

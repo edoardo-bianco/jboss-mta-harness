@@ -55,6 +55,7 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 | Primeiro uso | Abra `iniciar-harness.code-workspace` e siga a [configuracao do workspace](doc/guias/tools/workspace.md#configuracao). Gere/salve o workspace local e adicione os projetos externos. |
 | Quero escolher o que corrigir | Confira o registro e use a [priorizacao opcional por categoria](doc/guias/tools/priorizacao-issues.md). |
 | Ja escolhi uma issue | Use **Planejamento: planejar**, a partir da escolha e das evidencias no registro. |
+| Quero conferir uma base ou consultar uma issue preparada | Use as [consultas de issues por MCP ou CLI](doc/guias/tools/consultas-issues.md), com ContextPath explicito e JSON paginado. |
 | Recebi analise ou plano de um colega | Use **Planejamento: compartilhar contexto** e siga o [guia de importacao](doc/guias/tools/compartilhamento-contextos.md). |
 | Quero ajuda para retomar | Use `$orientar-migracao` no Codex ou `migracao_helper` no Copilot, conforme o [guia de orientacao](doc/guias/orientacao-migracao.md). |
 
@@ -64,6 +65,11 @@ contexto; elaborar ranking/fichas ou plano/to-do e outra etapa, manual ou pela
 execucao do prompt no Codex/Copilot.
 Com plano revisado e GO, outro colega pode implementar manualmente ou com agente.
 Testes e revisao humana do resultado continuam necessarios nas duas formas.
+
+As consultas MCP sao opcionais: quando configuradas e disponiveis, os agentes as
+usam para recuperar a base e os incidentes. Sem MCP, priorizacao e planejamento
+continuam pela leitura dos arquivos, sem exigir consulta manual ou JSON copiado.
+Node >=20 e npm sao necessarios somente para ativar MCP; veja o [guia de consultas](doc/guias/tools/consultas-issues.md).
 
 O [pre-planejamento opcional](doc/guias/tools/priorizacao-issues.md) separa as
 categorias `mandatory`, `optional`, `potential` e outras recebidas. Examina uma

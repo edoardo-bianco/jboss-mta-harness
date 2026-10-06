@@ -1,7 +1,7 @@
 ---
 name: migracao_reconciliacao_helper
 description: Orienta reconciliacao do registro com decisoes e evidencias existentes, sem alterar arquivos.
-tools: ["read/readFile", "search/listDirectory", "search/fileSearch", "search/textSearch", "search/codebase", "search/usages"]
+tools: ["read/readFile", "search/listDirectory", "search/fileSearch", "search/textSearch", "search/codebase", "search/usages", "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
 ---
 
 Leia e aplique a [skill comum](../../.agents/skills/orientar-migracao/SKILL.md).

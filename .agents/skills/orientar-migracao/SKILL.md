@@ -1,6 +1,6 @@
 ---
 name: orientar-migracao
-description: Orienta uma etapa da migracao de aplicacoes com o JBoss MTA Harness, recuperando escolhas e evidencias dos arquivos. Use para iniciar, priorizar, planejar ou retomar o trabalho, inclusive contexto recebido; orienta sem executar tarefas ou corretivas.
+description: Orienta uma etapa da migracao de aplicacoes com o JBoss MTA Harness, recuperando escolhas e evidencias dos arquivos. Use para preparar o ambiente, iniciar, priorizar, planejar ou retomar o trabalho, inclusive contexto recebido; orienta sem executar tarefas ou corretivas.
 ---
 
 # Orientar a migracao pelo estado efetivo
@@ -9,7 +9,8 @@ O desenvolvedor executa as tarefas, escolhe prioridades, concede GO e aceita o
 resultado. O helper le os arquivos e indica uma proxima acao. Esta skill e comum
 ao Codex e ao GitHub Copilot; nao instala agentes nem configura permissoes.
 
-Use leitura e busca. Terminal, se necessario, somente para leitura: nao execute
+Use leitura, busca e as tres consultas MCP harnessIssues quando disponiveis,
+conforme o guia de consultas abaixo. Terminal, se necessario, somente para leitura: nao execute
 scripts, importe modulos ou acione Run Tasks para descobrir o estado. Indice,
 preparadores e ate Status do servidor podem gravar arquivos. Nao altere registros,
 ranking, fichas, plano/to-do, checkboxes, GO ou aceite durante a orientacao.
@@ -27,6 +28,15 @@ especialistas nao subdelegam. Use apoio apenas quando necessario a etapa e permi
 na sessao. Skill aplicada nao comprova delegacao: relate somente chamadas reais.
 
 ## Identificar e ler o contexto
+
+Se o pedido for somente instalar/configurar Node ou MCP do harness, siga a
+[configuracao MCP](../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa)
+diretamente, sem recuperar contexto de migracao. Oriente uma etapa por vez: versao/arquitetura,
+ZIP em pasta fixa, conferencia de node/npm, dependencias, configurador, raizes e
+descoberta no cliente. Reaproveite caminhos/resultados informados e pergunte apenas
+o que faltar para o proximo passo. Nao exija projeto, MTA ou registro para esse
+preparo. Forneca comando e resultado esperado para o desenvolvedor executar;
+nao instale, configure ou amplie permissoes pelo helper. MCP permanece opcional.
 
 1. Consulte [AGENTS.md](../../../AGENTS.md) e o caminho pertinente no
    [guia do desenvolvedor](../../../doc/guias/harness-migracao-desenvolvedor.md).
@@ -150,6 +160,22 @@ Leia a secao pertinente antes de recomendar tarefa/comando. Use os caminhos reai
 da selecao; nao execute preparadores para descobrir destinos ainda inexistentes.
 Se guia e ferramenta divergirem, exponha a lacuna, sem inventar comando.
 Funcionalidades do backlog nao sao operacoes disponiveis.
+
+Para conferir uma base ou recuperar uma issue, leia o guia de
+[consultas de issues](../../../doc/guias/tools/consultas-issues.md#consultas-por-etapa).
+Quando expostas, use somente auditar_base, listar_issues e obter_issue do servidor
+harnessIssues, com ContextPath/Source selecionados e escopo da etapa. Raizes sao
+configuracao do desenvolvedor; nao as amplie nem contorne recusas com outro acesso.
+MCP e opcional: sem ele, continue pela leitura direta dos arquivos com as ferramentas
+habituais. Priorizacao e planejamento da implementacao mantem o fluxo existente;
+nao exija instalar Node/MCP, consultar manualmente ou copiar JSON para prosseguir.
+Para uma consulta pontual solicitada, a CLI executada pelo desenvolvedor e opcional;
+nao execute a CLI nem importe seu modulo. Isso nao amplia o terminal deste helper.
+Recibo de reconciliacao nao e aceito: use base suportada explicitamente vinculada
+ou leitura direta. Nao prepare outro contexto apenas para habilitar consultas.
+Confira Status, Provenance, paginacao e TruncatedFields; erro nao e
+zero issues, Availability nao substitui escolhas atuais e candidato local nao
+comprova aplicabilidade. Consulta nao marca cobertura nem substitui exame.
 
 | Necessidade | Fonte operacional |
 | --- | --- |

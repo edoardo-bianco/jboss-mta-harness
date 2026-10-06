@@ -21,6 +21,16 @@ Navegacao: [conteudo do repositorio](#o-que-acompanha-o-clone) ·
 
 ## O que acompanha o clone
 
+O adaptador MCP fica em `mcp/issues`, com SDK e lockfile versionados. Para
+desenvolve-lo, instale as dependencias com `npm.cmd ci --prefix mcp/issues --ignore-scripts`
+e rode `npm.cmd test --prefix mcp/issues` usando Node >=20 no Windows.
+Os testes usam Windows PowerShell 5.1 e fixtures em `.harness/tests`, sem MTA/JBoss
+reais. Cobrem stdio, paridade, configuracao, limites e ciclo de vida dos filhos.
+`tests/Test-IssueQueryRoots.ps1` cobre a restricao opcional de caminhos do nucleo.
+`tests/Test-PlanningWithoutMcp.ps1` executa as regressoes de categorias e plano
+por issue com Node/npm/npx ausentes do PATH e configuracao MCP indisponivel.
+O [guia de consultas](tools/consultas-issues.md) explica instalacao e alternativa CLI.
+
 Scripts, tarefas, prompts, skills/perfis, exemplo de configuracao, workspace inicial,
 testes e documentacao entram no Git. Aplicacoes e playgrounds ficam fora do harness;
 o workspace inicial contem somente o harness. `config/harness.local.json`, o workspace

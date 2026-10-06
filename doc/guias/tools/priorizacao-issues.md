@@ -184,9 +184,14 @@ snapshot e no Source atual. Todos os incidentes sao preservados; preparar as
 paginas nao significa que o agente leu todos ou confirmou aplicabilidade.
 `Files` registra os caminhos/hashes dos derivados. Retomada os confere; recriar
 produz outra solicitacao e preserva os anteriores. `UNAVAILABLE` traz o erro de
-extracao e exige conferir os artefatos originais; nao significa zero achados.
+extracao; sem resposta MCP suficiente, exige conferir os artefatos originais.
+Nao significa zero achados.
 
-O agente deve abrir os caminhos literalmente, inclusive em `.harness`, normalmente
+Com [MCP disponivel](consultas-issues.md#consultas-por-etapa), o agente recupera os
+incidentes por obter_issue, confere base/projeto, hashes, paginas e truncamentos.
+Uma resposta suficiente dispensa abrir novamente o indice/paginas dos mesmos
+incidentes. Codigo local e evidencias adicionais necessarias continuam exigidos.
+Sem MCP, o agente abre os caminhos literalmente, inclusive em `.harness`, normalmente
 ignorada pelas buscas. O MTA pode preservar URI da maquina/pasta antiga: o trecho
 relativo a `input` aponta candidatos em `AnalysisSource` e `Source`. Conferir
 arquivo/metodo/conteudo antes de usar a linha antiga. Referencias externas ou

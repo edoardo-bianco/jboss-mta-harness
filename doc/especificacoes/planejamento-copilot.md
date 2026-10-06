@@ -158,9 +158,13 @@ Issues DEV/reconsideracao fora do inventario exigem novo preparo/contrato explic
 o agente nao amplia a lista. Preparo pendente com template/contrato alterado exige
 recriar para adotar instrucoes novas.
 
-Ler IncidentEvidence.IndexPath e paginas pertinentes por caminho literal antes
-de declarar falta de apontamentos. Contexto antigo/derivado indisponivel exige
-consultar CatalogPath/Findings autorizados. Em output.js o ID combina ruleset.name
+Recuperar os apontamentos antes de declarar sua ausencia. Com MCP disponivel,
+usar obter_issue da base/projeto selecionados, conferindo proveniencia, hashes,
+paginas/ordinais, Total/HasMore e truncamentos. Resposta suficiente substitui a
+leitura dos derivados equivalentes; nao exigir abertura duplicada de indice/paginas.
+Sem MCP, ler IncidentEvidence.IndexPath e paginas pertinentes por caminho literal.
+Contexto antigo/derivado indisponivel sem resposta MCP suficiente exige consultar
+CatalogPath/Findings autorizados. Em output.js o ID combina ruleset.name
 e chave de violations; em YAML conferir incidents e nao apenas cabecalho/regras.
 Busca excluida/fora do workspace nao prova ausencia; HTML SPA pode ser so a interface.
 Conferir localizacao e solucao MTA, snapshot, Source, POMs, consumidores

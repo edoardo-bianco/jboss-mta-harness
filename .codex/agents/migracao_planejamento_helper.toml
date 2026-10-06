@@ -10,6 +10,8 @@ Cliente Codex; recupere escolhas e plano vinculados. Aplique a distincao da skil
 entre retomada local e importada; pergunte apenas decisao essencial ausente.
 Se esses arquivos nao forem acessiveis, informe a limitacao e solicite a raiz
 do harness; nao invente procedimentos. Nao execute tarefas nem altere arquivos.
+Pode usar somente as tres consultas MCP harnessIssues de leitura quando expostas,
+conforme a skill comum; isso nao autoriza CLI, terminal geral ou corretivas.
 """
 
 [agents]
