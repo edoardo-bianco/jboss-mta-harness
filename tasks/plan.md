@@ -81,6 +81,67 @@ Logs locais: .harness/tests/eap70-regressao*.log neste checkout. Nao iniciou
 JBoss real, nao criou usuario e nao alterou instalacoes/configuracoes locais.
 Start/estado/stop, CLI/JVM e socket JDWP reais ficam para a maquina de trabalho.
 
+## Consultas de issues - implementacao 2026-10-06
+
+Retomada autorizada: primeiro incremento valida auditoria, lista e detalhe em
+recibos de priorizacao, filtros literais, 138 incidentes paginados/por ordinal,
+truncamento declarado, origem completa, hashes e leitura sem escrita. Teste
+Test-IssueQueries PASS em PowerShell 5.1; RED observado antes de lista/detalhe e
+da validacao completa de origem. Ainda faltam recibos de planejamento, CLI,
+casos adicionais, documentacao operacional e avaliacao MCP. Contrato salvo
+descreve a entrega pretendida; este incremento ainda nao e a entrega completa.
+
+Atualizacao apos a interrupcao: PRs #11 e #12 integrados. Main local, origin/main
+e base de harness/consultas-issues alinhadas em fcee604; corretivas ja presentes
+neste checkout. Trabalho parcial abaixo preservado sem commit, sem ampliar
+implementacao nesta sincronizacao. Ensaio do deploy real continua pendente.
+
+Interrupcao solicitada para corretiva prioritaria EAP 7.0: trabalho preservado
+nesta branch. A primeira auditoria passou em Test-IssueQueries; listagem,
+detalhe, CLI e demais casos ainda faltam. Corretiva em branch separada
+harness/compatibilidade-eap70, checkout .harness/worktrees/eap70, derivada de main.
+Na retomada, trazer a corretiva aceita e continuar o contrato abaixo; nao tratar
+o nucleo parcial como entrega concluida.
+
+Continuidade autorizada depois da PR #10 integrada. Main limpa em 0e74925;
+branch harness/consultas-issues. Implementar auditar_base, listar_issues e
+obter_issue como consultas somente leitura, reutilizando parser/catalogo,
+leitor de registro e mapeamento de incidentes. Skills: using-agent-skills,
+incremental-implementation, test-driven-development, api-and-interface-design,
+git-workflow-and-versioning e code-review-and-quality.
+
+Entrada explicita ContextPath de priorizacao ou planejamento; Source obrigatorio
+quando houver varios projetos. Sem configurar toolchains, inicializar registro,
+buscar rodada por recencia ou executar preparadores. Saida JSON versionada com
+identidade, origem, hashes, escopo, paginacao, lacunas e erros distinguiveis.
+Categoria MTA, elegibilidade registrada e aplicabilidade no codigo sao distintas.
+Consulta/extracao nao consome cobertura nem altera ficha/plano/GO/aceite.
+
+Incrementos: (1) contrato, testes e leitura/auditoria da base; (2) listagem e
+detalhe paginados, filtros e CLI; (3) recibos consolidados/importados, falhas e
+preservacao; (4) guias/prompts/helper, avaliacao MCP e revisao independente.
+Reaproveitar Get-HarnessMtaCatalog, Read-HarnessMigrationInput e
+Get-IncidentLocation; evitar copiar parsers. Uma CLI com operacao explicita,
+sem uma Run Task por funcao. MCP e adaptador futuro, avaliado apos validar o
+nucleo; nenhuma instalacao ou ampliacao de permissoes nesta entrega.
+
+Encaixe: HAR-03/OBJ-01 para integridade e apontamentos, OBJ-02/SRC-06 para recorte
+por issue e HAR-01/04 para o contrato do adaptador. Nao implementar grafo Java,
+comparar_ocorrencias, dependencias resolvidas ou classificacao por IA.
+engineering-harness-vscode.md continua adiado e sem leitura.
+
+Aceite: 138 incidentes recuperaveis por pagina/ordinal sem omissoes, mesmo ID em
+projetos distintos, categorias isoladas, escolhas atuais preservadas, origem
+importada/consolidada sem MTA original, erros de acesso/ausencia/formato/hash
+distintos, nenhuma escrita nas entradas ou criacao de .harness pela consulta.
+Resultados longos declaram truncamento e caminho da evidencia completa; comparar
+tamanho de resposta com catalogo sintetico, sem alegar economia real de tokens.
+Teste corporativo compara mesma fatia de 10%, tempo, omissoes e consumo quando
+disponivel no cliente. Esse ensaio continua pendente.
+
+Reversao: reverter commits desta entrega. Consultas nao criam dados persistidos;
+preservar recibos, diagnosticos, propostas e escolhas existentes.
+
 ## Revisao de documentacao e orientacao - 2026-10-06
 
 Pedido humano: revisar README, guia do desenvolvedor, guias, helpers e skills

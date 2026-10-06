@@ -20,6 +20,20 @@
   sintaxe/diff conferidos e revisao independente sem bloqueadores.
 - [ ] Validar start/estado/stop no EAP 7.0 real da maquina de trabalho.
 
+## Consultas de issues - implementacao 2026-10-06
+
+- [x] Confirmar main limpa/PR #10 e criar harness/consultas-issues.
+- [x] Recuperar proposta e mapear reuso, limites e capacidades relacionadas.
+- [x] Trazer corretivas dos PRs #11/#12 da main (fcee604), preservando trabalho parcial.
+- [x] Definir contrato e escrever testes de leitura/auditoria antes do codigo.
+- [x] Validar nucleo para priorizacao: lista/detalhe, filtros, 138 incidentes,
+  ordinal, truncamento, escolhas atuais, identidade, hashes e ausencia de escrita.
+- [ ] Implementar listagem/detalhe paginados, filtros e CLI JSON somente leitura.
+- [ ] Cobrir consolidado/importado, identidade, hashes, falhas e preservacao.
+- [ ] Alinhar guias/prompts/helper e avaliar adaptador MCP nas fontes oficiais.
+- [ ] Executar regressao dirigida, revisao independente e salvar commits.
+- [ ] Comparar no cliente a mesma fatia de 10%: omissoes, tempo e tokens reais.
+
 ## Revisao de documentacao e orientacao - 2026-10-06
 
 - [x] Conferir raiz, branch, HEAD e estado limpo; retomar eead84b.
@@ -49,8 +63,8 @@
   Logs em .harness/tests/entrega2-20261006/; fixtures nao versionadas.
 - [ ] Ensaiar na maquina de trabalho: exportar analise de 10%, importar em outra
   raiz, continuar categoria, planejar uma ficha e compartilhar seu plano.
-- [ ] Integrar/publicar esta entrega apos revisao humana. Ferramentas/MCP e
-  engineering-harness-vscode.md continuam adiados.
+- [x] Integrar/publicar esta entrega: PR #10 aceita e integrada em 0e74925.
+  Consultas retomadas acima; engineering-harness-vscode.md continua adiado.
 
 ## Categorias, planejamento por issue e portabilidade - proposta 2026-10-06
 
