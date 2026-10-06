@@ -69,7 +69,7 @@ Copy-Item -LiteralPath (Join-Path $root 'scripts/gerenciar-jboss.ps1') -Destinat
 @'
 function Get-HarnessJbossServer {
     param($Context,$Eap)
-    [pscustomobject]@{Home='fixture';Settings=[pscustomobject]@{standaloneConfig='standalone.xml';debugPort=8787};HttpPort=8080;ManagementPort=9990}
+    [pscustomobject]@{Home='fixture';Version='7.0';Settings=[pscustomobject]@{standaloneConfig='standalone.xml';debugPort=8787};HttpPort=8080;ManagementPort=9990}
 }
 Export-ModuleMember -Function Get-HarnessJbossServer
 '@ | Set-Content -LiteralPath (Join-Path $scripts 'HarnessJbossRuntime.psm1') -Encoding UTF8

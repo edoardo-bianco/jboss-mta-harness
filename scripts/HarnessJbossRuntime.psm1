@@ -29,8 +29,12 @@ function Get-HarnessJbossServer {
         if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Arquivo ausente: $file" }
         if ($file -match '["%!^&|<>\r\n]') { throw 'Caminho nao suportado pelo launcher JBoss Windows.' }
     }
-    $version=if ($Eap -eq 'eap71') {'7.1'} else {'7.4'}
-    if ((Get-Content -LiteralPath (Join-Path $homePath 'version.txt') -Raw) -notmatch ('Version '+[regex]::Escape($version)+'\.')) { throw 'Instalacao JBoss nao corresponde ao EAP selecionado.' }
+    # eap71 conserva a chave de configuracao do servidor legado (7.0 ou 7.1).
+    # A identidade em runtime e os argumentos da CLI usam a versao instalada.
+    $versionMatch=[regex]::Match((Get-Content -LiteralPath (Join-Path $homePath 'version.txt') -Raw),'\bVersion\s+(\d+\.\d+)\.')
+    $version=$versionMatch.Groups[1].Value
+    $allowed=if ($Eap -eq 'eap71') {@('7.0','7.1')} else {@('7.4')}
+    if (-not $versionMatch.Success -or $version -notin $allowed) { throw ("Instalacao JBoss nao corresponde a $Eap. Versoes aceitas: "+($allowed -join ', ')+'. Confira version.txt e tools.'+$Eap+'Home.') }
     $key=Get-HarnessProjectKey $homePath
     $state=Resolve-HarnessPath (Join-Path $Context.Root ('.harness/jboss/'+$Eap+'__'+$key.Substring(0,12))) $Context.Root
     [pscustomobject]@{Eap=$Eap; Home=$homePath; Base=$base; Jdk=$jdk; Java=$java; Cli=$cli; Version=$version; Settings=$settings; ManagementPort=(9990+$settings.portOffset); HttpPort=(8080+$settings.portOffset); State=$state}
@@ -63,9 +67,12 @@ function Invoke-JbossJava {
 
 function Invoke-JbossCli {
     param($Server, [string]$Command)
+    $protocol=if ($Server.Version -eq '7.0') {'http-remoting'} else {'remote+http'}
     $arguments=@(('-Djboss.cli.config='+ (Join-Path $Server.Home 'bin/jboss-cli.xml')), '-jar', $Server.Cli,
-        '--connect', ('--controller=remote+http://127.0.0.1:'+$Server.ManagementPort), '--error-on-interact', '--timeout=3000',
-        ('--command-timeout='+$Server.Settings.timeoutSeconds), ('--command='+$Command))
+        '--connect', ('--controller='+$protocol+'://127.0.0.1:'+$Server.ManagementPort), '--error-on-interact', '--timeout=3000')
+    # A CLI 7.0 nao oferece command-timeout; o limite externo continua ativo.
+    if ($Server.Version -ne '7.0') { $arguments+=('--command-timeout='+$Server.Settings.timeoutSeconds) }
+    $arguments+=('--command='+$Command)
     $reply=Invoke-JbossJava $Server $arguments ($Server.Settings.timeoutSeconds+5)
     if ($reply.ExitCode -ne 0 -or $reply.Output -match '"outcome"\s*=>\s*"failed"') { throw "CLI JBoss falhou: $($reply.Output)" }
     return $reply.Output
@@ -133,6 +140,15 @@ function Start-JbossProcess {
             # O parser Java aceita somente a porta numerica apos --debug.
             # O launcher usa DEBUG_PORT como endereco JDWP, sem repassa-lo ao parser.
             $env:DEBUG_PORT='127.0.0.1:'+$Server.Settings.debugPort
+            if ($Server.Version -eq '7.0') {
+                # O launcher antigo redefine DEBUG_PORT ao interpretar --debug.
+                # Aplicar o bind depois desse parser, preservando a conf instalada.
+                $debugConf=Join-Path $Run 'standalone-debug.conf.bat'
+                $lines=@('@echo off', 'if exist "%JBOSS_HOME%\bin\standalone.conf.bat" call "%JBOSS_HOME%\bin\standalone.conf.bat" %*',
+                    ('set "DEBUG_PORT=127.0.0.1:'+$Server.Settings.debugPort+'"'))
+                [IO.File]::WriteAllText($debugConf,($lines -join "`r`n"),[Text.Encoding]::ASCII)
+                $env:STANDALONE_CONF=$debugConf
+            }
             $arguments+=' --debug '+$Server.Settings.debugPort
         }
         $arguments+='"'
@@ -177,7 +193,11 @@ function Stop-HarnessJboss {
     if ($current.Identity -ne 'MATCHED') { throw 'Stop exige identidade confirmada pelo gerenciamento.' }
     $process=Get-Process -Id $current.ProcessId -ErrorAction Stop
     if ($process.StartTime.ToUniversalTime().ToString('o') -ne $current.ProcessStartUtc) { throw 'Processo mudou antes do shutdown.' }
-    $command=if ($Server.Version -eq '7.1') {'shutdown --timeout=10'} else {'shutdown --suspend-timeout=10'}
+    $command=switch ($Server.Version) {
+        '7.0' {':shutdown(timeout=10)'}
+        '7.1' {'shutdown --timeout=10'}
+        default {'shutdown --suspend-timeout=10'}
+    }
     $null=Invoke-JbossCli $Server $command
     if (-not $process.WaitForExit($Server.Settings.timeoutSeconds*1000)) { throw 'Shutdown enviado, mas saida nao confirmada; nenhum processo foi forcado.' }
     $after=Get-HarnessJbossStatus $Server

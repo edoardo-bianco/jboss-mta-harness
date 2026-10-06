@@ -25,8 +25,8 @@ try {
     }
     $serverAction=$Action -in @('Status','Start','StartDebug','Stop')
     if (-not $Eap) {
-        $allOption=if ($serverAction) {' | 3. Todos (EAP 7.1 e 7.4)'} else {''}
-        Write-Host "Servidor: 1. EAP 7.1 | 2. EAP 7.4$allOption | Enter/q cancela"
+        $allOption=if ($serverAction) {' | 3. Todos (legado e EAP 7.4)'} else {''}
+        Write-Host "Servidor: 1. EAP 7.0/7.1 (eap71) | 2. EAP 7.4$allOption | Enter/q cancela"
         $choice=Read-Host 'EAP'
         $Eap=switch ($choice) {'1' {'eap71'} '2' {'eap74'} '3' {if ($serverAction) {'all'} else {throw 'Selecao cancelada.'}} default {throw 'Selecao cancelada.'}}
     }
@@ -45,7 +45,7 @@ try {
         foreach ($serverId in $selected) {
             try {
                 $server=Get-HarnessJbossServer $context $serverId
-                Write-Host "Servidor: $serverId | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
+                Write-Host "Servidor: $serverId | EAP detectado: $($server.Version) | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
                 Write-Host "HTTP: $($server.HttpPort) | Gerenciamento: $($server.ManagementPort) | Debug: 127.0.0.1:$($server.Settings.debugPort)"
                 if ($Action -eq 'Stop') { Write-Host 'Stop encerra este servidor e todas as aplicacoes nele implantadas.' }
                 $result=Invoke-HarnessJbossOperation $context $server $Action
@@ -68,7 +68,7 @@ try {
         exit 0
     }
     $server=Get-HarnessJbossServer $context $Eap
-    Write-Host "Servidor: $Eap | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
+    Write-Host "Servidor: $Eap | EAP detectado: $($server.Version) | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
     Write-Host "HTTP: $($server.HttpPort) | Gerenciamento: $($server.ManagementPort) | Debug: 127.0.0.1:$($server.Settings.debugPort)"
     if ($Action -eq 'AddUser') {
         Write-Host 'Assistente oficial: a = Management User (gerenciamento/console); b = Application User.'

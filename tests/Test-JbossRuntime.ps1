@@ -5,6 +5,25 @@ Import-Module (Join-Path $root 'scripts/HarnessJbossRuntime.psm1') -Force -Disab
 function Assert($condition,$message) { if (-not $condition) { throw $message } }
 $module=Get-Module HarnessJbossRuntime
 $server=[pscustomobject]@{Home='C:\EAP';Base='C:\EAP\standalone';Version='7.4';ManagementPort=10090;HttpPort=8180;Settings=[pscustomobject]@{standaloneConfig='standalone.xml';debugPort=8788;timeoutSeconds=10}}
+$server | Add-Member NoteProperty Cli 'C:\EAP\bin\client\jboss-cli-client.jar'
+& $module {
+    function script:Invoke-JbossJava {
+        param($Server,$Arguments,$TimeoutSeconds)
+        $script:cliArguments=$Arguments; $script:cliTimeout=$TimeoutSeconds
+        [pscustomobject]@{ExitCode=0;Output='{"outcome" => "success", "result" => "running"}'}
+    }
+}
+foreach ($version in @('7.0','7.1','7.4')) {
+    $server.Version=$version
+    $null=Invoke-JbossCli $server ':read-attribute(name=server-state)'
+    $arguments=& $module {$script:cliArguments}
+    $protocol=if ($version -eq '7.0') {'http-remoting'} else {'remote+http'}
+    Assert ($arguments -contains "--controller=${protocol}://127.0.0.1:10090") "Protocolo CLI incorreto para $version."
+    Assert (($arguments -contains '--command-timeout=10') -eq ($version -ne '7.0')) "command-timeout incompativel com $version."
+    Assert ($arguments -contains '--timeout=3000' -and $arguments -contains '--error-on-interact') 'Protecoes da CLI ausentes.'
+    Assert ((& $module {$script:cliTimeout}) -eq 15) 'Timeout externo precisa proteger inclusive CLI 7.0.'
+}
+$server.Version='7.4'
 & $module {
     $script:output='{"outcome" => "success", "result" => "C:\\Program Files\\JBoss"}'
     function script:Invoke-JbossCli { param($Server,$Command) $script:output }
@@ -15,7 +34,7 @@ Assert ($value -eq 'C:\Program Files\JBoss') 'Parser DMR alterou escapes de cami
 $rejected=$false; try { & $module {param($s) Read-JbossValue $s ':test'} $server } catch {$rejected=$true}
 Assert $rejected 'Outcome failed aceito.'
 & $module {
-    $script:listening=$false; $script:starting=$false; $script:wrongHome=$false
+    $script:listening=$false; $script:starting=$false; $script:wrongHome=$false; $script:productVersion='7.4.0.GA'
     function script:Get-JbossListener { param($Port)
         if ($script:listening -and $Port -eq 10090) {[pscustomobject]@{OwningProcess=$PID;LocalAddress='127.0.0.1'}}
     }
@@ -25,7 +44,7 @@ Assert $rejected 'Outcome failed aceito.'
             'name=home-dir' {if ($script:wrongHome) {'C:\outro'} else {'C:\EAP'};break}
             'name=base-dir' {'C:\EAP\standalone';break}
             'name=config-file' {'C:\EAP\standalone\configuration\standalone.xml';break}
-            'name=product-version' {'7.4.0.GA';break}
+            'name=product-version' {$script:productVersion;break}
             'java.version' {'1.8.0_504';break}
             'name=server-state' {'running';break}
             default {throw "Consulta inesperada: $Command"}
@@ -38,6 +57,15 @@ Assert ((Get-HarnessJbossStatus $server).State -eq 'UNREACHABLE') 'Processo sem 
 & $module {$script:listening=$true}
 $status=Get-HarnessJbossStatus $server
 Assert ($status.State -eq 'RUNNING' -and $status.Identity -eq 'MATCHED') 'Identidade valida recusada.'
+foreach ($version in @('7.0','7.1','7.4')) {
+    $server.Version=$version
+    & $module {param($v) $script:productVersion=$v+'.0.GA'} $version
+    Assert ((Get-HarnessJbossStatus $server).Identity -eq 'MATCHED') "Identidade $version recusada."
+}
+$server.Version='7.0'
+$rejected=$false; try {Get-HarnessJbossStatus $server} catch {$rejected=$true}
+Assert $rejected 'Aceitar eap71 como alias nao pode ignorar versao real em runtime.'
+$server.Version='7.4'
 Assert ((Start-HarnessJboss $server 'nao-utilizado').State -eq 'RUNNING') 'Start de servidor running deve ser idempotente.'
 $rejected=$false; try {Start-HarnessJboss $server 'nao-utilizado' -DebugMode} catch {$rejected=$true}
 Assert $rejected 'Start debug nao pode alegar debug de servidor normal.'
@@ -58,15 +86,16 @@ Assert $rejected 'Stop de outra instalacao aceito.'
     }
     function script:Invoke-JbossCli { param($Server,$Command) $script:lastShutdown=$Command;$script:shutdownSent=$true }
 }
-foreach ($version in @('7.1','7.4')) {
+foreach ($version in @('7.0','7.1','7.4')) {
     & $module {$script:shutdownSent=$false}
     $server.Version=$version
     Assert ((Stop-HarnessJboss $server).State -eq 'STOPPED') 'Shutdown nao confirmou a saida.'
     $command=& $module {$script:lastShutdown}
-    if ($version -eq '7.1') {Assert ($command -eq 'shutdown --timeout=10') 'EAP 7.1 exige --timeout.'}
+    if ($version -eq '7.0') {Assert ($command -eq ':shutdown(timeout=10)') 'EAP 7.0 exige operacao shutdown com timeout legado.'}
+    elseif ($version -eq '7.1') {Assert ($command -eq 'shutdown --timeout=10') 'EAP 7.1 exige --timeout.'}
     else {Assert ($command -eq 'shutdown --suspend-timeout=10') 'EAP 7.4 exige --suspend-timeout.'}
 }
 & $module {$script:shutdownSent=$false;$script:canExit=$false}
 $rejected=$false; try {Stop-HarnessJboss $server} catch {$rejected=$true}
 Assert $rejected 'Shutdown sem saida foi tratado como sucesso.'
-Write-Output 'PASS: DMR EAP 7.1/7.4, identidade, estados, idempotencia e protecao de stop.'
+Write-Output 'PASS: CLI/DMR EAP 7.0/7.1/7.4, identidade, estados, idempotencia e protecao de stop.'

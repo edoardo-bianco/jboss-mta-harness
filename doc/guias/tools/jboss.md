@@ -9,7 +9,7 @@ html:
 
 [Voltar ao fluxo principal do desenvolvedor](../harness-migracao-desenvolvedor.md#roteiro-onde-estou-e-o-que-escolho).
 
-Controle local de JBoss EAP 7.1/7.4, usuarios de gerenciamento, deploy, rollback
+Controle local de JBoss EAP 7.0/7.1/7.4, usuarios de gerenciamento, deploy, rollback
 e debug Java. Os comandos partem da raiz do harness, em Windows PowerShell 5.1.
 Para preparar a IDE, consulte as [extensoes Java](workspace.md#extensoes-java-no-vs-code).
 
@@ -47,6 +47,12 @@ separadamente; iniciar o servidor nao comprova a corretiva.
 ### Instalacoes, portas e XML standalone
 
 Configure `tools.eap71Home`, `tools.eap74Home` e `tools.applicationJdk8Home`.
+`eap71` e a chave do servidor legado: aceita instalacao **EAP 7.0 ou 7.1**.
+Pode manter `tools.eap71Home` apontando para sua pasta `j-boss-eap-7.0`, sem
+renomear a pasta ou o campo. A versao e lida do `version.txt` e conferida no
+servidor em execucao; o terminal mostra `EAP detectado`. `eap74` exige EAP 7.4.
+Essa compatibilidade do controle local nao altera o perfil de analise MTA.
+
 **Workspace: configurar caminhos** acrescenta campos `eap` ausentes sem substituir
 valores existentes. Padroes (offset aplicado aos sockets do standalone):
 
@@ -95,6 +101,15 @@ equivale a servidor correto. Processo existente sem gerenciamento fica
 shutdown e aguarda a saida do processo identificado, sem encerrar outros Java.
 Em timeout, consulte o recibo e os logs; o processo e preservado para diagnostico.
 
+No EAP 7.0, o harness usa o protocolo e argumentos da
+[CLI 7.0](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.0/html-single/management_cli_guide/index)
+e a operacao `:shutdown(timeout=10)`, conforme a
+[configuracao 7.0](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.0/html/configuration_guide/starting_and_stopping_jboss_eap).
+O limite externo de tempo continua ativo mesmo sem `--command-timeout` na CLI antiga.
+Para debug 7.0, um `standalone-debug.conf.bat` na pasta da execucao chama a conf
+instalada e aplica o bind local depois da leitura dos argumentos do launcher.
+A instalacao nao e editada. O attach continua chamado `JBoss eap71 - attach Java`.
+
 ### Console administrativa e usuario de gerenciamento
 
 Para usar a console administrativa do JBoss, prepare o usuario de gerenciamento
@@ -120,7 +135,7 @@ Com o EAP iniciado, abra a console correspondente aos offsets padrao do harness:
 
 | Servidor | Console |
 | --- | --- |
-| EAP 7.1 | http://localhost:9990/console |
+| EAP 7.0/7.1 (eap71) | http://localhost:9990/console |
 | EAP 7.4 | http://localhost:10090/console |
 
 Se alterou `portOffset`, use a porta de gerenciamento exibida pela tarefa.
@@ -190,12 +205,12 @@ Elas substituem a antiga tarefa **Aplicacao: gerenciar JBoss**:
 
 | Tarefa | Selecao |
 | --- | --- |
-| Servidor: iniciar JBoss | Modo normal ou debug, depois EAP 7.1, EAP 7.4 ou Todos. |
-| Servidor: parar JBoss | EAP 7.1, EAP 7.4 ou Todos. |
-| Servidor: consultar estado JBoss | EAP 7.1, EAP 7.4 ou Todos. |
-| Servidor: criar usuario JBoss | EAP 7.1/7.4; assistente oficial solicita tipo, nome e senha. Nao exige servidor ativo. |
-| Aplicacao: deploy no JBoss | Workspace, EAP 7.1/7.4, aplicacao e WAR/EAR descoberto ou caminho manual. |
-| Aplicacao: rollback no JBoss | Workspace, EAP 7.1/7.4, aplicacao, deployment e release anterior. |
+| Servidor: iniciar JBoss | Modo normal ou debug, depois EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
+| Servidor: parar JBoss | EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
+| Servidor: consultar estado JBoss | EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
+| Servidor: criar usuario JBoss | EAP 7.0/7.1/7.4; assistente oficial solicita tipo, nome e senha. Nao exige servidor ativo. |
+| Aplicacao: deploy no JBoss | Workspace, EAP 7.0/7.1/7.4, aplicacao e WAR/EAR descoberto ou caminho manual. |
+| Aplicacao: rollback no JBoss | Workspace, EAP 7.0/7.1/7.4, aplicacao, deployment e release anterior. |
 
 Iniciar, parar e consultar estado nao pedem aplicacao nem workspace: atuam sobre
 o servidor escolhido, inclusive sem projeto Maven disponivel. Nao criam registros
@@ -206,7 +221,7 @@ As tarefas ficam no repositorio; nao precisa regenerar workspace para receber
 o novo menu. Se necessario, recarregue a janela do VS Code.
 Escopo atual: Windows, PowerShell 5.1, Java 8 e servidor local standalone.
 
-**3. Todos (EAP 7.1 e 7.4)** executa a acao primeiro no 7.1 e depois no 7.4,
+**3. Todos (legado e EAP 7.4)** executa a acao primeiro no `eap71` (7.0 ou 7.1) e depois no 7.4,
 com as configuracoes, verificacoes de identidade, locks e recibos de cada um.
 No start, o modo normal/debug escolhido vale para ambos. O terminal mostra cada
 resultado e um resumo final; falha de configuracao ou operacao de um servidor
@@ -217,7 +232,7 @@ Criar usuario, deploy e rollback continuam exigindo um EAP individual.
 
 ### Testar o controle do servidor sem deploy
 
-1. Execute **Servidor: consultar estado JBoss** e escolha EAP 7.1 ou 7.4.
+1. Execute **Servidor: consultar estado JBoss** e escolha EAP 7.0/7.1 ou 7.4.
 2. Se estiver STOPPED, execute **Servidor: iniciar JBoss**, escolha **1. Start normal**
    e o mesmo EAP. Confira `Status: SUCCEEDED` e `Observed.State: RUNNING`.
 3. Consulte o estado novamente; confira `Identity: MATCHED` e `Debug: false`.
@@ -303,7 +318,7 @@ Language Support for Java (`redhat.java`) e Debugger for Java
 (`vscjava.vscode-java-debug`); instale essas extensoes se ainda nao estiverem disponiveis.
 O Java do language server continua separado do Java 8 da aplicacao.
 
-Os attaches conectam em `127.0.0.1`, nas portas configuradas (8787 para EAP 7.1,
+Os attaches conectam em `127.0.0.1`, nas portas configuradas (8787 para EAP 7.0/7.1,
 8788 para EAP 7.4 nos padroes). JDWP inicia com `suspend=n`, sem aguardar o
 debugger para subir o servidor. Alterar a porta no JSON exige regenerar o
 workspace e reiniciar o servidor. Os nomes desses attaches sao gerenciados pelo

@@ -19,7 +19,7 @@ foreach ($eap in @('eap71','eap74')) {
     foreach ($file in @('bin/client/jboss-cli-client.jar','bin/standalone.bat','standalone/configuration/standalone.xml')) {
         [IO.File]::WriteAllText((Join-Path $eapHome $file),'fixture; nao executar')
     }
-    $version=if ($eap -eq 'eap71') {'7.1'} else {'7.4'}
+    $version=if ($eap -eq 'eap71') {'7.0'} else {'7.4'}
     [IO.File]::WriteAllText((Join-Path $eapHome 'version.txt'),"Version $version.0.GA")
     $config.tools[$eap+'Home']=$eapHome
 }
@@ -80,6 +80,7 @@ foreach ($action in @('Status','Start','StartDebug','Stop')) {
         if ($action -eq 'Stop') { Assert ($receipt.Observed.State -eq 'STOPPED') 'Todos nao parou o servidor.' }
     }
     Assert ($result.Output.Contains('Resumo por servidor') -and $result.Output.Contains('eap71') -and $result.Output.Contains('eap74')) 'Falta resumo dos resultados.'
+    Assert ($result.Output.Contains('EAP detectado: 7.0') -and $result.Output.Contains('EAP detectado: 7.4')) 'Saida deve distinguir chave legada da versao instalada.'
 }
 foreach ($action in @('Status','Stop')) {
     $result=Invoke-Entry -Arguments @('-Action',$action) -Answers @('3')
@@ -99,7 +100,7 @@ foreach ($failedEap in @('eap71','eap74')) {
 $result=Invoke-Entry -Arguments @('-Eap','all','-Action','Status')
 Assert ($result.ExitCode -eq 1 -and $result.Receipts.Count -eq 1 -and $result.Receipts[0].Eap -eq 'eap74') 'Configuracao invalida de um EAP impediu processar o outro.'
 Assert ($result.Output.Contains('eap71') -and $result.Output.Contains('FAILED')) 'Falha anterior ao recibo deve aparecer no resultado.'
-[IO.File]::WriteAllText((Join-Path $area 'eap71/version.txt'),'Version 7.1.0.GA')
+[IO.File]::WriteAllText((Join-Path $area 'eap71/version.txt'),'Version 7.0.0.GA')
 foreach ($eap in @('eap71','eap74')) {
     $result=Invoke-Entry -Arguments @('-Eap',$eap,'-Action','Status')
     Assert ($result.ExitCode -eq 0 -and $result.Receipts.Count -eq 1 -and $result.Receipts[0].Eap -eq $eap) 'Selecao individual regrediu.'

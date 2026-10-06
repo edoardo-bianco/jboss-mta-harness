@@ -1,5 +1,46 @@
 # Plano do agente: evolucao do harness
 
+## Corretiva prioritaria: EAP 7.0 na opcao eap71 - 2026-10-06
+
+Pedido humano: a instalacao local usada ha anos e j-boss-eap-7.0, configurada em
+tools.eap71Home; start foi recusado. Get-HarnessJbossServer exige Version 7.1.*
+nessa opcao. Aceitar EAP 7.0/7.1 mantendo a chave eap71 e detectar a versao real
+para validar identidade e selecionar argumentos da CLI. Eap74 continua exigindo
+7.4. Nao alterar perfil MTA, Java 8, instalacao/configuracao local ou aplicacao.
+
+Main 0e74925; branch harness/compatibilidade-eap70 em checkout separado
+.harness/worktrees/eap70. Trabalho incompleto de consultas permanece preservado
+no checkout principal em harness/consultas-issues. Skills: debugging-and-error-
+recovery, test-driven-development, git-workflow-and-versioning e revisao independente.
+
+Reproduzir com version.txt 7.0 e testar matriz 7.0/7.1/7.4, rejeicoes cruzadas,
+identidade em runtime, argumentos CLI e shutdown. Conferir diferencas oficiais
+da CLI 7.0 antes de afirmar compatibilidade. Alinhar menu/guia e rodar regressao
+JBoss simulada; nao iniciar/parar servidor real sem ambiente de ensaio selecionado.
+Reversao: reverter commit da corretiva, sem mudar instalacoes ou configuracao.
+
+Resultado: eap71 aceita 7.0/7.1 e preserva versao detectada para identidade e CLI;
+eap74 permanece restrito. CLI 7.0 usa http-remoting, sem command-timeout, mantendo
+limite externo; shutdown usa :shutdown(timeout=10). Debug 7.0 usa conf auxiliar
+da execucao que chama a instalada e aplica DEBUG_PORT depois do parser antigo.
+Menu/guia mostram 7.0/7.1 e versao detectada; chaves/portas/MTA preservados.
+
+Fontes: [CLI EAP 7.0](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.0/html-single/management_cli_guide/index),
+[shutdown EAP 7.0](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.0/single/configuration_guide/overview_of_class_loading_and_modules)
+e [launcher upstream antigo](https://raw.githubusercontent.com/wildfly/wildfly-core/2.0.10.Final/core-feature-pack/src/main/resources/content/bin/standalone.bat).
+Launcher upstream fundamenta a ordem do parser; nao substitui ensaio da instalacao real.
+
+Validacao: testes reproduziram recusa da versao, protocolo CLI incorreto e perda
+do bind local antes das respectivas correcoes. 10 scripts PASS no Windows
+PowerShell 5.1: JbossVersions, JbossRuntime, JbossLegacyLauncher, Jboss,
+JbossAddUser, JbossAllServers, JbossArtifacts, JbossServerContext, JbossWorkspace
+e TaskInputs. Fixture de deploy passou a informar Version, ja presente no
+objeto real, apos detectar essa omissao no teste. Sintaxe dos 7 scripts e
+git diff --check aprovados. Revisao independente sem bloqueadores.
+Logs locais: .harness/tests/eap70-regressao*.log neste checkout. Nao iniciou
+JBoss real, nao criou usuario e nao alterou instalacoes/configuracoes locais.
+Start/estado/stop, CLI/JVM e socket JDWP reais ficam para a maquina de trabalho.
+
 ## Revisao de documentacao e orientacao - 2026-10-06
 
 Pedido humano: revisar README, guia do desenvolvedor, guias, helpers e skills
