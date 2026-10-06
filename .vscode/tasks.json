@@ -271,6 +271,16 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
+      "label": "Planejamento: compartilhar contexto",
+      "detail": "Exporta analise ou plano por issue em ZIP; importa com associacao explicita aos projetos locais, preservando originais e escolhas existentes.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/compartilhar-contexto.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-Interactive"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Planejamento: planejar",
       "detail": "Cria ou retoma a proposta pelas escolhas e evidencias do migracao.md. Sem registro, orienta atualizar o indice; pergunta somente quando o contexto for ambiguo.",
       "type": "process",

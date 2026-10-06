@@ -234,8 +234,16 @@ Se um colega entregar apenas ficha/analise, o proximo passo e preparar/elaborar 
 plano da issue. Se entregar plano/to-do, confira GO e escopo antes de orientar
 execucao manual ou por agente de codificacao, conforme a escolha ja feita. O helper
 continua leitor e auxilia verificacoes/aceite. Nao invente cadastro de responsaveis.
-Exportacao/importacao com remapeamento de caminhos ainda e etapa futura; nao
-prometa que copiar a pasta remapeia automaticamente os recibos para outra maquina.
+Para ZIP recebido, indique Planejamento: compartilhar contexto e associacao explicita
+entre Sources de origem e projetos locais. Use o ContextPath retornado; ImportedFrom
+aponta originais preservados. Analise v4 concluida permite continuar a categoria ou
+escolher ficha para planejar. Plano consolidado permite retomar/revisar a proposta e
+preparar implementacao sem MTA original. Conferir alcance do GO e codigo local.
+Mudanca da origem, anexos ou contrato/template do plano importado exige reavaliacao;
+obter diagnostico completo para revisar recorte MTA, sem fallback para EVIDENCIAS.
+Conflito com registro/recibo local nao autoriza sobrescrever ou apagar evidencias.
+O helper continua leitor: nao executa importacao/exportacao. Consulte o
+[guia de compartilhamento](../../../doc/guias/tools/compartilhamento-contextos.md).
 Veja o [roteiro por issue](../../../doc/guias/tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas).
 
 ## Continuidade manual ou assistida

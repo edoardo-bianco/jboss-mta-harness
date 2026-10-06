@@ -265,6 +265,11 @@ individuais por projeto/issue, sob `.harness/planning/<artifactId>/issues/`.
 O agente cria fichas somente das examinadas; o ranking aponta para esses arquivos.
 Mesmo ID em projetos diferentes mantem fichas distintas, com contexto suficiente
 para compartilhar cada uma. Contextos v2/v3 continuam mandatory e conservam layout.
+
+Uma analise v4 concluida pode ser exportada por **Planejamento: compartilhar
+contexto**. O pacote leva a cadeia da categoria e o diagnostico para continuar a
+sequencia ou planejar uma ficha em outro workspace. Veja o
+[roteiro de exportacao/importacao](compartilhamento-contextos.md).
 CLI aceita `-Category optional` (ou outra recebida); omitida, preserva mandatory.
 Ao passar PreviousRequestId sem Category, a categoria daquela sequencia e retomada.
 Mudancas relevantes posteriores precisam ser explicitadas na analise; snapshot

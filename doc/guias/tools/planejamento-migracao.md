@@ -74,9 +74,11 @@ entradas diferentes geram novo recibo com Previous e preservam o anterior. Criar
 ou revisar o recorte MTA ainda consulta sua origem registrada. Nao edite copias
 consolidadas de um recibo. Limpeza de execucoes preserva esses dossies.
 
-Nesta entrega e possivel compartilhar a leitura dos documentos; **exportar/importar
-e remapear caminhos automaticamente entre maquinas ainda nao foi implementado**.
-Copiar uma pasta nao torna seus recibos automaticamente operacionais em outra raiz.
+Use **Planejamento: compartilhar contexto** para exportar analise concluida ou
+plano/to-do e importar com associacao aos Sources locais. Consulte o
+[roteiro entre maquinas](compartilhamento-contextos.md), incluindo conflitos e
+retomada de proposta consolidada sem o MTA original. Copiar uma pasta avulsa nao
+substitui essa importacao.
 
 No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
 Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).

@@ -4,7 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 24 -and @($labels | Sort-Object -Unique).Count -eq 24) 'Manter 24 tarefas distintas, incluindo priorizacao multi-projeto.'
+Assert ($labels.Count -eq 25 -and @($labels | Sort-Object -Unique).Count -eq 25) 'Manter 25 tarefas distintas, incluindo compartilhamento com menu de operacao.'
 $serverLabels=@('Servidor: iniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
@@ -26,7 +26,9 @@ Assert (@($labels | Where-Object { $_ -cnotmatch '^(Workspace|Aplicacao|Servidor
 $prioritization = @($tasks.tasks | Where-Object label -eq 'Planejamento: priorizar issues')
 Assert ($prioritization.Count -eq 1 -and $prioritization[0].args -contains '${workspaceFolder}/scripts/preparar-priorizacao.ps1' -and $prioritization[0].args -contains '${input:harnessWorkspacePath}' -and $prioritization[0].args -contains '${execPath}' -and $prioritization[0].args -notcontains '-SelectTarget') 'Priorizacao deve usar o workspace inteiro e abrir prompt.'
 Assert ($prioritization[0].args -contains '-Interactive' -and $prioritization[0].args -notcontains '-SelectTop') 'Priorizacao deve oferecer percentual e recriar/progredir na mesma tarefa.'
-$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -notin @('Planejamento: priorizar issues','Planejamento: planejar') })
+$sharing=@($tasks.tasks | Where-Object label -eq 'Planejamento: compartilhar contexto')
+Assert ($sharing.Count -eq 1 -and $sharing[0].args -contains '${workspaceFolder}/scripts/compartilhar-contexto.ps1' -and $sharing[0].args -contains '-Interactive' -and $sharing[0].args -contains '${input:harnessWorkspacePath}') 'Compartilhar deve oferecer exportar/importar na mesma tarefa do workspace.'
+$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -notin @('Planejamento: priorizar issues','Planejamento: planejar','Planejamento: compartilhar contexto') })
 foreach ($monitor in @($tasks.tasks | Where-Object label -like 'MTA: acompanhar*')) {
     Assert ($monitor.args -contains '-Active' -and $monitor.args -notcontains '-SelectTarget' -and -not ($monitor.args | Where-Object { $_ -like '${input:*}' })) 'Observabilidade nao deve solicitar workspace/projeto.'
 }

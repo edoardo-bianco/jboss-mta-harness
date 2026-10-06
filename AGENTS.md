@@ -117,6 +117,13 @@ Para categorias e dossies padronizados por issue, siga a
   .harness e local: nao e lock compartilhado. Politicas Git antigas sao historicas,
   nao pendencias a renovar. Preserve trabalho local e revalide o codigo integrado
   conforme os criterios do lote. GO e aceite humano continuam separados.
+- Compartilhamento usa `Planejamento: compartilhar contexto`, conforme
+  [ADR-0007](doc/adr/0007-compartilhamento-de-contextos.md). Source local exige
+  associacao explicita. Preserve originais e cadeia recebida; derivados usam
+  ImportedFrom. Conflitos nao autorizam sobrescrita. Analise recebida segue para
+  escolha/planejamento; plano consolidado recebido permite retomada e preparo de
+  implementacao sem MTA original, conferindo escopo/GO e codigo local. Mudanca de
+  origem/anexos/contrato exige reavaliacao, sem fallback silencioso.
 
 Consulte o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md)
 para uso e os documentos de `doc/` para contratos

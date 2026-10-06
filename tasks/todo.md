@@ -1,5 +1,25 @@
 # To-do do agente: evolucao do harness
 
+## Exportacao/importacao - implementacao 2026-10-06
+
+- [x] Retomar main integrada/limpa e confirmar proxima entrega com o humano.
+- [x] Criar harness/exportacao-importacao e registrar contrato/aceite do incremento.
+- [x] Testar e implementar ZIP versionado, inventario/hashes e exportacao do plano.
+- [x] Testar importacao em outra raiz, Source explicito, derivados e originais preservados.
+- [x] Tratar preview, conflito, reimportacao e validacao de caminhos/limites/integridade.
+- [x] Exportar/importar priorizacao concluida com cadeia, categoria, cobertura e MTA.
+- [x] Comprovar continuidade e passagem de ficha recebida ao planejamento.
+- [x] Integrar CLI/Run Task, orientador, contrato e guias sem duplicar fluxos.
+- [x] Rodar regressao dirigida, revisao independente e registrar limites do ensaio.
+- [x] Corrigir achados da revisao: vinculos/caminhos, origem congelada, historico,
+  links relativos, hashes Previous e rollback de arquivos/diretorios novos.
+- [x] Windows PowerShell 5.1: 20 scripts PASS; sintaxe, diff e 262 links locais OK.
+  Logs em .harness/tests/entrega2-20261006/; fixtures nao versionadas.
+- [ ] Ensaiar na maquina de trabalho: exportar analise de 10%, importar em outra
+  raiz, continuar categoria, planejar uma ficha e compartilhar seu plano.
+- [ ] Integrar/publicar esta entrega apos revisao humana. Ferramentas/MCP e
+  engineering-harness-vscode.md continuam adiados.
+
 ## Categorias, planejamento por issue e portabilidade - proposta 2026-10-06
 
 Status: **Entrega 1 implementada localmente**, conforme autorizacao posterior do desenvolvedor. Ensaio humano na maquina de trabalho pendente.

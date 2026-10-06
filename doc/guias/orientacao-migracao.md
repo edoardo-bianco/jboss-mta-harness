@@ -20,6 +20,12 @@ Ele responde com **uma proxima acao**, motivo, caminho/mensagem prontos e result
 a conferir. Voce executa as tarefas, escolhe prioridades, concede GO e aceita o
 resultado. Nao precisa conhecer os nomes dos campos internos para pedir ajuda.
 
+Para um ZIP recebido, indique **Planejamento: compartilhar contexto** e associe
+os projetos locais. Depois informe ao orientador o ContextPath devolvido pela
+tarefa. Analise recebida segue para escolha/planejamento; proposta recebida segue
+para revisao de escopo/GO e execucao manual ou assistida. Veja o
+[roteiro entre colegas](tools/compartilhamento-contextos.md).
+
 Navegacao: [configuracao](#configuracao) · [iniciar](#iniciar-no-codex-ou-no-copilot) ·
 [retomar](#retomar-em-outro-chat-ou-cliente) · [pedidos por etapa](#pedidos-por-etapa) ·
 [resultado e proximo passo](#resultado-e-proximo-passo).

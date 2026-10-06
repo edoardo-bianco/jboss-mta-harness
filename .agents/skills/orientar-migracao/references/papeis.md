@@ -110,6 +110,11 @@ contexto e o roteiro do guia; para trabalho assistido, indique o prompt preparad
 Nao condicione continuidade manual a recomendacao da IA ou execucao de prompt. Mudanca nessas
 entradas leva a Planejamento: planejar para revisao com Previous, sem apagar historico.
 Vinculos antigos seguem o unico sucessor explicito; bifurcacoes exigem escolha.
+Pacote recebido usa Planejamento: compartilhar contexto, com Source local explicito.
+Depois, leia ContextPath/ImportedFrom. Analise recebida requer plano; proposta
+recebida requer conferencia de escopo/GO e codigo antes da execucao. Mudanca das
+entradas de proposta importada exige reavaliacao com a origem pertinente; nao
+prometer revisao MTA offline nem sobrescrever estado local em conflito.
 se falta GO, indique
 o que revisar e como registrar a decisao pelo guia.
 PLANEJADA retoma o plano existente sem regredir Andamento; se o pedido e somente

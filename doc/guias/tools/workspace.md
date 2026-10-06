@@ -411,8 +411,8 @@ anexos, evidencias, backups e rodadas MTA que estejam dentro dela. A tarefa
    da primeira. Revisao/GO precedem a implementacao; aceite vem apos verificacoes.
 
 Esse ensaio usa registros, contextos e prompts novos; nao recupera automaticamente
-escolhas ou aprovacoes apagadas. Registre seus resultados antes de avancar para
-exportacao/importacao ou outras entregas.
+escolhas ou aprovacoes apagadas. Registre seus resultados e, para ensaiar a passagem
+entre colegas, siga o [roteiro de compartilhamento](compartilhamento-contextos.md#ensaio-em-pequena-escala).
 
 #### Pastas locais e backups temporarios
 
@@ -482,6 +482,7 @@ Referencia de consulta; para escolher a operacao e a ordem, use o
 | [Workspace: conferir configuracao ao abrir](#comecar-na-maquina-de-trabalho) | `conferir-ambiente.ps1 -AoAbrir` |
 | [Planejamento: planejar](planejamento-migracao.md#preparar-e-executar-o-prompt) | `preparar-planejamento.ps1` |
 | [Planejamento: priorizar issues](priorizacao-issues.md#uso-manual-pela-run-task) | `preparar-priorizacao.ps1` |
+| [Planejamento: compartilhar contexto](compartilhamento-contextos.md) | `compartilhar-contexto.ps1` |
 | [Planejamento: criar pasta de evidencias](planejamento-migracao.md#revisar-um-lote-com-evidencias-complementares) | `criar-pasta-evidencias.ps1` |
 | [Planejamento: abrir plano e to-do](planejamento-migracao.md#localizar-documentos-e-identificar-o-historico) | `abrir-planejamento.ps1` |
 

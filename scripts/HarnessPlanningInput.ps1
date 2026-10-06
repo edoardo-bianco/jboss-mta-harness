@@ -192,6 +192,27 @@ function Invoke-HarnessRegisteredPlanningCore {
         if ($receipt.PSObject.Properties['LayoutVersion'] -and ($chosen.Count -ne 1 -or $chosen[0].Id -cne $receipt.IssueId)) {
             throw 'A solicitacao pertence a uma issue. Preserve essa escolha para revisar ou use NewPlan para a outra issue; nao misturar dossies.'
         }
+        if ($receipt.PSObject.Properties['ImportedFrom'] -and $receipt.EvidenceMode -eq 'CONSOLIDATED') {
+            $markers=[regex]::Matches($receipt.MigrationSnapshot,'(?m)^<!-- MTA (\{[^\r\n]+\}) -->\s*$')
+            $frozenOrigin=if ($markers.Count -eq 1) { $markers[0].Groups[1].Value | ConvertFrom-Json } else { $null }
+            $currentBasis=if ($register.Origin) { 'MTA' } else { 'EVIDENCIAS' }
+            if ($currentBasis -ne (Get-HarnessPlanningBasis $receipt) -or
+                ($register.Origin | ConvertTo-Json -Depth 30 -Compress) -cne ($frozenOrigin | ConvertTo-Json -Depth 30 -Compress)) {
+                throw 'Origem da proposta importada mudou no registro. Reavalie a base antes de retomar; nao reutilizar silenciosamente.'
+            }
+            $index=Get-IssueEvidenceIndex $Context $register $EvidenceIndexPath
+            $inputs=@(Get-HarnessPlanningEvidenceInputs $Context.Root $register $index)
+            if (($inputs | ConvertTo-Json -Depth 5 -Compress) -cne ($receipt.SourceEvidenceInputs | ConvertTo-Json -Depth 5 -Compress)) {
+                throw 'Entradas locais da proposta importada mudaram. Reavalie com a origem MTA quando aplicavel; nao reutilizar a proposta nem trocar sua base silenciosamente.'
+            }
+            if ($receipt.ContractSnapshot -cne [IO.File]::ReadAllText((Join-Path $Context.Root 'doc/especificacoes/planejamento-copilot.md')) -or
+                $receipt.PromptSha256 -cne (Get-FileHash -LiteralPath (Join-Path $Context.Root '.github/prompts/planejar-lotes.prompt.md')).Hash) {
+                throw 'Contrato/template da proposta importada difere do atual. Reavalie a proposta antes de preparar outro planejamento.'
+            }
+            Assert-HarnessPlanningEvidence $receipt $Context.Root
+            if ($ValidateOnly) { return }
+            return Get-HarnessPlanningRequestResult $receipt -Reused
+        }
         $run=Get-HarnessRegisteredMtaRun $register $Context.Root
         $basis=if ($run) { 'MTA' } else { 'EVIDENCIAS' }
         $sameBase=(Get-HarnessPlanningBasis $receipt) -eq $basis -and

@@ -1,5 +1,66 @@
 # Plano do agente: evolucao do harness
 
+## Exportacao/importacao de contextos - implementacao 2026-10-06
+
+Continuidade autorizada apos PR #9 integrado (main 4516916). Trabalho de evolucao
+na branch harness/exportacao-importacao. Ensaio corporativo de 10% da entrega 1
+permanece pendente; autorizacao para este incremento nao comprova aquele ensaio.
+engineering-harness-vscode.md e ferramentas/MCP continuam para depois.
+
+Entregar ZIP versionado em dois pontos: priorizacao concluida (com cadeia,
+registros, fichas e diagnostico necessario a continuidade) e plano/to-do de uma
+issue com evidencias consolidadas. Exportar conserva o estado e declara lacunas;
+nao concede GO. Reutilizar validadores de integridade, identidade e historico.
+
+Importar exige associacao explicita entre cada Source de origem e projeto local
+do workspace. Conservar originais byte a byte em importacoes/<PackageId>/original;
+materializar documentos locais derivados, com caminhos locais e ImportedFrom.
+Preservar origem MTA/RunId e rastrear RequestId. Recalcular somente hashes dos
+derivados, nunca dos originais. GO/aceite recebidos sao fatos de origem: verificar
+alcance local antes da execucao. Indexar registros locais apos importacao.
+
+Incrementos: (1) manifesto/ZIP e exportacao de plano consolidado; (2) importacao
+com mapeamento, preview, conflitos e reimportacao; (3) pacote de priorizacao com
+Previous/cobertura e passagem da ficha ao planejamento; (4) CLI/Run Task, guias,
+orientador e regressao. Cada incremento recebe teste de comportamento antes do
+codigo. Uma operacao de compartilhamento com menu exportar/importar.
+
+Aceite: duas raizes com espacos; plano recebido prepara implementacao sem MTA
+original; analise recebida permite continuar categoria e planejar uma issue;
+reimportacao identica nao sobrescreve edicoes locais; conflitos sao explicitos.
+ZIP adulterado, entrada duplicada, caminho absoluto/traversal, link/junction e
+versao desconhecida sao recusados antes de gravar destinos. Nao levar configuracao
+da maquina, caches, permissoes ou credenciais; arquivos da analise entram apenas
+no pacote de analise explicitamente escolhido. Pacote de plano e restrito ao recorte.
+
+Reversao: reverter scripts/contratos desta entrega preservando ZIPs e originais
+recebidos. Nao desfazer decisoes, apagar evidencias ou alterar aplicacoes.
+
+Resultado local: operacao implementada por HarnessTransfer e compartilhar-contexto,
+com ADR-0007, contrato, guias e skill comum do orientador alinhados. ZIP SchemaVersion=1;
+analise exige v4 concluida e MTA completo, plano exige LayoutVersion=2 CONSOLIDATED.
+SourceMap e obrigatorio. Importacao materializa destinos novos; nao mescla registros
+existentes ou pacotes incrementais. Mesmo ZIP/mapa reutiliza sem sobrescrever.
+Publicacao inclui marker/arquivos/diretorios sob lock; rollback remove somente os
+criados. Atualizacao de indice falha separadamente como PENDING, sem ocultar importacao.
+
+Retomada de proposta recebida compara origem, entradas e contrato/template sem
+abrir MTA original. Mudanca exige reavaliacao; novas analises/recortes MTA dependem
+de diagnostico completo. Revisoes anteriores mantem suas proprias bases. Os originais
+permanecem byte a byte; remapeamento e hashes novos pertencem apenas aos derivados.
+
+Validacao 2026-10-06: 20 scripts PASS em Windows PowerShell 5.1 (planejamento/CLI/
+evidencias/portabilidade/issues, implementacao/branch, priorizacao/categorias/
+progresso/incidentes, indice/registro/MTA externo, limpeza/workspace/caminhos,
+Run Tasks e pacote). Sintaxe PowerShell e git diff --check OK; 262 links locais
+verificados sem erro. Logs locais em .harness/tests/entrega2-20261006/.
+Revisao independente em tres rodadas; achados corrigidos e nenhum bloqueante
+residual no recorte final. Teste de pacote inclui duas raizes com espacos e
+artifactId diferente, dois projetos, Previous, origem alterada, hashes adulterados,
+caminho absoluto/traversal/duplicado, papel sem vinculo, versao desconhecida,
+symlink ZIP, preview/CLI, conflitos, idempotencia e falha antes da publicacao.
+Nao executado: ensaio corporativo humano de 10%, corretivas ou aceite de aplicacao.
+
 ## Categorias, planejamento por issue e portabilidade - proposta 2026-10-06
 
 Status: Entrega 1 implementada localmente apos autorizacao humana; validacao e

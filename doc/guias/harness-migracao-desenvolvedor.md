@@ -64,6 +64,7 @@ Veja [o roteiro manual e o formato das fichas](tools/priorizacao-issues.md#plane
 | Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Importe uma aplicacao externa no workspace. |
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
+| ZIP de analise ou plano recebido de um colega | [Compartilhar contextos](tools/compartilhamento-contextos.md): importar, associar Sources locais e continuar da etapa recebida. |
 | Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
 | Quero comparar oportunidades de uma categoria entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): categoria, fatia percentual por risco, repetibilidade e alcance, com recriacao ou avanco. |
