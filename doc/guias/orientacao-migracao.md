@@ -20,11 +20,13 @@ Ele responde com **uma proxima acao**, motivo, caminho/mensagem prontos e result
 a conferir. Voce executa as tarefas, escolhe prioridades, concede GO e aceita o
 resultado. Nao precisa conhecer os nomes dos campos internos para pedir ajuda.
 
-Para recuperar uma issue especifica ou conferir a base, o helper pode indicar a
-[CLI de consultas](tools/consultas-issues.md) e interpretar o JSON retornado por
-voce. Os perfis de orientacao continuam sem executar scripts; essas consultas
-ainda nao estao expostas por MCP. Paginas, truncamentos e origem precisam ser
-conferidos antes de usar a resposta como evidencia.
+Para recuperar uma issue ou conferir a base, configure as
+[consultas MCP](tools/consultas-issues.md#configurar-mcp-no-codex-e-no-copilot).
+O helper pode chamar as tres ferramentas de leitura diretamente, sem terminal
+geral. Sem MCP, continua pela leitura direta dos arquivos e pelo fluxo habitual
+de priorizacao/planejamento; a CLI e uma alternativa opcional para consulta pontual.
+Os perfis continuam sem executar tarefas/corretivas. Confira origem, paginas e
+truncamentos antes de usar a resposta como evidencia.
 
 Para um ZIP recebido, indique **Planejamento: compartilhar contexto** e associe
 os projetos locais. Depois informe ao orientador o ContextPath devolvido pela

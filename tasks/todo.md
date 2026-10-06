@@ -6,10 +6,15 @@
 - [x] Conferir checkout e fontes oficiais; registrar fronteiras de leitura e fases.
 - [x] Testar e implementar raizes permitidas no nucleo de leitura; selecao
   multi-projeto corrigida por teste RED/GREEN e oito regressoes PASS.
-- [ ] Implementar SDK/stdio, schemas restritos e subprocesso fixo via JSON stdin.
-- [ ] Validar discovery, chamadas, paridade, erros, Unicode, timeout/cancelamento.
-- [ ] Configurar clientes e alinhar fases, prompts, helpers, skill e guias.
-- [ ] Rodar regressao, audit de dependencias, revisao independente e salvar commits.
+- [x] Implementar SDK/stdio, schemas restritos e subprocesso fixo via JSON stdin.
+- [x] Validar discovery, chamadas, paridade, erros, caminho Unicode e espacos,
+  timeout/cancelamento e espera pelo termino do filho no Node20.20.2.
+- [x] Configurar clientes localmente e alinhar fases, prompts, helpers, skill e guias;
+  Codex CLI reconhece configuracao; 18 perfis/prompts e 409 links conferidos.
+- [x] Comprovar preparadores sem Node/npm/npx e sem configuracao MCP; agentes
+  continuam pelo fluxo anterior, sem exigir consultas manuais/JSON copiado.
+- [x] Rodar regressao e revisao independente sem bloqueadores; npm audit sem
+  vulnerabilidades. Incrementos salvos em commits locais na branch de trabalho.
 - [ ] Homologar descoberta e uso pelos agentes no cliente da maquina de trabalho.
 
 ## Corretiva deploy Windows legado - 2026-10-06
@@ -46,7 +51,8 @@
 - [x] Alinhar guias/prompts/helper e avaliar adaptador MCP nas fontes oficiais.
 - [x] Executar regressao dirigida e revisao independente: 10 scripts PASS,
   376 links, sintaxe/skill/diff OK; salvar incrementos em commits locais.
-- [ ] Proximo incremento: implementar e homologar adaptador MCP, conforme avaliacao.
+- [x] Implementar adaptador MCP no incremento acima; homologacao nativa corporativa
+  permanece separada do teste de integracao via SDK.
 - [ ] Comparar no cliente a mesma fatia de 10%: omissoes, tempo e tokens reais.
 
 ## Revisao de documentacao e orientacao - 2026-10-06

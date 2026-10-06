@@ -36,6 +36,26 @@ Sem modificar configuracao pessoal global ou executar MTA/build/deploy de aplica
 Reversao: remover configuracao do servidor e reverter commits deste incremento;
 CLI e contexto existentes continuam utilizaveis. Ensaio real de 10% permanece.
 
+Aceite reforcado pelo humano: MCP e opcional. Sem MCP/Node, priorizacao e
+planejamento da implementacao por issue devem continuar como antes, pelo agente
+lendo os arquivos, sem exigir consultas manuais, copiar JSON ou instalar runtime.
+Testar preparadores com Node/npm/npx ausentes do PATH e conferir a orientacao.
+
+Resultado local: SDK stdio com 3 ferramentas, instalacao npm local e configurador
+Codex/Copilot preservando servidores existentes. Helpers continuam read-only e
+prompts mantem capacidades anteriores, acrescidas somente das consultas. Sem MCP,
+priorizacao e plano/todo por issue seguem pelos arquivos; export/import preservados.
+
+Verificado: suite MCP (schemas, configuracao, lifecycle e integracao real) no
+Node20.20.2/PowerShell5.1, incluindo caminho Unicode; AllowedRoots e oito scripts
+de regressao de consultas/priorizacao/planejamento/pacotes PASS. Prova adicional
+Test-PlanningWithoutMcp remove Node/npm/npx do PATH: categorias e planejamento
+por issue PASS. Codex CLI le harnessIssues da configuracao local; 18 perfis/prompts,
+409 links e skill validados. Audit npm: 0 vulnerabilidades. Revisoes independentes
+de codigo/documentacao sem bloqueadores apos corretivas de selecao e encerramento.
+Sem MTA, build ou JBoss reais. Descoberta/delegacao no cliente corporativo e
+comparacao de acerto/tempo/tokens em 10% continuam pendentes, sem alegar economia.
+
 ## Corretiva: caminho do WAR na CLI Windows legada - 2026-10-06
 
 Evolucao do harness. Relato humano: deploy de SIMTR-api no EAP 7.0 iniciado em

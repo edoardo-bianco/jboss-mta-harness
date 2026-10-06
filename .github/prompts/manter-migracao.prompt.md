@@ -3,7 +3,7 @@ name: manter-migracao
 description: Atualiza o registro local de issues preservando decisoes humanas, sem planejar ou executar corretivas.
 argument-hint: Use o contexto preparado; indique observacoes, evidencias ou documento recebido.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles']
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor
@@ -11,6 +11,17 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 Objetivo e observacoes desta atualizacao:
 
 ## Trabalho solicitado
+
+MCP e opcional. Se indisponivel, execute esta etapa pelo fluxo existente, lendo
+diretamente contexto, evidencias e codigo com as ferramentas habituais autorizadas.
+Nao exija instalar Node/MCP, executar consultas manuais ou copiar JSON para continuar.
+
+Purpose=migration-register nao e entrada das consultas MCP. Se houver recibo
+de priorizacao/planejamento explicitamente vinculado e pertinente a mesma base,
+harnessIssues pode recuperar evidencias dele, conforme o
+[guia de consultas](../../doc/guias/tools/consultas-issues.md#consultas-por-etapa).
+Sem essa base ou sem MCP, leia os arquivos diretamente. Nao crie outro contexto
+para consultar nem trate retorno como reconciliacao executada/aceite.
 
 Leia o contexto ao final, ContextPath, MigrationPath e MigrationSourcePath.
 Confira Purpose=migration-register e MigrationPath iguais no recibo e na selecao;

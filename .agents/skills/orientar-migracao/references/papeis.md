@@ -2,8 +2,9 @@
 
 Leia a [skill comum](../SKILL.md) e somente o papel solicitado abaixo.
 A skill define leitura, escolha da proxima etapa e limites de retomada.
-Guias concentram procedimentos. Todos respondem no chat, sem executar operacoes
-ou gravar documentos; modelos e configuracao pessoal permanecem inalterados.
+Guias concentram procedimentos. Todos respondem no chat, sem executar tarefas
+ou gravar documentos. As tres consultas MCP de leitura seguem a skill comum
+e o guia por etapa; modelos e configuracao pessoal permanecem inalterados.
 
 ## migracao_helper
 

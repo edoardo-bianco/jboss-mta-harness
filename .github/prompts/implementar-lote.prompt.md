@@ -3,7 +3,7 @@ name: implementar-lote
 description: Implementa somente o lote com GO humano vigente e registra verificacoes reais.
 argument-hint: Use o prompt de implementacao preparado para o plano/to-do aprovados.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'read/problems', 'search/changes', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'search/usages', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', 'execute/getTerminalOutput']
+tools: ['agent', 'read/readFile', 'read/problems', 'search/changes', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'search/usages', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', 'execute/getTerminalOutput', "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor
@@ -11,6 +11,17 @@ tools: ['agent', 'read/readFile', 'read/problems', 'search/changes', 'search/lis
 Observacoes para a execucao do lote aprovado:
 
 ## Trabalho solicitado
+
+MCP e opcional. Se indisponivel, execute esta etapa pelo fluxo existente, lendo
+diretamente contexto, evidencias e codigo com as ferramentas habituais autorizadas.
+Nao exija instalar Node/MCP, executar consultas manuais ou copiar JSON para continuar.
+
+Quando MCP harnessIssues estiver exposto, use auditar_base/obter_issue com o
+ContextPath do planejamento vinculado a esta etapa, conforme o
+[guia de consultas](../../doc/guias/tools/consultas-issues.md#consultas-por-etapa).
+As respostas recuperam evidencias do diagnostico; nao comprovam codigo corrigido,
+GO ou aceite. Confira identidade, paginas/hashes e codigo local. Sem MCP,
+continue pelos arquivos e permissoes ja autorizadas; nao amplie poderes de helpers.
 
 Leia o bloco JSON final e ContextPath, PlanPath e TodoPath integralmente.
 PlanSnapshot/TodoSnapshot consolidam os documentos no preparo; confira os arquivos

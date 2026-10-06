@@ -91,20 +91,28 @@ Inventario/hashes antes e depois demonstram leitura sem escrita; consulta sobre
 caminho inexistente nao cria .harness. Comparacao de bytes em fixture mede apenas
 volume de resposta. Economia de tokens/acerto exige ensaio no cliente.
 
-MCP deve apenas adaptar este contrato, sem duplicar parser, armazenar estado ou
-ampliar permissoes. Avaliacao de transporte/runtime pertence a esta entrega;
-instalacao e homologacao do adaptador permanecem em incremento proprio.
+MCP adapta este contrato sem duplicar o parser ou armazenar resultados entre
+chamadas. O nucleo continua disponivel por CLI sem Node. Helpers ganham somente
+as tres consultas de leitura; execucao, GO e aceite continuam etapas separadas.
+Disponibilidade de MCP/Node nao e precondicao de priorizacao ou planejamento da
+implementacao. Sem eles, agentes seguem pelos arquivos e ferramentas anteriores,
+sem exigir consultas manuais/JSON copiado. Planos/todos por issue e exportacao/
+importacao existentes sao preservados. Test-PlanningWithoutMcp cobre preparadores
+de categorias e planejamento por issue sem Node/npm/npx no PATH.
 
 <a id="avaliacao-mcp-2026-10-06"></a>
 
 ## Avaliacao MCP - 2026-10-06
 
-Proposta para o proximo incremento: adaptador local stdio com SDK oficial
+Decisao implementada apos escolha humana: adaptador local stdio com SDK oficial
 TypeScript e subprocesso Windows PowerShell 5.1 chamando o mesmo nucleo. O SDK
 resolve o protocolo; regras, hashes e parsers permanecem em HarnessIssueQuery.
 TypeScript consta como Tier 1 no [catalogo oficial de SDKs](https://modelcontextprotocol.io/docs/2026-07-28/sdk).
-A escolha de SDK/versao/runtime deve ser fixada e homologada nos clientes ao
-implementar; nenhum pacote Node/Python/.NET adicional e necessario nesta entrega.
+SDK servidor/cliente 2.3.1 e Zod 4.6.5 fixados no package-lock, com Node >=20
+confirmado pelo desenvolvedor. Dependencias ficam em mcp/issues; sem instalacao
+global, Python, endpoint HTTP ou alteracao de Node/PATH da maquina.
+npm ci --ignore-scripts reproduz a instalacao. A configuracao pode apontar
+Node20 separado do Node18.
 
 | Alternativa | Avaliacao para este harness |
 | --- | --- |
@@ -115,27 +123,47 @@ implementar; nenhum pacote Node/Python/.NET adicional e necessario nesta entrega
 
 O transporte stdio e iniciado pelo cliente e reserva stdout para mensagens do
 protocolo, com logs em stderr; o adaptador deve distinguir esse canal do JSON
-produzido pela CLI. A proposta de stdio decorre do uso local, nao de medicao de
+produzido pelo nucleo PowerShell. A escolha de stdio decorre do uso local, nao de medicao de
 desempenho. [Especificacao stdio](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/stdio).
 
-Expor exatamente auditar_base, listar_issues e obter_issue, cada uma com schema
+Expostos exatamente auditar_base, listar_issues e obter_issue, cada uma com schema
 de entrada restrito e outputSchema do envelope. Mapear o resultado para
 structuredContent e texto JSON de compatibilidade; erros de dominio continuam
 com Code/Message e isError, separados dos erros de protocolo. Paginas sao
 argumentos da consulta; tools/list lista as tres ferramentas, nao as issues.
 [Contrato MCP de tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools).
 
-Marcar a natureza de leitura nas annotations suportadas pelo SDK/versao adotados,
-sem tratar essa declaracao como controle de acesso. Root e raizes permitidas
-devem ser configuracao local do servidor; nao permitir que argumentos ampliem
-essas raizes. O adaptador precisa validar tambem os caminhos internos do recibo,
-executar sem shell/Invoke-Expression, impor timeout/cancelamento e nao elevar
-permissoes. O nucleo atual aceita caminhos locais explicitos e **nao e um sandbox
-de raizes**. Por isso nao basta publicar a CLI como servidor.
+Annotations declaram leitura/idempotencia e ausencia de escrita/acesso remoto;
+nao sao controle de acesso. config/mcp.local.json define root, allowedRoots e
+timeoutMs (1000..120000, padrao 60000). HARNESS_MCP_CONFIG permite selecionar outro
+arquivo pelo processo cliente; argumentos das tools nao podem mudar configuracao.
+O padrao permite somente a raiz do harness. O nucleo recebe AllowedRoots apenas
+pelo adaptador e confere caminhos operacionais internos antes do acesso. Escolha
+multi-projeto e lexical; Source nao selecionado nao exige permissao. Referencias
+historicas e candidatos de codigo nao sao abertos.
 
-Antes de disponibilizar MCP: fixar SDK/versoes compativeis com Codex/Copilot reais,
-validar Unicode/espacos, quoting e erros do subprocesso, comparar CLI/MCP para os
-mesmos recibos, testar raizes permitidas e cancelamento, conferir descoberta
-nativa e o ensaio de 10%. Nao escrever configuracao MCP nos clientes nem ampliar
-tools dos helpers ate a entrega do adaptador. engineering-harness-vscode.md
+O processo fixo Windows PowerShell 5.1 recebe JSON por stdin, sem shell,
+Invoke-Expression, perfil ou alteracao de ExecutionPolicy. PSModulePath do filho
+usa seus modulos nativos para evitar herdar modulos incompativeis do PowerShell7.
+Entrada limitada a 128 KiB no bridge; resposta do nucleo a 256 KiB; stderr a 1024
+caracteres. O MCP fornece envelope em structuredContent e texto de compatibilidade.
+Schemas recusam parametros extras e limites invalidos antes de executar o nucleo.
+
+No maximo duas consultas simultaneas. TIMEOUT/CANCELLED solicitam encerramento
+do filho e aguardam close antes de liberar o slot. Fechamento normal do cliente,
+SIGINT/SIGTERM abortam e aguardam consultas; termino forcado do pai pode impedir
+essa limpeza. Raizes, UNC/junctions e hashes sao verificacoes da aplicacao,
+**nao um sandbox do sistema operacional** contra troca concorrente de caminhos.
+Erro nao causa fallback para outra origem, preparador ou permissao mais ampla.
+
+Configurador local preserva outros servidores, e idempotente e recusa entradas
+harnessIssues conflitantes antes de gravar. Nao altera configuracao pessoal global.
+Templates atuais e skill permitem somente as tres consultas; recibos/prompts
+historicos permanecem intactos. Ver [instalacao e uso por etapa](../guias/tools/consultas-issues.md#configurar-mcp-no-codex-e-no-copilot).
+
+Validacao local: Node20.20.2, cliente SDK por stdio, discovery, schemas, chamadas,
+paridade com nucleo, Unicode/espacos, contextos MTA/consolidado/importado/manual,
+hashes, raizes, cancelamento, timeout, configuracao e inventario sem escrita.
+Homologacao da descoberta/delegacao nas interfaces Codex/Copilot da maquina de
+trabalho e ensaio real de 10% continuam humanos e pendentes. engineering-harness-vscode.md
 continua fora deste escopo.
