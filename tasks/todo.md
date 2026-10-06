@@ -1,5 +1,15 @@
 # To-do do agente: evolucao do harness
 
+## Corretiva prioritaria EAP 7.0 - 2026-10-06
+
+- [x] Preservar consultas em andamento e criar checkout/branch da corretiva.
+- [x] Localizar recusa de Version 7.0 na opcao eap71.
+- [x] Reproduzir por teste e ajustar deteccao/identidade sem aceitar outras versoes.
+- [x] Conferir CLI 7.0, start/status/stop, menu e documentacao.
+- [x] Rodar regressao JBoss, revisar e salvar commit isolado: 10 scripts PASS;
+  sintaxe/diff conferidos e revisao independente sem bloqueadores.
+- [ ] Validar start/estado/stop no EAP 7.0 real da maquina de trabalho.
+
 ## Revisao de documentacao e orientacao - 2026-10-06
 
 - [x] Conferir raiz, branch, HEAD e estado limpo; retomar eead84b.
