@@ -1,5 +1,15 @@
 # To-do do agente: evolucao do harness
 
+## Corretiva deploy Windows legado - 2026-10-06
+
+- [x] Preservar consultas e criar branch isolada da main com PR #11 integrado.
+- [x] Localizar tratamento de caminho absoluto na CLI antiga.
+- [x] Reproduzir falha e corrigir deploy/rollback com caminho nativo e espacos.
+- [x] Conferir parser real sem servidor e executar regressao dirigida: 4 scripts PASS.
+- [x] Alinhar guia e revisar: sintaxe/diff OK, revisao independente sem bloqueadores.
+- [x] Salvar commit isolado da corretiva.
+- [ ] Validar deploy SIMTR-api no EAP 7.0 da maquina de trabalho.
+
 ## Corretiva prioritaria EAP 7.0 - 2026-10-06
 
 - [x] Preservar consultas em andamento e criar checkout/branch da corretiva.

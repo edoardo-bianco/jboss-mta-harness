@@ -251,6 +251,13 @@ e o recibo antes de continuar; nao equivale a sucesso parcial confirmado.
 
 ### Deploy e rollback
 
+No Windows, o harness envia a copia da release a CLI com caminho absoluto nativo
+(`C:\...\arquivo.war`), entre aspas para preservar espacos. A CLI antiga do EAP
+7.0 interpreta `C:/...` como relativo e pode formar `JBossHome\C:\...`, causando
+`Path ... doesn't exist` antes do envio do artefato. Esse erro exige atualizar
+o harness com a corretiva de caminho; nao e causado pelo modo debug. O aviso
+`CLI is running in a non-modular environment` isoladamente nao identifica essa falha.
+
 1. Construa a aplicacao pela tarefa Maven e confira seu resultado.
 2. Execute **Servidor: iniciar JBoss** (normal ou debug) e **Servidor: consultar estado JBoss**; espere RUNNING.
 3. Execute **Aplicacao: deploy no JBoss**, escolha EAP e aplicacao, confirme/selecione o WAR/EAR encontrado (ou informe caminho manual) e um **nome estavel**, por exemplo

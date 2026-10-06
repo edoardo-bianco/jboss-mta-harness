@@ -1,5 +1,45 @@
 # Plano do agente: evolucao do harness
 
+## Corretiva: caminho do WAR na CLI Windows legada - 2026-10-06
+
+Evolucao do harness. Relato humano: deploy de SIMTR-api no EAP 7.0 iniciado em
+debug falha com caminho JBossHome + caminho absoluto da release. RunId informado
+673917f1dbdf4c6a9573da0078fcfe2c. O aviso de CLI nao modular acompanha a falha,
+mas a excecao aponta leitura de arquivo, antes do envio do WAR ao servidor.
+
+Base origin/main 4ded353 (PR #11 integrado), branch harness/correcao-deploy-windows
+no checkout .harness/worktrees/deploy-path. Consultas incompletas preservadas na
+branch original. Skills de diagnostico, testes e revisao de codigo aplicadas.
+
+Causa localizada: Invoke-HarnessJbossRelease converte o snapshot de C:\... para
+C:/...; WindowsFilenameTabCompleter da CLI upstream 2.0.10.Final reconhece raiz
+por :\ ou prefixo UNC. O formato com / recebe o diretorio atual como prefixo.
+O parser FileSystemPathArgument preserva barras invertidas no Windows.
+
+Plano: reproduzir o caminho duplicado em teste, preservar o caminho nativo na
+CLI para deploy/rollback e conferir espacos, hashes, historico e erros. Ensaiar
+o parser Java real sem conexao a servidor, incluindo CLI legada e locais 7.1/7.4.
+Alinhar guia e revisar antes do commit. Reversao: reverter o commit desta
+corretiva; nao alterar instalacao, aplicacao, configuracao ou releases anteriores.
+Deploy real do SIMTR permanece para validacao na maquina de trabalho.
+
+Resultado: preservado o caminho nativo ja normalizado, entre aspas, no comando
+comum a deploy e rollback. Sem alterar launcher, debug, autenticacao, hashes,
+lock, verificacao remota ou protecao de deployments nao gerenciados.
+
+Validacao: Test-Jboss reproduziu JBossHome\C:/... antes da mudanca e passou depois,
+incluindo espacos, substituicao, rollback e protecoes. Test-JbossArtifacts,
+Test-JbossRuntime e Test-JbossAllServers tambem PASS no Windows PowerShell 5.1.
+Parser offline real: upstream 2.0.10.Final rejeita o formato anterior e preserva
+o nativo; CLIs das instalacoes locais EAP 7.1/7.4 preservam o nativo. A prova
+exercitou Invoke-JbossJava (quoting Windows), FileSystemPathArgument e leitura
+da fixture, sem conectar ou alterar servidor. EAP 7.0 instalado nao disponivel
+nesta maquina: upstream representativo nao comprova deploy real SIMTR.
+Fontes/prova nao versionadas: .harness/tests/cli-path-probe/ neste checkout.
+Referencia de origem: [WindowsFilenameTabCompleter 2.0.10.Final](https://github.com/wildfly/wildfly-core/blob/2.0.10.Final/cli/src/main/java/org/jboss/as/cli/handlers/WindowsFilenameTabCompleter.java).
+Sintaxe PowerShell e git diff --check aprovados; revisao independente estatica
+sem bloqueadores. Guia atualizado com diagnostico e comportamento corrigido.
+
 ## Corretiva prioritaria: EAP 7.0 na opcao eap71 - 2026-10-06
 
 Pedido humano: a instalacao local usada ha anos e j-boss-eap-7.0, configurada em

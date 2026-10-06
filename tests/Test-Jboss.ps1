@@ -3,7 +3,7 @@ $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 Import-Module (Join-Path $root 'scripts/HarnessJboss.psm1') -Force -DisableNameChecking
 function Assert($condition,$message) { if (-not $condition) { throw $message } }
-$area=Join-Path $root ('.harness/tests/jboss-'+[guid]::NewGuid().ToString('N'))
+$area=Join-Path $root ('.harness/tests/jboss com espacos-'+[guid]::NewGuid().ToString('N'))
 $null=[IO.Directory]::CreateDirectory($area)
 $server=[pscustomobject]@{Eap='eap74'; Home='C:\fixture-eap74'; Base='C:\fixture-eap74\standalone'; State=$area; Settings=[pscustomobject]@{timeoutSeconds=10;standaloneConfig='standalone.xml'}}
 $context=[pscustomobject]@{Root=$root; Active=[pscustomobject]@{name='app';label='app';path='C:\fixture-app'}}
@@ -18,7 +18,12 @@ $module=Get-Module HarnessJboss
     function script:Invoke-JbossCli { param($Server,$Command)
         if ($script:failDeploy) { throw 'Falha simulada de deploy' }
         if ($Command -match '^deploy "([^"]+)" --name=([^ ]+) --runtime-name=([^ ]+)') {
-            $script:deployed[$Matches[2]]=[pscustomobject]@{Status='OK';Hash=(Get-FileHash -LiteralPath $Matches[1] -Algorithm SHA1).Hash;RuntimeName=$Matches[3]}
+            $path=$Matches[1]; $name=$Matches[2]; $runtimeName=$Matches[3]
+            # Mesmo criterio de raiz de WindowsFilenameTabCompleter da CLI antiga:
+            # C:/... recebe Home como prefixo, embora o .NET aceite esse formato.
+            if (-not $path.Contains(':\') -and -not $path.StartsWith('\\')) { $path=$Server.Home+'\'+$path }
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Path $path doesn't exist." }
+            $script:deployed[$name]=[pscustomobject]@{Status='OK';Hash=(Get-FileHash -LiteralPath $path -Algorithm SHA1).Hash;RuntimeName=$runtimeName}
         } else { throw "Comando inesperado: $Command" }
     }
 }
@@ -31,7 +36,7 @@ function New-War([string]$Name,[string]$Content) {
 }
 $v1=New-War 'v1' 'release 1'; $v2=New-War 'v2' 'release 2'
 $first=Invoke-HarnessJbossRelease $context $server Deploy $v1 'app.war'
-Assert ($first.Status -eq 'SUCCEEDED') 'Primeiro deploy falhou.'
+Assert ($first.Status -eq 'SUCCEEDED') ('Primeiro deploy falhou: '+$first.Error)
 $second=Invoke-HarnessJbossRelease $context $server Deploy $v2 'app.war'
 Assert ($second.Status -eq 'SUCCEEDED' -and $second.PreviousRelease -eq $first.RunId) 'Substituicao perdeu versao anterior.'
 $rollback=Invoke-HarnessJbossRelease $context $server Rollback -DeploymentName 'app.war' -ReleaseId $first.RunId
