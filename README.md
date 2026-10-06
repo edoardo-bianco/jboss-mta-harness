@@ -55,7 +55,8 @@ retomada.
 **O agente de orientacao e opcional.** Para trabalhar sem helper, use as Run Tasks
 e a secao **Uso** do guia de cada etapa. Na priorizacao, a tarefa prepara o prompt;
 voce pode executa-lo diretamente no Codex/Copilot para produzir o relatorio.
-Depois, siga as [fichas e o caminho manual](doc/guias/tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao)
+Escolha a categoria na priorizacao: mandatory, optional, potential ou outra recebida,
+com continuidade independente. Depois, siga as [fichas e o caminho manual](doc/guias/tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao)
 para investigar, planejar e implementar, com as mesmas revisoes e verificacoes.
 Quem ja sabe o que corrigir pode escolher a issue no registro e ir direto a Planejar.
 

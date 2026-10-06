@@ -37,12 +37,22 @@ function Get-HarnessCleanupPaths {
         if (-not (Test-Path -LiteralPath $base)) { continue }
         # Validar antes de enumerar recursivamente: nunca seguir junctions.
         Assert-CleanupTree $base $state
-        if ($All) { $paths.Add($base); continue }
+        if ($All) {
+            $issueProjects=@(if ($area -eq 'planning') { Get-ChildItem -LiteralPath $base -Directory | Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'issues') } })
+            if (-not $issueProjects.Count) { $paths.Add($base); continue }
+            # Dossies de issue incluem evidencias oficiais; nao sao execucoes descartaveis.
+            foreach ($project in Get-ChildItem -LiteralPath $base -Directory) {
+                if ($project.FullName -notin @($issueProjects.FullName)) { $paths.Add($project.FullName); continue }
+                foreach ($child in Get-ChildItem -LiteralPath $project.FullName -Directory | Where-Object Name -NE 'issues') { $paths.Add($child.FullName) }
+            }
+            continue
+        }
         $receiptName = switch ($area) { 'runs' {'manifest.json'} 'builds' {'result.json'} 'planning' {'context.json'} }
         $depth = if ($area -eq 'planning') { 3 } else { 2 }
         $folders = @($base)
         for ($i=0; $i -lt $depth; $i++) { $folders = @($folders | ForEach-Object { Get-ChildItem -LiteralPath $_ -Directory -Force | Select-Object -ExpandProperty FullName }) }
         foreach ($folder in $folders) {
+            if ($area -eq 'planning' -and (Split-Path (Split-Path $folder -Parent) -Leaf) -eq 'issues') { continue }
             $receipt = Join-Path $folder $receiptName
             # Indices externos identificam o projeto local sem consultar o destino.
             if ($area -eq 'runs' -and (Test-Path -LiteralPath (Join-Path $folder 'location.json') -PathType Leaf)) {
@@ -88,7 +98,7 @@ function Invoke-HarnessCleanup {
         else { Write-Host 'Serao removidos somente caminhos locais em .harness (execucoes, indices MTA, prompts, planos e to-dos):' }
         foreach ($path in $paths) { Write-Host $path }
         Write-Host 'Encerre agentes que estejam usando estes arquivos. Configuracao ativa, fontes, templates e backups do workspace serao preservados.'
-        Write-Host 'MTA externo, migracao.md, evidencias e coletas Sonar serao preservados.'
+        Write-Host 'MTA externo, migracao.md, evidencias, dossies por issue e coletas Sonar serao preservados.'
         if (-not $PSBoundParameters.ContainsKey('ConfirmText')) { $ConfirmText = Read-Host 'Digite LIMPAR para confirmar a exclusao; Enter ou outro texto cancela' }
         if ($ConfirmText -cne 'LIMPAR') { Write-Host 'Limpeza cancelada; historico preservado.'; return }
         # Revalidar todos os destinos antes da primeira remocao, ainda sob os locks.

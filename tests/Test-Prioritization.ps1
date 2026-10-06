@@ -117,7 +117,7 @@ Assert ($conflictReceipt.Projects[0].Mta -eq $null -and ($conflictReceipt.Projec
 # CLI real, workspace escolhido, JSON e editor simulado, sem agente ou ferramentas externas.
 $scripts = Join-Path $fixture 'scripts'
 $null = [IO.Directory]::CreateDirectory($scripts)
-foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessPrioritization.psm1','HarnessPrioritizationState.ps1','HarnessPrioritizationEvidence.ps1','preparar-priorizacao.ps1')) { Copy-Item (Join-Path $root ('scripts/' + $name)) $scripts }
+foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessIssuePlanning.ps1','HarnessPrioritizationEvidence.ps1','HarnessPrioritization.psm1','HarnessPrioritizationState.ps1','HarnessPrioritizationEvidence.ps1','preparar-priorizacao.ps1')) { Copy-Item (Join-Path $root ('scripts/' + $name)) $scripts }
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = $projects; $config.activeProject = 'app-a'
 Write-HarnessJson $context.ConfigPath $config

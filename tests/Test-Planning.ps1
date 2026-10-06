@@ -182,7 +182,7 @@ Write-HarnessJson $resultPath $savedResult
 # Entrada real em fixture: ferramentas de build/MTA do config nao existem.
 $scripts = Join-Path $fixture 'scripts'
 $null = New-Item -ItemType Directory -Path $scripts -Force
-foreach ($name in @('Harness.psm1','HarnessGit.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','preparar-planejamento.ps1')) {
+foreach ($name in @('Harness.psm1','HarnessGit.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessIssuePlanning.ps1','HarnessPrioritizationEvidence.ps1','preparar-planejamento.ps1')) {
     Copy-Item -LiteralPath (Join-Path $root "scripts/$name") -Destination (Join-Path $scripts $name)
 }
 $entry = Join-Path $scripts 'preparar-planejamento.ps1'

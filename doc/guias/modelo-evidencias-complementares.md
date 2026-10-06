@@ -8,7 +8,11 @@ html:
 # Evidencias do projeto
 
 Objetivo: fornecer dados pertinentes ao registro e ao planejamento da migracao.
-Use como LEIA-ME.md; a tarefa abre o indice em .harness/projetos/<projeto>/evidencias/.
+Use como LEIA-ME.md. Com uma issue escolhida, a tarefa abre o indice em
+`.harness/planning/<artifactId>/issues/<issue>/evidencias/`; sem escolha, conserva
+o indice geral em `.harness/projetos/<projeto>/evidencias/`. Preserve o marcador
+de identidade criado pela tarefa. A primeira coluna pode conter caminho relativo
+ou link Markdown para a ficha-base e anexos. Links do registro tambem sao lidos.
 Pode ser usado desde o primeiro plano, sem lote anterior obrigatorio.
 
 | Arquivo relativo | Relacao com a correcao |
@@ -25,3 +29,5 @@ Reconciliar separadamente exige um motivo concreto, como escolhas contraditorias
 troca da origem MTA. Preserve arquivos ja referenciados; novos resultados podem usar
 nomes distintos nesta mesma pasta.
 Indices antigos continuam aceitos por EvidenceIndexPath.
+O preparo copia as entradas por solicitacao: acrescente novos anexos ao indice
+editavel da issue e use Planejamento: planejar. Nao altere copias consolidadas.

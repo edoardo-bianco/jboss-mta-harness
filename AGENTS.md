@@ -8,6 +8,8 @@ Para identidade do projeto e Git informativo, siga a
 o controle de branches da ADR-0003.
 Para a entrada unica de planejamento orientada pelo registro, siga a
 [ADR-0005](doc/adr/0005-planejamento-orientado-pelo-registro.md).
+Para categorias e dossies padronizados por issue, siga a
+[ADR-0006](doc/adr/0006-categorias-e-dossie-por-issue.md).
 
 - Evolucao do harness inclui scripts, prompts, preparacao de contexto, Run Tasks,
   configuracao, testes e documentacao. Use `tasks/plan.md` e `tasks/todo.md`.
@@ -43,12 +45,23 @@ Para a entrada unica de planejamento orientada pelo registro, siga a
   anteriores por Source/ID (AnalyzedIssues), com ou sem proposta. Cada examinada
   recebe linha com posicao ou motivo e ficha de evidencias/referencias/roteiro
   para planejamento e corretiva manual. Mencao/sobreposicao nao comprova exame.
-  Seu contexto fica em `.harness/priorizacao/`; escreve apenas `RankingPath`, sem
+  Categoria escolhida separa as sequencias (mandatory, optional, potential ou
+  outra recebida). Recibos v2/v3 permanecem mandatory; novos v4 declaram Category.
+  Seu contexto fica em `.harness/priorizacao/`; escreve `RankingPath` e as fichas
+  das examinadas em `FichaPaths` por Source/ID, sem
   planos/to-dos, alteracao dos registros ou GO. Depois da escolha humana, segue
   planejamento de um lote. Helpers so orientam/revisam no chat. Siga o contrato.
 - Migracao usa `PlanPath` e `TodoPath` do contexto selecionado, sob
   `.harness/planning/`, na pasta da solicitacao identificada pelo recibo. Nunca use `tasks/` do harness
   para corretivas da aplicacao, nem altere o harness como parte de um lote.
+- Novos contextos LayoutVersion=2 separam projeto/issue e usam nomes identificaveis
+  para ficha/contexto/plan/todo; preserve nomes e recibos legados. Ficha e anexos
+  entram no plano da issue; outra issue/projeto mantem documentos proprios.
+  EvidenceMode=CONSOLIDATED valida as copias em Consolidated.Files, sem exigir
+  acesso ao MTA original. PlanningBasis, MtaOrigin/RunId e hashes preservam origem;
+  Source atual ainda exige conferencia de conteudo. Nao aplicar fallback silencioso
+  aos recibos antigos nem inferir resolucao MTA sem comparacao. Limpeza preserva
+  os dossies em planning/<projeto>/issues, inclusive fichas e anexos oficiais.
 - A entrada habitual e `Planejamento: planejar`: cria, retoma ou atualiza a proposta
   a partir do registro. Nao exigir selecao repetida de operacao/projeto/MTA nem
   copiar novamente escolhas para o prompt. Registro ausente direciona a

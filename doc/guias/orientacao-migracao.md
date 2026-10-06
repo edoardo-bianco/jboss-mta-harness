@@ -117,6 +117,15 @@ Veja o [procedimento de planejamento e execucao](tools/planejamento-migracao.md#
 
 ### Continuar manualmente a partir de uma ficha
 
+Pode ser outro colega quem implementa. O orientador recupera a ficha e os anexos
+do projeto/issue, confere se existe plano/to-do e indica a etapa que falta.
+Os documentos seguem [estrutura padronizada e dossie por issue](tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas).
+Com somente analise, orienta elaborar o plano; com proposta, revisar GO; com GO,
+seguir execucao manual ou por agente de codificacao conforme a escolha humana.
+O orientador continua leitor. Contexto consolidado dispensa MTA original para
+implementar, mas exige conferir o codigo local. Exportacao/importacao e remapeamento
+automaticos ainda sao trabalho futuro.
+
 O helper e opcional e tambem orienta trabalho manual. Diga, por exemplo:
 
 ```text

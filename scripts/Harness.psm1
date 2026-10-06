@@ -504,6 +504,101 @@ function Get-HarnessProjectFolder {
     $label + '__' + (Get-HarnessProjectKey $Project.name)
 }
 
+function Get-HarnessIssueProjectPaths {
+    param([string]$Root, $Project)
+    $source=Resolve-HarnessPath $Project.path $Root
+    $planning=Resolve-HarnessPath (Join-Path $Root '.harness/planning') $Root
+    $matches=@(if (Test-Path -LiteralPath $planning) {
+        foreach ($folder in Get-ChildItem -LiteralPath $planning -Directory) {
+            $identityPath=Resolve-HarnessPath (Join-Path $folder.FullName 'issues/project.json') $Root
+            if (-not (Test-Path -LiteralPath $identityPath -PathType Leaf)) { continue }
+            $identity=Get-Content -LiteralPath $identityPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            if ((Resolve-HarnessPath $identity.Source $Root) -ieq $source) {
+                [pscustomobject]@{Folder=(Split-Path $identityPath -Parent);Name=$folder.Name;ArtifactId=$identity.ArtifactId;IdentityPath=$identityPath}
+            }
+        }
+    })
+    if ($matches.Count -gt 1) { throw 'Mais de uma pasta de issues para o mesmo Source. Confira a identidade.' }
+    if ($matches.Count -eq 1) { return $matches[0] } # Nome observado no primeiro preparo e historico.
+    $artifactId=$null; $reader=$null
+    $pom=Join-Path $Project.path 'pom.xml'
+    if (Test-Path -LiteralPath $pom -PathType Leaf) {
+        try {
+            $settings=New-Object Xml.XmlReaderSettings
+            $settings.DtdProcessing=[Xml.DtdProcessing]::Prohibit; $settings.XmlResolver=$null
+            $reader=[Xml.XmlReader]::Create($pom,$settings)
+            $xml=New-Object Xml.XmlDocument; $xml.XmlResolver=$null; $xml.Load($reader)
+            $node=$xml.SelectSingleNode("/*[local-name()='project']/*[local-name()='artifactId']")
+            if ($node) { $artifactId=$node.InnerText.Trim() }
+        } finally { if ($reader) { $reader.Dispose() } }
+    }
+    # Compatibilidade com projetos ainda sem identidade Maven declarada.
+    $projectFolder=if ($artifactId) {$artifactId} else {$Project.name}
+    if ($projectFolder -cnotmatch '^[A-Za-z0-9_][A-Za-z0-9_.-]{0,63}$' -or $projectFolder -match '^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])(?:\.|$)' -or $projectFolder.EndsWith('.')) { throw 'artifactId/nome do projeto nao pode ser usado como pasta. Informe uma identidade Maven literal e segura.' }
+    $projectPath=Resolve-HarnessPath (Join-Path $Root ('.harness/planning/'+$projectFolder+'/issues')) $Root
+    $identityPath=Join-Path $projectPath 'project.json'
+    if (Test-Path -LiteralPath $identityPath -PathType Leaf) {
+        $identity=Get-Content -LiteralPath $identityPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if ((Resolve-HarnessPath $identity.Source $Root) -ine (Resolve-HarnessPath $Project.path $Root)) { throw "artifactId duplicado em Sources diferentes: $projectFolder. Use uma raiz de trabalho separada; nao misturar dossies." }
+    }
+    [pscustomobject]@{Folder=$projectPath;Name=$projectFolder;ArtifactId=$artifactId;IdentityPath=$identityPath}
+}
+
+function Get-HarnessIssuePaths {
+    param([string]$Root, $Project, [string]$Id, $ProjectPaths)
+    if ([string]::IsNullOrWhiteSpace($Id) -or $Id -match '[\r\n\x00]') { throw 'ID da issue ausente/invalido.' }
+    $cached=[bool]$ProjectPaths
+    if (-not $ProjectPaths) { $ProjectPaths=Get-HarnessIssueProjectPaths $Root $Project }
+    $label = ([regex]::Replace(($Id -split '::')[-1], '[^A-Za-z0-9_-]', '-')).Trim('-','_')
+    if (-not $label) { $label='issue' }
+    if ($label.Length -gt 16) { $label=$label.Substring(0,16) }
+    $folderLabel=if ($label.Length -gt 8) {$label.Substring(0,8)} else {$label}
+    $issueFolder = $folderLabel + '__' + (Get-HarnessProjectKey $Id)
+    $projectLabel=$ProjectPaths.Name
+    if ($projectLabel.Length -gt 20) { $projectLabel=$projectLabel.Substring(0,20)+'-'+(Get-HarnessProjectKey $projectLabel).Substring(0,6) }
+    $stem=$projectLabel+'-'+$label+'-'+(Get-HarnessProjectKey $Id).Substring(0,6)
+    $folder=Join-Path $ProjectPaths.Folder $issueFolder
+    if (-not $cached) { $folder=Resolve-HarnessPath $folder $Root }
+    [pscustomobject]@{Folder=$folder;Stem=$stem;ArtifactId=$ProjectPaths.ArtifactId;ProjectIdentityPath=$ProjectPaths.IdentityPath;EvidenceIndexPath=(Join-Path $folder 'evidencias/LEIA-ME.md')}
+}
+
+function Initialize-HarnessIssueProject {
+    param($Paths, $Project)
+    if (-not (Test-Path -LiteralPath $Paths.ProjectIdentityPath -PathType Leaf)) {
+        Write-HarnessJson $Paths.ProjectIdentityPath @{Project=$Project.name;Source=$Project.path;ArtifactId=$Paths.ArtifactId}
+    }
+}
+
+function Get-HarnessIssueReceipts {
+    param([string]$Root)
+    $base=Join-Path $Root '.harness/planning'
+    if (-not (Test-Path -LiteralPath $base)) { return }
+    foreach ($project in Get-ChildItem -LiteralPath $base -Directory) {
+        $issues=Join-Path $project.FullName 'issues'
+        if (-not (Test-Path -LiteralPath $issues)) { continue }
+        $null=Resolve-HarnessPath $issues $Root
+        foreach ($issue in Get-ChildItem -LiteralPath $issues -Directory) {
+            $null=Resolve-HarnessPath $issue.FullName $Root
+            foreach ($request in Get-ChildItem -LiteralPath $issue.FullName -Directory | Where-Object Name -Match '^p_[a-f0-9]{12}$') {
+                $null=Resolve-HarnessPath $request.FullName $Root
+                $receipts=@(Get-ChildItem -LiteralPath $request.FullName -File -Filter 'contexto-*.json')
+                if (-not $receipts.Count) { continue } # Preparo interrompido nao constitui recibo.
+                if ($receipts.Count -ne 1) { throw "Solicitacao de issue ambigua: $($request.FullName)" }
+                $receipts[0]
+            }
+        }
+    }
+}
+
+function Assert-HarnessIssueFicha {
+    param([string]$Path, [string]$Source, [string]$Id)
+    $text=[IO.File]::ReadAllText($Path)
+    $markers=[regex]::Matches($text, '(?s)<!-- issue:\s*(\{.*?\})\s*-->')
+    if ($markers.Count -ne 1) { throw "Ficha exige identificacao unica issue (Source/Id): $Path" }
+    $identity=$markers[0].Groups[1].Value | ConvertFrom-Json
+    if ($identity.Source.Replace('\','/') -ine $Source.Replace('\','/') -or $identity.Id -cne $Id) { throw 'Ficha pertence a outro projeto/issue.' }
+}
+
 function Resolve-HarnessMtaRunDirectory {
     param([string]$Index, [string]$Root)
     $indexPath = Resolve-HarnessPath $Index $Root
@@ -828,4 +923,6 @@ Export-ModuleMember -Function Initialize-HarnessMigration, Get-HarnessMtaCatalog
 Export-ModuleMember -Function Get-HarnessExternalMtaRuns
 Export-ModuleMember -Function Resolve-HarnessMigrationPath
 Export-ModuleMember -Function Get-HarnessMigrationPaths
+Export-ModuleMember -Function Get-HarnessIssuePaths, Get-HarnessIssueProjectPaths, Get-HarnessIssueReceipts, Initialize-HarnessIssueProject
+Export-ModuleMember -Function Assert-HarnessIssueFicha
 Export-ModuleMember -Function Open-HarnessEditor

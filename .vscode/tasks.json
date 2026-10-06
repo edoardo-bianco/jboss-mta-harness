@@ -258,7 +258,7 @@
     },
     {
       "label": "Planejamento: priorizar issues",
-      "detail": "Prepara uma fatia percentual de issues mandatory; permite recriar ou progredir sem repetir propostas anteriores.",
+      "detail": "Escolhe a categoria e prepara uma fatia percentual; permite recriar ou progredir sem repetir issues examinadas nessa sequencia.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [

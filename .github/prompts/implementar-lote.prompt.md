@@ -29,6 +29,12 @@ TodoSha256 e EvidenceHashes por ferramenta real antes da primeira escrita.
 Confira PlanningBasis: legado sem o campo significa MTA. Em MTA, confira origem,
 RunId e artefatos previstos; em EVIDENCIAS, confira EvidenceInputs e hashes das
 entradas presentes, sem exigir RunId, snapshot ou quatro artefatos MTA inexistentes.
+Em EvidenceMode=CONSOLIDATED no recibo, valide Consolidated.Files, FichaPath e o
+recorte Consolidated.MtaIssuePath, mantendo PlanningBasis e MtaOrigin/RunId.
+Nao exigir a rodada original: seus caminhos sao proveniencia historica. Compare
+caminhos relativos/simbolos/trechos com Source local; nao copie linhas antigas sem
+conferir. Use o mapa local de EvidenceIndexPath para os anexos. Recibos sem o modo
+mantem verificacao original, sem fallback pela ausencia da rodada.
 Divergencia exige outro preparo; nao infira aprovacao de hashes ou arquivos.
 
 Identifique GO humano vigente, responsavel e alcance das dispensas no plano.

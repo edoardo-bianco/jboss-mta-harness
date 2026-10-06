@@ -16,6 +16,9 @@ Leia o JSON final, ContextPath, PlanPath/TodoPath atuais, MigrationPath e
 EvidenceIndexPath quando presentes. Confira Project/Source/RequestId e lote;
 PlanningBasis ausente no legado significa MTA. Confira RunId/origem quando a base
 for MTA; EVIDENCIAS usa EvidenceInputs e nao exige artefatos ou rodada inexistentes.
+Em EvidenceMode=CONSOLIDATED, consulte as copias de Consolidated.Files e o mapa
+local EvidenceIndexPath; Run/AnalysisSource sao historicos. Nao exigir o MTA
+original para revisar a corretiva, nem declarar resolucao MTA sem comparacao.
 Sem contexto explicito, solicite o arquivo preparado; nao busque o mais recente.
 Leia DeveloperGuidePath para tarefas e procedimentos, quando existente.
 Use ContractSnapshot preservado. As copias PlanSnapshot/TodoSnapshot e hashes sao

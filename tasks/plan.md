@@ -1,5 +1,624 @@
 # Plano do agente: evolucao do harness
 
+## Categorias, planejamento por issue e portabilidade - proposta 2026-10-06
+
+Status: Entrega 1 implementada localmente apos autorizacao humana; validacao e
+ensaio humano pendente registrados em tasks/todo.md. Proposta aprovada preservada;
+a proposta de ferramentas de 2026-10-05 permanece abaixo como trabalho posterior.
+Ordem confirmada no chat: categorias e passagem ao planejamento; depois
+exportacao/importacao; por ultimo ferramentas de consulta e avaliacao MCP.
+Retomada na branch `harness/tools-analise-issues`, HEAD `1b13b88`, mesma base da
+main local e origin/main observado. Na abertura havia somente plan.md e todo.md
+alterados, sem commit. Evolucao do harness, conforme ADRs 0002, 0004 e 0005.
+
+### Decisoes concretizadas na implementacao
+
+- Ensaio humano escolhido: reiniciar o estado local na maquina de trabalho apos
+  receber esta entrega. Descartar ali a .harness de ensaio, preservar configuracao,
+  workspace, fontes e MTA externo; reconstruir indice/registros, iniciar categoria
+  com 10% e levar uma ficha ao plano/to-do. Nao reutilizar propostas antigas nesse
+  ensaio. Decisao registrada; exclusao e ensaio ainda nao executados.
+- Categoria v4 por sequencia; v2/v3 continuam mandatory. Ranking aponta fichas
+  individuais por Source/Id; Previous guarda hashes das fichas examinadas.
+- Pasta do projeto usa artifactId do POM raiz, escolha confirmada pelo humano.
+  Source permanece no contexto. Identidade inicial em issues/project.json conserva
+  o historico se artifactId mudar; duplicidade real informa conflito.
+- Layout final compacto: .harness/planning/<artifactId>/issues/<regra-curta>__<chave>/,
+  com fichas/p_<id>/, evidencias/LEIA-ME.md e p_<id>/ para cada solicitacao de plano.
+  Substitui a camada ilustrativa planejamentos/ abaixo, para caber em caminhos
+  usuais do Windows PowerShell 5.1. Nomes longos de arquivos sao abreviados com chave.
+- Contexto de uma issue consolida ficha, anexos e recorte MTA com proveniencia/hashes.
+  Implementacao dispensa origem MTA em modo CONSOLIDATED; criacao/revisao de recorte
+  MTA ainda consulta a origem. Importacao/remapeamento entre maquinas nao foi adiantada.
+- Modelo fixo para toda issue: nove secoes no plano e cinco no to-do, com tarefas
+  ligadas aos passos E1/E2...; secoes nao aplicaveis permanecem justificadas.
+  Preparador nao simula proposta: agente ou humano preenche os modelos do contrato.
+- Orientador, papeis, prompts, guias e ADR-0006 alinhados. Perfis dos clientes
+  reutilizam a skill comum; nao foi necessario duplicar regras nesses perfis.
+- Reversao: reverter o incremento de scripts/contrato/prompts/guias na branch,
+  preservando dossies e recibos gerados. Versao antiga pode nao ler v4/LayoutVersion2;
+  nao apagar nem converter esses artefatos como parte da reversao.
+
+### Diagnostico na abertura (historico da proposta)
+
+| Parte | Evidencia no repositorio | Consequencia para a proposta |
+| --- | --- | --- |
+| Registro de migracao | `Initialize-HarnessMigration`, em scripts/Harness.psm1, mantem categoria, presenca, decisao, andamento e observacoes/referencias. | `migracao.md` concentra decisoes e links; nao garante que os detalhes tecnicos estejam dentro dele. Preservar um registro por projeto. |
+| Priorizacao geral | `Read-PrioritizationProject`, em scripts/HarnessPrioritization.psm1, filtra `Category -eq 'mandatory'`. | O limite de categoria esta na priorizacao. Estender o filtro e a identidade das sequencias, reaproveitando a extracao existente. |
+| Fichas de diagnostico | `.github/prompts/priorizar-issues.prompt.md` exige ficha de cada examinada, inclusive SEM POSICAO, no RankingPath. | Achados, amostra, referencias, lacunas e roteiro ficam em `priorizacao.md`; o preparo gera contexto/incidentes, e a ficha depende da analise efetiva. |
+| Entrada do plano | `Get-HarnessPlanningEvidenceInputs`, em scripts/HarnessPlanningInput.ps1, le links das issues ANALISAR AGORA e do indice de evidencias. | Ja pode aproveitar uma ficha explicitamente referenciada. A selecao de planejamento nao filtra mandatory; testar optional/potential de ponta a ponta. |
+| Unidade de planejamento | Contrato, secao Planejamento de um lote, e `.github/prompts/planejar-lotes.prompt.md`. | Um par PlanPath/TodoPath por solicitacao/lote coerente. Nao existe geracao automatica de um par para cada linha do registro. |
+| Portabilidade existente | tests/Test-PlanningPortable.ps1 cobre rodada MTA recebida em outro caminho, preservando origem e RunId. | Reaproveitar essa leitura; ela nao equivale a exportar/importar toda a priorizacao ou solicitacao de planejamento. |
+
+Fluxo proposto: escolher categoria na priorizacao -> examinar uma fatia ->
+consultar fichas -> escolher issue/recorte no registro, com referencia a ficha ->
+Planejamento: planejar -> revisar plan/to-do -> GO -> implementacao manual ou
+por agente autorizado -> verificacoes -> aceite. Categoria e criterio de selecao,
+nao prova de aplicabilidade, prioridade humana, autorizacao ou conclusao.
+
+### Entrega 1: categorias separadas com passagem comprovada ao plano
+
+Objetivo testavel: analisar mandatory, depois optional ou potential, retomar cada
+sequencia sem misturar cobertura e planejar a issue escolhida usando sua ficha.
+Refinamento humano: documentos separados por projeto + issue, nomes identificaveis
+e contexto suficiente para implementar sem depender da pasta MTA original.
+Este e o primeiro incremento a implementar e levar a maquina de trabalho.
+Nao depende de MCP nem da funcionalidade de exportacao/importacao.
+
+**Selecao e continuidade propostas:**
+
+- Uma categoria MTA por sequencia nesta entrega. Oferecer os valores efetivamente
+  encontrados nos registros com origem valida, incluindo mandatory, optional e
+  potential quando presentes. Exibir rotulo compreensivel e valor original;
+  preservar outras categorias recebidas, sem renomear todas como "outras".
+  Issue manual continua com origem humana; nao atribuir categoria MTA a DEV-*.
+- Reutilizar `Planejamento: priorizar issues`; escolher categoria ao iniciar uma
+  sequencia. Retomada explicitamente identificada conserva a categoria e nao pede
+  a mesma escolha. Exibir categoria, total elegivel, exclusoes e diagnosticos.
+  Categoria sem elegiveis informa zero e motivos; nao muda para outra categoria.
+- Acrescentar `-Category` na CLI. Inicio nao interativo sem esse argumento preserva
+  mandatory por compatibilidade, com categoria explicita na resposta. Continue
+  de recibo identificado herda sua categoria; argumento divergente exige iniciar
+  outra sequencia. Ambiguidade exige selecao, sem usar recencia.
+- Persistir categoria no contexto, selecao do prompt, resposta CLI e identidade
+  usada para localizar historico. Proposta de campo: `Category`, SchemaVersion=4.
+  Versoes 2/3 sem esse campo significam mandatory; nao reescrever historico.
+  Contextos Top antigos mantem a orientacao existente de recriacao.
+- A base fixa, percentual e exclusao por Source + ID passam a valer dentro da
+  sequencia da categoria. optional inicia sua propria SequenceId/base, preservando
+  mandatory. Voltar a mandatory recupera seu progresso. Previous/Continue nao
+  atravessam categorias; Recreate preserva a cadeia anterior da mesma categoria.
+- Preservar os filtros atuais de presenca, decisao e andamento, os hashes, a
+  distincao entre examinadas e recomendadas e as regras de falha operacional.
+  Categoria nao reabre ADIAR/FORA DO ESCOPO nem consome cobertura por consulta.
+  Recibo antigo pendente conserva contrato/prompt; instrucao nova exige preparo
+  compativel ou recriacao explicita. Resultado concluido v2/v3 pode alimentar
+  continuidade mandatory v4, preservando a cobertura comprovada.
+
+**Passagem para o planejamento e documentos compartilhados:**
+
+O registro conserva a escolha humana e os links da ficha e dos anexos da issue;
+cada solicitacao nova de planejamento desta entrega trata uma issue de um projeto,
+com recorte explicito. Uma issue heterogenea pode exigir lotes sucessivos. Issues
+relacionadas conservam documentos proprios e referencias de dependencia; mudanca
+compartilhada precisa de escopo/GO coerente, sem contar a mesma tarefa duas vezes.
+Nao gerar planos de todo o catalogo antecipadamente. Manter um lote ativo por
+frente, coordenada pelo humano. Contratos antigos de lotes com varios IDs continuam
+historicos; nao dividir seus documentos nem autorizacoes automaticamente.
+
+**Organizacao por projeto e issue, com nomes identificaveis:**
+
+Manter os documentos da aplicacao sob `.harness/planning/`, com hierarquia de
+projeto, issue e solicitacao. A identidade logica continua Project/Source + ID
+completo, incluindo ruleset; regras iguais em projetos diferentes sao trabalhos
+distintos. Rotulos de pastas/arquivos incluem projeto e regra legiveis e um sufixo
+estavel de desambiguacao quando necessario; nunca usar apenas a chave curta da
+regra, remover caracteres causando colisao ou derivar identidade de um titulo.
+
+Exemplo ilustrativo da pasta de uma solicitacao, com nomes abreviados:
+
+```text
+.harness/planning/
+  projeto-a__chave/
+    issues/
+      hibernate4-00039__chave/
+        fichas/<solicitacao-priorizacao>/
+          ficha-projeto-a-hibernate4-00039.md
+        evidencias/
+          LEIA-ME.md
+        planejamentos/<solicitacao-planejamento>/
+          contexto-projeto-a-hibernate4-00039.json
+          ficha-projeto-a-hibernate4-00039.md
+          plan-projeto-a-hibernate4-00039.md
+          todo-projeto-a-hibernate4-00039.md
+          evidencias/
+            LEIA-ME.md
+            apontamentos-mta.json
+            anexos-utilizados/
+```
+
+- A ficha em `fichas/` e o resultado por projeto/issue do pre-planejamento. O ranking
+  geral passa a resumir e referenciar essas fichas, inclusive SEM POSICAO; cada
+  examinada recebe sua ficha propria. Isso exige evoluir explicitamente o contrato
+  atual: novas priorizacoes podem escrever RankingPath e os FichaPaths declarados
+  no recibo, com isolamento de destinos. Nao produzem planos nem alteram registros.
+  Rankings antigos com fichas internas continuam legiveis; qualquer extracao para
+  o formato novo preserva origem, conteudo e arquivo historico.
+- A ficha dentro da solicitacao de planejamento e a copia identificada usada
+  naquela proposta, com origem/hash, sem reinterpretar a analise como nova.
+  Evidencias utilizadas tambem ficam consolidadas nessa solicitacao. Assim a pasta
+  escolhida contem ficha, contexto, plano, tarefas e anexos necessarios para o
+  colega compreender/executar o recorte; evidencia externa essencial ainda ausente
+  fica declarada e impede apresentar esse conjunto como autossuficiente.
+- O indice de anexos editavel da issue fica em `issues/<chave>/evidencias/`.
+  Preparar uma revisao captura os arquivos pertinentes em nova solicitacao;
+  preserva-se a anterior. PlanPath, TodoPath, ContextPath, FichaPath e indice de
+  anexos indicam os arquivos reais, sem nomes fixos presumidos nos consumidores.
+- `projeto-b` recebe outra pasta e outra ficha para a mesma regra, repetindo
+  descricao, recomendacao, referencias e demais informacoes necessarias. Pontos
+  locais, aplicabilidade, evidencias, progresso, GO e aceite pertencem a cada
+  projeto. Uma conclusao do projeto A nao atualiza B por igualdade de regra.
+  Referencias cruzadas explicam relacao/dependencia e nao substituem a ficha local.
+- Nos exemplos seguintes, plan/to-do/contexto designam papeis: arquivos novos
+  usam `plan-<projeto>-<issue>.md`, `todo-<projeto>-<issue>.md` e
+  `contexto-<projeto>-<issue>.json`. Versao/RequestId fica na pasta da solicitacao
+  e no conteudo; o nome tambem identifica a issue ao compartilhar arquivo avulso.
+  Compartilhar so o plano pode perder contexto: a unidade recomendada e a pasta.
+
+Preparadores, leitores de historico, resolucao de referencias, indice, abertura,
+implementacao/revisao e limpeza precisam reconhecer esse layout versionado.
+Hoje Get-MtaPlanningHistory presume pasta por rodada e nomes fixos; tambem ha
+filtros de referencias `(plan|todo|context)` e descoberta de `context.json`.
+Somente renomear arquivos quebraria o fluxo. Criar novo formato e manter leitura
+dos antigos, sem mover/renomear recibos, planos ou evidencias ja existentes.
+Antes da implementacao, ajustar AGENTS/contrato/ADRs pertinentes para registrar
+essa evolucao de destinos; nao altera tasks/ como area exclusiva do harness.
+
+**Implementar com evidencias consolidadas, sem acesso a rodada MTA:**
+
+Nao e necessario executar ou instalar MTA para aplicar uma corretiva ja planejada.
+No comportamento atual, porem, New-MtaImplementationPrompt chama
+Assert-HarnessPlanningEvidence e, com PlanningBasis=MTA, abre a rodada e valida
+Manifest/Result/Findings/Dependencies. Portanto, implementar sem a pasta original
+e requisito novo deste incremento, nao capacidade ja comprovada.
+
+Proposta: consolidar as evidencias efetivamente usadas pela issue enquanto suas
+fontes estao acessiveis e preparar contexto de execucao que valide esse conjunto
+local. Distinguir a origem MTA da disponibilidade do diretorio original. Definir
+modo explicito de evidencia MTA consolidada no novo contrato/recibo, preservando
+PlanningBasis e a proveniencia; recibos antigos mantem verificacao da origem.
+Nao mudar um recibo para EVIDENCIAS nem ignorar hashes porque o MTA desapareceu.
+Ausencia inesperada de arquivo continua erro, sem fallback silencioso.
+
+O conjunto consolidado precisa incluir:
+
+- Origem MTA/RunId, ID completo da regra, categoria, descricao/recomendacao e
+  referencias usadas; versao/alvo quando comprovados. Registrar arquivos de
+  origem/hashes conferidos na consolidacao, os hashes dos derivados e a relacao
+  entre ambos. Validacao local prova integridade dos derivados, nao nova leitura
+  da rodada que ficou inacessivel.
+- Incidentes/evidencias que sustentam TODO o recorte do plano: URI original,
+  linha/trecho/mensagem disponiveis, pontos incluidos/excluidos, cobertura e
+  limites. Amostra da ficha de priorizacao so sustenta implementacao quando o
+  planejamento aprofundou o necessario; nao equivale a diagnosticar todas as
+  ocorrencias da regra. Preservar extratos tecnicos, nao apenas resumo narrativo.
+- Localizacao no codigo: caminho relativo a raiz do projeto, modulo,
+  classe/metodo/assinatura, linha como ajuda e trecho de referencia. Conservar
+  separadamente URI historica MTA e mapeamento conferido no Source. Caminho
+  absoluto da maquina de origem ou numero de linha isolado nao localizam com
+  seguranca a corretiva no checkout do colega.
+- Ficha, anexos pertinentes, decisoes de escopo, plano/tarefas e contrato aplicavel
+  necessarios a execucao; links internos relativos sempre que possivel. Referencias
+  historicas externas permanecem informativas; necessidade tecnica externa ainda
+  aberta deve ser listada. O colega continua precisando do checkout e do ambiente
+  de build/testes previstos, sem embutir caches/configuracao pessoal no conjunto.
+
+Antes de implementar, conferir os pontos do codigo atual e as precondicoes contra
+as evidencias consolidadas. Diferenca de conteudo relevante pode exigir revisao
+do recorte; branch/HEAD por si so permanece informativo. Nova duvida nao coberta
+pode exigir complemento da origem, outra evidencia ou novo MTA, de forma explicita.
+Implementacao/build/testes nao demonstram desaparecimento no MTA: reanalise e
+comparacao continuam verificacoes separadas, com pendencia visivel quando ausentes.
+
+Teste de aceite: preparar a issue com MTA disponivel, consolidar as entradas,
+tornar a origem indisponivel na fixture e preparar a implementacao usando somente
+a pasta da solicitacao e o Source. Deve funcionar no modo consolidado; derivado
+ausente/alterado deve falhar, e recibo legado MTA deve conservar sua validacao.
+Copiar a pasta para outra maquina com retomada automatica pertence a entrega 2;
+a estrutura e a independencia da origem MTA sao preparadas nesta entrega 1.
+
+**Passagem entre colegas como cenario principal:**
+
+O colega A pode produzir a analise e a proposta; o colega B recebe a pasta da
+issue do projeto e implementa manualmente ou com agente de codificacao. Se A
+entregar somente a ficha, o material identifica etapa ANALISE; B completa o
+planejamento antes da implementacao. Ficha nao equivale a plano aprovado.
+
+| Papel no fluxo | Responsabilidade |
+| --- | --- |
+| Quem analisa/planeja | Entregar ficha, evidencias, referencias ao codigo e, quando elaborado, plano/to-do com recorte, verificacoes e decisoes. Explicitar a etapa entregue e as lacunas. |
+| Quem recebe | Relacionar o projeto de origem ao checkout local, conferir o recorte e as evidencias; complementar o necessario e escolher execucao manual ou assistida. |
+| Agente orientador | Ler o conjunto recebido, identificar a etapa real, recuperar escolhas e indicar uma proxima acao com caminho/mensagem pronta para o cliente usado. Orientar planejamento ausente, anexos necessarios, GO e verificacoes, sem executar corretivas. |
+| Agente de codificacao, quando escolhido | Consumir a mesma ficha/contexto/plano/tarefas, conferir o Source atual e implementar somente o recorte autorizado; devolver alteracoes e evidencias verificaveis. |
+
+O plano deve permitir que B trabalhe sem o chat de A e sem outro cliente/plugin
+obrigatorio. Resultados de implementacao e testes voltam associados ao mesmo
+projeto/issue/recorte. Declaracao de B nao comprova integracao no checkout de A;
+andamento, evidencias e aceite distinguem essas situacoes. Nao introduzir cadastro
+de responsaveis, lock distribuido ou gestao automatica de branches para esse fluxo.
+O mecanismo de transferir/importar e conciliar automaticamente permanece entrega 2.
+
+**Fluxo detalhado: da ficha ao planejamento da implementacao**
+
+Refinamento solicitado pelo desenvolvedor nesta retomada: receber o que o
+pre-planejamento produziu para a ficha e permitir anexar evidencias especificas
+da issue tratada. Faz parte da entrega 1. "Planejar a implementacao" significa
+elaborar a proposta em Planejamento: planejar; preparar/executar a implementacao
+e a etapa posterior que consome o par revisado e a autorizacao humana.
+
+| Momento | Acao do desenvolvedor | Comportamento proposto do harness/planejador |
+| --- | --- | --- |
+| 1. Escolher a ficha | Escolher a issue examinada e registrar ANALISAR AGORA com o encaminhamento da ficha. | A ficha individual do projeto fornece Source/ID e sua origem na priorizacao. Recuperar escolhas existentes, sem pedir novamente projeto, categoria e rodada. |
+| 2. Complementar a issue | Usar os anexos existentes ou acrescentar arquivos e explicar sua relacao com a issue. | Disponibilizar caminho de evidencias especifico da issue e seu LEIA-ME, reaproveitando a operacao de evidencias existente. Anexos adicionais sao opcionais; nao impor formulario ou interromper quando a base ja for suficiente. |
+| 3. Preparar o planejamento | Acionar Planejamento: planejar a partir da escolha registrada. | Montar a solicitacao da issue com ficha base, anexos pertinentes, escolhas/recorte e origem; consolidar o que estiver disponivel e declarar faltas. Informar nomes/caminhos identificaveis. Preparo ainda nao escreve o plano. |
+| 4. Elaborar a proposta | Executar o prompt preparado no cliente utilizado, ou elaborar manualmente no mesmo contrato. | Reaproveitar o diagnostico, conferir os pontos pertinentes no Source, confrontar anexos e preencher plan.md/todo.md. Perguntar somente o que faltar e mudar escopo, solucao ou aceite. |
+| 5. Revisar e executar | Revisar a proposta; escolher implementacao manual ou por agente e autorizar o recorte. | O executor utiliza o mesmo plan/to-do. Registrar verificacoes e submeter o resultado ao aceite, separado do GO. |
+
+**Entradas por issue no contexto proposto:**
+
+- Identidade: Project/Source, ID completo, categoria de origem e recorte escolhido.
+- Ficha base: solicitacao de priorizacao, arquivo individual por projeto/issue,
+  referencia do ranking e hash disponivel (ancora quando a ficha for legada).
+  Consumir achados, recomendacao candidata, pontos e
+  amostra, riscos/confianca, lacunas, roteiro e referencias ja produzidos. Nao
+  considerar toda issue do ranking como selecionada nem perder a ancora ao
+  normalizar o caminho do arquivo para calcular seu hash.
+- Anexos da issue: indice explicitamente associado e arquivos listados, com
+  relacao com a issue, origem/data/ambiente quando relevantes e estado de leitura.
+  Evidencias compartilhadas preservam a associacao a cada ID pertinente.
+- Escolhas e observacoes atuais: comportamento esperado, restricoes e decisoes
+  do desenvolvedor. Conferir codigo/evidencias pertinentes, sem repetir a triagem
+  global ou tratar a recomendacao preliminar como solucao definitiva.
+
+Agrupar esses vinculos por issue no recibo (proposta: `IssueInputs`), aproveitando
+SelectedIssues e EvidenceInputs. O registro e a entrada humana; esse agrupamento
+e derivado, nao uma segunda ficha que o desenvolvedor precisa manter.
+Ficha ausente/ambigua ou de outro Source/ID fica explicita; nunca escolher a mais
+recente ou importar o diagnostico de outra issue. O caminho independente sem
+pre-planejamento continua aceitando MTA/EVIDENCIAS, sem fabricar uma ficha.
+
+**Como anexar evidencias:**
+
+Proposta de organizacao, ainda nao criada: na pasta da issue sob o projeto em
+`.harness/planning/`, `evidencias/LEIA-ME.md`, conforme a arvore acima. Substitui a
+localizacao inicialmente proposta dentro das evidencias gerais do registro.
+O ID original fica no indice; a chave evita caracteres invalidos e colisoes.
+A pasta editavel permanece estavel entre revisoes; cada solicitacao preserva
+suas entradas consolidadas. Reaproveitar `criar-pasta-evidencias.ps1` e sua
+Run Task; estender o preparo para a issue escolhida, preservando o indice geral
+e os indices legados. Nao criar uma tarefa nova para cada issue.
+
+O usuario coloca ou referencia arquivos e preenche a tabela ja conhecida:
+
+| Arquivo relativo | Relacao com a correcao |
+| --- | --- |
+| erro-reproduzido.txt | Exemplo: erro observado antes da corretiva; informar cenario e ambiente. |
+| configuracao.xml | Exemplo: trecho pertinente da configuracao que esclarece uma lacuna da ficha. |
+| decisao.md | Exemplo: comportamento que deve ser preservado e decisao humana aplicavel. |
+
+Exemplos ilustrativos, nao anexos obrigatorios. Permitir documentos, logs depurados,
+configuracoes, resultados de testes e referencias pertinentes; formato inacessivel
+fica declarado. Copiar um arquivo sem lista-lo nao comprova sua inclusao/leitura.
+O harness calcula os hashes disponiveis e informa anexo ausente; nao exige hashes
+do usuario. O planejamento carrega a ficha e os anexos listados para a issue
+escolhida, mais evidencias compartilhadas explicitamente pertinentes.
+
+Hoje o leitor percorre a tabela de um EvidenceIndexPath e os links das observacoes;
+nao expande automaticamente um LEIA-ME de issue apenas por estar linkado em outro
+indice. Portanto, somente orientar uma nova pasta seria insuficiente: a entrega
+precisa resolver explicitamente o indice da issue e ler seus anexos com o leitor
+existente, preservar ancora/associacoes e isolar entradas de outras issues.
+Compatibilidade: o LEIA-ME geral de duas colunas continua aceito; sua pertinencia
+e avaliada como no contrato atual, sem inventar associacao quando ela nao existe.
+
+**Saida e atualizacao da proposta:**
+
+- `plan-<projeto>-<issue>.md` identifica a ficha base e os anexos usados. Explica
+  o que foi reaproveitado, confirmado, revisto ou continua incerto; apresenta
+  alteracoes concretas, ordem/dependencias, testes/resultado esperado e reversao.
+- `todo-<projeto>-<issue>.md` converte o plano em tarefas com evidencias de conclusao,
+  incluindo obter evidencia essencial quando necessario, revisao/GO, corretiva,
+  verificacoes e aceite. Um par por issue/recorte coerente na solicitacao.
+- Para acrescentar um log depois, registrar o novo anexo no indice da mesma issue
+  e usar Planejamento: planejar novamente. Entradas iguais retomam a solicitacao;
+  evidencias alteradas produzem recibo sucessor com Previous e preservam o anterior.
+  A revisao aproveita a proposta existente; nao inicia outro lote independente.
+  Conflito entre anexo e ficha deve ser explicado antes de decidir a solucao.
+  Informacao essencial ausente preserva rascunho/ID, sem par ficticio.
+
+**Simplificacao do orientador e dos guias como parte da entrega 1:**
+
+Pedido adicional confirmado: limpar, simplificar e alinhar o agente orientador,
+os prompts e os guias ao fluxo de ficha + anexos -> plano/to-do. A entrega so
+fica coerente quando o comportamento e sua orientacao refletem a mesma sequencia.
+
+- Usar os mesmos termos em todos os pontos: priorizacao produz fichas;
+  Planejamento: planejar usa a ficha escolhida e os anexos para propor a corretiva;
+  preparar implementacao recebe o plano revisado; execucao e aceite sao posteriores.
+  Explicar a diferenca entre o indice de projetos e o indice de anexos da issue.
+- O orientador recupera categoria, issue, ficha, anexos e solicitacao ja registrados.
+  Entrega uma proxima acao, motivo, caminho/mensagem prontos para o cliente atual
+  e resultado a conferir. Se os anexos ja bastam, segue ao planejamento; se faltar
+  algo essencial, indica qual evidencia obter e onde registra-la. Nao exige
+  reapresentar escolhas, editar JSON interno ou percorrer menus ja resolvidos.
+- Manter uma instrucao comum em `.agents/skills/orientar-migracao/SKILL.md` e
+  `references/papeis.md`; ajustar os papeis de preparo, planejamento, impacto e
+  implementacao somente no que o fluxo mudou. Os perfis de `.github/agents/` e
+  `.codex/agents/` referenciam essa base, evitando copias divergentes de regras.
+  O helper permanece leitor/orientador; nao gera plano, edita anexos nem implementa.
+- O contrato descreve comportamento; os guias explicam operacao. O guia central
+  aponta as etapas; priorizacao ensina escolher a ficha; planejamento explica
+  anexar, elaborar e revisar; orientacao mostra como pedir o proximo passo;
+  o modelo de evidencias mostra como listar anexos. Manter links entre eles,
+  evitando repetir o procedimento completo em cada arquivo.
+- Orientar a pasta do projeto/issue e os nomes efetivos dos documentos, incluindo
+  fichas separadas para regras repetidas em projetos diferentes. Explicar quando
+  a execucao usa evidencias consolidadas e como localizar o codigo relativo ao
+  Source do colega; nao exigir a pasta original MTA nesse modo validado.
+- Revisar instrucoes vigentes que fixam mandatory, so reconhecem recibos v2/v3,
+  tratam o indice geral como unica entrada ou confundem planejamento e execucao.
+  Remover repeticoes e redirecionar caminhos antigos quando preciso; preservar
+  recibos, snapshots, planos e decisoes historicas. Reaproveitar tarefas existentes.
+- A orientacao com helper e a execucao direta pelas Run Tasks devem produzir o
+  mesmo encaminhamento. Nenhum cliente exige nomes/comandos do outro. Ler a
+  ficha/receber um anexo nao marca implementacao, GO ou aceite.
+
+Aceite de clareza: com os mesmos arquivos, guia e orientador indicam a mesma
+proxima acao em cinco cenarios: escolher categoria; partir da ficha escolhida;
+acrescentar evidencia; atualizar a proposta; encaminhar plano revisado para
+execucao manual ou por agente. Conferir caminhos reais, uso das entradas, links
+e preservacao das escolhas. Testes documentais nao substituem ensaio nativo.
+
+**Trabalho ordenado para implementar a entrega 1:**
+
+1. **Filtro e identidade da sequencia.** Alterar HarnessPrioritization.psm1 e
+   HarnessPrioritizationState.ps1; adicionar Test-PrioritizationCategories.ps1.
+   Aceite: bases/coberturas isoladas; retorno a categoria anterior retoma sua
+   cadeia; historico v2/v3 permanece legivel como mandatory. Verificar fixtures
+   com varias categorias, origens, decisoes e historicos ambiguos.
+2. **Entrada do usuario e contexto do agente.** Alterar preparar-priorizacao.ps1,
+   tasks.json, priorizar-issues.prompt.md e testes de CLI/menus pertinentes.
+   Aceite: categoria visivel na selecao e saidas; cancelamento sem gravacao;
+   uma tarefa existente atende todas as categorias. Verificar JSON sem interacao,
+   inicio/retomada e diagnostico de categoria invalida ou sem elegiveis.
+3. **Pastas e nomes por projeto/issue.** Evoluir preparacao/historico no modulo
+   HarnessPlanning e resolucao de referencias em HarnessPlanningInput.
+   Aceite: nomes identificam projeto/issue, sem colisao; novas pastas sao descobertas
+   e recibos antigos continuam abrindo nos caminhos originais. Cobrir Test-Planning.
+   Conferir HarnessProjectIndex, HarnessCleanup e descoberta de arquivos em uma
+   subetapa propria; teste de limpeza deve preservar entradas oficiais da issue.
+4. **Fichas individuais da priorizacao.** Declarar FichaPaths por Source/ID no
+   recibo e alinhar prompt/validacao do resultado. Aceite: uma ficha por examinada
+   e projeto, inclusive SEM POSICAO; ranking linka cada ficha; mesma regra em
+   projetos distintos tem conteudo completo separado, sem transferir conclusoes.
+   Cobrir destinos/identidade e compatibilidade com rankings internos antigos.
+5. **Anexos por issue.** Estender criar-pasta-evidencias.ps1 e o modelo de indice,
+   reaproveitando Harness.psm1; cobrir em Test-EvidenceFolder.ps1.
+   Aceite: pasta/indice vinculados ao projeto/ID, retomada sem sobrescrever anexos,
+   nomes seguros sem colisao e indice geral/legado preservado.
+6. **Ficha e anexos como entrada efetiva.** Ajustar HarnessPlanningInput.ps1 e
+   HarnessPlanning.psm1, com Test-PlanningEvidence.ps1.
+   Aceite: optional/potential preserva ID/categoria, ficha/ancora e anexos;
+   evidencias de outra issue nao entram automaticamente; mesmo arquivo ligado a
+   duas issues preserva os dois vinculos. Retomada nao duplica solicitacao;
+   anexo novo/alterado gera Previous sem sobrescrever a proposta anterior.
+7. **Consolidacao e execucao sem origem MTA acessivel.** Reaproveitar extracao de
+   HarnessPrioritizationEvidence; completar os incidentes necessarios ao recorte
+   e registrar provenance/hashes/contrato no novo contexto.
+   Em subetapa de execucao, adaptar validacao e prompts de implementacao/revisao
+   para o modo consolidado. Aceite: entrada suficiente funciona com MTA original
+   indisponivel; anexo alterado/ausente nao e aceito; legado mantem verificacoes.
+   Conferir referencias de codigo relativas e isolamento por projeto/issue.
+8. **Plano legivel por issue/recorte.** Ajustar contrato, planejar-lotes.prompt.md
+   e encaminhamento da ficha em priorizar-issues.prompt.md.
+   Aceite: entradas e destinos explicitos, diagnostico aproveitado com conferencia
+   local, plano suficiente para execucao manual ou por agente. Ensaiar anexo que
+   esclarece ou contradiz a ficha, sem concluir pela existencia do arquivo.
+9. **Orientador alinhado.** Ajustar skill comum e papeis; conferir os perfis
+   Codex/Copilot e alterar apenas os que precisarem de adaptacao.
+   Aceite: reconhece categoria/ficha/anexos, preserva escolhas e entrega uma acao
+   com caminhos reais, mantendo o papel leitor. Ensaiar os cinco cenarios acima.
+10. **Guias simplificados.** Alinhar doc/guias/harness-migracao-desenvolvedor.md,
+   orientacao-migracao.md, tools/priorizacao-issues.md,
+   tools/planejamento-migracao.md e modelo-evidencias-complementares.md.
+   Aceite: termos e passos correspondem as tarefas/prompts; instrucao direta e
+   orientada pelo helper concordam. Verificar links, exemplos e remocoes de duplicacao.
+11. **Ensaio integrado.** Conferir tarefas geradas e referencias de entrada atingidas
+   (incluindo AGENTS.md e README quando necessario). Registrar teste corporativo
+   e limites observados. Aceite: executar o fluxo abaixo com os caminhos apresentados.
+
+Verificacao automatizada prevista, em Windows PowerShell 5.1:
+Test-PrioritizationCategories, Test-Prioritization, Test-PrioritizationProgress,
+Test-PrioritizationIncidents, Test-EvidenceFolder, Test-PlanningEvidence,
+Test-Planning, Test-Implementation, Test-PlanningPortable, Test-ProjectIndex,
+Test-Cleanup e Test-TaskInputs, conforme as subetapas que alteram seus contratos.
+Acrescentar casos de layout/ficha/consolidacao na suite pertinente ou teste focado.
+Ampliar somente conforme riscos/falhas encontrados. Fixtures em `.harness/tests/`.
+Testes de preparo comprovam selecao/contexto/integridade; nao comprovam qualidade
+de fichas/planos produzidos pela IA nem comportamento nativo do cliente corporativo.
+
+Roteiro de aceite na maquina de trabalho:
+
+1. Com uma base contendo categorias diferentes, preparar uma fatia mandatory e
+   obter ranking com fichas; guardar RequestId, base, quota e IDs examinados.
+2. Preparar optional (ou outra categoria presente). Conferir categoria e denominador
+   proprios, mantendo os arquivos mandatory. Retomar mandatory e conferir exclusao
+   das examinadas anteriores, inclusive as que ficaram SEM POSICAO.
+3. Escolher uma issue optional/potential, registrar ANALISAR AGORA e link da ficha,
+   anexar uma evidencia em seu indice, executar Planejamento: planejar e conferir
+   ficha/ancora, anexos efetivamente lidos, identidade, recorte, passos, dependencias,
+   verificacoes e reversao no par produzido. Anexo de outra issue fica fora.
+4. Retomar o mesmo plano sem duplicacao; acrescentar outro anexo e conferir revisao
+   vinculada por Previous, com historico preservado. Pedir a um colega que avalie a clareza do
+   roteiro manual; registrar lacunas sem conceder GO/aceite automaticamente.
+5. Conferir fichas separadas para a mesma regra em dois projetos e os nomes dos
+   arquivos ao abri-los fora da pasta. Conferir contexto, ficha, plano e todo de
+   uma issue sem consultar o chat que os produziu.
+6. Ensaiar origem MTA indisponivel com contexto consolidado e codigo acessivel;
+   verificar que o orientador distingue analise recebida de plano pronto para GO
+   e encaminha tanto execucao manual quanto agente de codificacao. Simulacao de
+   preparo nao conta como implementacao real nem como aceite.
+   Concluir a avaliacao desta entrega antes de iniciar exportacao/importacao.
+
+### Entrega 2: exportar/importar pontos estaveis
+
+Direcao recomendada, a detalhar apos o ensaio da entrega 1: pacote ZIP com manifesto
+versionado, etapa, identidade/origem, caminhos relativos, hashes e inventario de
+arquivos/dependencias ausentes. Dois tipos de pacote atendem ao pedido:
+
+| Ponto de compartilhamento | Conteudo necessario |
+| --- | --- |
+| Priorizacao geral concluida | Registro, indice como fotografia informativa, rankings/fichas selecionados, contextos e cadeia Previous necessaria a continuidade, base/cobertura e evidencias referenciadas. |
+| Planejamento de uma issue pronto para revisao ou implementacao | Pasta da solicitacao do projeto/issue: contexto, ficha, plan/to-do identificaveis, evidencias consolidadas e decisoes humanas do escopo. Incluir somente referencias necessarias a esse recorte, sem exigir todo ranking ou toda rodada. Declarar se e proposta ou se ha GO registrado; exportar nao muda esse estado. |
+
+"Estavel" descreve etapa/versao identificada, nao ausencia de lacunas. A ficha pode
+concluir SEM POSICAO; o plano pode estar aguardando GO. Exportacao deve declarar
+estado real e cobertura, conferir a integridade do pacote e listar o que falta.
+Para implementar a issue no modo consolidado, o pacote leva as evidencias do
+recorte; a rodada MTA completa nao e dependencia automatica. Para continuar
+priorizacao/investigacao alem desse recorte ou usar recibo legado dependente da
+origem, incluir/localizar o catalogo e as evidencias necessarias. Declarar essa
+diferenca no manifesto. Pacote parcial nao inventa MTA nem troca PlanningBasis
+silenciosamente. Copiar apenas migracao.md e indice perde fichas, solicitacoes e
+referencias necessarias a continuidade.
+
+Importacao proposta: conferir versao/integridade/caminhos e apresentar a relacao
+do projeto de origem com o Source local escolhido pelo colega; rejeitar caminhos
+que saiam do destino. Preservar pacote, recibos, hashes e caminhos historicos;
+registrar mapeamento e proveniencia em novos dados locais, sem editar o original
+para fingir que nasceu na outra maquina. Source de origem + ID continua rastreavel,
+e o Source local e explicitamente associado, sem unir projetos apenas pelo nome.
+Recriar o indice local a partir dos registros importados e evidencias disponiveis.
+
+Importar nao sobrescreve escolhas locais silenciosamente: mostrar colisoes,
+reimportacao e divergencias para conciliacao. Preservar GO/aceite como fatos da
+origem; conferir se autorizacao se aplica ao mesmo recorte local, sem herda-la
+automaticamente de outra proposta. Codigo recebido/corrigido por colega exige
+integracao e verificacao no Source; pacote nao comprova implementacao local.
+Nao transportar caches Maven, settings pessoais, credenciais, permissoes do
+cliente ou politicas Git. Codigo/snapshot entra somente no escopo explicito
+do pacote, conforme necessario as evidencias compartilhadas.
+
+Aceite futuro: exportar em uma raiz, importar em outra com espacos, mapear Source,
+abrir fichas/planos, retomar cobertura/solicitacao sem colisao, preservar origem
+e detectar anexo ausente/alterado. Testar tambem reimportacao, conflito de decisoes
+e pacote por EVIDENCIAS sem MTA. Definir formato/CLI/Run Tasks nesse incremento,
+reutilizando leitores e validadores existentes e mantendo dependencias declaradas.
+Ensaio principal: colega A analisa/planeja e exporta uma issue; colega B importa
+em outro Source explicitamente associado, usa o orientador e implementa manualmente
+ou por agente com a mesma documentacao, sem acesso ao MTA de A quando o conjunto
+consolidado for suficiente. Testar tambem receber so analise, completar o plano
+e devolver resultados sem inferir integracao/aceite no checkout de A.
+
+### Entrega 3: ferramentas de consulta e MCP, por ultimo
+
+`auditar_base`, `listar_issues` e `obter_issue` permanecem propostas de consultas
+reutilizaveis; devem refletir categoria, origem, pagina/cobertura e evidencias
+definidas acima. Reaproveitar parser/catalogo/extracao atuais. Nao criar interface
+MCP como precondicao da primeira entrega. Avaliar transporte/runtime/configuracao
+em incremento proprio, com documentacao oficial vigente e teste nos clientes.
+Esta e a ultima etapa desta sequencia, depois de exportacao/importacao, conforme
+pedido explicito do desenvolvedor. Antes de detalhar ferramentas, conciliar seu
+escopo com as features/capacidades existentes. Essa conciliacao ficou adiada a
+pedido do desenvolvedor; nao e trabalho da presente retomada.
+
+Encaixe inicial no catalogo ja existente em
+`doc/features/evolucao-harness-dominios-capacidades-priorizacao.md` e na
+`doc/estrategia/conciliacao-evolucao-harness.md`:
+
+| Proposta | Capacidades relacionadas a conferir no detalhamento |
+| --- | --- |
+| Categorias e planejamento por issue/recorte | OBJ-01/02 e HAR-03: identidade original, escolha, cobertura e unidade de trabalho. |
+| Exportacao/importacao por etapa | HAR-03 e SRC-06: origem, continuidade e contexto; transporte entre maquinas e conciliacao ainda exigem contrato proprio. |
+| auditar_base | HAR-03 e OBJ-01: integridade, proveniencia e consistencia das entradas existentes. |
+| listar_issues / obter_issue | OBJ-01/02 e SRC-06: consulta dos apontamentos e contexto delimitado, reaproveitando parser/extracao. |
+| Exposicao por MCP | HAR-01/04: apresentacao das capacidades e adaptador do cliente; nao duplicar o nucleo de consultas. |
+
+Atualizacao do desenvolvedor: somente `doc/features/engineering-harness-vscode.md`
+foi adicionado; o restante permaneceu inalterado. Sua presenca foi conferida no
+estado local, sem leitura/analise do conteudo. Nao aguardar copias em especificacoes,
+mover documentos ou conciliar propostas agora. A avaliacao desse material fica
+para retomada futura explicitamente pedida; foco atual na evolucao do fluxo de
+categorias, fichas e evidencias para o planejamento.
+
+## Ferramentas para analise de issues e pre-planejamento - retomada 2026-10-05
+
+Prioridade revista em 2026-10-06 pela proposta acima; preservar esta analise como
+base das ferramentas futuras, sem iniciar sua implementacao nesta retomada.
+
+Status: analise inicial salva a pedido do desenvolvedor para retomar no dia
+seguinte. Implementacao nao iniciada; escopo e interface ainda sao propostas.
+Branch temporaria harness/tools-analise-issues, derivada de main 1b13b88,
+checkout inicialmente limpo. Main e a unica branch permanente; as demais servem
+somente ao trabalho temporario. O PR #8 (workspace sem name) ja foi integrado.
+
+Objetivo: oferecer consultas prontas e testadas para que o agente recupere e
+confira evidencias MTA sem improvisar parsers e buscas a cada analise. O harness
+cuida de extracao, identidade, contagens e verificacoes reproduziveis; o agente
+interpreta aplicabilidade e recomenda prioridades sustentadas por evidencias.
+
+Evidencia que motivou a proposta: o MTA corporativo fornecido pelo desenvolvedor
+contem 138 incidentes de hibernate4-00039, com URI, linha, mensagem e trecho em
+output.js e output.yaml. O Copilot nao recuperou esses dados e concluiu a fatia
+sem recomendacoes. Os dois primeiros incidentes mostram retorno de metodo e
+criacao de array; sua relacao com persistencia ainda exige exame do codigo.
+Extrair os incidentes nao comprova aplicabilidade nem quantidade de corretivas.
+
+Base existente conferida:
+
+- scripts/Harness.psm1: Get-HarnessMtaCatalog, inclusive IncludeIncidents,
+  interpreta o JSON do catalogo sem executar JavaScript.
+- scripts/HarnessPrioritizationEvidence.ps1: extrai incidentes em paginas de ate
+  dez, preserva detalhes, hashes e caminhos candidatos para snapshot/Source.
+- scripts/HarnessPrioritization.psm1: prepara contexto, elegibilidade e fatia.
+- scripts/HarnessPrioritizationState.ps1: valida identidade, quota, duplicatas
+  e continuidade; validacao formal nao comprova qualidade do diagnostico.
+- Ainda nao ha interface MCP de consulta por issue nesses componentes.
+
+Ferramentas propostas (nomes provisórios):
+
+| Ferramenta | Resultado esperado |
+| --- | --- |
+| auditar_base | Conferir acesso, identidade/rodada, hashes e contagens entre MTA, registro e indice; explicar divergencias, distinguindo ausencia de acesso negado. |
+| listar_issues | Consultar por projeto, categoria MTA, tecnologia, decisao e andamento; paginar, preservar Source + ID e explicar elegibilidade/exclusao. |
+| obter_issue | Entregar regra, recomendacao, referencias e incidentes com URI, linha e trecho; permitir pagina ou ocorrencia especifica. |
+| comparar_ocorrencias | Conferir candidatos no Source contra o snapshot; apresentar diferencas e mapeamentos ambiguos sem inferir equivalencia ou resolucao. |
+| inspecionar_dependencias | Recuperar POMs, propriedades, escopos e configuracao pertinente; separar versao declarada de resolvida e runtime comprovado. |
+| validar_priorizacao | Conferir IDs, quota, duplicatas, referencias e cobertura declarada, sem confundir formato valido com diagnostico tecnico comprovado. |
+
+Primeiro incremento recomendado: auditar_base, listar_issues e obter_issue.
+Reaproveitar o nucleo PowerShell; avaliar um adaptador MCP local para acesso pelo
+agente e compartilhar as mesmas funcoes com as Run Tasks. Nao criar uma tarefa
+por ferramenta auxiliar. Transporte, runtime, configuracao e contratos de entrada/
+saida precisam ser definidos antes de implementar; MCP ainda nao foi instalado.
+Referencia consultada: [MCP no VS Code](https://code.visualstudio.com/docs/agent-customization/mcp-servers).
+
+Separar quatro dimensoes: categoria MTA original (mandatory/optional/potential),
+agrupamento tecnico com origem explicita, aplicabilidade avaliada no codigo e
+prioridade recomendada por risco/repetibilidade/alcance/verificabilidade.
+Contagem e igualdade de regra nao provam mesma transformacao. Nao substituir
+escolhas humanas, conceder GO ou marcar uma issue como examinada pela simples
+consulta/extracao. Falha operacional de acesso nao consome cobertura.
+
+Consultas leem somente origens autorizadas do contexto. Respostas estruturadas
+devem declarar identidade, proveniencia, pagina/cobertura e erros distinguiveis.
+Respeitar permissoes reais do cliente, inclusive para a rodada externa; MCP nao
+deve servir para contornar recusa. Regenerar indice divergente permanece operacao
+deterministica do harness, preservando registros humanos e recibos historicos.
+Na retomada, detalhar o contrato minimo e os testes do primeiro incremento antes
+de alterar scripts/prompts. Reteste corporativo das correcoes anteriores segue
+pendente; testes locais nao comprovam o comportamento do Copilot naquela maquina.
+
 ## Regeneracao com pastas sem nome - 2026-10-05
 
 Bugfix em harness/workspace-sem-nome, derivada de main 360442a, checkout limpo.

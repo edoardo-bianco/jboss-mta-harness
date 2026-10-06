@@ -29,8 +29,9 @@ localizador, nunca autoridade para substituir a rodada do registro pela mais rec
 Ausencias/conflitos ficam em Diagnostics por projeto; preparador nao inicializa
 registros, atualiza indice ou executa MTA. Indice ausente exige preparo pelo humano.
 
-Recibo/prompt ficam em .harness/priorizacao/<RequestId>/. RankingPath e o unico
-destino de escrita do agente de priorizacao; nao e PlanPath/TodoPath nem GO.
+Recibo/prompt ficam em .harness/priorizacao/<RequestId>/. O agente escreve o resumo
+em RankingPath e cada ficha examinada no destino FichaPaths de Source/Id. Em legado
+sem FichaPaths, preserva as fichas no ranking. Nao escreve PlanPath/TodoPath nem GO.
 Preparar nao gera ranking. Snapshots preservam entradas; o agente confere mudancas
 nos registros/indice e integridade MTA antes de recomendar, sem usar hashes como
 lock humano. Divergencia de rodada/escopo/evidencia exige esclarecer ou novo preparo;
@@ -60,7 +61,7 @@ Derivados facilitam leitura e nao revogam restricoes do cliente. Helpers recebem
 o mesmo escopo e limites; permissao de leitura nao concede escrita, GO ou aceite.
 
 Triagem ampla de candidatas e permitida somente nesta etapa; aprofundar por amostra
-as promissoras, sem planejar varios lotes. Elegiveis por padrao: mandatory/PRESENTE,
+as promissoras, sem planejar varios lotes. Elegiveis: categoria escolhida/PRESENTE,
 A DEFINIR ou ANALISAR AGORA, NAO ANALISADA/ANALISADA. ADIAR/FORA DO ESCOPO e demais
 andamentos exigem pedido expresso por projeto/ID/recorte para reconsiderar; preservar
 justificativas e trabalho ativo. Issues DEV so por inclusao humana explicita, sem
@@ -83,13 +84,19 @@ nao constitui exame: registrar tentativa/erro fora de AnalyzedIssues e manter
 IN_PROGRESS ate recuperar a leitura. Incerteza tecnica apos exame efetivo pode
 receber SEM POSICAO e consumir quota. Nao converter falha operacional em cobertura.
 
-SchemaVersion=3 identifica a continuidade por cobertura, corrigida em 2026-10-05.
-Sem historico do escopo, iniciar sequencia.
+SchemaVersion=4 acrescenta Category e FichaPaths a continuidade por cobertura.
+mandatory, optional, potential e outras categorias recebidas mantem sequencias
+independentes por escopo/categoria, com denominador e exclusoes proprios. Recibos
+v2/v3 continuam mandatory. Sem categoria explicita, CLI preserva mandatory; com
+PreviousRequestId herda a categoria. Menu mostra categorias recebidas, sem agrupa-las.
+Sem historico do escopo/categoria, iniciar sequencia.
 Com historico, escolher Recreate (nova SequenceId/base) ou Continue (mesma base,
 excluindo a uniao das examinadas anteriores em AnalyzedIssues, com ou sem proposta).
 ExcludedIssues guarda essa uniao por Source/ID; ProposedIssues continua somente
 recomendacao. Recriar preserva solicitacoes antigas.
-Previous vincula a anterior; em Continue inclui RankingSha256. Ponta unica pode
+Previous vincula a anterior; em Continue inclui RankingSha256 e, para pai v4,
+FichaHashes das examinadas. Alterar uma ficha ancestral exige conferir/recriar.
+Ponta unica pode
 ser localizada; varias exigem PreviousRequestId/escolha humana, nunca recencia.
 Referencia antiga segue sucessor unico; bifurcacao exige escolha. Contextos Top
 antigos sao historicos e exigem recriar, sem conversao automatica. Sem RankingPath,
@@ -102,7 +109,7 @@ O agente grava no proprio RankingPath um unico bloco delimitado por
 `<!-- priorizacao:resultado -->` e `<!-- /priorizacao:resultado -->`, com JSON em
 cerca json: RequestId, Status=COMPLETED, AnalyzedIssues e ProposedIssues. Os arrays
 contem objetos Source/Id de AvailableIssues, sem duplicatas; propostas sao
-subconjunto das examinadas. Em SchemaVersion=3, COMPLETED exige exatamente
+subconjunto das examinadas. Em SchemaVersion=3/4, COMPLETED exige exatamente
 SliceSize examinadas; quota zero admite arrays vazios, e a ausencia de recomendacoes
 e valida em qualquer fatia. IN_PROGRESS nao autoriza avanco; retomar o mesmo resultado
 parcial, sem inventar leituras. Mencoes/overlaps nao comprovam exame ou proposta.
@@ -295,9 +302,58 @@ Nao descobrir a solicitacao mais recente por conveniencia ou pelo editor ativo.
 
 Use somente solicitacao identificada. Confira RequestId, Project, Source,
 ContextPath, PlanPath e TodoPath entre prompt e recibo. Purpose deve ser
-application-remediation; plan.md/todo.md ficam junto ao recibo sob .harness/planning.
+application-remediation; PlanPath/TodoPath ficam junto ao recibo sob .harness/planning.
 Nao reconstruir destinos por nome de pasta, procurar o mais recente ou editar tasks/.
 Preparacao grava prompt/recibo, nunca simula proposta, executa agente ou concede GO.
+
+### Dossie por projeto e issue
+
+Novas escolhas de uma issue usam LayoutVersion=2, sob
+`.harness/planning/<artifactId>/issues/<regra>__<chave>/`. artifactId vem do POM
+raiz do projeto; na ausencia desse campo, usa o identificador do workspace/config.
+Sources diferentes com mesmo artifactId exigem esclarecimento, sem misturar pastas.
+O registro continua identificando Source local; artifactId e o nome compartilhavel.
+Cada issue recebe nomes `ficha-<projeto-issue>.md`, `contexto-<projeto-issue>.json`,
+`plan-<projeto-issue>.md` e `todo-<projeto-issue>.md`, declarados nos recibos.
+Fichas de priorizacao ficam em `fichas/p_<solicitacao>/`; cada preparo de plano em
+`p_<solicitacao>/`. O indice editavel fica em `evidencias/LEIA-ME.md`.
+O nome inicial do projeto fica em issues/project.json e e preservado por Source
+mesmo apos mudar artifactId. Partes longas de nomes de arquivo sao abreviadas com
+chave, preservando pasta do projeto e identidade completa no recibo.
+Nomes antigos continuam aceitos; nao renomear historico. Uma nova proposta delimita
+uma issue por projeto; recibos legados com varios IDs preservam seu lote coerente.
+
+Ficha individual inclui marcador `<!-- issue: {"Source":"...","Id":"..."} -->`.
+Repete contexto necessario a leitura isolada mesmo quando outra ficha usa a mesma
+regra em outro projeto. Ranking resume e liga as fichas; nao substitui escolha humana.
+Observacao do registro ou indice de evidencias referencia a ficha-base. Varias
+fichas-base, Source/Id divergente ou destino adulterado exigem correcao explicita.
+Sem ficha anterior, o preparo cria apenas entrada identificada, sem alegar analise.
+
+O novo recibo consolida as entradas em EvidenceMode=CONSOLIDATED. FichaPath e
+IssueInputs identificam ficha/anexos; SourceEvidenceInputs preserva as referencias
+originais. Consolidated.Files declara caminhos relativos, hashes, origem e hash
+original. O indice local mapeia copias para origens; links dentro das copias sao
+historicos. Referencias externas/ausentes ficam como lacunas, sem inventar conteudo.
+Para MTA, Consolidated.MtaIssuePath preserva todos os incidentes da regra, detalhes,
+recomendacoes/links fornecidos, caminhos relativos candidatos e proveniencia.
+Extracao completa nao comprova exame/aplicabilidade; pontos atuais exigem leitura
+de Source. Issue DEV com registro MTA preserva a origem sem inventar achado MTA.
+
+Implementacao valida as copias, sem exigir Run/AnalysisSource originais. PlanningBasis
+e MtaOrigin/RunId nao mudam. Copia ausente/alterada bloqueia o preparo; anexo humano
+original acessivel e alterado exige reavaliacao. Recibos sem EvidenceMode continuam
+validando os artefatos originais, sem fallback silencioso. Criar/revisar um recorte
+MTA ainda exige a origem registrada; executar um plano consolidado nao. Exportacao,
+importacao e remapeamento de recibos entre maquinas pertencem a entrega posterior.
+Limpeza de execucoes preserva dossies `issues`, pois incluem evidencias oficiais.
+
+Plano/to-do devem permitir que outro colega implemente manualmente ou com agente:
+contexto/ficha de entrada, escopo, alteracoes por arquivo/simbolo, dependencias e
+ordem, passos, verificacoes observaveis, reversao e aceite. Ficha nao equivale a
+plano; plano nao concede GO. Orientador ajuda a etapa atual e continua leitor.
+
+### Base e continuidade
 
 PlanningBasis identifica MTA ou EVIDENCIAS. Recibos antigos sem esse campo mantem
 a semantica MTA. Em MTA, conferir tambem RunId: Manifest/Result devem corresponder
@@ -318,7 +374,7 @@ de identidade de uma base MTA nao autoriza fallback silencioso para EVIDENCIAS.
 Ausencia de MTA completo permite uma proposta sustentada pelo codigo/evidencias,
 sem afirmar categoria mandatory, cobertura MTA ou resolucao nao demonstradas.
 
-Quando PlanningBasis=MTA, leia Manifest/Result e trechos pertinentes de Findings,
+Quando PlanningBasis=MTA e EvidenceMode nao for CONSOLIDATED, leia Manifest/Result e trechos pertinentes de Findings,
 Dependencies e Rules. Nas duas bases, leia POMs,
 fontes/testes. Ausencia na busca nao prova ausencia de arquivo ignorado; leia caminhos
 literais e restrinja buscas a eles, sem output/** ou .harness/**. Nao alegue leitura
@@ -457,15 +513,48 @@ Fixar plugin/receitas e JDK da ferramenta separadamente de Java 8 da aplicacao.
 Sequencia: testes da receita, dryRun, revisao do patch, GO humano do escopo, run,
 verificacoes. Planejamento nao instala, desenvolve receita ou executa comandos.
 
-Gravar em portugues plan.md com titulo "Plano de corretivas da aplicacao" e todo.md,
-ambos com identidade, PlanningBasis, origem/Previous/context.json e "Lote ativo: <ID>"
-no inicio; RunId somente quando houver base MTA.
+Gravar em portugues nos destinos PlanPath/TodoPath, com os nomes identificaveis do
+recibo. Em LayoutVersion=2, usar sempre a estrutura abaixo, independente da issue.
+Campos/secao sem aplicacao permanecem com "Nao se aplica" e justificativa. Informacao
+essencial ausente recebe lacuna especifica; nao preencher com suposicao.
+
+Modelo fixo de PlanPath:
+
+1. **Identificacao e origem**: projeto/artifactId, Source, issue completa, categoria
+   real, RequestId, Lote ativo, PlanningBasis, ContextPath/FichaPath, Previous e,
+   somente em MTA, MtaOrigin/RunId. Estado inicial PROPOSTA - NAO APROVADA.
+2. **Objetivo e escopo**: comportamento atual/esperado, recorte, cobertura,
+   contagens observadas e fora do escopo.
+3. **Evidencias e premissas**: entradas utilizadas, links, leitura/amostra,
+   confirmacoes no codigo atual, conflitos, lacunas e precondicoes.
+4. **Alteracoes previstas**: tabela com arquivo relativo/simbolo, alteracao,
+   justificativa e comportamento a preservar; incluir POM/configuracao se aplicavel.
+5. **Dependencias e ordem**: dependencias internas/entre issues/projetos, restricoes,
+   impacto em consumidores e o que precisa estar pronto antes de cada passo.
+6. **Sequencia de execucao**: passos E1, E2... em ordem, cada qual com entrada,
+   acao concreta, saida e verificacao; rota manual e apoio de ferramenta quando houver.
+7. **Verificacoes e criterios de aceite**: testes/comandos/cenarios pertinentes,
+   resultado esperado, evidencia a guardar e limites do ambiente.
+8. **Riscos e reversao**: riscos e confianca separados; gatilho, passos e verificacao
+   da reversao no recorte, preservando trabalho alheio.
+9. **Decisoes humanas e historico**: GO/dispensas e aceite nos termos abaixo,
+   revisoes justificadas, execucao comprovada e referencias dos resultados.
+
+Modelo fixo de TodoPath: identidade e link ao plano no inicio, seguidos de:
+
+1. **Preparacao**: conferir entradas, lacunas/precondicoes e referencia ao GO.
+2. **Implementacao**: tarefas ligadas a E1, E2... do plano, com dependencia quando
+   houver; cada tarefa diz o resultado que permite marca-la concluida.
+3. **Verificacoes**: executar criterios previstos e registrar resultados reais.
+4. **Evidencias dos resultados**: guardar caminhos de testes/logs/diffs pertinentes
+   e registrar cobertura/limites, sem repetir o diagnostico do plano.
+5. **Revisao e aceite humano**: revisar resultado, referenciar aceite no plano e
+   manter pendencias explicitas. Proximo lote somente mediante continuidade pedida.
+
+Use checkboxes [ ] ate comprovacao e associe evidencia de conclusao a cada tarefa.
+GO fica no plano; o to-do o referencia, sem conceder autorizacao por checkbox.
+Planos legados preservam sua estrutura e nomes, sem conversao forcada.
 ID estavel usa letras/numeros/ponto/hifen/sublinhado. Nova proposta: PROPOSTA - NAO APROVADA.
-Plano contem premissas/origens, evidencias/limites, matriz curta de dependencias,
-recorte/contagens/deduplicacao, transformacao/rota, risco/confianca, POM, testes,
-aceite observavel, reversao, precondicoes e historico/reconciliacao.
-To-do referencia plano, sem repetir analise; tarefas dependentes com evidencia de
-conclusao, [ ] ate comprovacao; separar obter evidencia, GO, implementar, verificar e aceite.
 
 Decisao humana fica uma vez no plan.md; todo.md referencia essa secao:
 Responsavel: (vazio); GO humano: PENDENTE; Pendencias dispensadas como precondicao:

@@ -342,7 +342,9 @@ CLI sem WorkspacePath, mantenha `repositories` coerente com os projetos desejado
 3. Confira os caminhos listados. Nas opcoes **1/2**, a limpeza inclui somente
    execucoes em `.harness/runs`, `.harness/builds` e `.harness/planning`, com
    relatorios/snapshots locais, indices de MTA externo, prompts, `plan.md`, `todo.md`
-   e recibos. Os ponteiros locais relacionados tambem sao removidos. Na opcao **3**,
+   e recibos legados. Os dossies em `planning/<artifactId>/issues/` sao preservados,
+   incluindo fichas, anexos e novas propostas. Os ponteiros locais relacionados
+   tambem sao removidos. Na opcao **3**,
    apenas a pasta central de backups temporarios sera removida.
 4. Digite **LIMPAR** para excluir. Enter ou outro texto cancela. Os scripts recusam
    links/junctions e caminhos fora das areas autorizadas, e bloqueiam limpeza
@@ -355,11 +357,12 @@ CLI sem WorkspacePath, mantenha `repositories` coerente com os projetos desejado
 
 A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, templates
 versionados dos prompts, cache Maven, backups, `.harness/evidencias/`, `.harness/projetos/`
-e `.harness/priorizacao/`.
+e `.harness/priorizacao/`, alem dos dossies por issue em `.harness/planning/`.
 Nao apaga `target/` da aplicacao nem qualquer conteudo MTA externo, registrado ou recebido.
 No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
 pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
-recibo identificavel permanecem. A opcao todos remove as tres areas por inteiro.
+recibo identificavel permanecem. A opcao todos remove runs/builds e o planejamento
+fora dos dossies por issue.
 Para MTA externo, somente o indice local `location.json` e seus ponteiros entram
 na limpeza. O destino externo nao e consultado e pode estar indisponivel.
 Depois, o historico/ultimo relatorio perde a referencia local; informe a pasta quando
@@ -380,11 +383,43 @@ Alteracoes permanentes dos prompts devem estar no template correspondente em
 preparado pertence aquela solicitacao e sera apagada com ela. Para conservar um
 plano ou resultado, guarde antes uma copia fora das areas que serao removidas.
 
+#### Reiniciar um ensaio do zero
+
+Use este caminho quando decidir descartar todo o estado local do ensaio. A exclusao
+integral de `.harness/` tambem remove registros e decisoes humanas, fichas, planos,
+anexos, evidencias, backups e rodadas MTA que estejam dentro dela. A tarefa
+**Workspace: limpar execucoes** preserva parte desse material e nao faz esse reinicio.
+
+1. Atualize o harness para a entrega que sera ensaiada. Alteracoes ainda sem
+   commit/push em outra maquina nao chegam por `git pull`.
+2. Encerre build/MTA, testes, preparacao e agentes que usem o estado local; pare
+   tambem o servidor iniciado pelo harness antes de descartar seus controles.
+3. Confira o caminho absoluto e o conteudo da `.harness` deste checkout. Com todo
+   esse material de ensaio descartavel, remova somente essa pasta. Se houver
+   worktrees ou links/junctions, resolva-os separadamente antes da exclusao.
+4. Preserve `config/harness.local.json`, o workspace e os fontes das aplicacoes,
+   que ficam fora dela. Um MTA externo completo pode ser reutilizado; confirme
+   sua aplicabilidade ao codigo atual. MTA que estava dentro da pasta sera perdido.
+5. Execute **Workspace: atualizar indice dos projetos** para reconstruir registros
+   e indice. Confira a origem MTA reconhecida; resolva origem ausente ou ambigua
+   pelo fluxo de MTA existente antes de priorizar.
+6. Execute **Planejamento: priorizar issues**, escolha uma categoria e informe
+   **10%**. Execute o novo prompt e confira ranking e fichas por projeto/issue.
+7. Escolha uma issue no registro, vincule sua ficha e acrescente anexos pertinentes.
+   Execute **Planejamento: planejar** e confira os modelos comuns de plano/to-do
+   nos destinos por artifactId e issue. Depois ensaie outra categoria e a retomada
+   da primeira. Revisao/GO precedem a implementacao; aceite vem apos verificacoes.
+
+Esse ensaio usa registros, contextos e prompts novos; nao recupera automaticamente
+escolhas ou aprovacoes apagadas. Registre seus resultados antes de avancar para
+exportacao/importacao ou outras entregas.
+
 #### Pastas locais e backups temporarios
 
 `.harness/` guarda dados locais do harness e e ignorada pelo Git. As pastas sao
 criadas conforme o uso; nao precisam existir todas depois de uma limpeza.
-Build e planejamento usam projeto/data/ID; MTA externo usa projeto/data compacta.
+Build usa projeto/data/ID; novos planos usam artifactId/issue/solicitacao e os
+legados conservam seus destinos. MTA externo usa projeto/data compacta.
 Os IDs completos permanecem nos recibos. `.harness/i` e outros worktrees de agentes
 podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 
@@ -393,7 +428,7 @@ podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 | `.harness/builds/` | Registro de cada build Maven: `console.log` e `result.json`, com projeto, comando/fases, ferramentas, estado Git coletado, datas, status e exit code. O WAR/JAR e os relatorios de testes continuam no `target/` da aplicacao. |
 | `.harness/runs/` | Rodadas MTA locais ou indices `location.json` das rodadas externas: `manifest.json` identifica entrada, argumentos, hashes e estado Git; `result.json` registra resultado/integridade; `console.log` guarda a saida. Cada rodada possui `input/` (copia dos fontes analisados), `rules/` (regras usadas) e `output/` (achados, dependencias e relatorio HTML com seus arquivos). A copia `input/` e evidencia, nao checkout para corretivas. |
 | `.harness/sonar/` | Resultados Sonar por projeto/data, com RESUMO.md, metricas, criterios e Gate; preservados pela limpeza de execucoes. |
-| `.harness/planning/` | Contextos e prompts preparados com base MTA ou EVIDENCIAS, solicitacao retomada ou Previous explicito. O agente executor grava `plan.md`/`todo.md`. Manutencao usa `registro/solicitacao_<id>` e so reconcilia o registro. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
+| `.harness/planning/` | Contextos e prompts com base MTA ou EVIDENCIAS. Novos dossies em `<artifactId>/issues/<issue>/` reunem fichas, anexos e solicitacoes com plano/to-do de nomes identificaveis; sao preservados pela limpeza de execucoes. Legados conservam nomes e destinos. Manutencao usa `registro/solicitacao_<id>` e so reconcilia o registro. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
 | `.harness/priorizacao/` | Contexto e prompt por solicitacao para comparar issues entre projetos; `priorizacao.md` e produzido ao executar o prompt. Preservada pela limpeza de execucoes. A lista nao e plano nem escolha humana. |
 | `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
 | `.harness/projetos/` | Registro por raiz local e evidencias/LEIA-ME.md; criacao idempotente, sem duplicar por rodada. Preservados pela limpeza, locais e ausentes no clone. |

@@ -130,7 +130,7 @@ $cliRegister = [IO.File]::ReadAllText($register.MigrationPath).Replace('<!-- mta
 [IO.File]::WriteAllText($register.MigrationPath,$cliRegister)
 $cliRegisterHash = (Get-FileHash $register.MigrationPath).Hash
 $null = [IO.Directory]::CreateDirectory("$fixture/scripts")
-foreach ($file in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessProjectIndex.psm1','atualizar-indice-projetos.ps1')) {
+foreach ($file in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessIssuePlanning.ps1','HarnessPrioritizationEvidence.ps1','HarnessProjectIndex.psm1','atualizar-indice-projetos.ps1')) {
     Copy-Item -LiteralPath (Join-Path $root "scripts/$file") -Destination "$fixture/scripts/$file"
 }
 $editor = "$fixture/scripts/editor.ps1"
