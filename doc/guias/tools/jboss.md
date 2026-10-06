@@ -467,8 +467,8 @@ em **Java Projects**, nao presumindo que seja o rotulo da pasta no Explorer.
 A extensao usa esse campo para resolver classes e expressoes.
 [Configuracao de attach Java](https://github.com/microsoft/vscode-java-debug#attach).
 
-Os exemplos ANTES/DEPOIS sao projetos distintos com classes homonimas: confirme
-que o fonte, a configuracao escolhida e a aplicacao implantada correspondem.
+Se voce importou projetos distintos com classes homonimas, confirme que o fonte,
+a configuracao escolhida e a aplicacao implantada correspondem.
 Hot Code Replace rejeitado exige conferir o motivo; build/deploy permite
 recarregar a aplicacao quando a mudanca nao pode ser aplicada na JVM existente.
 O roteiro descreve o teste; nao comprova que breakpoint, Watch ou substituicao

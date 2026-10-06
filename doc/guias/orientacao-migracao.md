@@ -129,8 +129,8 @@ Os documentos seguem [estrutura padronizada e dossie por issue](tools/planejamen
 Com somente analise, orienta elaborar o plano; com proposta, revisar GO; com GO,
 seguir execucao manual ou por agente de codificacao conforme a escolha humana.
 O orientador continua leitor. Contexto consolidado dispensa MTA original para
-implementar, mas exige conferir o codigo local. Exportacao/importacao e remapeamento
-automaticos ainda sao trabalho futuro.
+implementar, mas exige conferir o codigo local. Para tornar o contexto operacional
+em outra raiz, use a [importacao com associacao aos projetos locais](tools/compartilhamento-contextos.md).
 
 O helper e opcional e tambem orienta trabalho manual. Diga, por exemplo:
 
@@ -160,7 +160,8 @@ e as evidencias; identifique a etapa atual e me oriente em uma proxima acao.
 ```
 
 Se houver mais de uma frente, indique a que deseja continuar quando solicitado.
-`ContextPath` e o caminho do recibo `context.json`; o helper deve localiza-lo e
+`ContextPath` e o caminho do recibo (`contexto-<projeto>-<issue>.json` nos novos
+planos ou `context.json` na priorizacao e em layouts legados); o helper deve localiza-lo e
 apresenta-lo, nao exigir que voce invente o caminho. GO vigente do mesmo escopo
 e preservado; mudanca de escopo exige revisao da autorizacao.
 
@@ -214,6 +215,7 @@ da etapa. Voce pode entrar diretamente onde parou.
 | 6. Implementar o lote autorizado | [Preparo da implementacao](tools/planejamento-migracao.md#orientar-implementacao). |
 | 7. Verificar e aceitar o resultado | [Verificacoes e aceite](tools/planejamento-migracao.md#orientar-verificacoes-e-aceite), com [Maven](tools/maven.md#orientacao-com-o-helper), [Sonar](tools/sonar.md#orientacao-com-o-helper) e [JBoss](tools/jboss.md#orientacao-com-o-helper). |
 | 8. Reconciliar e decidir continuidade | [Reconciliacao](tools/planejamento-migracao.md#orientar-reconciliacao-e-continuidade). |
+| Compartilhar ou receber analise/plano | [Exportacao/importacao](tools/compartilhamento-contextos.md#orientacao-com-o-helper). |
 
 ## Resultado e proximo passo
 

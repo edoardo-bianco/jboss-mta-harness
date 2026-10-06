@@ -47,38 +47,42 @@ prazo, prioridade e piloto permanecem a definir.
 ## Como usar
 
 **Siga o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md).**
-Ele explica a primeira configuracao e conduz o fluxo completo, da analise ao
-planejamento, implementacao, verificacao, aceite e reconciliacao. Em cada etapa,
-indica o guia de ferramenta adequado para os comandos, opcoes e caminhos de
-retomada.
+Ele conduz da configuracao ao aceite. Os guias de etapa concentram comandos,
+opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 
-**O agente de orientacao e opcional.** Para trabalhar sem helper, use as Run Tasks
-e a secao **Uso** do guia de cada etapa. Na priorizacao, a tarefa prepara o prompt;
-voce pode executa-lo diretamente no Codex/Copilot para produzir o relatorio.
-Escolha a categoria na priorizacao: mandatory, optional, potential ou outra recebida,
-com continuidade independente. Depois, siga as [fichas e o caminho manual](doc/guias/tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao)
-para investigar, planejar e implementar, com as mesmas revisoes e verificacoes.
-Quem ja sabe o que corrigir pode escolher a issue no registro e ir direto a Planejar.
+| Sua situacao | Primeiro passo |
+| --- | --- |
+| Primeiro uso | Abra `iniciar-harness.code-workspace` e siga a [configuracao do workspace](doc/guias/tools/workspace.md#configuracao). Gere/salve o workspace local e adicione os projetos externos. |
+| Quero escolher o que corrigir | Confira o registro e use a [priorizacao opcional por categoria](doc/guias/tools/priorizacao-issues.md). |
+| Ja escolhi uma issue | Use **Planejamento: planejar**, a partir da escolha e das evidencias no registro. |
+| Recebi analise ou plano de um colega | Use **Planejamento: compartilhar contexto** e siga o [guia de importacao](doc/guias/tools/compartilhamento-contextos.md). |
+| Quero ajuda para retomar | Use `$orientar-migracao` no Codex ou `migracao_helper` no Copilot, conforme o [guia de orientacao](doc/guias/orientacao-migracao.md). |
 
-Para comecar com orientacao, siga o [guia de orientacao da migracao com Codex ou GitHub Copilot](doc/guias/orientacao-migracao.md)
-e diga apenas o objetivo, por exemplo: "Quero priorizar as issues mandatory dos
-projetos deste workspace". O guia explica `orientar-migracao`, `migracao_helper`,
-retomada e passagem a execucao; cada guia de etapa oferece pedidos de exemplo e
-o resultado esperado. O helper confere a situacao e conduz uma etapa por vez.
+**O agente de orientacao e opcional e permanece leitor.** Ele confere os arquivos
+e indica uma proxima acao. As tarefas de priorizacao e planejamento preparam
+contexto; elaborar ranking/fichas ou plano/to-do e outra etapa, manual ou pela
+execucao do prompt no Codex/Copilot.
+Com plano revisado e GO, outro colega pode implementar manualmente ou com agente.
+Testes e revisao humana do resultado continuam necessarios nas duas formas.
 
-O [pre-planejamento opcional](doc/guias/tools/priorizacao-issues.md) examina uma
+O [pre-planejamento opcional](doc/guias/tools/priorizacao-issues.md) separa as
+categorias `mandatory`, `optional`, `potential` e outras recebidas. Examina uma
 fatia de **0,01% a 100,00%** das issues elegiveis sobre o total inicial fixo.
 Com uma priorizacao existente, escolha recriar ou progredir; o avanco exclui as
-issues ja examinadas na sequencia, com ou sem recomendacao. Cada issue examinada
-recebe evidencias, referencias e roteiro para continuidade manual. Depois voce
-escolhe o recorte para planejar.
+issues ja examinadas naquela categoria/escopo, com ou sem recomendacao. Cada uma
+recebe ficha de evidencias, referencias e roteiro; o ranking resume a comparacao.
+Depois voce escolhe a issue e seu recorte para planejar.
 
 No planejamento, a entrada e **Planejamento: planejar**: usa a escolha e as
-evidencias do registro para criar ou atualizar a proposta. Se faltar registro,
-**Workspace: atualizar indice dos projetos** o prepara. Nao e necessario repetir
-projeto, rodada e escolhas em menus sucessivos. Evidencias suficientes permitem
+evidencias do registro para criar ou atualizar a proposta. Sem pacote a importar,
+se faltar registro, **Workspace: atualizar indice dos projetos** o prepara. Nao e
+necessario repetir projeto, rodada e escolhas em menus sucessivos. Evidencias suficientes permitem
 planejar sem pacote MTA completo; duvidas essenciais sao esclarecidas antes de
-concluir o plano. Veja [entradas e resultados](doc/guias/tools/planejamento-migracao.md#preparar-e-executar-o-prompt).
+concluir o plano, sem trocar silenciosamente uma base MTA ja declarada.
+Plano e to-do usam modelos padronizados e nomes que identificam projeto/issue,
+na pasta do `artifactId` Maven. O [dossie por issue](doc/guias/tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas)
+reune ficha e evidencias usadas. O plano consolidado recebido permite preparar
+implementacao sem o MTA original; revisar suas entradas exige reavaliacao explicita.
 
 Para contribuir com a evolucao do harness, consulte [AGENTS.md](AGENTS.md) e as
 [decisoes arquiteturais](doc/adr/). O [contrato de planejamento](doc/especificacoes/planejamento-copilot.md)

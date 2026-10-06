@@ -25,18 +25,31 @@ fixo, recomendando por risco/repetibilidade/alcance. Com historico, perguntar
 recriar/progredir; progresso exclui todos os IDs examinados na sequencia,
 com ou sem proposta. Toda examinada tem linha com posicao ou motivo e ficha
 de evidencias/referencias/roteiro para continuidade manual pelo desenvolvedor.
-Escreve apenas RankingPath sob .harness/priorizacao; nao escolhe pelo humano,
+Categoria e escopo delimitam a sequencia; v2/v3 permanecem mandatory. Novos recibos
+v4 escrevem RankingPath e as fichas examinadas em FichaPaths por Source/Id;
+em legado sem FichaPaths, as fichas ficam no ranking. Nao escolhe pelo humano,
 nao altera registros nem planeja lotes. Escolha humana precede o planejamento usual.
 Helpers explicam/revisam a lista no chat; executar o prompt e etapa separada.
 
+Novos planos usam dossie por projeto/issue e os destinos identificaveis do recibo,
+sob a pasta do artifactId Maven. Ficha/anexos sao entradas; plano/to-do seguem os
+modelos do contrato. A mesma regra em projetos diferentes tem documentos separados.
+Planejamento: compartilhar contexto exporta analise concluida ou plano consolidado.
+Importar exige Source local explicito e preserva originais, conforme
+[ADR-0007](../doc/adr/0007-compartilhamento-de-contextos.md). Em plano importado,
+entradas alteradas interrompem a retomada para reavaliacao; nao prometer sucessor
+automatico. CONSOLIDATED permite preparar implementacao sem MTA original, conferindo
+codigo e alcance do GO. Importar nao concede execucao/aceite nem autoriza sobrescrita.
+
 Siga a [ADR-0005](../doc/adr/0005-planejamento-orientado-pelo-registro.md).
 Planejamento: planejar cria, retoma ou atualiza a proposta pelo registro existente;
-nao exigir menu de operacao ou selecao repetida de projeto/rodada. Sem registro,
-orientar Workspace: atualizar indice dos projetos. Indice localiza, registro atual
+nao exigir menu de operacao ou selecao repetida de projeto/rodada. Para ZIP recebido,
+orientar importacao antes de inicializar registros. Sem pacote a importar e sem
+registro, orientar Workspace: atualizar indice dos projetos. Indice localiza, registro atual
 concentra escolha/recorte/evidencias; ranking antigo nao revoga escolha atual.
 PlanningBasis=MTA|EVIDENCIAS permite proposta por evidencias humanas sem fabricar
-MTA. Conferir integridade da base real. Origem/evidencias/contrato/template iguais
-retomam a solicitacao; mudancas nessas entradas geram recibo com Previous. Escolhas
+MTA. Conferir integridade da base real. Em contexto local, origem/evidencias/contrato/template
+iguais retomam a solicitacao; mudancas geram recibo com Previous. Escolhas
 e observacoes atuais sao lidas sem reescrever historico. Link antigo segue Previous
 ate o unico sucessor; bifurcacao pede escolha. Nao escolher plano/rodada por recencia.
 Reconciliar so por motivo concreto; PENDENTE historico nao e gate generico.

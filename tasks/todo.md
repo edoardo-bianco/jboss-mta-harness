@@ -1,5 +1,17 @@
 # To-do do agente: evolucao do harness
 
+## Revisao de documentacao e orientacao - 2026-10-06
+
+- [x] Conferir raiz, branch, HEAD e estado limpo; retomar eead84b.
+- [x] Ler skills pertinentes e mapear divergencias com o fluxo implementado.
+- [x] Alinhar README, guia principal e guias de etapas, preservando ancoras.
+- [x] Simplificar skill/papeis e alinhar instrucoes dos clientes sem ampliar poderes.
+- [x] Validar links, comandos/tarefas e skill; ensaiar cenarios de orientacao.
+  401 links, 25 tarefas, 22 referencias a scripts, 12 perfis e 3 cenarios aprovados.
+- [x] Revisar diff, registrar limites da verificacao e salvar commit documental.
+- [ ] Validar descoberta/delegacao nativa nos clientes e ensaio de 10% na maquina
+  de trabalho; os cenarios de leitura nao comprovam essa homologacao.
+
 ## Exportacao/importacao - implementacao 2026-10-06
 
 - [x] Retomar main integrada/limpa e confirmar proxima entrega com o humano.

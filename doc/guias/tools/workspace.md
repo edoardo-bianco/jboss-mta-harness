@@ -357,7 +357,8 @@ CLI sem WorkspacePath, mantenha `repositories` coerente com os projetos desejado
 
 A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, templates
 versionados dos prompts, cache Maven, backups, `.harness/evidencias/`, `.harness/projetos/`
-e `.harness/priorizacao/`, alem dos dossies por issue em `.harness/planning/`.
+e `.harness/priorizacao/`, alem de `.harness/importacoes/` e dos dossies por issue
+em `.harness/planning/`.
 Nao apaga `target/` da aplicacao nem qualquer conteudo MTA externo, registrado ou recebido.
 No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
 pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
@@ -430,6 +431,7 @@ podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 | `.harness/sonar/` | Resultados Sonar por projeto/data, com RESUMO.md, metricas, criterios e Gate; preservados pela limpeza de execucoes. |
 | `.harness/planning/` | Contextos e prompts com base MTA ou EVIDENCIAS. Novos dossies em `<artifactId>/issues/<issue>/` reunem fichas, anexos e solicitacoes com plano/to-do de nomes identificaveis; sao preservados pela limpeza de execucoes. Legados conservam nomes e destinos. Manutencao usa `registro/solicitacao_<id>` e so reconcilia o registro. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
 | `.harness/priorizacao/` | Contexto e prompt por solicitacao para comparar issues entre projetos; `priorizacao.md` e produzido ao executar o prompt. Preservada pela limpeza de execucoes. A lista nao e plano nem escolha humana. |
+| `.harness/importacoes/` | Originais e manifesto recebidos, recibo de importacao e diagnosticos/anexos transportados. Preservada pela limpeza; as copias operacionais dos planos e priorizacoes ficam em seus destinos habituais. |
 | `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
 | `.harness/projetos/` | Registro por raiz local e evidencias/LEIA-ME.md; criacao idempotente, sem duplicar por rodada. Preservados pela limpeza, locais e ausentes no clone. |
 | `.harness/projetos/indice-projetos.md` e `indices/` | Ultima acao por projeto e copias datadas dessas consultas, geradas pela tarefa de indice e preservadas pela limpeza. |
@@ -439,7 +441,7 @@ podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
 | `%USERPROFILE%\.m2\repository` | Repositorio local padrao do Maven, fora do harness; compartilhado com os demais projetos da maquina, salvo configuracao propria do Maven. |
 
 Na raiz tambem podem aparecer **arquivos de controle**, que nao sao pastas:
-`mta.lock` coordena build/MTA/limpeza; `planning.lock` coordena preparacao/limpeza.
+`mta.lock` coordena build/MTA/limpeza; `planning.lock` coordena preparacao/importacao/limpeza.
 Eles podem permanecer vazios depois da execucao; sua existencia nao comprova
 atividade. `active-mta.json` identifica a rodada para acompanhamento, e
 `last-<Project>.json` aponta para a ultima rodada MTA bem-sucedida do projeto.
@@ -470,9 +472,12 @@ Referencia de consulta; para escolher a operacao e a ordem, use o
 | [MTA: conferir ambiente](mta.md#uso) | `conferir-ambiente.ps1` |
 | [**Aplicacao: build Maven (Java 8)**](maven.md#uso) | **`construir-aplicacao.ps1 -Goals <fases escolhidas>`** |
 | [Aplicacao: analisar SonarQube](sonar.md#uso) | `analisar-sonar.ps1` |
-| [Servidor: iniciar JBoss / parar JBoss / consultar estado JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
+| [Servidor: iniciar JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
+| [Servidor: parar JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
+| [Servidor: consultar estado JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
 | [Servidor: criar usuario JBoss](jboss.md#console-administrativa-e-usuario-de-gerenciamento) | `gerenciar-jboss.ps1 -Action AddUser` (assistente oficial com JDK 8, sem selecao de aplicacao) |
-| [Aplicacao: deploy no JBoss / rollback no JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
+| [Aplicacao: deploy no JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
+| [Aplicacao: rollback no JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
 | [Aplicacao: preparar implementacao do lote](planejamento-migracao.md#preparar-implementacao-do-lote) | `preparar-implementacao.ps1` |
 | [**MTA: executar analise**](mta.md#uso) | **`executar-mta.ps1`** |
 | [**MTA: acompanhar log da analise**](mta.md#acompanhar-a-analise-mta) | **`acompanhar-log-mta.ps1 -Active`** |

@@ -1,3 +1,10 @@
+---
+html:
+  embed_local_images: true
+  embed_svg: true
+  offline: true
+---
+
 # Compartilhar analise ou planejamento entre colegas
 
 [Voltar ao fluxo do desenvolvedor](../harness-migracao-desenvolvedor.md).
@@ -7,7 +14,27 @@ um ponto estavel em ZIP ou importar o pacote recebido. O menu pede a operacao,
 o contexto e o arquivo. Na importacao, associe cada projeto de origem ao projeto
 local do workspace. Essa associacao e explicita, mesmo quando o artifactId coincide.
 
-## Qual ponto compartilhar
+## Orientacao com o helper
+
+```text
+Quero entregar ao meu colega a analise concluida deste projeto.
+Confira o contexto vinculado e indique como exportar esse ponto.
+```
+
+Para receber, informe o caminho do ZIP ou o ContextPath retornado pela importacao.
+O helper identifica a etapa e orienta uma acao; voce executa a tarefa e escolhe os
+projetos locais. O helper nao descompacta, importa nem concede GO.
+
+## Configuracao
+
+Use a mesma versao do harness nas duas maquinas, com os projetos locais incluidos
+no workspace salvo. Para importar, os destinos dos registros/recibos precisam
+estar livres; confira os [conflitos](#conflitos-e-limites) antes de inicializar um
+registro para o projeto recebido. O ZIP nao substitui a configuracao da maquina.
+
+## Uso
+
+### Qual ponto compartilhar
 
 | Ponto escolhido | Conteudo do pacote | Continuidade do colega |
 | --- | --- | --- |
@@ -26,7 +53,7 @@ Revise os anexos e use o canal de compartilhamento aprovado pela sua equipe.
 Configuracao da maquina, settings Maven, caches e permissoes nao sao coletados.
 O filtro de nomes de credenciais nao substitui a revisao do conteudo dos anexos.
 
-## Na maquina de quem recebe
+### Na maquina de quem recebe
 
 1. Atualize o harness para a mesma versao usada na origem e abra um workspace
    salvo com o codigo dos projetos locais. Configure as ferramentas desta maquina.
@@ -58,7 +85,12 @@ registrada: obtenha o diagnostico completo ou uma nova proposta do colega.
 Nao converta MTA em EVIDENCIAS apenas porque a pasta original esta indisponivel.
 Copias consolidadas sao historicas; os anexos atuais ficam no indice editavel da issue.
 
-## Conflitos e limites
+**Se as entradas mudaram:** a tarefa interrompe a retomada do plano importado;
+ela nao cria automaticamente uma revisao com Previous. Informe a mudanca ao
+orientador para organizar a reavaliacao da base e o preparo explicito adequado.
+Receber outro ZIP nao mescla essa revisao com o estado local existente.
+
+### Conflitos e limites
 
 - A primeira importacao exige destinos livres para os registros/recibos envolvidos.
   Mesmo um registro vazio ja existente gera conflito: confira o estado ou use
@@ -76,7 +108,7 @@ Copias consolidadas sao historicas; os anexos atuais ficam no indice editavel da
 - Caminhos de codigo e dados dentro de anexos/snapshots podem ser historicos.
   Use os indices locais, o caminho relativo e o simbolo para conferir o Source.
 
-## Uso explicito pela CLI
+### Uso explicito pela CLI
 
 Exportacao (o destino ZIP precisa ser novo e sua pasta deve existir):
 
@@ -113,3 +145,11 @@ plano/to-do, exporte o plano e importe em um terceiro ambiente de ensaio. Confir
 leitura, links e preparo de implementacao sem o MTA original. Reimporte o mesmo
 ZIP apos uma nota local no plano e confira que a nota permanece. Esse roteiro
 nao exige executar a corretiva nem concede aceite sobre a aplicacao.
+
+## Resultado e proximo passo
+
+Na exportacao, confira o ZIP e as lacunas informadas. Na importacao, use os caminhos
+devolvidos e o registro local: analise recebida permite continuar a categoria ou
+escolher uma ficha para planejar; proposta recebida segue para revisao de escopo/GO.
+Se preferir continuar sem helper, siga o [planejamento](planejamento-migracao.md#qual-caminho-seguir)
+ou a [priorizacao](priorizacao-issues.md#fatias-e-continuidade), conforme a etapa.
