@@ -20,7 +20,7 @@ Ele responde com **uma proxima acao**, motivo, caminho/mensagem prontos e result
 a conferir. Voce executa as tarefas, escolhe prioridades, concede GO e aceita o
 resultado. Nao precisa conhecer os nomes dos campos internos para pedir ajuda.
 
-Para recuperar uma issue ou conferir a base, configure as
+Para recuperar uma issue ou conferir a base pelas ferramentas opcionais, configure as
 [consultas MCP](tools/consultas-issues.md#configurar-mcp-no-codex-e-no-copilot).
 O helper pode chamar as tres ferramentas de leitura diretamente, sem terminal
 geral. Sem MCP, continua pela leitura direta dos arquivos e pelo fluxo habitual
@@ -50,6 +50,12 @@ As instrucoes ficam em `.agents/skills` no repositorio, local reconhecido por
 [Copilot no VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills).
 A descoberta depende do cliente e da pasta aberta. Nao e necessario regenerar
 o workspace para acrescentar a skill.
+
+O helper tambem orienta a [instalacao do Node em pasta fixa e configuracao MCP](tools/consultas-issues.md#instalar-node-em-pasta-fixa).
+Informe a versao atual, pasta escolhida e etapa ja realizada; veja a
+[mensagem de exemplo](tools/consultas-issues.md#orientacao-com-o-helper).
+Essa orientacao de ambiente nao exige selecionar projeto, MTA ou criar registro.
+O desenvolvedor executa os comandos e retorna com o resultado para o proximo passo.
 
 ### Se a skill ou o agente nao aparecer
 

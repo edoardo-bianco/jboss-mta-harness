@@ -1,6 +1,6 @@
 ---
 name: orientar-migracao
-description: Orienta uma etapa da migracao de aplicacoes com o JBoss MTA Harness, recuperando escolhas e evidencias dos arquivos. Use para iniciar, priorizar, planejar ou retomar o trabalho, inclusive contexto recebido; orienta sem executar tarefas ou corretivas.
+description: Orienta uma etapa da migracao de aplicacoes com o JBoss MTA Harness, recuperando escolhas e evidencias dos arquivos. Use para preparar o ambiente, iniciar, priorizar, planejar ou retomar o trabalho, inclusive contexto recebido; orienta sem executar tarefas ou corretivas.
 ---
 
 # Orientar a migracao pelo estado efetivo
@@ -28,6 +28,15 @@ especialistas nao subdelegam. Use apoio apenas quando necessario a etapa e permi
 na sessao. Skill aplicada nao comprova delegacao: relate somente chamadas reais.
 
 ## Identificar e ler o contexto
+
+Se o pedido for somente instalar/configurar Node ou MCP do harness, siga a
+[configuracao MCP](../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa)
+diretamente, sem recuperar contexto de migracao. Oriente uma etapa por vez: versao/arquitetura,
+ZIP em pasta fixa, conferencia de node/npm, dependencias, configurador, raizes e
+descoberta no cliente. Reaproveite caminhos/resultados informados e pergunte apenas
+o que faltar para o proximo passo. Nao exija projeto, MTA ou registro para esse
+preparo. Forneca comando e resultado esperado para o desenvolvedor executar;
+nao instale, configure ou amplie permissoes pelo helper. MCP permanece opcional.
 
 1. Consulte [AGENTS.md](../../../AGENTS.md) e o caminho pertinente no
    [guia do desenvolvedor](../../../doc/guias/harness-migracao-desenvolvedor.md).

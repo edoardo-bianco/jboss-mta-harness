@@ -1,5 +1,13 @@
 # To-do do agente: evolucao do harness
 
+## Guia de instalacao Node e apoio do helper - 2026-10-06
+
+- [x] Conferir checkout limpo e localizar guia e instrucoes comuns dos helpers.
+- [x] Detalhar ZIP/pasta fixa e vincular configuracao nos guias de entrada.
+- [x] Alinhar skill/papel de preparo para orientar Node/MCP sem exigir migracao.
+- [x] Conferir 382 links, comandos, 18 perfis/prompts e skill; salvar incremento
+  documental em commit local, mantendo pendente o ensaio na maquina de trabalho.
+
 ## Auditoria de coerencia da entrega - 2026-10-06
 
 - [x] Conferir raiz/branch/HEAD e registrar escopo da auditoria.

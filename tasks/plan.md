@@ -1,5 +1,24 @@
 # Plano do agente: evolucao do harness
 
+## Guia de instalacao Node e apoio do helper - 2026-10-06
+
+Pedido: detalhar a instalacao Node em pasta fixa na configuracao do guia e permitir
+que o helper acompanhe esse preparo. Evolucao documental do harness; retomar
+harness/consultas-issues limpa em 9d25965. Concentrar ZIP, estrutura da pasta,
+verificacao de versoes e configuracao MCP no guia de consultas. Workspace e
+orientacao encaminham a essa secao; skill comum e papel de preparo reconhecem
+duvidas de Node/MCP sem exigir projeto, MTA ou registro. O desenvolvedor executa
+os comandos; helper orienta uma etapa por vez. Manter MCP opcional e permissoes.
+Verificar links, comandos existentes, metadados dos perfis e validacao da skill.
+Reversao: reverter o commit documental; nenhuma instalacao local nesta entrega.
+
+Concluido: guia com ZIP oficial/arquitetura, estrutura da pasta, node/npm por
+caminho absoluto, dependencias e configurador, mais exemplo de pedido ao helper.
+Guias de workspace/orientacao vinculados; skill comum e papel de preparo ajustados
+sem alterar perfis/permissoes. Verificacao documental: 382 links locais sem erros,
+18 perfis/prompts preservados, 25 tarefas/comandos conferidos e skill aprovada
+pelo validador oficial. Diff sem erros; scripts/runtime permanecem inalterados.
+
 ## Auditoria de coerencia da entrega - 2026-10-06
 
 Pedido: auditar implementacao, README, guias, agentes e skill. Retomar branch

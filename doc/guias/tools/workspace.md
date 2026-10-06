@@ -67,6 +67,11 @@ de reutilizacao da etapa 3, sem repetir a analise apenas para preparar a propost
 Tambem pode planejar com issues e evidencias fornecidas, sem pacote MTA completo;
 nesse caso siga a etapa 4 do guia principal.
 
+Para ativar as consultas MCP opcionais, siga a [instalacao do Node em pasta fixa](consultas-issues.md#instalar-node-em-pasta-fixa)
+e depois a configuracao dos clientes no mesmo guia. Node 18 pode permanecer no
+PATH para outros projetos. O [helper acompanha esse preparo](consultas-issues.md#orientacao-com-o-helper)
+uma etapa por vez; priorizacao e planejamento continuam sem MCP quando indisponivel.
+
 Aplicacoes e playgrounds ficam fora do repositorio do harness e sao adicionados
 ao workspace pelo desenvolvedor. JBoss 7.1/7.4 podem permanecer
 nas pastas onde foram extraidos; seus caminhos sao opcionais nesta primeira etapa.

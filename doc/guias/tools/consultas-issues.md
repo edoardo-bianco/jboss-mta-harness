@@ -97,20 +97,52 @@ O cliente inicia o processo quando precisa; nao ha servico Windows, porta HTTP,
 JBoss ou MTA a iniciar. A primeira instalacao exige acesso ao registro npm
 permitido pela empresa. Depois, as consultas leem arquivos locais.
 
-Node 18 pode permanecer para outros projetos. Para usar outro executavel somente
-no MCP, extraia a distribuicao ZIP do [Node para Windows](https://nodejs.org/en/download/archive)
-em uma pasta fixa. No exemplo abaixo, ela e `C:\ferramentas\node20` e contem
-node.exe, npm.cmd e node_modules da distribuicao. Nao e preciso alterar PATH.
+### Instalar Node em pasta fixa
 
-Na raiz do clone atualizado do harness:
+Node 18 pode permanecer para outros projetos. Use a distribuicao ZIP para ter
+um executavel separado para MCP, sem alterar o PATH nem o Node padrao da maquina.
+
+1. Confira a arquitetura do Windows em **Configuracoes > Sistema > Sobre > Tipo
+   de sistema**. Para x64, baixe o [Node 20.20.2 ZIP oficial](https://nodejs.org/download/release/v20.20.2/node-v20.20.2-win-x64.zip),
+   versao usada no ensaio do harness. Para outra arquitetura ou versao >=20,
+   escolha o ZIP Windows correspondente no [arquivo oficial do Node](https://nodejs.org/en/download/archive).
+2. Extraia o ZIP e coloque **todo o conteudo da pasta interna** em uma pasta fixa
+   permitida na maquina, por exemplo `C:\ferramentas\node20`. Preserve todos os
+   arquivos, inclusive `node_modules`; copiar somente node.exe nao inclui npm.
+3. Confira se os executaveis estao diretamente nessa pasta, sem um nivel extra
+   como `node20\node-v20.20.2-win-x64\node.exe`:
+
+```text
+C:\ferramentas\node20\
+  node.exe
+  npm.cmd
+  npx.cmd
+  node_modules\
+  ...
+```
+
+No PowerShell, confira as duas versoes pelo caminho completo:
 
 ```powershell
 & 'C:\ferramentas\node20\node.exe' --version
+& 'C:\ferramentas\node20\npm.cmd' --version
+```
+
+Para o ZIP do exemplo, o primeiro comando deve mostrar `v20.20.2`; o segundo,
+a versao do npm incluido. `node --version` sem caminho continua usando o Node
+anterior do PATH. Se usar outra pasta, ajuste todos os caminhos dos exemplos.
+
+### Instalar dependencias e configurar os clientes
+
+Abra o PowerShell na raiz do clone atualizado do harness, onde existe
+`mcp\issues\package-lock.json`, e execute:
+
+```powershell
 & 'C:\ferramentas\node20\npm.cmd' ci --prefix .\mcp\issues --ignore-scripts
 & 'C:\ferramentas\node20\node.exe' .\mcp\issues\configure.mjs
 ```
 
-Se o Node adequado ja esta no PATH, use `node`, `npm.cmd` e `node` respectivamente.
+Se o Node adequado ja esta no PATH, use `npm.cmd` e `node` respectivamente.
 O configurador grava o caminho real do executavel utilizado, sem trocar Node
 global. Cria/mescla `.codex/config.toml` e `.vscode/mcp.json` somente neste clone;
 preserva outros servidores e recusa uma entrada harnessIssues diferente.
@@ -153,6 +185,22 @@ pode impedir MCP mesmo com Node instalado.
 
 Referencias: [MCP no Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli),
 [configuracao MCP no VS Code](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
+
+### Orientacao com o helper
+
+No Codex, selecione `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+Voce pode pedir ajuda antes de ter projeto, MTA ou registro preparado:
+
+```text
+Tenho Node 18 e quero configurar o MCP do harness com Node 20 em pasta fixa.
+Oriente uma etapa por vez, mantendo meu Node atual. Ainda nao extrai o ZIP.
+```
+
+Informe o que ja fez, a pasta escolhida e o resultado do comando solicitado.
+O helper consulta este guia, adapta os caminhos, explica o resultado esperado e
+ajuda a interpretar erros. Voce executa instalacao/comandos e ajusta os arquivos
+locais; o helper permanece orientador. Se MCP nao estiver disponivel, ele continua
+a priorizacao e o planejamento pela leitura dos arquivos, sem exigir essa instalacao.
 
 ### Uso pontual pelo npx
 
