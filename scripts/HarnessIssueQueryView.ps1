@@ -93,7 +93,7 @@ function Get-QueryDetail {
         $pageResult.Paging=[ordered]@{Total=$incidents.Count;Returned=1;Incident=$Incident;Page=$null;PageSize=$null;HasMore=$false}
     }
     $locationProject=if ($Base.Mta) {
-        [pscustomobject]@{Source=$Base.Project.Source;Mta=[pscustomobject]@{RunId=$Base.Mta.RunId;AnalysisSource=$Base.Mta.AnalysisSource;MtaOrigin=[pscustomobject]@{Run=$Base.Mta.Run}}}
+        [pscustomobject]@{Source=$Base.Project.Source;Mta=[pscustomobject]@{RunId=$Base.Mta.RunId;AnalysisSource=$Base.Mta.AnalysisSource;MtaOrigin=[pscustomobject]@{Run=(Get-QueryProperty $Base.Mta.MtaOrigin 'Run' $Base.Mta.Run)}}}
     } else {$null}
     $selected=@(foreach ($item in $pageResult.Items) {
         $offset++; $cuts=[Collections.Generic.List[object]]::new()

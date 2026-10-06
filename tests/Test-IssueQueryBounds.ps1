@@ -29,6 +29,14 @@ function Save-QueryCatalog {
     $receipt=$receiptJson | ConvertFrom-Json; $receipt.Projects[0].Mta.CatalogSha256=(Get-FileHash $catalog).Hash
     Write-HarnessJson $prepared.ContextPath $receipt
 }
+$longUri=$incident.uri
+$incident.uri='file:///C:/historico/input/src/Classe.java'; Save-QueryCatalog
+$receipt=Get-Content $prepared.ContextPath -Raw | ConvertFrom-Json
+$receipt.Projects[0].Mta.MtaOrigin | Add-Member NoteProperty Run 'C:/historico' -Force
+Write-HarnessJson $prepared.ContextPath $receipt
+$origin=Query obter_issue @{Id=$issueId;Incident=1}
+Assert ($origin.Status -eq 'OK' -and $origin.Data.Incidents[0].Location.SourceCandidate -eq (Join-Path $source 'src/Classe.java')) 'Run historico explicito ignorado no mapeamento.'
+$incident.uri=$longUri
 Save-QueryCatalog
 $long=Query obter_issue @{Id=$issueId;Incident=1;MaxTextChars=128}
 Assert ($long.Status -eq 'OK' -and $long.Data.Incidents[0].Location.RelativePath.Length -eq 128) ('Localizacao nao limitada: '+($long | ConvertTo-Json -Depth 8 -Compress))
