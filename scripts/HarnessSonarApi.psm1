@@ -20,12 +20,14 @@ function Invoke-SonarApiGet {
         [Parameter(Mandatory = $true)][ValidateSet('api/system/status', 'api/components/show', 'api/project_analyses/search', 'api/ce/component', 'api/ce/task', 'api/issues/search', 'api/measures/component', 'api/qualitygates/project_status')][string]$Endpoint,
         [hashtable]$Query = @{},
         [ValidateRange(1, 120)][int]$TimeoutSeconds = 15,
-        [Threading.CancellationToken]$CancellationToken = [Threading.CancellationToken]::None
+        [Threading.CancellationToken]$CancellationToken = [Threading.CancellationToken]::None,
+        [ValidateSet('Bearer', 'Basic')][string]$AuthScheme = 'Bearer'
     )
     $client = $null
     $handler = $null
     $response = $null
     $token = $null
+    $credential = $null
     try {
         $base = Get-SonarServerBase $ServerUrl
         $token = [Environment]::GetEnvironmentVariable('SONAR_TOKEN', 'Process')
@@ -60,7 +62,10 @@ function Invoke-SonarApiGet {
         $client = New-Object Net.Http.HttpClient($handler)
         $client.Timeout = [TimeSpan]::FromSeconds($TimeoutSeconds)
         $client.MaxResponseContentBufferSize = 1MB
-        $client.DefaultRequestHeaders.Authorization = New-Object Net.Http.Headers.AuthenticationHeaderValue('Bearer', $token)
+        # SonarQube 9.9 Web API: token como usuario Basic, senha vazia.
+        # https://docs.sonarsource.com/sonarqube-server/9.9/extension-guide/web-api
+        $credential = if ($AuthScheme -eq 'Basic') { [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($token + ':')) } else { $token }
+        $client.DefaultRequestHeaders.Authorization = New-Object Net.Http.Headers.AuthenticationHeaderValue($AuthScheme, $credential)
         $response = $client.GetAsync($address, $CancellationToken).GetAwaiter().GetResult()
         if ([int]$response.StatusCode -ne 200) { throw 'HTTP failure.' }
         $bytes = $response.Content.ReadAsByteArrayAsync().GetAwaiter().GetResult()
@@ -75,6 +80,7 @@ function Invoke-SonarApiGet {
         throw 'SONAR_API_UNVERIFIED: request failed; details suppressed.'
     } finally {
         $token = $null
+        $credential = $null
         if ($null -ne $response) { $response.Dispose() }
         if ($null -ne $client) { $client.DefaultRequestHeaders.Clear(); $client.Dispose() }
         elseif ($null -ne $handler) { $handler.Dispose() }
@@ -121,7 +127,8 @@ function Wait-SonarComputeEngine {
         [AllowNull()][string]$BranchName,
         [ValidateRange(1, 3600)][int]$TimeoutSeconds = 300,
         [ValidateRange(1, 5000)][int]$PollMilliseconds = 1000,
-        [Threading.CancellationToken]$CancellationToken = [Threading.CancellationToken]::None
+        [Threading.CancellationToken]$CancellationToken = [Threading.CancellationToken]::None,
+        [ValidateSet('Bearer', 'Basic')][string]$AuthScheme = 'Bearer'
     )
     $deadline = $null
     try {
@@ -130,7 +137,7 @@ function Wait-SonarComputeEngine {
         $deadline.CancelAfter($TimeoutSeconds * 1000)
         while ($true) {
             $deadline.Token.ThrowIfCancellationRequested()
-            $reply = Invoke-SonarApiGet -ServerUrl $ServerUrl -Endpoint 'api/ce/task' -Query @{ id = $TaskId } -CancellationToken $deadline.Token
+            $reply = Invoke-SonarApiGet -ServerUrl $ServerUrl -Endpoint 'api/ce/task' -Query @{ id = $TaskId } -CancellationToken $deadline.Token -AuthScheme $AuthScheme
             $task = Get-SonarApiField $reply 'task'
             foreach ($field in @('id', 'type', 'componentKey', 'status')) {
                 if ((Get-SonarApiField $task $field) -isnot [string]) { throw 'Missing CE field.' }

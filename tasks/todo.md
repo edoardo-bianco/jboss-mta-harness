@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Autenticacao Sonar local e corporativo - 2026-10-07
+
+- [x] Confirmar diagnostico Basic/Bearer, merge MCP #16 e branch isolada da main.
+- [x] Reproduzir falta de Basic com teste de transporte HTTP real (RED: parametro ausente).
+- [x] Adicionar apiAuthScheme opcional com padrao Bearer e propagar em todo o fluxo.
+- [x] Testar modos, legado, configuracao invalida, redacao e protecoes HTTP.
+- [x] Executar quatro suites Sonar em PowerShell 5.1: todas PASS, API com 59 verificacoes.
+- [x] Atualizar modelo/guia com exemplo corporativo, caminhos e branch develop.
+- [x] Revisar diff e dois exemplos JSON; preparar incremento para PR separado do MCP.
+- [ ] Homologar novas coletas nos servidores local e corporativo com o operador.
+
 ## Referencias MCP nos agentes Copilot - 2026-10-07
 
 - [x] Conferir main a6929ab limpa e criar harness/corrigir-tools-copilot.

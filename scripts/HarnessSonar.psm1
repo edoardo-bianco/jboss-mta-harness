@@ -50,6 +50,11 @@ function Get-HarnessSonarSettings {
     }
     if (@($settings.PSObject.Properties.Name | Where-Object { $_ -match '(token|password|login|credential)' }).Count) { throw 'Remova credenciais do JSON. O token sera solicitado com entrada oculta.' }
     $url = Get-SonarServerBase $settings.serverUrl
+    $authScheme = 'Bearer'
+    if ($settings.PSObject.Properties['apiAuthScheme']) {
+        if ($settings.apiAuthScheme -isnot [string] -or $settings.apiAuthScheme -cnotin @('Bearer','Basic')) { throw 'sonar.apiAuthScheme deve ser Bearer ou Basic.' }
+        $authScheme = $settings.apiAuthScheme
+    }
     if ($settings.scannerVersion -cnotmatch '^5\.\d+\.\d+\.\d+$') { throw 'Use uma versao fixa 5.x do sonar-maven-plugin, compativel com seu servidor.' }
     if ($settings.ceTimeoutSeconds -isnot [int] -or $settings.ceTimeoutSeconds -lt 1 -or $settings.ceTimeoutSeconds -gt 3600) { throw 'ceTimeoutSeconds deve ser inteiro entre 1 e 3600.' }
     if ($settings.profiles -isnot [Array]) { throw 'sonar.profiles deve ser uma lista de perfis Maven.' }
@@ -65,17 +70,18 @@ function Get-HarnessSonarSettings {
         if ($file -match '["%!^&|<>\r\n]') { throw 'Caminho nao suportado pelo launcher Maven Windows.' }
         if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Arquivo ausente: $file" }
     }
-    [pscustomobject]@{ServerUrl=$url; Jdk=$jdk; Java=$files[0]; Maven=$files[2]; Pom=$files[3]; Version=$settings.scannerVersion; Timeout=$settings.ceTimeoutSeconds; Profiles=@($settings.profiles)}
+    [pscustomobject]@{ServerUrl=$url; AuthScheme=$authScheme; Jdk=$jdk; Java=$files[0]; Maven=$files[2]; Pom=$files[3]; Version=$settings.scannerVersion; Timeout=$settings.ceTimeoutSeconds; Profiles=@($settings.profiles)}
 }
 
 function Assert-SonarCurrentAnalysis {
-    param([string]$ServerUrl, [string]$ProjectKey, [string]$BranchName, [string]$AnalysisId)
+    param([string]$ServerUrl, [string]$ProjectKey, [string]$BranchName, [string]$AnalysisId,
+        [ValidateSet('Bearer','Basic')][string]$AuthScheme = 'Bearer')
     $query = @{project=$ProjectKey; p='1'; ps='1'}
     $queueQuery = @{component=$ProjectKey}
     if ($BranchName) { $query.branch=$BranchName; $queueQuery.branch=$BranchName }
-    $reply = Invoke-SonarApiGet $ServerUrl 'api/project_analyses/search' $query
+    $reply = Invoke-SonarApiGet $ServerUrl 'api/project_analyses/search' $query -AuthScheme $AuthScheme
     if (@($reply.analyses).Count -ne 1 -or $reply.analyses[0].key -cne $AnalysisId) { throw 'Analise atual diferente; metricas nao vinculadas.' }
-    $queue = Invoke-SonarApiGet $ServerUrl 'api/ce/component' $queueQuery
+    $queue = Invoke-SonarApiGet $ServerUrl 'api/ce/component' $queueQuery -AuthScheme $AuthScheme
     if (@($queue.queue).Count -gt 0 -or ($queue.PSObject.Properties['current'] -and $queue.current -and $queue.current.status -in @('PENDING','IN_PROGRESS'))) { throw 'Outra analise em processamento; metricas nao vinculadas.' }
 }
 
@@ -97,6 +103,7 @@ function Invoke-HarnessSonar {
         Project=$Context.Active.name; Source=$Context.Active.path; ProjectLabel=$Context.Active.label
         RunId=[guid]::NewGuid().ToString('N'); Phase=$Phase; PhaseOrigin='OPERATOR'
         ServerUrl=$settings.ServerUrl; ServerVersion=$null; ProjectKey=$ProjectKey; BranchName=$BranchName
+        ApiAuthScheme=$settings.AuthScheme
         ScannerVersion=$settings.Version; ScannerJavaHome=$settings.Jdk; ScannerJavaVersion=$null; MavenVersion=$null
         ApplicationJavaHome=$Context.Config.tools.applicationJdk8Home; MavenHome=$Context.Config.tools.applicationMavenHome
         SettingsPath=$Context.Config.tools.applicationMavenSettingsPath; Profiles=$settings.Profiles
@@ -138,11 +145,11 @@ function Invoke-HarnessSonar {
         if ($plain -match '[\s\x00-\x1f\x7f]') { throw 'Token invalido.' }
         $env:SONAR_TOKEN=$plain; $plain=$null
         $result.Stage='SERVER'
-        $server=Invoke-SonarApiGet $settings.ServerUrl 'api/system/status'
+        $server=Invoke-SonarApiGet $settings.ServerUrl 'api/system/status' -AuthScheme $settings.AuthScheme
         if ($server.status -cne 'UP') { throw 'Servidor nao esta UP.' }
         $result.ServerVersion=Protect-SonarText ([string]$server.version)
         if ($baseline -and $baseline.ServerVersion -cne $result.ServerVersion) { throw 'Versao do servidor diferente do baseline.' }
-        $project=Invoke-SonarApiGet $settings.ServerUrl 'api/components/show' @{component=$ProjectKey}
+        $project=Invoke-SonarApiGet $settings.ServerUrl 'api/components/show' @{component=$ProjectKey} -AuthScheme $settings.AuthScheme
         if ($project.component.key -cne $ProjectKey -or $project.component.qualifier -cne 'TRK') { throw 'Projeto existente nao confirmado.' }
         $result.Stage='SCAN'
         $report=Join-Path $run 'report-task.txt'
@@ -162,19 +169,19 @@ function Invoke-HarnessSonar {
         $metadata=Read-SonarTaskReport $report $settings.ServerUrl $ProjectKey
         $result.TaskId=$metadata.TaskId
         Write-Host 'Relatorio enviado. Aguardando processamento no SonarQube...'
-        $task=Wait-SonarComputeEngine -ServerUrl $settings.ServerUrl -TaskId $metadata.TaskId -ProjectKey $ProjectKey -BranchName $BranchName -TimeoutSeconds $settings.Timeout
+        $task=Wait-SonarComputeEngine -ServerUrl $settings.ServerUrl -TaskId $metadata.TaskId -ProjectKey $ProjectKey -BranchName $BranchName -TimeoutSeconds $settings.Timeout -AuthScheme $settings.AuthScheme
         $result.AnalysisId=$task.AnalysisId; $result.AnalysisStatus='SUCCESS'
         $result.Stage='QUALITY_GATE'
-        $gate=Invoke-SonarApiGet $settings.ServerUrl 'api/qualitygates/project_status' @{analysisId=$task.AnalysisId}
+        $gate=Invoke-SonarApiGet $settings.ServerUrl 'api/qualitygates/project_status' @{analysisId=$task.AnalysisId} -AuthScheme $settings.AuthScheme
         if ($gate.projectStatus.status -cnotin @('OK','ERROR','WARN','NONE')) { throw 'Quality Gate desconhecido.' }
         $result.QualityGateStatus=$gate.projectStatus.status
         Write-SonarJson (Join-Path $run 'quality-gate.json') @{AnalysisId=$task.AnalysisId; ProjectKey=$ProjectKey; Result=$gate.projectStatus}
         $result.Stage='METRICS'
-        Assert-SonarCurrentAnalysis $settings.ServerUrl $ProjectKey $BranchName $task.AnalysisId
+        Assert-SonarCurrentAnalysis $settings.ServerUrl $ProjectKey $BranchName $task.AnalysisId -AuthScheme $settings.AuthScheme
         $metrics=@('ncloc','coverage','duplicated_lines_density','violations','blocker_violations','critical_violations','bugs','vulnerabilities','code_smells','new_violations','new_coverage','new_duplicated_lines_density')
         $query=@{component=$ProjectKey; metricKeys=($metrics -join ',')}
         if ($BranchName) { $query.branch=$BranchName }
-        $measures=Invoke-SonarApiGet $settings.ServerUrl 'api/measures/component' $query
+        $measures=Invoke-SonarApiGet $settings.ServerUrl 'api/measures/component' $query -AuthScheme $settings.AuthScheme
         if ($measures.component.key -cne $ProjectKey) { throw 'Metricas de outro projeto.' }
         # Consulta separada: servidores antigos podem recusar metricas MQR.
         # Critical no modo Standard nao e substituto automatico para High.
@@ -182,13 +189,13 @@ function Invoke-HarnessSonar {
         $severityMetrics=@('software_quality_blocker_issues','software_quality_high_issues')
         $query.metricKeys=$severityMetrics -join ','
         $severity=$null
-        try { $severity=Invoke-SonarApiGet $settings.ServerUrl 'api/measures/component' $query } catch { $severity=$null }
+        try { $severity=Invoke-SonarApiGet $settings.ServerUrl 'api/measures/component' $query -AuthScheme $settings.AuthScheme } catch { $severity=$null }
         if ($severity) {
             if ($severity.component.key -cne $ProjectKey) { throw 'Severidades de outro projeto.' }
             $allMeasures+=@($severity.component.measures)
         }
         $metrics+=$severityMetrics
-        Assert-SonarCurrentAnalysis $settings.ServerUrl $ProjectKey $BranchName $task.AnalysisId
+        Assert-SonarCurrentAnalysis $settings.ServerUrl $ProjectKey $BranchName $task.AnalysisId -AuthScheme $settings.AuthScheme
         $result.MissingMetrics=@($metrics | Where-Object { $_ -cnotin @($allMeasures | ForEach-Object { $_.metric }) })
         Write-SonarJson (Join-Path $run 'measures.json') @{AnalysisId=$task.AnalysisId; ProjectKey=$ProjectKey; BranchName=$BranchName; CollectedAtUtc=[DateTime]::UtcNow.ToString('o'); Measures=$allMeasures; MissingMetrics=$result.MissingMetrics}
         $result.MetricsStatus='MATCHED'
@@ -215,6 +222,7 @@ function Invoke-HarnessSonar {
             if ($result.ResultPath) {
                 Write-SonarJson $result.ResultPath $result
                 $lines=@('# Coleta SonarQube', '', "Projeto: $($result.ProjectLabel)", "Source: $($result.Source)", "RunId: $($result.RunId)", "Estado declarado pelo operador: $Phase", "Inicio: $(Format-HarnessDate $result.StartedAtUtc)", "Servidor: $($result.ServerUrl)", "Chave: $ProjectKey", "AnalysisId: $($result.AnalysisId)", "Resultado da operacao: $($result.Status)", "Processamento: $($result.AnalysisStatus)", "Quality Gate do servidor: $($result.QualityGateStatus)", "Criterios do harness: $($result.CriteriaStatus)", "Metricas: $($result.MetricsStatus)", "Dashboard: $($result.DashboardUrl)", '')
+                $lines += @("Autenticacao da API: $($result.ApiAuthScheme)", '')
                 if ($criteria) {
                     $lines+=@('| Criterio | Valor | Regra |', '| --- | --- | --- |', "| Blocker | $($criteria.BlockerIssues) | Reprova acima de zero |", "| High | $($criteria.HighIssues) | Reprova acima de zero |", "| Cobertura global (%) | $($criteria.Coverage) | Aviso abaixo de 85% |", "| Total de issues | $($criteria.TotalIssues) | Aviso se aumentar ante o baseline |", '', "Comparacao: $($criteria.BaselineComparison); diferenca de issues: $($criteria.IssuesDelta)", "Baseline selecionado: $($criteria.BaselineResultPath)", '')
                     foreach ($message in $criteria.Failures) { $lines+='REPROVADO: ' + $message }

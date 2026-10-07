@@ -29,6 +29,7 @@ try {
         Requests = (New-Object 'Collections.Concurrent.ConcurrentQueue[string]')
         Responses = (New-Object 'Collections.Concurrent.ConcurrentQueue[object]')
         Token = $synthetic
+        ExpectedAuthorization = 'Bearer ' + $synthetic
     })
     $listener = New-Object Net.Sockets.TcpListener([Net.IPAddress]::Loopback, 0)
     $listener.Start()
@@ -51,9 +52,11 @@ while (-not $state.Stop) {
             if ([string]::IsNullOrEmpty($line)) { break }
             if ($line.StartsWith('Authorization:')) { $authorization = $line.Substring(14).Trim() }
         }
-        if ($authorization -cne ('Bearer ' + $state.Token)) { $state.AuthValid = $false }
+        $authorized = $authorization -ceq $state.ExpectedAuthorization
+        if (-not $authorized) { $state.AuthValid = $false }
         $reply = $null
         if (-not $state.Responses.TryDequeue([ref]$reply)) { $reply = [pscustomobject]@{ Body = '{}'; Status = 500; Extra = '' } }
+        if (-not $authorized) { $reply = [pscustomobject]@{ Body = '{}'; Status = 401; Extra = '' } }
         if ($reply.Extra -eq 'delay') { Start-Sleep -Milliseconds 1500 }
         $body = [Text.Encoding]::UTF8.GetBytes($reply.Body)
         $crlf = [string][char]13 + [char]10
@@ -79,6 +82,34 @@ while (-not $state.Stop) {
     $requests = $state.Requests.ToArray()
     Assert-Test ($requests[1].Contains('branch=feature%2Fa%20b') -and $requests[1].Contains('component=fixture%3Akey')) 'query escaping'
     Assert-Test (-not ($requests -join ' ').Contains($synthetic)) 'no token in URL'
+    $basic = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($synthetic + ':'))
+    $state.ExpectedAuthorization = 'Basic ' + $basic
+    Queue-Response '{"status":"UP","version":"9.9.5"}'
+    $response = Invoke-SonarApiGet -ServerUrl $url -Endpoint 'api/system/status' -AuthScheme Basic
+    Assert-Test ($response.version -ceq '9.9.5' -and $state.AuthValid) 'Basic token username with empty password'
+    foreach ($ceStatus in @('PENDING', 'IN_PROGRESS', 'SUCCESS')) {
+        Queue-Response ('{"task":{"id":"CE1","type":"REPORT","componentKey":"fixture:key","status":"' + $ceStatus + '","analysisId":"A1","branch":"develop"}}')
+    }
+    $task = Wait-SonarComputeEngine -ServerUrl $url -TaskId 'CE1' -ProjectKey 'fixture:key' -BranchName develop -PollMilliseconds 1 -TimeoutSeconds 2 -AuthScheme Basic
+    Assert-Test ($task.AnalysisId -ceq 'A1' -and $state.AuthValid) 'Basic used in every CE poll'
+    foreach ($status in @(302, 401)) {
+        Queue-Response ('{"message":"' + $basic + '"}') $status ('Location: ' + $url + '/stolen')
+        $before = $state.Requests.Count
+        $rejected = $false
+        try { $null = Invoke-SonarApiGet -ServerUrl $url -Endpoint 'api/system/status' -AuthScheme Basic }
+        catch { $rejected = $_.Exception.Message -ceq 'SONAR_API_UNVERIFIED: request failed; details suppressed.' }
+        Assert-Test ($rejected -and $state.Requests.Count -eq $before + 1) 'Basic failure sanitized without redirect or auth fallback'
+    }
+    Assert-Test (-not ($state.Requests.ToArray() -join ' ').Contains($basic)) 'no Basic credential in URL'
+    $state.ExpectedAuthorization = 'Bearer ' + $synthetic
+    Queue-Response '{"status":"UP"}'
+    $response = Invoke-SonarApiGet -ServerUrl $url -Endpoint 'api/system/status' -AuthScheme Bearer
+    Assert-Test ($response.status -ceq 'UP' -and $state.AuthValid) 'explicit Bearer remains supported after Basic'
+    $before = $state.Requests.Count
+    $rejected = $false
+    try { $null = Invoke-SonarApiGet -ServerUrl $url -Endpoint 'api/system/status' -AuthScheme Digest }
+    catch { $rejected = $true }
+    Assert-Test ($rejected -and $state.Requests.Count -eq $before) 'invalid auth scheme sends nothing'
     $before = $state.Requests.Count
     $rejected = $false
     try { $null = Invoke-SonarApiGet -ServerUrl $url -Endpoint 'api/system/status' -Query @{ component = 'fixture' } }

@@ -24,8 +24,9 @@ Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
 
 Use **Terminal > Run Task > Aplicacao: analisar SonarQube**, da pasta `harness`.
 A mesma tarefa atende ao servidor Docker local e ao corporativo: o endpoint
-muda no JSON local. O harness nao instala/inicia Docker, cria projetos no Sonar
-nem altera a politica de qualidade do servidor.
+e o esquema de autenticacao da API ficam no JSON local. O harness nao
+instala/inicia Docker, cria projetos no Sonar nem altera a politica de qualidade
+do servidor.
 
 ## Orientacao com o helper
 
@@ -62,6 +63,7 @@ ao lado de `tools` e `mta`. Exemplo preenchido para Docker local:
 ```json
 "sonar": {
   "serverUrl": "http://localhost:9000",
+  "apiAuthScheme": "Bearer",
   "scannerJdkHome": "C:/ferramentas/jdk-21",
   "scannerVersion": "5.8.0.7211",
   "ceTimeoutSeconds": 300,
@@ -72,6 +74,7 @@ ao lado de `tools` e `mta`. Exemplo preenchido para Docker local:
 | Campo | Padrao no modelo | O que conferir na maquina do desenvolvedor |
 | --- | --- | --- |
 | `serverUrl` | `null` | Preencher localhost:9000 para Docker local ou URL HTTPS final do Sonar corporativo. |
+| `apiAuthScheme` | `Bearer` | Opcional: `Bearer` ou `Basic`. Ausencia preserva Bearer; para a API do SonarQube 9.9, use Basic. |
 | `scannerJdkHome` | `null` | Preencher caminho do JDK instalado e compativel com scanner/servidor. |
 | `scannerVersion` | `5.8.0.7211` | Versao fixa do plugin Maven; confirmar homologacao e acesso ao repositorio Maven corporativo. |
 | `ceTimeoutSeconds` | `300` | Tempo maximo de espera pelo processamento no servidor, em segundos. |
@@ -121,6 +124,63 @@ na configuracao normal aprovada do projeto/Sonar, nao em parametros arbitrarios
 do harness. Nao e preciso regenerar o workspace para mudar esse bloco.
 JSON antigo sem `sonar` continua servindo para build/MTA. Para incluir os padroes,
 abra **Workspace: configurar caminhos**; o scan apenas valida a configuracao.
+
+### Exemplo corporativo: SIMTR-api no SonarQube 9.9
+
+No `config/harness.local.json` da maquina de trabalho, atualize somente o bloco
+`sonar`, preservando os outros blocos. Exemplo com os valores informados pelo
+operador; JDK e scanner ainda precisam de validacao na coleta completa:
+
+```json
+"sonar": {
+  "serverUrl": "https://sonar-esteira.apps.produtos4.caixa",
+  "apiAuthScheme": "Basic",
+  "scannerJdkHome": "C:\\desenvolvimento\\Java\\jdk-25.0.3+9",
+  "scannerVersion": "5.8.0.7211",
+  "ceTimeoutSeconds": 300,
+  "profiles": []
+}
+```
+
+Os caminhos ja configurados em `tools` continuam sendo usados: Java da aplicacao
+em `C:\desenvolvimento\Java\jdk1.8.0_112`, Maven em
+`C:\desenvolvimento\apache-maven-3.9.12` e o override de settings informado pelo
+operador em `C:\desenvolvimento\apache-maven-3.9.12\conf\settings.xml`. Esse
+override atende a este ambiente; nas demais maquinas, o padrao continua `null`.
+
+1. Ative a conexao/DNS corporativo que permite acessar esse servidor.
+2. Confira que o projeto `C:\desenvolvimento\repositorio\jboss-7-jdk8\SIMTR-api`
+   esta entre as pastas do workspace e execute o build/testes conforme o roteiro abaixo.
+3. Execute **Aplicacao: analisar SonarQube** e selecione esse projeto.
+4. Informe a chave **SIMTR-api** e, no campo de branch Sonar, **develop**.
+   Chave e branch sao entradas da tarefa, nao campos adicionais do bloco `sonar`.
+5. Escolha ANTES/DEPOIS e eventual baseline conforme a coleta pretendida.
+   Informe o valor do token somente na entrada oculta do terminal.
+6. Confira `ApiAuthScheme: Basic`, `ProjectKey: SIMTR-api` e
+   `BranchName: develop` no novo `result.json`; acompanhe tambem `Stage`,
+   `ScannerExitCode`, `AnalysisStatus` e os criterios no resumo.
+
+Basic envia o token como usuario e senha vazia, conforme a
+[Web API do SonarQube 9.9](https://docs.sonarsource.com/sonarqube-server/9.9/extension-guide/web-api).
+O teste relatado neste ambiente confirmou HTTP 200 com Basic nas consultas de
+projeto com/sem develop; Bearer retornou HTTP 401. Isso comprova a autenticacao
+de leitura, mas nao a permissao de enviar analises nem a compatibilidade do scanner.
+As metricas MQR podem estar ausentes no 9.9; nesse caso os criterios permanecem
+UNVERIFIED, conforme a politica abaixo, mesmo depois de corrigida a autenticacao.
+
+`apiAuthScheme` escolhe a autenticacao das consultas do harness, incluindo CE,
+Gate e metricas. O scanner continua recebendo `SONAR_TOKEN` temporariamente.
+Nao ha troca automatica de esquema apos falha. Para continuar no Sonar local,
+preserve sua URL/JDK e `Bearer`; configuracoes sem esse campo mantem o mesmo
+comportamento. Campo presente com valor vazio, null ou diferente dos dois modos
+e recusado antes da execucao.
+
+No Windows PowerShell 5.1, `\u0026` no JSON representa `&`. A URL
+`/dashboard?id=SIMTR-api\u0026branch=develop` vira
+`/dashboard?id=SIMTR-api&branch=develop` ao ler o JSON e equivale a
+`/dashboard?branch=develop&id=SIMTR-api`. Esse escape nao exige trocar a URL
+do servidor nem remover a branch. Use o link do resumo ou o valor ja lido com
+`ConvertFrom-Json`.
 
 ## Uso
 
@@ -175,6 +235,7 @@ Git e apenas informativo. Mudancas nas entradas durante o scan invalidam a colet
 
 | Campo | Significado |
 | --- | --- |
+| ApiAuthScheme | Esquema usado nas consultas do harness: Bearer ou Basic; nao contem credencial. |
 | ScannerExitCode | Saida do Maven; zero nao confirma o processamento nem o Gate. |
 | AnalysisStatus | SUCCESS somente depois de CE confirmar task, projeto e analysisId. |
 | QualityGateStatus | Resultado do servidor para aquele analysisId; ERROR e reprovacao. |

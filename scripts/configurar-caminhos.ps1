@@ -51,7 +51,7 @@ try {
     Write-Host "Configuracao: $ConfigPath"
     Write-Host 'Para rodadas MTA em pasta curta externa, configure mta.runsPath = C:/mta-runs. Null preserva .harness/runs. Historico existente nao e movido.'
     Write-Host 'Preencha os caminhos em tools e salve. Os projetos das tarefas vem do workspace aberto; activeProject e um padrao opcional.'
-    Write-Host 'Confira sonar: serverUrl (local/corporativo), scannerJdkHome, scannerVersion (padrao 5.8.0.7211; validar compatibilidade), ceTimeoutSeconds e profiles. Token nunca vai no JSON; a tarefa solicita entrada oculta.'
+    Write-Host 'Confira sonar: serverUrl (local/corporativo), apiAuthScheme (padrao Bearer; Basic para API 9.9), scannerJdkHome, scannerVersion (padrao 5.8.0.7211; validar compatibilidade), ceTimeoutSeconds e profiles. Token nunca vai no JSON; a tarefa solicita entrada oculta.'
     Write-Host 'Confira eap.eap71/eap74: standaloneConfig, portOffset, debugPort e timeoutSeconds. Use Servidor: iniciar/parar/consultar estado/criar usuario JBoss e Aplicacao: deploy/rollback no JBoss; gere o workspace para atualizar os attaches Java.'
     Write-Host 'Para criar um workspace pelo JSON, preencha repositories e execute Workspace: gerar workspace. Para adicionar projetos no workspace existente, use Add Folder to Workspace.'
     if ($EditorPath) {

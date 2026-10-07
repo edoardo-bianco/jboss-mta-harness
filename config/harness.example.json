@@ -19,6 +19,7 @@
   },
   "sonar": {
     "serverUrl": null,
+    "apiAuthScheme": "Bearer",
     "scannerJdkHome": null,
     "scannerVersion": "5.8.0.7211",
     "ceTimeoutSeconds": 300,
