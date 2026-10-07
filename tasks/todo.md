@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Guia Node 24 na maquina de trabalho - 2026-10-07
+
+- [x] Conferir raiz/branch/HEAD e criar harness/guia-node24 da main d198ad4 limpa.
+- [x] Conferir distribuicao oficial e recuperar caminho/versoes informados.
+- [x] Atualizar guia: Node 24.21.0, pasta node-24, verificacao e comandos MCP.
+- [x] Revisar links, sintaxe dos quatro blocos PowerShell, quatro comandos com o
+  caminho informado e diff; salvar incremento documental em commit local.
+- [x] Registrar relato de execucao: Node v24.21.0 e npm 11.19.0 na maquina de trabalho.
+- [ ] Continuar ensaio humano: instalar dependencias, configurar clientes e chamar
+  auditar_base, listar_issues e obter_issue; versoes exibidas nao encerram esse teste.
+
 ## Guia de instalacao Node e apoio do helper - 2026-10-06
 
 - [x] Conferir checkout limpo e localizar guia e instrucoes comuns dos helpers.

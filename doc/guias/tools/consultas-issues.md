@@ -101,19 +101,24 @@ permitido pela empresa. Depois, as consultas leem arquivos locais.
 
 Node 18 pode permanecer para outros projetos. Use a distribuicao ZIP para ter
 um executavel separado para MCP, sem alterar o PATH nem o Node padrao da maquina.
+Os exemplos usam **Node 24.21.0 LTS** em
+`C:\desenvolvimento\ferramentas\node-24`, pasta adotada no ensaio da maquina de
+trabalho. Node >=20 continua sendo o requisito tecnico; para uma instalacao
+nova, use uma [linha LTS com suporte](https://nodejs.org/en/about/previous-releases).
 
 1. Confira a arquitetura do Windows em **Configuracoes > Sistema > Sobre > Tipo
-   de sistema**. Para x64, baixe o [Node 20.20.2 ZIP oficial](https://nodejs.org/download/release/v20.20.2/node-v20.20.2-win-x64.zip),
-   versao usada no ensaio do harness. Para outra arquitetura ou versao >=20,
-   escolha o ZIP Windows correspondente no [arquivo oficial do Node](https://nodejs.org/en/download/archive).
+   de sistema** e abra a [distribuicao oficial do Node 24](https://nodejs.org/dist/latest-v24.x/).
+   Baixe o ZIP Windows da versao **24.21.0** usado neste exemplo: para x64,
+   `node-v24.21.0-win-x64.zip`; para ARM64, `node-v24.21.0-win-arm64.zip`.
 2. Extraia o ZIP e coloque **todo o conteudo da pasta interna** em uma pasta fixa
-   permitida na maquina, por exemplo `C:\ferramentas\node20`. Preserve todos os
-   arquivos, inclusive `node_modules`; copiar somente node.exe nao inclui npm.
+   permitida na maquina, neste exemplo `C:\desenvolvimento\ferramentas\node-24`.
+   Preserve todos os arquivos, inclusive `node_modules`; copiar somente node.exe
+   nao inclui npm.
 3. Confira se os executaveis estao diretamente nessa pasta, sem um nivel extra
-   como `node20\node-v20.20.2-win-x64\node.exe`:
+   como `node-24\node-v24.21.0-win-x64\node.exe`:
 
 ```text
-C:\ferramentas\node20\
+C:\desenvolvimento\ferramentas\node-24\
   node.exe
   npm.cmd
   npx.cmd
@@ -124,13 +129,17 @@ C:\ferramentas\node20\
 No PowerShell, confira as duas versoes pelo caminho completo:
 
 ```powershell
-& 'C:\ferramentas\node20\node.exe' --version
-& 'C:\ferramentas\node20\npm.cmd' --version
+& 'C:\desenvolvimento\ferramentas\node-24\node.exe' --version
+& 'C:\desenvolvimento\ferramentas\node-24\npm.cmd' --version
 ```
 
-Para o ZIP do exemplo, o primeiro comando deve mostrar `v20.20.2`; o segundo,
-a versao do npm incluido. `node --version` sem caminho continua usando o Node
-anterior do PATH. Se usar outra pasta, ajuste todos os caminhos dos exemplos.
+O primeiro comando deve mostrar `v24.21.0`; o segundo, a versao do npm incluido.
+No ensaio da maquina de trabalho em 07/10/2026, o desenvolvedor informou
+`v24.21.0` e npm `11.19.0`. Essa conferencia comprova apenas a execucao de Node/npm;
+instalacao de dependencias, descoberta e chamadas MCP continuam a ser verificadas.
+Os testes automatizados anteriores foram executados em Node 20.20.2.
+`node --version` sem caminho continua usando o Node anterior do PATH.
+Se usar outra pasta, ajuste todos os caminhos dos exemplos.
 
 ### Instalar dependencias e configurar os clientes
 
@@ -138,10 +147,11 @@ Abra o PowerShell na raiz do clone atualizado do harness, onde existe
 `mcp\issues\package-lock.json`, e execute:
 
 ```powershell
-& 'C:\ferramentas\node20\npm.cmd' ci --prefix .\mcp\issues --ignore-scripts
-& 'C:\ferramentas\node20\node.exe' .\mcp\issues\configure.mjs
+& 'C:\desenvolvimento\ferramentas\node-24\npm.cmd' ci --prefix .\mcp\issues --ignore-scripts
+& 'C:\desenvolvimento\ferramentas\node-24\node.exe' .\mcp\issues\configure.mjs
 ```
 
+Execute o configurador depois que a instalacao das dependencias terminar sem erro.
 Se o Node adequado ja esta no PATH, use `npm.cmd` e `node` respectivamente.
 O configurador grava o caminho real do executavel utilizado, sem trocar Node
 global. Cria/mescla `.codex/config.toml` e `.vscode/mcp.json` somente neste clone;
