@@ -1,5 +1,37 @@
 # Plano do agente: evolucao do harness
 
+## Autenticacao Sonar local e corporativo - 2026-10-07
+
+Evolucao do harness em harness/sonar-autenticacao-compativel, criada de
+origin/main 34ee4e1 com o PR #16 MCP integrado e checkout limpo. Com DNS ativo,
+o operador comprovou no Sonar 9.9.5: Basic valida o token e consulta SIMTR-api
+com/sem develop (HTTP 200); Bearer retorna valid=False e HTTP 401 no projeto.
+O escape JSON \u0026 representa &; a ordem dos parametros do dashboard nao
+explica a falha SERVER anterior ao scanner.
+
+Preservar Bearer como padrao, inclusive em configuracoes antigas sem o novo
+campo opcional sonar.apiAuthScheme. Basic explicito usa token como usuario e
+senha vazia em todas as consultas HTTP, inclusive espera CE e verificacoes das
+metricas. Scanner continua com SONAR_TOKEN temporario; nao gravar credenciais.
+Registrar somente o esquema no resultado/resumo, documentar a escolha e validar
+configuracao, transporte HTTP real em loopback e propagacao no fluxo simulado.
+Preservar TLS, bloqueio de redirects, limites e redacao. Sem fallback automatico.
+
+Validar quatro suites Sonar em Windows PowerShell 5.1 e revisar diff. Homologacao
+com servidor local real e nova coleta corporativa permanecem humanas; testes
+simulados nao comprovam permissao de analise nem compatibilidade do scanner.
+Reversao: reverter o incremento; o padrao anterior permanece Bearer.
+
+Resultado: novo teste falhou inicialmente por ausencia do parametro Basic e
+passou apos a implementacao. Test-SonarApi (59 verificacoes), Test-Sonar,
+Test-SonarConfig e Test-SonarCriteria passaram em Windows PowerShell 5.1,
+fora do sandbox sem alterar ExecutionPolicy. Cobertos Basic/Bearer, ausencia
+do campo, modos invalidos, CE, dez chamadas por fluxo, defaults/overrides,
+redacao de token/Base64, recusa de redirects e ausencia de fallback.
+Revisados diff, propagacao e dois exemplos JSON do guia (local/corporativo).
+O exemplo corporativo usa URL, JDK/Maven/settings e projeto/branch informados;
+nao altera configuracoes locais nem declara homologacao do scanner.
+
 ## Referencias MCP nos agentes Copilot - 2026-10-07
 
 Evolucao do harness na branch harness/corrigir-tools-copilot, da main a6929ab

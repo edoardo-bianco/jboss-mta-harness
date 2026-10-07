@@ -17,20 +17,23 @@ $config.sonar.serverUrl = 'http://localhost:9000'
 $config.sonar.scannerJdkHome = "$area/jdk21"
 Write-HarnessJson "$fixture/config.json" $config
 $context = Read-HarnessConfig "$fixture/config.json" $fixture
+$context.Config.sonar.PSObject.Properties.Remove('apiAuthScheme')
 $module = Get-Module HarnessSonar
 # Executar o wrapper nativo com credencial sintetica e saida hostil, antes dos mocks.
 $native = Join-Path $area 'scanner simulado.cmd'
-[IO.File]::WriteAllText($native, "@echo off`r`necho token=%SONAR_TOKEN%`r`nexit /b 9`r`n")
+$nativeBasic = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes('synthetic-native-token-123456789:'))
+[IO.File]::WriteAllText($native, "@echo off`r`necho token=%SONAR_TOKEN%`r`necho Authorization: Basic $nativeBasic`r`nexit /b 9`r`n")
 $savedNativeToken = $env:SONAR_TOKEN
 try {
     $env:SONAR_TOKEN='synthetic-native-token-123456789'
     $captured = @(& $module { param($file) Invoke-SonarTool $file @() } $native 6>&1)
     Assert ($captured[-1].ExitCode -eq 9) 'Wrapper perdeu exit code nativo.'
     Assert (-not (($captured | Out-String).Contains($env:SONAR_TOKEN))) 'Wrapper exibiu token no terminal.'
+    Assert (-not (($captured | Out-String).Contains($nativeBasic))) 'Wrapper exibiu credencial Basic no terminal.'
     Assert (($captured | Out-String).Contains('[REDACTED]')) 'Wrapper nao mascarou saida.'
 } finally { $env:SONAR_TOKEN=$savedNativeToken }
 & $module {
-    $script:Mode = 'OK'; $script:Calls = @(); $script:MetricReads=0
+    $script:Mode = 'OK'; $script:Calls = @(); $script:MetricReads=0; $script:ApiCalls=@()
     function script:Invoke-SonarTool {
         param($Executable, $Arguments)
         $script:Calls += [pscustomobject]@{Args=$Arguments; Java=$env:JAVA_HOME; Token=$env:SONAR_TOKEN; Cwd=(Get-Location).Path; MavenArgs=$env:MAVEN_ARGS}
@@ -44,7 +47,8 @@ try {
         [pscustomobject]@{ExitCode=0; Output=$null}
     }
     function script:Invoke-SonarApiGet {
-        param($ServerUrl, $Endpoint, $Query)
+        param($ServerUrl, $Endpoint, $Query, $AuthScheme)
+        $script:ApiCalls += [pscustomobject]@{Endpoint=$Endpoint; AuthScheme=$AuthScheme}
         if ($script:Mode -eq 'AUTH_FAIL') { throw 'SONAR_API_UNVERIFIED' }
         switch ($Endpoint) {
             'api/system/status' { [pscustomobject]@{status='UP'; version='2026.1'} }
@@ -73,7 +77,8 @@ try {
         }
     }
     function script:Wait-SonarComputeEngine {
-        param($ServerUrl, $TaskId, $ProjectKey, $BranchName, $TimeoutSeconds)
+        param($ServerUrl, $TaskId, $ProjectKey, $BranchName, $TimeoutSeconds, $AuthScheme)
+        $script:ApiCalls += [pscustomobject]@{Endpoint='api/ce/task'; AuthScheme=$AuthScheme}
         if ($script:Mode -eq 'CE_FAIL') { throw 'SONAR_CE_UNVERIFIED' }
         [pscustomobject]@{TaskId=$TaskId; AnalysisId='analysis-1'}
     }
@@ -88,6 +93,8 @@ try {
     Assert ($result.CriteriaStatus -eq 'PASS' -and $result.BaselineComparison -eq 'PENDING') 'Criterios devem ser avaliados separadamente.'
     Assert ($result.Project -eq 'app' -and $result.AnalysisId -eq 'analysis-1' -and $result.Phase -eq 'ANTES') 'Identidade perdida.'
     Assert ($result.MissingMetrics -contains 'duplicated_lines_density') 'Metrica ausente deve ficar explicita.'
+    $apiCalls=@(& $module { $script:ApiCalls })
+    Assert ($result.ApiAuthScheme -ceq 'Bearer' -and $apiCalls.Count -eq 10 -and @($apiCalls | Where-Object AuthScheme -cne 'Bearer').Count -eq 0) 'Configuracao antiga deve manter Bearer em todas as consultas.'
     $run = Split-Path -Parent $result.ResultPath
     Assert ((Split-Path -Leaf $run) -match '^sonar_.*__[a-f0-9]{12}$') 'Convencao de pastas perdida.'
     $calls = @(& $module { $script:Calls }); $scan = $calls[-1]
@@ -96,6 +103,31 @@ try {
     Assert ($scan.Args -contains ('-Dsonar.java.jdkHome=' + $context.Config.tools.applicationJdk8Home)) 'Java da aplicacao nao foi informado.'
     Assert ($env:SONAR_TOKEN -eq 'previous-token' -and $env:JAVA_HOME -eq $oldJava -and $env:MAVEN_ARGS -eq 'deploy') 'Ambiente nao restaurado.'
     $hash = (Get-FileHash $result.ResultPath).Hash
+    foreach ($authScheme in @('Basic','Bearer')) {
+        $context.Config.sonar | Add-Member -NotePropertyName apiAuthScheme -NotePropertyValue $authScheme -Force
+        & $module { $script:ApiCalls=@(); $script:MetricReads=0 }
+        $authenticated=Invoke-HarnessSonar $context 'team:app' -BranchName develop -Phase ANTES -Token $secure
+        $apiCalls=@(& $module { $script:ApiCalls })
+        Assert ($authenticated.Status -eq 'SUCCEEDED' -and $authenticated.ApiAuthScheme -ceq $authScheme) 'Modo explicito nao concluiu coleta.'
+        Assert ($apiCalls.Count -eq 10 -and @($apiCalls | Where-Object AuthScheme -cne $authScheme).Count -eq 0) 'Esquema nao propagado a todas as consultas (CE, gate, metricas e correlacao).'
+        $record=Get-Content -Raw $authenticated.ResultPath | ConvertFrom-Json
+        Assert ($record.ApiAuthScheme -ceq $authScheme) 'Esquema nao registrado no recibo.'
+        Assert ($record.DashboardUrl -ceq 'http://localhost:9000/dashboard?id=team%3Aapp&branch=develop') 'Dashboard/branch nao sobreviveu ao JSON.'
+        $summary=Get-Content -Raw (Join-Path (Split-Path $authenticated.ResultPath) 'RESUMO.md')
+        Assert ($summary.Contains('Autenticacao da API: ' + $authScheme)) 'Esquema nao registrado no resumo.'
+        $scan=@(& $module { $script:Calls })[-1]
+        Assert ($scan.Args -contains '-Dsonar.branch.name=develop' -and ($scan.Args -join ' ') -notmatch 'sonar.token|sonar.login|squ_TEST') 'Branch/token incorretos no scanner.'
+    }
+    foreach ($invalidScheme in @($null, '', 'Digest', @('Basic'), 1)) {
+        $context.Config.sonar.apiAuthScheme=$invalidScheme
+        $callsBefore=@(& $module { $script:Calls }).Count
+        $apiBefore=@(& $module { $script:ApiCalls }).Count
+        $invalidRejected=$false
+        try { $null=Invoke-HarnessSonar $context 'team:app' -Token $secure }
+        catch { $invalidRejected=$_.Exception.Message -ceq 'sonar.apiAuthScheme deve ser Bearer ou Basic.' }
+        Assert ($invalidRejected -and @(& $module { $script:Calls }).Count -eq $callsBefore -and @(& $module { $script:ApiCalls }).Count -eq $apiBefore) 'Esquema invalido nao recusado antes de processos/rede.'
+    }
+    $context.Config.sonar.apiAuthScheme='Bearer'
     foreach ($mode in @('HIGH','LOW_COVERAGE','INCREASE','NO_MQR')) {
         & $module { param($m) $script:Mode=$m; $script:MetricReads=0 } $mode
         $next=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath $result.ResultPath
@@ -134,6 +166,8 @@ try {
     }
     foreach ($file in Get-ChildItem -LiteralPath "$fixture/.harness/sonar" -Recurse -File) {
         Assert (-not ([IO.File]::ReadAllText($file.FullName).Contains($secret))) 'Token persistido.'
+        $basicSecret=[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($secret + ':'))
+        Assert (-not ([IO.File]::ReadAllText($file.FullName).Contains($basicSecret))) 'Credencial Basic persistida.'
     }
     $lock = [IO.File]::Open("$fixture/.harness/mta.lock", 'OpenOrCreate', 'ReadWrite', 'None')
     try {
