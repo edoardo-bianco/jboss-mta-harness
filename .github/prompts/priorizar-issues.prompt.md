@@ -3,7 +3,7 @@ name: priorizar-issues
 description: Recomenda issues da categoria escolhida por risco, repetibilidade e alcance antes da escolha humana.
 argument-hint: Use o contexto preparado para os projetos do workspace; indique preferencias.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'search/usages', 'edit/createFile', 'edit/editFiles', "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'search/usages', 'edit/createFile', 'edit/editFiles', "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor

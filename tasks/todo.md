@@ -1,5 +1,15 @@
 # To-do do agente: evolucao do harness
 
+## Referencias MCP nos agentes Copilot - 2026-10-07
+
+- [x] Conferir main a6929ab limpa e criar harness/corrigir-tools-copilot.
+- [x] Localizar divergencia de maiusculas nas referencias e conferir fonte VS Code.
+- [x] Reproduzir referencias invalidas com teste de contrato.
+- [x] Corrigir seis helpers e seis prompts; documentar diagnostico e recuperacao.
+- [x] Validar referencias (dois testes de contrato PASS), revisar diff e salvar incremento.
+- [x] Registrar evidencia humana: servidor Running e Discovered 3 tools.
+- [ ] Confirmar selecao e uma chamada real no Copilot da maquina de trabalho.
+
 ## Raizes MCP pelo workspace e configuracao MTA - 2026-10-07
 
 - [x] Conferir main a8444c6 limpa e criar harness/mcp-raizes-workspace.

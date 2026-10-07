@@ -3,7 +3,7 @@ name: implementar-lote
 description: Implementa somente o lote com GO humano vigente e registra verificacoes reais.
 argument-hint: Use o prompt de implementacao preparado para o plano/to-do aprovados.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'read/problems', 'search/changes', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'search/usages', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', 'execute/getTerminalOutput', "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
+tools: ['agent', 'read/readFile', 'read/problems', 'search/changes', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'search/usages', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', 'execute/getTerminalOutput', "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor

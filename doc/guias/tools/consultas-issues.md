@@ -223,6 +223,31 @@ pode impedir MCP mesmo com Node instalado.
 Referencias: [MCP no Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli),
 [configuracao MCP no VS Code](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
 
+#### Servidor descoberto, mas consultas indisponiveis no helper
+
+`Running` seguido de `Discovered 3 tools` no log comprova inicializacao e
+descoberta, mas nao a selecao de tools para o agente ou uma consulta bem-sucedida.
+Se as tres consultas aparecem desmarcadas em **Configure Tools**, selecione
+individualmente `auditar_base`, `listar_issues` e `obter_issue` no grupo
+`harnessIssues` e confirme. No agente personalizado, confira o arquivo que o
+cliente informa que sera atualizado; preserve as demais ferramentas do perfil.
+
+Nos arquivos `.github/agents/*.agent.md` e `.github/prompts/*.prompt.md`, as
+referencias `tools` usam `harnessissues/auditar_base`,
+`harnessissues/listar_issues` e `harnessissues/obter_issue`, com prefixo minusculo.
+O VS Code [normaliza o nome do servidor para minusculas](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/mcp/common/mcpLanguageModelToolContribution.ts)
+e [compara as referencias de forma exata](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/chat/browser/tools/languageModelToolsService.ts).
+`harnessIssues/...` no frontmatter nao seleciona essas consultas. O nome do
+servidor em `.vscode/mcp.json` continua `harnessIssues`; nao precisa renomea-lo
+nem reinstalar Node/dependencias para corrigir a selecao do agente.
+
+Salve o arquivo do agente, abra novo chat com `migracao_helper` e confira a
+selecao. Valide uma chamada real de `auditar_base` com ContextPath selecionado.
+Se continuar indisponivel, confira se o agente ativo vem deste clone ou de outra
+copia/perfil e os nomes gravados pelo **Configure Tools** da versao instalada.
+O [guia de agentes personalizados do VS Code](https://code.visualstudio.com/docs/agent-customization/custom-agents)
+explica a lista `tools` e que referencias indisponiveis sao ignoradas.
+
 ### Orientacao com o helper
 
 No Codex, selecione `$orientar-migracao`; no Copilot, selecione `migracao_helper`.

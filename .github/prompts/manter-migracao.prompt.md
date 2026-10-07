@@ -3,7 +3,7 @@ name: manter-migracao
 description: Atualiza o registro local de issues preservando decisoes humanas, sem planejar ou executar corretivas.
 argument-hint: Use o contexto preparado; indique observacoes, evidencias ou documento recebido.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor

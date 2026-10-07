@@ -3,7 +3,7 @@ name: planejar-lotes
 description: Cria ou atualiza um lote a partir das escolhas do registro e da base MTA ou evidencias.
 argument-hint: Use as issues ANALISAR AGORA do registro; ajuste o objetivo se necessario.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor
