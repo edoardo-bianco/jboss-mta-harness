@@ -60,7 +60,7 @@ function Write-HarnessJson {
     [IO.File]::WriteAllText($Path, ($Value | ConvertTo-Json -Depth 12), (New-Object Text.UTF8Encoding($false)))
 }
 
-function Read-HarnessWorkspaceProjects {
+function Read-HarnessWorkspaceFile {
     param([string]$WorkspacePath, [string]$Root)
     $WorkspacePath = Resolve-HarnessPath $WorkspacePath $Root
     $json = Get-Content -LiteralPath $WorkspacePath -Raw -Encoding UTF8
@@ -74,6 +74,14 @@ function Read-HarnessWorkspaceProjects {
         if ($match.Value.StartsWith('"')) { $match.Value } else { '' }
     })
     $workspace = $json | ConvertFrom-Json
+    if (-not $workspace.PSObject.Properties['folders'] -or $workspace.folders -isnot [Array]) { throw 'Workspace deve conter folders como lista.' }
+    return $workspace
+}
+
+function Read-HarnessWorkspaceProjects {
+    param([string]$WorkspacePath, [string]$Root)
+    $WorkspacePath = Resolve-HarnessPath $WorkspacePath $Root
+    $workspace = Read-HarnessWorkspaceFile $WorkspacePath $Root
     $seen = @{}
     foreach ($folder in $workspace.folders) {
         if (-not $folder.PSObject.Properties['path']) { continue }
@@ -927,3 +935,4 @@ Export-ModuleMember -Function Get-HarnessMigrationPaths
 Export-ModuleMember -Function Get-HarnessIssuePaths, Get-HarnessIssueProjectPaths, Get-HarnessIssueReceipts, Initialize-HarnessIssueProject
 Export-ModuleMember -Function Assert-HarnessIssueFicha
 Export-ModuleMember -Function Open-HarnessEditor
+Export-ModuleMember -Function Read-HarnessWorkspaceFile

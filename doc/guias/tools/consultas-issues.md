@@ -163,20 +163,45 @@ O TOML resultante e validado antes de gravar. Se `mcp_servers` estiver em uma
 tabela inline que nao admite acrescentar a secao, o configurador preserva os
 arquivos e pede ajuste manual dessa tabela; nao sobrescreve outros servidores.
 
-Abra `config/mcp.local.json` criado pelo configurador e acrescente somente as
-pastas necessarias ao trabalho. `.` ja permite o clone do harness; fontes e MTA
-externos precisam de suas entradas, por exemplo:
+O configurador associa o workspace padrao e `config/harness.local.json` quando
+esses arquivos existem. Abra `config/mcp.local.json` e confira as referencias:
 
 ```json
 {
-  "allowedRoots": [".", "C:/fontes/meu-servico", "C:/analises/mta-meu-servico"],
+  "allowedRoots": ["."],
+  "workspacePath": "jboss-mta-harness.local.code-workspace",
+  "harnessConfigPath": "config/harness.local.json",
   "timeoutMs": 60000
 }
 ```
 
-Use caminhos locais, sem UNC/junctions. Inclua tambem anexos operacionais externos
-quando exigidos pelo recibo. Origem historica de um plano CONSOLIDATED nao precisa
-estar acessivel. Nao libere um disco inteiro para contornar um erro.
+As permissoes cobrem as **raizes e suas subpastas**. A cada consulta, o MCP le
+`folders` do workspace salvo e `mta.runsPath` da configuracao do harness. Adicionar
+ou remover uma pasta pelo VS Code e salvar o workspace atualiza o acesso na
+consulta seguinte. Novas rodadas sob a mesma raiz MTA nao exigem editar o MCP.
+Com `mta.runsPath = null`, as rodadas ficam em `.harness/runs`, coberta por `.`.
+O recibo selecionado continua determinando qual analise consultar; permissao de
+leitura nao escolhe rodada por recencia nem adiciona projetos ao planejamento.
+
+Se usar outro `.code-workspace` ou outro arquivo de configuracao, informe seu
+caminho nesses dois campos uma unica vez. O servidor nao detecta a janela ativa
+do editor. Referencias relativas usam a pasta do harness; `folders[].path` usa
+a pasta do workspace e `mta.runsPath` relativo usa a pasta do harness, como nas
+Run Tasks. Os arquivos referenciados sao entradas confiadas pelo desenvolvedor.
+
+Para atualizar uma configuracao MCP criada antes desse suporte, execute novamente
+o mesmo `configure.mjs` acima. Ele associa os arquivos padrao existentes e preserva
+referencias personalizadas, `allowedRoots`, timeout e outros servidores. Se os
+arquivos padrao ainda nao existem, informa a ausencia e permite configurar suas
+referencias depois. Configuracoes sem esses campos continuam usando a lista fixa.
+
+Use `allowedRoots` apenas para raizes adicionais explicitas, como anexos externos
+ou analises recebidas fora da raiz MTA configurada. Uma raiz presente nessa lista
+continua permitida mesmo que seja removida do workspace. Nao cadastre cada projeto
+ou cada rodada novamente. Use caminhos locais, sem UNC/ADS/junctions e sem liberar
+a raiz de um disco. Origem historica de um plano CONSOLIDATED nao precisa estar
+acessivel. Workspace/configuracao referenciado ausente ou invalido causa erro;
+nao ha fallback para permissoes antigas ou mais amplas.
 Root e raizes permitidas sao configuracao do desenvolvedor; o agente nao pode
 amplia-las pelos argumentos da consulta. `root` opcional no JSON muda a raiz
 dos registros; omitido, usa este clone. Normalmente mantenha o padrao.
@@ -186,6 +211,8 @@ variavel e sem o arquivo padrao o servidor assume leitura restrita ao clone.
 
 Reinicie a sessao do Codex na raiz do harness e reabra/recarregue o workspace
 do VS Code. Aceite a confianca/permissao normal de MCP quando o cliente solicitar.
+Esse reinicio e necessario ao mudar `mcp.local.json` ou a configuracao do cliente;
+editar os arquivos ja referenciados e salvar basta para atualizar suas raizes.
 No Codex, o projeto precisa estar confiavel para carregar sua configuracao local.
 No Copilot, confira `harnessIssues` na lista de servidores MCP e as ferramentas
 disponiveis no chat. Deve haver exatamente **auditar_base, listar_issues e
@@ -206,7 +233,8 @@ Quero configurar o MCP harnessIssues. Ja extraí o Node em
 C:\desenvolvimento\ferramentas\node-24 e conferi as versoes:
 Node v24.21.0 e npm 11.19.0. Meu Node padrao continua sendo o 18.
 Oriente a instalacao das dependencias e a configuracao, uma etapa por vez,
-aproveitando esse caminho e sem alterar o PATH.
+aproveitando esse caminho e sem alterar o PATH. As fontes estao nos folders
+do workspace salvo e a raiz MTA ja esta em mta.runsPath do harness.
 ```
 
 Informe o que ja fez, a pasta escolhida e o resultado do comando solicitado.
@@ -267,7 +295,8 @@ sao ignoradas; as ferramentas anteriores de leitura/escrita autorizada permanece
 | Sintoma | Conferencia |
 | --- | --- |
 | Servidor nao inicia | Caminho do Node >=20, npm ci concluido, caminho do server.mjs e arquivo HARNESS_MCP_CONFIG existente/valido na configuracao do cliente. |
-| ACCESS_DENIED | Pastas operacionais do recibo em allowedRoots; corrigir com o desenvolvedor, sem burlar pela CLI. |
+| ACCESS_DENIED | Conferir folders do workspace salvo, mta.runsPath e raizes adicionais explicitas; corrigir com o desenvolvedor, sem burlar pela CLI. |
+| CONFIG_ERROR | Conferir os arquivos referenciados por workspacePath/harnessConfigPath e seus caminhos; configuracao invalida nao reutiliza permissoes antigas. |
 | RUNTIME_ERROR | Windows PowerShell 5.1 disponivel e politica de scripts autorizada pela equipe; nao alterar ExecutionPolicy pelo agente. |
 | TIMEOUT ou BUSY | Consulta limitada ao tempo configurado (1..120 segundos) e a dois processos simultaneos; reduza o recorte e aguarde. |
 | HASH_MISMATCH, BASE_CHANGED ou IDENTITY_CONFLICT | Conferir origem e mudanca concreta. Repetir pela CLI nao torna a base valida. |

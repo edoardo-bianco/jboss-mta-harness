@@ -1,5 +1,17 @@
 # To-do do agente: evolucao do harness
 
+## Raizes MCP pelo workspace e configuracao MTA - 2026-10-07
+
+- [x] Conferir main a8444c6 limpa e criar harness/mcp-raizes-workspace.
+- [x] Localizar folders/JSONC, mta.runsPath e fronteira atual de AllowedRoots.
+- [x] Reproduzir a lacuna com testes de resolucao e atualizacao das raizes.
+- [x] Integrar resolucao de leitura a cada consulta, preservando limites e legado.
+- [x] Atualizar configurador com referencias aos arquivos locais, sem duplicar caminhos.
+- [x] Validar tres consultas via SDK, configuracao, alteracoes entre chamadas e regressao:
+  nove testes MCP Node20.20.2 e quatro scripts PowerShell 5.1 PASS.
+- [x] Alinhar guia, contrato e helper; conferir 37 links, sintaxe e diff; salvar incremento.
+- [ ] Homologar descoberta e consultas na maquina de trabalho com o desenvolvedor.
+
 ## Guia Node 24 na maquina de trabalho - 2026-10-07
 
 - [x] Conferir raiz/branch/HEAD e criar harness/guia-node24 da main d198ad4 limpa.

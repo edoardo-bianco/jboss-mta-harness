@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
 import { parse as parseToml } from 'smol-toml';
-import { harnessRoot } from './bridge.mjs';
+import { harnessRoot, resolveSettings } from './bridge.mjs';
 
 const names=['auditar_base','listar_issues','obter_issue'];
 function assertNoLinks(file) {
@@ -42,14 +42,18 @@ export function configureClients(root,nodePath) {
     throw new Error('harnessIssues ja configurado no VS Code com valores diferentes; revise a entrada existente.');
   }
   json.servers.harnessIssues=server;
-  const outputs=[[codex,newCodex],[vscode,JSON.stringify(json,null,2)+'\n']];
-  if (!existsSync(config)) outputs.push([config,JSON.stringify({allowedRoots:['.'],timeoutMs:60000},null,2)+'\n']);
+  const settings=existsSync(config) ? JSON.parse(readFileSync(config,'utf8').replace(/^\uFEFF/,'')) : {allowedRoots:['.'],timeoutMs:60000};
+  for (const [field,file] of [['workspacePath','jboss-mta-harness.local.code-workspace'],['harnessConfigPath','config/harness.local.json']]) {
+    if (settings[field] === undefined && existsSync(path.join(root,file))) settings[field]=file;
+  }
+  const resolved=resolveSettings(settings,root);
+  const outputs=[[codex,newCodex],[vscode,JSON.stringify(json,null,2)+'\n'],[config,JSON.stringify(settings,null,2)+'\n']];
   // Todos os conflitos sao detectados antes da primeira gravacao.
   for (const [file,content] of outputs) {
     mkdirSync(path.dirname(file),{recursive:true});
     if (!existsSync(file) || readFileSync(file,'utf8')!==content) writeFileSync(file,content,'utf8');
   }
-  return {codex,vscode,config,nodePath};
+  return {codex,vscode,config,nodePath,workspacePath:resolved.workspacePath ?? null,harnessConfigPath:resolved.harnessConfigPath ?? null};
 }
 
 if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta.url)) {
@@ -58,5 +62,6 @@ if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta
   }
   const result=configureClients(harnessRoot,realpathSync(process.execPath));
   console.log(JSON.stringify(result,null,2));
-  console.log('Inclua as pastas de fontes e MTA em allowedRoots de config/mcp.local.json. Reinicie os clientes e confira as tres tools.');
+  console.log('Confira workspacePath e harnessConfigPath em config/mcp.local.json. As raizes de folders e mta.runsPath serao lidas a cada consulta; allowedRoots fica para excecoes explicitas. Reinicie os clientes e confira as tres tools.');
+  if (!result.workspacePath || !result.harnessConfigPath) console.log('Arquivo padrao ausente: indique o workspace/configuracao em uso pelos campos acima, ou execute novamente este configurador depois de prepara-los.');
 }

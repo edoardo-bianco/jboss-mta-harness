@@ -1,5 +1,41 @@
 # Plano do agente: evolucao do harness
 
+## Raizes MCP pelo workspace e configuracao MTA - 2026-10-07
+
+Pedido: aproveitar folders do workspace salvo e mta.runsPath do harness como
+raizes de leitura, sem cadastrar novamente projetos ou cada rodada MTA. Evolucao
+do harness na branch harness/mcp-raizes-workspace, criada da main a8444c6 limpa.
+O MCP referencia os arquivos locais de workspace/configuracao escolhidos pelo
+desenvolvedor e rele suas raizes a cada consulta. A base consultada continua sendo
+o ContextPath explicito, sem escolher analise por recencia. allowedRoots permanece
+para excecoes explicitas e configuracoes antigas mantem o comportamento fixo.
+
+Incremento 1: testar e implementar resolucao somente leitura reutilizando o leitor
+de projetos do workspace; integrar a ponte MCP, preservar restricoes de caminhos
+e recusar configuracao invalida sem fallback. Incremento 2: configurador associa
+os arquivos padrao existentes ou caminhos explicitamente informados, preserva
+outros servidores/raizes e permite atualizar a configuracao local ja criada.
+Alinhar contrato, guia e orientador; validar regressao Node/PowerShell e SDK real.
+Cobrir adicao/remocao de projeto, nova subpasta MTA, mudanca da raiz, JSONC, pasta
+vizinha, UNC/ADS/junction, raiz de disco, arquivo ausente/invalido e ausencia de
+escrita nas consultas. Arquivos do workspace/configuracao sao entradas confiadas
+pelo desenvolvedor; argumentos das tools e recibos nao concedem novas permissoes.
+Reversao: reverter os commits e restaurar a configuracao MCP fixa quando adotada.
+Homologacao no cliente corporativo permanece humana; nenhum ajuste automatico
+da maquina de trabalho e realizado neste checkout.
+
+Resultado: referencias workspacePath/harnessConfigPath suportadas sem nova
+dependencia. O configurador associa arquivos padrao existentes e preserva
+referencias personalizadas/raizes extras. Leitor JSONC extraido para reuso; ponte
+recalcula permissoes por chamada, com CONFIG_ERROR para entradas invalidas.
+Arquivos referenciados nao sao reescritos pelas consultas. Guias, contrato e
+orientador alinhados para nao pedir novamente os caminhos de projetos/rodadas.
+Validacao: nove testes Node MCP PASS em Node20.20.2, incluindo SDK/stdio real,
+as tres consultas e mudancas de permissoes entre chamadas; Test-McpRoots,
+Test-Workspace, Test-IssueQueryRoots e Test-PlanningWithoutMcp PASS em PowerShell
+5.1. Conferidos 37 links locais, sintaxe dos cinco arquivos PowerShell alterados
+e diff. Nenhuma alegacao de homologacao no cliente corporativo ou teste Node24.
+
 ## Guia Node 24 na maquina de trabalho - 2026-10-07
 
 Pedido: atualizar o guia MCP para Node 24.21.0 em

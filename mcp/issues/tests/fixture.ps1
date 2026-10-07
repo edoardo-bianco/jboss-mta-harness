@@ -20,4 +20,4 @@ $updatedRegister=[IO.File]::ReadAllText($paths.MigrationPath).Replace('| DEV-LOG
 $settings=Join-Path $area 'mcp-config.json'
 Write-HarnessJson $settings @{root=$fixture;allowedRoots=@($area);timeoutMs=60000}
 $baseline=Invoke-HarnessIssueQuery -Root $fixture -ContextPath $plan.ContextPath -Action obter_issue -Id $issueId -Incident 138
-[Console]::Out.WriteLine((@{area=$area;root=$fixture;source=$source;context=$prepared.ContextPath;plan=$plan.ContextPath;id=$issueId;unicodeTitle=$unicodeTitle;settings=$settings;manualRoot=$manualRoot;manualPlan=$manualPlan.ContextPath;importRoot=$destination;importPlan=$received.ContextPath;baseline=$baseline} | ConvertTo-Json -Depth 50 -Compress))
+[Console]::Out.WriteLine((@{area=$area;root=$fixture;source=$source;run=$run;context=$prepared.ContextPath;plan=$plan.ContextPath;id=$issueId;unicodeTitle=$unicodeTitle;settings=$settings;manualRoot=$manualRoot;manualPlan=$manualPlan.ContextPath;importRoot=$destination;importPlan=$received.ContextPath;baseline=$baseline} | ConvertTo-Json -Depth 50 -Compress))

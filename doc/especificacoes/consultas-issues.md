@@ -134,7 +134,8 @@ argumentos da consulta; tools/list lista as tres ferramentas, nao as issues.
 [Contrato MCP de tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools).
 
 Annotations declaram leitura/idempotencia e ausencia de escrita/acesso remoto;
-nao sao controle de acesso. config/mcp.local.json define root, allowedRoots e
+nao sao controle de acesso. config/mcp.local.json define root, allowedRoots,
+workspacePath/harnessConfigPath opcionais e
 timeoutMs (1000..120000, padrao 60000). HARNESS_MCP_CONFIG permite selecionar outro
 arquivo pelo processo cliente; argumentos das tools nao podem mudar configuracao.
 Arquivo explicitamente indicado ausente/invalido impede iniciar o servidor, sem
@@ -143,6 +144,21 @@ o padrao permite somente a raiz do harness. O nucleo recebe AllowedRoots apenas
 pelo adaptador e confere caminhos operacionais internos antes do acesso. Escolha
 multi-projeto e lexical; Source nao selecionado nao exige permissao. Referencias
 historicas e candidatos de codigo nao sao abertos.
+
+Quando referenciados pelo desenvolvedor, o workspace salvo (JSONC) e a configuracao
+do harness sao relidos pela ponte PowerShell a cada consulta, sem inicializar
+registros nem executar preparadores. As pastas locais de folders e mta.runsPath
+ampliam a lista ate suas raizes, incluindo subpastas; mta.runsPath null usa a raiz
+ja permitida do harness. Sao no maximo 100 raizes distintas. Nao se copiam projetos
+ou rodadas para mcp.local.json. Remover uma pasta do workspace ou trocar a raiz
+MTA revoga a permissao anterior, salvo se tambem declarada em allowedRoots.
+Arquivo ausente/corrompido ou caminho invalido produz CONFIG_ERROR, sem fallback.
+Raiz de disco, UNC, ADS e junctions sao recusados. O leitor JSONC e compartilhado
+com as Run Tasks. mta.runsPath relativo continua ancorado no harness, mesmo com
+root alternativo para os registros; paths de folders sao relativos ao workspace.
+As tools nao recebem esses campos, nao alteram permissoes e continuam exigindo
+ContextPath explicito. A configuracao MCP e carregada ao iniciar o servidor;
+somente o conteudo dos arquivos referenciados e relido sem reinicio.
 
 O processo fixo Windows PowerShell 5.1 recebe JSON por stdin, sem shell,
 Invoke-Expression, perfil ou alteracao de ExecutionPolicy. PSModulePath do filho
@@ -164,6 +180,10 @@ harnessIssues conflitantes antes de gravar. Valida o TOML completo com
 nao reserializa configuracoes existentes. Tabelas inline que impedem acrescentar
 a secao exigem ajuste manual, sem gravacao parcial por esse conflito.
 Nao altera configuracao pessoal global.
+Em nova execucao, associa jboss-mta-harness.local.code-workspace e
+config/harness.local.json quando existentes; preserva referencias personalizadas,
+raizes explicitas e timeout. Ausencia dos arquivos padrao e informada, permitindo
+preparo Node/MCP antes do workspace. Referencias explicitas ausentes sao erro.
 Templates atuais e skill permitem somente as tres consultas; recibos/prompts
 historicos permanecem intactos. Ver [instalacao e uso por etapa](../guias/tools/consultas-issues.md#configurar-mcp-no-codex-e-no-copilot).
 
