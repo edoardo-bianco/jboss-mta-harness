@@ -248,6 +248,35 @@ copia/perfil e os nomes gravados pelo **Configure Tools** da versao instalada.
 O [guia de agentes personalizados do VS Code](https://code.visualstudio.com/docs/agent-customization/custom-agents)
 explica a lista `tools` e que referencias indisponiveis sao ignoradas.
 
+### Uso com DevSquad, outros agentes e Codex
+
+As Run Tasks preparam contexto e prompt; quem consulta MCP e o agente na execucao
+posterior desse prompt. As consultas nao sao exclusivas dos helpers.
+
+No Copilot Local, **Executar Prompt** usa `agent: devsquad` e a lista `tools` do
+arquivo preparado. Essa lista [tem prioridade sobre a lista do agente](https://code.visualstudio.com/docs/agent-customization/prompt-files#tool-list-priority).
+Por isso a corretiva abrange tambem `planejar-lotes`, `priorizar-issues`,
+`implementar-lote`, `revisar-lote`, `revisar-resultado` e `manter-migracao`.
+Somente anexar/ler o arquivo em um chat nao equivale a Executar Prompt. Um agente
+externo usado fora desse fluxo depende da propria lista de tools; a configuracao
+dos subagentes deve ser conferida antes de delegar consultas a eles.
+
+No Codex, as tres consultas sao disponibilizadas pelo servidor
+`mcp_servers.harnessIssues` de `.codex/config.toml`, com `enabled_tools` contendo
+os nomes simples `auditar_base`, `listar_issues` e `obter_issue`. A skill
+`using-agent-skills` orienta o trabalho e a escolha de skills; ela nao cadastra
+esse servidor nem substitui sua configuracao. Execute o prompt preparado na
+sessao Codex com MCP carregado. Veja [MCP no Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)
+e [o papel das skills](https://developers.openai.com/plugins/concepts/skills).
+
+Depois de atualizar o clone, prepare os prompts pelas tarefas usuais para usar
+os templates corrigidos. Copias antigas em `.harness/` preservam seus cabecalhos;
+nao sao reescritas pelo Git pull. Planejamento local pode gerar sucessor com
+Previous ao detectar template novo; priorizacao pendente pode pedir Recreate;
+contexto importado pode exigir reavaliacao explicita. Preserve recibos, planos,
+GO e historico; nao edite hashes para forcar retomada. Preparar implementacao
+gera um novo prompt para o plano selecionado e mantem os anteriores.
+
 ### Orientacao com o helper
 
 No Codex, selecione `$orientar-migracao`; no Copilot, selecione `migracao_helper`.

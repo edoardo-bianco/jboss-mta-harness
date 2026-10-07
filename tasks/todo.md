@@ -8,6 +8,9 @@
 - [x] Corrigir seis helpers e seis prompts; documentar diagnostico e recuperacao.
 - [x] Validar referencias (dois testes de contrato PASS), revisar diff e salvar incremento.
 - [x] Registrar evidencia humana: servidor Running e Discovered 3 tools.
+- [x] Conferir DevSquad nos prompts gerados de planejamento, priorizacao,
+  implementacao/revisao e allowlist do Codex: tres scripts PowerShell e oito testes Node PASS.
+- [x] Documentar uso com outros agentes, using-agent-skills e prompts antigos.
 - [ ] Confirmar selecao e uma chamada real no Copilot da maquina de trabalho.
 
 ## Raizes MCP pelo workspace e configuracao MTA - 2026-10-07

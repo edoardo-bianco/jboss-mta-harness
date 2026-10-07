@@ -56,6 +56,13 @@ Assert ($data.ProjectIndexPath -eq (Join-Path $fixture '.harness/projetos/indice
 Assert ($data.MigrationPath -eq $null -and $data.EvidenceIndexPath -eq $null) 'Contexto historico inventou registro/evidencias.'
 Assert (Test-Path -LiteralPath $prepared.ResultReviewPromptPath) 'Revisao do resultado nao preparada.'
 $reviewContent = [IO.File]::ReadAllText($prepared.ResultReviewPromptPath)
+foreach ($promptText in @($content, $reviewContent)) {
+    $frontmatter = [regex]::Match($promptText, '(?s)\A---\s*\r?\n(.*?)\r?\n---').Groups[1].Value
+    Assert ($frontmatter -match '(?m)^agent: devsquad\s*$') 'Implementacao/revisao perdeu o condutor DevSquad.'
+    $toolLine = [regex]::Match($frontmatter, '(?m)^tools: \[(.*?)\]').Groups[1].Value
+    $mcpTools = @([regex]::Matches($toolLine, '[''"](harnessissues/[^''"]+)[''"]', 'IgnoreCase') | ForEach-Object { $_.Groups[1].Value })
+    Assert (@(Compare-Object @('harnessissues/auditar_base','harnessissues/listar_issues','harnessissues/obter_issue') $mcpTools -CaseSensitive).Count -eq 0) 'Implementacao/revisao nao propagou as tres referencias MCP exatas.'
+}
 $reviewData = [regex]::Match($reviewContent, '(?s)```json\s*(\{.*?\})\s*```').Groups[1].Value | ConvertFrom-Json
 Assert ($reviewData.Operation -eq 'revisar-resultado' -and $reviewData.RequestId -eq $requestId -and $reviewData.PlanSnapshot -ceq $data.PlanSnapshot) 'Revisao nao pertence ao lote/contexto preparado.'
 Assert ($reviewData.TemplateSha256 -eq (Get-FileHash (Join-Path $templates 'revisar-resultado.prompt.md')).Hash) 'Revisao registra hash de template errado.'

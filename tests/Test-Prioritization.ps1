@@ -39,6 +39,11 @@ Assert ($receipt.Projects.Count -eq 3 -and $receipt.Projects[2].MigrationSnapsho
 Assert ($receipt.Projects[0].Source -eq $projects[0].path -and $receipt.Projects[0].MigrationSnapshot.Contains('r::1')) 'Registro nao vinculado ao Source.'
 Assert ($receipt.Projects[0].Diagnostics.Count -gt 0) 'Ausencia de origem MTA nao informada.'
 $promptText = [IO.File]::ReadAllText($prepared.PromptPath)
+$frontmatter = [regex]::Match($promptText, '(?s)\A---\s*\r?\n(.*?)\r?\n---').Groups[1].Value
+Assert ($frontmatter -match '(?m)^agent: devsquad\s*$') 'Priorizacao perdeu o condutor DevSquad.'
+$toolLine = [regex]::Match($frontmatter, '(?m)^tools: \[(.*?)\]').Groups[1].Value
+$mcpTools = @([regex]::Matches($toolLine, '[''"](harnessissues/[^''"]+)[''"]', 'IgnoreCase') | ForEach-Object { $_.Groups[1].Value })
+Assert (@(Compare-Object @('harnessissues/auditar_base','harnessissues/listar_issues','harnessissues/obter_issue') $mcpTools -CaseSensitive).Count -eq 0) 'Priorizacao nao propagou as tres referencias MCP exatas.'
 $selection = [regex]::Match($promptText, '(?s)```json\s*(\{[^`]*\})\s*```\s*$').Groups[1].Value | ConvertFrom-Json
 Assert ($selection.RequestId -eq $receipt.RequestId -and $selection.ContextPath -eq $prepared.ContextPath -and $selection.RankingPath -eq $prepared.RankingPath -and $selection.Percentage -eq 10) 'Prompt nao espelha o recibo preparado.'
 Assert ($receipt.ProjectIndexSnapshot -eq [IO.File]::ReadAllText($index) -and $receipt.ContractSnapshot -eq [IO.File]::ReadAllText((Join-Path $fixture 'doc/especificacoes/planejamento-copilot.md'))) 'Snapshots nao preservam o contexto.'
