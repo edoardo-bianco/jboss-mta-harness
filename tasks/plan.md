@@ -1,5 +1,15 @@
 # Plano do agente: evolucao do harness
 
+## Projeto generico no guia Sonar - 2026-10-07
+
+Evolucao documental em harness/guia-sonar-projeto-generico, criada da
+origin/main a5def36 limpa apos o merge do PR #17. Substituir o projeto concreto
+do exemplo por NOME-DO-PROJETO (pasta) e CHAVE-DO-PROJETO (chave Sonar), explicando
+o preenchimento. Conferir ausencia do nome anterior no guia e revisar o diff;
+o comportamento e a configuracao da coleta permanecem os validados no PR #17.
+Verificacao: nenhuma ocorrencia do nome anterior no guia, campos genericos
+conferidos em caminho/chave/URLs e git diff --check sem erros.
+
 ## Autenticacao Sonar local e corporativo - 2026-10-07
 
 Evolucao do harness em harness/sonar-autenticacao-compativel, criada de
