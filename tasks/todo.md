@@ -8,6 +8,8 @@
 - [x] Revisar links, sintaxe dos quatro blocos PowerShell, quatro comandos com o
   caminho informado e diff; salvar incremento documental em commit local.
 - [x] Registrar relato de execucao: Node v24.21.0 e npm 11.19.0 na maquina de trabalho.
+- [x] Conferir encaminhamento dos perfis a skill comum e atualizar exemplos de
+  pedido ao helper e npx para Node 24; preservar testes historicos em Node20.20.2.
 - [ ] Continuar ensaio humano: instalar dependencias, configurar clientes e chamar
   auditar_base, listar_issues e obter_issue; versoes exibidas nao encerram esse teste.
 

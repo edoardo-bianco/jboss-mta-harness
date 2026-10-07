@@ -22,6 +22,10 @@ foi substituido pela distribuicao oficial Node 24 acessivel. Validacao documenta
 quatro blocos PowerShell sem erros de sintaxe, dois links locais existentes,
 quatro comandos com o caminho informado, entradas MCP existentes e diff sem erros.
 Testes de runtime nao foram repetidos nesta alteracao exclusivamente documental.
+Complemento: ao conferir a orientacao do migracao_helper, alinhar tambem a
+mensagem de exemplo ao preparo ja realizado e o uso pontual de npx a Node 24.
+Os perfis Codex/Copilot ja encaminham a skill comum, que referencia este guia;
+nenhuma mudanca de permissoes ou de comportamento do helper e necessaria.
 
 ## Guia de instalacao Node e apoio do helper - 2026-10-06
 

@@ -202,8 +202,11 @@ No Codex, selecione `$orientar-migracao`; no Copilot, selecione `migracao_helper
 Voce pode pedir ajuda antes de ter projeto, MTA ou registro preparado:
 
 ```text
-Tenho Node 18 e quero configurar o MCP do harness com Node 20 em pasta fixa.
-Oriente uma etapa por vez, mantendo meu Node atual. Ainda nao extrai o ZIP.
+Quero configurar o MCP harnessIssues. Ja extraí o Node em
+C:\desenvolvimento\ferramentas\node-24 e conferi as versoes:
+Node v24.21.0 e npm 11.19.0. Meu Node padrao continua sendo o 18.
+Oriente a instalacao das dependencias e a configuracao, uma etapa por vez,
+aproveitando esse caminho e sem alterar o PATH.
 ```
 
 Informe o que ja fez, a pasta escolhida e o resultado do comando solicitado.
@@ -215,10 +218,10 @@ a priorizacao e o planejamento pela leitura dos arquivos, sem exigir essa instal
 ### Uso pontual pelo npx
 
 ```powershell
-npx.cmd --yes --package=node@20 node --version
+npx.cmd --yes --package=node@24 node --version
 ```
 
-Isso baixa para o cache e usa Node 20 somente nesse comando; nao instala Node 20
+Isso baixa para o cache e usa Node 24 somente nesse comando; nao instala Node 24
 como padrao nem altera seu Node 18. Para o MCP, use a pasta fixa acima, evitando
 depender da permanencia do cache ou de download ao abrir o cliente.
 [Funcionamento do npx](https://docs.npmjs.com/cli/v10/commands/npx/).
