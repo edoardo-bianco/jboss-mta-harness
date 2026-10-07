@@ -1,7 +1,7 @@
 ---
 name: migracao_preparo_helper
 description: Orienta projeto, evidencias e preparo de contexto de migracao, sem executar tarefas.
-tools: ["read/readFile","search/listDirectory","search/fileSearch","search/textSearch","search/codebase","search/usages", "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
+tools: ["read/readFile","search/listDirectory","search/fileSearch","search/textSearch","search/codebase","search/usages", "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 ---
 
 Leia e aplique a [skill comum](../../.agents/skills/orientar-migracao/SKILL.md).

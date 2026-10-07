@@ -1,5 +1,47 @@
 # Plano do agente: evolucao do harness
 
+## Referencias MCP nos agentes Copilot - 2026-10-07
+
+Evolucao do harness na branch harness/corrigir-tools-copilot, da main a6929ab
+limpa. Relato corporativo: servidor Running e Discovered 3 tools; consultas
+desmarcadas no migracao_helper. As listas tools usam harnessIssues/... enquanto
+o VS Code normaliza o prefixo para harnessissues/... e resolve nomes com
+comparacao exata. Corrigir os seis helpers e seis prompts consumidores, mantendo
+somente as tres consultas explicitas, e documentar a selecao pelo cliente.
+Preservar o nome harnessIssues em mcp.json e a configuracao Node/raizes.
+
+Validar as referencias dos doze arquivos contra o catalogo MCP com teste de
+regressao (falha inicial reproduzida no migracao_helper), conferir diff e testes
+de contrato. Descoberta do servidor esta comprovada pelo log humano; chamada
+real das consultas no Copilot corporativo continua pendente. Reversao: reverter
+este incremento de configuracao, sem alterar o servidor ou dados da aplicacao.
+
+Fontes do diagnostico: normalizacao em mcpLanguageModelToolContribution.ts e
+resolucao exata em languageModelToolsService.ts do VS Code, referenciadas no guia
+doc/guias/tools/consultas-issues.md.
+
+Resultado: referencias corrigidas nos doze arquivos e guia atualizado. Os dois
+testes de contract.test.mjs passaram em Node20.20.2; regressao conferiu as tres
+consultas explicitas em cada perfil. Revisao do diff confirma mudanca somente
+do prefixo nas listas tools, sem ampliar capacidades. git diff --check passou.
+Validacao da selecao e chamada real no cliente corporativo permanece pendente.
+
+Complemento solicitado: conferir o executor DevSquad/Copilot e a skill
+using-agent-skills/Codex nas tarefas de priorizacao, planejamento e preparo de
+implementacao. Conferidos os preparadores reais: copiam os templates corrigidos
+com agent: devsquad e tools; no Copilot Local a lista do prompt prevalece. No
+Codex, o configurador mantem enabled_tools com os tres nomes simples. O guia
+distingue esses caminhos e orienta sobre copias de prompts anteriores, preservando
+o fluxo de sucessao/reavaliacao e os recibos historicos.
+
+Validacao ampliada: oito testes Node20.20.2 de contrato/configuracao PASS,
+incluindo a allowlist TOML; Test-Planning, Test-Prioritization e Test-Implementation
+PASS em PowerShell 5.1, conferindo ferramentas e DevSquad nos prompts gerados.
+O teste de planejamento passou a ler aspas simples e duplas e comparar nomes
+com maiusculas/minusculas significativas. Diff revisado sem mudancas de runtime,
+raizes, instalacao ou permissao de escrita dos helpers. Publicar a corretiva em
+PR para main; homologacao das consultas nos clientes permanece humana.
+
 ## Raizes MCP pelo workspace e configuracao MTA - 2026-10-07
 
 Pedido: aproveitar folders do workspace salvo e mta.runsPath do harness como

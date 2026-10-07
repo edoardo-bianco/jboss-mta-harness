@@ -1,7 +1,7 @@
 ---
 name: migracao_helper
 description: Conduz uma etapa da migracao por vez, recupera o registro e coordena helpers de leitura.
-tools: ["read/readFile","search/listDirectory","search/fileSearch","search/textSearch","search/codebase","search/usages","agent", "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
+tools: ["read/readFile","search/listDirectory","search/fileSearch","search/textSearch","search/codebase","search/usages","agent", "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 agents: ["migracao_preparo_helper","migracao_reconciliacao_helper","migracao_planejamento_helper","migracao_impacto_helper","migracao_implementacao_helper","devsquad.plan"]
 ---
 

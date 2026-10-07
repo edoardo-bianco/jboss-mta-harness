@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
 import path from 'node:path';
+import { parse as parseToml } from 'smol-toml';
 import { configureClients } from '../configure.mjs';
 import { harnessRoot, loadSettings } from '../bridge.mjs';
 
@@ -19,6 +20,8 @@ test('configuracao local preserva outros servidores, e idempotente e recusa conf
   assert.deepEqual(json.inputs,[]);
   assert.equal(json.servers.harnessIssues.command,process.execPath);
   const saved=readFileSync(codex,'utf8');
+  assert.deepEqual(parseToml(saved).mcp_servers.harnessIssues.enabled_tools,
+    ['auditar_base','listar_issues','obter_issue']);
   configureClients(root,process.execPath);
   assert.equal(readFileSync(codex,'utf8'),saved);
   json.servers.harnessIssues.command='custom.exe'; writeFileSync(copilot,JSON.stringify(json));

@@ -223,6 +223,60 @@ pode impedir MCP mesmo com Node instalado.
 Referencias: [MCP no Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli),
 [configuracao MCP no VS Code](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
 
+#### Servidor descoberto, mas consultas indisponiveis no helper
+
+`Running` seguido de `Discovered 3 tools` no log comprova inicializacao e
+descoberta, mas nao a selecao de tools para o agente ou uma consulta bem-sucedida.
+Se as tres consultas aparecem desmarcadas em **Configure Tools**, selecione
+individualmente `auditar_base`, `listar_issues` e `obter_issue` no grupo
+`harnessIssues` e confirme. No agente personalizado, confira o arquivo que o
+cliente informa que sera atualizado; preserve as demais ferramentas do perfil.
+
+Nos arquivos `.github/agents/*.agent.md` e `.github/prompts/*.prompt.md`, as
+referencias `tools` usam `harnessissues/auditar_base`,
+`harnessissues/listar_issues` e `harnessissues/obter_issue`, com prefixo minusculo.
+O VS Code [normaliza o nome do servidor para minusculas](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/mcp/common/mcpLanguageModelToolContribution.ts)
+e [compara as referencias de forma exata](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/chat/browser/tools/languageModelToolsService.ts).
+`harnessIssues/...` no frontmatter nao seleciona essas consultas. O nome do
+servidor em `.vscode/mcp.json` continua `harnessIssues`; nao precisa renomea-lo
+nem reinstalar Node/dependencias para corrigir a selecao do agente.
+
+Salve o arquivo do agente, abra novo chat com `migracao_helper` e confira a
+selecao. Valide uma chamada real de `auditar_base` com ContextPath selecionado.
+Se continuar indisponivel, confira se o agente ativo vem deste clone ou de outra
+copia/perfil e os nomes gravados pelo **Configure Tools** da versao instalada.
+O [guia de agentes personalizados do VS Code](https://code.visualstudio.com/docs/agent-customization/custom-agents)
+explica a lista `tools` e que referencias indisponiveis sao ignoradas.
+
+### Uso com DevSquad, outros agentes e Codex
+
+As Run Tasks preparam contexto e prompt; quem consulta MCP e o agente na execucao
+posterior desse prompt. As consultas nao sao exclusivas dos helpers.
+
+No Copilot Local, **Executar Prompt** usa `agent: devsquad` e a lista `tools` do
+arquivo preparado. Essa lista [tem prioridade sobre a lista do agente](https://code.visualstudio.com/docs/agent-customization/prompt-files#tool-list-priority).
+Por isso a corretiva abrange tambem `planejar-lotes`, `priorizar-issues`,
+`implementar-lote`, `revisar-lote`, `revisar-resultado` e `manter-migracao`.
+Somente anexar/ler o arquivo em um chat nao equivale a Executar Prompt. Um agente
+externo usado fora desse fluxo depende da propria lista de tools; a configuracao
+dos subagentes deve ser conferida antes de delegar consultas a eles.
+
+No Codex, as tres consultas sao disponibilizadas pelo servidor
+`mcp_servers.harnessIssues` de `.codex/config.toml`, com `enabled_tools` contendo
+os nomes simples `auditar_base`, `listar_issues` e `obter_issue`. A skill
+`using-agent-skills` orienta o trabalho e a escolha de skills; ela nao cadastra
+esse servidor nem substitui sua configuracao. Execute o prompt preparado na
+sessao Codex com MCP carregado. Veja [MCP no Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli)
+e [o papel das skills](https://developers.openai.com/plugins/concepts/skills).
+
+Depois de atualizar o clone, prepare os prompts pelas tarefas usuais para usar
+os templates corrigidos. Copias antigas em `.harness/` preservam seus cabecalhos;
+nao sao reescritas pelo Git pull. Planejamento local pode gerar sucessor com
+Previous ao detectar template novo; priorizacao pendente pode pedir Recreate;
+contexto importado pode exigir reavaliacao explicita. Preserve recibos, planos,
+GO e historico; nao edite hashes para forcar retomada. Preparar implementacao
+gera um novo prompt para o plano selecionado e mantem os anteriores.
+
 ### Orientacao com o helper
 
 No Codex, selecione `$orientar-migracao`; no Copilot, selecione `migracao_helper`.

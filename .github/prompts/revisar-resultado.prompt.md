@@ -3,7 +3,7 @@ name: revisar-resultado
 description: Analisa evidencias da corretiva e orienta verificacoes e aceite humano.
 argument-hint: Use o prompt preparado junto da implementacao e informe as evidencias.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor

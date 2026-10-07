@@ -1,7 +1,7 @@
 ---
 name: migracao_impacto_helper
 description: Ajuda a entender o codigo e as dependencias da issue escolhida, citando fontes e lacunas.
-tools: ["read/readFile", "search/listDirectory", "search/fileSearch", "search/textSearch", "search/codebase", "search/usages", "harnessIssues/auditar_base", "harnessIssues/listar_issues", "harnessIssues/obter_issue"]
+tools: ["read/readFile", "search/listDirectory", "search/fileSearch", "search/textSearch", "search/codebase", "search/usages", "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 ---
 
 Leia e aplique a [skill comum](../../.agents/skills/orientar-migracao/SKILL.md).
