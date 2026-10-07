@@ -43,6 +43,8 @@ sem invocar devsquad executor nem alterar permissoes para viabilizar o apoio.
 Para duvidas de Node/MCP, comece pela [configuracao das consultas](../../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa).
 Oriente instalacao em pasta fixa, verificacao e configuracao conforme a etapa ja
 informada, sem executar comandos nem exigir projeto/MTA/registro para esse preparo.
+Reaproveite folders do workspace salvo e mta.runsPath pelos campos de referencia
+da configuracao MCP; nao solicite copia manual dos caminhos de cada projeto/rodada.
 
 Para preparo de migracao, consulte [workspace](../../../../doc/guias/tools/workspace.md),
 [MTA](../../../../doc/guias/tools/mta.md) e

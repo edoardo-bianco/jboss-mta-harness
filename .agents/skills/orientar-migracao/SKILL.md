@@ -37,6 +37,11 @@ descoberta no cliente. Reaproveite caminhos/resultados informados e pergunte ape
 o que faltar para o proximo passo. Nao exija projeto, MTA ou registro para esse
 preparo. Forneca comando e resultado esperado para o desenvolvedor executar;
 nao instale, configure ou amplie permissoes pelo helper. MCP permanece opcional.
+Para raizes de leitura, confira workspacePath/harnessConfigPath em mcp.local.json:
+as fontes vem de folders do workspace salvo e a raiz MTA de mta.runsPath. Nao peca
+para cadastrar cada projeto/rodada em allowedRoots; essa lista guarda excecoes
+explicitas. Configuracao antiga pode ser atualizada pelo configurador executado
+pelo desenvolvedor. O helper nao escolhe outra raiz nem modifica permissoes.
 
 1. Consulte [AGENTS.md](../../../AGENTS.md) e o caminho pertinente no
    [guia do desenvolvedor](../../../doc/guias/harness-migracao-desenvolvedor.md).

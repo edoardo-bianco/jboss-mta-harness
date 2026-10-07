@@ -7,23 +7,38 @@ import { outputSchema, queryError } from './contract.mjs';
 
 export const harnessRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const bridgePath = path.join(harnessRoot, 'scripts/invocar-consulta-mcp.ps1');
-const settingsSchema = z.strictObject({ root: z.string().min(1).optional(), allowedRoots: z.array(z.string().min(1)).min(1).max(100), timeoutMs: z.number().int().min(1000).max(120000).default(60000) });
+const settingsSchema = z.strictObject({
+  root: z.string().min(1).optional(), allowedRoots: z.array(z.string().min(1)).min(1).max(100),
+  workspacePath: z.string().min(1).optional(), harnessConfigPath: z.string().min(1).optional(),
+  timeoutMs: z.number().int().min(1000).max(120000).default(60000),
+});
 
 export function loadSettings(configPath) {
   if (configPath !== undefined && !existsSync(configPath)) throw new Error('Arquivo de configuracao MCP nao encontrado: '+configPath);
   configPath ??= path.join(harnessRoot, 'config/mcp.local.json');
-  const settings = settingsSchema.parse(existsSync(configPath) ? JSON.parse(readFileSync(configPath,'utf8').replace(/^\uFEFF/,'')) : { allowedRoots: [harnessRoot] });
-  const root = path.resolve(harnessRoot, settings.root ?? '.');
-  const allowedRoots = [root,...settings.allowedRoots.map(value => path.resolve(harnessRoot, value))];
-  for (const root of allowedRoots) {
+  return resolveSettings(existsSync(configPath) ? JSON.parse(readFileSync(configPath,'utf8').replace(/^\uFEFF/,'')) : { allowedRoots: [harnessRoot] });
+}
+
+export function resolveSettings(value, baseRoot=harnessRoot) {
+  const settings = settingsSchema.parse(value);
+  const root = path.resolve(baseRoot, settings.root ?? '.');
+  const allowedRoots = [root,...settings.allowedRoots.map(value => path.resolve(baseRoot, value))];
+  const sources = {};
+  for (const field of ['workspacePath','harnessConfigPath']) {
+    if (settings[field] !== undefined) sources[field]=path.resolve(baseRoot,settings[field]);
+  }
+  for (const root of [...allowedRoots,...Object.values(sources)]) {
     if (!/^[A-Za-z]:[\\/]/.test(root) || root.slice(2).includes(':')) throw new Error('Raizes MCP devem ser caminhos locais, sem UNC/ADS.');
     for (let current=root; ; current=path.dirname(current)) {
       if (existsSync(current) && lstatSync(current).isSymbolicLink()) throw new Error('Raizes MCP nao podem conter junctions/links.');
       if (current === path.dirname(current)) break;
     }
   }
+  for (const [field,file] of Object.entries(sources)) {
+    if (!existsSync(file) || !lstatSync(file).isFile()) throw new Error(field+' nao encontrado como arquivo: '+file);
+  }
   // A raiz de dados e confiavel, configurada pelo desenvolvedor, nunca por uma tool.
-  return { root, allowedRoots: [...new Set(allowedRoots)], timeoutMs: settings.timeoutMs };
+  return { root, allowedRoots: [...new Set(allowedRoots)], ...sources, timeoutMs: settings.timeoutMs };
 }
 
 export function runQuery(settings, action, args, signal, spawnProcess=spawn) {
@@ -72,6 +87,7 @@ export function runQuery(settings, action, args, signal, spawnProcess=spawn) {
         finish(result);
       } catch { finish(queryError(action,'RUNTIME_ERROR',stderr || 'Subprocesso nao retornou JSON valido. Confira politica de scripts e instalacao do harness.')); }
     });
-    child.stdin.end(JSON.stringify({ Action: action, Root: settings.root, AllowedRoots: settings.allowedRoots, Arguments: args }), 'utf8');
+    child.stdin.end(JSON.stringify({ Action: action, Root: settings.root, AllowedRoots: settings.allowedRoots,
+      WorkspacePath: settings.workspacePath, HarnessConfigPath: settings.harnessConfigPath, Arguments: args }), 'utf8');
   });
 }

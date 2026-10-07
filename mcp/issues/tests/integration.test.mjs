@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { Client } from '@modelcontextprotocol/client';
@@ -16,6 +16,11 @@ function inventory(root) {
 
 test('SDK stdio: tres consultas, paridade, limites, cancelamento e nenhuma escrita', {timeout:180000}, async t => {
   const fixture=JSON.parse(execFileSync(powershell,['-NoProfile','-File',path.join(harnessRoot,'mcp/issues/tests/fixture.ps1')],{encoding:'utf8',env:{...process.env,PSModulePath:path.join(path.dirname(powershell),'Modules')},timeout:90000,maxBuffer:1024*1024}));
+  const workspace=path.join(fixture.root,'projetos.code-workspace'), harnessConfig=path.join(fixture.root,'harness.json');
+  const workspaceJson=JSON.stringify({folders:[{path:fixture.source}]}), harnessJson=JSON.stringify({schemaVersion:1,mta:{runsPath:fixture.run}});
+  writeFileSync(workspace,workspaceJson); writeFileSync(harnessConfig,harnessJson);
+  const dynamicConfig=path.join(fixture.root,'mcp-workspace.json');
+  writeFileSync(dynamicConfig,JSON.stringify({root:fixture.root,allowedRoots:[fixture.root],workspacePath:workspace,harnessConfigPath:harnessConfig}));
   const before=inventory(fixture.area);
   const settings=loadSettings(fixture.settings);
   const transport=new StdioClientTransport({command:process.execPath,args:[path.join(harnessRoot,'mcp/issues/server.mjs')],env:{...process.env,HARNESS_MCP_CONFIG:fixture.settings},stderr:'pipe'});
@@ -61,6 +66,34 @@ test('SDK stdio: tres consultas, paridade, limites, cancelamento e nenhuma escri
   const pending=runQuery(settings,'auditar_base',{ContextPath:fixture.context},controller.signal);
   controller.abort();
   assert.equal((await pending).Error.Code,'CANCELLED');
+  const dynamicClient=new Client({name:'workspace-test',version:'1.0.0'});
+  const dynamicTransport=new StdioClientTransport({command:process.execPath,args:[path.join(harnessRoot,'mcp/issues/server.mjs')],env:{...process.env,HARNESS_MCP_CONFIG:dynamicConfig},stderr:'pipe'});
+  let dynamicStderr=''; dynamicTransport.stderr?.on('data',data=>{dynamicStderr+=data});
+  await dynamicClient.connect(dynamicTransport);
+  const dynamicCall=(name,args={ContextPath:fixture.context})=>dynamicClient.callTool({name,arguments:args});
+  try {
+    for (const name of ['auditar_base','listar_issues','obter_issue']) {
+      const args={ContextPath:fixture.context,...(name==='obter_issue'?{Id:fixture.id,Incident:138}:{})};
+      const result=await dynamicCall(name,args);
+      assert.equal(result.isError,false,JSON.stringify(result));
+    }
+    writeFileSync(workspace,JSON.stringify({folders:[]}));
+    assert.equal((await dynamicCall('auditar_base')).structuredContent.Error.Code,'ACCESS_DENIED');
+    writeFileSync(workspace,workspaceJson);
+    assert.equal((await dynamicCall('auditar_base')).isError,false);
+    writeFileSync(harnessConfig,JSON.stringify({schemaVersion:1,mta:{runsPath:fixture.run+'-outra-raiz'}}));
+    assert.equal((await dynamicCall('auditar_base')).structuredContent.Error.Code,'ACCESS_DENIED');
+    writeFileSync(harnessConfig,'{invalido');
+    assert.equal((await dynamicCall('auditar_base')).structuredContent.Error.Code,'CONFIG_ERROR');
+    writeFileSync(harnessConfig,harnessJson);
+    assert.equal((await dynamicCall('auditar_base')).isError,false);
+    const injected=await dynamicCall('auditar_base',{ContextPath:fixture.context,WorkspacePath:workspace});
+    assert.equal(injected.isError,true);
+  } finally {
+    writeFileSync(workspace,workspaceJson); writeFileSync(harnessConfig,harnessJson);
+    await dynamicClient.close();
+  }
+  assert.equal(dynamicStderr,'');
   assert.deepEqual(inventory(fixture.area),before);
   await client.close();
   assert.equal(stderr,'');
