@@ -1,5 +1,32 @@
 # Plano do agente: evolucao do harness
 
+## Guia Node 24 na maquina de trabalho - 2026-10-07
+
+Pedido: atualizar o guia MCP para Node 24.21.0 em
+`C:\desenvolvimento\ferramentas\node-24`, conforme o preparo informado pelo
+desenvolvedor. Evolucao documental na branch harness/guia-node24, criada da
+main d198ad4; a frente anterior permanece em harness/compreensao-codigo-objetivo.
+Atualizar download, extracao, verificacao e comandos de instalacao/configuracao
+no guia de consultas, mantendo as referencias dos demais guias para essa entrada.
+Preservar Node >=20 como requisito tecnico e os testes historicos em Node20.20.2.
+
+Relato humano: node --version retornou v24.21.0 e npm.cmd --version retornou
+11.19.0 na maquina de trabalho. Isso confirma a execucao desses comandos; a
+instalacao das dependencias, descoberta e chamadas MCP ainda aguardam ensaio.
+Conferir fontes oficiais, links, exemplos PowerShell, caminhos e diff. Reversao:
+reverter somente este incremento documental, sem alterar instalacoes ou configuracoes.
+
+Concluido: guia atualizado com Node 24.21.0, caminho node-24 e relato de npm
+11.19.0; o link antigo do arquivo de downloads, que retornou 404 na conferencia,
+foi substituido pela distribuicao oficial Node 24 acessivel. Validacao documental:
+quatro blocos PowerShell sem erros de sintaxe, dois links locais existentes,
+quatro comandos com o caminho informado, entradas MCP existentes e diff sem erros.
+Testes de runtime nao foram repetidos nesta alteracao exclusivamente documental.
+Complemento: ao conferir a orientacao do migracao_helper, alinhar tambem a
+mensagem de exemplo ao preparo ja realizado e o uso pontual de npx a Node 24.
+Os perfis Codex/Copilot ja encaminham a skill comum, que referencia este guia;
+nenhuma mudanca de permissoes ou de comportamento do helper e necessaria.
+
 ## Guia de instalacao Node e apoio do helper - 2026-10-06
 
 Pedido: detalhar a instalacao Node em pasta fixa na configuracao do guia e permitir
