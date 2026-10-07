@@ -125,7 +125,7 @@ do harness. Nao e preciso regenerar o workspace para mudar esse bloco.
 JSON antigo sem `sonar` continua servindo para build/MTA. Para incluir os padroes,
 abra **Workspace: configurar caminhos**; o scan apenas valida a configuracao.
 
-### Exemplo corporativo: SIMTR-api no SonarQube 9.9
+### Exemplo corporativo no SonarQube 9.9
 
 No `config/harness.local.json` da maquina de trabalho, atualize somente o bloco
 `sonar`, preservando os outros blocos. Exemplo com os valores informados pelo
@@ -149,14 +149,17 @@ operador em `C:\desenvolvimento\apache-maven-3.9.12\conf\settings.xml`. Esse
 override atende a este ambiente; nas demais maquinas, o padrao continua `null`.
 
 1. Ative a conexao/DNS corporativo que permite acessar esse servidor.
-2. Confira que o projeto `C:\desenvolvimento\repositorio\jboss-7-jdk8\SIMTR-api`
-   esta entre as pastas do workspace e execute o build/testes conforme o roteiro abaixo.
+2. Substitua `NOME-DO-PROJETO` pelo nome da pasta da sua aplicacao. Confira que
+   `C:\desenvolvimento\repositorio\jboss-7-jdk8\NOME-DO-PROJETO` esta entre as
+   pastas do workspace e execute o build/testes conforme o roteiro abaixo.
 3. Execute **Aplicacao: analisar SonarQube** e selecione esse projeto.
-4. Informe a chave **SIMTR-api** e, no campo de branch Sonar, **develop**.
+4. Informe a chave do seu projeto no SonarQube, representada neste exemplo por
+   `CHAVE-DO-PROJETO`, e, no campo de branch Sonar, **develop**.
+   Use a chave exata cadastrada no Sonar; ela pode diferir do nome da pasta.
    Chave e branch sao entradas da tarefa, nao campos adicionais do bloco `sonar`.
 5. Escolha ANTES/DEPOIS e eventual baseline conforme a coleta pretendida.
    Informe o valor do token somente na entrada oculta do terminal.
-6. Confira `ApiAuthScheme: Basic`, `ProjectKey: SIMTR-api` e
+6. Confira `ApiAuthScheme: Basic`, `ProjectKey` com a chave informada e
    `BranchName: develop` no novo `result.json`; acompanhe tambem `Stage`,
    `ScannerExitCode`, `AnalysisStatus` e os criterios no resumo.
 
@@ -176,9 +179,9 @@ comportamento. Campo presente com valor vazio, null ou diferente dos dois modos
 e recusado antes da execucao.
 
 No Windows PowerShell 5.1, `\u0026` no JSON representa `&`. A URL
-`/dashboard?id=SIMTR-api\u0026branch=develop` vira
-`/dashboard?id=SIMTR-api&branch=develop` ao ler o JSON e equivale a
-`/dashboard?branch=develop&id=SIMTR-api`. Esse escape nao exige trocar a URL
+`/dashboard?id=CHAVE-DO-PROJETO\u0026branch=develop` vira
+`/dashboard?id=CHAVE-DO-PROJETO&branch=develop` ao ler o JSON e equivale a
+`/dashboard?branch=develop&id=CHAVE-DO-PROJETO`. Esse escape nao exige trocar a URL
 do servidor nem remover a branch. Use o link do resumo ou o valor ja lido com
 `ConvertFrom-Json`.
 

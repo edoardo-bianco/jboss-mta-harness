@@ -1,5 +1,11 @@
 # To-do do agente: evolucao do harness
 
+## Projeto generico no guia Sonar - 2026-10-07
+
+- [x] Confirmar merge do PR #17 e criar branch documental da main a5def36 limpa.
+- [x] Substituir nome concreto no guia e explicar pasta/chave a preencher.
+- [x] Conferir ocorrencias e diff; preparar ajuste documental para PR.
+
 ## Autenticacao Sonar local e corporativo - 2026-10-07
 
 - [x] Confirmar diagnostico Basic/Bearer, merge MCP #16 e branch isolada da main.
