@@ -1,5 +1,16 @@
 # Plano do agente: evolucao do harness
 
+## Refinamento documental do planejamento por sprints - 2026-10-08
+
+Pedido: complementar a proposta futura com contexto de evidencias/indice/registro/
+priorizacao/planos, prompt por Codex ou Copilot/DevSquad, estimativa pelo agente,
+reservas de teste/implantacao e diagrama temporal com percentuais por agrupamento.
+Preservar a escolha explicita de nao implementar nesta entrega. Conferido PR #20
+MERGED em d1e60e8, incluindo ccef7e3; nenhuma diferenca local ficou fora do merge.
+Branch harness/planejamento-macro-contexto criada da main atualizada, checkout limpo.
+Atualizar somente a proposta e referencias de backlog; revisar links e coerencia
+de capacidade/base/limite de sprints. Nao repetir suites de runtime para texto.
+
 ## Metadados de branch e certificado Sonar corporativo - 2026-10-08
 
 Pedido: analisar a coleta corporativa e documentar a instalacao do certificado
