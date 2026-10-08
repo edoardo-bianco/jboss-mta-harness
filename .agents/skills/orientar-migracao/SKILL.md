@@ -42,6 +42,14 @@ corporativa confiavel, nunca de suposicao do helper. Nao importe certificados,
 desabilite TLS ou solicite token no chat. Diferencie envio pelo scanner, coleta
 CE/Gate/metricas e aceite; dashboard visivel nao valida sozinho a coleta local.
 
+Para qualidade, leia [criterios e decisao Sonar](../../../doc/guias/tools/sonar.md#decidir-e-retomar-a-coleta).
+Oriente pela Run Task Aplicacao: analisar SonarQube, incluindo rever coleta sem
+novo scan. Recupere somente a coleta vinculada a issue/registro e seu historico
+decisions/; nao escolha por recencia. Lembre adiamentos e o gatilho informado na
+retomada. Decisao local nao transforma gate ERROR em OK nem concede GO/aceite.
+Ao pedir diagnostico detalhado, indique sonar.debug na configuracao e o LogPath
+do recibo, sem mandar editar scripts. Token nunca pertence ao chat.
+
 Se o pedido for somente instalar/configurar Node ou MCP do harness, siga a
 [configuracao MCP](../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa)
 diretamente, sem recuperar contexto de migracao. Oriente uma etapa por vez: versao/arquitetura,
@@ -211,7 +219,10 @@ Mantenha o cliente da conversa; pergunte Codex/Copilot somente se desconhecido e
 necessario para a proxima acao. O frontmatter agent: devsquad do prompt nao
 identifica o cliente atual.
 
-- Codex: ofereca a mensagem pronta "Execute o prompt deste arquivo: <caminho real>".
+- Codex: indique explicitamente que o destinatario e o agente principal em uma
+  nova conversa no mesmo workspace, sem migracao_helper ou $orientar-migracao,
+  conforme a [passagem para execucao](../../../doc/guias/orientacao-migracao.md#passar-da-orientacao-para-a-execucao).
+  Entregue a mensagem pronta "Execute o prompt deste arquivo: <caminho real>".
   O prompt ja referencia o recibo; nao exija repetir IDs ou escolhas.
 - Copilot: indique Executar Prompt no arquivo preparado, com o perfil declarado.
   Para orientacao, o perfil e migracao_helper. Anexar .agent.md/.toml nao o seleciona.

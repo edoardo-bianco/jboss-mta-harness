@@ -15,6 +15,27 @@ Use o **ContextPath da solicitacao em que esta trabalhando**, indicado no prepar
 ou no plano. Nao escolha um arquivo por ser o mais recente. Para um pacote de
 colega, [importe primeiro](compartilhamento-contextos.md) e use o recibo local.
 
+## Consultar pelo helper
+
+No chat do VS Code, selecione a [entrada de orientacao do seu cliente](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot)
+e peca a consulta. Se o contexto/projeto ja estiver identificado na conversa ou
+nos arquivos, nao precisa repeti-lo. Para uma consulta com selecao explicita:
+
+```text
+No contexto <caminho do contexto.json>, do projeto <Source local>, confira a
+base e mostre a issue <ID>, com as evidencias disponiveis e suas limitacoes.
+```
+
+O helper usa as consultas MCP quando disponiveis e confere origem, paginas e
+eventuais cortes antes de responder. Voce nao precisa executar comandos nem
+copiar JSON. Sem MCP, ele continua pela leitura dos arquivos; configurar Node/MCP
+nao e requisito para consultar as evidencias ou seguir o planejamento.
+Essa leitura nao registra exame nem altera decisoes. A consulta deve manter o
+contexto e o projeto escolhidos; ambiguidade exige esclarecer a selecao.
+
+## Alternativa avancada: CLI
+
+Use esta alternativa somente se quiser consultar diretamente pelo terminal.
 Execute na raiz do harness. Substitua os caminhos abaixo pelos seus; o recibo deve
 existir. Root so e necessario quando a raiz dos registros difere deste harness.
 Se a priorizacao inclui varios projetos, informe tambem Source exatamente como

@@ -160,4 +160,4 @@ function Wait-SonarComputeEngine {
     finally { if ($null -ne $deadline) { $deadline.Dispose() } }
 }
 
-Export-ModuleMember -Function Get-SonarServerBase, Invoke-SonarApiGet, Read-SonarTaskReport, Wait-SonarComputeEngine
+Export-ModuleMember -Function Get-SonarServerBase, Invoke-SonarApiGet, Get-SonarApiField, Read-SonarTaskReport, Wait-SonarComputeEngine

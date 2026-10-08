@@ -15,33 +15,58 @@ function Get-SonarMetricNumber {
 }
 
 function Get-HarnessSonarCriteria {
-    param([object[]]$Measures, $Baseline=$null)
+    param([object[]]$Measures, $Baseline=$null, $IssueSnapshot=$null,
+        [ValidateSet('ANTES','DEPOIS')][string]$Phase='ANTES')
     $coverage=Get-SonarMetricNumber $Measures 'coverage' -Coverage
-    $blocker=Get-SonarMetricNumber $Measures 'software_quality_blocker_issues'
-    $high=Get-SonarMetricNumber $Measures 'software_quality_high_issues'
+    $duplication=Get-SonarMetricNumber $Measures 'duplicated_lines_density' -Coverage
     $issues=Get-SonarMetricNumber $Measures 'violations'
     $warnings=@(); $failures=@(); $pending=@(); $delta=$null
     if ($null -eq $coverage) { $pending+='Cobertura ausente ou invalida.' }
-    elseif ($coverage -lt 85) { $warnings+='Cobertura abaixo de 85%.' }
-    if ($null -eq $blocker) { $pending+='Contagem Blocker MQR ausente ou invalida.' }
-    elseif ($blocker -gt 0) { $failures+='Ha issues Blocker.' }
-    if ($null -eq $high) { $pending+='Contagem High MQR ausente ou invalida.' }
-    elseif ($high -gt 0) { $failures+='Ha issues High.' }
-    if ($null -eq $issues) { $pending+='Total de issues ausente ou invalido.' }
+    elseif ($coverage -lt 80) { $failures+='Cobertura abaixo do minimo de 80%.' }
+    elseif ($coverage -lt 85) { $warnings+='Cobertura atende 80%, mas esta abaixo da meta de 85%.' }
+    if ($null -eq $duplication) { $pending+='Duplicidade ausente ou invalida.' }
+    elseif ($duplication -gt 5) { $failures+='Duplicidade acima do maximo de 5%.' }
+    $blocker=$null; $critical=$null; $high=$null; $openCount=$null; $severeKeys=$null; $newKeys=$null
+    $complete=$IssueSnapshot -and $IssueSnapshot.Status -ceq 'COMPLETE'
+    if ($complete) {
+        $blocker=0; $critical=0; $high=0; $severeKeys=@(); $openCount=@($IssueSnapshot.Issues).Count
+        foreach ($issue in $IssueSnapshot.Issues) {
+            $severity=[string]$issue.severity
+            $impacts=@($issue.impacts | ForEach-Object { $_.severity })
+            if ($severity -ceq 'BLOCKER' -or $impacts -ccontains 'BLOCKER') { $blocker++ }
+            if ($severity -ceq 'CRITICAL') { $critical++ }
+            if ($impacts -ccontains 'HIGH') { $high++ }
+            if ($severity -cin @('BLOCKER','CRITICAL') -or $impacts -ccontains 'HIGH' -or $impacts -ccontains 'BLOCKER') { $severeKeys+=$issue.key }
+            if ($severity -cnotin @('BLOCKER','CRITICAL','MAJOR','MINOR','INFO') -and $impacts.Count -eq 0) { $pending+='Issue sem severidade reconhecida.' }
+        }
+        # O coletor ja valida chaves unicas, preservando maiusculas/minusculas.
+        if ($severeKeys.Count) { $failures+='Ha issues abertas BLOCKER, CRITICAL ou HIGH.' }
+    } else { $pending+='Lista completa de issues abertas indisponivel; severidades e novas issues nao verificadas.' }
     $comparison='PENDING'
     if ($Baseline -and $null -ne $issues) {
-        $delta=$issues - $Baseline.TotalIssues; $comparison='COMPARED'
-        if ($delta -gt 0) { $warnings+='Total de issues aumentou em relacao ao ANTES selecionado.' }
+        $delta=$issues - $Baseline.TotalIssues
+    }
+    if ($Baseline -and $complete -and $null -ne $Baseline.Issues) {
+        $keys=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
+        foreach ($old in $Baseline.Issues) { $null=$keys.Add([string]$old.key) }
+        $newKeys=@($IssueSnapshot.Issues | Where-Object { -not $keys.Contains([string]$_.key) } | ForEach-Object { $_.key })
+        $comparison='COMPARED'
+        if ($newKeys.Count) { $failures+='Ha issues novas no conjunto aberto em relacao ao ANTES selecionado.' }
+    } elseif ($Baseline -or $Phase -ceq 'DEPOIS') {
+        $pending+='Comparacao por chave pendente: informe um ANTES com lista completa de issues.'
     }
     $status=if ($failures.Count) { 'FAIL' } elseif ($pending.Count) { 'UNVERIFIED' } elseif ($warnings.Count) { 'WARN' } else { 'PASS' }
     [pscustomobject]@{
-        Policy='blocker-high-zero_coverage85-warning_issues-increase-warning-v1'
-        Status=$status; Coverage=$coverage; CoverageWarningBelow=85; BlockerIssues=$blocker; HighIssues=$high; TotalIssues=$issues
+        Policy='open-severe-new-zero_coverage80-goal85_duplication5-v2'
+        Status=$status; Coverage=$coverage; MinimumCoverage=80; CoverageWarningBelow=85
+        DuplicatedLinesDensity=$duplication; MaximumDuplication=5
+        BlockerIssues=$blocker; CriticalIssues=$critical; HighIssues=$high; TotalIssues=$issues; OpenIssues=$openCount
+        SevereIssueKeys=$severeKeys; SevereIssues=$(if ($null -ne $severeKeys) { $severeKeys.Count } else { $null }); NewIssueKeys=$newKeys
         Warnings=@($warnings); Failures=@($failures); Pending=@($pending)
         BaselineComparison=$comparison; IssuesDelta=$delta
         BaselineRunId=$(if ($Baseline) { $Baseline.RunId } else { $null })
         BaselineResultPath=$(if ($Baseline) { $Baseline.ResultPath } else { $null })
-        ComparisonLimit='Comparacao numerica de violations; nao verifica equivalencia dos perfis, regras ou exclusoes. Sem baseline, comparacao PENDING nao reprova os criterios disponiveis.'
+        ComparisonLimit='Novas no conjunto aberto por chave podem incluir reaberturas ou mudancas de regras; nao comprovam causa no codigo. New Code do servidor e separado. Perfis, exclusoes e conteudo precisam de conferencia. ANTES sem baseline inicia a referencia; DEPOIS sem lista comparavel fica pendente.'
     }
 }
 
@@ -64,7 +89,22 @@ function Read-HarnessSonarBaseline {
     if ($measures.AnalysisId -cne $record.AnalysisId -or $measures.ProjectKey -cne $record.ProjectKey -or [string]$measures.BranchName -cne [string]$record.BranchName) { throw 'Metricas do baseline nao correspondem ao recibo.' }
     $total=Get-SonarMetricNumber $measures.Measures 'violations'
     if ($null -eq $total) { throw 'Baseline sem total de issues valido.' }
-    [pscustomobject]@{RunId=$record.RunId; ResultPath=$path; TotalIssues=$total; ServerVersion=$record.ServerVersion}
+    $issues=$null
+    if ($record.PSObject.Properties['IssuesStatus'] -and $record.IssuesStatus -ceq 'COMPLETE') {
+        $issuePath=Resolve-HarnessPath (Join-Path (Split-Path -Parent $path) 'issues.json') $Context.Root
+        if (-not $record.PSObject.Properties['IssuesSha256'] -or (Get-FileHash -LiteralPath $issuePath -Algorithm SHA256).Hash -cne $record.IssuesSha256) { throw 'Hash das issues do baseline divergente.' }
+        $saved=Get-Content -LiteralPath $issuePath -Raw -Encoding UTF8 | ConvertFrom-Json
+        foreach ($field in @('RunId','AnalysisId','ServerUrl','ProjectKey','BranchName')) {
+            if ([string]$saved.$field -cne [string]$record.$field) { throw 'Issues do baseline nao correspondem ao recibo.' }
+        }
+        if ($saved.Snapshot.Status -cne 'COMPLETE' -or $saved.Snapshot.Filter -cne 'resolved=false' -or $saved.Snapshot.Issues -isnot [Array] -or $saved.Snapshot.Count -ne $saved.Snapshot.Issues.Count) { throw 'Lista de issues do baseline incompleta.' }
+        $keys=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
+        foreach ($issue in $saved.Snapshot.Issues) {
+            if ($issue.key -isnot [string] -or -not $issue.key -or $issue.project -cne $record.ProjectKey -or -not $keys.Add($issue.key)) { throw 'Identidade das issues do baseline invalida.' }
+        }
+        $issues=$saved.Snapshot.Issues
+    }
+    [pscustomobject]@{RunId=$record.RunId; ResultPath=$path; TotalIssues=$total; ServerVersion=$record.ServerVersion; Issues=$issues}
 }
 
 Export-ModuleMember -Function Get-HarnessSonarCriteria, Read-HarnessSonarBaseline

@@ -1,5 +1,20 @@
 # To-do do agente: evolucao do harness
 
+## Sonar: evidencias e decisao humana - 2026-10-08
+
+- [x] Comparar checkpoint de referencia e fluxo atual; conferir main e criar branch.
+- [x] Registrar contrato de criterios, origem, comparacao e decisao separada.
+- [x] Testar e implementar cobertura 80/85, duplicidade 5 e severidades reais.
+- [x] Coletar issues completas/paginadas e comparar chaves com o ANTES selecionado.
+- [x] Exibir condicoes corporativas e registrar/retomar decisao sem reescrever evidencias.
+- [x] Configurar sonar.debug opcional, INFO por padrao e log mascarado por coleta.
+- [x] Atualizar guia/helper e passagem para planejamento por evidencias.
+- [x] Validar PS5.1 e revisar limites/regressoes; preparar consolidacao para PR.
+- [x] Aplicar os cinco ajustes documentais da auditoria independente e validar os encaminhamentos.
+- [ ] Homologar nova coleta e decisao na maquina corporativa com o operador.
+- [ ] Depois do Sonar: discutir manutencao/reconciliacao com o desenvolvedor, preservando a simplificacao da ADR-0005 e orientacao pelo VS Code. Nenhuma nova Run Task nesta entrega.
+
+
 ## Refinamento documental do planejamento por sprints - 2026-10-08
 
 - [x] Conferir merge completo do PR #20 e criar branch documental da main atualizada.
@@ -32,7 +47,7 @@
 - [x] Validar cinco suites PS5.1 e plugin real em DEBUG com token sintetico mascarado.
 - [x] Revisar diff completo e preparar Basic/diagnostico para integracao por PR.
 - [ ] Acompanhar repeticao corporativa e identificar causa do timeout Java.
-- [ ] Avaliar desabilitacao do log detalhado apos o diagnostico.
+- [x] Avaliar desabilitacao do log detalhado: sonar.debug opcional, false/INFO por padrao, na consolidacao de 2026-10-08.
 
 ## Autenticacao do processo scanner Maven - 2026-10-07
 

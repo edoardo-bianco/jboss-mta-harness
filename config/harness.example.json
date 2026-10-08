@@ -18,6 +18,7 @@
     "eap74": {"standaloneConfig": "standalone.xml", "portOffset": 100, "debugPort": 8788, "timeoutSeconds": 120}
   },
   "sonar": {
+    "debug": false,
     "serverUrl": null,
     "apiAuthScheme": "Bearer",
     "scannerJdkHome": null,
