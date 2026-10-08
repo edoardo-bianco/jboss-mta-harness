@@ -6,10 +6,10 @@ Import-Module (Join-Path $PSScriptRoot 'HarnessSonarApi.psm1') -DisableNameCheck
 Import-Module (Join-Path $PSScriptRoot 'HarnessSonarCriteria.psm1') -DisableNameChecking
 
 function Protect-SonarText {
-    param([string]$Text)
-    $token = [Environment]::GetEnvironmentVariable('SONAR_TOKEN', 'Process')
+    param([string]$Text, [string]$Token = [Environment]::GetEnvironmentVariable('SONAR_TOKEN', 'Process'))
     if ($token) {
-        foreach ($secret in @($token, [Uri]::EscapeDataString($token), [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($token + ':')))) {
+        $jsonToken = ConvertTo-Json -InputObject $token -Compress
+        foreach ($secret in @($token, $jsonToken.Substring(1, $jsonToken.Length - 2), [Uri]::EscapeDataString($token), [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($token + ':')))) {
             $Text = $Text.Replace($secret, '[REDACTED]')
         }
     }
@@ -23,21 +23,38 @@ function Write-SonarJson {
 }
 
 function Invoke-SonarTool {
-    param([string]$Executable, [string[]]$Arguments)
+    param([string]$Executable, [string[]]$Arguments, [ValidateSet('Bearer','Basic')][string]$ScannerAuthScheme)
     foreach ($value in @($Executable) + $Arguments) {
         if ($value -match '["%!^&|<>\r\n]') { throw 'Argumento nao suportado pelo launcher Maven Windows.' }
     }
     $saved = $ErrorActionPreference
+    $token = [Environment]::GetEnvironmentVariable('SONAR_TOKEN', 'Process')
+    $previousAuth = @{}
     try {
+        if ($ScannerAuthScheme) {
+            foreach ($name in @('SONAR_TOKEN','SONAR_SCANNER_JSON_PARAMS','SONARQUBE_SCANNER_PARAMS')) {
+                $previousAuth[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
+                [Environment]::SetEnvironmentVariable($name, $null, 'Process')
+            }
+            if ($ScannerAuthScheme -ceq 'Basic') {
+                # SONAR_TOKEN tem precedencia e produziria Bearer mesmo com sonar.login.
+                # JSON somente no ambiente do processo: nenhum segredo na linha de comando.
+                $env:SONAR_SCANNER_JSON_PARAMS = @{ 'sonar.login'=$token; 'sonar.password'='' } | ConvertTo-Json -Compress
+            } else { $env:SONAR_TOKEN = $token }
+        }
         $ErrorActionPreference = 'Continue'
         $version = $Arguments -contains '-version' -or $Arguments -contains '--version'
         $lines = New-Object 'Collections.Generic.List[string]'
         & $Executable @Arguments 2>&1 | ForEach-Object {
-            $line = Protect-SonarText $_.ToString()
+            $line = Protect-SonarText $_.ToString() -Token $token
             if ($version) { $lines.Add($line) } else { Write-Host $line }
         }
         [pscustomobject]@{ExitCode=$LASTEXITCODE; Output=($lines -join "`n")}
-    } finally { $ErrorActionPreference = $saved }
+    } finally {
+        foreach ($name in $previousAuth.Keys) { [Environment]::SetEnvironmentVariable($name, $previousAuth[$name], 'Process') }
+        $token = $null
+        $ErrorActionPreference = $saved
+    }
 }
 
 function Get-HarnessSonarSettings {
@@ -103,7 +120,7 @@ function Invoke-HarnessSonar {
         Project=$Context.Active.name; Source=$Context.Active.path; ProjectLabel=$Context.Active.label
         RunId=[guid]::NewGuid().ToString('N'); Phase=$Phase; PhaseOrigin='OPERATOR'
         ServerUrl=$settings.ServerUrl; ServerVersion=$null; ProjectKey=$ProjectKey; BranchName=$BranchName
-        ApiAuthScheme=$settings.AuthScheme
+        ApiAuthScheme=$settings.AuthScheme; ScannerAuthScheme=$settings.AuthScheme
         ScannerVersion=$settings.Version; ScannerJavaHome=$settings.Jdk; ScannerJavaVersion=$null; MavenVersion=$null
         ApplicationJavaHome=$Context.Config.tools.applicationJdk8Home; MavenHome=$Context.Config.tools.applicationMavenHome
         SettingsPath=$Context.Config.tools.applicationMavenSettingsPath; Profiles=$settings.Profiles
@@ -128,7 +145,7 @@ function Invoke-HarnessSonar {
         $result['Git'] = Get-HarnessGitState $Context
         $sourceFiles = @(Get-HarnessFiles $Context.Active.path)
         Write-SonarJson (Join-Path $run 'inputs.json') @{Project=$result.Project; Source=$result.Source; Files=$sourceFiles; Note='Hashes dos arquivos de entrada; nao comprovam atualidade dos binarios ou cobertura.'}
-        foreach ($name in @('JAVA_HOME','PATH','MAVEN_HOME','M2_HOME','MAVEN_ARGS','MAVEN_OPTS','JAVA_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','MAVEN_SKIP_RC','MAVEN_BASEDIR','MAVEN_PROJECTBASEDIR','MAVEN_BATCH_PAUSE','MAVEN_BATCH_ECHO','SONAR_TOKEN','SONAR_HOST_URL','SONAR_SCANNER_JSON_PARAMS','SONAR_SCANNER_OPTS','SONAR_SCANNER_JAVA_OPTS')) {
+        foreach ($name in @('JAVA_HOME','PATH','MAVEN_HOME','M2_HOME','MAVEN_ARGS','MAVEN_OPTS','JAVA_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','MAVEN_SKIP_RC','MAVEN_BASEDIR','MAVEN_PROJECTBASEDIR','MAVEN_BATCH_PAUSE','MAVEN_BATCH_ECHO','SONAR_TOKEN','SONAR_HOST_URL','SONAR_SCANNER_JSON_PARAMS','SONARQUBE_SCANNER_PARAMS','SONAR_SCANNER_OPTS','SONAR_SCANNER_JAVA_OPTS')) {
             $previous[$name]=[Environment]::GetEnvironmentVariable($name,'Process')
             [Environment]::SetEnvironmentVariable($name,$null,'Process')
         }
@@ -163,7 +180,7 @@ function Invoke-HarnessSonar {
             ('-Dsonar.scanner.metadataFilePath=' + $report), ('-Dsonar.working.directory=' + (Join-Path $run 'scanner-work')))
         if ($BranchName) { $arguments+=('-Dsonar.branch.name=' + $BranchName) }
         Write-Host "Enviando $($result.ProjectLabel) ao Sonar $($settings.ServerUrl) | Chave: $ProjectKey | Estado declarado: $Phase"
-        $scan=Invoke-SonarTool $settings.Maven $arguments; $result.ScannerExitCode=$scan.ExitCode
+        $scan=Invoke-SonarTool $settings.Maven $arguments -ScannerAuthScheme $settings.AuthScheme; $result.ScannerExitCode=$scan.ExitCode
         if ($scan.ExitCode -ne 0) { throw 'Scanner Maven falhou; consulte a saida do terminal.' }
         $result.Stage='COMPUTE_ENGINE'
         $metadata=Read-SonarTaskReport $report $settings.ServerUrl $ProjectKey
@@ -222,7 +239,7 @@ function Invoke-HarnessSonar {
             if ($result.ResultPath) {
                 Write-SonarJson $result.ResultPath $result
                 $lines=@('# Coleta SonarQube', '', "Projeto: $($result.ProjectLabel)", "Source: $($result.Source)", "RunId: $($result.RunId)", "Estado declarado pelo operador: $Phase", "Inicio: $(Format-HarnessDate $result.StartedAtUtc)", "Servidor: $($result.ServerUrl)", "Chave: $ProjectKey", "AnalysisId: $($result.AnalysisId)", "Resultado da operacao: $($result.Status)", "Processamento: $($result.AnalysisStatus)", "Quality Gate do servidor: $($result.QualityGateStatus)", "Criterios do harness: $($result.CriteriaStatus)", "Metricas: $($result.MetricsStatus)", "Dashboard: $($result.DashboardUrl)", '')
-                $lines += @("Autenticacao da API: $($result.ApiAuthScheme)", '')
+                $lines += @("Autenticacao da API: $($result.ApiAuthScheme)", "Autenticacao do scanner: $($result.ScannerAuthScheme)", '')
                 if ($criteria) {
                     $lines+=@('| Criterio | Valor | Regra |', '| --- | --- | --- |', "| Blocker | $($criteria.BlockerIssues) | Reprova acima de zero |", "| High | $($criteria.HighIssues) | Reprova acima de zero |", "| Cobertura global (%) | $($criteria.Coverage) | Aviso abaixo de 85% |", "| Total de issues | $($criteria.TotalIssues) | Aviso se aumentar ante o baseline |", '', "Comparacao: $($criteria.BaselineComparison); diferenca de issues: $($criteria.IssuesDelta)", "Baseline selecionado: $($criteria.BaselineResultPath)", '')
                     foreach ($message in $criteria.Failures) { $lines+='REPROVADO: ' + $message }

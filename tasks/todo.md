@@ -1,5 +1,17 @@
 # To-do do agente: evolucao do harness
 
+## Autenticacao do processo scanner Maven - 2026-10-07
+
+- [x] Conferir codigo oficial 5.8.0.7211/4.1.2.1663 e preservar feature suspensa.
+- [x] Criar branch da main limpa para a corretiva autorizada.
+- [x] Reproduzir Basic incorreto em processo filho com credencial sintetica.
+- [x] Propagar escolha ao scanner, restaurar ambiente e proteger saidas.
+- [x] Registrar esquema no resultado/resumo e atualizar guia corporativo Java 17.
+- [x] Validar cinco suites PS5.1 e bootstrap HTTP do plugin Maven real em loopback.
+- [x] Revisar diff/documentacao e salvar corretiva em commit.
+- [ ] Diagnosticar timeout de conexao do processo Java corporativo (nova evidencia).
+- [ ] Homologar nova coleta corporativa com o operador (build Java 8/scanner Java 17).
+
 ## Projeto generico no guia Sonar - 2026-10-07
 
 - [x] Confirmar merge do PR #17 e criar branch documental da main a5def36 limpa.
