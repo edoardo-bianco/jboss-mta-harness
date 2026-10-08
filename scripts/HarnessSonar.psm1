@@ -183,7 +183,7 @@ function Invoke-HarnessSonar {
         $scan=Invoke-SonarTool $settings.Maven $arguments -ScannerAuthScheme $settings.AuthScheme; $result.ScannerExitCode=$scan.ExitCode
         if ($scan.ExitCode -ne 0) { throw 'Scanner Maven falhou; consulte a saida do terminal.' }
         $result.Stage='COMPUTE_ENGINE'
-        $metadata=Read-SonarTaskReport $report $settings.ServerUrl $ProjectKey
+        $metadata=Read-SonarTaskReport $report $settings.ServerUrl $ProjectKey -BranchName $BranchName
         $result.TaskId=$metadata.TaskId
         Write-Host 'Relatorio enviado. Aguardando processamento no SonarQube...'
         $task=Wait-SonarComputeEngine -ServerUrl $settings.ServerUrl -TaskId $metadata.TaskId -ProjectKey $ProjectKey -BranchName $BranchName -TimeoutSeconds $settings.Timeout -AuthScheme $settings.AuthScheme

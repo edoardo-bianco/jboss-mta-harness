@@ -43,7 +43,10 @@ try {
         $path = ($Arguments | Where-Object { $_ -like '-Dsonar.scanner.metadataFilePath=*' }).Substring(33)
         $server = 'http://localhost:9000'
         if ($script:Mode -eq 'WRONG_SERVER') { $server = 'https://wrong.example' }
-        [IO.File]::WriteAllText($path, "projectKey=team:app`nserverUrl=$server`nceTaskId=task-1`nceTaskUrl=$server/api/ce/task?id=task-1")
+        $branchArgument = @($Arguments | Where-Object { $_ -like '-Dsonar.branch.name=*' })
+        $branchMetadata = if ($branchArgument.Count) { "`nbranch=" + $branchArgument[0].Substring('-Dsonar.branch.name='.Length) } else { '' }
+        if ($script:Mode -eq 'WRONG_BRANCH') { $branchMetadata = "`nbranch=other" }
+        [IO.File]::WriteAllText($path, "projectKey=team:app`nserverUrl=$server`nceTaskId=task-1`nceTaskUrl=$server/api/ce/task?id=task-1$branchMetadata")
         [pscustomobject]@{ExitCode=0; Output=$null}
     }
     function script:Invoke-SonarApiGet {
@@ -115,6 +118,7 @@ try {
         $record=Get-Content -Raw $authenticated.ResultPath | ConvertFrom-Json
         Assert ($record.ApiAuthScheme -ceq $authScheme) 'Esquema nao registrado no recibo.'
         Assert ($record.ScannerAuthScheme -ceq $authScheme) 'Esquema do scanner nao registrado no recibo.'
+        Assert ($record.TaskId -ceq 'task-1' -and $record.AnalysisId -ceq 'analysis-1') 'Metadados com branch nao chegaram ao CE.'
         Assert ($record.DashboardUrl -ceq 'http://localhost:9000/dashboard?id=team%3Aapp&branch=develop') 'Dashboard/branch nao sobreviveu ao JSON.'
         $summary=Get-Content -Raw (Join-Path (Split-Path $authenticated.ResultPath) 'RESUMO.md')
         Assert ($summary.Contains('Autenticacao da API: ' + $authScheme)) 'Esquema nao registrado no resumo.'
@@ -123,6 +127,11 @@ try {
         Assert ($scan.AuthScheme -ceq $authScheme) 'Escolha de autenticacao nao chegou ao launcher Maven.'
         Assert ($scan.Args -contains '-Dsonar.branch.name=develop' -and ($scan.Args -join ' ') -notmatch 'sonar.token|sonar.login|squ_TEST') 'Branch/token incorretos no scanner.'
     }
+    & $module { $script:Mode='WRONG_BRANCH'; $script:ApiCalls=@() }
+    $wrongBranch=Invoke-HarnessSonar $context 'team:app' -BranchName develop -Phase ANTES -Token $secure
+    Assert ($wrongBranch.Status -eq 'FAILED' -and $wrongBranch.Stage -eq 'COMPUTE_ENGINE' -and $null -eq $wrongBranch.TaskId) 'Metadados de outra branch foram aceitos.'
+    Assert (@(& $module { $script:ApiCalls | Where-Object Endpoint -eq 'api/ce/task' }).Count -eq 0) 'Metadados divergentes chegaram ao CE.'
+    & $module { $script:Mode='OK' }
     foreach ($invalidScheme in @($null, '', 'Digest', @('Basic'), 1)) {
         $context.Config.sonar.apiAuthScheme=$invalidScheme
         $callsBefore=@(& $module { $script:Calls }).Count

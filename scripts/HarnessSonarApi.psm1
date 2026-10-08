@@ -97,7 +97,7 @@ function Get-SonarApiField {
 
 function Read-SonarTaskReport {
     [CmdletBinding()]
-    param([string]$Path, [string]$ServerUrl, [string]$ProjectKey)
+    param([string]$Path, [string]$ServerUrl, [string]$ProjectKey, [AllowNull()][string]$BranchName)
     try {
         $base = Get-SonarServerBase $ServerUrl
         $file = Get-Item -LiteralPath $Path -ErrorAction Stop
@@ -108,7 +108,7 @@ function Read-SonarTaskReport {
         foreach ($line in ($text -split '\r?\n')) {
             if ([string]::IsNullOrWhiteSpace($line) -or $line.StartsWith('#')) { continue }
             $parts = $line -split '=', 2
-            if ($parts.Count -ne 2 -or $parts[0] -cnotin @('projectKey', 'serverUrl', 'serverVersion', 'dashboardUrl', 'ceTaskId', 'ceTaskUrl') -or $values.ContainsKey($parts[0])) { throw 'Invalid metadata fields.' }
+            if ($parts.Count -ne 2 -or $parts[0] -cnotin @('projectKey', 'serverUrl', 'serverVersion', 'branch', 'dashboardUrl', 'ceTaskId', 'ceTaskUrl') -or $values.ContainsKey($parts[0])) { throw 'Invalid metadata fields.' }
             $values[$parts[0]] = $parts[1]
         }
         foreach ($name in @('projectKey', 'serverUrl', 'ceTaskId', 'ceTaskUrl')) {
@@ -116,6 +116,10 @@ function Read-SonarTaskReport {
         }
         if ($values.projectKey -cne $ProjectKey -or (Get-SonarServerBase $values.serverUrl) -cne $base -or $values.ceTaskId -cnotmatch '^[A-Za-z0-9_-]{1,200}$' -or
             $values.ceTaskUrl -cne ($base + '/api/ce/task?id=' + [Uri]::EscapeDataString($values.ceTaskId))) { throw 'Unbound metadata.' }
+        # O scanner pode incluir branch; recibos antigos omitem o campo.
+        # A correlacao com a branch selecionada tambem e exigida na resposta CE.
+        if ($values.ContainsKey('branch') -and ([string]::IsNullOrWhiteSpace($values.branch) -or
+            ($BranchName -and $values.branch -cne $BranchName))) { throw 'Different metadata branch.' }
         return [pscustomobject]@{ TaskId = $values.ceTaskId }
     } catch { throw 'SONAR_METADATA_UNVERIFIED: invalid or unbound report; details suppressed.' }
 }
