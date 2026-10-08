@@ -219,7 +219,10 @@ Mantenha o cliente da conversa; pergunte Codex/Copilot somente se desconhecido e
 necessario para a proxima acao. O frontmatter agent: devsquad do prompt nao
 identifica o cliente atual.
 
-- Codex: ofereca a mensagem pronta "Execute o prompt deste arquivo: <caminho real>".
+- Codex: indique explicitamente que o destinatario e o agente principal em uma
+  nova conversa no mesmo workspace, sem migracao_helper ou $orientar-migracao,
+  conforme a [passagem para execucao](../../../doc/guias/orientacao-migracao.md#passar-da-orientacao-para-a-execucao).
+  Entregue a mensagem pronta "Execute o prompt deste arquivo: <caminho real>".
   O prompt ja referencia o recibo; nao exija repetir IDs ou escolhas.
 - Copilot: indique Executar Prompt no arquivo preparado, com o perfil declarado.
   Para orientacao, o perfil e migracao_helper. Anexar .agent.md/.toml nao o seleciona.

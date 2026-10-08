@@ -130,7 +130,12 @@ de [pre-planejamento](tools/priorizacao-issues.md#orientacao-com-o-helper).
 O helper entrega a mensagem pronta para o cliente atual, com os caminhos reais.
 Quando a tarefa preparar um prompt:
 
-- **Codex:** envie `Execute o prompt deste arquivo:` seguido do caminho fornecido.
+- **Codex:** abra uma nova conversa no mesmo workspace, com o agente principal,
+  sem selecionar `migracao_helper` nem invocar `$orientar-migracao`. Nessa conversa
+  de execucao, envie `Execute o prompt deste arquivo:` seguido do caminho fornecido.
+  O prompt e seu recibo recuperam a etapa, as escolhas e os limites; nao e preciso
+  copia-los novamente. A conversa com o helper permanece para orientacao e pode
+  ser retomada depois com o resultado.
 - **Copilot:** abra o prompt preparado e use **Executar Prompt**, com o agente
   indicado e DevSquad nas fases pertinentes, em conversa Local.
 

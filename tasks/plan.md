@@ -2,6 +2,16 @@
 
 ## Sonar: evidencias e decisao humana - 2026-10-08
 
+Complemento autorizado apos auditoria independente do commit 5e350b9: corrigir
+os cinco achados documentais na mesma PR #22. Alinhar Sonar 9.9/Standard, explicitar
+passagem do helper ao executor Codex, indicar ANTES no guia principal, priorizar
+consulta pelo agente sobre CLI e delimitar os JSONs cobertos pelo historico de
+decisoes. Preservar comportamento dos scripts, permissoes e escopo de manutencao.
+Validar links/ancoras e revisar novamente os encaminhamentos com os auditores.
+Resultado: os dois revisores confirmaram os ajustes; duas ancoras apontadas na
+revisao foram corrigidas. Verificados 452 links/ancoras em 24 documentos e diff
+sem erros. Incremento apenas documental; sem alteracao de scripts ou Run Tasks.
+
 Pedido autorizado: continuar a evolucao Sonar antes do planejamento por sprints.
 Pendencia separada, adiada pelo desenvolvedor: revisar o encaminhamento da
 manutencao/reconciliacao conforme ADR-0005 e o fluxo por Run Tasks no VS Code.

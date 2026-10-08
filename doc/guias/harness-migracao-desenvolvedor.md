@@ -138,6 +138,12 @@ com configuracoes e registros de execucao distintos.
 Ele explica os dois caminhos, a selecao de projeto/modulo, as fases e a leitura
 do resultado.
 
+Para comparar a qualidade antes e depois da corretiva, aproveite o build/testes
+do mesmo estado para uma coleta **Sonar ANTES**, pela tarefa **Aplicacao: analisar
+SonarQube**. Confira o XML JaCoCo e preserve a coleta para a comparacao DEPOIS,
+conforme o [guia Sonar](tools/sonar.md#executar-e-consultar). Essa coleta e opcional
+no fluxo de planejamento; sem ela, a comparacao fica pendente.
+
 **Resultado esperado e continuidade:** build bem-sucedido e conhecimento dos
 testes efetivamente executados. Isso prepara a analise da etapa 3; falhas de
 compilacao/testes precisam de tratamento. Build e MTA sao operacoes separadas.

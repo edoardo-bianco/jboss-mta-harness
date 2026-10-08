@@ -10,6 +10,7 @@
 - [x] Configurar sonar.debug opcional, INFO por padrao e log mascarado por coleta.
 - [x] Atualizar guia/helper e passagem para planejamento por evidencias.
 - [x] Validar PS5.1 e revisar limites/regressoes; preparar consolidacao para PR.
+- [x] Aplicar os cinco ajustes documentais da auditoria independente e validar os encaminhamentos.
 - [ ] Homologar nova coleta e decisao na maquina corporativa com o operador.
 - [ ] Depois do Sonar: discutir manutencao/reconciliacao com o desenvolvedor, preservando a simplificacao da ADR-0005 e orientacao pelo VS Code. Nenhuma nova Run Task nesta entrega.
 

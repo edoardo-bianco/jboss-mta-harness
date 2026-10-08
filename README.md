@@ -56,7 +56,7 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 | Preparar minha maquina ou as dos colegas | Siga o [roteiro por maquina](doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas), que encaminha ao certificado Sonar e ao Node/MCP opcional; o helper usa essas mesmas fontes. |
 | Quero escolher o que corrigir | Confira o registro e use a [priorizacao opcional por categoria](doc/guias/tools/priorizacao-issues.md). |
 | Ja escolhi uma issue | Use **Planejamento: planejar**, a partir da escolha e das evidencias no registro. |
-| Quero conferir uma base ou consultar uma issue preparada | Use as [consultas de issues por MCP ou CLI](doc/guias/tools/consultas-issues.md), com ContextPath explicito e JSON paginado. |
+| Quero conferir uma base ou consultar uma issue preparada | Peca ao helper a [consulta da base ou da issue](doc/guias/tools/consultas-issues.md#consultar-pelo-helper), indicando o contexto se ainda nao estiver identificado. |
 | Recebi analise ou plano de um colega | Use **Planejamento: compartilhar contexto** e siga o [guia de importacao](doc/guias/tools/compartilhamento-contextos.md). |
 | Quero ajuda para retomar | Use `$orientar-migracao` no Codex ou `migracao_helper` no Copilot, conforme o [guia de orientacao](doc/guias/orientacao-migracao.md). |
 

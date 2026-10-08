@@ -188,8 +188,10 @@ Basic envia o token como usuario e senha vazia, conforme a
 O teste relatado neste ambiente confirmou HTTP 200 com Basic nas consultas de
 projeto com/sem develop; Bearer retornou HTTP 401. Isso comprova a autenticacao
 de leitura, mas nao a permissao de enviar analises nem a compatibilidade do scanner.
-As metricas MQR podem estar ausentes no 9.9; nesse caso os criterios permanecem
-UNVERIFIED, conforme a politica abaixo, mesmo depois de corrigida a autenticacao.
+As metricas MQR podem estar ausentes no 9.9. A lista completa de issues permite
+avaliar as severidades Standard sem essas metricas, conforme a politica abaixo.
+Lista ausente ou incompleta deixa essa verificacao pendente; uma falha comprovada
+em outro criterio continua sendo falha.
 
 `apiAuthScheme` escolhe a autenticacao das consultas do harness, incluindo CE,
 Gate e metricas, e do processo scanner Maven. Em Bearer, o scanner recebe
@@ -537,8 +539,12 @@ Ao concluir a coleta, a mesma tarefa mostra o resumo e pede uma decisao:
 Para retomar, execute **Aplicacao: analisar SonarQube > 2 Rever evidencias/decisao**
 e informe o `result.json` selecionado. Nao pede JDK, token ou nova conexao ao Sonar.
 Mostra a decisao atual e o motivo/gatilho; outra escolha cria a proxima entrada
-em `decisions/decision_NNNNNN.json`. Sequencia, hashes das evidencias e vinculo
-anterior sao conferidos. Nao reescreve result.json, gate, metricas ou decisoes antigas.
+em `decisions/decision_NNNNNN.json`. A partir da primeira decisao, confere a
+sequencia, o vinculo anterior e os hashes dos JSONs presentes na coleta:
+`result.json`, `inputs.json`, `quality-gate.json`, `measures.json`, `issues.json`
+e `criteria.json`. O `RESUMO.md` exibido e um derivado e nao integra essa verificacao
+de hashes; confira os JSONs vinculados para decidir, especialmente se o resumo
+divergir deles. Nao reescreve result.json, gate, metricas ou decisoes antigas.
 O retorno 0 desse modo significa revisao local concluida, nao gate aprovado.
 
 O lembrete e local e aparece na retomada; nao ha agendamento, notificacao ou
