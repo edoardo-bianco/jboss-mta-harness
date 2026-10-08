@@ -126,6 +126,13 @@ Para erro Sonar, use o [diagnostico por etapa](../../../../doc/guias/tools/sonar
 Uma falha TLS antecede a resposta HTTP; scanner com exit 0 pode ter enviado o
 relatorio e o harness falhar depois. Confira metadados/TaskId antes de orientar
 reenvio, troca de versao ou nova instalacao do certificado.
+Para criterios/adiamentos, siga a [decisao e retomada Sonar](../../../../doc/guias/tools/sonar.md#decidir-e-retomar-a-coleta).
+Confira issues.json, criteria.json, condicoes corporativas e decisoes da coleta
+referenciada. Ausencia de lista/baseline nao prova zero novas issues. Explique a
+pendencia e ofereca a tarefa para a decisao humana, sem registrar por conta propria.
+CorrigirAgora encaminha ao planejamento/GO separado; RegistrarParaDepois mantem
+o lembrete e nao dispensa politica corporativa. Sem issue MTA pertinente, oriente
+o registro DEV/manual por evidencias, sem inventar mandatory ou ampliar o lote.
 
 Outro colega pode implementar manualmente ou com agente de codificacao. Dossie
 consolidado dispensa MTA original para preparar implementacao, preservando a
@@ -133,6 +140,7 @@ conferencia do codigo local e o alcance do GO recebido. O helper nao implementa.
 
 Reaproveite evidencias e indique verificacao concreta para o que falta. JaCoCo:
 meta de 85% de linhas do recorte, aviso abaixo sem reprovar build pelo percentual.
+Esse recorte JaCoCo e distinto dos criterios globais da coleta Sonar descritos no guia.
 Falhas reais de compilacao/testes continuam falhas. Sonar e roteiro funcional sao
 verificacoes distintas; deploy EAP 7.4 depende de pertinencia e ambiente autorizado.
 Testes aprovados levam a revisao humana do resultado, nao a aceite automatico.

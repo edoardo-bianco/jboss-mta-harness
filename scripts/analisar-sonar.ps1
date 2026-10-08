@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param([string]$ConfigPath, [string]$WorkspacePath, [string]$Target, [switch]$SelectTarget,
     [string]$ProjectKey, [string]$BranchName, [ValidateSet('ANTES','DEPOIS')][string]$Phase, [string]$BaselineResultPath,
-    [switch]$PrepareCertificate)
+    [switch]$PrepareCertificate, [ValidateSet('Scan','Review')][string]$Action, [string]$ResultPath)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $token=$null
@@ -11,6 +11,21 @@ try {
     Import-Module (Join-Path $PSScriptRoot 'HarnessSonar.psm1') -Force -DisableNameChecking
     Import-Module (Join-Path $PSScriptRoot 'HarnessSonarCertificate.psm1') -Force -DisableNameChecking
     $root=Split-Path -Parent $PSScriptRoot
+    Import-Module (Join-Path $PSScriptRoot 'HarnessSonarReview.psm1') -Force -DisableNameChecking
+    if (-not $Action) {
+        if ($ResultPath) { $Action='Review' }
+        elseif ($ProjectKey -or $Phase -or $PrepareCertificate) { $Action='Scan' }
+        else {
+            $operation=Read-Host 'Sonar: 1 Nova coleta; 2 Rever evidencias/decisao de coleta existente; q cancela'
+            $Action=switch ($operation) { '1' { 'Scan' } '2' { 'Review' } default { throw 'Selecao cancelada.' } }
+        }
+    }
+    if ($Action -eq 'Review') {
+        if (-not $ResultPath) { $ResultPath=Read-Host 'Caminho do result.json da coleta que deseja rever' }
+        $null=Show-HarnessSonarReview $root $ResultPath
+        exit 0 # Sucesso da revisao local; nao e aprovacao tecnica da analise.
+    }
+    if ($ResultPath) { throw 'ResultPath somente pode ser usado com Action Review.' }
     if (-not $ConfigPath) { $ConfigPath=Join-Path $root 'config/harness.local.json' }
     $context=Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
     $settings=Get-HarnessSonarSettings $context
@@ -29,11 +44,13 @@ try {
         $BaselineResultPath=Read-Host 'Caminho do result.json ANTES para comparar issues (Enter deixa comparacao pendente; q cancela)'
         if ($BaselineResultPath -eq 'q') { throw 'Selecao cancelada.' }
     }
-    Write-Host 'Criterios: Blocker/High acima de zero reprovam; cobertura abaixo de 85% e aumento de issues geram avisos. Quality Gate do servidor e independente.'
+    Write-Host 'Criterios: issues abertas Blocker/Critical/High e novas chaves exigem corretiva; cobertura minima 80% (meta 85%); duplicidade maxima 5%. Gate corporativo permanece independente.'
     $token=Read-Host 'Token Sonar do usuario (entrada oculta, nao sera salvo)' -AsSecureString
     $result=Invoke-HarnessSonar $context -ProjectKey $ProjectKey -BranchName $BranchName -Phase $Phase -Token $token -BaselineResultPath $BaselineResultPath
+    $token.Dispose(); $token=$null
     $result | ConvertTo-Json -Depth 6 | Write-Host
     Write-Host "Resumo: $(Join-Path (Split-Path $result.ResultPath) 'RESUMO.md')"
+    $null=Show-HarnessSonarReview $root $result.ResultPath
     if ($result.Status -eq 'SUCCEEDED') { exit 0 }
     if ($result.Status -in @('QUALITY_GATE_FAILED','CRITERIA_FAILED')) { exit 2 }
     exit 1

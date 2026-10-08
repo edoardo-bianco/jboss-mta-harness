@@ -42,6 +42,14 @@ corporativa confiavel, nunca de suposicao do helper. Nao importe certificados,
 desabilite TLS ou solicite token no chat. Diferencie envio pelo scanner, coleta
 CE/Gate/metricas e aceite; dashboard visivel nao valida sozinho a coleta local.
 
+Para qualidade, leia [criterios e decisao Sonar](../../../doc/guias/tools/sonar.md#decidir-e-retomar-a-coleta).
+Oriente pela Run Task Aplicacao: analisar SonarQube, incluindo rever coleta sem
+novo scan. Recupere somente a coleta vinculada a issue/registro e seu historico
+decisions/; nao escolha por recencia. Lembre adiamentos e o gatilho informado na
+retomada. Decisao local nao transforma gate ERROR em OK nem concede GO/aceite.
+Ao pedir diagnostico detalhado, indique sonar.debug na configuracao e o LogPath
+do recibo, sem mandar editar scripts. Token nunca pertence ao chat.
+
 Se o pedido for somente instalar/configurar Node ou MCP do harness, siga a
 [configuracao MCP](../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa)
 diretamente, sem recuperar contexto de migracao. Oriente uma etapa por vez: versao/arquitetura,

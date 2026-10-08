@@ -1,5 +1,59 @@
 # Plano do agente: evolucao do harness
 
+## Sonar: evidencias e decisao humana - 2026-10-08
+
+Pedido autorizado: continuar a evolucao Sonar antes do planejamento por sprints.
+Pendencia separada, adiada pelo desenvolvedor: revisar o encaminhamento da
+manutencao/reconciliacao conforme ADR-0005 e o fluxo por Run Tasks no VS Code.
+Nao incluir nova tarefa nem redesenhar manutencao nesta consolidacao Sonar.
+Origem: checkpoint de arvore-documento-quarkus-proxy-ft-simulador-otel
+(validar-checkpoint-sonarqube.ps1 e .codex/hooks/SonarQuality.psm1), conferido
+somente para leitura. Evolucao do harness na branch harness/sonar-evidencias-decisao,
+derivada da main limpa 745a8e6; nenhuma corretiva de aplicacao autorizada aqui.
+
+Contrato desta entrega:
+- sonar.debug booleano opcional, false por padrao: INFO sem -X; true habilita
+  DEBUG/-X. Salvar scanner-info.log ou scanner-debug.log por coleta, mascarando
+  o token antes de escrever e sem sobrescrever coletas anteriores.
+- Cobertura global abaixo de 80% e duplicidade global acima de 5% sao nao conformes;
+  cobertura de 80% ate menos de 85% gera aviso; 85% e a meta. Limites inclusivos.
+- Issues abertas BLOCKER/CRITICAL (Standard) ou HIGH/BLOCKER (impacts) exigem
+  corretiva. Preservar severidades reais, sem converter Critical em High ou exigir
+  metricas MQR de um servidor 9.9. Issues novas no conjunto aberto sao comparadas
+  por chave com o ANTES escolhido, incluindo possiveis reaberturas. Diferenca de
+  totais e apenas informativa. New Code do servidor permanece uma dimensao distinta.
+- Coletar issues paginadas com identidade, regra, severidade, arquivo/linha e
+  mensagem; conservar origem/analise e conferir analise atual antes/depois.
+  Paginacao incompleta, mudanca de base ou falta de evidencia nunca equivale a zero.
+  Baseline legado sem lista permite leitura de metricas, mas nao prova novas issues.
+- Preservar Quality Gate e suas condicoes oficiais (metrica, operador, limite,
+  valor e escopo informado), inclusive ERROR. Nenhuma decisao local muda o servidor,
+  aprova release, dispensa gate corporativo ou concede GO/aceite de lote.
+- Separar resultado tecnico e decisao. Na tarefa existente, oferecer CorrigirAgora,
+  RegistrarParaDepois ou Interromper; Enter deixa PENDING. Adiamento exige motivo
+  e momento/gatilho de revisao. Guardar historico local vinculado ao RunId e hashes;
+  revisitar a coleta sem token/rede/novo scan, sem reescrever result.json antigo.
+- Evidencias e lembrete podem ser anexados a um plano pelo fluxo vigente. Sem issue
+  MTA correspondente, orientar registro DEV-.../manual com base EVIDENCIAS, sem
+  inventar mandatory. Helper permanece leitor e lembra pendencias vinculadas na
+  retomada/revisao; nao executa corretivas nem exige Sonar para priorizar/indexar.
+
+Incrementos: (1) criterios e casos-limite; (2) issues, comparacao e fluxo coletor;
+(3) decisao/retomada na tarefa; (4) guia canonico, helper e regressao/revisao/PR.
+Testes Windows PowerShell 5.1 em tests/Test-Sonar*.ps1, com servidor HTTP local
+e fixtures; sem token real nem acesso ao Sonar corporativo. Suites de tarefas e
+planejamento quando seus contratos forem afetados. Homologacao corporativa fica
+explicita como pendente. Preservar politica TLS, Java 8/JDK do scanner e caches.
+
+Validacao local: nove suites Sonar/Run Tasks em Windows PowerShell 5.1 aprovadas,
+incluindo HTTP loopback (67 verificacoes) e keytool real sem rede (20 verificacoes).
+Revisao adicional cobriu gate incompleto, listas vazias, baseline legado/adulterado
+e entrada Review sem configuracao/token. Sintaxe e 130 links locais conferidos.
+O quick_validate.py da skill nao iniciou por ausencia de PyYAML; frontmatter
+inalterado e referencias revisadas diretamente. Comportamento nativo do helper e
+nova coleta corporativa dependem do ensaio do operador. Nenhuma nova Run Task.
+
+
 ## Refinamento documental do planejamento por sprints - 2026-10-08
 
 Pedido: complementar a proposta futura com contexto de evidencias/indice/registro/
