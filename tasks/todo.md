@@ -1,5 +1,14 @@
 # To-do do agente: evolucao do harness
 
+## Priorizacao compartilhada e planejamento por desenvolvedor - 2026-10-08
+
+- [x] Conferir raiz/branch/HEAD e criar branch documental derivada da main.
+- [x] Explicar o fluxo de equipe no guia do desenvolvedor com referencias de exportacao/importacao.
+- [x] Recomendar o fluxo na skill comum dos helpers, preservando orientacao somente leitura.
+- [x] Validar links/ancoras, diff e coerencia com o exportador/importador atuais.
+- [x] Revisar independentemente e aplicar ajuste de clareza no vinculo da ficha.
+- [x] Preparar descricao e validacao da entrega documental para PR.
+
 ## Adotar novo MTA pelo VS Code - 2026-10-08
 
 - [x] Conferir main integrada e criar branch; registrar escopo autorizado.

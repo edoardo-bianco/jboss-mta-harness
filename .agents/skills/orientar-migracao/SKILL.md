@@ -70,6 +70,14 @@ pelo desenvolvedor. O helper nao escolhe outra raiz nem modifica permissoes.
    migracao; melhorias da ferramenta usam tasks/plan.md e tasks/todo.md, fora do lote.
    Identifique objetivo e Source/artefato informado. Pedido curto basta; uma
    operacao isolada, como debug, nao exige contexto completo de migracao.
+   Se uma pessoa prepara a analise comum e cada desenvolvedor vai planejar e
+   implementar suas issues, recomende compartilhar a priorizacao concluida,
+   conforme o [fluxo de equipe](../../../doc/guias/harness-migracao-desenvolvedor.md#priorizacao-compartilhada-e-planejamento-por-desenvolvedor).
+   Confira a etapa real: analise incompleta segue para concluir ranking/fichas;
+   concluida segue para exportacao pela Run Task de compartilhamento. Nao exija
+   planos individuais na origem nem cobertura de 100% para compartilhar uma
+   fatia concluida. A distribuicao das issues e humana; o destinatario elabora
+   o plano com ficha/anexos vinculados antes da implementacao autorizada.
 2. Se o pedido tratar de ZIP de contexto exportado pelo harness, siga primeiro
    [compartilhamento](../../../doc/guias/tools/compartilhamento-contextos.md).
    Oriente associacao explicita aos projetos locais antes de criar registros:
