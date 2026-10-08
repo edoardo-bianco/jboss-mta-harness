@@ -1,5 +1,76 @@
 # Plano do agente: evolucao do harness
 
+## Log detalhado do scanner e integracao Basic - 2026-10-08
+
+Pedido autorizado: habilitar o diagnostico e levar a corretiva Basic mais o log
+detalhado a main por PR. Retomada da branch harness/sonar-scanner-basic, limpa
+em caea604, com main/origin/main em 1dbd3a1. Compreensao de codigo segue suspensa.
+
+Adicionar -e/-X ao Maven do scan e trocar sonar.verbose/log.level para true/DEBUG.
+Documentar captura do terminal em .harness/ensaios/sonar-timeout e posterior
+desabilitacao desses argumentos. Manter a redacao do launcher, Basic/Bearer,
+Java 8 da aplicacao e Java 17 do scanner corporativo; configuracao local preservada.
+O curl corporativo funcionou segundo o operador; a causa do timeout Java segue
+pendente. Logs ampliados sao diagnostico, nao corretiva de transporte.
+
+Verificar cinco suites Sonar PS5.1 e bootstrap do plugin real com -e/-X e DEBUG,
+credencial sintetica e servidor loopback, incluindo ausencia do token na saida.
+Revisar diff completo contra main, publicar PR e integrar apos as verificacoes.
+Homologacao corporativa e eventual desabilitacao do debug permanecem posteriores.
+
+Resultado: cinco suites PS5.1 PASS (launcher, fluxo, API com 59 verificacoes,
+configuracao e criterios). Plugin real 5.8.0.7211, Maven 3.9.16 e JDK 25 local:
+Basic/Bearer PASS com DEBUG e Caused by presentes, token sintetico e Base64
+ausentes da saida. Fixture 9.9.5 interrompeu em /batch/index com 503 intencional,
+antes do motor. Evidencias em .harness/tests/sonar-scanner-debug-20261008/resultado.json
+e logs locais por esquema. Nao equivale a homologacao corporativa Java 17.
+Revisao do diff completo contra main: autenticacao/restauracao/redacao preservadas,
+sem alteracao de dependencias, configuracao local, aplicacao ou feature suspensa.
+Sintaxe PowerShell e git diff --check PASS. Entrega pronta para o PR solicitado;
+publicacao e integracao ficam rastreadas no GitHub pelos commits deste incremento.
+
+## Autenticacao do processo scanner Maven - 2026-10-07
+
+Corretiva autorizada do harness em harness/sonar-scanner-basic, derivada da main
+1dbd3a1 limpa. A feature de compreensao permanece suspensa na branch propria.
+O PR #17 configurou Basic nas APIs, mas o processo Maven ainda recebe SONAR_TOKEN,
+que o scanner 5.8.0.7211 converte em Bearer. O servidor corporativo 9.9.5 rejeitou
+Bearer no teste humano. A ultima coleta parou antes disso em TOOLS com Java 8.
+
+Reusar sonar.apiAuthScheme para APIs e scanner: Bearer permanece padrao; Basic
+fornece sonar.login e senha vazia por SONAR_SCANNER_JSON_PARAMS somente durante
+o processo, sem SONAR_TOKEN concorrente, argumentos secretos ou arquivo de token.
+Restaurar ambiente em sucesso/falha e mascarar token, JSON escapado e Base64.
+Registrar esquema do scanner e orientar JDK 17 para o corporativo 9.9; manter
+build Java 8 e configuracao local existente, inclusive JDK 25 quando validado.
+
+Validacao: reproduzir falha antes da implementacao, conferir ambiente em processo
+Windows real com token sintetico, propagacao no fluxo, falhas/restauracao/redacao
+e suites Sonar API/configuracao/criterios. Atualizar guia e revisar diff. Testes
+locais nao homologam envio ao servidor corporativo. Reversao: reverter incremento.
+
+Resultado: Test-SonarLauncher reproduziu erro de ambiente Basic antes da mudanca
+e passou depois. Cinco suites PS5.1 PASS: launcher (processo filho real e redacao),
+fluxo Sonar (incluindo validacao simulada Java 17/25 e recusa Java 8), API (59
+verificacoes HTTP), configuracao e criterios. Ensaio adicional com Maven 3.9.16,
+plugin real 5.8.0.7211 e JDK 25 local confirmou Basic/Bearer na sequencia
+/api/v2/analysis/version -> /api/server/version -> /batch/index contra fixture
+loopback 9.9.5; resposta 503 intencional interrompeu antes do motor. Evidencias
+locais em .harness/tests/sonar-scanner-auth/resultado.json. Sem analise real.
+
+Nova evidencia humana: RunId 779138e9067c450fb732feaa03a8fd98, scanner Java
+17.0.15, Maven 3.9.12, servidor 9.9.5.90363, Stage=SCAN, ScannerExitCode=1.
+APIs PowerShell responderam; plugin iniciou e falhou com HTTP connect timed out
+na consulta de versao. Modulos SKIPPED decorrem da falha inicial. O operador
+confirmou acesso direto, sem proxy/PAC, e o sucesso anterior das APIs com Basic.
+A conexao/endereco efetivo do Java ainda precisa de diagnostico; a corretiva Basic
+nao deve ser apresentada como solucao desse timeout. Guia inclui verificacao
+sem token e distingue o fallback HTTP do scanner de falhas de transporte.
+Revisao: segredos somente no ambiente temporario, TLS/redirects das APIs
+preservados, nenhuma dependencia/configuracao local ou aplicacao alterada;
+diff sem erros e exemplos JSON conferidos. Incremento pronto para integracao
+separada da feature suspensa; homologacao corporativa continua pendente.
+
 ## Projeto generico no guia Sonar - 2026-10-07
 
 Evolucao documental em harness/guia-sonar-projeto-generico, criada da

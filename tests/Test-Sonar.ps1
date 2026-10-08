@@ -33,12 +33,12 @@ try {
     Assert (($captured | Out-String).Contains('[REDACTED]')) 'Wrapper nao mascarou saida.'
 } finally { $env:SONAR_TOKEN=$savedNativeToken }
 & $module {
-    $script:Mode = 'OK'; $script:Calls = @(); $script:MetricReads=0; $script:ApiCalls=@()
+    $script:Mode = 'OK'; $script:Calls = @(); $script:MetricReads=0; $script:ApiCalls=@(); $script:JavaVersion='21.0.1'
     function script:Invoke-SonarTool {
-        param($Executable, $Arguments)
-        $script:Calls += [pscustomobject]@{Args=$Arguments; Java=$env:JAVA_HOME; Token=$env:SONAR_TOKEN; Cwd=(Get-Location).Path; MavenArgs=$env:MAVEN_ARGS}
-        if ($Arguments -contains '-version') { return [pscustomobject]@{ExitCode=0; Output='java version "21.0.1"'} }
-        if ($Arguments -contains '--version') { return [pscustomobject]@{ExitCode=0; Output="Apache Maven 3.9.16`nJava version: 21.0.1"} }
+        param($Executable, $Arguments, $ScannerAuthScheme)
+        $script:Calls += [pscustomobject]@{Args=$Arguments; Java=$env:JAVA_HOME; Token=$env:SONAR_TOKEN; Cwd=(Get-Location).Path; MavenArgs=$env:MAVEN_ARGS; AuthScheme=$ScannerAuthScheme; Legacy=$env:SONARQUBE_SCANNER_PARAMS}
+        if ($Arguments -contains '-version') { return [pscustomobject]@{ExitCode=0; Output=('java version "' + $script:JavaVersion + '"')} }
+        if ($Arguments -contains '--version') { return [pscustomobject]@{ExitCode=0; Output="Apache Maven 3.9.16`nJava version: $script:JavaVersion"} }
         if ($script:Mode -eq 'MAVEN_FAIL') { return [pscustomobject]@{ExitCode=7; Output=$null} }
         $path = ($Arguments | Where-Object { $_ -like '-Dsonar.scanner.metadataFilePath=*' }).Substring(33)
         $server = 'http://localhost:9000'
@@ -83,11 +83,12 @@ try {
         [pscustomobject]@{TaskId=$TaskId; AnalysisId='analysis-1'}
     }
 }
-$oldToken = $env:SONAR_TOKEN; $oldJava = $env:JAVA_HOME; $oldArgs = $env:MAVEN_ARGS
+$oldToken = $env:SONAR_TOKEN; $oldJava = $env:JAVA_HOME; $oldArgs = $env:MAVEN_ARGS; $oldLegacy = $env:SONARQUBE_SCANNER_PARAMS
 $secret = 'squ_TEST_ONLY_do_not_persist_987654321'
 $secure = ConvertTo-SecureString $secret -AsPlainText -Force
 try {
     $env:SONAR_TOKEN = 'previous-token'; $env:MAVEN_ARGS = 'deploy'
+    $env:SONARQUBE_SCANNER_PARAMS = '{"sonar.token":"previous-legacy-token"}'
     $result = Invoke-HarnessSonar $context 'team:app' -Phase ANTES -Token $secure
     Assert ($result.Status -eq 'SUCCEEDED' -and $result.QualityGateStatus -eq 'OK' -and $result.MetricsStatus -eq 'MATCHED') 'Analise simulada deveria concluir.'
     Assert ($result.CriteriaStatus -eq 'PASS' -and $result.BaselineComparison -eq 'PENDING') 'Criterios devem ser avaliados separadamente.'
@@ -100,6 +101,7 @@ try {
     $calls = @(& $module { $script:Calls }); $scan = $calls[-1]
     Assert (($scan.Args -join ' ') -notmatch 'sonar.token|sonar.login|squ_TEST') 'Token enviado por argumento.'
     Assert ($scan.Token -eq $secret -and -not $scan.MavenArgs -and $scan.Java -eq (Resolve-HarnessPath "$area/jdk21" $root)) 'Ambiente do scanner incorreto.'
+    Assert ($scan.AuthScheme -ceq 'Bearer' -and -not $scan.Legacy -and $result.ScannerAuthScheme -ceq 'Bearer') 'Scanner legado deve manter Bearer sem herdar JSON externo.'
     Assert ($scan.Args -contains ('-Dsonar.java.jdkHome=' + $context.Config.tools.applicationJdk8Home)) 'Java da aplicacao nao foi informado.'
     Assert ($env:SONAR_TOKEN -eq 'previous-token' -and $env:JAVA_HOME -eq $oldJava -and $env:MAVEN_ARGS -eq 'deploy') 'Ambiente nao restaurado.'
     $hash = (Get-FileHash $result.ResultPath).Hash
@@ -112,10 +114,13 @@ try {
         Assert ($apiCalls.Count -eq 10 -and @($apiCalls | Where-Object AuthScheme -cne $authScheme).Count -eq 0) 'Esquema nao propagado a todas as consultas (CE, gate, metricas e correlacao).'
         $record=Get-Content -Raw $authenticated.ResultPath | ConvertFrom-Json
         Assert ($record.ApiAuthScheme -ceq $authScheme) 'Esquema nao registrado no recibo.'
+        Assert ($record.ScannerAuthScheme -ceq $authScheme) 'Esquema do scanner nao registrado no recibo.'
         Assert ($record.DashboardUrl -ceq 'http://localhost:9000/dashboard?id=team%3Aapp&branch=develop') 'Dashboard/branch nao sobreviveu ao JSON.'
         $summary=Get-Content -Raw (Join-Path (Split-Path $authenticated.ResultPath) 'RESUMO.md')
         Assert ($summary.Contains('Autenticacao da API: ' + $authScheme)) 'Esquema nao registrado no resumo.'
+        Assert ($summary.Contains('Autenticacao do scanner: ' + $authScheme)) 'Esquema do scanner nao registrado no resumo.'
         $scan=@(& $module { $script:Calls })[-1]
+        Assert ($scan.AuthScheme -ceq $authScheme) 'Escolha de autenticacao nao chegou ao launcher Maven.'
         Assert ($scan.Args -contains '-Dsonar.branch.name=develop' -and ($scan.Args -join ' ') -notmatch 'sonar.token|sonar.login|squ_TEST') 'Branch/token incorretos no scanner.'
     }
     foreach ($invalidScheme in @($null, '', 'Digest', @('Basic'), 1)) {
@@ -128,6 +133,13 @@ try {
         Assert ($invalidRejected -and @(& $module { $script:Calls }).Count -eq $callsBefore -and @(& $module { $script:ApiCalls }).Count -eq $apiBefore) 'Esquema invalido nao recusado antes de processos/rede.'
     }
     $context.Config.sonar.apiAuthScheme='Bearer'
+    foreach ($javaVersion in @('17.0.16','25.0.3','1.8.0_112')) {
+        & $module { param($v) $script:JavaVersion=$v } $javaVersion
+        $javaResult=Invoke-HarnessSonar $context 'team:app' -Token $secure
+        if ($javaVersion -like '1.8*') { Assert ($javaResult.Stage -eq 'TOOLS' -and $javaResult.Status -eq 'FAILED' -and $null -eq $javaResult.ScannerExitCode) 'Java 8 deve parar antes do scanner.' }
+        else { Assert ($javaResult.Status -eq 'SUCCEEDED') "Validacao do harness recusou Java $javaVersion." }
+    }
+    & $module { $script:JavaVersion='21.0.1' }
     foreach ($mode in @('HIGH','LOW_COVERAGE','INCREASE','NO_MQR')) {
         & $module { param($m) $script:Mode=$m; $script:MetricReads=0 } $mode
         $next=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath $result.ResultPath
@@ -148,6 +160,7 @@ try {
         if ($mode -like 'RACE*') { Assert ($next.MetricsStatus -eq 'UNVERIFIED' -and -not (Test-Path (Join-Path (Split-Path $next.ResultPath) 'measures.json'))) 'Metricas de outra analise exportadas.' }
     }
     Assert ((Get-FileHash $result.ResultPath).Hash -eq $hash) 'Recibo anterior alterado.'
+    Assert ($env:SONARQUBE_SCANNER_PARAMS -ceq '{"sonar.token":"previous-legacy-token"}') 'Ambiente legado nao restaurado pelo fluxo.'
     # Baselines incompatíveis ou adulterados devem ser recusados antes do scanner.
     $badDir=Join-Path (Split-Path $run) 'baseline-invalido'
     $null=New-Item -ItemType Directory -Path $badDir
@@ -179,6 +192,6 @@ try {
     $legacy.PSObject.Properties.Remove('sonar'); Write-HarnessJson "$fixture/legacy.json" $legacy
     $null = Read-HarnessConfig "$fixture/legacy.json" $fixture
 } finally {
-    $secure.Dispose(); $env:SONAR_TOKEN=$oldToken; $env:JAVA_HOME=$oldJava; $env:MAVEN_ARGS=$oldArgs
+    $secure.Dispose(); $env:SONAR_TOKEN=$oldToken; $env:JAVA_HOME=$oldJava; $env:MAVEN_ARGS=$oldArgs; $env:SONARQUBE_SCANNER_PARAMS=$oldLegacy
 }
 Write-Output 'PASS: Sonar simulado, identidade, gate, falhas, concorrencia, historico e token.'

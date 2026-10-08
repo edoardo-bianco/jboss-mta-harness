@@ -24,7 +24,7 @@ Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
 
 Use **Terminal > Run Task > Aplicacao: analisar SonarQube**, da pasta `harness`.
 A mesma tarefa atende ao servidor Docker local e ao corporativo: o endpoint
-e o esquema de autenticacao da API ficam no JSON local. O harness nao
+e o esquema de autenticacao das APIs e do scanner ficam no JSON local. O harness nao
 instala/inicia Docker, cria projetos no Sonar nem altera a politica de qualidade
 do servidor.
 
@@ -74,7 +74,7 @@ ao lado de `tools` e `mta`. Exemplo preenchido para Docker local:
 | Campo | Padrao no modelo | O que conferir na maquina do desenvolvedor |
 | --- | --- | --- |
 | `serverUrl` | `null` | Preencher localhost:9000 para Docker local ou URL HTTPS final do Sonar corporativo. |
-| `apiAuthScheme` | `Bearer` | Opcional: `Bearer` ou `Basic`. Ausencia preserva Bearer; para a API do SonarQube 9.9, use Basic. |
+| `apiAuthScheme` | `Bearer` | Opcional: `Bearer` ou `Basic`, aplicado nas APIs e no scanner Maven. Ausencia preserva Bearer; para SonarQube 9.9, use Basic. |
 | `scannerJdkHome` | `null` | Preencher caminho do JDK instalado e compativel com scanner/servidor. |
 | `scannerVersion` | `5.8.0.7211` | Versao fixa do plugin Maven; confirmar homologacao e acesso ao repositorio Maven corporativo. |
 | `ceTimeoutSeconds` | `300` | Tempo maximo de espera pelo processamento no servidor, em segundos. |
@@ -128,19 +128,30 @@ abra **Workspace: configurar caminhos**; o scan apenas valida a configuracao.
 ### Exemplo corporativo no SonarQube 9.9
 
 No `config/harness.local.json` da maquina de trabalho, atualize somente o bloco
-`sonar`, preservando os outros blocos. Exemplo com os valores informados pelo
-operador; JDK e scanner ainda precisam de validacao na coleta completa:
+`sonar`, preservando os outros blocos. Exemplo para scanner em JDK 17; ajuste
+o caminho para a pasta realmente instalada. A coleta completa ainda deve ser
+validada no servidor corporativo:
 
 ```json
 "sonar": {
   "serverUrl": "https://sonar-esteira.apps.produtos4.caixa",
   "apiAuthScheme": "Basic",
-  "scannerJdkHome": "C:\\desenvolvimento\\Java\\jdk-25.0.3+9",
+  "scannerJdkHome": "C:\\desenvolvimento\\Java\\jdk-17",
   "scannerVersion": "5.8.0.7211",
   "ceTimeoutSeconds": 300,
   "profiles": []
 }
 ```
+
+O projeto continua compilando/testando com Java 8. O
+[ambiente de analise do SonarQube 9.9](https://docs.sonarsource.com/sonarqube-server/9.9/analyzing-source-code/scanner-environment)
+documenta Java 11 ou 17; neste harness, use Java 17 para esse servidor. Escolher
+um plugin antigo que inicie em Java 8 nao torna o motor de analise 9.9 compativel
+com Java 8. O scanner 5.8 mantem a inicializacao para servidores anteriores ao
+10.6, conforme o [codigo oficial da biblioteca 4.1.2](https://github.com/SonarSource/sonar-scanner-java-library/blob/4.1.2.1663/lib/src/main/java/org/sonarsource/scanner/lib/ScannerEngineBootstrapper.java).
+Isso nao substitui a homologacao completa da combinacao usada na empresa.
+O sucesso de outro servidor com Java 25 continua valido para aquele ambiente;
+nao altere o JDK do Sonar local ja validado apenas por causa deste exemplo.
 
 Os caminhos ja configurados em `tools` continuam sendo usados: Java da aplicacao
 em `C:\desenvolvimento\Java\jdk1.8.0_112`, Maven em
@@ -159,7 +170,8 @@ override atende a este ambiente; nas demais maquinas, o padrao continua `null`.
    Chave e branch sao entradas da tarefa, nao campos adicionais do bloco `sonar`.
 5. Escolha ANTES/DEPOIS e eventual baseline conforme a coleta pretendida.
    Informe o valor do token somente na entrada oculta do terminal.
-6. Confira `ApiAuthScheme: Basic`, `ProjectKey` com a chave informada e
+6. Confira `ApiAuthScheme: Basic`, `ScannerAuthScheme: Basic`, `ScannerJavaHome`
+   apontando para JDK 17, `ProjectKey` com a chave informada e
    `BranchName: develop` no novo `result.json`; acompanhe tambem `Stage`,
    `ScannerExitCode`, `AnalysisStatus` e os criterios no resumo.
 
@@ -172,7 +184,12 @@ As metricas MQR podem estar ausentes no 9.9; nesse caso os criterios permanecem
 UNVERIFIED, conforme a politica abaixo, mesmo depois de corrigida a autenticacao.
 
 `apiAuthScheme` escolhe a autenticacao das consultas do harness, incluindo CE,
-Gate e metricas. O scanner continua recebendo `SONAR_TOKEN` temporariamente.
+Gate e metricas, e do processo scanner Maven. Em Bearer, o scanner recebe
+`SONAR_TOKEN`. Em Basic, recebe `sonar.login` com o token e `sonar.password`
+vazio por `SONAR_SCANNER_JSON_PARAMS`, somente no ambiente temporario do processo,
+sem `SONAR_TOKEN` concorrente. A [implementacao oficial](https://github.com/SonarSource/sonar-scanner-java-library/blob/4.1.2.1663/lib/src/main/java/org/sonarsource/scanner/lib/internal/http/ScannerHttpClient.java)
+prioriza Bearer quando existe `sonar.token`; por isso o isolamento e necessario.
+O campo `ScannerAuthScheme` registra a escolha, nao comprova autenticacao bem-sucedida.
 Nao ha troca automatica de esquema apos falha. Para continuar no Sonar local,
 preserve sua URL/JDK e `Bearer`; configuracoes sem esse campo mantem o mesmo
 comportamento. Campo presente com valor vazio, null ou diferente dos dois modos
@@ -184,6 +201,79 @@ No Windows PowerShell 5.1, `\u0026` no JSON representa `&`. A URL
 `/dashboard?branch=develop&id=CHAVE-DO-PROJETO`. Esse escape nao exige trocar a URL
 do servidor nem remover a branch. Use o link do resumo ou o valor ja lido com
 `ConvertFrom-Json`.
+
+### Scanner inicia em Java 17, mas ocorre timeout de conexao
+
+Se o terminal mostra `sonar:5.8.0.7211:sonar`, `Java 17` e depois
+`Failed to query server version ... HTTP connect timed out`, o plugin iniciou
+e falhou ao conectar ao servidor antes da analise. `SKIPPED` nos modulos e
+consequencia dessa falha no agregador, nao evidencia de incompatibilidade Java 8.
+O aviso `parent.relativePath` do POM e outro assunto; ele nao explica esse timeout.
+
+`ServerVersion` preenchido com `Stage=SCAN` indica que as APIs PowerShell ja
+responderam, enquanto o processo Java falhou. Conferir proxy/PAC, DNS/enderecos
+e acesso do processo Java. Nao aumentar `ceTimeoutSeconds`: ele limita a espera
+pelo processamento de um relatorio ja enviado, nao essa conexao inicial.
+Um erro TLS como `PKIX` exigiria outra investigacao; timeout nao comprova isso.
+
+A biblioteca tenta `/api/v2/analysis/version` primeiro. Em servidor antigo, uma
+resposta HTTP de erro permite consultar `/api/server/version`; um timeout de
+conexao nao segue esse caminho. O teste local com plugin real verificou essa
+sequencia diante de 404, sem executar o motor nem homologar o servidor corporativo.
+
+Para identificar o proxy efetivo do PowerShell, sem credenciais:
+
+```powershell
+$destino = [Uri]'https://sonar-esteira.apps.produtos4.caixa'
+$proxy = [Net.WebRequest]::DefaultWebProxy
+if ($null -eq $proxy -or $proxy.IsBypassed($destino)) {
+    'PowerShell: acesso direto para esse destino'
+} else {
+    $rota = $proxy.GetProxy($destino)
+    [pscustomobject]@{ ProxyHost=$rota.DnsSafeHost; ProxyPort=$rota.Port }
+}
+Test-NetConnection -ComputerName $destino.DnsSafeHost -Port 443
+```
+
+O teste TCP mede acesso direto; ele pode falhar mesmo quando o PowerShell acessa
+por proxy. Se o ambiente realmente exigir proxy, o scanner Maven 5.x possui
+`SONAR_SCANNER_PROXY_HOST` e `SONAR_SCANNER_PROXY_PORT`, conforme os
+[parametros oficiais](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/analysis-parameters/parameters-not-settable-in-ui#proxy).
+Use somente a rota efetiva do ambiente, sem inventar hosts/portas, persistir
+senhas ou mudar settings/certificados para contornar a falha.
+
+### Capturar log detalhado do plugin
+
+O diagnostico esta temporariamente habilitado no harness: Maven recebe `-e -X`
+e o scanner recebe `sonar.verbose=true` e `sonar.log.level=DEBUG`. Vale tambem
+para a Run Task existente. `-e` exibe a cadeia de excecoes e `-X` habilita debug
+do Maven, conforme a [referencia Maven](https://maven.apache.org/ref/3.9.12/maven-embedder/cli.html).
+As propriedades Sonar seguem a [referencia de logs](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/analysis-parameters/parameters-not-settable-in-ui#analysis-logging).
+
+Para salvar a saida, execute no terminal PowerShell, na raiz do harness:
+
+```powershell
+$pastaLog = '.harness\ensaios\sonar-timeout'
+New-Item -ItemType Directory -Force -Path $pastaLog | Out-Null
+$log = Join-Path $pastaLog ("scanner-{0}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
+
+powershell.exe -NoProfile -File .\scripts\analisar-sonar.ps1 -SelectTarget 2>&1 |
+    Tee-Object -FilePath $log
+
+Write-Host "Log salvo em: $log"
+```
+
+Responda as escolhas usuais e informe o token somente na entrada oculta. O log
+passa pela redacao do launcher para o token Sonar, inclusive Basic/JSON, mas
+debug Maven pode exibir outras propriedades/credenciais do ambiente ou projeto.
+Revise antes de compartilhar. Para este timeout, preserve o trecho de consulta
+da versao ate o erro final, incluindo todos os `Caused by`. O `result.json`
+continua registrando a etapa/resultado; ele nao substitui esse log do terminal.
+
+Manter build Java 8 e scanner corporativo Java 17. Depois do diagnostico, avaliar
+em nova alteracao a retirada de `-e -X` e o retorno a `sonar.verbose=false` e
+`sonar.log.level=INFO` em `scripts/HarnessSonar.psm1`. Nenhuma nova Run Task ou
+mudanca de configuracao local e necessaria para esta captura.
 
 ## Uso
 
@@ -211,8 +301,9 @@ do servidor nem remover a branch. Use o link do resumo ou o valor ja lido com
 9. Aguarde Maven e processamento no servidor. Abra o caminho `RESUMO.md` exibido
    no terminal ou o `DashboardUrl` do resultado.
 
-O token e temporario em `SONAR_TOKEN` do processo de execucao; o ambiente anterior
-e restaurado ao terminar. A tarefa nao o envia como argumento e nao grava log
+O token fica somente no ambiente temporario de execucao, conforme o esquema
+descrito acima; o ambiente anterior e restaurado inclusive em falhas. A tarefa
+nao o envia como argumento e nao grava log
 bruto do scanner. A saida no terminal mascara o token. Nao habilite debug ou
 logging externo que capture o ambiente do processo; o harness nao controla
 plugins Maven, hooks ou configuracoes externas do projeto.
