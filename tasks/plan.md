@@ -1,5 +1,46 @@
 # Plano do agente: evolucao do harness
 
+## Metadados de branch e certificado Sonar corporativo - 2026-10-08
+
+Pedido: analisar a coleta corporativa e documentar a instalacao do certificado
+publico, incluindo orientacao pelos helpers. Branch harness/sonar-metadados-certificado
+criada da main 71966f7, com checkout limpo. O scanner 5.5.0.6356 enviou a task
+AaEbbLMHsmCUpOwSB4P2 com exit 0; o leitor rejeita branch=develop no report-task.txt
+antes de registrar TaskId. Corrigir esse campo opcional, conferir a branch quando
+informada e manter as validacoes de projeto/servidor/task e a verificacao CE.
+
+Reproduzir a falha nos testes de API e fluxo antes da corretiva; validar PS5.1,
+legado sem branch, divergencias e protecao dos metadados. Documentar truststore
+do scanner com certificado publico conferido, preservando truststores existentes,
+sem desabilitar TLS nem alterar o JDK 8 da aplicacao. Atualizar skill/papeis comuns
+dos orientadores e conferir links e exemplos PowerShell. Preservar a coleta FAILED;
+dashboard visivel nao comprova Gate/metricas coletados nem aceite humano. A evolucao
+ANTES/DEPOIS com alertas e exportacao permanece fora deste incremento.
+
+Extensao pedida: integrar preparo do certificado na tarefa Sonar existente,
+com conferencia SHA-256 pelo operador antes da primeira importacao; reutilizar
+truststore padrao e preservar suas entradas. Sem nova Run Task, sem proxy novo,
+sem alterar cacerts/Windows/JDK 8. Incluir testes locais isolados do usuario real.
+README e guia do desenvolvedor encaminham ao roteiro de preparo por maquina;
+procedimentos ficam somente nos guias Sonar e Node/MCP, usados pelos helpers.
+
+Consolidacao solicitada para uso corporativo de indice, priorizacao, planejamento
+e exportacao. Conferir esses fluxos e disponibilizar a entrega versionada apos
+revisao. Planejamento macro depende do indice/registros que o usuario enviara,
+prazo e capacidade da equipe; nao produzir estimativa ficticia. Incluir no guia
+JBoss a entrada para o catalogo JBS e a ferramenta Red Hat, como preparo da proxima
+sprint; nao implementar ou executar migracao de servidor neste incremento.
+
+Validacao local: API Sonar com 67 verificacoes (RED antes da corretiva/GREEN depois),
+fluxo Sonar simulado aprovado em PS5.1, certificado com 20 verificacoes em PS5.1 e
+keytool real sobre certificados sinteticos, sem rede. Preservacao, reuso,
+cancelamento e falha de importacao conferidos. Suites ProjectIndex, Prioritization,
+IssuePlanning, ContextPackage e TaskInputs aprovadas. Sintaxe dos scripts/exemplos
+e 298 links internos conferidos. Revisao da skill por leitura: fontes, fronteira
+de orientacao e frontmatter preservados; quick_validate.py indisponivel por falta
+de PyYAML no Python local, sem instalar dependencias globais por este motivo.
+Conexao corporativa e nova coleta completa permanecem para o operador.
+
 ## Log detalhado do scanner e integracao Basic - 2026-10-08
 
 Pedido autorizado: habilitar o diagnostico e levar a corretiva Basic mais o log

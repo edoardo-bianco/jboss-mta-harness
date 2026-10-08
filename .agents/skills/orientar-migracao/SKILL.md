@@ -29,6 +29,19 @@ na sessao. Skill aplicada nao comprova delegacao: relate somente chamadas reais.
 
 ## Identificar e ler o contexto
 
+Para primeiro uso ou preparo de maquinas dos colegas, parta do [README](../../../README.md#como-usar)
+e da etapa 1 do [guia do desenvolvedor](../../../doc/guias/harness-migracao-desenvolvedor.md#1-preparar-o-ambiente),
+que levam ao [roteiro por maquina](../../../doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas).
+Cite a secao usada na orientacao; procedimentos ficam nos guias, sem reconstruir
+um roteiro paralelo nem exigir contexto de migracao para instalar ferramentas.
+
+Para certificado/TLS do Sonar, leia [certificado publico e diagnostico](../../../doc/guias/tools/sonar.md#certificado-publico-do-sonar-corporativo).
+Oriente o preparo integrado na tarefa existente ou a chamada isolada do mesmo
+modulo. Preserve truststore e escolhas ja informados; a impressao vem de fonte
+corporativa confiavel, nunca de suposicao do helper. Nao importe certificados,
+desabilite TLS ou solicite token no chat. Diferencie envio pelo scanner, coleta
+CE/Gate/metricas e aceite; dashboard visivel nao valida sozinho a coleta local.
+
 Se o pedido for somente instalar/configurar Node ou MCP do harness, siga a
 [configuracao MCP](../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa)
 diretamente, sem recuperar contexto de migracao. Oriente uma etapa por vez: versao/arquitetura,

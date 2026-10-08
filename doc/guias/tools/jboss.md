@@ -44,6 +44,14 @@ separadamente; iniciar o servidor nao comprova a corretiva.
 
 ## Configuracao
 
+### Migrar a configuracao do servidor
+
+Para transformar a configuracao de origem, siga o
+[guia de migracao da configuracao para EAP 7.4](migracao-configuracao-jboss.md).
+Ele concentra inventario, ferramenta Red Hat, ensaio e orientacao com o helper.
+O controle local abaixo opera uma instalacao ja preparada; selecionar um XML
+existente nao migra automaticamente a configuracao do servidor.
+
 ### Instalacoes, portas e XML standalone
 
 Configure `tools.eap71Home`, `tools.eap74Home` e `tools.applicationJdk8Home`.

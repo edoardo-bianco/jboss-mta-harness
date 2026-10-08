@@ -114,6 +114,15 @@ ou trabalhar com repositorios corporativos.
 Ele cobre primeira configuracao, projetos, ajustes da IDE e dados locais, e
 encaminha a configuracao propria de cada ferramenta.
 
+Para instalar em outra maquina, siga o [roteiro por maquina](tools/workspace.md#preparar-as-maquinas-dos-colegas).
+Ele encaminha aos procedimentos mantidos de certificado Sonar e Node/MCP.
+Voce pode le-los diretamente ou pedir ao helper que o conduza pelas mesmas fontes.
+
+Para preparar a configuracao do servidor de destino, siga o
+[guia de migracao da configuracao JBoss para EAP 7.4](tools/migracao-configuracao-jboss.md).
+Ele explica a ferramenta Red Hat, as conferencias de versao e o ensaio, com
+orientacao do helper. As Run Tasks de start/deploy operam a instalacao ja preparada.
+
 **Resultado esperado e continuidade:** ambiente pronto e projeto identificado.
 A etapa 2 prepara uma nova analise; quem ja possui MTA pertinente pode seguir
 para a etapa 3.

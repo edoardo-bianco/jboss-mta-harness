@@ -1,5 +1,21 @@
 # To-do do agente: evolucao do harness
 
+## Metadados de branch e certificado Sonar corporativo - 2026-10-08
+
+- [x] Conferir log, leitor, raiz/main/HEAD e criar branch com checkout limpo.
+- [x] Reproduzir recusa de branch=develop e corrigir metadados mantendo correlacao.
+- [x] Validar API/fluxo Sonar em PS5.1, legado e divergencias de branch.
+- [x] Integrar preparo do certificado na tarefa Sonar e testar isolamento/confianca.
+- [x] Documentar instalacao/conferencia do certificado publico no guia corporativo.
+- [x] Orientar helpers pelo guia, distinguindo TLS, envio e coleta posterior.
+- [x] Ligar README/guia do desenvolvedor ao preparo por maquina, Sonar e Node/MCP sem duplicar procedimentos.
+- [x] Documentar migracao da configuracao EAP 7.4 em guia especifico, com entrada pelo guia do desenvolvedor/helper; execucao fica para a proxima sprint.
+- [x] Validar indice, priorizacao, planejamento de issue, compartilhamento e tarefas para o uso corporativo.
+- [x] Revisar diff, links e sintaxe dos exemplos; registrar limites da verificacao.
+- [x] Preparar consolidacao revisada e versionada para entrega na principal.
+- [ ] Conferir nova coleta corporativa com o operador, sem alterar recibo historico.
+
+
 ## Log detalhado do scanner e integracao Basic - 2026-10-08
 
 - [x] Conferir branch/HEAD, checkout limpo e main remota; preservar feature suspensa.
