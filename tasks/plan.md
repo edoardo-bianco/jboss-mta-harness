@@ -1,5 +1,31 @@
 # Plano do agente: evolucao do harness
 
+## Consolidacao documental da MACRO-01 - 2026-10-08
+
+Retomada autorizada apos merge da PR #24: substituir a proposta existente pela
+analise v2.0 fornecida pelo desenvolvedor e incorporar seu template separado.
+Origem: planejamento-macro-sprints.md e planejamento-sprints.template.md na
+pasta informada feature-planejamneto-macro-sprint. A referencia 745a8e6/PR #21
+do documento e historica; esta integracao parte da main 5aef6df/PR #24, na branch
+harness/consolidar-planejamento-sprints. Originais fornecidos permanecem intactos.
+
+- Atualizar doc/features/planejamento-macro-sprints.md e criar
+  doc/modelos/planejamento-sprints.template.md, preservando os requisitos.
+- Manter o template como fonte unica: substituir o bloco duplicado da analise
+  pelo link ao modelo separado e ajustar somente sua referencia de localizacao.
+- Atualizar o backlog MACRO-01 com a especificacao consolidada e o template.
+- Conferir fidelidade dos arquivos, links/ancoras, criterios e coerencia com a
+  main integrada; fazer revisao independente antes de publicar PR.
+- Manter tarefa, prompt executavel, calculos e revisao automatica como futura
+  implementacao. Esta entrega nao gera cronograma real nem altera a migracao.
+
+Resultado: template identico ao fornecido (SHA-256 conferido); analise difere
+somente pela referencia ao template separado e pelo comentario de localizacao.
+Revisao independente aprovada sem achados. Conferidos 404 links/ancoras locais,
+sem erros; placeholders do modelo nao sao caminhos existentes. Whitespace
+validado preservando somente as quebras Markdown intencionais dos originais.
+Fontes externas historicas nao foram revalidadas e nenhum fluxo foi implementado.
+
 ## Priorizacao compartilhada e planejamento por desenvolvedor - 2026-10-08
 
 Pedido autorizado: recomendar a preparacao central da analise/priorizacao e
