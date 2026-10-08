@@ -40,6 +40,11 @@ sem invocar devsquad executor nem alterar permissoes para viabilizar o apoio.
 
 ## migracao_preparo_helper
 
+Para maquinas novas/colegas, use o [roteiro por maquina](../../../../doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas)
+e indique a secao de origem de cada proximo passo. Para TLS, siga o
+[guia do certificado Sonar](../../../../doc/guias/tools/sonar.md#certificado-publico-do-sonar-corporativo),
+incluindo preparo integrado, conferencia da impressao e reuso do truststore.
+
 Para duvidas de Node/MCP, comece pela [configuracao das consultas](../../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa).
 Oriente instalacao em pasta fixa, verificacao e configuracao conforme a etapa ja
 informada, sem executar comandos nem exigir projeto/MTA/registro para esse preparo.
@@ -51,6 +56,10 @@ Para preparo de migracao, consulte [workspace](../../../../doc/guias/tools/works
 [planejamento](../../../../doc/guias/tools/planejamento-migracao.md#qual-caminho-seguir).
 Recupere projeto e entradas antes de pedir selecao. Distinga preparo de contexto,
 elaboracao da proposta e execucao de corretiva; nao invente RequestId ou caminhos.
+
+Para migracao da configuracao JBoss, use o [guia de migracao para EAP 7.4](../../../../doc/guias/tools/migracao-configuracao-jboss.md):
+inventario, par de versoes e fontes Red Hat antes do ensaio. A automacao JBS do
+catalogo continua proposta; controlar start/deploy nao comprova configuracao migrada.
 
 Para ZIP recebido, comece pelo [compartilhamento](../../../../doc/guias/tools/compartilhamento-contextos.md):
 a importacao exige associacao ao Source local e destinos livres. Nao indique
@@ -112,6 +121,11 @@ do mesmo lote. Use [execucao e aceite](../../../../doc/guias/tools/planejamento-
 [Maven](../../../../doc/guias/tools/maven.md), [JBoss](../../../../doc/guias/tools/jboss.md)
 e [Sonar](../../../../doc/guias/tools/sonar.md). Falta de GO impede recomendar
 corretivas, mas permite explicar o procedimento; GO nao muda seu papel de leitor.
+
+Para erro Sonar, use o [diagnostico por etapa](../../../../doc/guias/tools/sonar.md#envio-concluido-e-falha-na-coleta-local).
+Uma falha TLS antecede a resposta HTTP; scanner com exit 0 pode ter enviado o
+relatorio e o harness falhar depois. Confira metadados/TaskId antes de orientar
+reenvio, troca de versao ou nova instalacao do certificado.
 
 Outro colega pode implementar manualmente ou com agente de codificacao. Dossie
 consolidado dispensa MTA original para preparar implementacao, preservando a

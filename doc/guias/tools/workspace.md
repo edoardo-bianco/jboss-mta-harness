@@ -17,6 +17,7 @@ e quando precisar ajustar o ambiente durante o trabalho.
 | Necessidade | Secao |
 | --- | --- |
 | Comecar em uma maquina | [Primeira configuracao](#comecar-na-maquina-de-trabalho) |
+| Preparar tambem as maquinas dos colegas | [Roteiro por maquina e usuario](#preparar-as-maquinas-dos-colegas) |
 | Alterar caminhos ou escolhas da IDE | [JSON local](#configuracao-da-maquina) e [workspace gerado/manual](#duas-opcoes-para-configurar-o-workspace) |
 | Permitir leitura dos relatorios MTA pelo Copilot | [Acesso a pasta MTA](#acesso-do-copilot-a-pasta-mta) |
 | Selecionar ou adicionar aplicacoes | [Projetos](#escolher-o-projeto-em-cada-tarefa) e [exemplos/corporativos](#ensaiar-e-depois-usar-os-projetos-corporativos) |
@@ -108,6 +109,39 @@ isso nao gera workspace nem atualiza prompts salvos. Para usar instrucoes novas,
 prepare outro prompt na operacao desejada, reutilizando o MTA existente quando
 aplicavel. Na manutencao do registro, pode escolher somente registro/evidencias.
 Prompts e copias do contrato de solicitacoes anteriores permanecem historicos.
+
+#### Preparar as maquinas dos colegas
+
+Cada colega comeca pelo [README](../../../README.md#como-usar) e pelo
+[guia do desenvolvedor](../harness-migracao-desenvolvedor.md#1-preparar-o-ambiente).
+Esta tabela encaminha aos procedimentos; comandos e versoes ficam no guia de cada
+ferramenta, tambem consultado pelo helper. Confira os caminhos desta maquina e
+o usuario que executara as tarefas; arquivos locais nao acompanham o clone.
+
+| Preparo necessario | Procedimento e evidencia a conferir |
+| --- | --- |
+| Workspace e ferramentas | [Primeira configuracao](#comecar-na-maquina-de-trabalho): workspace salvo, projetos externos e JSON com caminhos locais. Maven usa settings normais da maquina ou override corporativo explicito. |
+| Build/testes | [Maven Java 8](maven.md#build-maven-da-aplicacao-com-java-8): versao Java, resultado dos testes e cobertura da aplicacao. |
+| Sonar corporativo | [Configuracao Sonar](sonar.md#exemplo-corporativo-no-sonarqube-99) e [certificado publico](sonar.md#certificado-publico-do-sonar-corporativo): JDK do scanner, endpoint, impressao confirmada e truststore do usuario. A propria tarefa oferece o preparo. |
+| Consultas MCP opcionais | [Node em pasta fixa](consultas-issues.md#instalar-node-em-pasta-fixa), seguido de [dependencias e clientes](consultas-issues.md#instalar-dependencias-e-configurar-os-clientes): node/npm pelo caminho escolhido, configurador e descoberta/consulta real no cliente. |
+
+Instale apenas o necessario para a etapa do colega. Para Node/MCP e certificado,
+a orientacao inicial dispensa MTA e registro de migracao. Compartilhe os links dos
+guias e a referencia corporativa do certificado; cada usuario informa seu proprio
+token no terminal e confere seus caminhos, sem copiar credenciais/configuracao
+pessoal de outra maquina.
+
+No Codex, ative `$orientar-migracao`; no Copilot, escolha `migracao_helper` e envie:
+
+```text
+Estou preparando esta maquina para usar o harness, incluindo Sonar corporativo
+e consultas MCP. Leia o roteiro por maquina no guia de workspace e me oriente
+uma etapa por vez pelos guias oficiais do repositorio. Informe a fonte, a tarefa
+ou comando e o resultado esperado. Ja concluimos: [etapas e caminhos locais].
+```
+
+O helper preserva o que ja foi conferido e indica a proxima acao. Para retomar,
+informe a etapa e o resultado obtido, sem token; nao precisa repetir todo o roteiro.
 
 #### Extensoes Java no VS Code
 

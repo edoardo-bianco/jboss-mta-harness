@@ -87,8 +87,9 @@ O caminho do JDK e um exemplo. No trabalho, use a URL HTTPS e eventual caminho
 base corporativo, por exemplo `https://sonar.empresa/sonarqube`. HTTP e aceito
 somente em loopback (localhost/127.0.0.1) para o Docker local. Nao use URLs com
 credenciais, query string ou fragmento. Certificados continuam sendo validados;
-cadeias/proxy corporativos devem ser configurados pela rotina aprovada da equipe
-no Windows e no JDK. Redirecionamentos das APIs sao recusados; use a URL final.
+para o scanner, siga o [preparo integrado do certificado publico](#certificado-publico-do-sonar-corporativo).
+As APIs PowerShell usam a confianca do Windows. Redirecionamentos das APIs sao
+recusados; use a URL final. Proxy so deve ser configurado se exigido pelo ambiente.
 
 Use uma versao fixa **5.x** homologada para seu servidor. O exemplo fixa
 5.8.0.7211, sem afirmar que seja a ultima versao. Escolha o JDK conforme a
@@ -136,8 +137,8 @@ validada no servidor corporativo:
 "sonar": {
   "serverUrl": "https://sonar-esteira.apps.produtos4.caixa",
   "apiAuthScheme": "Basic",
-  "scannerJdkHome": "C:\\desenvolvimento\\Java\\jdk-17",
-  "scannerVersion": "5.8.0.7211",
+  "scannerJdkHome": "C:\\desenvolvimento\\Java\\jdk-17.0.15+6",
+  "scannerVersion": "5.5.0.6356",
   "ceTimeoutSeconds": 300,
   "profiles": []
 }
@@ -147,9 +148,11 @@ O projeto continua compilando/testando com Java 8. O
 [ambiente de analise do SonarQube 9.9](https://docs.sonarsource.com/sonarqube-server/9.9/analyzing-source-code/scanner-environment)
 documenta Java 11 ou 17; neste harness, use Java 17 para esse servidor. Escolher
 um plugin antigo que inicie em Java 8 nao torna o motor de analise 9.9 compativel
-com Java 8. O scanner 5.8 mantem a inicializacao para servidores anteriores ao
-10.6, conforme o [codigo oficial da biblioteca 4.1.2](https://github.com/SonarSource/sonar-scanner-java-library/blob/4.1.2.1663/lib/src/main/java/org/sonarsource/scanner/lib/ScannerEngineBootstrapper.java).
-Isso nao substitui a homologacao completa da combinacao usada na empresa.
+com Java 8. No log corporativo fornecido pelo operador em 2026-10-08, a combinacao
+5.5.0.6356/JDK 17 enviou o relatorio ao servidor 9.9.5.90363; a coleta posterior
+do harness falhou, conforme o [diagnostico abaixo](#envio-concluido-e-falha-na-coleta-local).
+Isso comprova o envio nessa execucao, sem homologar toda a coleta ou trocar o
+padrao 5.8.0.7211 do modelo de configuracao.
 O sucesso de outro servidor com Java 25 continua valido para aquele ambiente;
 nao altere o JDK do Sonar local ja validado apenas por causa deste exemplo.
 
@@ -163,7 +166,9 @@ override atende a este ambiente; nas demais maquinas, o padrao continua `null`.
 2. Substitua `NOME-DO-PROJETO` pelo nome da pasta da sua aplicacao. Confira que
    `C:\desenvolvimento\repositorio\jboss-7-jdk8\NOME-DO-PROJETO` esta entre as
    pastas do workspace e execute o build/testes conforme o roteiro abaixo.
-3. Execute **Aplicacao: analisar SonarQube** e selecione esse projeto.
+3. Execute **Aplicacao: analisar SonarQube** e selecione esse projeto. Se faltar
+   o truststore, a tarefa oferece o [preparo do certificado](#certificado-publico-do-sonar-corporativo)
+   antes de pedir o token ou iniciar a analise.
 4. Informe a chave do seu projeto no SonarQube, representada neste exemplo por
    `CHAVE-DO-PROJETO`, e, no campo de branch Sonar, **develop**.
    Use a chave exata cadastrada no Sonar; ela pode diferir do nome da pasta.
@@ -201,6 +206,121 @@ No Windows PowerShell 5.1, `\u0026` no JSON representa `&`. A URL
 `/dashboard?branch=develop&id=CHAVE-DO-PROJETO`. Esse escape nao exige trocar a URL
 do servidor nem remover a branch. Use o link do resumo ou o valor ja lido com
 `ConvertFrom-Json`.
+
+### Certificado publico do Sonar corporativo
+
+O erro `SSLHandshakeException: The certificate chain is not trusted`, acompanhado
+de `PKIX path building failed`, indica que o Java nao conseguiu estabelecer uma
+cadeia de confianca. No caso relatado, o plugin ja havia iniciado e o log dizia
+`No active proxy detected`. O `curl.exe` com Schannel funcionava no Windows;
+isso nao comprova que o scanner Java consiga validar a mesma cadeia.
+
+O procedimento abaixo prepara o **certificado publico do servidor** no truststore
+do scanner. A validacao TLS continua ativa. Ele nao instala chave privada,
+nao muda o `cacerts` do JDK, o repositorio Windows ou o Java 8 da aplicacao.
+Para distribuir uma CA corporativa em vez do certificado do servidor, siga a
+rotina aprovada pela equipe de infraestrutura. Certificados intermediarios
+ausentes na cadeia servida tambem devem ser corrigidos pela equipe do servidor.
+
+**Na tarefa habitual, sem copiar script:**
+
+1. Execute **Aplicacao: analisar SonarQube**. Em HTTPS, se nao existir
+   `truststore.p12`, aparece `Certificado Sonar`. Escolha **c** para preparar o
+   certificado corporativo. Enter continua usando a confianca Windows/JDK;
+   `q` cancela. HTTP local dispensa esta etapa.
+2. O script usa o `keytool.exe` do JDK configurado em `sonar.scannerJdkHome`
+   para obter o certificado por conexao direta e apresentar titular, emissor,
+   validade e SHA-256. Cada chamada ao keytool tem limite de 30 segundos.
+3. Confira a impressao SHA-256 com a equipe responsavel ou outra fonte corporativa
+   confiavel e cole o valor confirmado. Copiar apenas o valor recem-obtido do
+   servidor nao e uma verificacao independente de identidade. Enter ou valor
+   diferente cancela, preservando o truststore e sem iniciar a analise.
+4. O script cria o PKCS12 ou acrescenta o certificado ao arquivo existente,
+   mantendo as outras entradas. Depois segue para as entradas e o token da analise.
+
+**Destino por usuario:** `%USERPROFILE%\.sonar\ssl\truststore.p12`, senha
+padrao `changeit`, contendo certificados publicos. Quando `SONAR_USER_HOME`
+estiver definido, usa `<SONAR_USER_HOME>\ssl\truststore.p12`; o caminho deve
+ser absoluto. O scanner Maven 5.x reconhece esse destino padrao. O token Sonar
+nao e gravado nele. O preparo deixa apenas o truststore e seu arquivo `.lock`
+de coordenacao; os arquivos temporarios da importacao sao removidos.
+
+**Nao reinstala em toda execucao:** se o arquivo ja existe, a tarefa o reutiliza
+sem buscar ou importar certificados. Isso nao prova que contenha o certificado
+do endpoint atual; o scanner ainda verifica TLS durante a conexao. Se o preparo
+for solicitado explicitamente, um certificado identico preserva o arquivo;
+um certificado novo e acrescentado, sem excluir os anteriores. Falha do keytool
+ou senha diferente de `changeit` interrompe a operacao sem substituir o original.
+
+**Renovacao, outro servidor ou preparo isolado:** a importacao do certificado do
+servidor pode precisar ser repetida quando ele for renovado. Para solicitar o
+preparo mesmo com truststore existente e continuar a analise, execute da raiz:
+
+```powershell
+.\scripts\analisar-sonar.ps1 -PrepareCertificate
+```
+
+Para preparar somente o certificado, sem selecionar projeto nem enviar fontes,
+este e o script de apoio. Ele chama a **mesma implementacao** da tarefa e usa os
+valores locais ja preenchidos, sem manter outra receita de importacao:
+
+```powershell
+Import-Module .\scripts\HarnessSonarCertificate.psm1 -Force
+$sonar = (Get-Content .\config\harness.local.json -Raw | ConvertFrom-Json).sonar
+Initialize-HarnessSonarCertificate -ServerUrl $sonar.serverUrl `
+    -ScannerJdkHome $sonar.scannerJdkHome -PrepareCertificate
+```
+
+Os comandos `keytool -printcert`, `-importcert` e `-list`, com preparo temporario
+e preservacao do arquivo existente, estao em
+[HarnessSonarCertificate.psm1](../../../scripts/HarnessSonarCertificate.psm1).
+Nao apague um truststore funcional para repetir o preparo. A remocao de entradas
+antigas ou a manutencao de truststore com senha/politica propria pertence ao
+procedimento da equipe; a tarefa nao remove certificados automaticamente.
+
+**Conferencia:** na proxima analise, o scanner deve superar a conexao HTTPS sem
+`SSLHandshakeException`. Se surgir HTTP 401/403, conferir autenticacao/permissao;
+isso e outra etapa. Se o erro TLS for das APIs PowerShell, este PKCS12 nao altera
+a confianca do Windows. `sonar.scanner.skipSystemTruststore=true` apenas evita a
+leitura dos certificados do sistema; nao desabilita a verificacao nem resolve,
+por si so, uma cadeia nao confiavel.
+
+**Fontes tecnicas:** [TLS nos scanners Sonar](https://docs.sonarsource.com/sonarqube-server/2025.5/analyzing-source-code/scanners/scanner-environment/manage-tls-certificates),
+[parametros de truststore](https://docs.sonarsource.com/sonarqube-server/2025.2/analyzing-source-code/analysis-parameters)
+e [keytool do Java 17](https://docs.oracle.com/en/java/javase/17/docs/specs/man/keytool.html).
+O [roteiro por maquina](workspace.md#preparar-as-maquinas-dos-colegas) e o ponto
+de passagem para colegas; o helper deve orientar por esta secao, sem executar
+a importacao, pedir token no chat ou declarar o certificado confiavel por conta propria.
+
+### Envio concluido e falha na coleta local
+
+No log corporativo fornecido em 2026-10-08, o scanner retornou exit 0, o POST
+`api/ce/submit` retornou HTTP 200 e houve `ANALYSIS SUCCESSFUL`/`BUILD SUCCESS`.
+O `report-task.txt` identificou `ceTaskId=AaEbbLMHsmCUpOwSB4P2` e
+`branch=develop`. Apesar disso, o harness terminou com `Stage=COMPUTE_ENGINE`,
+`TaskId=null` e `AnalysisStatus=UNVERIFIED`.
+
+A causa reproduzida nos testes locais foi o leitor antigo rejeitar o campo
+`branch` do recibo, antes da consulta CE. O leitor corrigido aceita esse campo
+opcional, confere a branch selecionada e preserva as verificacoes de servidor,
+projeto e task. Recibos antigos sem `branch` continuam aceitos; a resposta CE
+continua sendo conferida. Este erro posterior ao envio nao pede reinstalar o
+certificado, trocar o goal Maven nem aumentar o timeout CE.
+
+| Evidencia | O que comprova |
+| --- | --- |
+| `Analysis report generated` | Relatorio local produzido; ainda falta envio. |
+| `Analysis report uploaded`, POST 200 e scanner exit 0 | Servidor recebeu o relatorio; o processamento CE pode continuar. |
+| Task CE `SUCCESS` com `analysisId` correspondente | Processamento daquela analise concluido. |
+| Gate/metricas coletados e vinculados | Coleta do harness conferida, sujeita aos criterios e a revisao humana. |
+
+O dashboard atualiza depois que o servidor processa o relatorio. Ver o resultado
+no dashboard e coerente com envio bem-sucedido, mesmo se a coleta local falhou.
+Modulos `SKIPPED` no resumo do goal agregador, isoladamente, nao provam que seus
+fontes foram omitidos. Preserve o `result.json` FAILED e o recibo historico;
+nao os marque como aprovados. A versao corrigida vale para novas coletas e nao
+reprocessa automaticamente aquela execucao. Antes de recomendar outro scan,
+confira a task recebida e identifique qual evidencia ainda falta.
 
 ### Scanner inicia em Java 17, mas ocorre timeout de conexao
 

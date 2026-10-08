@@ -171,6 +171,15 @@ while (-not $state.Stop) {
     [IO.File]::WriteAllText($reportPath, $report)
     $task = Read-SonarTaskReport -Path $reportPath -ServerUrl $url -ProjectKey 'fixture:key'
     Assert-Test ($task.TaskId -ceq 'CE1' -and @($task.PSObject.Properties).Count -eq 1) 'metadata returns only trusted task identifier'
+    $branchReport = $report + [char]10 + 'serverVersion=9.9.5.90363' + [char]10 + 'branch=develop' + [char]10 + 'dashboardUrl=' + $url + '/dashboard?id=fixture%3Akey&branch=develop'
+    [IO.File]::WriteAllText($reportPath, $branchReport)
+    $task = Read-SonarTaskReport -Path $reportPath -ServerUrl $url -ProjectKey 'fixture:key'
+    Assert-Test ($task.TaskId -ceq 'CE1') 'metadata accepts scanner branch field'
+    $task = Read-SonarTaskReport -Path $reportPath -ServerUrl $url -ProjectKey 'fixture:key' -BranchName 'develop'
+    Assert-Test ($task.TaskId -ceq 'CE1') 'metadata matches selected branch'
+    [IO.File]::WriteAllText($reportPath, $report)
+    $task = Read-SonarTaskReport -Path $reportPath -ServerUrl $url -ProjectKey 'fixture:key' -BranchName 'develop'
+    Assert-Test ($task.TaskId -ceq 'CE1') 'legacy metadata without branch remains supported; CE checks branch'
     foreach ($badReport in @(
         $report.Replace('id=CE1', 'id=CE1&extra=1'),
         $report.Replace('ceTaskUrl=' + $url, 'ceTaskUrl=https://other.invalid'),
@@ -178,13 +187,23 @@ while (-not $state.Stop) {
         $report.Replace('projectKey=fixture:key', 'projectKey=other:key'),
         ($report + [char]10 + 'ceTaskId=OTHER'),
         $report.Replace('ceTaskId=CE1', 'ceTaskId='),
-        ('ceTaskId=STALE')
+        ('ceTaskId=STALE'),
+        ($branchReport + [char]10 + 'branch=other'),
+        $branchReport.Replace('branch=develop', 'branch='),
+        ($report + [char]10 + 'unknownField=unexpected')
     )) {
         [IO.File]::WriteAllText($reportPath, $badReport)
         $rejected = $false
         try { $null = Read-SonarTaskReport -Path $reportPath -ServerUrl $url -ProjectKey 'fixture:key' }
         catch { $rejected = $_.Exception.Message.StartsWith('SONAR_METADATA_UNVERIFIED:') }
         Assert-Test $rejected 'unbound/duplicate/unsafe metadata rejected'
+    }
+    [IO.File]::WriteAllText($reportPath, $branchReport)
+    foreach ($selectedBranch in @('other', 'Develop')) {
+        $rejected = $false
+        try { $null = Read-SonarTaskReport -Path $reportPath -ServerUrl $url -ProjectKey 'fixture:key' -BranchName $selectedBranch }
+        catch { $rejected = $_.Exception.Message.StartsWith('SONAR_METADATA_UNVERIFIED:') }
+        Assert-Test $rejected 'metadata from another selected branch rejected'
     }
     foreach ($status in @('PENDING', 'IN_PROGRESS', 'SUCCESS')) {
         Queue-Response ('{"task":{"id":"CE1","type":"REPORT","componentKey":"fixture:key","status":"' + $status + '","analysisId":"A1","branch":"feature/a"}}')

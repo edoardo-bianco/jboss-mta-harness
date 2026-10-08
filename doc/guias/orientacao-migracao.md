@@ -57,6 +57,11 @@ Informe a versao atual, pasta escolhida e etapa ja realizada; veja a
 Essa orientacao de ambiente nao exige selecionar projeto, MTA ou criar registro.
 O desenvolvedor executa os comandos e retorna com o resultado para o proximo passo.
 
+Para preparar sua maquina ou as dos colegas, use o [roteiro por maquina](tools/workspace.md#preparar-as-maquinas-dos-colegas).
+O helper consulta os mesmos guias vinculados pelo README e pelo guia do desenvolvedor,
+inclusive o [preparo do certificado Sonar](tools/sonar.md#certificado-publico-do-sonar-corporativo).
+Ele informa a fonte e a proxima acao, sem instalar certificados ou ferramentas.
+
 ### Se a skill ou o agente nao aparecer
 
 Confira os arquivos no clone e se as customizacoes estao habilitadas no cliente.
