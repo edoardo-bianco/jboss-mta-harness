@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Consolidacao documental da MACRO-01 - 2026-10-08
+
+- [x] Confirmar merge da PR #24 e retomar a branch de sprints alinhada a main.
+- [x] Conferir os dois documentos fornecidos e registrar origem/escopo documental.
+- [x] Incorporar analise v2.0 e template separado, sem duplicar o modelo.
+- [x] Atualizar backlog e validar fidelidade, links/ancoras e diff.
+- [x] Revisar independentemente e preparar a entrega documental para PR.
+- [x] Especificar selecao de todos os projetos ou subconjunto, com escopo persistido e AC-17.
+- [x] Conferir o complemento de escopo e preparar sua inclusao na PR #25.
+- [ ] Implementar MACRO-01 em etapa futura autorizada, conforme o backlog vigente.
+
 ## Priorizacao compartilhada e planejamento por desenvolvedor - 2026-10-08
 
 - [x] Conferir raiz/branch/HEAD e criar branch documental derivada da main.
@@ -976,7 +987,7 @@ As dependencias de validacao ja registradas permanecem; nao fixam uma ordem glob
 | COMP-01 | Capacidade solicitada; detalhada por DEP-01/02 | Coletor deterministico Maven e matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. DEP-03 e extensao a avaliar separadamente. |
 | CORE-01 | Piloto opcional transversal; detalhado por SRC | Navegacao/coleta de contexto Java independente de MTA/engine, principalmente SRC-01/03/06. SRC-02/04/05 ampliam opcoes, sem se tornarem requisitos do primeiro piloto. Adaptador ainda a escolher. |
 | SERV-01 | Capacidade solicitada; detalhada por JBS-01..05 | Inventario, rota comprovada, assistencia, transformacao de configuracao e validacao no destino isolado. Reutilizar operacoes existentes; nao duplicar a demanda nem declarar rota 7.1 direta suportada. |
-| MACRO-01 | Proposta registrada em 08/10; implementacao futura | [Planejamento por sprints](../doc/features/planejamento-macro-sprints.md): contexto/prompt por cliente, periodo/capacidade, estimativas, categorias/prioridades, testes/implantacao e diagrama temporal com percentuais. Sem nova Run Task nesta entrega; preservar planos de corretiva e decisoes humanas. |
+| MACRO-01 | Especificacao v2.0 e template consolidados em 08/10; implementacao futura | [Planejamento por sprints](../doc/features/planejamento-macro-sprints.md) e [template sintetico](../doc/modelos/planejamento-sprints.template.md): contrato, incrementos e criterios de aceite. Sem nova Run Task nesta entrega; preservar planos de corretiva e decisoes humanas. |
 | VAL-01 | Ensaio parcial interrompido para simplificacao; eventos 9/10 | Uso da skill e reconhecimento da escolha demonstrados no material trazido pelo desenvolvedor; reconciliacao primeiro sem conflito apontado nos dois clientes, Codex direcionou execucao ao Copilot. Delegacao ainda nao validada. Retestar em SIM-14: orientacao/delegacao, capacidades presentes/ausentes/inadequadas e ausencia de efeitos operacionais; casos do plano. |
 | VAL-02 | Ensaio operacional existente pendente | Prompts Copilot: reconciliacao/delegacao, issues, persistencia, retomada, GO, implementacao e continuidade com Previous/novo MTA. |
 | VAL-03 | Ensaio Sonar real pendente | Criterios Blocker/High, avisos de cobertura e comparacao com baseline, separados do Quality Gate. |
