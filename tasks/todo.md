@@ -1,5 +1,14 @@
 # To-do do agente: evolucao do harness
 
+## Log detalhado do scanner e integracao Basic - 2026-10-08
+
+- [x] Conferir branch/HEAD, checkout limpo e main remota; preservar feature suspensa.
+- [x] Habilitar -e/-X no Maven e true/DEBUG no scanner; documentar captura do log.
+- [x] Validar cinco suites PS5.1 e plugin real em DEBUG com token sintetico mascarado.
+- [x] Revisar diff completo e preparar Basic/diagnostico para integracao por PR.
+- [ ] Acompanhar repeticao corporativa e identificar causa do timeout Java.
+- [ ] Avaliar desabilitacao do log detalhado apos o diagnostico.
+
 ## Autenticacao do processo scanner Maven - 2026-10-07
 
 - [x] Conferir codigo oficial 5.8.0.7211/4.1.2.1663 e preservar feature suspensa.

@@ -1,5 +1,34 @@
 # Plano do agente: evolucao do harness
 
+## Log detalhado do scanner e integracao Basic - 2026-10-08
+
+Pedido autorizado: habilitar o diagnostico e levar a corretiva Basic mais o log
+detalhado a main por PR. Retomada da branch harness/sonar-scanner-basic, limpa
+em caea604, com main/origin/main em 1dbd3a1. Compreensao de codigo segue suspensa.
+
+Adicionar -e/-X ao Maven do scan e trocar sonar.verbose/log.level para true/DEBUG.
+Documentar captura do terminal em .harness/ensaios/sonar-timeout e posterior
+desabilitacao desses argumentos. Manter a redacao do launcher, Basic/Bearer,
+Java 8 da aplicacao e Java 17 do scanner corporativo; configuracao local preservada.
+O curl corporativo funcionou segundo o operador; a causa do timeout Java segue
+pendente. Logs ampliados sao diagnostico, nao corretiva de transporte.
+
+Verificar cinco suites Sonar PS5.1 e bootstrap do plugin real com -e/-X e DEBUG,
+credencial sintetica e servidor loopback, incluindo ausencia do token na saida.
+Revisar diff completo contra main, publicar PR e integrar apos as verificacoes.
+Homologacao corporativa e eventual desabilitacao do debug permanecem posteriores.
+
+Resultado: cinco suites PS5.1 PASS (launcher, fluxo, API com 59 verificacoes,
+configuracao e criterios). Plugin real 5.8.0.7211, Maven 3.9.16 e JDK 25 local:
+Basic/Bearer PASS com DEBUG e Caused by presentes, token sintetico e Base64
+ausentes da saida. Fixture 9.9.5 interrompeu em /batch/index com 503 intencional,
+antes do motor. Evidencias em .harness/tests/sonar-scanner-debug-20261008/resultado.json
+e logs locais por esquema. Nao equivale a homologacao corporativa Java 17.
+Revisao do diff completo contra main: autenticacao/restauracao/redacao preservadas,
+sem alteracao de dependencias, configuracao local, aplicacao ou feature suspensa.
+Sintaxe PowerShell e git diff --check PASS. Entrega pronta para o PR solicitado;
+publicacao e integracao ficam rastreadas no GitHub pelos commits deste incremento.
+
 ## Autenticacao do processo scanner Maven - 2026-10-07
 
 Corretiva autorizada do harness em harness/sonar-scanner-basic, derivada da main

@@ -242,6 +242,39 @@ por proxy. Se o ambiente realmente exigir proxy, o scanner Maven 5.x possui
 Use somente a rota efetiva do ambiente, sem inventar hosts/portas, persistir
 senhas ou mudar settings/certificados para contornar a falha.
 
+### Capturar log detalhado do plugin
+
+O diagnostico esta temporariamente habilitado no harness: Maven recebe `-e -X`
+e o scanner recebe `sonar.verbose=true` e `sonar.log.level=DEBUG`. Vale tambem
+para a Run Task existente. `-e` exibe a cadeia de excecoes e `-X` habilita debug
+do Maven, conforme a [referencia Maven](https://maven.apache.org/ref/3.9.12/maven-embedder/cli.html).
+As propriedades Sonar seguem a [referencia de logs](https://docs.sonarsource.com/sonarqube-server/analyzing-source-code/analysis-parameters/parameters-not-settable-in-ui#analysis-logging).
+
+Para salvar a saida, execute no terminal PowerShell, na raiz do harness:
+
+```powershell
+$pastaLog = '.harness\ensaios\sonar-timeout'
+New-Item -ItemType Directory -Force -Path $pastaLog | Out-Null
+$log = Join-Path $pastaLog ("scanner-{0}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
+
+powershell.exe -NoProfile -File .\scripts\analisar-sonar.ps1 -SelectTarget 2>&1 |
+    Tee-Object -FilePath $log
+
+Write-Host "Log salvo em: $log"
+```
+
+Responda as escolhas usuais e informe o token somente na entrada oculta. O log
+passa pela redacao do launcher para o token Sonar, inclusive Basic/JSON, mas
+debug Maven pode exibir outras propriedades/credenciais do ambiente ou projeto.
+Revise antes de compartilhar. Para este timeout, preserve o trecho de consulta
+da versao ate o erro final, incluindo todos os `Caused by`. O `result.json`
+continua registrando a etapa/resultado; ele nao substitui esse log do terminal.
+
+Manter build Java 8 e scanner corporativo Java 17. Depois do diagnostico, avaliar
+em nova alteracao a retirada de `-e -X` e o retorno a `sonar.verbose=false` e
+`sonar.log.level=INFO` em `scripts/HarnessSonar.psm1`. Nenhuma nova Run Task ou
+mudanca de configuracao local e necessaria para esta captura.
+
 ## Uso
 
 ### Executar e consultar

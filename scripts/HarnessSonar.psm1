@@ -170,13 +170,13 @@ function Invoke-HarnessSonar {
         if ($project.component.key -cne $ProjectKey -or $project.component.qualifier -cne 'TRK') { throw 'Projeto existente nao confirmado.' }
         $result.Stage='SCAN'
         $report=Join-Path $run 'report-task.txt'
-        $arguments=@('-B','-f',$settings.Pom)
+        $arguments=@('-B','-e','-X','-f',$settings.Pom)
         if ($result.SettingsPath) { $arguments+=@('-s',$result.SettingsPath) }
         if ($settings.Profiles.Count) { $arguments+=('-P' + ($settings.Profiles -join ',')) }
         $arguments+=@(('org.sonarsource.scanner.maven:sonar-maven-plugin:' + $settings.Version + ':sonar'),
             ('-Dsonar.host.url=' + $settings.ServerUrl), ('-Dsonar.projectKey=' + $ProjectKey),
             ('-Dsonar.java.jdkHome=' + $result.ApplicationJavaHome), ('-Dsonar.scanner.javaExePath=' + $settings.Java),
-            '-Dsonar.scanner.skipJreProvisioning=true', '-Dsonar.verbose=false', '-Dsonar.log.level=INFO', '-Dsonar.qualitygate.wait=false',
+            '-Dsonar.scanner.skipJreProvisioning=true', '-Dsonar.verbose=true', '-Dsonar.log.level=DEBUG', '-Dsonar.qualitygate.wait=false',
             ('-Dsonar.scanner.metadataFilePath=' + $report), ('-Dsonar.working.directory=' + (Join-Path $run 'scanner-work')))
         if ($BranchName) { $arguments+=('-Dsonar.branch.name=' + $BranchName) }
         Write-Host "Enviando $($result.ProjectLabel) ao Sonar $($settings.ServerUrl) | Chave: $ProjectKey | Estado declarado: $Phase"
