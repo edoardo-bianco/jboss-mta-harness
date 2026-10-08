@@ -14,6 +14,11 @@ um ponto estavel em ZIP ou importar o pacote recebido. O menu pede a operacao,
 o contexto e o arquivo. Na importacao, associe cada projeto de origem ao projeto
 local do workspace. Essa associacao e explicita, mesmo quando o artifactId coincide.
 
+Para preparar uma analise comum e deixar cada desenvolvedor planejar e implementar
+sua issue, siga o [fluxo de equipe do guia do desenvolvedor](../harness-migracao-desenvolvedor.md#priorizacao-compartilhada-e-planejamento-por-desenvolvedor).
+O ponto a exportar nesse cenario e a priorizacao concluida; os procedimentos
+abaixo explicam o conteudo do pacote e a continuidade em outra maquina.
+
 ## Orientacao com o helper
 
 ```text
@@ -52,6 +57,12 @@ o recorte consolidado, sem exigir a pasta MTA completa para implementar.
 Revise os anexos e use o canal de compartilhamento aprovado pela sua equipe.
 Configuracao da maquina, settings Maven, caches e permissoes nao sao coletados.
 O filtro de nomes de credenciais nao substitui a revisao do conteudo dos anexos.
+
+Informe o ZIP diretamente na importacao, sem descompactar manualmente. No pacote
+de analise, a copia operacional da rodada recebida fica em
+`.harness/importacoes/<PackageId>/mta/<identificador>/`, mesmo quando `mta.runsPath`
+aponta para uma pasta externa. As referencias operacionais sao ajustadas; a
+configuracao das novas execucoes locais do MTA permanece a mesma.
 
 ### Na maquina de quem recebe
 

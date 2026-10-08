@@ -65,6 +65,7 @@ Veja [o roteiro manual e o formato das fichas](tools/priorizacao-issues.md#plane
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
 | ZIP de analise ou plano recebido de um colega | [Compartilhar contextos](tools/compartilhamento-contextos.md): importar, associar Sources locais e continuar da etapa recebida. |
+| Preparo a priorizacao para a equipe e cada desenvolvedor vai planejar suas issues | [Priorizacao compartilhada e planejamento por desenvolvedor](#priorizacao-compartilhada-e-planejamento-por-desenvolvedor). |
 | Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
 | Quero comparar oportunidades de uma categoria entre projetos antes de escolher | [Priorizacao de issues](tools/priorizacao-issues.md): categoria, fatia percentual por risco, repetibilidade e alcance, com recriacao ou avanco. |
@@ -172,7 +173,8 @@ dos projetos e um registro de migracao por projeto. O indice resume evidencias
 e pendencias; o registro preserva decisoes, prioridades e andamento.
 O desenvolvedor decide o que merece analise agora e o que fica para depois.
 
-Se faltar o registro, execute **Workspace: atualizar indice dos projetos** e
+Se faltar o registro e nao houver ZIP de contexto para importar, execute
+**Workspace: atualizar indice dos projetos** e
 confira o link criado. No registro, marque **Decisao = ANALISAR AGORA** e descreva
 recorte/evidencias nas observacoes. **Andamento** continua refletindo o trabalho
 real; nao recebe ANALISAR AGORA. Sem regra MTA, use issue manual DEV-... conforme
@@ -197,6 +199,42 @@ lacunas indicadas. Progredir examina novas issues e preserva as fichas anteriore
 **Resultado esperado e continuidade:** prioridades e pendencias compreendidas.
 A etapa 5 produz ou revisa a proposta. Um lote existente com GO valido para
 o escopo atual pode retomar a etapa 6.
+
+#### Priorizacao compartilhada e planejamento por desenvolvedor
+
+Quando uma pessoa prepara a analise comum e cada desenvolvedor vai planejar e
+implementar suas issues, o fluxo recomendado e **compartilhar a priorizacao
+concluida**. Nao e necessario elaborar os planos individuais na maquina de quem
+prioriza. A equipe combina quem trabalha em cada issue; o ranking recomenda
+prioridades, sem distribuir trabalho ou conceder GO automaticamente.
+
+| Quem | Responsabilidade e passagem |
+| --- | --- |
+| Quem prepara a analise comum | Concluir a fatia/sequencia pretendida, conferir ranking, fichas e evidencias referenciadas e exportar a analise por **Planejamento: compartilhar contexto**. |
+| Cada desenvolvedor que recebe | Importar o ZIP pela mesma tarefa, associar os projetos aos fontes locais e usar o ContextPath devolvido. |
+| Quem planeja sua issue | Registrar a escolha **ANALISAR AGORA** e o recorte, vinculando ou preservando a referencia da ficha; usar **Planejamento: planejar** e executar o prompt preparado ou elaborar manualmente plano/to-do. |
+| Quem implementa | Conferir o plano, o codigo local e o GO; seguir a [etapa 6](#6-implementar-o-lote-autorizado), depois verificacoes e aceite. |
+
+O preparo do plano recupera a ficha e os anexos **referenciados** no registro ou
+indice de evidencias da issue. O executor usa o plano/to-do e essas evidencias
+consolidadas, conferindo o codigo local. Uma ficha pronta nao substitui o plano;
+preparar o prompt nao significa executa-lo. Consulte o
+[dossie e a passagem entre colegas](tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas).
+
+Antes da primeira importacao, configure a maquina e abra o workspace com os
+fontes locais; importe antes de inicializar registros para os projetos recebidos.
+Se ja houver registro/trabalho local, preserve-o e confira os
+[conflitos e limites](tools/compartilhamento-contextos.md#conflitos-e-limites): o
+importador nao mescla pacotes nem substitui registros existentes. O ZIP nao
+sincroniza as corretivas no codigo local.
+
+O [conteudo e ponto de exportacao](tools/compartilhamento-contextos.md#qual-ponto-compartilhar)
+e o [procedimento de importacao e continuidade](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe)
+ficam no guia de compartilhamento. A sequencia exportada leva suas fichas e
+historico; 100% examinadas significa cobertura da analise, nao issues resolvidas,
+e nao e requisito para compartilhar uma fatia concluida. Se o plano/to-do ja
+estiver elaborado e a intencao for entrega-lo ao implementador, compartilhe o
+**planejamento da issue** em vez de exigir que ele refaca a proposta.
 
 ### 5. Planejar e revisar um lote
 
@@ -234,10 +272,9 @@ Ele detalha o preparo do contexto, a execucao do prompt e a revisao do mesmo lot
 registrada. O GO autoriza a etapa 6; sem ele, a proposta permanece em revisao.
 Preparar documentos nao autoriza corretivas, e GO nao e aceite do resultado.
 
-Para passar o trabalho a outro colega, exporte a analise concluida ou o plano/to-do
-pela tarefa **Planejamento: compartilhar contexto**. O
-[guia de compartilhamento](tools/compartilhamento-contextos.md) explica qual ponto
-escolher, a associacao aos projetos locais e os limites da retomada.
+Para passar o trabalho a outro colega, siga o
+[fluxo de equipe](#priorizacao-compartilhada-e-planejamento-por-desenvolvedor),
+que distingue a entrega da analise da entrega do plano/to-do ja elaborado.
 
 ### 6. Implementar o lote autorizado
 

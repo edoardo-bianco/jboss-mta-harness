@@ -1,5 +1,31 @@
 # Plano do agente: evolucao do harness
 
+## Priorizacao compartilhada e planejamento por desenvolvedor - 2026-10-08
+
+Pedido autorizado: recomendar a preparacao central da analise/priorizacao e
+fichas, com planejamento detalhado e implementacao por cada desenvolvedor.
+Evolucao documental do harness na branch harness/fluxo-priorizacao-compartilhada,
+derivada da main a32fe61. A incorporacao dos documentos fornecidos de sprints
+permanece pendente na frente harness/consolidar-planejamento-sprints.
+
+- Explicar responsabilidades e passagem analise -> planejamento -> GO ->
+  implementacao no guia do desenvolvedor, com links ao procedimento canonico.
+- Preservar ficha/anexos como entradas referenciadas; nao prometer inclusao de
+  todo arquivo local, sincronizacao de codigo ou mesclagem de registros.
+- Orientar importacao antes da inicializacao de registros, destinos livres e
+  diferenca entre analise compartilhada e plano de issue ja elaborado.
+- Recomendar o cenario na skill comum dos helpers Codex/Copilot, somente leitura,
+  com encaminhamento por Run Task conforme a etapa real e decisao humana.
+- Validar links/ancoras e diff; revisar independentemente antes de publicar PR.
+  Sem alteracao de scripts, tarefas, permissoes ou corretivas da aplicacao.
+
+Resultado: 416 links/ancoras locais conferidos sem erros e diff sem problemas
+de whitespace. Revisao independente aprovada, com ajuste de clareza aplicado:
+vincular ou preservar a ficha ao escolher a issue, pois importar nao cria esse
+vinculo automaticamente em cada linha. Confirmada a skill comum nos dois
+clientes e a fidelidade ao exportador/importador atuais. Validacao documental
+e estatica; importacao real e conversa com o helper nao foram executadas.
+
 ## Adotar novo MTA pelo VS Code - 2026-10-08
 
 Prioridade autorizada pelo desenvolvedor: tornar concreta a troca de base MTA do
