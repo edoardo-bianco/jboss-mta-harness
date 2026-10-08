@@ -29,7 +29,7 @@ Esta versão preserva o refinamento integrado pelo PR #21 e acrescenta: sprints 
 ## 2. Experiência de uso
 
 1. O usuário executa **Terminal → Run Task → `Planejamento: planejar sprints`**.
-2. A tarefa recupera o escopo já selecionado ou pede a seleção dos projetos/registros. Com planejamento anterior inequivocamente vinculado, oferece **revisar o existente** ou **criar cenário separado**. Não escolhe arquivo pela data de modificação.
+2. A tarefa recupera o escopo já selecionado ou oferece **Todos os projetos do workspace** e **Escolher projetos**. Mostra o escopo concreto para conferência, conforme a seção 2.2. Com planejamento anterior inequivocamente vinculado, oferece **revisar o existente** ou **criar cenário separado**. Não escolhe arquivo pela data de modificação.
 3. Reutiliza os parâmetros conhecidos e pergunta apenas informações ausentes ou que o usuário deseja alterar. Mostra um resumo editável de calendário, limites, equipe e escopo.
 4. Prepara recibo/contexto, calendário e prompt com caminhos reais. Abre o prompt e informa como executá-lo no cliente escolhido. A preparação não executa o agente automaticamente.
 5. O agente lê as fontes, propõe ou revisa a distribuição, preenche o template e salva Markdown e dados estruturados nos destinos recebidos. Se faltar dado essencial, preserva um rascunho com a lacuna precisa.
@@ -52,6 +52,14 @@ Na base consultada, `migracao_helper` e a skill `orientar-migracao` são leitore
 
 A implementação deve atualizar o encaminhamento dos helpers e comprovar o fluxo em cada cliente. Alterações de instruções e perfis pertencem à implementação da feature; executar um prompt de planejamento não concede GO para corretivas ou aceite de resultados.
 
+### 2.2. Incluir todos os projetos
+
+**Complemento solicitado pelo desenvolvedor em 08/10/2026:** permitir selecionar todos os projetos de uma vez. A opção **Todos os projetos do workspace** reutiliza a descoberta de projetos de aplicação do workspace salvo, incluindo agregadores Maven/`packaging=pom` reconhecidos como projetos. Não inclui toda pasta arbitrária nem varre repositórios externos ao workspace. A opção **Escolher projetos** permite delimitar um subconjunto.
+
+Mostrar nomes, Sources, quantidade de projetos e disponibilidade dos registros/evidências antes de preparar o contexto, permitindo ajustar o escopo. Projetos sem registro, MTA, priorização, ficha, plano ou estimativa ficam identificados com suas lacunas; não são removidos silenciosamente nem recebem zero issues/esforço por ausência de dados. O usuário pode mantê-los no rascunho para refinamento ou excluí-los explicitamente. Continuam valendo as regras de base por evidências e de viabilidade não avaliável quando faltarem dados essenciais.
+
+Persistir o modo de seleção e a lista concreta de identidades/Source usada, sem duplicar o mesmo projeto. Retomar preserva essa lista: adicionar um projeto ao workspace não amplia automaticamente o planejamento anterior. Para atualizar o conjunto de todos os projetos, usar a mesma Run Task e registrar a mudança de escopo na revisão. O helper deve reconhecer o pedido explícito de todos os projetos e encaminhar para essa opção, sem pedir seleção individual repetida nem assumir esse escopo em pedidos que não o indiquem.
+
 ## 3. Entradas e fontes de verdade
 
 ### 3.1. Parâmetros do planejamento
@@ -60,7 +68,7 @@ Os nomes abaixo definem o contrato lógico; o Codex deve adaptá-los às conven�
 
 | Entrada | Regra |
 | --- | --- |
-| Escopo e projetos | Identidades e registros selecionados; objetivo da migração, origem, destino e exclusões. Nunca inferir o escopo de todos os projetos apenas por estarem no workspace. |
+| Escopo e projetos | Seleção explícita de todos os projetos do workspace ou de um subconjunto, com lista concreta de identidades/Source e registros; objetivo da migração, origem, destino e exclusões. Reutilizar o escopo salvo na retomada. Nunca inferir todos apenas por estarem no workspace. |
 | `SprintStartDate` | Dia de início da Sprint 1, informado pelo usuário. Persistir como `YYYY-MM-DD`; apresentar como `DD/MM/AAAA`. |
 | `SprintLengthDays` | **14 dias corridos, fixos no MVP solicitado.** O calendário útil determina capacidade, não a duração da sprint. |
 | `MaxPreparationSprints` | Máximo de sprints com trabalho de preparação de ambiente. Inteiro ≥ 0. |
@@ -231,7 +239,7 @@ Não reutilizar `PlanPath`/`TodoPath` de uma corretiva como destino macro. Usar 
 | Grupo | Conteúdo |
 | --- | --- |
 | Identidade | `SchemaVersion`, `Purpose=sprint-planning`, `PlanningId`, `RevisionId`, `Previous`, cenário, estado e data de referência. |
-| Fontes | Projetos/Source, caminhos exatos, hashes, base MTA/evidências por projeto, cobertura, lacunas e conflitos. |
+| Fontes | Modo de seleção e lista concreta de projetos/Source, caminhos exatos, hashes, base MTA/evidências por projeto, cobertura, lacunas e conflitos. |
 | Restrições | Início, 14 dias, máximos por fase, prazo de produção, limite total quando presente, janela/duração de implantação e calendário. |
 | Equipe | Teto de devs; 1 arquiteto; 1 DevOps; pessoas/quantidades alocadas, dedicação, ausências, reservas e restrições compartilhadas. |
 | Baseline | ID, data, conjunto de issues únicas, categorias, total inicial, conclusões iniciais e mudanças posteriores de escopo. |
@@ -319,6 +327,7 @@ Os incrementos organizam a implementação; não reduzem o aceite completo da fe
 | AC-14 | Usar Copilot e Codex, com/sem MCP/perfil opcional | Mesmo contrato e saída; comprova capacidade do executor, sem exigir instalação nem fabricar delegação. |
 | AC-15 | Inspecionar efeitos do planejamento | Nenhuma corretiva, escrita em registro/plano/to-do de issue, marcação de GO/aceite ou implantação como efeito da simulação. |
 | AC-16 | Limpeza, edição manual e caminhos Windows com espaços | Preserva planos oficiais e comentários; trata conflitos de edição; tarefas funcionam em PowerShell 5.1. |
+| AC-17 | Selecionar todos os projetos, ajustar um subconjunto e retomar após mudança no workspace | Inclui todos os projetos de aplicação reconhecidos, inclusive agregadores, sem duplicar identidades; mostra escopo e lacunas sem omissão/zeros fictícios. Persiste a lista escolhida e só altera o escopo anterior por escolha explícita, com histórico. |
 
 Testar especialmente regras de calendário, capacidade, identidade/percentuais e reconciliação com fixtures pequenas. Fazer um ensaio ponta a ponta em cada cliente com o mesmo escopo. Testes determinísticos não comprovam obediência do agente; os ensaios verificam leitura, preenchimento, destinos e limites reais. Não repetir suites alheias à mudança sem risco concreto.
 

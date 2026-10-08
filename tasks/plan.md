@@ -19,12 +19,19 @@ harness/consolidar-planejamento-sprints. Originais fornecidos permanecem intacto
 - Manter tarefa, prompt executavel, calculos e revisao automatica como futura
   implementacao. Esta entrega nao gera cronograma real nem altera a migracao.
 
-Resultado: template identico ao fornecido (SHA-256 conferido); analise difere
+Resultado da incorporacao inicial: template identico ao fornecido (SHA-256 conferido); analise difere
 somente pela referencia ao template separado e pelo comentario de localizacao.
 Revisao independente aprovada sem achados. Conferidos 404 links/ancoras locais,
 sem erros; placeholders do modelo nao sao caminhos existentes. Whitespace
 validado preservando somente as quebras Markdown intencionais dos originais.
 Fontes externas historicas nao foram revalidadas e nenhum fluxo foi implementado.
+
+Complemento autorizado em 08/10: oferecer Todos os projetos do workspace ou
+Escolher projetos. Registrar escopo concreto, lacunas e ajuste explicito; retomar
+sem incluir automaticamente novos projetos do workspace. Especificar orientacao
+futura do helper e AC-17 na mesma feature/PR, preservando o template fornecido.
+Revisao independente do complemento aprovada sem achados; conferidos escopo
+explicito, lacunas, retomada e manutencao da implementacao como futura.
 
 ## Priorizacao compartilhada e planejamento por desenvolvedor - 2026-10-08
 

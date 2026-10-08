@@ -7,6 +7,8 @@
 - [x] Incorporar analise v2.0 e template separado, sem duplicar o modelo.
 - [x] Atualizar backlog e validar fidelidade, links/ancoras e diff.
 - [x] Revisar independentemente e preparar a entrega documental para PR.
+- [x] Especificar selecao de todos os projetos ou subconjunto, com escopo persistido e AC-17.
+- [x] Conferir o complemento de escopo e preparar sua inclusao na PR #25.
 - [ ] Implementar MACRO-01 em etapa futura autorizada, conforme o backlog vigente.
 
 ## Priorizacao compartilhada e planejamento por desenvolvedor - 2026-10-08
