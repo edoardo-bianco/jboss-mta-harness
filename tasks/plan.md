@@ -41,6 +41,11 @@ de orientacao e frontmatter preservados; quick_validate.py indisponivel por falt
 de PyYAML no Python local, sem instalar dependencias globais por este motivo.
 Conexao corporativa e nova coleta completa permanecem para o operador.
 
+Pedido adicional de 08/10: prever Run Task de planejamento macro por periodo,
+capacidade, prioridade e categoria. O usuario escolheu registrar a proposta e
+concluir a entrega atual. Fonte unica: doc/features/planejamento-macro-sprints.md;
+sem implementar tarefa/algoritmo nem criar cronograma com estimativas ficticias.
+
 ## Log detalhado do scanner e integracao Basic - 2026-10-08
 
 Pedido autorizado: habilitar o diagnostico e levar a corretiva Basic mais o log

@@ -13,6 +13,10 @@ Registro de 05/10/2026, comparando o [catálogo de 23 capacidades](../features/e
 
 ## Fontes e responsabilidades
 
+Demanda adicional de 08/10/2026: [planejamento macro por sprints](../features/planejamento-macro-sprints.md),
+registrado para evolucao futura, sem implementar nesta entrega. Complementa o
+planejamento detalhado por issue; nao altera as 23 capacidades da baseline historica.
+
 - A [estratégia](estrategia-harness_.md) mantém a direção: JBoss, núcleo comum, tecnologias, engines, IDEs, SDLC e modernização.
 - O catálogo detalha capacidades, alternativas e possíveis pilotos. Sua baseline e suas fontes históricas permanecem identificadas.
 - Esta conciliação relaciona os escopos e corrige a leitura da baseline antiga; não substitui os contratos nem é outro plano de implementação.

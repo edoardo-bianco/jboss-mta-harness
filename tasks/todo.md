@@ -13,6 +13,7 @@
 - [x] Validar indice, priorizacao, planejamento de issue, compartilhamento e tarefas para o uso corporativo.
 - [x] Revisar diff, links e sintaxe dos exemplos; registrar limites da verificacao.
 - [x] Preparar consolidacao revisada e versionada para entrega na principal.
+- [x] Registrar proposta de planejamento macro por sprints, conforme escolha de evolucao futura.
 - [ ] Conferir nova coleta corporativa com o operador, sem alterar recibo historico.
 
 
@@ -932,6 +933,7 @@ As dependencias de validacao ja registradas permanecem; nao fixam uma ordem glob
 | COMP-01 | Capacidade solicitada; detalhada por DEP-01/02 | Coletor deterministico Maven e matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. DEP-03 e extensao a avaliar separadamente. |
 | CORE-01 | Piloto opcional transversal; detalhado por SRC | Navegacao/coleta de contexto Java independente de MTA/engine, principalmente SRC-01/03/06. SRC-02/04/05 ampliam opcoes, sem se tornarem requisitos do primeiro piloto. Adaptador ainda a escolher. |
 | SERV-01 | Capacidade solicitada; detalhada por JBS-01..05 | Inventario, rota comprovada, assistencia, transformacao de configuracao e validacao no destino isolado. Reutilizar operacoes existentes; nao duplicar a demanda nem declarar rota 7.1 direta suportada. |
+| MACRO-01 | Proposta registrada em 08/10; implementacao futura | [Planejamento por sprints](../doc/features/planejamento-macro-sprints.md): periodo, capacidade, estimativas, prioridades/categorias e dependencias. Sem nova Run Task nesta entrega; preservar planos de corretiva e decisoes humanas. |
 | VAL-01 | Ensaio parcial interrompido para simplificacao; eventos 9/10 | Uso da skill e reconhecimento da escolha demonstrados no material trazido pelo desenvolvedor; reconciliacao primeiro sem conflito apontado nos dois clientes, Codex direcionou execucao ao Copilot. Delegacao ainda nao validada. Retestar em SIM-14: orientacao/delegacao, capacidades presentes/ausentes/inadequadas e ausencia de efeitos operacionais; casos do plano. |
 | VAL-02 | Ensaio operacional existente pendente | Prompts Copilot: reconciliacao/delegacao, issues, persistencia, retomada, GO, implementacao e continuidade com Previous/novo MTA. |
 | VAL-03 | Ensaio Sonar real pendente | Criterios Blocker/High, avisos de cobertura e comparacao com baseline, separados do Quality Gate. |
