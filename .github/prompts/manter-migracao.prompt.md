@@ -33,8 +33,22 @@ Confira projeto e IDs por conteudo; caminhos da maquina de um colega sao histori
 ProjectIndexPath, quando existente, permite conferir referencias do projeto;
 MigrationPath permanece autoridade das escolhas, nao o resumo do indice.
 
-O harness ja extraiu o catalogo da rodada escolhida quando fornecida. Reconcilie
-as decisoes, o documento-base e as evidencias pertinentes referenciadas em
+O harness ja extraiu o catalogo da rodada escolhida quando fornecida. Quando o
+pedido incluir adocao/comparacao de MTA, compare as duas bases usando
+PreviousMigration.Snapshot/Origin quando presentes (registro
+antes da carga) e MigrationSnapshot (depois da carga); MigrationPath concentra as
+escolhas atuais. Compare IDs e ocorrencias pelas evidencias das duas rodadas:
+persistentes, novas, nao reencontradas e inconclusivas. A tabela agrega por regra;
+contagem menor ou regra ausente nao comprova corretiva de todas as ocorrencias.
+Confira escopo/regras da analise e pontos do Source local, especialmente para MTA
+recebido. Sem acesso ao MTA anterior, use o snapshot apenas para a comparacao do
+catalogo/decisoes e declare inconclusiva a comparacao de ocorrencias nao verificavel.
+Recibos antigos sem PreviousMigration precisam de evidencia anterior explicita
+para comparar rodadas; nao invente a base anterior nem a eleja por recencia.
+Manutencao somente de decisoes/evidencias nao exige duas rodadas. Preserve planos
+e recibos antigos.
+
+Reconcilie as decisoes, o documento-base e as evidencias pertinentes referenciadas em
 EvidenceInputs, EvidenceIndexPath ou no registro. Recupere escolhas e
 observacoes atuais; nao exija repeti-las no prompt ou no indice. Identifique o
 motivo concreto da manutencao: conflito, evidencia contraditoria ou troca de base

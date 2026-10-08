@@ -4,7 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 25 -and @($labels | Sort-Object -Unique).Count -eq 25) 'Manter 25 tarefas distintas, incluindo compartilhamento com menu de operacao.'
+Assert ($labels.Count -eq 26 -and @($labels | Sort-Object -Unique).Count -eq 26) 'Manter 26 tarefas distintas, incluindo adocao explicita de MTA no registro.'
 $serverLabels=@('Servidor: iniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)

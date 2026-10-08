@@ -1,5 +1,39 @@
 # Plano do agente: evolucao do harness
 
+## Adotar novo MTA pelo VS Code - 2026-10-08
+
+Prioridade autorizada pelo desenvolvedor: tornar concreta a troca de base MTA do
+registro, hoje acessivel pela operacao avancada manter-migracao. Branch
+harness/atualizar-registro-mta derivada da main 4b38c5a (PR #22 integrada).
+
+- Adicionar Planejamento: atualizar registro de migracao, reutilizando o preparo
+  manter-migracao. Escolher projeto e rodada local ou pasta completa recebida.
+- Validar entradas e mostrar registro, Source local, origem atual e nova antes
+  da confirmacao explicita. Cancelamento/entrada invalida nao grava registro ou
+  contexto. Sem registro, orientar a tarefa de indice existente.
+- Preservar decisoes, andamento, linhas manuais, referencias e dossies anteriores.
+  Guardar no recibo o registro e a origem anteriores a carga para comparacao;
+  nao reencontrada nao equivale a resolvida. Validar snapshot da rodada recebida.
+- Abrir prompt para o executor reconciliar evidencias por ID; helper permanece
+  orientador. Depois seguir Planejamento: planejar, sem ritual obrigatorio a cada
+  lote e sem trocar automaticamente a base pela rodada mais recente.
+- Documentar procedimento uma unica vez no guia especifico; README, guia do
+  desenvolvedor e helper remetem a ele. ZIP do harness continua no compartilhamento.
+
+Validacao: teste de integracao PS5.1 com entradas reais da tarefa, cancelamento,
+rodada local/recebida, catalogo invalido, preservacao de escolhas e origem anterior;
+regressao de tarefas, registro, preparo/portabilidade e planejamento habitual.
+Revisao independente antes de PR; homologacao corporativa com o desenvolvedor.
+
+Resultado: oito suites PS5.1 aprovadas (MigrationTask, MigrationRegister,
+TaskInputs, PlanningCli, Planning, PlanningEvidence, PlanningPortable e ProjectIndex),
+378 links/ancoras locais conferidos e diff sem erros. Revisores tecnico e
+documental confirmaram os ajustes: proteger manifesto/resultado durante ADOTAR,
+separar conflito sem troca de base e condicionar comparacao de rodadas no prompt.
+Teste concorrente reproduziu a falha antes da corretiva e passou depois, sem
+gravar registro/contextos. VS Code nativo, execucao do agente e MTA corporativo
+nao foram automatizados; roteiro de homologacao segue na PR/guia canonico.
+
 ## Sonar: evidencias e decisao humana - 2026-10-08
 
 Complemento autorizado apos auditoria independente do commit 5e350b9: corrigir

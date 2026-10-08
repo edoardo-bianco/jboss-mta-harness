@@ -75,6 +75,11 @@ autoriza troca de base. Reaproveite o preparo vigente e exponha lacunas pertinen
 Compare registro, solicitacao, Previous e evidencias pertinentes. Use o
 [guia de reconciliacao](../../../../doc/guias/tools/planejamento-migracao.md#reconciliar-status-antes-de-atualizar-o-plano).
 Indique conflito concreto por issue/base antes de recomendar manutencao separada.
+Troca de base pedida pelo humano segue **Planejamento: atualizar registro de
+migracao**, conforme o [procedimento de adocao](../../../../doc/guias/tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente).
+Oriente tarefa e prompt, sem comando PowerShell no fluxo habitual. O recibo novo
+preserva PreviousMigration para comparar; ausencia nao e resolucao. O helper
+continua leitor e encaminha o prompt ao executor do cliente atual.
 PENDENTE historico, indice antigo ou nota nova nao impedem planejamento por si so.
 Reconciliacao nao planeja nem implementa; seu fluxo autorizado atualiza somente
 MigrationPath. Catalogo carregado nao comprova reconciliacao realizada.

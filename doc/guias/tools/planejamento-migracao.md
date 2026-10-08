@@ -183,7 +183,8 @@ Preparar contexto nao executa agente, altera a aplicacao ou concede GO.
 | Registrou a escolha e quer a proposta | **Planejamento: planejar**. A tarefa usa o registro e a base vinculada. |
 | Ja existe proposta e quer continuar/ajustar | **Planejamento: planejar**, retomando a solicitacao vinculada. Nao ha menu "replanejar". |
 | Tem novas evidencias | Referencie-as no registro/LEIA-ME e use a mesma entrada **Planejar**. |
-| Quer adotar outro MTA ou conciliar conflito concreto | Peca ao helper o encaminhamento de reconciliacao com os caminhos preenchidos. [Manutencao](#reconstruir-a-pasta-usando-um-mta-existente). |
+| Quer adotar outro MTA no registro | Use **Planejamento: atualizar registro de migracao**, conforme [adocao de outra origem](#reconstruir-a-pasta-usando-um-mta-existente). |
+| Ha conflito concreto entre decisoes/evidencias | Peca ao helper que identifique o conflito por ID e encaminhe ao prompt pertinente. [Reconciliacao](#reconciliar-status-antes-de-atualizar-o-plano). |
 | Proposta com GO vigente e quer executar | **Aplicacao: preparar implementacao do lote**. [Implementacao](#preparar-implementacao-do-lote). |
 
 ### Indice da situacao dos projetos
@@ -258,12 +259,53 @@ relevantes. O agente le somente anexos listados e pertinentes, tratando-os como 
 
 #### Manter o registro e adotar outra origem
 
-Este e o caminho avancado para adotar explicitamente outra origem, receber um
-registro de colega ou conciliar evidencias/decisoes. Nao e um submenu habitual
-de Planejar. O helper primeiro identifica o motivo e oferece o prompt existente
-ou uma chamada preenchida para `manter-migracao`.
+**Para considerar um novo MTA como base do projeto, execute Terminal > Run Task >
+Planejamento: atualizar registro de migracao.** Serve tanto para a rodada que voce
+acabou de executar quanto para uma pasta completa recebida de colega. Executar
+MTA ou atualizar o indice, por si so, nao substitui uma origem ja vinculada.
 
-Exemplo de manutencao por pasta completa recebida, com caminhos ilustrativos:
+1. Confirme o workspace e escolha o projeto local. O registro precisa existir;
+   se faltar, use **Workspace: atualizar indice dos projetos** e volte a tarefa.
+2. Escolha o MTA. **h** lista o historico local para escolher pelo numero;
+   **Enter** seleciona a ultima elegivel exibida, ainda sem gravar. Para a pasta
+   recebida, use **p** e informe seu caminho atual. Preserve a rodada completa:
+   `manifest.json`, `result.json`, `input`, `rules` e `output`, incluindo
+   `output/static-report/output.js`. Um HTML isolado nao e essa entrada.
+3. Confira a previa: registro e Source locais, origem atual e nova (RunId,
+   projeto, Source da analise e pasta). Para MTA recebido, os caminhos de origem
+   continuam sendo os do colega; voce confirma a associacao ao projeto local.
+   Digite **ADOTAR** para gravar. Enter/q cancela sem mudar registro ou contextos.
+4. A tarefa atualiza o catalogo e abre `manter-migracao.prompt.md`. Execute-o no
+   cliente atual conforme [a instrucao de execucao](#preparar-e-executar-o-prompt):
+   no Copilot, **Executar Prompt**; no Codex, nova conversa com o agente principal,
+   fora do helper, enviando a mensagem com o caminho exibida pela tarefa.
+5. Confira a comparacao e as pendencias registradas. Para criar ou atualizar a
+   proposta da issue escolhida, volte a **Planejamento: planejar**.
+
+O recibo guarda `PreviousMigration` com texto, origem e hash do registro antes
+da carga; `MigrationSnapshot` mostra o registro depois da carga. As escolhas
+atuais continuam em `MigrationPath`. Decisoes, andamento, linhas DEV-..., notas,
+referencias e planos/contextos anteriores sao preservados. O agente compara
+issues/ocorrencias persistentes, novas, nao reencontradas e inconclusivas. Sem os
+arquivos anteriores, a comparacao fica limitada ao catalogo/decisoes salvos;
+ausencia ou contagem menor nao comprova resolucao. Trocar a base nao atualiza
+automaticamente rankings/fichas antigos: suas conclusoes continuam ligadas a
+origem que foi examinada.
+
+O prompt grava somente o registro local e explica conflitos por ID. Nao produz
+lote, altera a aplicacao ou concede GO/aceite. Carregar o catalogo nao comprova
+reconciliacao executada; conclusao exige evidencias/conclusoes registradas.
+Se o novo MTA servira somente como evidencia do lote atual, referencie-o no indice
+de evidencias e solicite comparacao no prompt de revisao, sem adotar outra base.
+Este fluxo de troca explicita nao e um requisito para todo planejamento.
+
+**ZIP de contexto do harness:** use [Planejamento: compartilhar contexto](compartilhamento-contextos.md).
+A importacao tem associacao e destinos proprios; nao substitui este fluxo de pasta
+MTA nem mescla automaticamente um registro em andamento.
+
+**Compatibilidade avancada (fora do roteiro habitual):** a operacao existente
+`manter-migracao` tambem aceita documento recebido e manutencao sem novo MTA.
+Exemplo com caminhos ilustrativos:
 
 ```powershell
 .\scripts\preparar-planejamento.ps1 -WorkspacePath .\jboss-mta-harness.local.code-workspace -Target 'minha-app' -Operation manter-migracao -RunPath 'C:\mta-runs\minha-app\rodada' -MigrationSourcePath 'C:\recebidos\migracao.md'
@@ -274,12 +316,8 @@ Exemplo de manutencao por pasta completa recebida, com caminhos ilustrativos:
 sem adotar novo scan, a manutencao aceita `-WithoutMta` no lugar de RunId/RunPath;
 `-EvidenceIndexPath` pode apontar o LEIA-ME existente. Nao executar outra analise MTA.
 
-O preparo carrega dados objetivos e gera `manter-migracao.prompt.md`. Execute-o
-no cliente atual conforme [a instrucao de execucao](#preparar-e-executar-o-prompt).
-Ele grava somente o registro local, preserva decisoes humanas e historico e explica
-conflitos por ID. Nao produz lote, altera a aplicacao ou concede GO/aceite.
-Conclusao de reconciliacao exige evidencias/conclusoes registradas, sem marcar
-CONCLUIDA apenas porque o prompt existe ou a rodada e a mesma.
+Para conflito sem troca de MTA, o helper recupera o prompt pertinente e as
+evidencias; nao manda executar scripts como etapa habitual da migracao.
 
 #### Reconciliar status antes de atualizar o plano
 
@@ -290,7 +328,7 @@ Observe o motivo:
 | --- | --- |
 | Marcou ANALISAR AGORA ou acrescentou observacao coerente | Seguir para Planejar; nao repetir a escolha nem reconciliar por rotina. |
 | Acrescentou evidencia complementar do mesmo lote | Ler a evidencia ao atualizar a proposta. Perguntar apenas se houver contradicao relevante. |
-| Novo MTA disponivel | Conferir e decidir se deseja adota-lo. O indice/preparador nao troca a base por recencia. |
+| Novo MTA disponivel | Para mudar a base, usar **Planejamento: atualizar registro de migracao**. Para verificar o lote, pode ser apenas evidencia. O indice/preparador nao troca a base por recencia. |
 | Conflito entre escolhas, origem, codigo e evidencias | Explicar o conflito, efeito no recorte e qual decisao/evidencia resolve. |
 | Bloco antigo PENDENTE sem conflito impeditivo do recorte | Preservar historico e seguir; nao declarar CONCLUIDA por inferencia. |
 | Lote aceito e pedido de continuidade | Conciliar evidencias e cobertura antes de escolher novo lote. |

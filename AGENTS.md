@@ -75,6 +75,10 @@ Para categorias e dossies padronizados por issue, siga a
   direciona a `Workspace: atualizar indice dos projetos`; varios candidatos exigem escolha
   somente do registro/frente. Indice localiza; registro atual concentra a decisao.
   Planejar nao recarrega catalogo nem elege rodada/plano por recencia.
+  Adocao explicita de novo MTA usa `Planejamento: atualizar registro de migracao`:
+  previa das origens e Source local, confirmacao ADOTAR e prompt manter-migracao.
+  Helpers indicam essa Run Task, sem scripts manuais no fluxo habitual; trocar
+  catalogo nao comprova resolucao nem exige manutencao em todo lote.
 - Contexto declara `PlanningBasis=MTA|EVIDENCIAS`. Evidencias humanas podem
   sustentar planejamento sem pacote MTA completo, sem inventar RunId, snapshot,
   categoria ou resultado MTA. Contextos antigos sem o campo continuam MTA.

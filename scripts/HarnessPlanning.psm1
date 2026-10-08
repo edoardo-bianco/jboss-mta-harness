@@ -563,6 +563,15 @@ function New-MtaMigrationPromptCore {
         if ($selected) { $null = @(Get-HarnessMtaCatalog $selected.Run $Context.Root) }
         return
     }
+    $previousMigration = $null
+    $previousPath = (Get-HarnessMigrationPaths $Context.Root $Context.Active).MigrationPath
+    if ($selected -and (Test-Path -LiteralPath $previousPath -PathType Leaf)) {
+        $previous = Read-HarnessMigrationInput $Context.Root $Context.Active
+        $previousMigration = [ordered]@{
+            Path=$previous.MigrationPath; Origin=$previous.Origin
+            Snapshot=$previous.Text; Sha256=(Get-FileHash -LiteralPath $previousPath -Algorithm SHA256).Hash
+        }
+    }
     $register = if ($selected) { Update-HarnessMigration $Context $selected } else { Initialize-HarnessMigration $Context.Root $Context.Active }
     if (-not $EvidenceIndexPath) { $EvidenceIndexPath = $register.EvidenceIndexPath }
     if (-not $MigrationSourcePath) { $MigrationSourcePath = $register.MigrationPath }
@@ -606,6 +615,7 @@ function New-MtaMigrationPromptCore {
         ContractSnapshot=$contract
         ContextPath=(Join-Path $folder 'context.json')
         MigrationSnapshot=$migrationSnapshot
+        PreviousMigration=$previousMigration
         EvidenceIndexSnapshot=$evidenceSnapshot
         PromptTemplateHash=$templateHash
         MtaCatalogHash=$catalogHash
@@ -740,7 +750,7 @@ function Invoke-MtaPlanningPreparation {
     }
     try {
         if (-not $Choices['NonInteractive']) { throw 'OutputFormat Json exige NonInteractive.' }
-        if ($Choices['SelectTarget'] -or $Choices['SelectOperation'] -or $Choices['EditorPath']) { throw 'NonInteractive nao aceita seletores nem EditorPath; use escolhas explicitas e NoOpen.' }
+        if ($Choices['SelectTarget'] -or $Choices['SelectOperation'] -or $Choices['SelectMigrationInput'] -or $Choices['EditorPath']) { throw 'NonInteractive nao aceita seletores nem EditorPath; use escolhas explicitas e NoOpen.' }
         if ($Choices['RunId'] -and $Choices['RunPath']) { throw 'Use RunId ou RunPath, nao ambos.' }
         if ($Choices['PreviousRequestId'] -and $Choices['NewPlan']) { throw 'Use PreviousRequestId ou NewPlan, nao ambos.' }
         $operation = $Choices['Operation']

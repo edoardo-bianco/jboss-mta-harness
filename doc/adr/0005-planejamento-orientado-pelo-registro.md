@@ -53,6 +53,9 @@ orientacao suficiente para tomar decisoes, inclusive sem pacote MTA completo.
 - Reconciliacao trata motivos concretos: nova origem/catalogo, conflitos entre
   decisoes/evidencias ou conciliacao solicitada. Permanece disponivel em
   manter-migracao; nao e ritual previo ao planejamento nem conclusao automatica.
+  A adocao explicita de novo MTA possui a tarefa **Planejamento: atualizar registro
+  de migracao**, com previa e confirmacao da origem. Ela reutiliza manter-migracao;
+  nao acrescenta selecao de rodada ao Planejar habitual.
 - Helpers leem contexto e oferecem uma proxima acao com caminho/mensagem pronta
   para o cliente atual. Codex usa skills/subagentes disponiveis; Copilot usa seus
   perfis locais e DevSquad nas etapas de execucao pertinentes. A skill nao comprova

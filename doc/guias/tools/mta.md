@@ -177,6 +177,10 @@ RunId dentro da area de rodadas sao recusadas como ambiguas.
 
 Uma falha nao substitui o ultimo relatorio concluido do projeto. `SUCCEEDED` confirma a execucao e as verificacoes locais, nao a homologacao no EAP 7.4. Sonar e deploy complementam o ciclo nos momentos indicados no roteiro principal.
 
+Depois de uma corretiva, a nova rodada entra no historico, mas nao troca a base
+ja vinculada no registro. Para adota-la, use **Planejamento: atualizar registro
+de migracao**, seguindo o [procedimento de adocao e comparacao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente).
+
 ### Abrir e compartilhar relatorios
 
 Se os indices nao estiverem disponiveis, ou a rodada vier de um colega, preserve
@@ -192,7 +196,8 @@ O caminho acima e ilustrativo: informe a pasta que contem `manifest.json`,
 `result.json`, `input`, `rules` e `output`. O leitor confere resultado, identidade
 interna e evidencias e abre `output/static-report/index.html` na localizacao atual.
 Nao altera origem, indices nem ultimo sucesso local. Para planejar a partir dessa
-rodada, adote-a explicitamente no registro pelo [caminho de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente)
+rodada, use **Planejamento: atualizar registro de migracao**, opcao **p** para
+a pasta recebida, pelo [caminho de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente)
 e depois use **Planejamento: planejar**. A entrada habitual recupera a origem
 vinculada; nao oferece menu de rodadas nem escolhe a mais recente. Nao basta copiar so o HTML
 para comprovar a integridade de uma rodada completa;

@@ -299,6 +299,21 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
+      "label": "Planejamento: atualizar registro de migracao",
+      "detail": "Adota explicitamente uma rodada MTA local ou recebida no registro, preservando escolhas e preparando o prompt de comparacao. Confira a origem antes de confirmar.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": [
+        "-NoProfile", "-File", "${workspaceFolder}/scripts/preparar-planejamento.ps1",
+        "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget",
+        "-Operation", "manter-migracao", "-SelectMigrationInput",
+        "-EditorPath", "${execPath}"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Planejamento: criar pasta de evidencias",
       "detail": "Escolha o projeto; crie ou reabra seu indice evidencias/LEIA-ME.md, preservando o conteudo existente.",
       "type": "process",

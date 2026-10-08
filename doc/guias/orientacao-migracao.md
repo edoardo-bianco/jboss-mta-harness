@@ -198,7 +198,7 @@ consulta somente o helper pertinente; voce tambem pode pedir apoio especializado
 | --- | --- |
 | migracao_helper | Entender a situacao atual e indicar o proximo passo. |
 | migracao_preparo_helper | Orientar preparo do ambiente, localizacao/criacao do registro e base MTA ou evidencias. |
-| migracao_reconciliacao_helper | Entender divergencias entre registro, decisoes e evidencias. |
+| migracao_reconciliacao_helper | Entender divergencias entre registro, decisoes e evidencias; orientar a [adocao explicita de novo MTA por Run Task](tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente) quando solicitada. |
 | migracao_planejamento_helper | Comparar candidatas e revisar cobertura, proposta e GO. |
 | migracao_impacto_helper | Conferir amostras, codigo, dependencias, configuracoes e testes das issues. |
 | migracao_implementacao_helper | Orientar pendencias autorizadas, build, debug, testes e aceite. |

@@ -290,6 +290,12 @@ Decisao e andamento sao independentes:
 
 manter-migracao recebe registro atual, documento-base escolhido e
 novo MTA e/ou evidencias. Pode atualizar apenas por evidencias sem novo scan.
+Para adocao de rodada pelo VS Code, Planejamento: atualizar registro de migracao
+mostra origem atual/nova e Source local antes de ADOTAR. O recibo preserva
+PreviousMigration (Snapshot, Origin, Sha256) antes da carga; MigrationSnapshot
+guarda o estado apos a carga. A comparacao de ocorrencias exige as evidencias
+pertinentes das rodadas; snapshots do registro permitem somente comparar catalogo
+e decisoes. Recibos legados sem esses campos nao ganham origem anterior inferida.
 O preparo carrega dados objetivos; executar o prompt trata os conflitos/evidencias
 identificados. Uma conclusao existente nao deve ser repetida sem motivo. Manutencao
 e encaminhamento contextual, nao um menu obrigatorio antes de cada planejamento.
