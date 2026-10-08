@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Adotar novo MTA pelo VS Code - 2026-10-08
+
+- [x] Conferir main integrada e criar branch; registrar escopo autorizado.
+- [x] Reproduzir em teste a ausencia da tarefa e do fluxo de adocao.
+- [x] Implementar selecao local/recebida, previa e confirmacao sem gravacao antecipada.
+- [x] Preservar origem/registro anteriores e orientar comparacao no prompt.
+- [x] Alinhar guia canonico, entradas e helper sem duplicar procedimento.
+- [x] Validar PS5.1, links e regressao; revisar independentemente.
+- [x] Preparar PR com limites e roteiro de homologacao corporativa.
+- [ ] Homologar na maquina corporativa com o desenvolvedor.
+
 ## Sonar: evidencias e decisao humana - 2026-10-08
 
 - [x] Comparar checkpoint de referencia e fluxo atual; conferir main e criar branch.
@@ -12,7 +23,7 @@
 - [x] Validar PS5.1 e revisar limites/regressoes; preparar consolidacao para PR.
 - [x] Aplicar os cinco ajustes documentais da auditoria independente e validar os encaminhamentos.
 - [ ] Homologar nova coleta e decisao na maquina corporativa com o operador.
-- [ ] Depois do Sonar: discutir manutencao/reconciliacao com o desenvolvedor, preservando a simplificacao da ADR-0005 e orientacao pelo VS Code. Nenhuma nova Run Task nesta entrega.
+- [x] Depois do Sonar: discutir manutencao/reconciliacao com o desenvolvedor. Retomado na entrega propria de adocao MTA acima, preservando ADR-0005 e uso pelo VS Code.
 
 
 ## Refinamento documental do planejamento por sprints - 2026-10-08

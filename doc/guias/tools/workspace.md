@@ -525,6 +525,7 @@ Referencia de consulta; para escolher a operacao e a ordem, use o
 | [MTA: abrir ultimo relatorio](mta.md#uso) | `abrir-relatorio-mta.ps1` |
 | [Workspace: conferir configuracao ao abrir](#comecar-na-maquina-de-trabalho) | `conferir-ambiente.ps1 -AoAbrir` |
 | [Planejamento: planejar](planejamento-migracao.md#preparar-e-executar-o-prompt) | `preparar-planejamento.ps1` |
+| [Planejamento: atualizar registro de migracao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente) | `preparar-planejamento.ps1 -Operation manter-migracao -SelectMigrationInput` |
 | [Planejamento: priorizar issues](priorizacao-issues.md#uso-manual-pela-run-task) | `preparar-priorizacao.ps1` |
 | [Planejamento: compartilhar contexto](compartilhamento-contextos.md) | `compartilhar-contexto.ps1` |
 | [Planejamento: criar pasta de evidencias](planejamento-migracao.md#revisar-um-lote-com-evidencias-complementares) | `criar-pasta-evidencias.ps1` |

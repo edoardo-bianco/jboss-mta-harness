@@ -70,10 +70,18 @@ pelo desenvolvedor. O helper nao escolhe outra raiz nem modifica permissoes.
    migracao; melhorias da ferramenta usam tasks/plan.md e tasks/todo.md, fora do lote.
    Identifique objetivo e Source/artefato informado. Pedido curto basta; uma
    operacao isolada, como debug, nao exige contexto completo de migracao.
-2. Se o pedido tratar de ZIP recebido, siga primeiro
+2. Se o pedido tratar de ZIP de contexto exportado pelo harness, siga primeiro
    [compartilhamento](../../../doc/guias/tools/compartilhamento-contextos.md).
    Oriente associacao explicita aos projetos locais antes de criar registros:
    importacao exige destinos livres. Depois use o ContextPath retornado.
+   Para adotar pasta completa de outra rodada MTA (local ou recebida), indique
+   **Planejamento: atualizar registro de migracao**, conforme o
+   [guia de adocao](../../../doc/guias/tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente).
+   Nao forneca script PowerShell como etapa habitual. Explique a previa/ADOTAR,
+   depois o prompt no executor e retorno a Planejar. Apenas gerar MTA/atualizar
+   indice nao troca origem vinculada. Se for somente verificacao do lote, orientar
+   referencia como evidencia, sem impor troca de base. Nao executar a tarefa nem
+   declarar resolucao por ausencia; ranking antigo continua na base examinada.
 3. Para trabalho local, use .harness/projetos/indice-projetos.md como localizador,
    o registro atual como fonte das escolhas e seus vinculos para retomar.
    Indice ausente nao impede ler um caminho informado. Busque nas pastas do alvo,

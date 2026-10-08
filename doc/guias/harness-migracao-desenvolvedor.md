@@ -287,8 +287,13 @@ visiveis a cobertura parcial, os conflitos e o trabalho ainda pendente.
 Ela nao e uma etapa obrigatoria antes de cada planejamento. Marcar uma escolha
 ou acrescentar observacao coerente permite seguir para **Planejar**. Um bloco
 antigo PENDENTE exige conferir o motivo, sem invalidar a escolha atual nem ser
-marcado CONCLUIDA automaticamente. Nova origem/catalogo ou contradicao relevante
-recebe encaminhamento especifico do helper, com o prompt/comando pronto.
+marcado CONCLUIDA automaticamente. Para adotar uma nova origem/catalogo,
+use **Planejamento: atualizar registro de migracao** para escolher a rodada local
+ou recebida, conferir a troca de origem e abrir o prompt de comparacao. Siga o
+[procedimento unico de adocao](tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente);
+o helper orienta essa tarefa e a passagem ao executor, sem executar scripts.
+Contradicao de decisoes/evidencias sem troca de base segue o prompt pertinente,
+com o conflito identificado pelo helper, sem exigir outra rodada MTA.
 
 **Guia da etapa:** [Planejamento: reconciliacao e atualizacao do plano](tools/planejamento-migracao.md#reconciliar-status-antes-de-atualizar-o-plano).
 Ele distingue atualizar somente o registro, revisar o lote atual e preparar

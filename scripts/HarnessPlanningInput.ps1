@@ -257,7 +257,7 @@ function Invoke-HarnessRegisteredPreparation {
         WritesStarted=$false;ChangedFiles=@();ChangesVerified=$true;Diagnostics=@();Error=$null}
     try {
         if (-not $Choices['NonInteractive'] -or -not $Choices['NoOpen']) { throw 'Use NonInteractive e NoOpen para preparo estruturado.' }
-        if ($Choices['SelectTarget'] -or $Choices['SelectOperation'] -or $Choices['EditorPath'] -or $Choices['RunId'] -or $Choices['RunPath'] -or $Choices['WithoutMta'] -or $Choices['MigrationSourcePath'] -or ($Choices['Operation'] -and $Choices['Operation'] -ne 'planejar-lotes')) {
+        if ($Choices['SelectTarget'] -or $Choices['SelectOperation'] -or $Choices['SelectMigrationInput'] -or $Choices['EditorPath'] -or $Choices['RunId'] -or $Choices['RunPath'] -or $Choices['WithoutMta'] -or $Choices['MigrationSourcePath'] -or ($Choices['Operation'] -and $Choices['Operation'] -ne 'planejar-lotes')) {
             throw 'Preparo pelo registro nao aceita seletores ou troca de MTA/operacao. Use manter-migracao explicitamente para trocar a base.'
         }
         & {

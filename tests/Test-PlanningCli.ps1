@@ -67,7 +67,7 @@ Reject-Cli @{NonInteractive=$true;NoOpen=$true;Target=$app;Operation='planejar-l
 Reject-Cli @{NonInteractive=$true;NoOpen=$true;Target=$app;Operation='planejar-lotes';RunId=$runId} 'INPUT_REQUIRED' 'NewPlan|PreviousRequestId'
 Reject-Cli @{NonInteractive=$true;Target=$app;Operation='manter-migracao';WithoutMta=$true} 'INPUT_REQUIRED' 'NoOpen'
 $base = @{NonInteractive=$true;NoOpen=$true;Target=$app;Operation='planejar-lotes';RunId=$runId;NewPlan=$true}
-foreach ($override in @(@{SelectTarget=$true},@{SelectOperation=$true},@{EditorPath='code'},@{RunPath=$run},@{PreviousRequestId=('a'*32)},
+foreach ($override in @(@{SelectTarget=$true},@{SelectOperation=$true},@{SelectMigrationInput=$true},@{EditorPath='code'},@{RunPath=$run},@{PreviousRequestId=('a'*32)},
     @{WithoutMta=$true},@{Target=$other},@{RunId=('b'*32)},@{EvidenceIndexPath='ausente.md'},@{Target='desconhecido'},@{NonInteractive=$false})) {
     $args = $base.Clone(); foreach ($key in $override.Keys) { $args[$key] = $override[$key] }
     Reject-Cli $args 'FAILED'
