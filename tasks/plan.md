@@ -57,6 +57,19 @@ Documento e ADR disponibilizados no checkout original com hashes identicos;
 imagem original ja versionada foi reutilizada. Nenhum HTML foi gerado nesta
 etapa. Integracao documental local por fast-forward, sem push.
 
+Revisao editorial: retirar metatexto de elaboracao e rotulos como "Texto em
+portugues"; dar continuidade narrativa a motivacoes, responsabilidades e
+evolucao. Preservar fontes, imagem, contratos, configuracao de exportacao e a
+distincao entre arquitetura existente e proposta. Revisar, conferir links e
+sincronizar o documento no checkout original antes da integracao local.
+
+Revisao editorial concluida: narrativa continua no anexo e remocao de relatos
+de elaboracao ao longo da arquitetura. Revisao independente sem achados apos
+explicitar DDD, nucleo e perfis como evolucao proposta. Conferidos 88 links,
+dois exemplos JSON, 26 Run Tasks, imagem e frontmatter; documento sincronizado
+com conferencia do conteudo anterior e do hash final. Sem testes operacionais,
+pois a alteracao e exclusivamente editorial.
+
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 
 Retomada autorizada apos merge da PR #24: substituir a proposta existente pela

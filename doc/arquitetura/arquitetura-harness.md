@@ -7,16 +7,16 @@ html:
 
 # Arquitetura do Engineering Harness
 
-**Data:** 09/10/2026. **Estado:** consolidação da arquitetura existente e proposta de evolução para revisão.
+**Data:** 09/10/2026. **Estado:** arquitetura existente e evolução proposta.
 **Baseline:** `main` em `63908081c5b21ec1c483e9a79d033526786224d5`. As decisões propostas estão registradas na [ADR-0008](../adr/0008-nucleo-perfis-e-plataforma-do-harness.md).
 
 ## 1. Objetivo
 
-Estabelecer a arquitetura do harness de engenharia a partir do produto de migração JBoss, consolidando decisões implementadas e definindo sua evolução por domínios, subdomínios e capacidades. O documento orienta a separação entre núcleo, perfis, ferramentas, clientes de agentes e IDEs, com uma plataforma sustentável, operação humana direta e contexto verificável para trabalho assistido por IA.
+Evoluir o produto de migração JBoss para um harness de engenharia organizado por domínios, subdomínios e capacidades, preservando as decisões que sustentam sua operação. A separação entre núcleo, perfis, ferramentas, clientes de agentes e IDEs permite ampliar os cenários de uso com manutenção sustentável, operação humana direta e contexto verificável para trabalho assistido por IA.
 
 ## 2. Contexto
 
-O harness atual organiza a migração EAP com PowerShell, Run Tasks do VS Code, configurações locais, documentos, evidências e agentes. A [estratégia](../estrategia/estrategia-harness_.md), o [catálogo de capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) e sua [conciliação](../estrategia/conciliacao-evolucao-harness.md) propõem ampliar essa base para desenvolvimento, qualidade e modernização. A inspiração conceitual em harness engineering está documentada no [anexo A](#anexo-a--harness-engineering-imagem-original-e-texto-em-português). O produto ainda não possui núcleo extraído, sistema geral de perfis, extensão própria ou integração IntelliJ. A implementação de sprints está em outra frente; sua existência no checkout não significa entrega na baseline.
+O harness atual organiza a migração EAP com PowerShell, Run Tasks do VS Code, configurações locais, documentos, evidências e agentes. A [estratégia](../estrategia/estrategia-harness_.md), o [catálogo de capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) e sua [conciliação](../estrategia/conciliacao-evolucao-harness.md) ampliam essa direção para desenvolvimento, qualidade e modernização, apoiados nos fundamentos de [harness engineering](#anexo-a--fundamentos-de-harness-engineering). Para atender novos cenários, a arquitetura proposta extrai um núcleo comum e introduz perfis e interfaces independentes de IDE. Essas estruturas, a extensão própria e a integração IntelliJ ainda não fazem parte da base operacional; o planejamento de sprints também está em evolução.
 
 ## 3. Estratégia
 
@@ -30,14 +30,14 @@ Evoluir por capacidades verificáveis, preservando o ciclo objetivo → contexto
 | --- | --- | --- |
 | Entrada operacional | VS Code, tarefas JSON e workspace multifolder; scripts também podem ser chamados pelo terminal. Menus e abertura de arquivos estão acoplados ao fluxo Windows/VS Code. | [Run Tasks](../../.vscode/tasks.json), [workspace](../guias/tools/workspace.md) |
 | Automação | Windows PowerShell 5.1, `.ps1` como entradas e `.psm1` como módulos. Regras, I/O, menus e processos coexistem em parte desses módulos. | [Scripts](../../scripts), [Harness.psm1](../../scripts/Harness.psm1) |
-| Configuração | JSON local reúne projetos, ferramentas, EAP, Sonar e MTA. O campo `mta.profile` seleciona o perfil de análise; não implementa o sistema geral de perfis proposto aqui. | [Configuração de exemplo](../../config/harness.example.json) |
+| Configuração | JSON local reúne projetos, ferramentas, EAP, Sonar e MTA. O campo `mta.profile` seleciona o perfil de análise; o sistema geral de perfis pertence à arquitetura proposta. | [Configuração de exemplo](../../config/harness.example.json) |
 | Estado e conhecimento | JSON, Markdown, snapshots, SHA-256, logs e ZIP sob `.harness/`; templates e contratos versionados. Sem banco de dados central. | [Planejamento](../especificacoes/planejamento-copilot.md), [compartilhamento](../guias/tools/compartilhamento-contextos.md) |
 | MCP opcional | JavaScript ESM em Node.js; SDK `@modelcontextprotocol/server` 2.3.1, Zod 4.6.5 e `smol-toml` 1.9.0. Servidor `stdio` com três consultas de leitura; ponte chama PowerShell com entrada/saída JSON. O pacote declara Node `>=20`, não uma política atualizada de suporte LTS. | [Pacote](../../mcp/issues/package.json), [servidor](../../mcp/issues/server.mjs), [ponte](../../mcp/issues/bridge.mjs), [contrato](../../mcp/issues/contract.mjs) |
 | Build e cobertura | Maven 3 e JDK 8 para a aplicação; fases delimitadas, logs e recibos. JaCoCo depende da instrumentação e dos relatórios do projeto; o harness não cria cobertura por conta própria. | [Build](../guias/tools/maven.md), [módulo](../../scripts/HarnessBuild.psm1) |
 | Diagnóstico e qualidade | MTA CLI produz diagnóstico e snapshot; Sonar usa scanner Maven e API, com runtime próprio, coleta CE/Gate/métricas/issues e revisão local dos critérios. | [MTA](../guias/tools/mta.md), [Sonar](../guias/tools/sonar.md) |
 | Runtime da aplicação | Instalações JBoss EAP 7.1/7.4 standalone, Management CLI, artefatos WAR/EAR e debug Java remoto. Java 8, `javax.*` e Hibernate 5.3 quando aplicável são regras do alvo de migração. | [JBoss](../guias/tools/jboss.md), [contrato técnico](../especificacoes/planejamento-copilot.md) |
 | Agentes e instruções | Prompts Markdown para Copilot/DevSquad; skill comum e helpers declarados para Copilot e Codex. O cliente oferece modelo, ferramentas e delegação; o harness fornece procedimentos e contexto. | [Orientação](../guias/orientacao-migracao.md), [prompts](../../.github/prompts), [papéis](../../.agents/skills/orientar-migracao/references/papeis.md) |
-| Verificação do harness | Scripts de teste PowerShell e testes Node de contrato, configuração, integração e ciclo de vida do MCP. Existência dos testes não representa nova execução nesta consolidação. | [Testes](../../tests), [testes MCP](../../mcp/issues/tests) |
+| Verificação do harness | Scripts de teste PowerShell e testes Node de contrato, configuração, integração e ciclo de vida do MCP. | [Testes](../../tests), [testes MCP](../../mcp/issues/tests) |
 
 Node executa o adaptador MCP; Java executa aplicações e ferramentas Java. Trocar a linguagem do harness não muda o alvo das aplicações. Git é ferramenta de desenvolvimento e fonte informativa, não coordenador de frentes de migração.
 
@@ -53,13 +53,13 @@ Node executa o adaptador MCP; Java executa aplicações e ferramentas Java. Troc
 | Compartilhar preserva identidade e origem. | Importação exige associação ao `Source` local, hashes, destinos livres e cadeia `ImportedFrom`; não concede GO ou aceite. | [ADR-0007](../adr/0007-compartilhamento-de-contextos.md) |
 | MCP é uma entrada opcional de leitura. | As três consultas não marcam exame, não alteram decisões e não substituem conferência do código. | [Contrato de consultas](../especificacoes/consultas-issues.md) |
 
-Essas decisões descrevem implementação e contrato; homologações pendentes continuam no [acompanhamento do harness](../../tasks/todo.md). A proposta deste documento não reescreve decisões ou evidências históricas.
+Essas decisões sustentam os contratos operacionais e a continuidade do trabalho. A evolução preserva decisões e evidências históricas; homologações pendentes permanecem no [acompanhamento do harness](../../tasks/todo.md).
 
 ## 5. Arquitetura de comportamento
 
 ### 5.1. Matriz completa das Run Tasks da baseline
 
-Inventário das **26 entradas** de [`.vscode/tasks.json`](../../.vscode/tasks.json). A classificação domínio/subdomínio é a leitura arquitetural proposta; os nomes operacionais foram preservados. **D** executa uma operação determinística; **P** prepara material para acionamento explícito posterior do agente. Nenhuma dessas tarefas inicia automaticamente um agente de codificação.
+A jornada operacional parte da configuração do ambiente, passa pelo diagnóstico e planejamento e chega à implementação, verificação e operação da aplicação. As **26 entradas** de [`.vscode/tasks.json`](../../.vscode/tasks.json) oferecem essas ações. A matriz mantém seus nomes operacionais e propõe a organização por domínio/subdomínio. **D** executa uma operação determinística; **P** prepara material para acionamento explícito posterior do agente. O acionamento do agente de codificação permanece uma ação explícita do desenvolvedor.
 
 | Run Task | Domínio / subdomínio | Funcionalidade disponível e efeito principal | Agente | Implementação / guia |
 | --- | --- | --- | --- | --- |
@@ -92,7 +92,7 @@ Inventário das **26 entradas** de [`.vscode/tasks.json`](../../.vscode/tasks.js
 
 Os menus dessas tarefas concentram suas variantes; não há uma tarefa por projeto, arquivo ou função auxiliar. As opções completas permanecem nos guias vinculados. Debug por attach é uma configuração de depuração da IDE, não uma 27ª Run Task. As consultas `auditar_base`, `listar_issues` e `obter_issue` têm MCP/CLI próprios e também não são entradas desse inventário.
 
-**Sprints — em andamento:** `Planejamento: planejar sprints` foi observada no checkpoint `88520ac` da branch `harness/implementar-planejamento-sprints`, com ações Novo/Retomar/Revisar/Validar. A [MACRO-01](../features/planejamento-macro-sprints.md) e o [template](../modelos/planejamento-sprints.template.md) estão na baseline; implementação e verificações finais pertencem àquela frente. Após sua integração, conferir o comportamento entregue e incorporar a tarefa à matriz, sem inferir aceite a partir do checkpoint.
+**Planejamento de sprints — em evolução:** a [MACRO-01](../features/planejamento-macro-sprints.md) e seu [template](../modelos/planejamento-sprints.template.md) ampliam a visão por issue para escopo, calendário e capacidade de trabalho. A tarefa `Planejamento: planejar sprints`, com ações Novo/Retomar/Revisar/Validar, está em implementação e ainda não integra as 26 entradas da baseline. Sua incorporação ao inventário depende da integração e verificação do comportamento entregue.
 
 ### 5.2. Fluxos e autoridade
 
@@ -117,7 +117,7 @@ Build, serialização, resolução de caminhos, indexação e inicialização de
 
 Domínio e subdomínio organizam problemas e responsabilidades; **bounded context** delimita um modelo e seu vocabulário; **capacidade** descreve um resultado acionável; **plugin** implementa integrações; **perfil** compõe capacidades e políticas para um objetivo. Nenhum desses conceitos exige um microserviço. A referência conceitual é o [DDD Reference, de Eric Evans](https://www.domainlanguage.com/ddd/reference/); a decomposição abaixo é uma decisão deste projeto.
 
-**DDD pragmático**, neste documento, é a diretriz de aplicar modelagem conforme a complexidade e o valor do problema: compreender o trabalho, delimitar responsabilidades e investir nos modelos que protegem decisões relevantes. A distinção entre desenho estratégico — linguagem, subdomínios, contextos e relações — e tático — agregados e regras do modelo — está fundamentada em [Domain-Driven Design Distilled, de Vaughn Vernon, capítulos 2–6](https://www.informit.com/store/domain-driven-design-distilled-9780134434988), publicado pela Addison-Wesley. O monólito modular e os recortes propostos são escolhas do harness para aplicar esses fundamentos.
+A evolução do harness adota **DDD de forma pragmática**: a complexidade e o valor do problema orientam o investimento em modelagem. Compreender o trabalho e delimitar responsabilidades permite concentrar esse esforço nos modelos que protegem decisões relevantes. A distinção entre desenho estratégico — linguagem, subdomínios, contextos e relações — e tático — agregados e regras do modelo — está fundamentada em [Domain-Driven Design Distilled, de Vaughn Vernon, capítulos 2–6](https://www.informit.com/store/domain-driven-design-distilled-9780134434988), publicado pela Addison-Wesley. O monólito modular e os recortes propostos são escolhas do harness para aplicar esses fundamentos.
 
 A **linguagem ubíqua** deve ser construída com quem conhece o trabalho e aparecer nos diálogos, casos de uso e código dentro de cada contexto, como explica Vernon em [How To Do DDD](https://www.informit.com/articles/article.aspx?p=1944876&seqNum=3). No harness, termos como solicitação, evidência, proposta, GO e aceite precisam manter significados explícitos; nas aplicações, o vocabulário continua sendo validado com seus especialistas de negócio. A adoção tática segue as invariantes da seção 7.2, sem transformar cada script ou integração em um agregado.
 
@@ -156,7 +156,7 @@ Perfis não são novos bounded contexts automaticamente. `quarkus-desenvolviment
 
 É a aplicação do padrão [ports and adapters, de Alistair Cockburn](https://alistair.cockburn.us/hexagonal-architecture/). A direção das dependências protege as regras internas. O desenho inicial usa módulos no mesmo repositório e uma linha de releases; não exige broker, servidor remoto, contêiner ou publicação independente de cada pacote.
 
-Organização lógica proposta, sem mover os arquivos atuais nesta entrega:
+A organização lógica proposta distribui essas responsabilidades entre núcleo, contratos, adaptadores, plugins e perfis:
 
 ```text
 src/core/                 modelos e casos de uso por contexto
@@ -262,7 +262,7 @@ O catálogo alimenta um menu **perfil → domínio → subdomínio → capacidad
 
 No VS Code, tarefas e uma futura extensão traduzem seleção e progresso. No IntelliJ, o primeiro adaptador usa [External Tools](https://www.jetbrains.com/help/idea/configuring-third-party-tools.html), passando projeto, configuração e argumentos para a CLI; menu dedicado e plugin são incrementos de experiência. O suporte de [Tasks do VS Code](https://code.visualstudio.com/docs/debugtest/tasks) é outra forma de acionar processos, não uma dependência do núcleo. Configuração de debug da aplicação permanece específica da IDE.
 
-A [proposta de extensão VS Code](../features/engineering-harness-vscode.md) continua útil para distribuição e experiência. Esta arquitetura refina sua prioridade: CLI/contratos são a base executável; VSIX é um adaptador de distribuição, não o limite do produto. Essa mudança de direção ainda depende da revisão da ADR-0008 e não modifica a especificação histórica.
+A [proposta de extensão VS Code](../features/engineering-harness-vscode.md) contribui para distribuição e experiência de uso. A evolução prioriza CLI e contratos como base executável, permitindo que o VSIX distribua e apresente capacidades também acessíveis por outros clientes. A adoção dessa direção depende da revisão da ADR-0008; a especificação histórica permanece como referência da proposta original.
 
 ### 9.2. Orquestração por papéis
 
@@ -290,7 +290,7 @@ O orientador atual permanece leitor. Se uma evolução permitir que o orquestrad
 
 Guias do núcleo explicam seleção, decisões, execução, evidências e continuidade. Guias dos perfis explicam alvo e fluxo; guias de capacidade explicam ferramenta, entradas, resultado e limites. O catálogo referencia essas fontes por ID/versão, permitindo ao menu e ao orientador apresentar a mesma instrução. Adaptadores só acrescentam o modo de acionamento do cliente; não duplicam a regra funcional.
 
-Carregar progressivamente: mapa breve do núcleo → perfil ativo → procedimento da etapa → evidências/trechos solicitados. Cada entrega identifica origem, versão, cobertura, cortes e links para aprofundamento. Índices aceleram localização; o registro e os documentos vinculados continuam fontes das decisões. Snapshots preservam o contrato histórico. Conteúdo de código, logs e anexos é dado, nunca instrução para alterar autoridade.
+O contexto é carregado progressivamente: mapa breve do núcleo → perfil ativo → procedimento da etapa → evidências/trechos solicitados. Cada recorte identifica origem, versão, cobertura, cortes e links para aprofundamento. Índices aceleram localização; o registro e os documentos vinculados continuam fontes das decisões. Snapshots preservam o contrato histórico. Conteúdo de código, logs e anexos é dado, nunca instrução para alterar autoridade.
 
 ## 10. Escolha da plataforma
 
@@ -306,21 +306,21 @@ Prioridades: coesão do núcleo, manutenção pela equipe, reuso do MCP, CLI ind
 | Operação e distribuição | Runtime Node e dependências empacotadas/versionadas; ciclo de LTS a acompanhar. | Runtime Java e empacotamento próprio; framework servidor não é necessário para uma CLI. | Binário facilita distribuição, mas não elimina JDK/Maven/EAP usados pelos plugins. |
 | Custo principal | Disciplina de módulos, validação em runtime e gestão de dependências. | Reescrita das interfaces e integração com extensões/contratos JS; evitar framework maior que a necessidade. | Introdução de terceira plataforma sem benefício funcional demonstrado neste estágio. |
 
-**Escolha recomendada: TypeScript para núcleo, CLI/menu e MCP, executados em Node.js LTS.** A estratégia já indicava essa direção; a comparação confirma o ajuste ao produto atual. Adotar inicialmente a linha Node 24 LTS, com patch homologado e revisão do ciclo de suporte; em 09/10/2026 a [tabela oficial](https://nodejs.org/en/about/previous-releases) identifica 24 como LTS e 26 como Current. A escolha não altera o requisito do pacote atual nesta entrega.
+**Escolha recomendada: TypeScript para núcleo, CLI/menu e MCP, executados em Node.js LTS.** O reuso das interfaces existentes e a integração com ferramentas heterogêneas favorecem essa direção, já prevista na estratégia. A linha inicial recomendada é Node 24 LTS, com patch homologado e acompanhamento do ciclo de suporte; em 09/10/2026 a [tabela oficial](https://nodejs.org/en/about/previous-releases) identifica 24 como LTS e 26 como Current. A adoção dessa linha requer a atualização e validação dos pacotes durante a modernização.
 
 Compilar/verificar TypeScript em modo estrito e distribuir JavaScript ESM com dependências fixadas. Execução direta de `.ts` pelo Node não substitui verificação de tipos, conforme a [documentação oficial](https://nodejs.org/api/typescript.html). Manter esquemas de fronteira e testes de contrato; o [SDK MCP TypeScript](https://github.com/modelcontextprotocol/typescript-sdk) é uma integração, não o framework do domínio.
 
 **Java é a escolha complementar para análise especializada**, não um fallback oculto: JDT e ferramentas existentes rodam com seu próprio runtime. Java também é uma alternativa viável para o núcleo — há [SDK MCP Java](https://github.com/modelcontextprotocol/java-sdk). Reabrir essa decisão se um piloto demonstrar que predominam bibliotecas Java embutidas, ou se manutenção/distribuição Node forem impeditivas. Hoje não há evidência que justifique uma segunda implementação do núcleo.
 
-O piloto deve incluir manutenção de uma capacidade por um desenvolvedor da equipe: localizar a regra, alterar o contrato, testar e diagnosticar uma falha. A familiaridade da equipe com TypeScript e Java precisa ser confirmada nessa experiência; não foi medida por esta análise documental.
+O piloto avalia também a manutenção de uma capacidade pela equipe: localizar a regra, alterar o contrato, testar e diagnosticar uma falha. Essa experiência permite verificar a familiaridade com TypeScript e Java e o custo de sustentar a plataforma escolhida.
 
 Novos plugins usam TypeScript quando o trabalho é orquestrar I/O e interpretar contratos; usam Java quando dependem de APIs Java; preservam PowerShell para integração Windows enquanto ela for necessária. Escolher linguagem por responsabilidade, sem versões paralelas da mesma regra de domínio.
 
 ## 11. Compreensão e indexação Java independente de IDE
 
-### 11.1. Reconsideração do estudo anterior
+### 11.1. Base de análise e alternativas
 
-O [estudo CORE-01](../../tasks/plan.md#exploracao-java-opcional-e-transversal) priorizava JDT, com JavaParser como alternativa. O catálogo SRC-03 detalhou JavaParser/Symbol Solver, ainda como proposta. Esta consolidação resolve a direção recomendada: **Eclipse JDT como base Java, com JDT Language Server executado fora da IDE para consultas semânticas e JDT Core para extração sintática quando necessária**. O adaptador do harness será o cliente; não dependerá de extensões VS Code, índices privados do IntelliJ ou comandos da interface Eclipse.
+O [estudo CORE-01](../../tasks/plan.md#exploracao-java-opcional-e-transversal) prioriza JDT, enquanto o catálogo SRC-03 explora JavaParser/Symbol Solver como alternativa. A necessidade de consultas semânticas independentes de IDE conduz à recomendação de **Eclipse JDT como base Java, com JDT Language Server executado fora da IDE e JDT Core para extração sintática quando necessária**. O adaptador do harness será o cliente; não dependerá de extensões VS Code, índices privados do IntelliJ ou comandos da interface Eclipse.
 
 | Opção open source | Adequação e limites | Decisão proposta |
 | --- | --- | --- |
@@ -343,11 +343,11 @@ Inicializar/importar um projeto no analisador pode escrever cache, resolver depe
 
 Uma chamada estática não comprova execução; reflexão, CDI/EJB, proxies, geração e configuração externa deixam lacunas. Fatos técnicos devem ser relacionados a cenários, testes e observações de runtime para discutir comportamento. Limites de negócio são hipóteses a validar, não clusters inferidos automaticamente de pacotes.
 
-**Aceite do piloto:** consultar o mesmo projeto fora de qualquer IDE, via CLI e MCP; verificar sobrecarga/herança, reactor Maven, Java 8, fontes geradas, dependência ausente e alteração após indexação; distinguir lacunas dinâmicas; medir tempo de preparo/consulta, memória, cobertura e volume de contexto. A prova precisa demonstrar utilidade para ao menos dois objetivos, como impacto de migração e seleção de testes. Esta entrega documental não executa o piloto nem homologa uma versão do JDT.
+**Aceite do piloto:** consultar o mesmo projeto fora de qualquer IDE, via CLI e MCP; verificar sobrecarga/herança, reactor Maven, Java 8, fontes geradas, dependência ausente e alteração após indexação; distinguir lacunas dinâmicas; medir tempo de preparo/consulta, memória, cobertura e volume de contexto. A prova precisa demonstrar utilidade para ao menos dois objetivos, como impacto de migração e seleção de testes. A homologação do JDT permanece condicionada a esses resultados.
 
 ## 12. Capacidades arquiteturais e critérios de qualidade
 
-Aqui, capacidades arquiteturais são propriedades que sustentam várias funcionalidades; não são novas Run Tasks.
+As capacidades arquiteturais sustentam as funcionalidades do produto e orientam sua evolução. Independência de IDE, rastreabilidade, confiabilidade e eficiência de contexto precisam ser demonstradas em cenários verificáveis.
 
 | Propriedade | Mecanismo proposto | Evidência para aceitar a evolução |
 | --- | --- | --- |
@@ -363,63 +363,47 @@ Aqui, capacidades arquiteturais são propriedades que sustentam várias funciona
 
 Nenhum ganho de desempenho, custo ou qualidade é declarado sem medição. Critérios técnicos não substituem a revisão funcional e o aceite humano.
 
-## 13. Modernização incremental e integração
+## 13. Modernização incremental
+
+A modernização parte dos contratos e ferramentas existentes e extrai uma capacidade por vez. Cada incremento precisa preservar o comportamento conhecido e demonstrar o benefício da nova estrutura antes de ampliar seu uso para outros perfis e clientes.
 
 | Incremento | Resultado verificável |
 | --- | --- |
-| Base documental | Revisar esta arquitetura e a ADR-0008; reconciliar o estado da frente de sprints na integração. |
+| Direção arquitetural | Revisar a ADR-0008 e alinhar o escopo dos incrementos aos contratos e capacidades disponíveis. |
 | Contratos e primeira capacidade | Tipar o MCP existente e extrair uma consulta para o núcleo; comparar entradas, resultados, erros, hashes e paginação com as fixtures PowerShell. |
 | CLI/menu e perfil JBoss | Executar essa capacidade pelos mesmos contratos, com configuração núcleo/perfil e compatibilidade v1. Demonstrar terminal e IntelliJ sem exigir extensão própria. |
 | Regras e ferramentas por capacidade | Migrar preparo/continuidade e adaptadores em recortes coerentes, preservando PowerShell até equivalência. Incluir escrita e falhas parciais nas verificações. |
 | Compreensão Java | Realizar o piloto JDT da seção 11; conectar fatos ao contexto por objetivo, sem tornar indexação pré-requisito universal. |
 | Segundo perfil e terceiro cliente | Demonstrar reuso com Quarkus ou cobertura e validar Claude Code, mantendo as integrações existentes. Escolher o recorte por necessidade real. |
 
-Uma capacidade só muda de “proposta” para “implementada” quando código, contrato, guia e verificações correspondentes estiverem disponíveis; homologação e aceite ficam separados. Remover um caminho PowerShell somente após equivalência e migração dos consumidores. Empacotar o produto versionado com dependências e conteúdo próprio; referenciar instalações corporativas de JDK/Maven/MTA/EAP sem duplicá-las.
-
-Esta entrega altera documentação na branch `harness/arquitetura-nucleo-perfis`, derivada da baseline, em worktree separado. A integração documental na `main` preserva a implementação concorrente de sprints. Quando aquela frente for integrada, será necessário reconciliar o inventário e as adições em `tasks/plan.md`/`tasks/todo.md`. Publicar a proposta não autoriza implementar todos os incrementos ou migrar uma aplicação.
+Uma capacidade passa de proposta a implementada quando código, contrato, guia e verificações correspondentes estão disponíveis; homologação e aceite mantêm seus critérios próprios. A retirada de um caminho PowerShell depende da equivalência funcional e da migração dos consumidores. O produto será distribuído com versões e dependências definidas, referenciando as instalações corporativas de JDK/Maven/MTA/EAP sem duplicá-las.
 
 ## 14. Fontes e precedência
 
-As referências oficiais foram consultadas em 09/10/2026; versões e suporte devem ser reconferidos no piloto. Os links próximos das afirmações sustentam fatos sobre ferramentas; recomendações, modelos e decomposição são decisões propostas deste documento.
+As fontes oficiais sustentam as características das ferramentas e os fundamentos de arquitetura. Versões e suporte têm como referência 09/10/2026 e precisam ser reconferidos nos pilotos. A decomposição em contextos, a plataforma e a composição por perfis formam a direção proposta na ADR-0008; os contratos vigentes continuam orientando a operação.
 
 | Fonte consolidada | Papel nesta arquitetura |
 | --- | --- |
 | [AGENTS.md](../../AGENTS.md) e [ADRs 0001–0007](../adr) | Contratos vigentes e evolução das decisões; ADR-0003 é histórica nos pontos substituídos. |
 | [Estratégia](../estrategia/estrategia-harness_.md) e [conciliação](../estrategia/conciliacao-evolucao-harness.md) | Direção, base reaproveitável e limites das propostas anteriores. |
-| [Catálogo de domínios e capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) | IDs e recortes HAR/SRC/OBJ/DEP/JBS/CHG; este documento refina sua organização, sem declarar o catálogo entregue. |
+| [Catálogo de domínios e capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) | IDs e recortes HAR/SRC/OBJ/DEP/JBS/CHG que orientam a expansão das capacidades. |
 | [Contrato de planejamento](../especificacoes/planejamento-copilot.md), [consultas](../especificacoes/consultas-issues.md) e [guia do desenvolvedor](../guias/harness-migracao-desenvolvedor.md) | Comportamento implementado, invariantes e operação. |
 | [Extensão VS Code](../features/engineering-harness-vscode.md), [MACRO-01](../features/planejamento-macro-sprints.md) e [estudo CORE-01](../../tasks/plan.md#exploracao-java-opcional-e-transversal) | Propostas e estudos reconciliados, com estado de entrega explicitado. |
 
-Enquanto a ADR-0008 estiver proposta, os contratos vigentes orientam a execução. Ao aceitar uma mudança de regra, registrar sua adoção e atualizar os contratos afetados em incremento próprio; a visão arquitetural não substitui os procedimentos operacionais nem o histórico.
+Mudanças de regra exigem decisão registrada e atualização dos contratos afetados. Esse vínculo mantém arquitetura, procedimentos operacionais e histórico coerentes durante a evolução.
 
-## Anexo A — Harness engineering: imagem original e texto em português
+## Anexo A — Fundamentos de harness engineering
 
-### A.1. Referência e origem da ideia nesta proposta
-
-A referência indicada pelo desenvolvedor é a apresentação de Luca Mezzalira, [What's Happening in Software Architecture — O’Reilly](https://learning.oreilly.com/videos/whats-happening-in/0642572416683/), episódio de 22/09/2026, conforme o [catálogo público da O’Reilly](https://www.oreilly.com/videos/whats-happening-in/0642572416683/). O diagrama é reproduzido em sua forma original. O texto em português adapta o conteúdo do slide **Harness Engineering** fornecido pelo desenvolvedor, com ajustes de fluidez; os dados da apresentação foram conferidos no catálogo.
-
-O slide associa essa visão a Birgitta Böckeler, Distinguished Engineer da Thoughtworks. Seu artigo [Harness engineering for coding agent users](https://martinfowler.com/articles/harness-engineering.html), de 02/04/2026, detalha orientações antecipadas (*feedforward*), mecanismos de retorno (*feedback*) e o papel humano na evolução desses controles. Essas referências explicam a inspiração desta proposta; as escolhas de plataforma, núcleo, perfis e contratos são decisões locais do harness, descritas nas seções anteriores.
-
-### A.2. Imagem original
+Harness engineering organiza a colaboração entre pessoas e agentes de programação. O agente recebe contexto sobre o objetivo, a estrutura do sistema e as decisões que deve respeitar; depois de atuar, recebe evidências que orientam a próxima correção. Essa relação entre orientação antecipada (*feedforward*) e retorno (*feedback*) é desenvolvida por Birgitta Böckeler em [Harness engineering for coding agent users](https://martinfowler.com/articles/harness-engineering.html), de 02/04/2026, e apresentada por Luca Mezzalira em [What's Happening in Software Architecture — O’Reilly](https://learning.oreilly.com/videos/whats-happening-in/0642572416683/), episódio de [22/09/2026](https://www.oreilly.com/videos/whats-happening-in/0642572416683/).
 
 ![Diagrama de harness engineering: conhecimento arquitetural e orientações alimentam o agente; código e verificações formam o ciclo de retorno.](../estrategia/imagens/04-luca-mezzalira-harness.png)
 
-*Figura A.1 — Diagrama da apresentação de Luca Mezzalira referenciada na seção A.1. Arquivo original preservado na pasta de imagens da estratégia do harness.*
+*Figura A.1 — Orientação arquitetural e ciclo de retorno ao agente. Fonte: Luca Mezzalira, O’Reilly, 22/09/2026.*
 
-### A.3. Texto em português
+O ciclo começa na compreensão do domínio. Arquitetos e especialistas identificam os subdomínios, seu papel no produto e as características arquiteturais necessárias. A classificação em centrais, genéricos e de suporte ajuda a direcionar o investimento, mas pode mudar conforme o negócio evolui. Um subdomínio genérico pode tornar-se central, exigindo a revisão de suas responsabilidades e de seu desenho. Os fundamentos de DDD de Evans e Vernon, apresentados na seção 6.1, sustentam essa análise.
 
-**Engenharia de harness**
+As escolhas ganham continuidade quando seus motivos e concessões ficam registrados em ADRs. Guias, skills e arquivos como `AGENTS.md` tornam esse conhecimento acessível ao agente antes da execução. A arquitetura passa, assim, a orientar o trabalho cotidiano: o agente encontra critérios para tomar decisões coerentes com o domínio e os limites da solicitação.
 
-O trabalho com IA vai além da geração de código. Na engenharia de harness, uma pessoa colabora com um agente de programação e fornece antecipadamente as informações que estabelecem o contexto: como o projeto ou serviço deve ser estruturado, quais decisões precisam ser respeitadas e qual resultado se deseja alcançar. Depois, fornece retorno sobre o que foi produzido, ajudando o agente a ajustar sua atuação.
+Depois da produção de código, testes, análise estática, verificações de arquitetura e segurança e informações de runtime mostram os efeitos da mudança. Esses sinais alimentam o ciclo de correção. Como distingue Böckeler, verificações computacionais e avaliações inferenciais cumprem papéis diferentes: resultados determinísticos constituem evidências identificáveis, enquanto interpretações e revisões por IA precisam explicitar seus limites.
 
-**Os arquitetos continuam relevantes. Precisamos compreender como estruturar o domínio do sistema e quais características arquiteturais ele exige.** No DDD estratégico, começamos pelos subdomínios e os classificamos como centrais (*core*), genéricos (*generic*) ou de suporte (*supporting*). Essa compreensão ajuda a escolher as características arquiteturais adequadas a cada contexto.
-
-As categorias admitem exceções e podem mudar. Um subdomínio inicialmente genérico pode tornar-se central, ou ocorrer o contrário, conforme fatores externos alterem as necessidades do sistema. Compreender essas mudanças permite rever sua estrutura e as características arquiteturais necessárias.
-
-Podemos registrar em ADRs as decisões e os motivos para escolher determinadas alternativas e concessões (*trade-offs*). Essas decisões podem ser traduzidas em instruções para agentes, em arquivos como `AGENTS.md`. Essa é a orientação antecipada fornecida pelos arquitetos: tornar o conhecimento disponível de modo que o agente possa usá-lo ao trabalhar.
-
-**Depois da geração do código, precisamos de um ciclo de retorno que informe o agente sobre o resultado.** Esse retorno pode vir de análise estática, testes, testes de arquitetura, verificações de segurança e informações coletadas durante a execução do sistema. A IA também pode ajudar a explicar os resultados produzidos por verificações determinísticas.
-
-### A.4. Aplicação ao harness
-
-Nesta arquitetura, ADRs, guias, skills e contexto por perfil fornecem a orientação antecipada; ferramentas de análise, build, testes e observabilidade produzem o retorno. O orientador e seus especialistas conectam esses recursos ao objetivo da solicitação. A aplicação de DDD e suas fontes primárias estão na seção 6.1. Resultados determinísticos permanecem como evidências identificáveis; interpretações e revisões feitas por IA são registradas como avaliações, com seus limites. Essa distinção também é explicitada no artigo de Böckeler: um ciclo pode combinar controles computacionais e inferenciais. As decisões de negócio, o GO e o aceite humano seguem os contratos do harness.
+Na arquitetura proposta, núcleo e perfis organizam essas orientações e verificações em capacidades acionáveis. O orientador seleciona os recursos e especialistas pertinentes ao objetivo, e cada execução devolve evidências para a continuidade do trabalho. As pessoas aperfeiçoam esse sistema à medida que aprendem com seus resultados, preservando a responsabilidade pelas decisões de negócio, pelo GO e pelo aceite.
