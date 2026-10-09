@@ -36,6 +36,9 @@ independente por outro modelo identificou inconsistencias de nomes de dominio,
 vigencia historica das ADRs e alcance da pasta de evidencias; corrigidas e
 reconferidas sem novos achados. Nao foram executados testes operacionais ou
 pilotos das tecnologias propostas nesta mudanca exclusivamente documental.
+Commit documental 48e7265 integrado por fast-forward na main local em worktree
+separado; sem push. A branch e o trabalho pendente de sprints foram preservados.
+Revisao humana das escolhas da ADR-0008 permanece pendente.
 
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 

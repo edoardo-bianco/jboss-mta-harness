@@ -7,7 +7,7 @@
 - [x] Fundamentar nucleo/perfis, DDD, linguagem e indexacao Java em fontes oficiais.
 - [x] Escrever documento arquitetural e ADR proposta, com referencia no README.
 - [x] Validar links, JSON, cobertura da matriz e diff; realizar revisao independente.
-- [ ] Integrar a entrega documental revisada na main local, sem mudar a branch de sprints.
+- [x] Integrar a entrega documental revisada na main local, sem mudar a branch de sprints.
 - [ ] Revisao humana das escolhas arquiteturais propostas na ADR-0008.
 
 ## Consolidacao documental da MACRO-01 - 2026-10-08
