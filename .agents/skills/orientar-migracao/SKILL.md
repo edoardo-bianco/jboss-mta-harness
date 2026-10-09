@@ -29,6 +29,14 @@ na sessao. Skill aplicada nao comprova delegacao: relate somente chamadas reais.
 
 ## Identificar e ler o contexto
 
+Para planejamento macro de prazo/equipe, siga o [guia de sprints](../../../doc/guias/tools/planejamento-sprints.md).
+Indique **Planejamento: planejar sprints** e a acao pertinente; o prompt executado
+pergunta datas/equipe/restricoes ausentes. Recupere o contexto e a revisao
+vinculados, sem escolher por recencia nem ampliar projetos na retomada. Pedido
+explicito de todos os projetos encaminha a opcao correspondente. Para elaborar,
+entregue a mensagem com PromptPath real ao executor conforme a passagem abaixo;
+o helper nao executa/preenche/valida. Nao transforme a visao macro em GO de lote.
+
 Para primeiro uso ou preparo de maquinas dos colegas, parta do [README](../../../README.md#como-usar)
 e da etapa 1 do [guia do desenvolvedor](../../../doc/guias/harness-migracao-desenvolvedor.md#1-preparar-o-ambiente),
 que levam ao [roteiro por maquina](../../../doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas).
@@ -226,6 +234,7 @@ comprova aplicabilidade. Consulta nao marca cobertura nem substitui exame.
 | Build, testes e artefato | [Maven](../../../doc/guias/tools/maven.md) |
 | Categoria, fatia, ranking e fichas | [Priorizacao](../../../doc/guias/tools/priorizacao-issues.md) |
 | Diagnostico novo ou existente | [MTA](../../../doc/guias/tools/mta.md) |
+| Prazo, equipe, sprints e revisoes da visao macro | [Planejamento por sprints](../../../doc/guias/tools/planejamento-sprints.md) |
 | Registro, proposta, GO, implementacao e aceite | [Planejamento](../../../doc/guias/tools/planejamento-migracao.md) |
 | Exportar/importar ponto estavel | [Compartilhamento](../../../doc/guias/tools/compartilhamento-contextos.md) |
 | Qualidade e comparacao | [Sonar](../../../doc/guias/tools/sonar.md) |

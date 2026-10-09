@@ -257,6 +257,19 @@
       }
     },
     {
+      "label": "Planejamento: planejar sprints",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": [
+        "-NoProfile", "-File", "${workspaceFolder}/scripts/preparar-sprints.ps1",
+        "-WorkspacePath", "${input:harnessWorkspacePath}", "-Interactive",
+        "-EditorPath", "${execPath}"
+      ],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Planejamento: priorizar issues",
       "detail": "Escolhe a categoria e prepara uma fatia percentual; permite recriar ou progredir sem repetir issues examinadas nessa sequencia.",
       "type": "process",

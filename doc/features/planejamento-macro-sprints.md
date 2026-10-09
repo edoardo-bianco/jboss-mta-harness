@@ -4,7 +4,9 @@
 **Projeto:** [jboss-mta-harness](https://github.com/edoardo-bianco/jboss-mta-harness).  
 **Destino:** atualizar `doc/features/planejamento-macro-sprints.md`, preservando uma única feature.  
 **Base conferida:** `main`, commit [`745a8e64c75fa9a5ac4d356f6705dee93865503b`](https://github.com/edoardo-bianco/jboss-mta-harness/commit/745a8e64c75fa9a5ac4d356f6705dee93865503b), com o PR #21 integrado.  
-**Situação:** especificação para implementação futura pelo Codex. A consulta dessa base confirmou a proposta documental; a Run Task de sprints ainda não está implementada. Esta consolidação detalha a proposta para a próxima implementação.
+**Situação:** implementação autorizada em 08/10/2026 após o merge da PR #25, a partir da main `6390808`. Procedimento operacional em [planejamento por sprints](../guias/tools/planejamento-sprints.md); os critérios abaixo continuam sendo a referência de aceite.
+
+**Refinamentos confirmados durante a implementação:** a Run Task escolhe os projetos antes de reunir índice, registros e fichas. Datas, equipe, limites e demais perguntas pertencem à execução do prompt. O recorte inicial contém todas as issues **mandatory pendentes**; o prompt pergunta se deve incluir também **optional**. Preparação de ambiente/configuração JBoss e subsistemas, testes e implantação compõem o trabalho, conforme o prazo de produção. Evidências e arquivos fornecidos podem alterar estimativas; cada revisão explica fonte, hipótese e impacto, preservando a anterior.
 
 ## 1. Objetivo e encaixe na estratégia
 
@@ -30,8 +32,8 @@ Esta versão preserva o refinamento integrado pelo PR #21 e acrescenta: sprints 
 
 1. O usuário executa **Terminal → Run Task → `Planejamento: planejar sprints`**.
 2. A tarefa recupera o escopo já selecionado ou oferece **Todos os projetos do workspace** e **Escolher projetos**. Mostra o escopo concreto para conferência, conforme a seção 2.2. Com planejamento anterior inequivocamente vinculado, oferece **revisar o existente** ou **criar cenário separado**. Não escolhe arquivo pela data de modificação.
-3. Reutiliza os parâmetros conhecidos e pergunta apenas informações ausentes ou que o usuário deseja alterar. Mostra um resumo editável de calendário, limites, equipe e escopo.
-4. Prepara recibo/contexto, calendário e prompt com caminhos reais. Abre o prompt e informa como executá-lo no cliente escolhido. A preparação não executa o agente automaticamente.
+3. A tarefa confirma somente o escopo e suas lacunas. Datas, limites e equipe ainda desconhecidos ficam sem valor para serem perguntados pelo prompt.
+4. Prepara recibo/contexto e prompt com caminhos reais. Abre o prompt e informa como executá-lo no cliente escolhido. A preparação não executa o agente automaticamente.
 5. O agente lê as fontes, propõe ou revisa a distribuição, preenche o template e salva Markdown e dados estruturados nos destinos recebidos. Se faltar dado essencial, preserva um rascunho com a lacuna precisa.
 6. A validação determinística confere datas, capacidade, dependências, contagens e saídas. O resultado apresenta proposta, premissas, impedimentos e diferenças em relação à revisão anterior.
 7. Ao chegar nova evidência ou mudar uma restrição, o usuário usa **a mesma Run Task**. O agente reconcilia o plano, em vez de começar outro cronograma sem vínculo.

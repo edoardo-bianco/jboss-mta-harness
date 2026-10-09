@@ -56,6 +56,7 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 | Preparar minha maquina ou as dos colegas | Siga o [roteiro por maquina](doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas), que encaminha ao certificado Sonar e ao Node/MCP opcional; o helper usa essas mesmas fontes. |
 | Quero escolher o que corrigir | Confira o registro e use a [priorizacao opcional por categoria](doc/guias/tools/priorizacao-issues.md). |
 | Ja escolhi uma issue | Use **Planejamento: planejar**, a partir da escolha e das evidencias no registro. |
+| Quero prever a migracao por sprints, equipe e prazo | Use **Planejamento: planejar sprints**, conforme o [guia de planejamento macro](doc/guias/tools/planejamento-sprints.md); inclui todos os projetos ou um subconjunto. |
 | Quero conferir uma base ou consultar uma issue preparada | Peca ao helper a [consulta da base ou da issue](doc/guias/tools/consultas-issues.md#consultar-pelo-helper), indicando o contexto se ainda nao estiver identificado. |
 | Quero adotar um novo MTA, local ou recebido | Use **Planejamento: atualizar registro de migracao**, conforme o [guia de adocao e comparacao](doc/guias/tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente). |
 | Recebi um ZIP de analise ou plano do harness | Use **Planejamento: compartilhar contexto** e siga o [guia de importacao](doc/guias/tools/compartilhamento-contextos.md). |

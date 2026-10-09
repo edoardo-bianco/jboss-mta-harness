@@ -1,5 +1,22 @@
 # To-do do agente: evolucao do harness
 
+## Implementacao da MACRO-01 - 2026-10-08
+
+**Pausado pelo desenvolvedor; checkpoint detalhado no inicio de plan.md.**
+Branch harness/implementar-planejamento-sprints. Implementacao parcial preservada;
+nao integrada. Reproduzir/corrigir os dois achados finais de prazo e fases
+historicas antes de concluir os calculos e a entrega.
+
+- [x] Conferir merge/main e criar branch de evolucao preservando historico.
+- [x] Recuperar especificacao, template e pontos de reuso; registrar contrato.
+- [x] Testar e implementar contexto de todos/subconjunto sem mutar entradas.
+- [ ] Testar e implementar calendario, capacidade, baseline e alocacao por papel.
+- [ ] Integrar Run Task, prompt, renderizacao, validacao e revisoes preservadas.
+- [x] Alinhar guia canonico, README e orientacao do helper (conferir ajustes finais do motor na retomada).
+- [ ] Validar PS5.1, regressao de tarefas/limpeza e revisao independente.
+- [ ] Preparar entrega revisavel e roteiro para o primeiro uso corporativo.
+- [ ] Homologar primeiro planejamento real com entradas do desenvolvedor.
+
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 
 - [x] Confirmar merge da PR #24 e retomar a branch de sprints alinhada a main.
