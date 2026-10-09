@@ -22,6 +22,7 @@ try {
     if ($OutputFormat -eq 'Json') {
         $prepared | ConvertTo-Json -Depth 12
     } else {
+        Write-Host "Indice de priorizacao: $($prepared.PrioritizationIndexPath)"
         if ($prepared.Status -eq 'EXHAUSTED') { Write-Host 'Nao restam novas issues elegiveis nesta sequencia. Nenhuma solicitacao criada.'; exit 0 }
         if ($prepared.Reused) { Write-Host 'Retomando a fatia ainda sem resultado; percentual e quota originais preservados.' }
         Write-Host "Categoria: $($prepared.Category) | Projetos: $($prepared.Projects.Count) | Percentual: $($prepared.Percentage)% | Base inicial: $($prepared.InitialTotal) | Fatia: $($prepared.SliceSize)"

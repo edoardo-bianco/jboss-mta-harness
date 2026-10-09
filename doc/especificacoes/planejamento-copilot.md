@@ -49,7 +49,8 @@ cada item preserva Source, MigrationPath/Snapshot, EvidenceIndexPath, MtaOrigin,
 RunId, AnalysisSource e hashes das evidencias quando disponiveis. O indice e
 localizador, nunca autoridade para substituir a rodada do registro pela mais recente.
 Ausencias/conflitos ficam em Diagnostics por projeto; preparador nao inicializa
-registros, atualiza indice ou executa MTA. Indice ausente exige preparo pelo humano.
+registros, atualiza o indice dos projetos ou executa MTA. Indice dos projetos
+ausente exige preparo pelo humano.
 
 Recibo/prompt ficam em .harness/priorizacao/<RequestId>/. O agente escreve o resumo
 em RankingPath e cada ficha examinada no destino FichaPaths de Source/Id. Em legado
@@ -58,6 +59,39 @@ Preparar nao gera ranking. Snapshots preservam entradas; o agente confere mudanc
 nos registros/indice e integridade MTA antes de recomendar, sem usar hashes como
 lock humano. Divergencia de rodada/escopo/evidencia exige esclarecer ou novo preparo;
 notas/decisoes atuais sao consideradas com origem explicita. Git nao e consultado.
+
+Novos recibos declaram PrioritizationIndexPath, PrioritizationIndexTemplatePath e
+PrioritizationIndexTemplateSnapshot. O indice derivado e unico na raiz:
+`.harness/priorizacao/indice-priorizacao.md`. Segue o template de referencia
+`doc/modelos/indice-priorizacao.template.md`, com blocos por sequencia/escopo/categoria,
+fatias completas, pendencias, cobertura Source/Id distinta e sequencias substituidas.
+SequenceId/Previous definem os vinculos; datas so informam, nunca elegem a ponta.
+Recreate pendente substitui o vinculo anterior do mesmo escopo/categoria, sem
+inventar exame na nova base. Vinculo entre escopos distintos e referencia historica,
+nao substituicao da outra frente.
+Ambiguidade/integridade invalida fica explicita; cobertura desconhecida e N/A.
+
+O preparador reconcilia o indice deterministicamente depois de preparar, retomar
+ou constatar esgotamento, reutilizando a validacao de resultados/fichas/cadeia.
+Continue reconcilia tambem antes de recusar resultado parcial/invalido, retirando
+cobertura desatualizada. Falha/cancelamento nao contabiliza exame nem inventa
+fatia concluida. O executor do prompt
+atualiza o indice imediatamente apos gravar/reler ranking e fichas, identificando
+a conferencia do executor e a cobertura a conferir pelo preparador; nao alega
+validacao deterministica. O proximo preparo reconcilia novamente, sem nova task.
+Contextos legados sao lidos sem reescrita e, sem os campos novos, nao autorizam
+escrita do indice pelo agente. O indice nunca e entrada para decisao de continuidade.
+
+Somente o bloco entre `<!-- priorizacao:indice:inicio -->` e
+`<!-- priorizacao:indice:fim -->` e gerenciado. Conteudo manual externo e preservado
+literalmente; sem marcadores, acrescentar o bloco e conservar o manual como historico.
+Marcadores incompletos/duplicados impedem sobrescrita e exigem conferencia explicita.
+O preparador grava em temporario no mesmo diretorio e substitui atomicamente;
+mudanca observada desde a leitura impede publicacao e preserva a outra edicao.
+Helpers permanecem leitores; ProjectIndexPath e registros nao sao alterados.
+Importacao de analise remapeia PrioritizationIndexPath/TemplatePath para a raiz
+local no derivado e preserva o original. Nao exporta nem sobrescreve o indice
+agregado da origem; o preparo local reconstroi a visao das sequencias recebidas.
 
 O preparo inclui Mta.IncidentEvidence por projeto: Status, IndexPath, Files
 (Path/Sha256) e Diagnostic. Para as AvailableIssues, exporta os incidentes de

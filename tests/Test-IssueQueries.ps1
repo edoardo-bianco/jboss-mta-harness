@@ -41,7 +41,7 @@ $context=[pscustomobject]@{Root=$fixture;Active=$project;Projects=@($project);Co
 $paths=Initialize-HarnessMigration $fixture $project
 $index=Join-Path $fixture '.harness/projetos/indice-projetos.md'
 Set-Content -LiteralPath $index '# Indice sintetico'
-foreach ($file in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md','.github/prompts/planejar-lotes.prompt.md')) {
+foreach ($file in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md','.github/prompts/planejar-lotes.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
     $dest=Join-Path $fixture $file; $null=[IO.Directory]::CreateDirectory((Split-Path $dest -Parent)); Copy-Item -LiteralPath (Join-Path $root $file) -Destination $dest
 }
 $origin=@{RunId=$runId;Project='origem';Source='C:/origem/app';Run=$run} | ConvertTo-Json -Compress

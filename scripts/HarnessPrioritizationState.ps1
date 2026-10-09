@@ -40,6 +40,7 @@ function Read-PrioritizationHistory {
             $receipt.PromptPath -ine (Join-Path $folder.FullName 'priorizar-issues.prompt.md')) { throw "Identidade/destinos invalidos: $path" }
         $null = Resolve-HarnessPath $receipt.RankingPath $Root
         $null = Resolve-HarnessPath $receipt.PromptPath $Root
+        if ($receipt.PSObject.Properties['PrioritizationIndexPath'] -and $receipt.PrioritizationIndexPath -ine (Join-Path $base 'indice-priorizacao.md')) { throw 'Destino do indice de priorizacao divergente.' }
         if ($receipt.PSObject.Properties['SchemaVersion'] -and $receipt.SchemaVersion -ge 4) {
             if ($receipt.SchemaVersion -ne 4) { throw 'Versao de priorizacao desconhecida.' }
             if (@($receipt.FichaPaths).Count -ne @($receipt.AvailableIssues).Count) { throw 'Destinos das fichas divergem das issues disponiveis.' }
@@ -77,7 +78,11 @@ function Select-PrioritizationPrevious {
             if ((Get-PrioritizationCategory $current) -ine $Category) { throw 'A solicitacao pertence a outra categoria; inicie ou retome a sequencia dessa categoria.' }
             if ($visited.ContainsKey($current.RequestId)) { throw 'Ciclo no historico de priorizacao.' }
             $visited[$current.RequestId] = $true
-            $successors = @($History | Where-Object { $_.PSObject.Properties['Previous'] -and $_.Previous -and $_.Previous.RequestId -ceq $current.RequestId })
+            $currentScope=Get-PrioritizationScope $current.Projects
+            $successors = @($History | Where-Object {
+                $_.PSObject.Properties['Previous'] -and $_.Previous -and $_.Previous.RequestId -ceq $current.RequestId -and
+                (Get-PrioritizationScope $_.Projects) -ceq $currentScope
+            })
             if (-not $successors.Count) { return $current }
             if ($successors.Count -gt 1) { throw 'Referencia com varios sucessores. Informe PreviousRequestId da frente desejada.' }
             $selected = $successors
@@ -103,6 +108,7 @@ function Get-PrioritizationPreparedResult {
     param($Receipt, [bool]$Reused=$false, [string]$Status='PREPARED')
     [pscustomobject]@{Status=$Status;RequestId=$Receipt.RequestId;Category=(Get-PrioritizationCategory $Receipt);ContextPath=$Receipt.ContextPath;
         PromptPath=$Receipt.PromptPath;RankingPath=$Receipt.RankingPath;Projects=$Receipt.Projects;
+        PrioritizationIndexPath=(Join-Path (Split-Path (Split-Path $Receipt.ContextPath -Parent) -Parent) 'indice-priorizacao.md');
         Percentage=$Receipt.Percentage;InitialTotal=$Receipt.InitialTotal;SliceSize=$Receipt.SliceSize;Reused=$Reused}
 }
 

@@ -82,7 +82,7 @@ https://github.com/edoardo-bianco/jboss-mta-harness/pull/28.
 PR #28 integrada pelo desenvolvedor em 1ce801c; main local/remota sincronizadas
 e arvore limpa antes da entrega documental seguinte. Homologacao continua pendente.
 
-## Proxima entrega: indice automatico de priorizacao - 2026-10-09
+## Indice automatico de priorizacao implementado - 2026-10-09
 
 Pedido humano: implementar logo apos a corretiva de sprints a criacao/atualizacao
 de `.harness/priorizacao/indice-priorizacao.md` a cada priorizacao concluida,
@@ -91,7 +91,8 @@ nao prova de acesso aos arquivos corporativos nem aceite das issues.
 Template de referencia preservado em doc/modelos/indice-priorizacao.template.md,
 conforme novo pedido humano. Mantem o formato enviado (sequencia ativa, tabela
 de fatias, cobertura, substituidas e proximo passo), parametrizado para recibos
-reais e com atualizacao automatica prevista. A geracao ainda nao esta conectada.
+reais. Branch harness/automatizar-indice-priorizacao criada da main limpa
+2673ab1, apos os merges humanos das PRs #28 e #29.
 
 - Derivar o indice dos recibos/contextos e resultados de priorizacao, mantendo
   sequencia vigente por categoria, raiz Recreate e continuacoes vinculadas.
@@ -108,8 +109,30 @@ reais e com atualizacao automatica prevista. A geracao ainda nao esta conectada.
 - Integrar ao fluxo existente, sem nova Run Task e sem alterar decisoes nos
   registros. Testar Start/Recreate/Continue, categorias, cobertura e links.
 
-Implementacao em entrega posterior; esta branch registra o requisito e conclui
-as corretivas de sprints antes de iniciar mudancas no fluxo de priorizacao.
+Implementacao: o preparo reconcilia o indice pelos validadores existentes e
+separa solicitacoes pendentes de resultados completos. O condutor publica a
+atualizacao imediata depois de gravar/reler ranking e fichas, identificando-a
+como conferencia do executor, sem alegar validacao deterministica. A proxima
+execucao confere os resultados novamente. Nenhuma nova Run Task ou terminal
+do agente. O indice nao e autoridade para selecionar a sequencia.
+Preservar escopos/categorias independentes, vinculos Recreate/Previous e texto
+manual fora de marcadores gerenciados; marcadores invalidos exigem diagnostico.
+Cobertura exige cadeia consistente; bifurcacoes nao elegem vigencia por recencia.
+
+Implementado e validado na branch, aguardando integracao humana na main.
+Revisao independente identificou e teve corrigidos: diagnostico do indice mesmo
+quando Continue recusa resultado, separacao de escopos em Recreate e retomada
+explicita, escrita atomica com deteccao de conflito. Regressao de compartilhamento
+tambem levou ao remapeamento dos novos caminhos nos recibos derivados, sem copiar
+o indice agregado da origem nem modificar os originais.
+
+Validacao PowerShell 5.1: Test-PrioritizationIndex, Test-PrioritizationProgress,
+Test-Prioritization, Test-PrioritizationCategories, Test-PrioritizationIncidents,
+Test-ContextPackage, Test-IssueQueries, Test-TaskInputs e Test-Cleanup passaram.
+RED registrado antes das corretivas de cobertura antiga, escopo e retomada;
+testes cobrem notas manuais, falha/conflito na publicacao, v4 sem ficha e legado Top.
+Revisao final sem bloqueios. A execucao nativa do prompt no Copilot permanece
+para ensaio humano; testes de preparador/arquivos nao comprovam comportamento do chat.
 
 ## Publicacao de sprints e incorporacao da arquitetura - 2026-10-09
 

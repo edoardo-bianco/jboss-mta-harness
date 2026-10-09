@@ -71,6 +71,17 @@ function New-TransferAnalysisMapping {
     $folder=Join-Path $Context.Root ('.harness/priorizacao/'+$Record.RequestId)
     $Paths[(Split-Path $Record.ContextPath -Parent)]=$folder
     $Paths[$Record.ProjectIndexPath]=Join-Path $Context.Root '.harness/projetos/indice-projetos.md'
+    # O indice agregado pertence ao receptor, nao e um artefato a importar da origem.
+    $originPrioritization=Split-Path (Split-Path $Record.ContextPath -Parent) -Parent
+    if ($Record.PSObject.Properties['PrioritizationIndexPath']) {
+        if ($Record.PrioritizationIndexPath -ine (Join-Path $originPrioritization 'indice-priorizacao.md')) { throw 'Destino do indice recebido diverge da raiz da priorizacao.' }
+        $Paths[$Record.PrioritizationIndexPath]=Join-Path $Context.Root '.harness/priorizacao/indice-priorizacao.md'
+    }
+    if ($Record.PSObject.Properties['PrioritizationIndexTemplatePath']) {
+        $originRoot=Split-Path (Split-Path $originPrioritization -Parent) -Parent
+        if ($Record.PrioritizationIndexTemplatePath -ine (Join-Path $originRoot 'doc/modelos/indice-priorizacao.template.md')) { throw 'Template do indice recebido fora da raiz do harness.' }
+        $Paths[$Record.PrioritizationIndexTemplatePath]=Join-Path $Context.Root 'doc/modelos/indice-priorizacao.template.md'
+    }
     foreach ($ficha in $Record.FichaPaths) {
         if (-not $Projects.ContainsKey($ficha.Source)) { throw 'Source da ficha ausente do mapeamento.' }
         $issue=Get-HarnessIssuePaths $Context.Root $Projects[$ficha.Source] $ficha.Id

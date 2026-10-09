@@ -11,7 +11,7 @@ function Fixture($directory) {
     $app=$directory+'-codigo'
     $null=[IO.Directory]::CreateDirectory($app)
     Set-Content (Join-Path $app 'pom.xml') '<project><artifactId>servico</artifactId></project>'
-    foreach ($file in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/planejar-lotes.prompt.md','.github/prompts/implementar-lote.prompt.md','.github/prompts/revisar-resultado.prompt.md')) {
+    foreach ($file in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/planejar-lotes.prompt.md','.github/prompts/implementar-lote.prompt.md','.github/prompts/revisar-resultado.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
         $dest=Join-Path $directory $file; $null=[IO.Directory]::CreateDirectory((Split-Path $dest -Parent)); Copy-Item (Join-Path $root $file) $dest
     }
     $project=[pscustomobject]@{name='servico';label='Servico';path=$app}
@@ -168,6 +168,8 @@ $slice2=New-HarnessPrioritizationContext $cd -Category optional -Percentage 25 -
 $analysisZip=Join-Path $area 'analise.zip'
 $null=Export-HarnessContextPackage -Context $cd -ContextPath $slice2.ContextPath -PackagePath $analysisZip
 $analysisManifest=Read-HarnessContextPackage $analysisZip
+$sourceIndexHash=(Get-FileHash $slice2.PrioritizationIndexPath).Hash
+Assert (-not @($analysisManifest.Files | Where-Object OriginPath -EQ $slice2.PrioritizationIndexPath).Count) 'Indice agregado da origem foi incluido no pacote da fatia.'
 Assert ($analysisManifest.Kind -eq 'ANALISE' -and $analysisManifest.Receipts.Count -eq 2) 'Cadeia da analise truncada.'
 $analysisMap=@{}; $analysisMap[$cd.Active.path]=$ce.Active.path
 $analysisMap[$secondA.Active.path]=$secondB.Active.path
@@ -186,7 +188,12 @@ RewritePackage $analysisZip $badPrevious { param($metadata,$zipFile)
 }
 Reject { Import-HarnessContextPackage $ce $badPrevious $analysisMap -Preview } 'Ficha Previous divergente foi reparada silenciosamente.'
 $analysisImport=Import-HarnessContextPackage -Context $ce -PackagePath $analysisZip -SourceMap $analysisMap
+$importedIndexContext=Get-Content $analysisImport.ContextPath -Raw -Encoding UTF8 | ConvertFrom-Json
+Assert ($importedIndexContext.PrioritizationIndexPath -eq (Join-Path $ce.Root '.harness/priorizacao/indice-priorizacao.md')) 'Indice recebido nao aponta a raiz local.'
+Assert ($importedIndexContext.PrioritizationIndexTemplatePath -eq (Join-Path $ce.Root 'doc/modelos/indice-priorizacao.template.md')) 'Template recebido nao aponta a raiz local.'
 $next=New-HarnessPrioritizationContext $ce -Category optional -Percentage 25 -Mode Continue -PreviousRequestId $slice2.RequestId
+Assert ((Get-FileHash $slice2.PrioritizationIndexPath).Hash -eq $sourceIndexHash) 'Continuidade recebida alterou o indice da origem.'
+Assert ([IO.File]::ReadAllText($next.PrioritizationIndexPath) -match '4 de 8') 'Indice receptor nao incorporou a cobertura importada.'
 $nextRecord=Get-Content $next.ContextPath -Raw | ConvertFrom-Json
 Assert ($nextRecord.InitialTotal -eq 8 -and $nextRecord.ExcludedIssues.Count -eq 4 -and $nextRecord.AvailableIssues.Count -eq 4) 'Continuidade importada perdeu cobertura.'
 Assert ($nextRecord.Projects[0].Mta.MtaOrigin.Source -eq 'Z:/origem-mta') 'Origem MTA foi atribuida ao receptor.'

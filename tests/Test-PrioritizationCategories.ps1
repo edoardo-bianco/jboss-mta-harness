@@ -13,7 +13,7 @@ $null = [IO.Directory]::CreateDirectory($project.path)
 Set-Content (Join-Path $project.path 'pom.xml') '<project/>'
 $paths = Initialize-HarnessMigration $fixture $project
 $context = [pscustomobject]@{Root=$fixture;Projects=@($project);WorkspacePath=$null;ConfigPath=$null}
-foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md')) {
+foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
     $dest=Join-Path $fixture $relative
     $null=[IO.Directory]::CreateDirectory((Split-Path $dest -Parent))
     Copy-Item (Join-Path $root $relative) $dest
@@ -92,7 +92,7 @@ Complete $both
 foreach ($entry in $shared) { Assert-HarnessIssueFicha $entry.Path $entry.Source $entry.Id }
 # Entrada publica preserva a categoria tambem em JSON, sem menus.
 $scripts=Join-Path $fixture 'scripts'; $null=[IO.Directory]::CreateDirectory($scripts)
-foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessIssuePlanning.ps1','HarnessPrioritization.psm1','HarnessPrioritizationState.ps1','HarnessPrioritizationEvidence.ps1','preparar-priorizacao.ps1')) { Copy-Item (Join-Path $root ('scripts/'+$name)) $scripts }
+foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessIssuePlanning.ps1','HarnessPrioritization.psm1','HarnessPrioritizationState.ps1','HarnessPrioritizationEvidence.ps1','HarnessPrioritizationIndex.ps1','preparar-priorizacao.ps1')) { Copy-Item (Join-Path $root ('scripts/'+$name)) $scripts }
 $config=Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories=@(@{name='app';path=$project.path},@{name='app2';path=$second.path}); $config.activeProject=$null
 $configPath=Join-Path $fixture 'config.json'; Write-HarnessJson $configPath $config

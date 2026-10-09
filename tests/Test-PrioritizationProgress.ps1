@@ -18,7 +18,7 @@ $project = [pscustomobject]@{name='app';label='app';path=$source}
 $context = [pscustomobject]@{Root=$fixture;Projects=@($project);ConfigPath=$null;WorkspacePath=$null}
 $paths = Initialize-HarnessMigration $fixture $project
 Set-Content (Join-Path $fixture '.harness/projetos/indice-projetos.md') '# Indice'
-foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md')) {
+foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
     $destination = Join-Path $fixture $relative
     $null = [IO.Directory]::CreateDirectory((Split-Path $destination -Parent))
     Copy-Item (Join-Path $root $relative) $destination
@@ -34,7 +34,7 @@ $text = [IO.File]::ReadAllText($paths.MigrationPath).Replace('AGUARDANDO MTA', '
 $rows = @(1..200 | ForEach-Object { "| r::$_ | Regra $_ | mandatory | 500 | PRESENTE | A DEFINIR | NAO ANALISADA | |" })
 $text = $text.Replace('<!-- mta:fim -->', ((@("<!-- MTA $origin -->", "Rodada MTA: $runId.") + $rows) -join "`n") + "`n<!-- mta:fim -->")
 [IO.File]::WriteAllText($paths.MigrationPath, $text)
-function Read-Receipt($prepared) { Get-Content $prepared.ContextPath -Raw | ConvertFrom-Json }
+function Read-Receipt($prepared) { Get-Content $prepared.ContextPath -Raw -Encoding UTF8 | ConvertFrom-Json }
 function Save-Ranking($prepared, $examined, $proposed) {
     $result = @{RequestId=$prepared.RequestId;Status='COMPLETED';AnalyzedIssues=@($examined);ProposedIssues=@($proposed)} | ConvertTo-Json -Depth 6
     $body = '# Ranking de teste' + "`n<!-- priorizacao:resultado -->`n" + '```json' + "`n$result`n" + '```' + "`n<!-- /priorizacao:resultado -->`n"
@@ -53,13 +53,36 @@ function Save-Ranking($prepared, $examined, $proposed) {
 }
 $first = New-HarnessPrioritizationContext $context -Percentage '10,00'
 $initial = Read-Receipt $first
+Assert ((Test-Path $first.PrioritizationIndexPath) -and $initial.PrioritizationIndexTemplateSnapshot -eq [IO.File]::ReadAllText((Join-Path $fixture 'doc/modelos/indice-priorizacao.template.md'))) 'Preparo nao publicou indice/template no contexto.'
+Assert ([IO.File]::ReadAllText($first.PrioritizationIndexPath) -match 'PENDENTE') 'Preparo nao pode contar como exame.'
 Assert ($initial.InitialTotal -eq 200 -and $initial.SliceSize -eq 20) '200 issues a 10% devem produzir quota 20, sem contar ocorrencias.'
 $pending = New-HarnessPrioritizationContext $context -Mode Continue
 Assert ($pending.RequestId -eq $first.RequestId -and $pending.Reused) 'Preparo sem resultado deve ser retomado sem nova fatia.'
 Reject { New-HarnessPrioritizationContext $context -Percentage 10 } 'Solicitacao existente exige escolher recriar/progredir.'
 Save-Ranking $first $initial.AvailableIssues[0..19] $initial.AvailableIssues[0..19]
+$priorModule=Get-Module HarnessPrioritization
+& $priorModule { param($r) Update-PrioritizationIndex $r } $fixture | Out-Null
+Assert ([IO.File]::ReadAllText($first.PrioritizationIndexPath) -match '20 de 200') 'Fixture precisa comecar com fatia indexada.'
+$completeText=[IO.File]::ReadAllText($first.RankingPath)
+[IO.File]::WriteAllText($first.RankingPath,$completeText.Replace('COMPLETED','IN_PROGRESS'))
+$requestCount=@(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count
+Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10 } 'Parcial permitiu progresso.'
+$indexText=[IO.File]::ReadAllText($first.PrioritizationIndexPath)
+Assert ($indexText -match 'NAO_VALIDADA' -and $indexText -notmatch '20 de 200') 'Continue recusado deixou cobertura antiga no indice.'
+Assert (@(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count -eq $requestCount) 'Continue recusado criou fatia.'
+[IO.File]::WriteAllText($first.RankingPath,$completeText)
+# V4: um bloco completo sem a ficha individual nao pode manter cobertura conferida.
+& $priorModule { param($r) Update-PrioritizationIndex $r } $fixture | Out-Null
+$fichaPath=@($initial.FichaPaths | Where-Object { $_.Id -ceq $initial.AvailableIssues[0].Id })[0].Path
+[IO.File]::Move($fichaPath,($fichaPath+'.missing'))
+try {
+    Reject { New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10 } 'Ficha ausente permitiu progresso.'
+    $indexText=[IO.File]::ReadAllText($first.PrioritizationIndexPath)
+    Assert ($indexText -match 'Falta ficha' -and $indexText -notmatch '20 de 200') 'Ficha ausente conservou cobertura no indice.'
+} finally { [IO.File]::Move(($fichaPath+'.missing'),$fichaPath) }
 $second = New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10
 $next = Read-Receipt $second
+Assert ([IO.File]::ReadAllText($second.PrioritizationIndexPath) -match '20 de 200') 'Continue nao reconciliou exame anterior no indice.'
 Assert ($next.InitialTotal -eq 200 -and $next.SliceSize -eq 20 -and $next.AvailableIssues.Count -eq 180) 'Avanco deve manter denominador 200 e excluir 20 propostas.'
 Assert ($next.Previous.RequestId -eq $first.RequestId -and $next.SequenceId -eq $initial.SequenceId) 'Sequencia nao vinculada.'
 $seen = @($initial.AvailableIssues[0..19].Id)
@@ -72,6 +95,7 @@ Assert (@($last.AvailableIssues | Where-Object Id -eq $next.AvailableIssues[10].
 Save-Ranking $third $last.AvailableIssues $last.AvailableIssues
 $count = @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count
 $done = New-HarnessPrioritizationContext $context -Mode Continue -Percentage 10
+Assert ([IO.File]::ReadAllText($done.PrioritizationIndexPath) -match '200 de 200.*100') 'Esgotamento nao atualizou cobertura final.'
 Assert ($done.Status -eq 'EXHAUSTED' -and @(Get-ChildItem (Join-Path $fixture '.harness/priorizacao') -Directory).Count -eq $count) 'Esgotamento nao deve criar solicitacao vazia.'
 Assert ($done.SliceSize -eq 0 -and (New-HarnessPrioritizationContext $context -Mode Continue).Status -eq 'EXHAUSTED') 'Esgotamento nao deve pedir percentual nem exibir quota antiga.'
 $fresh = New-HarnessPrioritizationContext $context -Mode Recreate -Percentage '0,01'

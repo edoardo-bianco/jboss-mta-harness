@@ -46,7 +46,8 @@ using-agent-skills quando disponivel e skills pertinentes lidas; apoio usa subag
 reais do cliente. Forneca escopo, caminhos, contrato e pergunta delimitada; o apoio
 somente le/busca, sem escrita ou subdelegacao, e devolve evidencias ao condutor.
 Sem apoio compativel, prossiga diretamente e informe o limite; nao simule delegacao
-nem exija trocar de cliente. Somente o condutor escreve RankingPath e FichaPaths.
+nem exija trocar de cliente. Somente o condutor escreve RankingPath, FichaPaths
+e, quando declarado no contexto, PrioritizationIndexPath.
 No Copilot, antes de delegar, confira o nome exato e a disponibilidade do destinatario
 na sessao, a ferramenta agent e a lista agents do condutor; citar um perfil nao o
 torna disponivel. Esta rota solicita devsquad.plan; os migracao_*_helper pertencem
@@ -253,7 +254,47 @@ sem significar GO/aceite. O preparador valida o bloco antes de progredir.
 ```
 <!-- /priorizacao:resultado -->
 
-Nao altere migracao.md, indice, fontes, planos/to-dos ou recibos. Nao execute build,
+## Atualizar o indice de priorizacao
+
+Depois de gravar e reler RankingPath e as fichas, atualize automaticamente
+PrioritizationIndexPath, quando declarado neste contexto. Ele deve ser
+`.harness/priorizacao/indice-priorizacao.md` da mesma raiz de ContextPath;
+nao confunda com ProjectIndexPath. Use PrioritizationIndexTemplateSnapshot e
+confira PrioritizationIndexTemplatePath. Recibo antigo sem esses campos nao
+autoriza criar um destino inferido: informe a limitacao; o preparador reconcilia
+tambem os resultados legados na proxima execucao.
+
+Releia o indice imediatamente antes da edicao. Preserve literalmente todo o
+texto fora de `<!-- priorizacao:indice:inicio -->` e
+`<!-- priorizacao:indice:fim -->`. Sem marcadores, conserve o indice manual e
+acrescente um unico bloco gerenciado; marcadores incompletos/duplicados exigem
+relatar o conflito, sem sobrescrever. Nao altere notas humanas nem recibos.
+
+Conserve as demais sequencias, categorias, escopos e pendencias. Confira a
+sequencia desta solicitacao pelos contextos vinculados em Previous/SequenceId,
+nao por recencia. Se houver sucessores novos, releia seus contextos; bifurcacao
+fica explicita, sem eleger uma ponta. Recreate preserva a sequencia substituida
+e so zera a cobertura da nova. Escopos/categorias distintos nao se substituem.
+
+Preencha a linha desta fatia com ordem na cadeia, RequestId, modo, PreparedAtUtc,
+quantidade real de AnalyzedIssues, projetos examinados, numero de ProposedIssues
+e links relativos para ranking/contexto. COMPLETED exige quota completa e fichas
+por identidade; IN_PROGRESS, arquivo ausente ou inconsistente permanece em
+Pendencias e diagnosticos, fora da tabela de fatias concluidas. Conte cobertura
+pela uniao Source/Id das fatias completas da sequencia, sobre InitialTotal fixo;
+nao some duplicatas, propostas ou mencoes. N/A para base/cadeia desconhecida.
+
+Identifique a linha atual como **conferida pelo executor** e a cobertura alterada
+como **a conferir pelo preparador**. Atualize tambem o rotulo Conferencia do
+cabecalho para indicar essa pendencia; nao afirme validacao deterministica feita
+por voce. O preparador reconcilia o indice automaticamente na proxima execucao
+da mesma tarefa, inclusive retomada/esgotamento. Isso nao exige outra Run Task
+nem autoriza executar terminal. Se o indice mudar durante sua leitura/edicao,
+releia e concilie sem perder outras fatias. Releia o resultado e entregue o
+link do indice junto com RankingPath; se nao conseguir atualiza-lo, informe
+explicitamente o caminho e a pendencia, preservando ranking e fichas gravados.
+
+Nao altere migracao.md, ProjectIndexPath, fontes, planos/to-dos ou recibos. Nao execute build,
 MTA, Sonar, Git, receitas ou deploy. Nao selecione issues pelo humano, conceda GO,
 planeje varios lotes, declare resolucao ou inicie automaticamente planejamento.
 Se faltar ferramenta de escrita, informe e apresente resultado no chat sem simular arquivo.
