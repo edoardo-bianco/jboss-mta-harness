@@ -45,6 +45,9 @@ ela participa e qual resultado permite continuar. Cada etapa destaca o guia
 que a detalha. Configuracao, menus, comandos e alternativas de execucao ficam
 nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 
+O [cheat sheet das Run Tasks](../arquitetura/cheat-sheet-run-tasks.md) oferece
+uma consulta compacta das 27 tarefas, incluindo o planejamento por sprints.
+
 **Para receber orientacao, siga o [guia de orientacao da migracao com Codex ou GitHub Copilot](orientacao-migracao.md).**
 Ele explica a skill `orientar-migracao`, o papel `migracao_helper`, como iniciar,
 retomar e passar a execucao autorizada. O helper consulta os arquivos e indica
