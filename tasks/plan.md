@@ -70,6 +70,18 @@ dois exemplos JSON, 26 Run Tasks, imagem e frontmatter; documento sincronizado
 com conferencia do conteudo anterior e do hash final. Sem testes operacionais,
 pois a alteracao e exclusivamente editorial.
 
+Extracao da consulta rapida: mover o inventario da secao 5.1 para
+doc/arquitetura/cheat-sheet-run-tasks.md, preservando as 26 linhas, a legenda,
+a baseline e os limites do inventario. Manter referencia na arquitetura e
+frontmatter proprio para exportacao HTML independente. Conferir fidelidade,
+links e configuracao; sincronizar os dois documentos no checkout original.
+
+Extracao concluida e revisada sem achados: corpo da antiga secao 5.1 preservado
+integralmente, com 26 tarefas e sem duplicacao na arquitetura. Conferidos 52
+links locais na arquitetura e 39 no cheat sheet, dois exemplos JSON e ambos os
+frontmatters. Arquivos sincronizados no checkout original com conferencia de
+hash. HTML podera ser exportado separadamente; nao foi gerado nesta etapa.
+
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 
 Retomada autorizada apos merge da PR #24: substituir a proposta existente pela
