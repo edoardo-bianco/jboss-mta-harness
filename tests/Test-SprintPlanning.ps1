@@ -13,7 +13,7 @@ $projects=@(foreach ($name in @('api um','agregador','sem registro')) {
     [IO.File]::WriteAllText((Join-Path $source 'pom.xml'),'<project><modelVersion>4.0.0</modelVersion><groupId>test</groupId><artifactId>sample</artifactId><version>1</version><packaging>pom</packaging></project>')
     [pscustomobject]@{name=$name.Replace(' ','-');label=$name;path=$source}
 })
-foreach ($file in @('.github/prompts/planejar-sprints.prompt.md','doc/modelos/planejamento-sprints.template.md','doc/features/planejamento-macro-sprints.md')) {
+foreach ($file in @('.github/prompts/planejar-sprints.prompt.md','.github/prompts/revisar-sprints.prompt.md','doc/modelos/planejamento-sprints.template.md','doc/features/planejamento-macro-sprints.md')) {
     $target=Join-Path $fixture $file
     $null=New-Item -ItemType Directory -Path (Split-Path $target -Parent) -Force
     if (Test-Path (Join-Path $root $file)) { Copy-Item -LiteralPath (Join-Path $root $file) -Destination $target }

@@ -1,5 +1,95 @@
 # Plano do agente: evolucao do harness
 
+## Corretiva do ensaio de sprints - 2026-10-09
+
+Pedido humano: respeitar as restricoes informadas, corrigir o Gantt, revisar o
+prompt principal, preparar analise por prompt apos o calculo e tornar o template
+claro/coerente. Evolucao do harness autorizada; a orientacao da aplicacao permanece
+separada. Base main 3e2009f, arvore limpa, branch harness/corrigir-ensaio-sprints.
+PR #27 ja integrada; main sincronizada e worktrees auxiliares removidos.
+
+Evidencia do ensaio compartilhada no chat: 14 projetos/44 mandatory, inicio
+12/10/2026, implementacao ate 13/11, ajustes ate 19/11, QA de 16/11 a 11/12,
+PRD de 14/12 a 18/12; dois devs, arquiteto e DevOps distintos, reserva zero,
+reforco de um dev em novembro somente condicional, QA sem capacidade dimensionada.
+O calculo alocou 14 issues, deixou 30 sem conclusao e nao alocou QA/deploy.
+Tetos null causaram NAO_AVALIAVEL; acompanhamento prioritario concentrou arquiteto;
+Gantt desenhou bordas de sprint em vez dos dias alocados. Narrativa ficou obsoleta.
+
+1. Reproduzir com testes pequenos em PS5.1 e preservar os resultados do ensaio.
+2. Distinguir ausencia de teto por decisao explicita de valor desconhecido,
+   preservando legados; alocar acompanhamento distribuido em janela explicita.
+3. Registrar dias efetivos e desenhar Gantt sem inventar duracao/conclusao,
+   mantendo capacidade, prazos, dependencias, revisoes e passado publicado.
+4. Revisar template/prompt: unico plano, decisao humana x estimativa x calculo,
+   perguntas essenciais antes de assumir dados, fontes realmente lidas e
+   narrativa sem numeros/estados calculados duplicados. Preparar prompt de
+   analise somente leitura apos validar, com caminhos e versao vinculados.
+5. Testar fluxo e regressao, conferir Mermaid e links, revisar independentemente
+   e publicar corretiva revisavel. Homologacao exige nova revisao na maquina do
+   ensaio; nao recalcular nem editar silenciosamente documentos ja validados.
+
+Desenho: UnboundedPhases explicito; null legado continua desconhecido.
+AllocationMode=DISTRIBUTED usa janela completa, sem comprimir pelo prazo final.
+ASAP preserva comportamento legado. Distribuicao nao dispensa conclusao antes
+da producao. Valores e estimativas corporativas nao sao alterados nesta branch.
+
+Complemento humano: ganho de IA como parametro de entrada; no ensaio, reduzir
+20% do esforco dos desenvolvedores nas atividades apoiadas pelo harness e
+evidenciar a reducao. Estimation.AiDeveloperReductionPercent e Work.AiAssisted
+preservam faixa original em Effort e calculam faixa efetiva separada; nao mudam
+capacidade nem Arq/DevOps. Sem percentual padrao e sem desconto duplicado.
+
+Verificacao local concluida: nove suites PS5.1 passaram (SprintSimulation,
+SprintValidation, SprintPlanning, SprintLifecycle, SprintWorkflow, SprintEnsaio,
+TaskInputs, Workspace, Cleanup). SprintEnsaio tem 48 casos, com RED/GREEN para
+limites, distribuicao, ganho de IA e conclusao historica; SprintValidation tem
+26 casos. Workflow comprova snapshot/selagem do prompt de analise, idempotencia,
+compatibilidade legada, nova revisao e preservacao do contrato capturado.
+Conferidos 173 links/ancoras em oito documentos, sintaxe PS5.1 e diff sem erros.
+Revisao independente por outro modelo encontrou dois pontos, tratados e
+revisados: conclusao historica apresentada como atual e autoria dos objetivos/HUs.
+Nenhum novo P1/P2 encontrado na revisao final. Renderizacao visual Mermaid ainda
+nao verificada: navegador IAB indisponivel e inventario de navegadores conectado
+vazio. Datas/segmentos/marcos foram verificados deterministicamente; fixture HTML
+sintetica em .harness/tests/gantt-ensaio/index.html, sem dados corporativos.
+Servidor local temporario encerrado. Homologacao do ensaio continua pendente;
+apos integrar/atualizar, usar Revisar para capturar novos contratos, preservando
+a revisao corporativa publicada e as datas/equipe/escopo humanos.
+
+Corretiva versionada em 7134833 e publicada na PR #28 para main:
+https://github.com/edoardo-bianco/jboss-mta-harness/pull/28.
+Aguardando revisao/aprovacao e merge humano, conforme preferencia registrada.
+
+## Proxima entrega: indice automatico de priorizacao - 2026-10-09
+
+Pedido humano: implementar logo apos a corretiva de sprints a criacao/atualizacao
+de `.harness/priorizacao/indice-priorizacao.md` a cada priorizacao concluida,
+eliminando a atual manutencao manual. O exemplo recebido e referencia editorial,
+nao prova de acesso aos arquivos corporativos nem aceite das issues.
+Template de referencia preservado em doc/modelos/indice-priorizacao.template.md,
+conforme novo pedido humano. Mantem o formato enviado (sequencia ativa, tabela
+de fatias, cobertura, substituidas e proximo passo), parametrizado para recibos
+reais e com atualizacao automatica prevista. A geracao ainda nao esta conectada.
+
+- Derivar o indice dos recibos/contextos e resultados de priorizacao, mantendo
+  sequencia vigente por categoria, raiz Recreate e continuacoes vinculadas.
+- Mostrar ordem, ID, modo, data UTC, issues examinadas, projetos, propostas,
+  links para priorizacao/contexto e cobertura acumulada por Source/Id sobre
+  denominador inicial fixo; nao somar mencoes ou sobreposicoes como novo exame.
+- Preservar sequencias substituidas em secao historica. Nao escolher vigencia
+  apenas por data de arquivo; seguir a cadeia/decisao de recriar ou progredir.
+- Atualizar apos gravacao consistente da priorizacao; falha/cancelamento nao
+  publica uma fatia inexistente. Repeticao deve ser idempotente e preservar
+  dados humanos, categoria e historico; tratar indice manual preexistente.
+- Distinguir percentual da fatia de priorizacao de ganho de IA nas estimativas.
+  Cobertura de exame nao significa correcao, GO, validacao ou aceite.
+- Integrar ao fluxo existente, sem nova Run Task e sem alterar decisoes nos
+  registros. Testar Start/Recreate/Continue, categorias, cobertura e links.
+
+Implementacao em entrega posterior; esta branch registra o requisito e conclui
+as corretivas de sprints antes de iniciar mudancas no fluxo de priorizacao.
+
 ## Publicacao de sprints e incorporacao da arquitetura - 2026-10-09
 
 Pedido humano: abrir PR de sprints na main e alinhar a entrega; depois integrar

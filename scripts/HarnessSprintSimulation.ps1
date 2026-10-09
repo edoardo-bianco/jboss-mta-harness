@@ -37,11 +37,22 @@ function Get-HarnessSprintSimulation {
     if ($null -ne $schema -and $schema -ne 1) { throw 'SchemaVersion deve ser 1.' }
     if ($null -ne $purpose -and $purpose -cne 'sprint-planning') { throw 'Purpose deve ser sprint-planning.' }
     $constraints=Get-HarnessSprintValue $Data 'Constraints';$team=Get-HarnessSprintValue $Data 'Team'
+    $aiPercent=ConvertTo-HarnessSprintNumber (Get-HarnessSprintValue (Get-HarnessSprintValue $Data 'Estimation') 'AiDeveloperReductionPercent') 'Estimation.AiDeveloperReductionPercent' -Maximum 100
+    $adjustments=@()
     $start=ConvertTo-HarnessSprintDate (Get-HarnessSprintValue $constraints 'SprintStartDate') 'SprintStartDate'
     $deadline=ConvertTo-HarnessSprintDate (Get-HarnessSprintValue $constraints 'ProductionDeadline') 'ProductionDeadline'
     $reference=ConvertTo-HarnessSprintDate (Get-HarnessSprintValue $constraints 'ReferenceDate') 'ReferenceDate'
     if ($null -ne $start -and $null -ne $deadline -and $deadline -lt $start) { throw 'ProductionDeadline anterior a SprintStartDate.' }
     $limits=@{};foreach ($name in @('MaxPreparationSprints','MaxImplementationSprints','MaxTestSprints','MaxTotalSprints','MaxDevelopers')) { $limits[$name]=ConvertTo-HarnessSprintNumber (Get-HarnessSprintValue $constraints $name) $name -Integer }
+    $unbounded=@{};$phaseLimits=@{PREPARATION='MaxPreparationSprints';IMPLEMENTATION='MaxImplementationSprints';TEST='MaxTestSprints'}
+    $unboundedInput=Get-HarnessSprintValue $constraints 'UnboundedPhases'
+    if ($null -ne $unboundedInput -and $unboundedInput -isnot [array]) { throw 'UnboundedPhases exige array de fases.' }
+    foreach ($phase in @($unboundedInput)) {
+        if ($null -eq $phase -and $null -eq $unboundedInput) { continue }
+        if ($phase -isnot [string] -or $phase -cnotin @('PREPARATION','IMPLEMENTATION','TEST') -or $unbounded.ContainsKey($phase)) { throw 'UnboundedPhases exige fases validas, sem duplicatas.' }
+        if ($null -ne $limits[$phaseLimits[$phase]]) { throw 'UnboundedPhases conflita com teto numerico da fase.' }
+        $unbounded[$phase]=$true
+    }
     $week=@();foreach ($day in @(Get-HarnessSprintValue $team 'WorkWeek')) { if ($null -eq $day) { continue };$week+=ConvertTo-HarnessSprintNumber $day 'WorkWeek' -Integer -Maximum 6 }
     $holidays=@{};foreach ($day in @(Get-HarnessSprintValue $team 'Holidays')) { if ($null -ne $day) { $d=ConvertTo-HarnessSprintDate $day 'Holiday';if ($null -ne $d) { $holidays[$d.ToString('yyyy-MM-dd')]=$true } } }
     $staff=@{};foreach ($row in @(Get-HarnessSprintValue $team 'Staffing')) {
@@ -80,14 +91,32 @@ function Get-HarnessSprintSimulation {
         $notBefore=ConvertTo-HarnessSprintDate (Get-HarnessSprintValue $item 'NotBefore') "Work $id NotBefore"
         $workDeadline=ConvertTo-HarnessSprintDate (Get-HarnessSprintValue $item 'Deadline') "Work $id Deadline"
         if ($null -ne $notBefore -and $null -ne $workDeadline -and $workDeadline -lt $notBefore) { throw "Work ${id}: janela invertida." }
+        $allocationMode=Get-HarnessSprintValue $item 'AllocationMode'
+        if ($null -eq $allocationMode) { $allocationMode='ASAP' }
+        if ($allocationMode -cnotin @('ASAP','DISTRIBUTED')) { throw "Work ${id}: AllocationMode invalido." }
+        if ($allocationMode -eq 'DISTRIBUTED' -and ($null -eq $notBefore -or $null -eq $workDeadline)) { throw "Work ${id}: DISTRIBUTED exige NotBefore e Deadline." }
+        $aiAssisted=Get-HarnessSprintValue $item 'AiAssisted'
+        if ($null -ne $aiAssisted -and $aiAssisted -isnot [bool]) { throw "Work ${id}: AiAssisted exige booleano." }
         $effort=@{};foreach ($role in $roles) {
             $range=@{};foreach ($scenario in @('Min','Reference','Max')) { $range[$scenario]=ConvertTo-HarnessSprintNumber (Get-HarnessSprintValue (Get-HarnessSprintValue (Get-HarnessSprintValue $item 'Effort') $role) $scenario) "Work $id $role $scenario" }
             if (($null -ne $range.Min -and $null -ne $range.Reference -and $range.Min -gt $range.Reference) -or ($null -ne $range.Reference -and $null -ne $range.Max -and $range.Reference -gt $range.Max) -or ($null -ne $range.Min -and $null -ne $range.Max -and $range.Min -gt $range.Max)) { throw "Work ${id}: faixa de esforco invertida." }
             $effort[$role]=$range
         }
+        if ($aiAssisted -eq $true) {
+            $original=[ordered]@{};$effective=[ordered]@{}
+            foreach ($scenario in @('Min','Reference','Max')) {
+                $original[$scenario]=$effort.Dev[$scenario]
+                $effective[$scenario]=$null
+                if ($null -ne $original[$scenario] -and $null -ne $aiPercent) { $effective[$scenario]=$original[$scenario]*(1-$aiPercent/100) }
+                $effort.Dev[$scenario]=$effective[$scenario]
+            }
+            $adjustments+=[pscustomobject]@{Id=$id;ReductionPercent=$aiPercent;OriginalDev=[pscustomobject]$original;EffectiveDev=[pscustomobject]$effective}
+        }
         $keys=@();foreach ($issue in @(Get-HarnessSprintValue $item 'Issues')) { if ($null -ne $issue) { $key=Get-HarnessSprintIssueKey $issue;$keys+=$key;if (-not $coverage.ContainsKey($key)) { $coverage[$key]=@() };$coverage[$key]+=$id } }
         $remainingValue=Get-HarnessSprintValue $item 'Remaining';if ($null -ne $remainingValue -and $remainingValue -isnot [bool]) { throw "Work ${id}: Remaining exige booleano." }
         $entry=@{Id=$id;Title=[string](Get-HarnessSprintValue $item 'Title');Phase=$phase;Priority=$priority;DependsOn=@(Get-HarnessSprintValue $item 'DependsOn' | Where-Object {$null -ne $_});Effort=$effort;NotBefore=$notBefore;Deadline=$workDeadline;Issues=$keys;EstimateSource=(Get-HarnessSprintValue $item 'EstimateSource');Confidence=(Get-HarnessSprintValue $item 'Confidence');Acceptance=(Get-HarnessSprintValue $item 'Acceptance');Remaining=$remainingValue}
+        $entry.AllocationMode=$allocationMode
+        $entry.AssistanceMissing=($aiAssisted -eq $true -and $null -eq $aiPercent)
         $work+=$entry;$ids[$id]=$entry
     }
     # Kahn validation also covers self references and cycles independent of ordering.
@@ -137,8 +166,10 @@ function Get-HarnessSprintSimulation {
     }
     if ($null -eq $deadline) { $diagnostics.Add('ProductionDeadline ausente: o horizonte permite rascunho, mas nao comprova viabilidade de producao.') }
     $model=@{Work=$work;Sprints=$sprints;Roles=$roles;Limits=$limits;Base=$base;Required=$required;Known=$known;BaselineCount=$baselineCount;Actual=$actual;Accepted=$accepted;Excluded=$excluded;Coverage=$coverage;Gaps=@($gaps.ToArray());MissingCalendar=$missingCalendar;MissingDeadline=($null -eq $deadline);Reference=$reference;Start=$start;Cutoff=$cutoff;PreviousSimulation=$PreviousSimulation;Diagnostics=@($diagnostics.ToArray())}
+    $model.UnboundedPhases=$unbounded;$model.WorkWeek=$week;$model.Holidays=$holidays
     $results=@{};foreach ($scenario in @('Min','Reference','Max')) { $results[$scenario]=Invoke-HarnessSprintScenario -Model $model -Scenario $scenario }
     $result=$results.Reference
+    $result | Add-Member -NotePropertyName EffortAdjustments -NotePropertyValue @($adjustments)
     $currentScopeCount=$null;if ($known) { $currentScopeCount=@($required.Keys | Where-Object { -not $excluded.ContainsKey($_) }).Count }
     $result | Add-Member -NotePropertyName CurrentScopeCount -NotePropertyValue $currentScopeCount
     if ($result.Feasibility -eq 'CABE_NAS_PREMISSAS' -and $results.Max.Feasibility -ne 'CABE_NAS_PREMISSAS') { $result.Feasibility='EM_RISCO';$result.Diagnostics+= 'Cenario superior nao confirma a entrega na janela.' }
@@ -176,6 +207,7 @@ function Invoke-HarnessSprintScenario {
     foreach ($item in $Model.Work) {
         $blocks[$item.Id]=@{Window=$false;Phase=$false;Capacity=@{}}
         $remaining[$item.Id]=@{};foreach ($role in $Model.Roles) { $remaining[$item.Id][$role]=$item.Effort[$role][$Scenario];if ($null -eq $item.Effort[$role][$Scenario]) { $unknown[$item.Id]='Estimativa ausente.' } }
+        if ($item.AssistanceMissing) { $unknown[$item.Id]='Ganho de IA nao informado: preencha Estimation.AiDeveloperReductionPercent ou retire a aplicacao AiAssisted por decisao humana.' }
         if ($null -eq $item.Priority) { $unknown[$item.Id]='Prioridade explicita ausente.' }
         if (-not $item.EstimateSource) { $unknown[$item.Id]='Fonte da estimativa ausente.' }
         if (-not $item.Confidence -or -not $item.Acceptance) { $risk=$true;$diagnostics+="Work $($item.Id): confianca ou criterio de aceite nao informado." }
@@ -193,17 +225,33 @@ function Invoke-HarnessSprintScenario {
                 $limitField=@{PREPARATION='MaxPreparationSprints';IMPLEMENTATION='MaxImplementationSprints';TEST='MaxTestSprints'}[$item.Phase]
                 $hasRemainingEffort=@($Model.Roles | Where-Object { $remaining[$item.Id][$_] -gt 0 }).Count -gt 0
                 if ($hasRemainingEffort -and $limitField -and $null -ne $Model.Limits[$limitField] -and -not $phaseSprints[$item.Phase].ContainsKey($sprint.Number) -and $phaseSprints[$item.Phase].Count -ge $Model.Limits[$limitField]) { $blocks[$item.Id].Phase=$true;continue }
-                $fraction=[decimal]1;foreach ($role in $Model.Roles) { if ($remaining[$item.Id][$role] -gt 0) { if ($null -eq $free[$role]) { $fraction=0 } else { $fraction=[math]::Min($fraction,$free[$role]/$remaining[$item.Id][$role]) } } }
-                foreach ($role in $Model.Roles) { if ($remaining[$item.Id][$role] -gt 0 -and $null -ne $free[$role] -and $free[$role] -lt $remaining[$item.Id][$role]) { $blocks[$item.Id].Capacity[$role]=$true } }
+                $dailyFraction=[decimal]1
+                if ($item.AllocationMode -eq 'DISTRIBUTED' -and $hasRemainingEffort) {
+                    # Use the declared window, even beyond the production/total horizon.
+                    # Effort is already remaining; do not subtract historical effort again.
+                    $windowDays=0
+                    for ($day=$date;$day -le $item.Deadline;$day=$day.AddDays(1)) {
+                        if ($Model.WorkWeek -contains [int]$day.DayOfWeek -and -not $Model.Holidays.ContainsKey($day.ToString('yyyy-MM-dd'))) { $windowDays++ }
+                    }
+                    $dailyFraction=[decimal]1/$windowDays
+                }
+                $fraction=$dailyFraction;foreach ($role in $Model.Roles) { if ($remaining[$item.Id][$role] -gt 0) { if ($null -eq $free[$role]) { $fraction=0 } else { $fraction=[math]::Min($fraction,$free[$role]/$remaining[$item.Id][$role]) } } }
+                foreach ($role in $Model.Roles) { if ($remaining[$item.Id][$role] -gt 0 -and $null -ne $free[$role] -and $free[$role] -lt $remaining[$item.Id][$role]*$dailyFraction) { $blocks[$item.Id].Capacity[$role]=$true } }
                 if ($fraction -le 0) { continue }
-                if (-not $activities.ContainsKey($item.Id)) { $activities[$item.Id]=[pscustomobject]@{Id=$item.Id;Title=$item.Title;Phase=$item.Phase;Completed=$false;FirstWorkDate=$date.ToString('yyyy-MM-dd');Effort=[pscustomobject]@{Dev=[decimal]0;Architect=[decimal]0;DevOps=[decimal]0}} }
+                if (-not $activities.ContainsKey($item.Id)) { $activities[$item.Id]=[pscustomobject]@{Id=$item.Id;Title=$item.Title;Phase=$item.Phase;Completed=$false;FirstWorkDate=$date.ToString('yyyy-MM-dd');LastWorkDate=$date.ToString('yyyy-MM-dd');CompletionDate=$null;DailyAllocations=@();Effort=[pscustomobject]@{Dev=[decimal]0;Architect=[decimal]0;DevOps=[decimal]0}} }
+                $dailyEffort=[ordered]@{};$dailyTotal=[decimal]0
                 $total=[decimal]0;foreach ($role in $Model.Roles) {
                     $used=$remaining[$item.Id][$role]*$fraction;$remaining[$item.Id][$role]-=$used
                     if ([math]::Abs($remaining[$item.Id][$role]) -lt 0.000000001) { $remaining[$item.Id][$role]=[decimal]0 }
                     if ($null -ne $free[$role]) { $free[$role]-=$used };$load[$role]+=$used;$activities[$item.Id].Effort.$role+=$used;$total+=$remaining[$item.Id][$role]
                     if ($used -gt 0) { $phaseSprints[$item.Phase][$sprint.Number]=$true }
+                    $dailyEffort[$role]=$used;$dailyTotal+=$used
                 }
-                if ($total -eq 0) { $completed[$item.Id]=$date;$activities[$item.Id].Completed=$true }
+                if ($dailyTotal -gt 0) {
+                    $activities[$item.Id].LastWorkDate=$date.ToString('yyyy-MM-dd')
+                    $activities[$item.Id].DailyAllocations+= [pscustomobject]@{Date=$date.ToString('yyyy-MM-dd');Effort=[pscustomobject]$dailyEffort}
+                }
+                if ($total -eq 0) { $completed[$item.Id]=$date;$activities[$item.Id].Completed=$true;$activities[$item.Id].CompletionDate=$date.ToString('yyyy-MM-dd') }
             }
         }
         $forecast=0;foreach ($key in $Model.Base.Keys) {
@@ -219,7 +267,9 @@ function Invoke-HarnessSprintScenario {
     foreach ($pair in @(@('PREPARATION','MaxPreparationSprints'),@('IMPLEMENTATION','MaxImplementationSprints'),@('TEST','MaxTestSprints'))) {
         if ($null -ne $Model.Limits[$pair[1]] -and $phaseSprints[$pair[0]].Count -gt $Model.Limits[$pair[1]]) { $failed=$true;$diagnostics+="Historico excede $($pair[1]); sprints consumidas nao podem ser apagadas." }
     }
-    foreach ($field in @('MaxPreparationSprints','MaxImplementationSprints','MaxTestSprints','MaxDevelopers')) { if ($null -eq $Model.Limits[$field]) { $missing=$true;$diagnostics+="Limite nao informado: $field." } }
+    foreach ($pair in @(@('PREPARATION','MaxPreparationSprints'),@('IMPLEMENTATION','MaxImplementationSprints'),@('TEST','MaxTestSprints'),@('DEVELOPERS','MaxDevelopers'))) {
+        if ($null -eq $Model.Limits[$pair[1]] -and -not $Model.UnboundedPhases.ContainsKey($pair[0])) { $missing=$true;$diagnostics+="Limite nao informado: $($pair[1])." }
+    }
     foreach ($item in $Model.Work) {
         if ($completed.ContainsKey($item.Id)) { continue };$reason='Nao alocado dentro da capacidade, precedencias e limites informados.'
         if ($unknown.ContainsKey($item.Id)) { $missing=$true;$reason=$unknown[$item.Id] }

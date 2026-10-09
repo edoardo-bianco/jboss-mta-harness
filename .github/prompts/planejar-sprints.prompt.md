@@ -11,6 +11,8 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 Elabore ou revise o planejamento macro solicitado. Entregue os arquivos
 preenchidos, com lacunas explicitas; uma resposta apenas no chat nao encerra
 esta etapa quando ha informacao suficiente para registrar a proposta.
+Produza um unico plano consolidado para todos os projetos selecionados, com
+equipe e calendario compartilhados. Nao produza um cronograma isolado por projeto.
 
 Leia o ContextPath selecionado ao final deste arquivo e os destinos nele
 declarados: SprintDataPath e SprintPlanPath. ContextPath, PromptPath,
@@ -68,7 +70,7 @@ ja validada; a tarefa rejeita edicao posterior para preservar sua publicacao.
 ## Preencher dados e narrativa
 
 Edite somente os dados proprios do planejamento permitidos pelo formato pronto
-(Work, Team, Constraints, premissas, Decisions, Changes, EvidenceReview e Baseline.Accepted
+(Work, Team, Constraints, Estimation, premissas, Decisions, Changes, EvidenceReview e Baseline.Accepted
 comprovadas conforme o direcionamento humano e os campos efetivamente presentes,
 mais ScopeCategories/ScopeDecision/Baseline.Issues somente na formacao inicial acima) e o
 Markdown editorial desta revisao. Preserve Baseline.Known informado pelo preparo;
@@ -79,7 +81,9 @@ Nao escreva planos de corretiva, registros, fichas ou arquivos da aplicacao.
 
 Datas, prazo e equipe sao perguntados por este prompt, nao pela Run Task de
 preparo. Recupere primeiro Constraints/Team no SprintDataPath e respostas humanas
-ja registradas. Solicite somente os essenciais faltantes: inicio, prazo maximo
+ja registradas. Antes de preencher a proposta completa, pergunte os essenciais
+faltantes e aguarde a resposta; pode continuar lendo fontes. Nao encerre com
+um rascunho extenso para so depois perguntar as restricoes. Solicite inicio, prazo maximo
 de producao, maximos de sprints de preparacao/implementacao/testes integrados,
 eventual limite total e teto de devs. Apresente a pergunta de forma curta e
 permita conservar a lacuna; nao imponha formulario para repetir dados conhecidos.
@@ -89,6 +93,11 @@ apenas quando ainda faltarem para avaliar o cenario. Pergunte somente o que
 altere o escopo, a estimativa ou o aceite. Se nao houver resposta/evidencia,
 preserve null/a estimar no formato previsto e explique o refinamento necessario.
 Lacunas relevantes impedem afirmar viabilidade; nao use zero para desconhecido.
+Se o humano decidir nao impor tetos adicionais por fase, mantenha os respectivos
+Max...Sprints=null e registre as fases em Constraints.UnboundedPhases
+(PREPARATION, IMPLEMENTATION, TEST). Registre a decisao em Decisions. Lista
+ausente/vazia com null continua lacuna; nao invente tetos e nao preencha essa
+lista por falta de resposta. Prazo de producao e teto de devs continuam exigidos.
 
 Organize Work por resultado verificavel, fase, dependencias e prioridade humana.
 Use PREPARATION, IMPLEMENTATION, TEST ou DEPLOYMENT. Testes/revisao de corretiva
@@ -117,11 +126,17 @@ retirada exige Changes.Excluded com Reason/Evidence, preservando a inclusao.
 Para cada atividade, preencha os campos do formato pronto: Id, Title, Phase,
 Priority (menor numero primeiro), DependsOn, Issues por Source/Id, Effort por
 Dev/Architect/DevOps com Min/Reference/Max, EstimateSource, Confidence,
-Assumptions, NotBefore, Deadline, Acceptance, References e Remaining.
+Assumptions, NotBefore, Deadline, AllocationMode, AiAssisted, Acceptance, References e Remaining.
 Use IDs unicos e referencias realmente existentes. Nao distribua uma issue em
 varias atividades sem explicar a continuidade e o aceite completo. Decomponha
 quando isso tornar entregas e dependencias verificaveis; uma macroatividade pode
 ocupar varias sprints. Nao esconda carga em reservas.
+AllocationMode=ASAP aloca na primeira capacidade disponivel. Para acompanhamento
+recorrente ao longo da migracao, use DISTRIBUTED com NotBefore/Deadline explicitos
+que representem a janela humana; o motor distribui o esforco restante nos dias
+uteis da janela, compartilhando a capacidade com outras atividades. Nao concentre
+todo o acompanhamento do arquiteto numa atividade prioritaria ASAP. Nao invente
+janela nem use distribuicao para dispensar capacidade, precedencias ou producao.
 
 Estime somente o trabalho restante em dias-pessoa por papel. Reaproveite
 estimativas humanas comparaveis; caso proponha outra faixa, registre fonte,
@@ -129,7 +144,8 @@ hipotese, confianca qualitativa e o motivo da mudanca. Avalie arquivos/evidencia
 fornecidos pelo humano quanto ao impacto em esforco, dependencias, risco e prazo.
 Pode referencia-los em Work.References e EstimateSource no formato pronto,
 somente depois de ler os arquivos realmente existentes. Nao publique um caminho
-inexistente ou nao lido como evidencia analisada. Na revisao, compare as fontes
+inexistente ou nao lido como evidencia analisada. Referencie arquivos realmente
+lidos, nao diretorios como jboss-modules ou jboss-deployments. Na revisao, compare as fontes
 anteriores e atuais e Context.InputChanges, quando presente, preservando as
 estimativas/historico anteriores. Se o preparo declarar EvidenceReview pendente,
 registre Reviewed e Reason somente depois dessa comparacao efetiva, com
@@ -138,6 +154,20 @@ EstimateEvidence e a captura calculada das fontes; nao edite seus hashes.
 Pontos MTA, quantidade de issues e story points
 nao se convertem automaticamente em horas, dias ou velocidade. Sem fundamento,
 registre a estimar e uma verificacao/piloto que permita refinar.
+
+Pergunte se o humano quer considerar ganho de IA e, se sim, qual reducao percentual
+do esforco de Dev e quais atividades sao apoiadas pelo harness. Recupere resposta
+ja dada; nao imponha ganho padrao. Registre Estimation.AiDeveloperReductionPercent
+(0 a 100; null se nao informado) e Work.AiAssisted=true somente nas atividades
+selecionadas; false/ausente nao aplica ganho. Registre origem humana e justificativa
+em Decisions/Assumptions/EstimateSource, como hipotese ainda nao medida.
+Effort.Dev deve guardar a faixa restante ANTES do desconto. O motor aplica o ganho
+uma unica vez nas tres faixas e evidencia original, efetivo e reducao em
+Simulation.EffortAdjustments e no Markdown. Nao reduza manualmente Effort nem
+aumente disponibilidade; Arq, DevOps, QA e espera externa nao recebem esse ganho.
+Se a estimativa anterior ja considerou IA, concilie sua base sem desconto antes
+de marcar AiAssisted; base desconhecida fica null, inclusive com ganho de 100%.
+Nao desconte duas vezes nem apresente a hipotese como produtividade comprovada.
 
 Use StaffingTemplate do contexto para preencher Team.Staffing, com uma linha
 por sprint. Informe Team.RolesAreDistinct somente conforme pessoas distintas
@@ -149,6 +179,11 @@ por papel. Considere calendario, ausencias e reservas sem dupla
 contagem. Se uma pessoa acumular papeis, explicite a restricao e obtenha
 disponibilidade compativel; nao multiplique a mesma capacidade. Acumulo de papeis
 pela mesma pessoa e lacuna a conciliar; o MVP calcula papeis distintos.
+Reforco eventual de equipe e alternativa condicionada; nao entra em Staffing nem
+altera o teto antes de decisao humana. QA pode participar sem headcount informado:
+registre essa premissa e a limitacao da capacidade nao dimensionada, contabilizando
+somente o suporte de Dev/Architect/DevOps em Work. Sobreposicao aceita pelo humano
+permanece permitida, mas continua sujeita a capacidade calculada.
 
 Preserve os tetos por fase, limite total e prazo de producao. A data de inicio
 ja publicada nao muda na revisao: outro calendario exige Novo cenario.
@@ -170,11 +205,22 @@ marque resolucao por inferencia. As demais continuam pendentes. Nao edite B0 par
 uma regra ausente no MTA como corrigida. Se esses campos exigirem alteracao,
 encaminhe a revisao humana pelos dados/formato suportados pela tarefa.
 
-Preencha a narrativa no Markdown preparado: escopo, premissas, objetivos/HUs,
-aceite resumido, referencias, impedimentos e mudancas da revisao. Preserve os
+Preencha as secoes do template preparado: Escopo, Decisoes confirmadas, Entregas
+e criterios de aceite, Objetivos propostos por sprint, Premissas e pendencias,
+Mudancas e Referencias. Escreva objetivo/HU, beneficio, IDs de Work e aceite por
+sprint desejada, sem datas/percentuais; a alocacao calculada confirmara ou apontara
+divergencia com essa proposta. Sem fundamento, explicite a lacuna de associacao.
+Substitua
+as instrucoes de preenchimento por conteudo concreto ou lacuna com impacto e
+proxima verificacao. Nao deixe placeholders nem frases genericas contraditorias.
+Distinga respostas humanas de estimativas propostas e de resultados calculados. Preserve os
 marcadores `<!-- sprints:inicio -->` e `<!-- sprints:fim -->` do bloco de calculo.
-Fora desse bloco, preserve e complete a narrativa. Nao escreva manualmente datas calculadas,
-carga/capacidade, percentuais, matriz ou Gantt dentro desses blocos.
+Fora desse bloco, preserve escolhas e complete a narrativa. Viabilidade, datas
+previstas, carga/capacidade, percentuais, matriz e Gantt pertencem exclusivamente
+ao bloco calculado: nao os duplique na narrativa nem os preencha manualmente.
+Marcos humanos sao restricoes e devem corresponder ao JSON. Na nova revisao,
+concilie texto antigo como "sem inicio/equipe" quando os dados ja existirem,
+preservando historico anterior e registrando o motivo da mudanca.
 Se JSON e texto editorial divergirem, exponha a diferenca e concilie as escolhas
 explicitamente; nao declare um deles correto apenas pela data de modificacao.
 
@@ -195,6 +241,9 @@ O desenvolvedor executa **Planejamento: planejar sprints > Validar e gerar
 cronograma**: essa etapa calcula tabelas, matriz/Gantt e resultado de viabilidade.
 Nao atribua CABE_NAS_PREMISSAS, percentuais ou datas finais sem esse resultado.
 Uma validacao consistente ainda nao e compromisso, GO de lote ou aceite humano.
+Depois de validar, a tarefa oferece ReviewPromptPath (revisar-sprints) para
+explicar e conferir o resultado em somente leitura. Alteracoes exigem Revisar,
+prompt principal da nova revisao e nova validacao deterministica pela tarefa.
 
 Entregue links para o JSON e o Markdown, estimativas/premissas alteradas,
 lacunas que impedem avaliacao e a proxima acao pela mesma tarefa. Informe

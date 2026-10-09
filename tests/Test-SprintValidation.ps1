@@ -44,7 +44,7 @@ function Test-Case([string]$name, [scriptblock]$action) {
 
 $fixture = Join-Path $root ('.harness/tests/sprints-validation-' + [guid]::NewGuid().ToString('N'))
 $null = [IO.Directory]::CreateDirectory($fixture)
-foreach ($relative in @('.github/prompts/planejar-sprints.prompt.md', 'doc/modelos/planejamento-sprints.template.md', 'doc/features/planejamento-macro-sprints.md', 'doc/especificacoes/planejamento-sprints.md')) {
+foreach ($relative in @('.github/prompts/planejar-sprints.prompt.md', '.github/prompts/revisar-sprints.prompt.md', 'doc/modelos/planejamento-sprints.template.md', 'doc/features/planejamento-macro-sprints.md', 'doc/especificacoes/planejamento-sprints.md')) {
     $target = Join-Path $fixture $relative
     $null = [IO.Directory]::CreateDirectory((Split-Path $target -Parent))
     Copy-Item -LiteralPath (Join-Path $root $relative) -Destination $target

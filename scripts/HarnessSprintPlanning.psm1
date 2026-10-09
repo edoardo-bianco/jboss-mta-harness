@@ -25,6 +25,11 @@ function Read-HarnessSprintContext {
     }
     $seal=Get-Content -LiteralPath (Join-Path $expected 'preparo.json') -Raw -Encoding UTF8 | ConvertFrom-Json
     if ($seal.ContextSha256 -cne (Get-FileHash -LiteralPath $path).Hash) { throw 'Contexto alterado depois do preparo. Preserve-o e prepare uma revisao.' }
+    $reviewPath=Get-SprintInputValue $receipt 'ReviewPromptPath'
+    if ($reviewPath) {
+        if ((Resolve-HarnessPath $reviewPath $Root) -ine (Join-Path $expected 'revisar-sprints.prompt.md')) { throw 'Destino do prompt de revisao divergente.' }
+        if (-not (Test-Path -LiteralPath $reviewPath -PathType Leaf) -or (Get-SprintInputValue $seal 'ReviewPromptSha256') -cne (Get-FileHash -LiteralPath $reviewPath).Hash) { throw 'Prompt de revisao alterado depois do preparo.' }
+    }
     $receipt
 }
 
@@ -122,6 +127,9 @@ function New-HarnessSprintContext {
         $directory=Resolve-HarnessPath (Join-Path $state ('sprints/'+$planningId+'/revisoes/'+$revisionId)) $root
         $receipt=[pscustomobject][ordered]@{SchemaVersion=1;Purpose='sprint-planning';PlanningId=$planningId;RevisionId=$revisionId;PreparedAtUtc=[DateTime]::UtcNow.ToString('o');SelectionMode=$mode;Projects=$inputs.Projects;References=$inputs.References;InputFingerprint=$inputs.Fingerprint;Previous=$null;Reason=$Reason;ContextPath=(Join-Path $directory 'contexto.json');PromptPath=(Join-Path $directory 'planejar-sprints.prompt.md');SprintDataPath=(Join-Path $directory 'planejamento-sprints.json');SprintPlanPath=(Join-Path $directory 'planejamento-sprints.md');ValidationPath=(Join-Path $directory 'validacao.json');WorkTemplate=(New-SprintWorkTemplate);StaffingTemplate=[ordered]@{Sprint=1;Developers=$null;DeveloperAvailability=$null;ArchitectAvailability=$null;DevOpsAvailability=$null;ReservePercent=$null;AbsenceDays=@{Dev=0;Architect=0;DevOps=0}};Reused=$false}
         $receipt | Add-Member -NotePropertyName InputChanges -NotePropertyValue $inputChanges
+        $receipt | Add-Member -NotePropertyName ReviewPromptPath -NotePropertyValue (Join-Path $directory 'revisar-sprints.prompt.md')
+        $receipt.WorkTemplate | Add-Member -NotePropertyName AllocationMode -NotePropertyValue 'ASAP'
+        $receipt.WorkTemplate | Add-Member -NotePropertyName AiAssisted -NotePropertyValue $false
         $historicalIssues=@()
         if ($previous) {
             $historicalIssues+=@(Get-SprintInputValue $previous 'HistoricalIssues' @())
@@ -147,17 +155,23 @@ function New-HarnessSprintContext {
             }
             $editorial=[IO.File]::ReadAllText($previous.SprintPlanPath)
         }
+        if ($data.Constraints -is [Collections.IDictionary]) { $data.Constraints['UnboundedPhases']=@() }
+        elseif (-not $data.Constraints.PSObject.Properties['UnboundedPhases']) { $data.Constraints | Add-Member -NotePropertyName UnboundedPhases -NotePropertyValue @() }
+        if (-not $data.PSObject.Properties['Estimation']) { $data | Add-Member -NotePropertyName Estimation -NotePropertyValue ([pscustomobject]@{AiDeveloperReductionPercent=$null}) }
         # Validate inputs again before any durable revision. The context receipt is written last.
         Assert-SprintReferences $receipt $root
         $null=[IO.Directory]::CreateDirectory($directory)
         Write-SprintJson $receipt.SprintDataPath $data
-        $markdown=New-SprintDraftMarkdown $receipt $editorial
+        $markdown=New-SprintDraftMarkdown $receipt $editorial ([IO.File]::ReadAllText((Join-Path $root 'doc/modelos/planejamento-sprints.template.md')))
         [IO.File]::WriteAllText($receipt.SprintPlanPath,$markdown,(New-Object Text.UTF8Encoding($false)))
         $template=[IO.File]::ReadAllText((Join-Path $root '.github/prompts/planejar-sprints.prompt.md'))
         $template += "`r`n`r`n## Contexto desta solicitacao`r`n`r`nContextPath: $($receipt.ContextPath)`r`nSprintDataPath: $($receipt.SprintDataPath)`r`nSprintPlanPath: $($receipt.SprintPlanPath)`r`nValidationPath: $($receipt.ValidationPath)`r`nPlanningId: $planningId`r`nRevisionId: $revisionId`r`n"
         [IO.File]::WriteAllText($receipt.PromptPath,$template,(New-Object Text.UTF8Encoding($false)))
+        $review=[IO.File]::ReadAllText((Join-Path $root '.github/prompts/revisar-sprints.prompt.md'))
+        $review+="`r`n`r`n## Contexto desta solicitacao`r`n`r`nContextPath: $($receipt.ContextPath)`r`nValidationPath: $($receipt.ValidationPath)`r`nSprintDataPath: $($receipt.SprintDataPath)`r`nSprintPlanPath: $($receipt.SprintPlanPath)`r`nPlanningId: $planningId`r`nRevisionId: $revisionId`r`n"
+        [IO.File]::WriteAllText($receipt.ReviewPromptPath,$review,(New-Object Text.UTF8Encoding($false)))
         Write-SprintJson $receipt.ContextPath $receipt
-        Write-SprintJson (Join-Path $directory 'preparo.json') ([ordered]@{ContextSha256=(Get-FileHash -LiteralPath $receipt.ContextPath).Hash;CalculatedBlockSha256=(Get-SprintJsonHash (Get-SprintCalculatedBlock $markdown))})
+        Write-SprintJson (Join-Path $directory 'preparo.json') ([ordered]@{ContextSha256=(Get-FileHash -LiteralPath $receipt.ContextPath).Hash;CalculatedBlockSha256=(Get-SprintJsonHash (Get-SprintCalculatedBlock $markdown));ReviewPromptSha256=(Get-FileHash -LiteralPath $receipt.ReviewPromptPath).Hash})
         $receipt
     } finally { $lease.Dispose() }
 }
@@ -351,11 +365,14 @@ function Complete-HarnessSprintPlan {
         if ((Get-FileHash -LiteralPath $receipt.SprintDataPath).Hash -cne $dataHash -or (Get-FileHash -LiteralPath $receipt.SprintPlanPath).Hash -cne $planHash) { throw 'Arquivos editados durante a validacao; tente novamente apos finalizar a edicao.' }
         Assert-SprintReferences $receipt $Root
         Assert-SprintReferences ([pscustomobject]@{References=$data.EstimateEvidence}) $Root
+        $null=Read-HarnessSprintContext $Root $receipt.ContextPath
         # Recoverable writes: no pointer refers to this revision until both files and validation exist.
         Write-SprintJson $receipt.SprintDataPath $data
         [IO.File]::WriteAllText($receipt.SprintPlanPath,$markdown,(New-Object Text.UTF8Encoding($false)))
         $validation=[pscustomobject][ordered]@{SchemaVersion=1;Purpose='sprint-planning-validation';PlanningId=$receipt.PlanningId;RevisionId=$receipt.RevisionId;Status='VALIDATED';Feasibility=$simulation.Feasibility;CheckedAtUtc=[DateTime]::UtcNow.ToString('o');DataSha256=(Get-FileHash -LiteralPath $receipt.SprintDataPath).Hash;PlanSha256=(Get-FileHash -LiteralPath $receipt.SprintPlanPath).Hash;ContextSha256=(Get-FileHash -LiteralPath $receipt.ContextPath).Hash;Diagnostics=$simulation.Diagnostics;DataSnapshot=$data;SprintPlanPath=$receipt.SprintPlanPath;ContextPath=$receipt.ContextPath}
         $validation | Add-Member -NotePropertyName BaselineFrozen -NotePropertyValue ([bool]$data.Baseline.Known)
+        $reviewPath=Get-SprintInputValue $receipt 'ReviewPromptPath'
+        if ($reviewPath) { $validation | Add-Member -NotePropertyName ReviewPromptPath -NotePropertyValue $reviewPath }
         Write-SprintJson $receipt.ValidationPath $validation
         Publish-SprintPointer $Root $receipt $validation
         $validation

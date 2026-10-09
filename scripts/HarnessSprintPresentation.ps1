@@ -7,7 +7,7 @@ function Get-SprintCalculatedBlock {
 }
 
 function New-SprintDraftMarkdown {
-    param($Receipt,[string]$PreviousMarkdown)
+    param($Receipt,[string]$PreviousMarkdown,[string]$Template)
     $block="<!-- sprints:inicio -->`r`n`r`nCalculos pendentes. Execute o prompt e depois Validar e gerar cronograma na mesma Run Task.`r`n`r`n<!-- sprints:fim -->"
     if ($PreviousMarkdown) {
         $old=Get-SprintCalculatedBlock $PreviousMarkdown
@@ -15,31 +15,8 @@ function New-SprintDraftMarkdown {
         return "<!-- Revisao $($Receipt.RevisionId); origem $($Receipt.Previous.RevisionId) -->`r`n$previous"
     }
     $labels=($Receipt.Projects | ForEach-Object Label) -join ', '
-    @"
-# Planejamento da migracao - $labels
-
-## Escopo e resultado esperado
-
-Rascunho preparado. O prompt coleta datas/equipe, confirma opcionais e preenche
-estimativas com fontes. Categorias iniciais: mandatory. Nenhum GO ou aceite.
-
-## Cronograma calculado
-
-$block
-
-## Objetivo da HU por sprint
-
-A detalhar pelo executor: objetivo, beneficio, aceite resumido e referencias
-para cada sprint, conforme o template. Conferir as datas apos calcular.
-
-## Impedimentos e decisoes
-
-Registrar premissas, decisoes humanas e a resolucao das lacunas das fontes.
-
-## Mudancas desta revisao
-
-$(if ($Receipt.Reason) {$Receipt.Reason} else {'Primeira preparacao; estimativas ainda nao elaboradas.'})
-"@
+    $old=Get-SprintCalculatedBlock $Template
+    $Template.Replace($old,$block).Replace('{{PROJECTS}}',$labels).Replace('{{REASON}}',$(if ($Receipt.Reason) {$Receipt.Reason} else {'Primeira proposta; preencher a partir das fontes e das respostas humanas.'}))
 }
 
 function Format-SprintCell {
@@ -54,6 +31,55 @@ function Format-SprintNumber {
     ([decimal]$Value).ToString('0.##',[Globalization.CultureInfo]::InvariantCulture)
 }
 
+function Format-SprintLimit {
+    param($Constraints,[string]$Field,[string]$Phase)
+    if ($Phase -and $Phase -in @(Get-HarnessSprintValue $Constraints 'UnboundedPhases')) { return 'Sem teto adicional' }
+    $value=Get-HarnessSprintValue $Constraints $Field
+    if ($null -eq $value) { if ($Field -eq 'MaxTotalSprints') { return 'Sem teto total adicional' };return 'Nao informado' }
+    Format-SprintNumber $value
+}
+
+function Get-SprintCurrentCompletion {
+    param($Activities,$Simulation,[string]$Id,[string]$ReferenceDate)
+    if (@($Simulation.Unscheduled | Where-Object Id -CEQ $Id).Count) { return }
+    $Activities | Where-Object { $_.Completed -and (Get-HarnessSprintValue $_ 'CompletionDate') -and (!$ReferenceDate -or $_.CompletionDate -ge $ReferenceDate) } | Sort-Object CompletionDate | Select-Object -Last 1
+}
+
+function Get-SprintGanttLines {
+    param($Work,$Simulation,[string]$ReferenceDate)
+    $rows=New-Object 'Collections.Generic.List[string]';$legacy=$false;$index=0
+    foreach ($item in $Work) {
+        $activities=@($Simulation.Sprints | ForEach-Object { $_.Activities } | Where-Object Id -CEQ $item.Id)
+        $days=@(foreach ($activity in $activities) {
+            if ($null -eq $activity.PSObject.Properties['DailyAllocations']) { $legacy=$true;continue }
+            foreach ($allocation in $activity.DailyAllocations) {
+                if (@('Dev','Architect','DevOps' | Where-Object { (Get-HarnessSprintValue $allocation.Effort $_) -gt 0 }).Count) { $allocation.Date }
+            }
+        }) | Sort-Object -Unique
+        $title=([regex]::Replace([string]$item.Title,'[^\p{L}\p{N} _-]',' ')).Trim()
+        $completion=@(Get-SprintCurrentCompletion $activities $Simulation $item.Id $ReferenceDate)
+        $partial=if ($completion.Count) {''} else {' - parcial'}
+        $segments=@();$first=$null;$last=$null
+        foreach ($value in $days) {
+            $day=[DateTime]::ParseExact($value,'yyyy-MM-dd',[cultureinfo]::InvariantCulture)
+            if ($null -ne $last -and ($day -ne $last.AddDays(1) -or ($ReferenceDate -and $value -ge $ReferenceDate -and $last.ToString('yyyy-MM-dd') -lt $ReferenceDate))) { $segments+=@{Start=$first;End=$last.AddDays(1)};$first=$null }
+            if ($null -eq $first) { $first=$day };$last=$day
+        }
+        if ($null -ne $first) { $segments+=@{Start=$first;End=$last.AddDays(1)} }
+        foreach ($segment in $segments) {
+            $label=if ($ReferenceDate -and $segment.Start.ToString('yyyy-MM-dd') -lt $ReferenceDate) {' - historico'} else {$partial}
+            $rows.Add(('    {0}{1} :a{2}, {3}, {4}' -f $title,$label,$index,$segment.Start.ToString('yyyy-MM-dd'),$segment.End.ToString('yyyy-MM-dd')));$index++
+        }
+        if ($completion.Count) { $rows.Add(('    Conclusao prevista - {0} :milestone, a{1}, {2}, 0d' -f $title,$index,$completion[0].CompletionDate));$index++ }
+    }
+    if ($rows.Count) {
+        '```mermaid';'gantt';'    title Dias alocados - previsao de referencia';'    dateFormat YYYY-MM-DD';'    axisFormat %d/%m'
+        $rows.ToArray();'```'
+        'Cada trecho mostra apenas dias com esforco alocado. Fins de semana, feriados e lacunas ficam sem barra; o limite direito e exclusivo. Marcos indicam conclusao prevista vigente, nunca aceite realizado. Trechos historicos preservam a previsao anterior, sem concluir trabalho reaberto.'
+    } else { 'Sem alocacoes diarias para desenhar o Gantt.' }
+    if ($legacy) { 'Historico legado sem alocacoes diarias: consulte a matriz por sprint. Nao foram inventadas datas exatas para essas atividades.' }
+}
+
 function ConvertTo-SprintMarkdown {
     param($Receipt,$Data,[string]$Markdown)
     $old=Get-SprintCalculatedBlock $Markdown
@@ -66,7 +92,10 @@ function ConvertTo-SprintMarkdown {
     $lines.Add('')
     $lines.Add('| Restricao | Valor |')
     $lines.Add('| --- | --- |')
-    foreach ($name in @('SprintStartDate','ProductionDeadline','MaxPreparationSprints','MaxImplementationSprints','MaxTestSprints','MaxTotalSprints','MaxDevelopers')) { $lines.Add(('| {0} | {1} |' -f $name,(Format-SprintCell $Data.Constraints.$name))) }
+    foreach ($pair in @(@('Inicio das sprints','SprintStartDate',''),@('Prazo de producao','ProductionDeadline',''),@('Sprints de preparacao','MaxPreparationSprints','PREPARATION'),@('Sprints de implementacao','MaxImplementationSprints','IMPLEMENTATION'),@('Sprints de testes','MaxTestSprints','TEST'),@('Total de sprints','MaxTotalSprints',''),@('Teto de desenvolvedores','MaxDevelopers',''))) {
+        $value=if ($pair[1] -like 'Max*') { Format-SprintLimit $Data.Constraints $pair[1] $pair[2] } else { Format-SprintCell $Data.Constraints.($pair[1]) }
+        $lines.Add(('| {0} | {1} |' -f $pair[0],$value))
+    }
     $lines.Add(('| Base B0 / categorias | {0} / {1} |' -f (Format-SprintNumber $simulation.BaselineCount),($Data.ScopeCategories -join ', ')))
     $lines.Add(('| Producao prevista | {0} |' -f (Format-SprintCell $simulation.ProductionDate)))
     $lines.Add('')
@@ -76,9 +105,38 @@ function ConvertTo-SprintMarkdown {
     $lines.Add('| Fase | Maximo informado | Sprints com esforco, incluindo historico |')
     $lines.Add('| --- | --- | --- |')
     foreach ($pair in @(@('Preparation','MaxPreparationSprints'),@('Implementation','MaxImplementationSprints'),@('Test','MaxTestSprints'))) {
-        $lines.Add(('| {0} | {1} | {2} |' -f $pair[0],(Format-SprintNumber $Data.Constraints.($pair[1])),(Format-SprintNumber $simulation.PhaseSprintCounts.($pair[0]))))
+        $lines.Add(('| {0} | {1} | {2} |' -f $pair[0],(Format-SprintLimit $Data.Constraints $pair[1] $pair[0].ToUpperInvariant()),(Format-SprintNumber $simulation.PhaseSprintCounts.($pair[0]))))
     }
     $lines.Add('Atividades nao alocadas e limites esgotados estao justificados abaixo. Respeitar o teto no trabalho alocado nao comprova que todo o trabalho cabe. Sem producao calculada, o atendimento ao prazo nao foi demonstrado.')
+    $lines.Add('')
+    $lines.Add('| Atividade | Inicio permitido | Prazo humano | Ultimo dia alocado | Conclusao prevista |')
+    $lines.Add('| --- | --- | --- | --- | --- |')
+    foreach ($work in $Data.Work) {
+        $allocations=@($simulation.Sprints | ForEach-Object { $_.Activities } | Where-Object Id -CEQ $work.Id)
+        $last=@($allocations | ForEach-Object { Get-HarnessSprintValue $_ 'LastWorkDate' } | Sort-Object | Select-Object -Last 1)
+        $done=@(Get-SprintCurrentCompletion $allocations $simulation $work.Id $Data.Constraints.ReferenceDate | ForEach-Object CompletionDate)
+        $lines.Add(('| {0} | {1} | {2} | {3} | {4} |' -f (Format-SprintCell $work.Id),(Format-SprintCell $work.NotBefore),(Format-SprintCell $work.Deadline),(Format-SprintCell ($last -join '')),(Format-SprintCell ($done -join ''))))
+    }
+    $adjustments=@(Get-HarnessSprintValue $simulation 'EffortAdjustments' | Where-Object { $null -ne $_ })
+    if ($adjustments.Count) {
+        $lines.Add('')
+        $lines.Add('### Hipotese de ganho com IA')
+        $lines.Add('')
+        $lines.Add('Reducao aplicada uma vez ao esforco restante de Dev nas atividades selecionadas. Faixas Min / Referencia / Max em dias-pessoa; capacidades e esforcos de Arq/DevOps permanecem iguais. Ganho proposto, nao economia realizada.')
+        $lines.Add('')
+        $lines.Add('| Atividade | Reducao informada | Dev original | Dev usado no calculo | Reducao em dias-pessoa |')
+        $lines.Add('| --- | --- | --- | --- | --- |')
+        foreach ($adjustment in $adjustments) {
+            $original=@();$effective=@();$reduction=@()
+            foreach ($range in @('Min','Reference','Max')) {
+                $original+=Format-SprintNumber $adjustment.OriginalDev.$range
+                $effective+=Format-SprintNumber $adjustment.EffectiveDev.$range
+                $delta=$null;if ($null -ne $adjustment.OriginalDev.$range -and $null -ne $adjustment.EffectiveDev.$range) { $delta=$adjustment.OriginalDev.$range-$adjustment.EffectiveDev.$range }
+                $reduction+=Format-SprintNumber $delta
+            }
+            $lines.Add(('| {0} | {1}% | {2} | {3} | {4} |' -f (Format-SprintCell $adjustment.Id),(Format-SprintNumber $adjustment.ReductionPercent),($original -join ' / '),($effective -join ' / '),($reduction -join ' / ')))
+        }
+    }
     $lines.Add('')
     $lines.Add('### Composicao e movimentos do escopo')
     $lines.Add('')
@@ -116,24 +174,12 @@ function ConvertTo-SprintMarkdown {
     }
     if ($Data.Constraints.SprintStartDate -and @($simulation.Sprints).Count) {
         $lines.Add('')
-        $lines.Add('```mermaid')
-        $lines.Add('gantt')
-        $lines.Add('    title Previsao por sprint - conferir matriz e lacunas')
-        $lines.Add('    dateFormat YYYY-MM-DD')
-        $i=0
-        foreach ($work in $Data.Work) {
-            $allocated=@($simulation.Sprints | Where-Object { @($_.Activities | Where-Object Id -CEQ $work.Id).Count })
-            if (-not $allocated.Count) { continue }
-            $title=([regex]::Replace([string]$work.Title,'[^\p{L}\p{N} _-]',' ')).Trim()
-            $end=([DateTime]::ParseExact($allocated[-1].End,'yyyy-MM-dd',[Globalization.CultureInfo]::InvariantCulture)).AddDays(1).ToString('yyyy-MM-dd')
-            $lines.Add(('    {0} :a{1}, {2}, {3}' -f $title,$i,$allocated[0].Start,$end))
-            $i++
-        }
-        $lines.Add('```')
-        $lines.Add('Barras mostram as sprints com trabalho, nao uma promessa de ocupacao continua. O termino da sprint permanece 14 dias mesmo quando o prazo corta sua capacidade.')
+        foreach ($line in @(Get-SprintGanttLines $Data.Work $simulation $Data.Constraints.ReferenceDate)) { $lines.Add($line) }
     }
     $lines.Add('')
     $lines.Add('### Fora do horizonte / a estimar')
+    $lines.Add('')
+    $lines.Add('As atividades abaixo continuam no escopo: falta alocar parte ou todo o esforco. Somente Changes.Excluded registra exclusao; uma atividade parcial nao conclui suas issues.')
     $lines.Add('')
     $lines.Add('| Atividade / issue | Motivo |')
     $lines.Add('| --- | --- |')

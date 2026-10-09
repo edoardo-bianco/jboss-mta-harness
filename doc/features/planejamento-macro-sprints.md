@@ -1,5 +1,16 @@
 # Feature MACRO-01 — Planejamento sintético da migração por sprints
 
+**Refinamento do ensaio de 09/10/2026:** limites por fase podem ser explicitamente
+sem teto adicional, sem confundir essa decisao com entrada desconhecida. O Gantt
+usa dias efetivamente alocados; acompanhamento recorrente aceita distribuicao
+em janela declarada. O ganho de IA e parametro humano de reducao do esforco de
+Dev nas atividades selecionadas, com original/efetivo evidenciados, nunca aumento
+de capacidade ou produtividade presumida. O template separa decisoes, entregas,
+objetivos/HUs propostos, premissas e resultados calculados. A mesma tarefa oferece
+um prompt de analise somente leitura apos validar; revalidacao numerica permanece
+no calculador. Campos, compatibilidade e fluxo no
+[contrato executavel](../especificacoes/planejamento-sprints.md).
+
 **Versão:** 2.0 — consolidação de requisitos em 08/10/2026.  
 **Projeto:** [jboss-mta-harness](https://github.com/edoardo-bianco/jboss-mta-harness).  
 **Destino:** atualizar `doc/features/planejamento-macro-sprints.md`, preservando uma única feature.  
