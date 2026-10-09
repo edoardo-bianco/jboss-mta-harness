@@ -1,5 +1,22 @@
 # Plano do agente: evolucao do harness
 
+## Publicacao de sprints e incorporacao da arquitetura - 2026-10-09
+
+Pedido humano: abrir PR de sprints na main e alinhar a entrega; depois integrar
+os documentos de arquitetura produzidos e incluir planejar sprints no cheat
+sheet. Evolucao do harness em duas entregas, preservando os arquivos recebidos.
+
+1. Publicar harness/implementar-planejamento-sprints, validada em 80dafed, abrir
+   PR para main, conferir revisao/checks e integrar conforme autorizacao humana.
+2. Atualizar main local e criar harness/integrar-arquitetura-cheat-sheet dessa
+   base; incorporar ADR-0008, arquitetura e cheat sheet, preservando propostas
+   futuras como propostas. Conferir o HTML exportado e a convencao do repositorio.
+3. Reconciliar a baseline e o inventario com a tarefa de sprints entregue;
+   explicar preparo/execucao do prompt/validacao deterministica e apontar ao guia.
+4. Conferir links, nomes/quantidade de tarefas, coerencia e revisao independente;
+   publicar e integrar a PR documental. Sincronizar main local/remota e registrar
+   evidencias. Homologacao corporativa continua pendente; nenhum lote autorizado.
+
 ## Implementacao da MACRO-01 - 2026-10-08
 
 **CONCLUSAO TECNICA LOCAL: 09/10/2026, retomada autorizada de 88520ac.**

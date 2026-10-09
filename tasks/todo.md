@@ -1,5 +1,13 @@
 # To-do do agente: evolucao do harness
 
+## Publicacao de sprints e incorporacao da arquitetura - 2026-10-09
+
+- [ ] Publicar PR de sprints e integrar na main apos conferir revisao/checks.
+- [ ] Atualizar main e abrir branch documental da base integrada.
+- [ ] Incorporar arquitetura/ADR e alinhar cheat sheet com planejar sprints.
+- [ ] Conferir links/inventario, revisar e integrar a PR documental.
+- [ ] Sincronizar main local/remota e registrar resultado, preservando arquivos.
+
 ## Implementacao da MACRO-01 - 2026-10-08
 
 **Concluido tecnicamente em 09/10/2026; retomada do checkpoint 88520ac.**
