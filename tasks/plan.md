@@ -57,12 +57,20 @@ Servidor local temporario encerrado. Homologacao do ensaio continua pendente;
 apos integrar/atualizar, usar Revisar para capturar novos contratos, preservando
 a revisao corporativa publicada e as datas/equipe/escopo humanos.
 
+Corretiva versionada em 7134833 e publicada na PR #28 para main:
+https://github.com/edoardo-bianco/jboss-mta-harness/pull/28.
+Aguardando revisao/aprovacao e merge humano, conforme preferencia registrada.
+
 ## Proxima entrega: indice automatico de priorizacao - 2026-10-09
 
 Pedido humano: implementar logo apos a corretiva de sprints a criacao/atualizacao
 de `.harness/priorizacao/indice-priorizacao.md` a cada priorizacao concluida,
 eliminando a atual manutencao manual. O exemplo recebido e referencia editorial,
 nao prova de acesso aos arquivos corporativos nem aceite das issues.
+Template de referencia preservado em doc/modelos/indice-priorizacao.template.md,
+conforme novo pedido humano. Mantem o formato enviado (sequencia ativa, tabela
+de fatias, cobertura, substituidas e proximo passo), parametrizado para recibos
+reais e com atualizacao automatica prevista. A geracao ainda nao esta conectada.
 
 - Derivar o indice dos recibos/contextos e resultados de priorizacao, mantendo
   sequencia vigente por categoria, raiz Recreate e continuacoes vinculadas.

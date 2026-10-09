@@ -10,11 +10,12 @@
 - [x] Validar nove suites PS5.1, fluxo completo, datas/segmentos Mermaid e documentacao.
 - [ ] Conferir renderizacao visual Mermaid em navegador conectado (indisponivel nesta sessao).
 - [x] Revisar independentemente e tratar achados com regressao.
-- [ ] Versionar e publicar PR de corretiva.
+- [x] Versionar e publicar PR de corretiva #28; aguardar aprovacao/merge humano.
 - [ ] Homologar por nova revisao do ensaio corporativo apos atualizacao.
 
 ## Proxima entrega: indice automatico de priorizacao - 2026-10-09
 
+- [x] Preservar formato fornecido em doc/modelos/indice-priorizacao.template.md como referencia de preenchimento.
 - [ ] Criar/atualizar indice-priorizacao.md automaticamente apos cada priorizacao concluida.
 - [ ] Derivar sequencia vigente/categoria, fatias e cobertura por Source/Id dos recibos, preservando substituidas.
 - [ ] Conferir links, idempotencia, cancelamento/falha e tratamento do indice manual existente.
