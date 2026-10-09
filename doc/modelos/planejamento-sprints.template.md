@@ -1,74 +1,72 @@
-# Planejamento da migração — {{escopo}}
+# Planejamento consolidado da migracao
 
-**Revisão:** {{ID}} · **Data de referência:** {{data}} · **Estado:** {{estado}}  
-**Viabilidade:** {{classificação e motivo em uma frase}}  
-**Revisão anterior:** {{link ou primeira versão}}
+## Escopo
 
-## Escopo e resultado esperado
+Projetos selecionados: {{PROJECTS}}.
 
-<Um parágrafo: aplicações/módulos, plataforma de origem e destino, resultado
-da migração e exclusões relevantes.>
+Descrever o resultado esperado e as categorias confirmadas. Identificar projetos
+sem issues no recorte e seu papel nas entregas compartilhadas. O contexto e o
+JSON identificam esta revisao e suas fontes; nenhum aceite e concedido por este plano.
 
-| Restrição | Planejamento |
-| --- | --- |
-| Período | {{início}} a {{prazo máximo de produção}}; sprints de 14 dias |
-| Limites | Preparação ≤ {{P}}; implementação ≤ {{I}}; testes integrados ≤ {{T}}; total {{limite, se informado}} |
-| Equipe | Até {{D}} devs + 1 arquiteto + 1 DevOps; dedicação {{resumo}} |
-| Base de issues | {{N0}} iniciais, {{concluídas iniciais}}; {{novas/reabertas/excluídas}}; total atual {{N}} |
-| Produção | Prevista {{data ou não definida}}; limite {{data}}; janela {{período}}; margem {{dias}} |
-| Premissas críticas | {{calendário, estimativas e dependências que condicionam a previsão}} |
+## Decisoes confirmadas
 
-## Linha do tempo
+Registrar apenas respostas humanas ja recebidas, com sua origem: marcos de
+entrega, equipe/disponibilidade, calendario, sobreposicoes permitidas e limites.
+Distinguir um teto nao informado de uma decisao explicita de nao impor teto
+adicional. Alternativas condicionais ficam nas pendencias, fora da capacidade base.
+Os valores devem corresponder a Constraints, Team e Decisions do JSON.
 
-<Inserir Gantt Mermaid com datas confirmadas e marcos. Manter a matriz abaixo
-como leitura independente do suporte a Mermaid. Sem datas, usar apenas S1..Sn.>
+## Entregas e criterios de aceite
 
-| Macroatividade | S1 {{datas}} | S2 {{datas}} | … | Produção {{janela}} |
-| --- | --- | --- | --- | --- |
-| Preparar ambientes e esteira | {{trabalho/marco}} | {{…}} | {{…}} | {{…}} |
-| Migrar configuração JBoss | {{trabalho/marco}} | {{…}} | {{…}} | {{…}} |
-| Corrigir issues e dependências | {{agrupamento}} | {{…}} | {{…}} | {{…}} |
-| Integrar e validar corretivas | {{validação}} | {{…}} | {{…}} | {{…}} |
-| Testes integrados/homologação | {{…}} | {{…}} | {{…}} | {{…}} |
-| Preparar e executar implantação | {{…}} | {{…}} | {{…}} | {{marco}} |
+Preencher uma linha por resultado verificavel, referenciando os IDs de Work.
+Descrever dependencias reais e beneficiarios do trabalho compartilhado, contado
+uma vez. A alocacao por sprint e as datas previstas sao apresentadas pelo calculo.
 
-## Sprints, metas e capacidade
+| Entrega / IDs de Work | Projetos beneficiados | Resultado e aceite esperado | Dependencias e fontes |
+| --- | --- | --- | --- |
 
-Percentuais sobre a baseline {{ID, N0}}; previsto e realizado são acumulados.
-Carga/capacidade em dias-pessoa: Dev · Arq · Ops.
+## Objetivos propostos por sprint
 
-| Sprint/período | Entrega e marco principal | Previsto: issues / % | Realizado na data de referência | Carga / capacidade por papel |
-| --- | --- | --- | --- | --- |
-| S1 — {{início–fim}} | {{marco verificável}} | {{n/N0; %}} | {{n/N0; % ou ainda não aferido}} | Dev {{a/b}}; Arq {{c/d}}; Ops {{e/f}} |
-| S2 — {{início–fim}} | {{marco verificável}} | {{n/N0; %}} | {{…}} | {{…}} |
+Escrever o objetivo/HU principal de cada sprint planejada, com beneficio e aceite,
+vinculando IDs de Work. Usar S1, S2 etc., sem repetir datas ou percentuais calculados.
+Sao objetivos desejados: o calculo verifica a alocacao, nao cria objetivos de negocio.
+Sem base para associar uma entrega a sprint, declarar a lacuna; a analise posterior
+confere a proposta contra a matriz e encaminha eventual ajuste por Revisar.
 
-## Objetivo da HU por sprint
+| Sprint desejada | Objetivo/HU e beneficio | IDs de Work | Aceite esperado |
+| --- | --- | --- | --- |
 
-### S1 — {{título da HU principal}}
+## Premissas e pendencias
 
-**Objetivo:** <resultado técnico e benefício esperado em 2–3 frases, incluindo
-o recorte da migração>. **Aceite resumido:** {{evidência necessária para o marco}}.
-**Referências:** {{projeto, agrupamento/IDs e links de ficha, plano e to-do existentes}}.
+Separar hipoteses de estimativa de informacoes ainda faltantes. Para cada uma,
+explicar o impacto e como confirmar/refinar; usar fonte realmente lida. Nao
+declarar ausencia de pendencias enquanto houver entradas ou evidencias faltantes.
 
-### S2 — {{título da HU principal}}
+| Tipo: hipotese ou lacuna | Premissa / informacao faltante | Impacto | Confirmacao necessaria |
+| --- | --- | --- | --- |
 
-**Objetivo:** {{resultado e benefício}}. **Aceite resumido:** {{evidência}}.
-**Referências:** {{links existentes; para plano ainda não elaborado, “a detalhar”}}.
+## Cronograma e verificacao calculados
 
-## Impedimentos e decisões
+Este bloco e preenchido exclusivamente por **Validar e gerar cronograma**.
+Consulte nele viabilidade, datas previstas, capacidade, cobertura, Gantt e
+justificativas do trabalho nao alocado. Nao repetir esses resultados fora do bloco.
 
-| Ponto | Impacto no marco/prazo | Decisão ou ação necessária |
-| --- | --- | --- |
-| {{risco, sobrecarga, dependência ou lacuna}} | {{efeito concreto}} | {{decisão/papel responsável}} |
+<!-- sprints:inicio -->
 
-**Fora do horizonte / a estimar:** {{resumo e link para a relação completa}}.
-**Mudanças desta revisão:** {{até cinco mudanças relevantes, causa e impacto}}.
+Calculos pendentes.
 
-## Documentos de referência
+<!-- sprints:fim -->
 
-- [Índice dos projetos]({{ProjectIndexPath}}).
-- [Registro da migração — projeto]({{MigrationPath}}).
-- [Priorização/fichas]({{caminho existente}}).
-- [Plano da issue/agrupamento]({{PlanPath}}) e [to-do]({{TodoPath}}).
-- [Configuração JBoss / testes / implantação]({{documentos existentes}}).
-- [Dados do planejamento]({{SprintDataPath}}) e [revisão anterior]({{Previous}}).
+## Mudancas desta revisao
+
+{{REASON}}
+
+Registrar o que mudou nas decisoes, estimativas e evidencias em relacao a Previous,
+com motivo e impacto esperado. Na primeira proposta, informar que nao ha anterior.
+
+## Referencias
+
+- [Dados do planejamento](planejamento-sprints.json).
+- [Contexto e fontes capturadas](contexto.json).
+
+Acrescentar somente arquivos efetivamente lidos para sustentar a narrativa.

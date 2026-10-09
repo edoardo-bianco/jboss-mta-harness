@@ -74,6 +74,10 @@ Sem executor, o preenchimento manual mantem os mesmos arquivos e a validacao.
    **Validar e gerar cronograma** para a revisao selecionada.
 6. Leia `validacao.json` e `planejamento-sprints.md`: lacunas, gargalos, limites
    e premissas precisam estar explicitos antes de considerar a previsao.
+7. Execute o prompt de analise `revisar-sprints.prompt.md` oferecido pela tarefa.
+   Ele explica o resultado em somente leitura e aponta divergencias concretas.
+   Para alterar dados ou narrativa, use **Revisar**, execute o prompt principal
+   preparado para a nova revisao e valide novamente pela mesma tarefa.
 
 A validacao do retorno do agente e deterministica. Se o cronograma nao atender
 as restricoes, confira a comparacao de limites e a secao **Fora do horizonte /
@@ -125,10 +129,11 @@ Cada revisao usa os caminhos informados pelo preparo:
     planejamento-sprints.json
     planejamento-sprints.md
     planejar-sprints.prompt.md
+    revisar-sprints.prompt.md
     validacao.json
 ```
 
-`preparo.json` vincula o hash do contexto; preserve esse selo junto ao recibo.
+`preparo.json` vincula os hashes do contexto e do prompt de analise; preserve o selo.
 `atual.json` e o ponteiro da revisao consistente; ele so e atualizado pela
 validacao apropriada. `validacao.json` e produzido pelo calculador. Essas saidas
 nao substituem uma decisao humana. Uma validacao estrutural pode publicar um
@@ -136,7 +141,7 @@ rascunho `NAO_AVALIAVEL`; isso nao declara que o prazo cabe. Os arquivos locais
 nao acompanham clone/pull.
 
 O contexto declara ContextPath, PromptPath, SprintDataPath, SprintPlanPath,
-ValidationPath e Previous. Projects identifica cada projeto/Source, registro,
+ValidationPath, ReviewPromptPath (novos contextos) e Previous. Projects identifica cada projeto/Source, registro,
 base, origem, issues, lacunas e candidatos de planejamento/priorizacao.
 References lista caminhos, hashes, disponibilidade e tipo das fontes usadas.
 Essas referencias sao somente leitura; nao altere o contexto para adicionar
@@ -183,6 +188,23 @@ O MVP calcula papeis distintos. Se uma pessoa acumular papeis, declare a lacuna
 e concilie a disponibilidade antes de avaliar viabilidade; nao some duas
 disponibilidades integrais como se fossem pessoas diferentes.
 
+"Sem teto adicional" e uma decisao, diferente de "ainda nao informado". Informe
+essa escolha ao prompt: ele registra Constraints.UnboundedPhases para as fases
+PREPARATION/IMPLEMENTATION/TEST e deixa os respectivos maximos null. Sem essa
+declaracao, null continua impedindo avaliar esses limites. Prazo e teto de devs
+continuam valendo. Nao preencha tetos ficticios para fazer o cronograma caber.
+
+O auxilio de IA pode ser informado como parametro de estimativa: percentual de
+reducao de esforco de Dev e atividades apoiadas pelo harness. Por exemplo, ganho
+humano de 20% transforma 10 dias-pessoa originais de Dev em 8 no calculo. O prompt
+registra Estimation.AiDeveloperReductionPercent=20 e Work.AiAssisted=true nas
+atividades escolhidas. A faixa original fica preservada em Effort, sem desconto
+manual; tabela propria mostra original, efetivo e reducao. Nao aumenta capacidade
+da equipe nem reduz Arq/DevOps ou espera de terceiros. E hipotese a medir,
+sem percentual padrao ou ganho garantido. Se a estimativa ja incluia IA, concilie
+a base primeiro para evitar desconto duplo. QA sem dimensionamento e reforco
+eventual de equipe continuam premissas/alternativas, fora da capacidade base.
+
 O inicio de sprints ja publicado fica fixo; outro calendario exige Novo cenario.
 ReferenceDate nao retrocede nas revisoes, e sprints ja encerradas permanecem
 como historico. O consumo anterior de cada fase continua contando no teto,
@@ -200,6 +222,13 @@ mesmo periodo; sequencias internas precisam de atividades/dependencias distintas
 DependsOn libera o trabalho no dia seguinte ao termino da dependencia. Fases
 nao impõem ordem automaticamente. Essa simulacao nao busca o melhor cronograma
 possivel; um resultado que nao cabe pede revisar premissas e alternativas.
+
+Para acompanhamento ao longo da migracao, Work.AllocationMode=DISTRIBUTED
+distribui o esforco restante em uma janela NotBefore/Deadline explicita. Assim o
+arquiteto pode compartilhar capacidade diaria entre apoio e implementacao. O
+modo ASAP (padrao) concentra na primeira capacidade disponivel. Distribuicao
+continua limitada por capacidade/dependencias e nao comprime a janela quando o
+prazo de producao a corta; saldo permanece nao alocado com justificativa.
 
 Sem estimativas, calendario ou restricoes essenciais, a viabilidade fica
 `NAO_AVALIAVEL`. Esforco zero requer fundamento de inaplicabilidade/trabalho
@@ -258,13 +287,23 @@ previsao tecnica: nao concede GO para lotes, aceite ou autorizacao de deploy.
 | NAO_CABE | A simulacao nao aloca todo o trabalho nos limites informados; revise alternativas. |
 | NAO_AVALIAVEL | Lacunas impedem avaliar o conjunto; complete/revise os dados indicados. |
 
-O Gantt destaca as sprints que recebem trabalho de cada atividade; a barra nao
-significa ocupacao continua de todos os dias. Confira as cargas e conclusoes nas
-tabelas. Se o resultado calculado exigir ajustar objetivos/HUs ou outra parte
+O Gantt mostra trechos de dias realmente alocados, com lacunas nos dias sem carga.
+O limite direito e exclusivo; marcos sao conclusoes previstas, nao aceites.
+Atividades parciais nao recebem marco de conclusao. Historico antigo sem detalhes
+diarios permanece apenas na matriz por sprint. A tabela de prazos compara janelas
+informadas e conclusao prevista; N/A nao demonstra atendimento. Trabalho em
+Unscheduled continua no escopo, parcialmente ou totalmente sem alocacao.
+Se o resultado calculado exigir ajustar objetivos/HUs ou outra parte
 editorial, use Revisar antes de editar a revisao publicada e valide a nova revisao.
 Lacunas e conflitos exigem completar a revisao ou criar revisao com motivo
 pela mesma tarefa. Para detalhar a corretiva escolhida, volte ao
 [planejamento por issue](planejamento-migracao.md#qual-caminho-seguir).
+
+Apos atualizar o harness, use **Revisar** para adotar estes campos, o template e
+os prompts corrigidos num planejamento ja validado. Informe o motivo e preserve
+as datas/equipe/escopo confirmados. Nao edite a publicacao antiga nem os hashes
+para aceitar a mudanca de contrato. O prompt principal concilia a narrativa da
+nova revisao; o prompt de analise posterior explica o novo resultado sem altera-lo.
 
 O [template editorial](../../modelos/planejamento-sprints.template.md) mantem a
 forma da visao sintetica. A [feature MACRO-01](../../features/planejamento-macro-sprints.md)

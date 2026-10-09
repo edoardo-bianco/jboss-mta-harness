@@ -1,5 +1,25 @@
 # To-do do agente: evolucao do harness
 
+## Corretiva do ensaio de sprints - 2026-10-09
+
+- [x] Conferir base limpa e criar branch da main integrada.
+- [x] Reproduzir limites, distribuicao e Gantt incorretos com testes RED.
+- [x] Corrigir motor e datas efetivas, preservando legados e historico.
+- [x] Parametrizar ganho de IA por decisao humana, evidenciando original e efetivo sem desconto duplicado.
+- [x] Revisar prompt/template e integrar prompt de analise do resultado.
+- [x] Validar nove suites PS5.1, fluxo completo, datas/segmentos Mermaid e documentacao.
+- [ ] Conferir renderizacao visual Mermaid em navegador conectado (indisponivel nesta sessao).
+- [x] Revisar independentemente e tratar achados com regressao.
+- [ ] Versionar e publicar PR de corretiva.
+- [ ] Homologar por nova revisao do ensaio corporativo apos atualizacao.
+
+## Proxima entrega: indice automatico de priorizacao - 2026-10-09
+
+- [ ] Criar/atualizar indice-priorizacao.md automaticamente apos cada priorizacao concluida.
+- [ ] Derivar sequencia vigente/categoria, fatias e cobertura por Source/Id dos recibos, preservando substituidas.
+- [ ] Conferir links, idempotencia, cancelamento/falha e tratamento do indice manual existente.
+- [ ] Integrar no fluxo atual, documentar e testar sem confundir exame com aceite nem fatia com ganho de IA.
+
 ## Publicacao de sprints e incorporacao da arquitetura - 2026-10-09
 
 - [x] Publicar PR de sprints e confirmar merge humano #26 em 17f80c2.
@@ -7,8 +27,8 @@
 - [x] Incorporar arquitetura/ADR e alinhar cheat sheet Markdown/HTML com planejar sprints.
 - [x] Remover a apresentacao especifica Migracao_EAP_71_74_Plano_DevOps.pptx e conferir referencias.
 - [x] Conferir 270 links/ancoras, inventario de 27 tarefas e revisao independente.
-- [ ] Publicar e integrar a PR documental conforme revisao aprovada no GitHub.
-- [ ] Sincronizar main local/remota e registrar resultado, preservando arquivos.
+- [x] Publicar e integrar a PR documental #27 em 3e2009f, por merge humano.
+- [x] Sincronizar main local/remota e remover worktrees auxiliares limpos.
 
 ## Implementacao da MACRO-01 - 2026-10-08
 

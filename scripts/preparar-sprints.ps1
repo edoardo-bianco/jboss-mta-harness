@@ -86,6 +86,12 @@ try {
         if ($Action -eq 'Validate') {
             Write-Host ("Validacao: {0} | Viabilidade: {1}" -f $result.Status,$result.Feasibility)
             foreach ($diagnostic in $result.Diagnostics) { Write-Warning $diagnostic }
+            if ($result.PSObject.Properties['ReviewPromptPath']) {
+                $files+= $result.ReviewPromptPath
+                Write-Host ('Analise do resultado: '+$result.ReviewPromptPath)
+                Write-Host ('Codex: no agente principal, envie: Execute o prompt deste arquivo: '+$result.ReviewPromptPath)
+                Write-Host 'Copilot: abra esse prompt e use Executar Prompt. A analise e somente leitura; a revalidacao numerica continua nesta tarefa.'
+            } else { Write-Host 'Revisao legada sem prompt de analise capturado. Use Revisar para adotar o fluxo atualizado.' }
         } else {
             Write-Host ("Cenario: {0} | Revisao: {1} | Retomado: {2}" -f $result.PlanningId,$result.RevisionId,$result.Reused)
             Write-Host ('Contexto: '+$result.ContextPath)
