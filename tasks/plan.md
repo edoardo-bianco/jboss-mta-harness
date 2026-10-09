@@ -2,9 +2,45 @@
 
 ## Implementacao da MACRO-01 - 2026-10-08
 
-**CHECKPOINT: pausado a pedido do desenvolvedor em 08/10/2026.** Retomar na
-branch harness/implementar-planejamento-sprints, sem reiniciar a implementacao.
-Nao integrado e ainda nao pronto para uso corporativo/aceite final.
+**CONCLUSAO TECNICA LOCAL: 09/10/2026, retomada autorizada de 88520ac.**
+Raiz, branch harness/implementar-planejamento-sprints e arvore limpa conferidas.
+Implementacao e verificacao final concluidas nesta branch, sem integrar na main.
+Entrega pronta para revisao/primeiro ensaio; homologacao corporativa e aceite
+humano continuam pendentes. Dois documentos novos de arquitetura encontrados
+durante a sessao foram preservados fora desta entrega.
+
+Resultado da retomada:
+- Prazo de producao obrigatorio para afirmar viabilidade; limite total sozinho
+  permite apenas rascunho. Sem inicio, Sprint 1..N usa horizonte explicito.
+- Revisoes descontam fases consumidas antes da alocacao e preservam sprints
+  encerradas; cenarios variam somente o futuro. Marcos zero nao consomem fase.
+- Identidades/categorias, exclusoes e booleanos reais validados. Inclusoes
+  historicas nao podem desaparecer por retirada no registro. Simulation manual
+  e recusada preservando arquivos/ponteiro. Movimentos aparecem no Markdown.
+- Conforme pedido humano de 09/10, retorno do agente passa por validacao
+  deterministica de prazos, capacidade, dependencias e limites. NAO_CABE e
+  EM_RISCO explicam causas, esforco nao alocado e horizonte, inclusive faixa Max.
+  Texto do agente nao autoriza mudar restricoes nem substitui o calculo.
+- Publicacao tolera bloqueio transitorio do Windows com tentativas limitadas
+  (erros 32/1175), conferindo hash e preservando o ponteiro anterior.
+
+Verificacao final: oito suites aprovadas em Windows PowerShell 5.1:
+Test-SprintSimulation, Test-SprintValidation (26 casos, com RED/GREEN),
+Test-SprintPlanning, Test-SprintLifecycle, Test-SprintWorkflow, Test-TaskInputs,
+Test-Workspace e Test-Cleanup. Fluxo final em
+.harness/tests/sprint-workflow-34726e81e6f5412aa8353288b5d5e7bf cobre JBoss ->
+issues -> testes -> producao, revisao com consumo historico, prazo insuficiente
+e risco da faixa superior. Fixture nao comprova planejamento corporativo.
+Conferidos 169 links/ancoras locais em sete documentos e sintaxe PS5.1 dos
+scripts/testes da entrega. Revisao tecnica e documental independente por outro
+modelo concluida sem bloqueios, com achados tratados e testes de regressao.
+
+Primeiro uso: Terminal > Run Task > Planejamento: planejar sprints > Novo cenario;
+selecionar projetos, executar o prompt preparado no agente principal e voltar
+a mesma tarefa em Validar e gerar cronograma. Conferir justificativas e decisoes
+no [guia canonico](../doc/guias/tools/planejamento-sprints.md#primeira-execucao).
+Publicacao/PR e integracao na main permanecem para a entrega solicitada pelo
+desenvolvedor; esta conclusao local nao faz merge nem concede aceite.
 
 Refinamentos humanos que prevalecem sobre a formulacao inicial da feature:
 - Run Task seleciona projetos antes de reunir contexto; o prompt pergunta datas,
@@ -31,7 +67,7 @@ Fixture completa gerada em .harness/tests/sprint-workflow-1ee836cba2b24109b968d8
 JBoss -> issues -> testes -> producao; mudanca de evidencia deslocou a data
 prevista e manteve a anterior. E apenas teste, nao planejamento corporativo.
 
-Retomada prioritaria (revisao final interrompida, achados ainda a reproduzir):
+Achados da pausa, tratados na retomada acima (registro historico):
 1. ProductionDeadline=null com MaxTotalSprints definido pode afirmar CABE;
    tornar prazo obrigatorio para viabilidade de producao, preservando rascunho.
 2. Contadores de fases reiniciam no motor; recolocar sprints historicas somente
@@ -49,7 +85,12 @@ Arquivos centrais: scripts/HarnessSprint{Sources,Simulation,Presentation}.ps1,
 scripts/HarnessSprintPlanning.psm1, scripts/preparar-sprints.ps1, testes
 Test-Sprint{Planning,Simulation,Lifecycle,Workflow}.ps1. Contrato executavel:
 doc/especificacoes/planejamento-sprints.md; guia: doc/guias/tools/planejamento-sprints.md.
-Agentes interrompidos a pedido humano; nao deixar trabalho concorrente ativo.
+Na pausa, agentes foram interrompidos a pedido humano. Na retomada, revisao e
+testes delegados terminaram; nenhum trabalho concorrente ficou ativo.
+
+Revisao independente executada com outro modelo, somente leitura. Cobriu prazo,
+fases historicas, identidades/categorias, booleanos, protecao de campos calculados,
+movimentos de escopo, rascunho relativo e consistencia das justificativas.
 
 Autorizada pelo desenvolvedor apos merge da PR #25 (main 6390808), com
 primeiro uso corporativo previsto para amanha. Evolucao do harness na branch

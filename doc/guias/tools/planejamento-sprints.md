@@ -75,6 +75,16 @@ Sem executor, o preenchimento manual mantem os mesmos arquivos e a validacao.
 6. Leia `validacao.json` e `planejamento-sprints.md`: lacunas, gargalos, limites
    e premissas precisam estar explicitos antes de considerar a previsao.
 
+A validacao do retorno do agente e deterministica. Se o cronograma nao atender
+as restricoes, confira a comparacao de limites e a secao **Fora do horizonte /
+a estimar**: ela informa esforco nao alocado, dependencias, fases esgotadas e
+horizonte efetivo. Os motivos sao os mesmos do JSON. Peça ao executor que explique
+o impacto e proponha alternativas com esses dados; qualquer alteracao de prazo,
+equipe, limites ou escopo depende da sua decisao e de nova validacao.
+Para EM_RISCO pela faixa superior, a secao **Sensibilidade ao esforco superior
+(Max)** mostra o que deixou de caber; os mesmos detalhes ficam em
+Simulation.Scenarios.Max.Unscheduled/Diagnostics no JSON.
+
 O preparo gera uma entrada com restricoes/estimativas ainda nulas e um Markdown de
 rascunho. Preparar nao executa o agente. O prompt preenche estimativas e
 macroatividades no JSON e a narrativa no Markdown; o calculador gera os numeros,
@@ -175,7 +185,9 @@ disponibilidades integrais como se fossem pessoas diferentes.
 
 O inicio de sprints ja publicado fica fixo; outro calendario exige Novo cenario.
 ReferenceDate nao retrocede nas revisoes, e sprints ja encerradas permanecem
-como historico. Os maximos por fase contam sprints com trabalho daquela fase; nao sao duracoes
+como historico. O consumo anterior de cada fase continua contando no teto,
+inclusive entre revisoes na sprint em andamento. Informe esforco e ausencias
+restantes; o motor nao os desconta duas vezes. Os maximos por fase contam sprints com trabalho daquela fase; nao sao duracoes
 obrigatorias nem parcelas automaticamente somaveis. TEST representa a campanha
 integrada/homologacao; testes de cada corretiva acompanham seu trabalho.
 Configuracao JBoss/subsystems do destino, integracao, testes e implantacao requerem fase e dependencias
@@ -193,6 +205,9 @@ Sem estimativas, calendario ou restricoes essenciais, a viabilidade fica
 `NAO_AVALIAVEL`. Esforco zero requer fundamento de inaplicabilidade/trabalho
 ja atendido; nao substitui desconhecido. Faixas Min/Reference/Max documentam
 incerteza e precisam de fonte/premissa, sem probabilidades inventadas.
+O prazo de producao e essencial mesmo quando ha limite total de sprints. Sem
+inicio, esse limite total permite exibir Sprint 1..N como rascunho relativo,
+sem inventar datas ou capacidade. Ele nao demonstra atendimento a producao.
 
 Arquivos adicionais fornecidos pelo desenvolvedor podem fundamentar as faixas
 em Work.References e EstimateSource. O executor precisa le-los e registrar fonte,
@@ -216,6 +231,10 @@ em Changes.New, sem alterar a referencia inicial.
 Baseline.Accepted exige evidencia e quem concedeu o aceite. Checkbox, teste aprovado ou
 desaparecimento no MTA nao comprova conclusao aceita. Novas, reabertas e excluidas
 ficam separadas em Changes, sem reescrever B0 para melhorar o percentual.
+Uma inclusao ja validada continua em Changes.New quando deixa de aparecer no
+registro. Para retira-la do escopo, registre Changes.Excluded com Reason/Evidence;
+nao apague a inclusao nem deixe Work alocando a issue excluida. O Markdown mostra
+esses movimentos e a composicao atual, separada do denominador B0.
 Confirme esses dados conforme o formato suportado antes de comparar previsoes
 e realizado; uma contagem agregada nao prova resolucao de todas as ocorrencias.
 Todas as pendentes do recorte devem estar em Work, mesmo a estimar; Unscheduled

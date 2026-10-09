@@ -162,6 +162,18 @@ function New-HarnessSprintContext {
     } finally { $lease.Dispose() }
 }
 
+function Get-SprintIssueSet {
+    param($Issues,[string]$Name)
+    $set=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    foreach ($issue in @($Issues)) {
+        if ($null -eq $issue) { continue }
+        $key=Get-HarnessSprintIssueKey $issue
+        if ($set.ContainsKey($key)) { throw "$Name contem Source/ID duplicado." }
+        $set[$key]=$issue
+    }
+    return ,$set
+}
+
 function Assert-SprintDataScope {
     param($Data,$Receipt,[string]$Root)
     if ($Data.SchemaVersion -ne 1 -or $Data.Purpose -cne 'sprint-planning' -or $Data.PlanningId -cne $Receipt.PlanningId -or $Data.RevisionId -cne $Receipt.RevisionId) { throw 'Identidade dos dados diverge do contexto.' }
@@ -169,14 +181,21 @@ function Assert-SprintDataScope {
     $categories=@($Data.ScopeCategories)
     if ('mandatory' -notin $categories -or @($categories | Where-Object { $_ -notin @('mandatory','optional') }).Count -or @($categories | Sort-Object -Unique).Count -ne $categories.Count) { throw 'Escopo exige mandatory e permite optional somente por decisao explicita.' }
     if ('optional' -in $categories -and -not $Data.ScopeDecision) { throw 'Incluir opcionais exige registrar a decisao humana em ScopeDecision.' }
+    foreach ($pair in @(@($Data.Team,'RolesAreDistinct'),@($Data.EvidenceReview,'Reviewed'),@($Data.Baseline,'Known'))) {
+        $value=Get-SprintInputValue $pair[0] $pair[1]
+        if ($null -ne $value -and $value -isnot [bool]) { throw "$($pair[1]) exige booleano real ou null." }
+    }
     $known=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
     $expected=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
+    $selectedSources=@{}
     foreach ($project in $Receipt.Projects) { foreach ($issue in $project.Issues) {
-        $key=$project.Source.ToLowerInvariant()+"`n"+$issue.Id
+        $key=Get-HarnessSprintIssueKey ([pscustomobject]@{Source=$project.Source;Id=$issue.Id})
         $known[$key]=$true
         if ($issue.Category -in $categories) { $expected[$key]=$true }
     } }
+    foreach ($project in $Receipt.Projects) { $selectedSources[$project.Source.Replace('\','/').TrimEnd('/').ToLowerInvariant()]=$true }
     $first=$true
+    $ancestors=@()
     if ($Receipt.Previous) {
         $ancestors=@(Get-SprintValidatedAncestors $Receipt $Root)
         $frozen=@($ancestors | Where-Object { $_.Validation.BaselineFrozen } | Select-Object -First 1)
@@ -186,24 +205,40 @@ function Assert-SprintDataScope {
             if ((Get-SprintJsonHash $Data.Baseline.Issues) -cne (Get-SprintJsonHash $previous.Baseline.Issues) -or $Data.Baseline.Id -cne $previous.Baseline.Id -or $Data.Baseline.Known -ne $previous.Baseline.Known) { throw 'B0 validada e fixa. Registre inclusoes/reaberturas/exclusoes em Changes.' }
         }
     }
-    $actual=[Collections.Generic.Dictionary[string,object]]::new([StringComparer]::Ordinal)
-    foreach ($issue in $Data.Baseline.Issues) {
-        $key=([string]$issue.Source).ToLowerInvariant()+"`n"+$issue.Id
-        if ($actual.ContainsKey($key)) { throw 'Source/ID duplicado na baseline.' }
-        $actual[$key]=$true
-    }
+    $actual=Get-SprintIssueSet $Data.Baseline.Issues 'Baseline.Issues'
     if ($first) {
         if ($actual.Count -ne $expected.Count -or @($expected.Keys | Where-Object { -not $actual.ContainsKey($_) }).Count) { throw 'B0 deve conter exatamente as issues das categorias selecionadas do contexto; aceite comprovado entra em Accepted.' }
         $isKnown=@($Receipt.Projects | Where-Object { -not $_.RegisterValid }).Count -eq 0
         if ($Data.Baseline.Known -ne $isKnown) { throw 'Denominador conhecido diverge das lacunas dos registros.' }
     }
-    foreach ($issue in @($Data.Changes.New)) {
-        $key=([string]$issue.Source).ToLowerInvariant()+"`n"+$issue.Id
-        $historical=@($Receipt.HistoricalIssues | Where-Object { $_.Source -ieq $issue.Source -and $_.Id -ceq $issue.Id })
-        if (-not $known.ContainsKey($key) -and -not $historical.Count) { throw 'Issue nova deve estar referenciada no contexto revisado ou no historico preservado.' }
-        $actual[$key]=$true
+    $historicalNew=Get-SprintIssueSet @() 'Historical.New'
+    foreach ($ancestor in $ancestors) { foreach ($issue in $ancestor.Validation.DataSnapshot.Changes.New) { $historicalNew[(Get-HarnessSprintIssueKey $issue)]=$issue } }
+    $new=Get-SprintIssueSet $Data.Changes.New 'Changes.New'
+    if (@($historicalNew.Keys | Where-Object { -not $new.ContainsKey($_) }).Count) { throw 'Inclusao historica validada deve permanecer em Changes.New; registre exclusao explicita com motivo/evidencia.' }
+    foreach ($key in $new.Keys) {
+        if ($actual.ContainsKey($key)) { throw 'Changes.New nao pode repetir uma issue de B0.' }
+        if (-not $expected.ContainsKey($key) -and -not $historicalNew.ContainsKey($key)) { throw 'Issue nova deve pertencer as categorias selecionadas do contexto ou a inclusao historica validada.' }
+        $actual[$key]=$new[$key]
     }
     if (@($expected.Keys | Where-Object { -not $actual.ContainsKey($_) }).Count) { throw 'Issues atuais do recorte faltam na B0/Changes.New. Inclua todas, mesmo ainda a estimar.' }
+    $excluded=Get-SprintIssueSet $Data.Changes.Excluded 'Changes.Excluded'
+    $reopened=Get-SprintIssueSet $Data.Changes.Reopened 'Changes.Reopened'
+    $accepted=Get-SprintIssueSet $Data.Baseline.Accepted 'Baseline.Accepted'
+    foreach ($set in @($excluded,$reopened,$accepted)) {
+        foreach ($key in $set.Keys) { if (-not $actual.ContainsKey($key)) { throw 'Changes/Accepted deve referenciar Source/ID de B0 ou Changes.New.' } }
+    }
+    foreach ($key in $reopened.Keys) { if ($excluded.ContainsKey($key)) { throw 'Issue nao pode estar simultaneamente reaberta e excluida.' } }
+    foreach ($key in $actual.Keys) {
+        $source=([string]$actual[$key].Source).Replace('\','/').TrimEnd('/').ToLowerInvariant()
+        if ((-not $selectedSources.ContainsKey($source) -or ($known.ContainsKey($key) -and -not $expected.ContainsKey($key))) -and -not $excluded.ContainsKey($key)) { throw 'Issue historica fora dos projetos/categorias selecionados exige exclusao explicita, preservando B0.' }
+    }
+    foreach ($work in $Data.Work) {
+        $workIssues=Get-SprintIssueSet $work.Issues "Work $($work.Id).Issues"
+        foreach ($key in $workIssues.Keys) {
+            if (-not $actual.ContainsKey($key)) { throw 'Work.Issues deve referenciar Source/ID de B0 ou Changes.New.' }
+            if ($excluded.ContainsKey($key)) { throw 'Work nao pode alocar issue excluida; concilie a atividade com a decisao de escopo.' }
+        }
+    }
 }
 
 function Publish-SprintPointer {
@@ -211,8 +246,10 @@ function Publish-SprintPointer {
     $directory=Split-Path $Receipt.ContextPath -Parent
     $scenario=Split-Path (Split-Path $directory -Parent) -Parent
     $pointer=Join-Path $scenario 'atual.json'
+    $pointerHash=$null
     $ancestors=@(Get-SprintValidatedAncestors $Receipt $Root)
     if (Test-Path -LiteralPath $pointer) {
+        $pointerHash=(Get-FileHash -LiteralPath $pointer).Hash
         $current=Get-Content -LiteralPath $pointer -Raw -Encoding UTF8 | ConvertFrom-Json
         $currentReceipt=Read-HarnessSprintContext $Root $current.ContextPath
         if ($currentReceipt.PlanningId -cne $Receipt.PlanningId -or $currentReceipt.RevisionId -cne $current.RevisionId -or $current.ValidationPath -ine $currentReceipt.ValidationPath -or $current.ValidationSha256 -cne (Get-FileHash -LiteralPath $currentReceipt.ValidationPath).Hash) { throw 'Ponteiro atual inconsistente; preserve historico e confira a publicacao.' }
@@ -222,7 +259,20 @@ function Publish-SprintPointer {
     $temporary=Join-Path $scenario ('atual-'+[guid]::NewGuid().ToString('N')+'.tmp')
     try {
         Write-SprintJson $temporary ([ordered]@{PlanningId=$Receipt.PlanningId;RevisionId=$Receipt.RevisionId;ContextPath=$Receipt.ContextPath;ValidationPath=$Receipt.ValidationPath;ValidationSha256=(Get-FileHash -LiteralPath $Receipt.ValidationPath).Hash})
-        if (Test-Path -LiteralPath $pointer) { [IO.File]::Replace($temporary,$pointer,[System.Management.Automation.Language.NullString]::Value) } else { [IO.File]::Move($temporary,$pointer) }
+        if ($null -ne $pointerHash) {
+            # Windows may briefly hold a newly written file open. Retry only errors
+            # which leave both names intact; never delete the previous pointer.
+            # https://learn.microsoft.com/windows/win32/api/winbase/nf-winbase-replacefilew
+            for ($attempt=0;$attempt -lt 8;$attempt++) {
+                if (-not (Test-Path -LiteralPath $pointer) -or (Get-FileHash -LiteralPath $pointer).Hash -cne $pointerHash) { throw 'Ponteiro editado durante a publicacao; preserve a outra contribuicao e confira o historico.' }
+                try { [IO.File]::Replace($temporary,$pointer,[System.Management.Automation.Language.NullString]::Value);break }
+                catch {
+                    $code=$_.Exception.GetBaseException().HResult -band 0xffff
+                    if ($code -notin @(32,1175) -or $attempt -eq 7) { throw }
+                    Start-Sleep -Milliseconds 200
+                }
+            }
+        } else { [IO.File]::Move($temporary,$pointer) }
     } finally { if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary -Force } }
 }
 
@@ -257,39 +307,38 @@ function Complete-HarnessSprintPlan {
             Get-SprintReference $path $Root 'Estimativa'
         } })
         $data.EstimateEvidence=@($estimateEvidence | Sort-Object Path -Unique)
-        $simulation=Get-HarnessSprintSimulation -Data $data
-        $data.Simulation=$simulation
-        if ($simulation.Feasibility -eq 'NAO_AVALIAVEL') { $data.State='RASCUNHO' }
-        # Sharing people across roles requires explicit distribution; do not assume extra capacity.
-        if ((Get-SprintInputValue $data.Team 'RolesAreDistinct') -ne $true) {
-            $simulation.Feasibility='NAO_AVALIAVEL'
-            $simulation.Diagnostics+= 'Confirme pessoas distintas por papel (Team.RolesAreDistinct); acumulo de papeis exige redistribuir disponibilidade sem dupla contagem.'
-            $data.State='RASCUNHO'
-        }
-        if (@($receipt.Projects | Where-Object { -not $_.RegisterValid }).Count) {
-            $simulation.Feasibility='NAO_AVALIAVEL'
-            $simulation.Diagnostics+='Escopo com registros ausentes/invalidos: trabalho total desconhecido.'
-            $data.State='RASCUNHO'
-        }
-        if (@($receipt.InputChanges).Count -and (-not $data.EvidenceReview.Reviewed -or [string]::IsNullOrWhiteSpace($data.EvidenceReview.Reason))) {
-            $simulation.Feasibility='NAO_AVALIAVEL'; $data.State='RASCUNHO'
-            $simulation.Diagnostics+='Evidencias mudaram: compare InputChanges e justifique EvidenceReview antes de confiar nas estimativas.'
-        }
-        if (@($data.EstimateEvidence | Where-Object { $_.Status -in @('AUSENTE','INVALIDA') }).Count) {
-            $simulation.Feasibility='NAO_AVALIAVEL'; $data.State='RASCUNHO'
-            $simulation.Diagnostics+='Arquivo usado para estimar esta ausente; confira EstimateEvidence.'
-        }
+        if ($null -ne $data.Simulation) { throw 'Simulation e calculada pela tarefa. Preserve a contribuicao na narrativa e restaure Simulation=null antes de validar.' }
+        $previousSimulation=$null
         if ($ancestors.Count) {
             $previousData=$ancestors[0].Validation.DataSnapshot
             if ($previousData.Constraints.SprintStartDate -and $data.Constraints.SprintStartDate -ne $previousData.Constraints.SprintStartDate) { throw 'Inicio das sprints ja publicadas e fixo; para outro calendario crie um cenario separado.' }
-            if ($previousData.Constraints.ReferenceDate -and $data.Constraints.ReferenceDate -and $data.Constraints.ReferenceDate -lt $previousData.Constraints.ReferenceDate) { throw 'Data de referencia nao pode retroceder numa revisao.' }
-            if ($data.Constraints.ReferenceDate) {
-                $past=@($previousData.Simulation.Sprints | Where-Object { $_.End -and $_.End -lt $data.Constraints.ReferenceDate })
-                foreach ($sprint in $past) {
-                    $simulation.Sprints=@($simulation.Sprints | Where-Object Number -NE $sprint.Number)+@($sprint)
-                }
-                $simulation.Sprints=@($simulation.Sprints | Sort-Object Number)
+            if ($previousData.Constraints.ReferenceDate -and (-not $data.Constraints.ReferenceDate -or $data.Constraints.ReferenceDate -lt $previousData.Constraints.ReferenceDate)) { throw 'Data de referencia nao pode retroceder nem ser removida numa revisao.' }
+            $previousSimulation=$previousData.Simulation
+        }
+        $simulation=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $previousSimulation
+        $data.Simulation=$simulation
+        if ($simulation.Feasibility -eq 'NAO_AVALIAVEL') { $data.State='RASCUNHO' }
+        $contextDiagnostics=@()
+        # Sharing people across roles requires explicit distribution; do not assume extra capacity.
+        if ((Get-SprintInputValue $data.Team 'RolesAreDistinct') -ne $true) {
+            $contextDiagnostics+= 'Confirme pessoas distintas por papel (Team.RolesAreDistinct); acumulo de papeis exige redistribuir disponibilidade sem dupla contagem.'
+        }
+        if (@($receipt.Projects | Where-Object { -not $_.RegisterValid }).Count) {
+            $contextDiagnostics+='Escopo com registros ausentes/invalidos: trabalho total desconhecido.'
+        }
+        if (@($receipt.InputChanges).Count -and (-not $data.EvidenceReview.Reviewed -or [string]::IsNullOrWhiteSpace($data.EvidenceReview.Reason))) {
+            $contextDiagnostics+='Evidencias mudaram: compare InputChanges e justifique EvidenceReview antes de confiar nas estimativas.'
+        }
+        if (@($data.EstimateEvidence | Where-Object { $_.Status -in @('AUSENTE','INVALIDA') }).Count) {
+            $contextDiagnostics+='Arquivo usado para estimar esta ausente; confira EstimateEvidence.'
+        }
+        if ($contextDiagnostics.Count) {
+            $data.State='RASCUNHO'
+            foreach ($scenario in @($simulation,$simulation.Scenarios.Min,$simulation.Scenarios.Max)) {
+                $scenario.Feasibility='NAO_AVALIAVEL';$scenario.State='RASCUNHO';$scenario.ProductionDate=$null
+                $scenario.Diagnostics+=$contextDiagnostics
             }
+            $simulation.Scenarios.Reference.Feasibility='NAO_AVALIAVEL';$simulation.Scenarios.Reference.ProductionDate=$null
         }
         $markdown=ConvertTo-SprintMarkdown $receipt $data ([IO.File]::ReadAllText($receipt.SprintPlanPath))
         $directory=Split-Path $receipt.ContextPath -Parent

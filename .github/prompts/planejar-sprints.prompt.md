@@ -103,6 +103,17 @@ ficha, estimativa ou decisao de prioridade. O planejamento macro referencia os l
 nao antecipa planos detalhados para
 todos eles nem autoriza execucao.
 
+O retorno exige validacao deterministica pela acao **Validar e gerar cronograma**
+da mesma tarefa. Nao afirme cumprimento de prazo somente pela narrativa.
+Se houver NAO_CABE/EM_RISCO, explique os motivos calculados (Unscheduled.Reason,
+esforco restante, dependencias, consumo das fases e horizonte), o impacto e
+alternativas para decisao humana. Em risco pela faixa superior, confira tambem
+Simulation.Scenarios.Max.Unscheduled/Diagnostics e a secao de sensibilidade;
+Unscheduled de referencia pode estar vazio. Se NAO_AVALIAVEL, diga qual entrada falta.
+Nao aumente limites/prazo nem retire trabalho para fazer o resultado caber.
+Inclusoes historicas de Changes.New permanecem mesmo quando o registro muda;
+retirada exige Changes.Excluded com Reason/Evidence, preservando a inclusao.
+
 Para cada atividade, preencha os campos do formato pronto: Id, Title, Phase,
 Priority (menor numero primeiro), DependsOn, Issues por Source/Id, Effort por
 Dev/Architect/DevOps com Min/Reference/Max, EstimateSource, Confidence,

@@ -99,4 +99,50 @@ $data=New-TestData;$deploy=Work 'DEPLOY' 0 0 1 'DEPLOYMENT';$deploy.Issues=@();$
 Assert ($null -eq $result.ProductionDate -and $result.Feasibility -eq 'NAO_AVALIAVEL') 'Deploy anterior ao fim do trabalho nao comprova producao.'
 $data=New-TestData;$data.Work[0].Effort.Dev.Reference=$null;$blocked=Work 'BLOCKED' 100;$blocked.DependsOn=@('W1');$data.Work+=$blocked
 Assert ((Get-HarnessSprintSimulation $data).Feasibility -eq 'NAO_AVALIAVEL') 'Lacuna essencial prevalece sobre falta de alocacao dependente.'
-Write-Host 'PASS: SprintSimulation calendario, capacidade, precedencias, baseline, cenarios e lacunas.'
+$data=New-TestData;$data.Constraints.ProductionDeadline=$null;$data.Constraints.MaxTotalSprints=2
+$deploy=Work 'DEPLOY' 0 0 1 'DEPLOYMENT';$deploy.Issues=@();$deploy.DependsOn=@('W1');$data.Work+=$deploy
+$result=Get-HarnessSprintSimulation $data
+Assert ($result.Feasibility -eq 'NAO_AVALIAVEL' -and $result.State -eq 'RASCUNHO' -and $null -eq $result.ProductionDate) 'Sem prazo de producao, limite total nao pode comprovar viabilidade.'
+Assert ($result.Sprints.Count -eq 2) 'Horizonte informado deve continuar disponivel no rascunho sem prazo.'
+
+# A revision consumes the original phase allowance, including a partly elapsed sprint.
+$data=New-TestData;$data.Constraints.MaxImplementationSprints=1
+$deploy=Work 'DEPLOY' 0 0 1 'DEPLOYMENT';$deploy.Issues=@();$deploy.DependsOn=@('W1');$data.Work+=$deploy
+$previous=Get-HarnessSprintSimulation $data;$previousJson=$previous | ConvertTo-Json -Depth 50
+$data.Constraints.ReferenceDate='2027-01-04'
+$result=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $previous
+Assert ($result.Feasibility -eq 'NAO_CABE' -and $result.PhaseSprintCounts.Implementation -eq 1) 'Revisao nao pode reutilizar limite de fase ja consumido.'
+Assert (($result.Sprints[0] | ConvertTo-Json -Depth 30) -ceq ($previous.Sprints[0] | ConvertTo-Json -Depth 30)) 'Sprint encerrada deve permanecer identica ao historico.'
+Assert (($previous | ConvertTo-Json -Depth 50) -ceq $previousJson) 'Revisao nao pode mutar a simulacao anterior.'
+$data.Constraints.MaxImplementationSprints=2
+$result=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $previous
+Assert ($result.Feasibility -eq 'CABE_NAS_PREMISSAS' -and $result.PhaseSprintCounts.Implementation -eq 2 -and $result.Sprints[1].Load.Dev -eq 5) 'Revisao deve alocar apenas o esforco restante no limite total ampliado.'
+$data.Constraints.MaxImplementationSprints=0;$data.Work=@($deploy);$data.Work[0].DependsOn=@();$data.Baseline.Accepted=@([pscustomobject]@{Source='C:/app';Id='I1';Evidence='teste';AcceptedBy='humano'})
+$result=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $previous
+Assert ($result.Feasibility -eq 'NAO_CABE') 'Reduzir teto abaixo do historico exige violacao mesmo sem trabalho restante na fase.'
+$data=New-TestData;$data.Constraints.MaxImplementationSprints=1;$data.Constraints.ReferenceDate='2026-12-28';$data.Work[0].Effort.Dev.Min=11;$data.Work[0].Effort.Dev.Reference=11;$data.Work[0].Effort.Dev.Max=11
+$result=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $previous
+Assert ($result.Feasibility -eq 'NAO_CABE' -and $result.PhaseSprintCounts.Implementation -eq 1 -and $result.Sprints[0].Load.Dev -eq 10) 'Sprint em andamento conta uma vez e usa somente capacidade restante.'
+$data=New-TestData;$data.Constraints.SprintStartDate=$null;$data.Constraints.MaxTotalSprints=3
+$result=Get-HarnessSprintSimulation $data
+Assert ($result.Sprints.Count -eq 3 -and $result.Sprints[2].Number -eq 3 -and $null -eq $result.Sprints[0].Start -and $null -eq $result.Sprints[0].Capacity.Dev -and $result.Feasibility -eq 'NAO_AVALIAVEL') 'Rascunho relativo deve mostrar Sprint 1..N sem datas ou capacidade inventadas.'
+$data=New-TestData;$data.Constraints.ReferenceDate='2026-12-28';$data.Work=@();$data.Baseline.Accepted=@([pscustomobject]@{Source='C:/app';Id='I1';Evidence='teste';AcceptedBy='humano'})
+$intermediate=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $previous
+$data=New-TestData;$data.Constraints.ReferenceDate='2027-01-04';$data.Constraints.MaxImplementationSprints=1
+$result=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $intermediate
+Assert ($result.Feasibility -eq 'NAO_CABE' -and $result.PhaseSprintCounts.Implementation -eq 1) 'Revisoes sucessivas nao podem esquecer fase consumida em sprint antes em andamento.'
+$data=New-TestData;$data.Work=@((Work 'W' 0));$data.Constraints.MaxImplementationSprints=0
+$deploy=Work 'DEPLOY' 0 0 1 'DEPLOYMENT';$deploy.DependsOn=@('W');$deploy.Issues=@();$data.Work+=$deploy
+$result=Get-HarnessSprintSimulation $data
+Assert ($result.Feasibility -eq 'CABE_NAS_PREMISSAS' -and $result.PhaseSprintCounts.Implementation -eq 0) 'Marco de esforco zero nao deve consumir limite de fase nem bloquear dependentes.'
+$data=New-TestData;$previous=Get-HarnessSprintSimulation $data
+$data.Constraints.ReferenceDate='2027-01-04';$data.Team.Staffing=@($data.Team.Staffing[1]);$data.Work=@((Work 'W' 25))
+$result=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $previous
+Assert ($result.Feasibility -eq 'NAO_CABE') 'Staffing de sprint encerrada nao pode contaminar capacidade futura conhecida.'
+Assert ($result.Unscheduled[0].Reason -like '*Dev=5*' -and $result.Unscheduled[0].Reason -like '*2027-01-17*') 'Nao cabe deve explicar esforco nao alocado e horizonte deterministico.'
+$data=New-TestData;$data.Work[0].Effort.Dev=[pscustomobject]@{Min=5;Reference=25;Max=30}
+$previous=Get-HarnessSprintSimulation $data
+$data.Constraints.ReferenceDate='2027-01-18';$data.Constraints.ProductionDeadline='2027-01-31';$data.Work=@()
+$result=Get-HarnessSprintSimulation -Data $data -PreviousSimulation $previous
+Assert ($result.PhaseSprintCounts.Implementation -eq 2 -and $result.Scenarios.Min.PhaseSprintCounts.Implementation -eq 2 -and $result.Scenarios.Max.PhaseSprintCounts.Implementation -eq 2) 'Cenarios variam somente o futuro, preservando o mesmo passado publicado.'
+Write-Host 'PASS: SprintSimulation calendario, capacidade, precedencias, baseline, cenarios, revisoes e lacunas.'

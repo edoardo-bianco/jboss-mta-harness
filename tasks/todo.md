@@ -2,19 +2,20 @@
 
 ## Implementacao da MACRO-01 - 2026-10-08
 
-**Pausado pelo desenvolvedor; checkpoint detalhado no inicio de plan.md.**
-Branch harness/implementar-planejamento-sprints. Implementacao parcial preservada;
-nao integrada. Reproduzir/corrigir os dois achados finais de prazo e fases
-historicas antes de concluir os calculos e a entrega.
+**Concluido tecnicamente em 09/10/2026; retomada do checkpoint 88520ac.**
+Branch harness/implementar-planejamento-sprints, sem integracao na main.
+Oito suites PS5.1 aprovadas, 26 casos de validacao, 169 links/ancoras e revisao
+independente sem bloqueios. Evidencias e primeiro uso no inicio de plan.md.
 
 - [x] Conferir merge/main e criar branch de evolucao preservando historico.
 - [x] Recuperar especificacao, template e pontos de reuso; registrar contrato.
 - [x] Testar e implementar contexto de todos/subconjunto sem mutar entradas.
-- [ ] Testar e implementar calendario, capacidade, baseline e alocacao por papel.
-- [ ] Integrar Run Task, prompt, renderizacao, validacao e revisoes preservadas.
-- [x] Alinhar guia canonico, README e orientacao do helper (conferir ajustes finais do motor na retomada).
-- [ ] Validar PS5.1, regressao de tarefas/limpeza e revisao independente.
-- [ ] Preparar entrega revisavel e roteiro para o primeiro uso corporativo.
+- [x] Testar e implementar calendario, capacidade, baseline e alocacao por papel.
+- [x] Integrar Run Task, prompt, renderizacao, validacao e revisoes preservadas.
+- [x] Alinhar guia canonico, README e orientacao do helper, incluindo ajustes finais.
+- [x] Validar PS5.1, regressao de tarefas/limpeza e revisao independente.
+- [x] Validar deterministicamente prazo/limites do retorno e explicar NAO_CABE/EM_RISCO com causas calculadas.
+- [x] Preparar entrega revisavel e roteiro para o primeiro uso corporativo.
 - [ ] Homologar primeiro planejamento real com entradas do desenvolvedor.
 
 ## Consolidacao documental da MACRO-01 - 2026-10-08
@@ -26,7 +27,7 @@ historicas antes de concluir os calculos e a entrega.
 - [x] Revisar independentemente e preparar a entrega documental para PR.
 - [x] Especificar selecao de todos os projetos ou subconjunto, com escopo persistido e AC-17.
 - [x] Conferir o complemento de escopo e preparar sua inclusao na PR #25.
-- [ ] Implementar MACRO-01 em etapa futura autorizada, conforme o backlog vigente.
+- [x] Implementar MACRO-01 em etapa futura autorizada: concluida localmente em 09/10, conforme registro acima.
 
 ## Priorizacao compartilhada e planejamento por desenvolvedor - 2026-10-08
 
@@ -69,7 +70,7 @@ historicas antes de concluir os calculos e a entrega.
 - [x] Detalhar contexto/prompt por cliente, capacidade, testes/implantacao e diagrama temporal na proposta unica.
 - [x] Revisar coerencia e tres referencias da proposta/backlog; sem links quebrados.
 - [x] Preparar complemento documental para publicacao em PR separado da entrega integrada.
-- [ ] MACRO-01: implementar somente em evolucao futura escolhida; usar a proposta do backlog.
+- [x] MACRO-01: evolucao posterior autorizada e concluida localmente em 09/10, conforme registro acima.
 
 ## Metadados de branch e certificado Sonar corporativo - 2026-10-08
 
@@ -1004,7 +1005,7 @@ As dependencias de validacao ja registradas permanecem; nao fixam uma ordem glob
 | COMP-01 | Capacidade solicitada; detalhada por DEP-01/02 | Coletor deterministico Maven e matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. DEP-03 e extensao a avaliar separadamente. |
 | CORE-01 | Piloto opcional transversal; detalhado por SRC | Navegacao/coleta de contexto Java independente de MTA/engine, principalmente SRC-01/03/06. SRC-02/04/05 ampliam opcoes, sem se tornarem requisitos do primeiro piloto. Adaptador ainda a escolher. |
 | SERV-01 | Capacidade solicitada; detalhada por JBS-01..05 | Inventario, rota comprovada, assistencia, transformacao de configuracao e validacao no destino isolado. Reutilizar operacoes existentes; nao duplicar a demanda nem declarar rota 7.1 direta suportada. |
-| MACRO-01 | Especificacao v2.0 e template consolidados em 08/10; implementacao futura | [Planejamento por sprints](../doc/features/planejamento-macro-sprints.md) e [template sintetico](../doc/modelos/planejamento-sprints.template.md): contrato, incrementos e criterios de aceite. Sem nova Run Task nesta entrega; preservar planos de corretiva e decisoes humanas. |
+| MACRO-01 | Implementada e validada localmente em 09/10; sem integracao na main, homologacao humana pendente | [Planejamento por sprints](../doc/features/planejamento-macro-sprints.md), [guia de uso](../doc/guias/tools/planejamento-sprints.md) e [template sintetico](../doc/modelos/planejamento-sprints.template.md): tarefa unica, contexto, motor deterministico, justificativas, revisoes e evidencias preservadas. Oito suites PS5.1 aprovadas; primeiro uso corporativo pendente. |
 | VAL-01 | Ensaio parcial interrompido para simplificacao; eventos 9/10 | Uso da skill e reconhecimento da escolha demonstrados no material trazido pelo desenvolvedor; reconciliacao primeiro sem conflito apontado nos dois clientes, Codex direcionou execucao ao Copilot. Delegacao ainda nao validada. Retestar em SIM-14: orientacao/delegacao, capacidades presentes/ausentes/inadequadas e ausencia de efeitos operacionais; casos do plano. |
 | VAL-02 | Ensaio operacional existente pendente | Prompts Copilot: reconciliacao/delegacao, issues, persistencia, retomada, GO, implementacao e continuidade com Previous/novo MTA. |
 | VAL-03 | Ensaio Sonar real pendente | Criterios Blocker/High, avisos de cobertura e comparacao com baseline, separados do Quality Gate. |

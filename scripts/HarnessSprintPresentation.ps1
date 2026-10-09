@@ -70,6 +70,27 @@ function ConvertTo-SprintMarkdown {
     $lines.Add(('| Base B0 / categorias | {0} / {1} |' -f (Format-SprintNumber $simulation.BaselineCount),($Data.ScopeCategories -join ', ')))
     $lines.Add(('| Producao prevista | {0} |' -f (Format-SprintCell $simulation.ProductionDate)))
     $lines.Add('')
+    $lines.Add('### Conferencia deterministica dos prazos e limites')
+    $lines.Add('')
+    $lines.Add(('- Prazo de producao informado: {0}; horizonte efetivo: {1}; producao calculada: {2}.' -f (Format-SprintCell $Data.Constraints.ProductionDeadline),(Format-SprintCell $simulation.Horizon),(Format-SprintCell $simulation.ProductionDate)))
+    $lines.Add('| Fase | Maximo informado | Sprints com esforco, incluindo historico |')
+    $lines.Add('| --- | --- | --- |')
+    foreach ($pair in @(@('Preparation','MaxPreparationSprints'),@('Implementation','MaxImplementationSprints'),@('Test','MaxTestSprints'))) {
+        $lines.Add(('| {0} | {1} | {2} |' -f $pair[0],(Format-SprintNumber $Data.Constraints.($pair[1])),(Format-SprintNumber $simulation.PhaseSprintCounts.($pair[0]))))
+    }
+    $lines.Add('Atividades nao alocadas e limites esgotados estao justificados abaixo. Respeitar o teto no trabalho alocado nao comprova que todo o trabalho cabe. Sem producao calculada, o atendimento ao prazo nao foi demonstrado.')
+    $lines.Add('')
+    $lines.Add('### Composicao e movimentos do escopo')
+    $lines.Add('')
+    $lines.Add(('B0 preservada: {0}; escopo atual conhecido (B0 + novas - excluidas): {1}. Reabertura nao aumenta o denominador.' -f (Format-SprintNumber $simulation.BaselineCount),(Format-SprintNumber $simulation.CurrentScopeCount)))
+    $lines.Add('| Movimento | Source / ID | Motivo | Evidencia |')
+    $lines.Add('| --- | --- | --- | --- |')
+    foreach ($kind in @('New','Reopened','Excluded')) {
+        foreach ($issue in $Data.Changes.$kind) {
+            $lines.Add(('| {0} | {1} / {2} | {3} | {4} |' -f $kind,(Format-SprintCell $issue.Source),(Format-SprintCell $issue.Id),(Format-SprintCell (Get-HarnessSprintValue $issue 'Reason')),(Format-SprintCell (Get-HarnessSprintValue $issue 'Evidence'))))
+        }
+    }
+    $lines.Add('')
     $lines.Add('### Sprints, metas e capacidade')
     $lines.Add('')
     $lines.Add('| Sprint / periodo | Entregas previstas | Previsto acumulado B0 | Realizado comprovado B0 | Dev carga/cap. | Arq carga/cap. | Ops carga/cap. |')
@@ -117,6 +138,16 @@ function ConvertTo-SprintMarkdown {
     $lines.Add('| Atividade / issue | Motivo |')
     $lines.Add('| --- | --- |')
     foreach ($item in $simulation.Unscheduled) { $lines.Add(('| {0} | {1} |' -f (Format-SprintCell $item.Id),(Format-SprintCell $item.Reason))) }
+    if ($simulation.Feasibility -eq 'EM_RISCO' -and $simulation.Scenarios.Max.Feasibility -ne 'CABE_NAS_PREMISSAS') {
+        $lines.Add('')
+        $lines.Add('### Sensibilidade ao esforco superior (Max)')
+        $lines.Add('')
+        $lines.Add(('A referencia cabe; a faixa superior resulta em {0}. Motivos calculados:' -f $simulation.Scenarios.Max.Feasibility))
+        $lines.Add('| Atividade / issue | Motivo na faixa superior |')
+        $lines.Add('| --- | --- |')
+        foreach ($item in $simulation.Scenarios.Max.Unscheduled) { $lines.Add(('| {0} | {1} |' -f (Format-SprintCell $item.Id),(Format-SprintCell $item.Reason))) }
+        foreach ($item in $simulation.Scenarios.Max.Diagnostics | Where-Object { $_ -notin $simulation.Diagnostics }) { $lines.Add('- '+(Format-SprintCell $item)) }
+    }
     $lines.Add('')
     $lines.Add('### Lacunas e verificacoes')
     $lines.Add('')

@@ -348,6 +348,11 @@ Ao receber este documento:
 
 > Consolide a feature `doc/features/planejamento-macro-sprints.md` com este documento e use-a como especificação da MACRO-01. Confira o que já existe na `main`, siga `AGENTS.md` e registre o plano de implementação nos arquivos do harness. A capacidade deve coletar restrições por Run Task, preparar contexto/prompt para Copilot ou Codex e permitir ao agente preencher e revisar o planejamento sintético. Preserve os máximos por fase, a equipe, o prazo de produção, a baseline de issues e os documentos de corretiva. Na etapa autorizada de implementação, avance por incrementos utilizáveis e valide os critérios de aceite.
 
+Refinamento confirmado em 09/10/2026: o retorno do agente deve passar pela
+validacao deterministica dos prazos e limites informados. Quando nao atender,
+a justificativa deve expor causas calculadas, trabalho nao alocado e impacto;
+texto do agente nao substitui essa verificacao nem autoriza alterar restricoes.
+
 ## 10. Referências e limites
 
 **Base do projeto conferida em 08/10/2026**, no commit acima. Os links relativos abaixo são resolvidos quando este arquivo estiver em `doc/features/`:

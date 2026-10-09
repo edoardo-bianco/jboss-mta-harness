@@ -57,4 +57,38 @@ $updated=Complete-HarnessSprintPlan $fixture $revision.ContextPath
 Assert ($updated.DataSnapshot.Simulation.ProductionDate -eq '2026-10-19') 'Nova evidencia/estimativa deveria deslocar producao, respeitando fim de semana.'
 Assert ((Get-Content $receipt.ValidationPath -Raw | ConvertFrom-Json).DataSnapshot.Simulation.ProductionDate -eq '2026-10-16') 'Reestimativa apagou previsao anterior.'
 Assert ((Get-FileHash $register.MigrationPath).Hash -eq $before) 'Planejamento macro alterou registro de migracao.'
+$historyRevision=New-HarnessSprintContext $context -PreviousContextPath $revision.ContextPath -Reason 'Revisar trabalho restante na segunda sprint'
+$data=Get-Content $historyRevision.SprintDataPath -Raw | ConvertFrom-Json
+$data.Constraints.ReferenceDate='2026-10-26'
+$data.Work[0].Effort=[pscustomobject]@{Dev=@{Min=0;Reference=0;Max=0};Architect=@{Min=0;Reference=0;Max=0};DevOps=@{Min=0;Reference=0;Max=0}}
+Save $historyRevision.SprintDataPath $data
+$remaining=Complete-HarnessSprintPlan $fixture $historyRevision.ContextPath
+Assert ($remaining.Feasibility -eq 'NAO_CABE') 'Teste restante nao pode reutilizar o limite consumido de campanha de testes.'
+Assert (($remaining.DataSnapshot.Simulation.Sprints[0] | ConvertTo-Json -Depth 40) -ceq ($updated.DataSnapshot.Simulation.Sprints[0] | ConvertTo-Json -Depth 40)) 'Integracao deve preservar sprint encerrada antes de calcular capacidade restante.'
+$reason=@($remaining.DataSnapshot.Simulation.Unscheduled | Where-Object Id -EQ 'Testar-integracao')[0].Reason
+Assert ($reason -like '*MaxTestSprints esgotado: 1 de 1*' -and $reason -like '*Dev=2*') 'Retorno deve justificar deterministicamente limite e esforco que nao couberam.'
+$markdown=[IO.File]::ReadAllText($historyRevision.SprintPlanPath)
+Assert ($markdown.Contains($reason) -and $markdown.Contains('Conferencia deterministica') -and $markdown.Contains('Composicao e movimentos')) 'Markdown deve mostrar os mesmos motivos e limites do JSON.'
+
+$shortDeadline=New-HarnessSprintContext $context -All
+$shortData=Get-Content $shortDeadline.SprintDataPath -Raw | ConvertFrom-Json
+$shortData.Constraints=$updated.DataSnapshot.Constraints | ConvertTo-Json | ConvertFrom-Json
+$shortData.Constraints.ProductionDeadline='2026-10-14'
+$shortData.Team=$updated.DataSnapshot.Team
+$shortData.Work=$updated.DataSnapshot.Work
+Save $shortDeadline.SprintDataPath $shortData
+$tooShort=Complete-HarnessSprintPlan $fixture $shortDeadline.ContextPath
+Assert ($tooShort.Feasibility -eq 'NAO_CABE' -and $null -eq $tooShort.DataSnapshot.Simulation.ProductionDate) 'Prazo menor que a sequencia exigida nao pode receber CABE.'
+$deployReason=@($tooShort.DataSnapshot.Simulation.Unscheduled | Where-Object Id -EQ 'Implantar-producao')[0].Reason
+Assert ($deployReason -like '*Dependencias nao concluidas: Testar-integracao*' -and $deployReason -like '*2026-10-14*') 'Prazo nao atendido exige causa e horizonte calculados.'
+$riskReceipt=New-HarnessSprintContext $context -All
+$riskData=$shortData | ConvertTo-Json -Depth 60 | ConvertFrom-Json
+$riskData.PlanningId=$riskReceipt.PlanningId;$riskData.RevisionId=$riskReceipt.RevisionId
+$riskData.Constraints.ProductionDeadline='2026-11-08';$riskData.Work[1].Effort.Dev.Max=50
+Save $riskReceipt.SprintDataPath $riskData
+$riskResult=Complete-HarnessSprintPlan $fixture $riskReceipt.ContextPath
+Assert ($riskResult.Feasibility -eq 'EM_RISCO' -and $riskResult.DataSnapshot.Simulation.Unscheduled.Count -eq 0) 'Referencia deve caber e deixar risco somente na faixa superior.'
+$riskReason=@($riskResult.DataSnapshot.Simulation.Scenarios.Max.Unscheduled | Where-Object Id -EQ 'Migrar-APIs')[0].Reason
+$riskMarkdown=[IO.File]::ReadAllText($riskReceipt.SprintPlanPath)
+Assert ($riskMarkdown.Contains('Sensibilidade ao esforco superior') -and $riskMarkdown.Contains($riskReason)) 'Risco da faixa superior exige justificativa deterministica visivel mesmo sem sobra na referencia.'
 Write-Output ('PASS: fluxo completo com JBoss, issues mandatory, testes, producao, Gantt e reestimativa rastreavel. Fixture: '+$fixture)
