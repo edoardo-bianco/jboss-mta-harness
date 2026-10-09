@@ -1,5 +1,42 @@
 # Plano do agente: evolucao do harness
 
+## Arquitetura do Engineering Harness: nucleo e perfis - 2026-10-09
+
+Pedido: consolidar estrategia, ADRs e implementacao em documento arquitetural
+autocontido; definir evolucao DDD pragmatica, plataforma, perfis/plugins,
+portabilidade de IDE/engine, comportamento por Run Task e compreensao Java.
+
+Base: main 63908081c5b21ec1c483e9a79d033526786224d5. Trabalho isolado na branch
+harness/arquitetura-nucleo-perfis, em worktree proprio. Checkout original de
+sprints preservado; checkpoint 88520ac e alteracoes locais sao apenas evidencia
+de trabalho em andamento, sem declarar integracao ou aceite.
+
+Entregas: doc/arquitetura/arquitetura-harness.md, ADR da direcao proposta e
+referencia de descoberta no README. Preservar documentos historicos e distinguir
+implementado na baseline, trabalho em andamento e arquitetura recomendada.
+
+Sequencia: (1) conferir fontes e inventariar todas as Run Tasks; (2) verificar
+fontes oficiais de plataforma, indexacao e clientes; (3) escrever comportamento,
+estrutura, dominios/capacidades e decisoes; (4) validar links, exemplos JSON,
+cobertura da matriz e diff; (5) revisar de forma independente e preparar entrega.
+
+Aceite documental: tecnologias atuais rastreaveis; matriz completa de tarefas e
+acionamento de agentes; nucleo/perfis/configuracao e fronteiras DDD explicitos;
+comparacao fundamentada de linguagens e indexadores; escolhas recomendadas com
+limites e pilotos; preservacao de GO/aceite, artefatos e configuracao Maven.
+Nao implementar a arquitetura ou alterar a frente de sprints nesta etapa.
+Integrar somente a documentacao na main local apos verificacao e revisao,
+preservando a ADR como proposta para a revisao humana das escolhas arquiteturais.
+
+Entrega documental concluida: arquitetura e ADR-0008 proposta, com descoberta
+pelo README. Verificacao: 87 links/ancoras locais validos, dois exemplos JSON
+validos, 26/26 Run Tasks representadas uma vez e taxonomia conferida; diff sem
+erros de whitespace. Fontes oficiais consultadas em 09/10/2026. Revisao
+independente por outro modelo identificou inconsistencias de nomes de dominio,
+vigencia historica das ADRs e alcance da pasta de evidencias; corrigidas e
+reconferidas sem novos achados. Nao foram executados testes operacionais ou
+pilotos das tecnologias propostas nesta mudanca exclusivamente documental.
+
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 
 Retomada autorizada apos merge da PR #24: substituir a proposta existente pela
