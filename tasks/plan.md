@@ -1,5 +1,141 @@
 # Plano do agente: evolucao do harness
 
+## Publicacao de sprints e incorporacao da arquitetura - 2026-10-09
+
+Pedido humano: abrir PR de sprints na main e alinhar a entrega; depois integrar
+os documentos de arquitetura produzidos e incluir planejar sprints no cheat
+sheet. Evolucao do harness em duas entregas, preservando os arquivos recebidos.
+
+1. Publicar harness/implementar-planejamento-sprints, validada em 80dafed, abrir
+   PR para main, conferir revisao/checks e integrar conforme autorizacao humana.
+2. Atualizar main local e criar harness/integrar-arquitetura-cheat-sheet dessa
+   base; incorporar ADR-0008, arquitetura e cheat sheet, preservando propostas
+   futuras como propostas. Conferir o HTML exportado e a convencao do repositorio.
+3. Reconciliar a baseline e o inventario com a tarefa de sprints entregue;
+   explicar preparo/execucao do prompt/validacao deterministica e apontar ao guia.
+4. Conferir links, nomes/quantidade de tarefas, coerencia e revisao independente;
+   publicar e integrar a PR documental. Sincronizar main local/remota e registrar
+   evidencias. Homologacao corporativa continua pendente; nenhum lote autorizado.
+
+## Implementacao da MACRO-01 - 2026-10-08
+
+**CONCLUSAO TECNICA LOCAL: 09/10/2026, retomada autorizada de 88520ac.**
+Raiz, branch harness/implementar-planejamento-sprints e arvore limpa conferidas.
+Implementacao e verificacao final concluidas nesta branch, sem integrar na main.
+Entrega pronta para revisao/primeiro ensaio; homologacao corporativa e aceite
+humano continuam pendentes. Dois documentos novos de arquitetura encontrados
+durante a sessao foram preservados fora desta entrega.
+
+Resultado da retomada:
+- Prazo de producao obrigatorio para afirmar viabilidade; limite total sozinho
+  permite apenas rascunho. Sem inicio, Sprint 1..N usa horizonte explicito.
+- Revisoes descontam fases consumidas antes da alocacao e preservam sprints
+  encerradas; cenarios variam somente o futuro. Marcos zero nao consomem fase.
+- Identidades/categorias, exclusoes e booleanos reais validados. Inclusoes
+  historicas nao podem desaparecer por retirada no registro. Simulation manual
+  e recusada preservando arquivos/ponteiro. Movimentos aparecem no Markdown.
+- Conforme pedido humano de 09/10, retorno do agente passa por validacao
+  deterministica de prazos, capacidade, dependencias e limites. NAO_CABE e
+  EM_RISCO explicam causas, esforco nao alocado e horizonte, inclusive faixa Max.
+  Texto do agente nao autoriza mudar restricoes nem substitui o calculo.
+- Publicacao tolera bloqueio transitorio do Windows com tentativas limitadas
+  (erros 32/1175), conferindo hash e preservando o ponteiro anterior.
+
+Verificacao final: oito suites aprovadas em Windows PowerShell 5.1:
+Test-SprintSimulation, Test-SprintValidation (26 casos, com RED/GREEN),
+Test-SprintPlanning, Test-SprintLifecycle, Test-SprintWorkflow, Test-TaskInputs,
+Test-Workspace e Test-Cleanup. Fluxo final em
+.harness/tests/sprint-workflow-34726e81e6f5412aa8353288b5d5e7bf cobre JBoss ->
+issues -> testes -> producao, revisao com consumo historico, prazo insuficiente
+e risco da faixa superior. Fixture nao comprova planejamento corporativo.
+Conferidos 169 links/ancoras locais em sete documentos e sintaxe PS5.1 dos
+scripts/testes da entrega. Revisao tecnica e documental independente por outro
+modelo concluida sem bloqueios, com achados tratados e testes de regressao.
+
+Primeiro uso: Terminal > Run Task > Planejamento: planejar sprints > Novo cenario;
+selecionar projetos, executar o prompt preparado no agente principal e voltar
+a mesma tarefa em Validar e gerar cronograma. Conferir justificativas e decisoes
+no [guia canonico](../doc/guias/tools/planejamento-sprints.md#primeira-execucao).
+Publicacao/PR e integracao na main permanecem para a entrega solicitada pelo
+desenvolvedor; esta conclusao local nao faz merge nem concede aceite.
+
+Refinamentos humanos que prevalecem sobre a formulacao inicial da feature:
+- Run Task seleciona projetos antes de reunir contexto; o prompt pergunta datas,
+  prazo, equipe e limites. Nao pedir esses dados na tarefa nem novamente no chat
+  de desenvolvimento do harness.
+- Planejamento cobre mandatory pendentes; prompt pergunta se inclui optional.
+  Reunir indice, registro e fichas/evidencias dos projetos; status isolado nao
+  comprova resolucao. Incluir preparacao JBoss/subsistemas, testes e producao.
+- Arquivos fornecidos podem mudar estimativas: origem, hashes, premissas e
+  impacto ficam rastreaveis, com revisao anterior preservada.
+- Conduzir com using-agent-skills e capacidades SDLC, testes e revisao independente.
+
+Implementado no checkpoint: contexto/escopo e referencias; prompt/guia/helper;
+tarefa unica com Novo/Retomar/Revisar/Validar; motor de calendario e alocacao;
+Markdown/matriz/Gantt; baseline e historico; captura de evidencias de estimativa;
+recuperacao da troca do ponteiro. Sem escrita nas aplicacoes/registros de issues.
+
+Validacoes realizadas antes da pausa: Test-SprintPlanning, Test-TaskInputs
+(inclusive cancelamento real da nova tarefa), Test-SprintLifecycle,
+Test-SprintWorkflow, Test-Workspace e Test-Cleanup passaram em PS5.1. O autor do
+motor confirmou os testes principais Test-SprintSimulation; acrescentava casos
+finais quando interrompido. Nao declarar suite final completa sem nova execucao.
+Fixture completa gerada em .harness/tests/sprint-workflow-1ee836cba2b24109b968d8cd6f9d123c:
+JBoss -> issues -> testes -> producao; mudanca de evidencia deslocou a data
+prevista e manteve a anterior. E apenas teste, nao planejamento corporativo.
+
+Achados da pausa, tratados na retomada acima (registro historico):
+1. ProductionDeadline=null com MaxTotalSprints definido pode afirmar CABE;
+   tornar prazo obrigatorio para viabilidade de producao, preservando rascunho.
+2. Contadores de fases reiniciam no motor; recolocar sprints historicas somente
+   depois do calculo nao desconta fases ja consumidas. Revisao precisa respeitar
+   limites totais de fase e capacidade/esforco restantes sem reescrever passado.
+3. Conferir identidades de Work/Changes/Accepted contra o escopo e decisoes de
+   exclusao; validar booleanos reais em EvidenceReview/Team.RolesAreDistinct.
+4. Conferir cobertura da especificacao (inclusive rascunho relativo sem datas,
+   janela final, limites e coerencia Markdown/JSON), executar testes finais,
+   validar links e concluir revisao independente por outro modelo.
+5. Atualizar backlog historico MACRO-01, registrar verificacoes finais, organizar
+   entrega/PR e orientar primeiro uso no VS Code. Nao fazer merge automatico.
+
+Arquivos centrais: scripts/HarnessSprint{Sources,Simulation,Presentation}.ps1,
+scripts/HarnessSprintPlanning.psm1, scripts/preparar-sprints.ps1, testes
+Test-Sprint{Planning,Simulation,Lifecycle,Workflow}.ps1. Contrato executavel:
+doc/especificacoes/planejamento-sprints.md; guia: doc/guias/tools/planejamento-sprints.md.
+Na pausa, agentes foram interrompidos a pedido humano. Na retomada, revisao e
+testes delegados terminaram; nenhum trabalho concorrente ficou ativo.
+
+Revisao independente executada com outro modelo, somente leitura. Cobriu prazo,
+fases historicas, identidades/categorias, booleanos, protecao de campos calculados,
+movimentos de escopo, rascunho relativo e consistencia das justificativas.
+
+Autorizada pelo desenvolvedor apos merge da PR #25 (main 6390808), com
+primeiro uso corporativo previsto para amanha. Evolucao do harness na branch
+harness/implementar-planejamento-sprints. Fonte unica dos requisitos:
+doc/features/planejamento-macro-sprints.md e template separado fornecido.
+
+1. Preparar contexto por escopo explicito (todos/subconjunto), preservar lacunas,
+   origens e hashes; criar tarefa unica, rascunho e prompt executavel.
+2. Calcular calendario/capacidade/alocacao por papel e validar baseline, fases,
+   dependencias e horizonte com testes PS5.1; estimativas continuam humanas/agente.
+3. Retomar/revisar com historico, conflito detectado e ponteiro publicado somente
+   apos validacao consistente. Gerar tabelas e diagrama a partir dos dados.
+4. Conectar guia, README e helper sem duplicar procedimento; revisar e validar
+   integracao e preservacao das evidencias antes de preparar PR.
+
+Contrato de implementacao: contexto.json identifica fontes e destinos exclusivos
+SprintPlanPath/SprintDataPath/ValidationPath. planejamento-sprints.json contem
+Constraints, Team, Baseline, Changes e Work; motor puro devolve simulacao. O
+executor preenche estimativas/premissas; a acao Validar da mesma tarefa calcula
+e publica Markdown/JSON/validacao correlacionados. Nenhuma escrita nos registros,
+planos de issues, codigo das aplicacoes ou servidores; nenhum GO/aceite inferido.
+Dados reais ainda nao informados ficam como lacunas, nao premissas confirmadas.
+
+Verificacao: testes de calendario/capacidade/limites/identidade, preparo e revisao
+com fontes ausentes/alteradas, concorrencia, cancelamento, tarefa e limpeza.
+Revisao independente e ensaio local com fixture; homologacao corporativa fica
+com o operador e nao pode ser declarada a partir das fixtures.
+
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 
 Retomada autorizada apos merge da PR #24: substituir a proposta existente pela

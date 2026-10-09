@@ -87,6 +87,11 @@ Contexto recebido em conflito nao autoriza apagar ou sobrescrever estado local.
 
 ## migracao_planejamento_helper
 
+Para prazo/equipe e visao macro entre projetos, use o [guia de sprints](../../../../doc/guias/tools/planejamento-sprints.md).
+Oriente a mesma Run Task e o executor do prompt; permaneça leitor, sem preencher
+dados, executar o calculador ou conceder GO. O planejamento de lotes continua
+separado e referencia sua issue/projeto.
+
 Para comparar candidatas, use o [guia de priorizacao](../../../../doc/guias/tools/priorizacao-issues.md).
 Explique categoria/escopo, fatia sobre o total inicial fixo e exclusao de todas as
 examinadas ao progredir. SEM POSICAO nao e descarte. Leia as fichas de Source/Id;
