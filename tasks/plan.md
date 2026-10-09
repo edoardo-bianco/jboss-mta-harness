@@ -1,5 +1,25 @@
 # Plano do agente: evolucao do harness
 
+## Exemplo de complemento ao prompt de sprints - 2026-10-09
+
+Pedido humano: guardar na documentacao uma mensagem clara e copiavel reunindo
+as respostas de datas, escopo, equipe, calendario, limites, QA e auxilio de IA.
+Evolucao documental do harness, branch harness/documentar-complemento-sprints,
+derivada da main limpa 1ce801c (PR #28 integrada e sincronizada).
+
+Adicionar exemplo preenchido e adaptavel no guia canonico de sprints, ligado ao
+passo de coleta das restricoes. Explicitar que os valores nao sao defaults, a
+mensagem complementa o prompt preparado e revisao validada exige Revisar.
+Preservar distincoes entre hipotese de IA, capacidade, reserva e reforco eventual;
+manter referencias, lacunas e validacao deterministica. Conferir coerencia com
+contrato/prompt, links e Markdown; sem testes de runtime para alteracao documental.
+
+Verificados 174 links/ancoras em oito documentos e diff sem erros de whitespace.
+Revisao documental independente sem achados bloqueantes; exemplo coerente com
+contrato e prompt principal. Nenhuma mudanca de runtime nem repeticao de suites.
+Publicacao em PR documental separada; o ensaio com a PR #28 ja integrada pode
+prosseguir sem aguardar esta documentacao. Merge continua a cargo do desenvolvedor.
+
 ## Corretiva do ensaio de sprints - 2026-10-09
 
 Pedido humano: respeitar as restricoes informadas, corrigir o Gantt, revisar o
@@ -59,7 +79,8 @@ a revisao corporativa publicada e as datas/equipe/escopo humanos.
 
 Corretiva versionada em 7134833 e publicada na PR #28 para main:
 https://github.com/edoardo-bianco/jboss-mta-harness/pull/28.
-Aguardando revisao/aprovacao e merge humano, conforme preferencia registrada.
+PR #28 integrada pelo desenvolvedor em 1ce801c; main local/remota sincronizadas
+e arvore limpa antes da entrega documental seguinte. Homologacao continua pendente.
 
 ## Proxima entrega: indice automatico de priorizacao - 2026-10-09
 

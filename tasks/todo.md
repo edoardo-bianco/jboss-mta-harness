@@ -1,5 +1,12 @@
 # To-do do agente: evolucao do harness
 
+## Exemplo de complemento ao prompt de sprints - 2026-10-09
+
+- [x] Conferir main limpa/integrada e criar branch documental.
+- [x] Adicionar exemplo copiavel e adaptavel no guia de sprints, vinculado ao fluxo.
+- [x] Conferir coerencia com contrato/prompt, links e Markdown; revisar a entrega.
+- [x] Preparar entrega documental para publicacao separada, sem bloquear o ensaio da PR #28.
+
 ## Corretiva do ensaio de sprints - 2026-10-09
 
 - [x] Conferir base limpa e criar branch da main integrada.
@@ -10,7 +17,7 @@
 - [x] Validar nove suites PS5.1, fluxo completo, datas/segmentos Mermaid e documentacao.
 - [ ] Conferir renderizacao visual Mermaid em navegador conectado (indisponivel nesta sessao).
 - [x] Revisar independentemente e tratar achados com regressao.
-- [x] Versionar e publicar PR de corretiva #28; aguardar aprovacao/merge humano.
+- [x] Versionar/publicar PR #28 e confirmar merge humano em 1ce801c; main sincronizada.
 - [ ] Homologar por nova revisao do ensaio corporativo apos atualizacao.
 
 ## Proxima entrega: indice automatico de priorizacao - 2026-10-09
