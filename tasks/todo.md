@@ -20,13 +20,16 @@
 - [x] Versionar/publicar PR #28 e confirmar merge humano em 1ce801c; main sincronizada.
 - [ ] Homologar por nova revisao do ensaio corporativo apos atualizacao.
 
-## Proxima entrega: indice automatico de priorizacao - 2026-10-09
+## Indice automatico de priorizacao - 2026-10-09
 
 - [x] Preservar formato fornecido em doc/modelos/indice-priorizacao.template.md como referencia de preenchimento.
-- [ ] Criar/atualizar indice-priorizacao.md automaticamente apos cada priorizacao concluida.
-- [ ] Derivar sequencia vigente/categoria, fatias e cobertura por Source/Id dos recibos, preservando substituidas.
-- [ ] Conferir links, idempotencia, cancelamento/falha e tratamento do indice manual existente.
-- [ ] Integrar no fluxo atual, documentar e testar sem confundir exame com aceite nem fatia com ganho de IA.
+- [x] Criar/atualizar indice-priorizacao.md no preparo e pelo prompt ao concluir, distinguindo as conferencias.
+- [x] Derivar sequencia vigente/categoria, fatias e cobertura por Source/Id dos recibos, preservando substituidas.
+- [x] Conferir links, idempotencia, cancelamento/falha e tratamento do indice manual existente.
+- [x] Integrar no fluxo atual, documentar e testar sem confundir exame com aceite nem fatia com ganho de IA.
+- [x] Tratar achados da revisao independente, publicar atomicamente e preservar caminhos locais na importacao.
+- [x] Validar nove suites PowerShell 5.1 e obter revisao final sem bloqueios.
+- [ ] Integrar na main mediante aprovacao humana e ensaiar a atualizacao pelo prompt no Copilot.
 
 ## Publicacao de sprints e incorporacao da arquitetura - 2026-10-09
 

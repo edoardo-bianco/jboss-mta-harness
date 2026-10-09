@@ -170,6 +170,13 @@ raizes isoladas, confere SourceMap, Previous, originais, links, preview, CLI,
 conflitos, idempotencia, integridade e rollback. Nao comprova a qualidade do plano
 nem o aceite da aplicacao.
 
+`tests/Test-PrioritizationIndex.ps1` verifica o indice derivado pelo template:
+cobertura distinta, sequencias por escopo/categoria, Recreate/Continue, legado,
+pendencias, bifurcacao, notas manuais, links, idempotencia e publicacao atomica
+com falha/conflito. A suite Progress tambem verifica a reconciliacao do indice
+quando Continue recusa resultado parcial ou uma ficha v4 ausente. Execute com
+`powershell.exe -NoProfile -File .\tests\Test-PrioritizationIndex.ps1`.
+
 `tests/Test-PlanningPortable.ps1` verifica MTA recebido de outra maquina, alertas
 do POM e continuidade sem indice local. `tests/Test-LongPaths.ps1` verifica copia,
 hashes e armazenamento externo em fixtures de caminhos longos.

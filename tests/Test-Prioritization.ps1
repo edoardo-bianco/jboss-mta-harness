@@ -25,7 +25,7 @@ foreach ($project in $projects[0..1]) {
 }
 $index = Join-Path $fixture '.harness/projetos/indice-projetos.md'
 Set-Content $index '# Indice: dados de teste'
-foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md')) {
+foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
     $destination = Join-Path $fixture $relative
     $null = [IO.Directory]::CreateDirectory((Split-Path $destination -Parent))
     if (Test-Path (Join-Path $root $relative)) { Copy-Item (Join-Path $root $relative) $destination }
@@ -52,7 +52,9 @@ foreach ($file in $before) { Assert ((Get-FileHash $file.Path).Hash -eq $file.Ha
 $again = New-HarnessPrioritizationContext $context -Percentage 10 -Mode Recreate
 Assert ($again.RequestId -ne $prepared.RequestId -and (Test-Path $prepared.PromptPath)) 'Historico sobrescrito.'
 foreach ($invalid in @('0','0,001','100.01','101','-1','NaN','1e1','1,000.00','')) {
+    $indexHash=(Get-FileHash $prepared.PrioritizationIndexPath).Hash
     Reject { New-HarnessPrioritizationContext $context -Percentage $invalid -Mode Recreate } ('Percentual invalido aceito: ' + $invalid)
+    Assert ((Get-FileHash $prepared.PrioritizationIndexPath).Hash -eq $indexHash) 'Preparo rejeitado alterou indice.'
 }
 foreach ($valid in @('0,01','0.01%','50','100,00%')) {
     $null = New-HarnessPrioritizationContext $context -Percentage $valid -Mode Recreate
@@ -122,7 +124,7 @@ Assert ($conflictReceipt.Projects[0].Mta -eq $null -and ($conflictReceipt.Projec
 # CLI real, workspace escolhido, JSON e editor simulado, sem agente ou ferramentas externas.
 $scripts = Join-Path $fixture 'scripts'
 $null = [IO.Directory]::CreateDirectory($scripts)
-foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessIssuePlanning.ps1','HarnessPrioritizationEvidence.ps1','HarnessPrioritization.psm1','HarnessPrioritizationState.ps1','HarnessPrioritizationEvidence.ps1','preparar-priorizacao.ps1')) { Copy-Item (Join-Path $root ('scripts/' + $name)) $scripts }
+foreach ($name in @('Harness.psm1','HarnessPlanning.psm1','HarnessPlanningInput.ps1','HarnessIssuePlanning.ps1','HarnessPrioritizationEvidence.ps1','HarnessPrioritization.psm1','HarnessPrioritizationState.ps1','HarnessPrioritizationIndex.ps1','preparar-priorizacao.ps1')) { Copy-Item (Join-Path $root ('scripts/' + $name)) $scripts }
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = $projects; $config.activeProject = 'app-a'
 Write-HarnessJson $context.ConfigPath $config

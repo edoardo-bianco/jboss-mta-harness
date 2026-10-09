@@ -57,7 +57,7 @@ O indice precisa existir; se necessario, execute antes
 [Workspace: atualizar indice dos projetos](planejamento-migracao.md#indice-da-situacao-dos-projetos).
 Registros ou evidencias ausentes/conflitantes aparecem como lacunas por projeto;
 os projetos utilizaveis podem continuar. O preparador nao inicializa registros,
-altera prioridades ou atualiza o indice.
+altera prioridades ou atualiza o indice dos projetos.
 Uma reconciliacao antiga PENDENTE nao e pre-requisito generico para esta etapa;
 o agente confere o motivo e registra o impacto real nas candidatas.
 
@@ -267,6 +267,46 @@ prompt preparado e, depois da execucao pelo agente, `priorizacao.md`. O recibo
 preserva snapshots do indice/registros, caminhos e hashes das entradas.
 Nos novos recibos, Category separa as sequencias e FichaPaths declara arquivos
 individuais por projeto/issue, sob `.harness/planning/<artifactId>/issues/`.
+
+### Indice automatico das priorizacoes
+
+O arquivo `.harness/priorizacao/indice-priorizacao.md` segue o
+[template de referencia](../../modelos/indice-priorizacao.template.md): sequencia
+ativa, tabela de fatias, cobertura acumulada, substituidas e proximo passo.
+Cada escopo/categoria conserva seus projetos, denominador e sequencia.
+
+Na mesma tarefa **Planejamento: priorizar issues**, o preparo cria/atualiza esse
+indice e mostra o caminho. A nova fatia aparece como **PENDENTE**, sem exame
+inventado. Ao terminar, o prompt atualiza a linha e a cobertura, identificando
+**conferencia do executor; a conferir pelo preparador**. Na proxima execucao da
+tarefa, inclusive retomada ou esgotamento, o preparador reconcilia os resultados
+com os validadores de quota, fichas e vinculos. Nao ha task adicional nem watcher:
+se Continue recusar um resultado parcial/invalido, o indice tambem recebe esse
+diagnostico, sem criar outra fatia. O preparo usa gravacao atomica e detecta
+edicoes concorrentes observadas antes da substituicao, preservando as notas.
+Gravar um ranking manualmente, fora do prompt, nao dispara um script.
+
+So resultados completos e consistentes entram na tabela de fatias concluidas.
+IN_PROGRESS, fichas ausentes e conflitos aparecem nas pendencias. A cobertura
+conta Source/Id distintos das fatias completas, inclusive examinadas sem proposta.
+No exemplo de 44 issues a 20%, as cinco fatias de 9+9+9+9+8 chegam a 44/44;
+isso indica exame, nao correcao ou aceite. Esse 20% nao e o ganho de IA de sprints.
+
+Recreate no mesmo escopo/categoria preserva os resultados anteriores como
+substituidos e inicia outra base; referencias a outro escopo nao o substituem.
+Continue acompanha a cadeia. Multiplas pontas ficam explicitas, sem escolher
+pela data. Um indice manual existente permanece literalmente antes do bloco
+automatico, identificado como historico. Notas humanas devem ficar fora dos
+marcadores `priorizacao:indice:inicio/fim`; marcadores invalidos sao diagnosticados.
+
+Prompts ja preparados antes desta evolucao conservam o contrato antigo. Seus
+resultados entram na reconciliacao do preparador, mas o agente so escreve o indice
+quando PrioritizationIndexPath estiver declarado no contexto novo. Nao edite
+recibos antigos para acrescentar esse campo.
+
+Ao importar uma analise compartilhada, os caminhos do indice/template passam
+para a raiz local nos recibos derivados. O indice agregado da origem nao e
+copiado sobre o local; a proxima priorizacao o reconcilia pelas fatias recebidas.
 O agente cria fichas somente das examinadas; o ranking aponta para esses arquivos.
 Mesmo ID em projetos diferentes mantem fichas distintas, com contexto suficiente
 para compartilhar cada uma. Contextos v2/v3 continuam mandatory e conservam layout.
@@ -390,8 +430,11 @@ planejamento somente apos sua escolha explicita. Confira se cada linha abre uma
 ficha com titulo compreensivel, evidencia da avaliacao e proxima acao manual concreta,
 inclusive SEM POSICAO. Compare indice, registros,
 fontes e planos antes/depois: o preparo produz contexto/prompt e paginas de
-incidentes; a execucao do prompt escreve o ranking e as fichas examinadas nos
-destinos declarados. O helper permanece leitor. Teste acesso externo
+incidentes e reconcilia o indice de priorizacao; a execucao do prompt escreve
+ranking/fichas e atualiza esse indice nos destinos declarados. Confira no indice
+a distincao entre conferencia do executor e do preparador, as pendencias e a
+preservacao de notas manuais. O indice dos projetos e os registros permanecem
+inalterados. O helper permanece leitor. Teste acesso externo
 concedido e negado: leitura deve retomar apos concessao; negativa preserva parcial
 sem consumir quota. Preparacao automatizada testada nao comprova a qualidade
 da recomendacao nem a integracao nativa do chat.

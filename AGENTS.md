@@ -56,7 +56,11 @@ Para categorias e dossies padronizados por issue, siga a
   outra recebida). Recibos v2/v3 permanecem mandatory; novos v4 declaram Category.
   Seu contexto fica em `.harness/priorizacao/`; escreve `RankingPath` e as fichas
   das examinadas em `FichaPaths` por Source/ID, sem
-  planos/to-dos, alteracao dos registros ou GO. Depois da escolha humana, segue
+  planos/to-dos, alteracao dos registros ou GO. Novos contextos tambem declaram
+  PrioritizationIndexPath: o condutor atualiza o indice derivado ao concluir;
+  o preparador reconcilia resultados/fichas/cadeia na proxima execucao.
+  Preserve texto manual externo ao bloco gerenciado, categorias e escopos;
+  indice nao escolhe sequencia nem comprova aceite. Depois da escolha humana, segue
   planejamento de um lote. Helpers so orientam/revisam no chat. Siga o contrato.
 - Migracao usa `PlanPath` e `TodoPath` do contexto selecionado, sob
   `.harness/planning/`, na pasta da solicitacao identificada pelo recibo. Nunca use `tasks/` do harness

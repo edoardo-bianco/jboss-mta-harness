@@ -76,7 +76,7 @@ $context = [pscustomobject]@{Root=$fixture;Projects=@($project);ConfigPath=$null
 $paths = Initialize-HarnessMigration $fixture $project
 $index = Join-Path $fixture '.harness/projetos/indice-projetos.md'
 Set-Content -LiteralPath $index '# Indice sintetico: mandatory 1 / 138'
-foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md')) {
+foreach ($relative in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
     $destination = Join-Path $fixture $relative
     $null = [IO.Directory]::CreateDirectory((Split-Path $destination -Parent))
     Copy-Item -LiteralPath (Join-Path $root $relative) -Destination $destination
