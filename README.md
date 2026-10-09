@@ -44,6 +44,11 @@ detalha propostas futuras. A [conciliacao com o backlog](doc/estrategia/concilia
 identifica sobreposicoes, entregas ja atendidas e pendencias preservadas;
 prazo, prioridade e piloto permanecem a definir.
 
+A [arquitetura do Engineering Harness](doc/arquitetura/arquitetura-harness.md)
+consolida a base implementada e propoe a evolucao por nucleo, perfis e capacidades,
+com matriz das Run Tasks, escolha de plataforma e indexacao Java independente de IDE.
+As novas decisoes estao em revisao na [ADR-0008](doc/adr/0008-nucleo-perfis-e-plataforma-do-harness.md).
+
 ## Como usar
 
 **Siga o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md).**

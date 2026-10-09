@@ -5,11 +5,21 @@
 Pedido humano: abrir PR de sprints na main e alinhar a entrega; depois integrar
 os documentos de arquitetura produzidos e incluir planejar sprints no cheat
 sheet. Evolucao do harness em duas entregas, preservando os arquivos recebidos.
+Complemento humano: retirar doc/guias/Migracao_EAP_71_74_Plano_DevOps.pptx,
+material de uma situacao especifica que nao pertence ao harness; nenhuma
+referencia local foi encontrada para esse arquivo.
+
+PR #26 integrada pelo desenvolvedor em 17f80c2. A main local em outro worktree
+contem a arquitetura ate 68528d6; a branch documental foi criada de origin/main
+17f80c2 e reune esse historico por merge, preservando os dois blocos de plano/to-do.
+Copias identicas dos tres Markdown foram conferidas por hash e guardadas em
+.harness/backups-temporarios/integracao-arquitetura-20261009/ com caminhos
+relativos preservados, para permitir a incorporacao dos arquivos ja versionados.
 
 1. Publicar harness/implementar-planejamento-sprints, validada em 80dafed, abrir
    PR para main, conferir revisao/checks e integrar conforme autorizacao humana.
-2. Atualizar main local e criar harness/integrar-arquitetura-cheat-sheet dessa
-   base; incorporar ADR-0008, arquitetura e cheat sheet, preservando propostas
+2. Criar harness/integrar-arquitetura-cheat-sheet da main remota integrada;
+   incorporar ADR-0008, arquitetura e cheat sheet, preservando propostas
    futuras como propostas. Conferir o HTML exportado e a convencao do repositorio.
 3. Reconciliar a baseline e o inventario com a tarefa de sprints entregue;
    explicar preparo/execucao do prompt/validacao deterministica e apontar ao guia.
@@ -17,11 +27,21 @@ sheet. Evolucao do harness em duas entregas, preservando os arquivos recebidos.
    publicar e integrar a PR documental. Sincronizar main local/remota e registrar
    evidencias. Homologacao corporativa continua pendente; nenhum lote autorizado.
 
+Verificacao documental concluida em 09/10: 270 links/ancoras locais em sete
+documentos; inventarios Markdown e HTML iguais as 27 tarefas de tasks.json;
+corpo HTML regenerado e comparado com o Markdown, preservando estilos/fontes.
+PPTX removido, sem referencias vivas. Sem conflitos ou erros de whitespace.
+Revisao independente concluida sem bloqueios. ADR-0008 permanece proposta.
+Alteracoes restritas a documentacao; suites da PR #26 nao foram repetidas.
+Publicacao e merge documental seguem a politica de revisao aprovada no GitHub,
+conforme escolha humana; sincronizacao da main local ocorre apos esse merge.
+
 ## Implementacao da MACRO-01 - 2026-10-08
 
 **CONCLUSAO TECNICA LOCAL: 09/10/2026, retomada autorizada de 88520ac.**
 Raiz, branch harness/implementar-planejamento-sprints e arvore limpa conferidas.
-Implementacao e verificacao final concluidas nesta branch, sem integrar na main.
+Implementacao e verificacao final concluidas nesta branch; PR #26 integrada na
+main remota em 17f80c2 pelo desenvolvedor em 09/10/2026.
 Entrega pronta para revisao/primeiro ensaio; homologacao corporativa e aceite
 humano continuam pendentes. Dois documentos novos de arquitetura encontrados
 durante a sessao foram preservados fora desta entrega.
@@ -56,8 +76,8 @@ Primeiro uso: Terminal > Run Task > Planejamento: planejar sprints > Novo cenari
 selecionar projetos, executar o prompt preparado no agente principal e voltar
 a mesma tarefa em Validar e gerar cronograma. Conferir justificativas e decisoes
 no [guia canonico](../doc/guias/tools/planejamento-sprints.md#primeira-execucao).
-Publicacao/PR e integracao na main permanecem para a entrega solicitada pelo
-desenvolvedor; esta conclusao local nao faz merge nem concede aceite.
+Publicacao e integracao da PR #26 concluidas; isso nao concede aceite de
+migracao nem substitui a homologacao corporativa.
 
 Refinamentos humanos que prevalecem sobre a formulacao inicial da feature:
 - Run Task seleciona projetos antes de reunir contexto; o prompt pergunta datas,
@@ -135,6 +155,88 @@ Verificacao: testes de calendario/capacidade/limites/identidade, preparo e revis
 com fontes ausentes/alteradas, concorrencia, cancelamento, tarefa e limpeza.
 Revisao independente e ensaio local com fixture; homologacao corporativa fica
 com o operador e nao pode ser declarada a partir das fixtures.
+
+## Arquitetura do Engineering Harness: nucleo e perfis - 2026-10-09
+
+Pedido: consolidar estrategia, ADRs e implementacao em documento arquitetural
+autocontido; definir evolucao DDD pragmatica, plataforma, perfis/plugins,
+portabilidade de IDE/engine, comportamento por Run Task e compreensao Java.
+
+Base: main 63908081c5b21ec1c483e9a79d033526786224d5. Trabalho isolado na branch
+harness/arquitetura-nucleo-perfis, em worktree proprio. Checkout original de
+sprints preservado; checkpoint 88520ac e alteracoes locais sao apenas evidencia
+de trabalho em andamento, sem declarar integracao ou aceite.
+
+Entregas: doc/arquitetura/arquitetura-harness.md, ADR da direcao proposta e
+referencia de descoberta no README. Preservar documentos historicos e distinguir
+implementado na baseline, trabalho em andamento e arquitetura recomendada.
+
+Sequencia: (1) conferir fontes e inventariar todas as Run Tasks; (2) verificar
+fontes oficiais de plataforma, indexacao e clientes; (3) escrever comportamento,
+estrutura, dominios/capacidades e decisoes; (4) validar links, exemplos JSON,
+cobertura da matriz e diff; (5) revisar de forma independente e preparar entrega.
+
+Aceite documental: tecnologias atuais rastreaveis; matriz completa de tarefas e
+acionamento de agentes; nucleo/perfis/configuracao e fronteiras DDD explicitos;
+comparacao fundamentada de linguagens e indexadores; escolhas recomendadas com
+limites e pilotos; preservacao de GO/aceite, artefatos e configuracao Maven.
+Nao implementar a arquitetura ou alterar a frente de sprints nesta etapa.
+Integrar somente a documentacao na main local apos verificacao e revisao,
+preservando a ADR como proposta para a revisao humana das escolhas arquiteturais.
+
+Entrega documental concluida: arquitetura e ADR-0008 proposta, com descoberta
+pelo README. Verificacao: 87 links/ancoras locais validos, dois exemplos JSON
+validos, 26/26 Run Tasks representadas uma vez e taxonomia conferida; diff sem
+erros de whitespace. Fontes oficiais consultadas em 09/10/2026. Revisao
+independente por outro modelo identificou inconsistencias de nomes de dominio,
+vigencia historica das ADRs e alcance da pasta de evidencias; corrigidas e
+reconferidas sem novos achados. Nao foram executados testes operacionais ou
+pilotos das tecnologias propostas nesta mudanca exclusivamente documental.
+Commit documental 48e7265 integrado por fast-forward na main local em worktree
+separado; sem push. A branch e o trabalho pendente de sprints foram preservados.
+Revisao humana das escolhas da ADR-0008 permanece pendente.
+
+Complemento solicitado: anexo com a imagem original de Harness Engineering,
+reutilizando doc/estrategia/imagens/04-luca-mezzalira-harness.png sem traducao
+dos rotulos; texto claro em portugues e referencias ao episodio O'Reilly de
+Luca Mezzalira e ao artigo de Birgitta Boeckeler. Fundamentar a aplicacao
+pragmatica de DDD em fontes primarias de Eric Evans e Vaughn Vernon. Preservar
+o frontmatter de exportacao HTML autocontido. Distinguir a origem conceitual
+das decisoes locais e os resultados deterministicos das avaliacoes por IA.
+Validar o anexo, integrar na main local e disponibilizar o documento e sua ADR
+em doc/ no checkout original, sem sobrescrever arquivos existentes ou alterar
+a branch e os arquivos de sprints.
+
+Complemento revisado sem achados materiais. Verificados 88 links/ancoras locais
+na arquitetura, dois exemplos JSON, 26 Run Tasks da baseline e frontmatter HTML.
+Documento e ADR disponibilizados no checkout original com hashes identicos;
+imagem original ja versionada foi reutilizada. Nenhum HTML foi gerado nesta
+etapa. Integracao documental local por fast-forward, sem push.
+
+Revisao editorial: retirar metatexto de elaboracao e rotulos como "Texto em
+portugues"; dar continuidade narrativa a motivacoes, responsabilidades e
+evolucao. Preservar fontes, imagem, contratos, configuracao de exportacao e a
+distincao entre arquitetura existente e proposta. Revisar, conferir links e
+sincronizar o documento no checkout original antes da integracao local.
+
+Revisao editorial concluida: narrativa continua no anexo e remocao de relatos
+de elaboracao ao longo da arquitetura. Revisao independente sem achados apos
+explicitar DDD, nucleo e perfis como evolucao proposta. Conferidos 88 links,
+dois exemplos JSON, 26 Run Tasks, imagem e frontmatter; documento sincronizado
+com conferencia do conteudo anterior e do hash final. Sem testes operacionais,
+pois a alteracao e exclusivamente editorial.
+
+Extracao da consulta rapida: mover o inventario da secao 5.1 para
+doc/arquitetura/cheat-sheet-run-tasks.md, preservando as 26 linhas, a legenda,
+a baseline e os limites do inventario. Manter referencia na arquitetura e
+frontmatter proprio para exportacao HTML independente. Conferir fidelidade,
+links e configuracao; sincronizar os dois documentos no checkout original.
+
+Extracao concluida e revisada sem achados: corpo da antiga secao 5.1 preservado
+integralmente, com 26 tarefas e sem duplicacao na arquitetura. Conferidos 52
+links locais na arquitetura e 39 no cheat sheet, dois exemplos JSON e ambos os
+frontmatters. Arquivos sincronizados no checkout original com conferencia de
+hash. HTML podera ser exportado separadamente; nao foi gerado nesta etapa.
 
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 

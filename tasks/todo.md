@@ -2,16 +2,18 @@
 
 ## Publicacao de sprints e incorporacao da arquitetura - 2026-10-09
 
-- [ ] Publicar PR de sprints e integrar na main apos conferir revisao/checks.
-- [ ] Atualizar main e abrir branch documental da base integrada.
-- [ ] Incorporar arquitetura/ADR e alinhar cheat sheet com planejar sprints.
-- [ ] Conferir links/inventario, revisar e integrar a PR documental.
+- [x] Publicar PR de sprints e confirmar merge humano #26 em 17f80c2.
+- [x] Abrir branch documental da main remota integrada e conciliar o historico local.
+- [x] Incorporar arquitetura/ADR e alinhar cheat sheet Markdown/HTML com planejar sprints.
+- [x] Remover a apresentacao especifica Migracao_EAP_71_74_Plano_DevOps.pptx e conferir referencias.
+- [x] Conferir 270 links/ancoras, inventario de 27 tarefas e revisao independente.
+- [ ] Publicar e integrar a PR documental conforme revisao aprovada no GitHub.
 - [ ] Sincronizar main local/remota e registrar resultado, preservando arquivos.
 
 ## Implementacao da MACRO-01 - 2026-10-08
 
 **Concluido tecnicamente em 09/10/2026; retomada do checkpoint 88520ac.**
-Branch harness/implementar-planejamento-sprints, sem integracao na main.
+Branch harness/implementar-planejamento-sprints integrada pela PR #26 em 17f80c2.
 Oito suites PS5.1 aprovadas, 26 casos de validacao, 169 links/ancoras e revisao
 independente sem bloqueios. Evidencias e primeiro uso no inicio de plan.md.
 
@@ -25,6 +27,21 @@ independente sem bloqueios. Evidencias e primeiro uso no inicio de plan.md.
 - [x] Validar deterministicamente prazo/limites do retorno e explicar NAO_CABE/EM_RISCO com causas calculadas.
 - [x] Preparar entrega revisavel e roteiro para o primeiro uso corporativo.
 - [ ] Homologar primeiro planejamento real com entradas do desenvolvedor.
+
+## Arquitetura do Engineering Harness: nucleo e perfis - 2026-10-09
+
+- [x] Conferir raiz, branch, HEAD e alteracoes; criar worktree a partir da main.
+- [x] Consolidar estrategia, ADRs, tecnologias e matriz completa de Run Tasks.
+- [x] Fundamentar nucleo/perfis, DDD, linguagem e indexacao Java em fontes oficiais.
+- [x] Escrever documento arquitetural e ADR proposta, com referencia no README.
+- [x] Validar links, JSON, cobertura da matriz e diff; realizar revisao independente.
+- [x] Integrar a entrega documental revisada na main local, sem mudar a branch de sprints.
+- [x] Incluir imagem original, texto em portugues e referencias O'Reilly/Birgitta no anexo.
+- [x] Fundamentar DDD pragmatico em fontes primarias e preservar tags de HTML autocontido.
+- [x] Validar e revisar o anexo; disponibilizar documento e ADR no checkout original.
+- [x] Revisar narrativa arquitetural, retirar metatexto e validar a versao atualizada.
+- [x] Extrair a matriz de Run Tasks em cheat sheet referenciado e validar exportabilidade.
+- [ ] Revisao humana das escolhas arquiteturais propostas na ADR-0008.
 
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 
@@ -1013,7 +1030,7 @@ As dependencias de validacao ja registradas permanecem; nao fixam uma ordem glob
 | COMP-01 | Capacidade solicitada; detalhada por DEP-01/02 | Coletor deterministico Maven e matriz por projeto: compatibilidade, fontes, pendencias e acao recomendada, sem alterar POM. DEP-03 e extensao a avaliar separadamente. |
 | CORE-01 | Piloto opcional transversal; detalhado por SRC | Navegacao/coleta de contexto Java independente de MTA/engine, principalmente SRC-01/03/06. SRC-02/04/05 ampliam opcoes, sem se tornarem requisitos do primeiro piloto. Adaptador ainda a escolher. |
 | SERV-01 | Capacidade solicitada; detalhada por JBS-01..05 | Inventario, rota comprovada, assistencia, transformacao de configuracao e validacao no destino isolado. Reutilizar operacoes existentes; nao duplicar a demanda nem declarar rota 7.1 direta suportada. |
-| MACRO-01 | Implementada e validada localmente em 09/10; sem integracao na main, homologacao humana pendente | [Planejamento por sprints](../doc/features/planejamento-macro-sprints.md), [guia de uso](../doc/guias/tools/planejamento-sprints.md) e [template sintetico](../doc/modelos/planejamento-sprints.template.md): tarefa unica, contexto, motor deterministico, justificativas, revisoes e evidencias preservadas. Oito suites PS5.1 aprovadas; primeiro uso corporativo pendente. |
+| MACRO-01 | Integrada na main pela PR #26 em 09/10; homologacao humana pendente | [Planejamento por sprints](../doc/features/planejamento-macro-sprints.md), [guia de uso](../doc/guias/tools/planejamento-sprints.md) e [template sintetico](../doc/modelos/planejamento-sprints.template.md): tarefa unica, contexto, motor deterministico, justificativas, revisoes e evidencias preservadas. Oito suites PS5.1 aprovadas; primeiro uso corporativo pendente. |
 | VAL-01 | Ensaio parcial interrompido para simplificacao; eventos 9/10 | Uso da skill e reconhecimento da escolha demonstrados no material trazido pelo desenvolvedor; reconciliacao primeiro sem conflito apontado nos dois clientes, Codex direcionou execucao ao Copilot. Delegacao ainda nao validada. Retestar em SIM-14: orientacao/delegacao, capacidades presentes/ausentes/inadequadas e ausencia de efeitos operacionais; casos do plano. |
 | VAL-02 | Ensaio operacional existente pendente | Prompts Copilot: reconciliacao/delegacao, issues, persistencia, retomada, GO, implementacao e continuidade com Previous/novo MTA. |
 | VAL-03 | Ensaio Sonar real pendente | Criterios Blocker/High, avisos de cobertura e comparacao com baseline, separados do Quality Gate. |
