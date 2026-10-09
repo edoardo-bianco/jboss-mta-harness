@@ -72,6 +72,8 @@ Sem executor, o preenchimento manual mantem os mesmos arquivos e a validacao.
    (data da fotografia do trabalho restante), estimativas e
    narrativa. Execute a mesma tarefa e escolha
    **Validar e gerar cronograma** para a revisao selecionada.
+   Para reunir essas respostas numa mensagem, adapte o
+   [exemplo de complemento](#exemplo-de-complemento-ao-prompt).
 6. Leia `validacao.json` e `planejamento-sprints.md`: lacunas, gargalos, limites
    e premissas precisam estar explicitos antes de considerar a previsao.
 7. Execute o prompt de analise `revisar-sprints.prompt.md` oferecido pela tarefa.
@@ -93,6 +95,90 @@ O preparo gera uma entrada com restricoes/estimativas ainda nulas e um Markdown 
 rascunho. Preparar nao executa o agente. O prompt preenche estimativas e
 macroatividades no JSON e a narrativa no Markdown; o calculador gera os numeros,
 tabelas, matriz e Gantt na etapa de validacao.
+
+### Exemplo de complemento ao prompt
+
+Depois de executar o prompt preparado, envie uma mensagem como a abaixo na
+mesma conversa do executor. Ela complementa o prompt principal com suas escolhas;
+nao substitui o arquivo preparado nem exige editar o prompt capturado. Tambem
+pode ser enviada como resposta agrupada as perguntas do agente.
+
+**Exemplo preenchido, nao padrao do harness:** substitua datas, equipe, limites,
+ausencias, reserva e ganho de IA pelas suas decisoes. Nao confirmado deve ficar
+"a informar", sem assumir zero ou disponibilidade integral. Use o escopo real
+do contexto e nao copie quantidades de projetos/issues de outro planejamento.
+Se a revisao ja foi validada, use **Revisar** antes de pedir alteracoes e execute
+o novo prompt preparado. Em retomadas, preserve respostas existentes; identifique
+explicitamente as escolhas que esta mudando e o motivo, sem repetir todo o exemplo.
+
+```text
+Use estas decisoes como complemento ao prompt principal. Preserve contexto,
+destinos, IDs e revisao preparados. Nao reinicie o planejamento nem repita
+perguntas ja respondidas aqui. Pergunte apenas lacunas ou contradicoes relevantes.
+
+ESCOPO
+- Um unico planejamento consolidado para todos os projetos do contexto,
+  compartilhando equipe e calendario.
+- Somente mandatory; nao incluir optional ou potential. Confira identidades
+  e cobertura pelas fontes, sem escolher issues apenas pela priorizacao.
+
+DATAS CONFIRMADAS - 2026
+- Inicio da primeira sprint de implementacao: 12/10/2026.
+- Corretivas das mandatory concluidas ate 13/11/2026.
+- Ajustes dessa etapa ate 19/11/2026.
+- Testes com QA na esteira DES: 16/11/2026 a 11/12/2026.
+- Janela planejada de PRD: 14/12/2026 a 18/12/2026; prazo maximo 18/12/2026.
+- Sobreposicao entre QA e ajustes intencional e aceita.
+- Data de referencia da fotografia do restante: 09/10/2026.
+- Preserve os marcos; nao mude datas para fazer o cronograma caber.
+
+EQUIPE, CALENDARIO E LIMITES
+- 2 desenvolvedores, 1 arquiteto e 1 DevOps, pessoas distintas, todos a 100%.
+- Ausencias planejadas: zero. Reserva de capacidade: 0%.
+- Segunda a sexta, respeitando os feriados nacionais. Sprints de 14 dias
+  corridos; feriados reduzem capacidade sem prolongar a sprint.
+- Sem teto adicional de sprints por fase ou total: registre a decisao
+  explicitamente no formato suportado, sem tratar como dado desconhecido.
+- Teto de 2 devs no cenario base. Um terceiro dev em novembro e alternativa
+  condicionada a necessidade e minha confirmacao; nao contabilizar agora.
+
+PREPARACAO, ACOMPANHAMENTO E QA
+- Arquiteto e DevOps iniciam JBoss local e esteira DES na primeira sprint,
+  em paralelo a implementacao possivel. Justifique as dependencias reais.
+- O arquiteto acompanha a migracao ao longo da janela pertinente. Distribua
+  esse esforco sem concentra-lo no inicio nem duplicar sua capacidade.
+  Se faltar definir a janela exata, pergunte antes de pressupor datas.
+- Registrar testes com QA sem quantidade de pessoas. Nao inventar capacidade
+  de QA; explicitar a limitacao e contar suporte/correcoes de Dev, Arq e DevOps.
+
+AUXILIO DA IA
+- Considerar reducao de 20% do esforco de Dev nas atividades apoiadas pelo
+  harness, como planejar issue e implementar. Identifique essas atividades.
+- E hipotese de planejamento informada por mim, ainda nao medida.
+- Preserve a faixa original sem desconto e aplique a reducao uma unica vez
+  pelo parametro do calculador. Evidencie percentual, original e efetivo.
+- Nao aumente disponibilidade nem reduza Arq, DevOps, QA ou espera externa.
+- Se a estimativa anterior ja incluia IA, concilie a base antes de aplicar
+  o parametro. Base desconhecida permanece lacuna; nao desconte duas vezes.
+
+ESTIMATIVAS E ENTREGA
+- Use fichas, registros e codigo pertinente para propor estimativas com
+  fonte, hipotese, confianca e lacunas; nao me peca que estime tudo do zero.
+- Referencie somente arquivos efetivamente lidos, nao diretorios genericos.
+- Concilie JSON e narrativa na revisao editavel, substituindo instrucoes de
+  preenchimento e textos obsoletos por conteudo claro, sem apagar historico.
+- Separe decisoes humanas, estimativas propostas e resultados calculados.
+  Preserve todas as issues do escopo, inclusive trabalho ainda nao alocado.
+- Nao afirme atendimento ao prazo antes da validacao deterministica. Se nao
+  couber, explique esforco restante, dependencias e papeis limitantes.
+- Ao terminar, indique Validar e gerar cronograma e depois o prompt de analise
+  do resultado da mesma revisao. Este complemento nao concede GO ou aceite.
+```
+
+O percentual de IA acima e uma hipotese explicita deste exemplo, nao uma medicao
+nem o percentual de fatia usado na priorizacao. Depois do preenchimento, confira
+no JSON as decisoes registradas e, apos validar, a reducao evidenciada e os marcos
+calculados. Enviar respostas ao agente nao executa a tarefa de validacao.
 
 ### Escolher a acao da mesma tarefa
 
