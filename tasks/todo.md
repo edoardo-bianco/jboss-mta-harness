@@ -8,6 +8,9 @@
 - [x] Escrever documento arquitetural e ADR proposta, com referencia no README.
 - [x] Validar links, JSON, cobertura da matriz e diff; realizar revisao independente.
 - [x] Integrar a entrega documental revisada na main local, sem mudar a branch de sprints.
+- [x] Incluir imagem original, texto em portugues e referencias O'Reilly/Birgitta no anexo.
+- [x] Fundamentar DDD pragmatico em fontes primarias e preservar tags de HTML autocontido.
+- [x] Validar e revisar o anexo; disponibilizar documento e ADR no checkout original.
 - [ ] Revisao humana das escolhas arquiteturais propostas na ADR-0008.
 
 ## Consolidacao documental da MACRO-01 - 2026-10-08

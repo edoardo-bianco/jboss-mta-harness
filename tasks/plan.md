@@ -40,6 +40,23 @@ Commit documental 48e7265 integrado por fast-forward na main local em worktree
 separado; sem push. A branch e o trabalho pendente de sprints foram preservados.
 Revisao humana das escolhas da ADR-0008 permanece pendente.
 
+Complemento solicitado: anexo com a imagem original de Harness Engineering,
+reutilizando doc/estrategia/imagens/04-luca-mezzalira-harness.png sem traducao
+dos rotulos; texto claro em portugues e referencias ao episodio O'Reilly de
+Luca Mezzalira e ao artigo de Birgitta Boeckeler. Fundamentar a aplicacao
+pragmatica de DDD em fontes primarias de Eric Evans e Vaughn Vernon. Preservar
+o frontmatter de exportacao HTML autocontido. Distinguir a origem conceitual
+das decisoes locais e os resultados deterministicos das avaliacoes por IA.
+Validar o anexo, integrar na main local e disponibilizar o documento e sua ADR
+em doc/ no checkout original, sem sobrescrever arquivos existentes ou alterar
+a branch e os arquivos de sprints.
+
+Complemento revisado sem achados materiais. Verificados 88 links/ancoras locais
+na arquitetura, dois exemplos JSON, 26 Run Tasks da baseline e frontmatter HTML.
+Documento e ADR disponibilizados no checkout original com hashes identicos;
+imagem original ja versionada foi reutilizada. Nenhum HTML foi gerado nesta
+etapa. Integracao documental local por fast-forward, sem push.
+
 ## Consolidacao documental da MACRO-01 - 2026-10-08
 
 Retomada autorizada apos merge da PR #24: substituir a proposta existente pela

@@ -16,7 +16,7 @@ Estabelecer a arquitetura do harness de engenharia a partir do produto de migra�
 
 ## 2. Contexto
 
-O harness atual organiza a migração EAP com PowerShell, Run Tasks do VS Code, configurações locais, documentos, evidências e agentes. A [estratégia](../estrategia/estrategia-harness_.md), o [catálogo de capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) e sua [conciliação](../estrategia/conciliacao-evolucao-harness.md) propõem ampliar essa base para desenvolvimento, qualidade e modernização. O produto ainda não possui núcleo extraído, sistema geral de perfis, extensão própria ou integração IntelliJ. A implementação de sprints está em outra frente; sua existência no checkout não significa entrega na baseline.
+O harness atual organiza a migração EAP com PowerShell, Run Tasks do VS Code, configurações locais, documentos, evidências e agentes. A [estratégia](../estrategia/estrategia-harness_.md), o [catálogo de capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) e sua [conciliação](../estrategia/conciliacao-evolucao-harness.md) propõem ampliar essa base para desenvolvimento, qualidade e modernização. A inspiração conceitual em harness engineering está documentada no [anexo A](#anexo-a--harness-engineering-imagem-original-e-texto-em-português). O produto ainda não possui núcleo extraído, sistema geral de perfis, extensão própria ou integração IntelliJ. A implementação de sprints está em outra frente; sua existência no checkout não significa entrega na baseline.
 
 ## 3. Estratégia
 
@@ -116,6 +116,10 @@ O domínio do produto é **conduzir trabalho de engenharia com contexto, decisã
 Build, serialização, resolução de caminhos, indexação e inicialização de processos são mecanismos de engenharia. A regra “esta alteração exige revisão do escopo aprovado” pertence ao domínio do harness; a regra “compilar este projeto em Java 8” pertence ao perfil JBoss; executar `mvn.cmd` pertence ao adaptador Maven. Essa separação evita transformar conhecimento de uma tecnologia em regra universal.
 
 Domínio e subdomínio organizam problemas e responsabilidades; **bounded context** delimita um modelo e seu vocabulário; **capacidade** descreve um resultado acionável; **plugin** implementa integrações; **perfil** compõe capacidades e políticas para um objetivo. Nenhum desses conceitos exige um microserviço. A referência conceitual é o [DDD Reference, de Eric Evans](https://www.domainlanguage.com/ddd/reference/); a decomposição abaixo é uma decisão deste projeto.
+
+**DDD pragmático**, neste documento, é a diretriz de aplicar modelagem conforme a complexidade e o valor do problema: compreender o trabalho, delimitar responsabilidades e investir nos modelos que protegem decisões relevantes. A distinção entre desenho estratégico — linguagem, subdomínios, contextos e relações — e tático — agregados e regras do modelo — está fundamentada em [Domain-Driven Design Distilled, de Vaughn Vernon, capítulos 2–6](https://www.informit.com/store/domain-driven-design-distilled-9780134434988), publicado pela Addison-Wesley. O monólito modular e os recortes propostos são escolhas do harness para aplicar esses fundamentos.
+
+A **linguagem ubíqua** deve ser construída com quem conhece o trabalho e aparecer nos diálogos, casos de uso e código dentro de cada contexto, como explica Vernon em [How To Do DDD](https://www.informit.com/articles/article.aspx?p=1944876&seqNum=3). No harness, termos como solicitação, evidência, proposta, GO e aceite precisam manter significados explícitos; nas aplicações, o vocabulário continua sendo validado com seus especialistas de negócio. A adoção tática segue as invariantes da seção 7.2, sem transformar cada script ou integração em um agregado.
 
 ### 6.2. Mapa proposto
 
@@ -387,3 +391,35 @@ As referências oficiais foram consultadas em 09/10/2026; versões e suporte dev
 | [Extensão VS Code](../features/engineering-harness-vscode.md), [MACRO-01](../features/planejamento-macro-sprints.md) e [estudo CORE-01](../../tasks/plan.md#exploracao-java-opcional-e-transversal) | Propostas e estudos reconciliados, com estado de entrega explicitado. |
 
 Enquanto a ADR-0008 estiver proposta, os contratos vigentes orientam a execução. Ao aceitar uma mudança de regra, registrar sua adoção e atualizar os contratos afetados em incremento próprio; a visão arquitetural não substitui os procedimentos operacionais nem o histórico.
+
+## Anexo A — Harness engineering: imagem original e texto em português
+
+### A.1. Referência e origem da ideia nesta proposta
+
+A referência indicada pelo desenvolvedor é a apresentação de Luca Mezzalira, [What's Happening in Software Architecture — O’Reilly](https://learning.oreilly.com/videos/whats-happening-in/0642572416683/), episódio de 22/09/2026, conforme o [catálogo público da O’Reilly](https://www.oreilly.com/videos/whats-happening-in/0642572416683/). O diagrama é reproduzido em sua forma original. O texto em português adapta o conteúdo do slide **Harness Engineering** fornecido pelo desenvolvedor, com ajustes de fluidez; os dados da apresentação foram conferidos no catálogo.
+
+O slide associa essa visão a Birgitta Böckeler, Distinguished Engineer da Thoughtworks. Seu artigo [Harness engineering for coding agent users](https://martinfowler.com/articles/harness-engineering.html), de 02/04/2026, detalha orientações antecipadas (*feedforward*), mecanismos de retorno (*feedback*) e o papel humano na evolução desses controles. Essas referências explicam a inspiração desta proposta; as escolhas de plataforma, núcleo, perfis e contratos são decisões locais do harness, descritas nas seções anteriores.
+
+### A.2. Imagem original
+
+![Diagrama de harness engineering: conhecimento arquitetural e orientações alimentam o agente; código e verificações formam o ciclo de retorno.](../estrategia/imagens/04-luca-mezzalira-harness.png)
+
+*Figura A.1 — Diagrama da apresentação de Luca Mezzalira referenciada na seção A.1. Arquivo original preservado na pasta de imagens da estratégia do harness.*
+
+### A.3. Texto em português
+
+**Engenharia de harness**
+
+O trabalho com IA vai além da geração de código. Na engenharia de harness, uma pessoa colabora com um agente de programação e fornece antecipadamente as informações que estabelecem o contexto: como o projeto ou serviço deve ser estruturado, quais decisões precisam ser respeitadas e qual resultado se deseja alcançar. Depois, fornece retorno sobre o que foi produzido, ajudando o agente a ajustar sua atuação.
+
+**Os arquitetos continuam relevantes. Precisamos compreender como estruturar o domínio do sistema e quais características arquiteturais ele exige.** No DDD estratégico, começamos pelos subdomínios e os classificamos como centrais (*core*), genéricos (*generic*) ou de suporte (*supporting*). Essa compreensão ajuda a escolher as características arquiteturais adequadas a cada contexto.
+
+As categorias admitem exceções e podem mudar. Um subdomínio inicialmente genérico pode tornar-se central, ou ocorrer o contrário, conforme fatores externos alterem as necessidades do sistema. Compreender essas mudanças permite rever sua estrutura e as características arquiteturais necessárias.
+
+Podemos registrar em ADRs as decisões e os motivos para escolher determinadas alternativas e concessões (*trade-offs*). Essas decisões podem ser traduzidas em instruções para agentes, em arquivos como `AGENTS.md`. Essa é a orientação antecipada fornecida pelos arquitetos: tornar o conhecimento disponível de modo que o agente possa usá-lo ao trabalhar.
+
+**Depois da geração do código, precisamos de um ciclo de retorno que informe o agente sobre o resultado.** Esse retorno pode vir de análise estática, testes, testes de arquitetura, verificações de segurança e informações coletadas durante a execução do sistema. A IA também pode ajudar a explicar os resultados produzidos por verificações determinísticas.
+
+### A.4. Aplicação ao harness
+
+Nesta arquitetura, ADRs, guias, skills e contexto por perfil fornecem a orientação antecipada; ferramentas de análise, build, testes e observabilidade produzem o retorno. O orientador e seus especialistas conectam esses recursos ao objetivo da solicitação. A aplicação de DDD e suas fontes primárias estão na seção 6.1. Resultados determinísticos permanecem como evidências identificáveis; interpretações e revisões feitas por IA são registradas como avaliações, com seus limites. Essa distinção também é explicitada no artigo de Böckeler: um ciclo pode combinar controles computacionais e inferenciais. As decisões de negócio, o GO e o aceite humano seguem os contratos do harness.
