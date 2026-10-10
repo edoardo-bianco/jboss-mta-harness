@@ -23,6 +23,9 @@ Implementacao autorizada por "proceder" em 10/10/2026, em andamento nesta branch
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
 - [x] S04a: leitura direta do formato static-report, data/fuso, empate, incompleto e regravacao, sem persistir diagnostico.
 - [x] Quatro testes novos em PowerShell 5.1; revisao independente da recuperacao sem bloqueios remanescentes. Fixtures sinteticas, sem conversao/limpeza de dados reais.
+- [x] S05a: indice geral/corrente por artifactId e links diretos, sem copia datada; preservacao de decisoes e marcadores ambíguos testada.
+- [x] S07a: build grava ultima tentativa no destino fixo, inclusive falha; preserva Java 8, Maven separado, settings e ambiente. Resultado/log/situacao publicados juntos.
+- [x] Retirada transacional de assets, recuperacao apos retirada e concorrencia real entre processos verificadas; produtores MTA/Sonar ainda em adaptacao.
 - [ ] Integrar o nucleo aos produtores/consumidores e concluir os demais criterios S01-S28 abaixo.
 
 Cada linha abaixo representa uma

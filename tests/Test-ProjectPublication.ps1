@@ -37,4 +37,20 @@ Publish-HarnessProjectFiles $project $files
 $values=Read-HarnessProjectFiles $project @('atual/planejamento/plano.md','atual/planejamento/tarefas.md')
 Assert ($values['atual/planejamento/plano.md'] -ceq 'plano dois' -and $values['atual/planejamento/tarefas.md'] -ceq 'tarefas dois') 'Leitor deve observar um conjunto completo.'
 Assert (-not (Test-Path -LiteralPath $project.TemporaryPath)) 'Segunda publicacao nao cria revisoes.'
-'PASS: publicacao, conflito, recuperacao e leitura consistente sem recibos permanentes.'
+Publish-HarnessProjectFiles $project @{'obsoleto.txt'='asset antigo'}
+& $module { $script:writes=0
+    function script:Write-ProjectPublishedFile { param($Source,$Destination)
+        & $script:originalWriter $Source $Destination
+        $script:writes++
+        if ($script:writes -eq 1) { throw 'falha depois da retirada e da nova escrita' }
+    }
+}
+try { Reject { Publish-HarnessProjectFiles $project ([ordered]@{'obsoleto.txt'=$null;'novo.txt'='novo'}) } 'Falha apos retirada deve ser reportada.' }
+finally { & $module { ${function:Write-ProjectPublishedFile}=$script:originalWriter } }
+Assert ([IO.File]::ReadAllText((Join-Path $project.Folder 'obsoleto.txt')) -ceq 'asset antigo') 'Recuperacao deve restaurar arquivo removido.'
+Assert (-not (Test-Path (Join-Path $project.Folder 'novo.txt'))) 'Recuperacao retira o arquivo novo do conjunto que falhou.'
+Publish-HarnessProjectFiles $project @{'obsoleto.txt'=$null}
+Assert (-not (Test-Path (Join-Path $project.Folder 'obsoleto.txt'))) 'Publicacao de novo conjunto deve poder retirar asset obsoleto, sem arquivo vazio.'
+Reject { Get-HarnessProjectTreePublication $project (Join-Path $project.Folder 'ausente') 'atual/planejamento' } 'Pasta preparada ausente nao pode significar apagar diagnostico corrente.'
+Reject { Get-HarnessProjectTreePublication $project $project.PlanPath 'atual/planejamento' } 'Arquivo nao e conjunto preparado valido.'
+'PASS: publicacao, conflito, recuperacao, retirada e leitura consistente sem recibos permanentes.'

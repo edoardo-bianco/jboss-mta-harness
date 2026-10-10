@@ -55,8 +55,9 @@ function Restore-ProjectPublication {
             $destination=Resolve-ProjectDocument $Project $entry.Path
             $before=Resolve-ProjectPath (Join-Path $temporary ('antes/'+$entry.Path)) $Project.Folder
             $after=Resolve-ProjectPath (Join-Path $temporary ('depois/'+$entry.Path)) $Project.Folder
-            if (-not (Test-Path -LiteralPath $after -PathType Leaf) -or ($entry.Existed -and -not (Test-Path -LiteralPath $before -PathType Leaf))) { throw 'Conjunto de recuperacao incompleto; preserve temporarios.' }
-            if ((Test-Path -LiteralPath $destination) -and -not (Test-ProjectFileBytes $destination $after) -and -not ($entry.Existed -and (Test-ProjectFileBytes $destination $before))) { throw "Edicao concorrente durante recuperacao: $destination. Preserve e concilie os arquivos em temporarios/publicacao." }
+            $removed=$entry.PSObject.Properties['Remove'] -and $entry.Remove
+            if ((-not $removed -and -not (Test-Path -LiteralPath $after -PathType Leaf)) -or ($entry.Existed -and -not (Test-Path -LiteralPath $before -PathType Leaf))) { throw 'Conjunto de recuperacao incompleto; preserve temporarios.' }
+            if ((Test-Path -LiteralPath $destination) -and -not (-not $removed -and (Test-ProjectFileBytes $destination $after)) -and -not ($entry.Existed -and (Test-ProjectFileBytes $destination $before))) { throw "Edicao concorrente durante recuperacao: $destination. Preserve e concilie os arquivos em temporarios/publicacao." }
         }
         foreach ($entry in $entries) {
             $destination=Resolve-ProjectDocument $Project $entry.Path
@@ -71,21 +72,33 @@ function Restore-ProjectPublication {
     Remove-ProjectPublication $Project
 }
 
-function Invoke-WithProjectAccess {
-    param($Project,[scriptblock]$Action)
+function Enter-HarnessProjectAccess {
+    param($Project,[switch]$ForOperation)
     # Only an OS mutex name: this digest is never saved in project data or used
     # for identity, navigation, history or authorization.
     $sha=[Security.Cryptography.SHA256]::Create()
     try { $name=[BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($Project.Folder.ToLowerInvariant()))).Replace('-','') }
     finally { $sha.Dispose() }
+    if ($ForOperation) { $name+='_operation' }
     $mutex=New-Object Threading.Mutex($false,('Local\HarnessProject_'+$name))
     $acquired=$false
     try {
         try { $acquired=$mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $acquired=$true }
         if (-not $acquired) { throw 'Projeto em uso por outra operacao; aguarde terminar.' }
-        Restore-ProjectPublication $Project
-        & $Action
-    } finally { if ($acquired) { $mutex.ReleaseMutex() }; $mutex.Dispose() }
+        if ($ForOperation) {
+            # Long-running tools serialize with each other. Readers may still
+            # inspect the complete current state while the next one is prepared.
+            $publication=Enter-HarnessProjectAccess $Project
+            try { } finally { $publication.ReleaseMutex(); $publication.Dispose() }
+        } else { Restore-ProjectPublication $Project }
+        return $mutex
+    } catch { if ($acquired) { $mutex.ReleaseMutex() }; $mutex.Dispose(); throw }
+}
+
+function Invoke-WithProjectAccess {
+    param($Project,[scriptblock]$Action)
+    $mutex=Enter-HarnessProjectAccess $Project
+    try { & $Action } finally { $mutex.ReleaseMutex(); $mutex.Dispose() }
 }
 
 function Write-ProjectPublishedFile {
@@ -134,15 +147,17 @@ function Publish-HarnessProjectFiles {
                 $path=Resolve-ProjectDocument $Project $relative
                 $after=Join-Path $temporary ('depois/'+$relative)
                 $null=[IO.Directory]::CreateDirectory((Split-Path $after -Parent))
-                $bytes=if ($Files[$relative] -is [byte[]]) { $Files[$relative] } else { (New-Object Text.UTF8Encoding($false)).GetBytes([string]$Files[$relative]) }
-                [IO.File]::WriteAllBytes($after,$bytes)
+                if ($null -ne $Files[$relative]) {
+                    if ($Files[$relative] -is [byte[]]) { [IO.File]::WriteAllBytes($after,$Files[$relative]) }
+                    else { [IO.File]::WriteAllBytes($after,(New-Object Text.UTF8Encoding($false)).GetBytes([string]$Files[$relative])) }
+                }
                 $existed=Test-Path -LiteralPath $path -PathType Leaf
                 if ($existed) {
                     $before=Join-Path $temporary ('antes/'+$relative)
                     $null=[IO.Directory]::CreateDirectory((Split-Path $before -Parent))
                     [IO.File]::Copy($path,$before)
                 }
-                $entries+=@{Path=$relative;Existed=$existed}
+                $entries+=@{Path=$relative;Existed=$existed;Remove=($null -eq $Files[$relative])}
             }
             Write-ProjectRecoveryInstruction $temporary $entries
             foreach ($entry in $entries) {
@@ -152,9 +167,12 @@ function Publish-HarnessProjectFiles {
                 } elseif (Test-Path -LiteralPath $path) { throw "Documento criado durante publicacao: $path" }
                 # Keep the prepared file for crash recovery; Replace consumes
                 # its source, so use a single transient working file.
-                $working=Join-Path $temporary 'escrita.tmp'
-                [IO.File]::Copy((Join-Path $temporary ('depois/'+$entry.Path)),$working,$true)
-                Write-ProjectPublishedFile $working $path
+                if ($entry.Remove) { [IO.File]::Delete($path) }
+                else {
+                    $working=Join-Path $temporary 'escrita.tmp'
+                    [IO.File]::Copy((Join-Path $temporary ('depois/'+$entry.Path)),$working,$true)
+                    Write-ProjectPublishedFile $working $path
+                }
             }
             Remove-ProjectPublication $Project
         } catch {
