@@ -3,6 +3,15 @@
 Status: proposta para revisão do desenvolvedor; não implementada por esta entrega.
 Data: 2026-10-09.
 
+Complemento de prioridade em 10/10/2026: por decisão do desenvolvedor, a
+[simplificação por projeto](../features/organizacao-simplificada-por-projeto.md),
+com [conversão descartável](../features/conversao-descartavel-dos-registros.md),
+limpeza e guias/orientador alinhados, antecede esta modernização e qualquer nova
+funcionalidade. O [plano](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10)
+registra a viabilidade e a retirada de recibos/rastreamentos como requisito.
+Reavaliar esta proposta sobre o contrato simplificado antes de implementá-la.
+Este complemento não altera o runtime nem declara a ADR aceita.
+
 ## Contexto
 
 O harness JBoss reúne automação, contexto e evidências, mas concentra configuração

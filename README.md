@@ -42,7 +42,17 @@ as capacidades existentes das propostas e seus criterios de avanco.
 O [catalogo de dominios e capacidades](doc/features/evolucao-harness-dominios-capacidades-priorizacao.md)
 detalha propostas futuras. A [conciliacao com o backlog](doc/estrategia/conciliacao-evolucao-harness.md)
 identifica sobreposicoes, entregas ja atendidas e pendencias preservadas;
-prazo, prioridade e piloto permanecem a definir.
+as prioridades relativas e pilotos posteriores permanecem a definir.
+
+**Prioridade definida em 10/10/2026:** concluir a
+[simplificacao por projeto](doc/features/organizacao-simplificada-por-projeto.md)
+e a [transicao dos registros](doc/features/conversao-descartavel-dos-registros.md)
+antes da modernizacao e de novas funcionalidades. O objetivo e retirar recibos e
+rastreamentos por execucao, usar caminhos fixos e oferecer links diretos das fichas
+para suas fontes. A entrega inclui limpeza e alinhamento dos guias e do orientador.
+O [plano de viabilidade](tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10)
+esta registrado; essa simplificacao ainda nao foi implementada. As instrucoes de
+uso abaixo descrevem o comportamento atual.
 
 A [arquitetura do Engineering Harness](doc/arquitetura/arquitetura-harness.md)
 consolida a base implementada e propoe a evolucao por nucleo, perfis e capacidades,

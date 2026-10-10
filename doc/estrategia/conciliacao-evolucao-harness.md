@@ -9,7 +9,14 @@ html:
 
 Registro de 05/10/2026, comparando o [catálogo de 23 capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md), baseado em `de5975096d`, com o harness integrado em `d48cf6a`. A análise usa código e documentação locais; não revalida ferramentas externas nem executa pilotos.
 
-**Situação:** proposta incorporada para avaliação futura. Data, prioridade escolhida e piloto continuam **a definir**. As sugestões P1/P2/P3 e a preferência pelo piloto A no catálogo não foram aprovadas como sequência de trabalho.
+**Situação atualizada em 10/10/2026:** a [simplificação por projeto](../features/organizacao-simplificada-por-projeto.md)
+e a [conversão descartável](../features/conversao-descartavel-dos-registros.md)
+têm precedência sobre modernização e novas funcionalidades. A entrega inclui
+retirada de recibos/rastreamentos, links diretos e limpeza/alinhamento dos guias
+e do orientador. [Plano e viabilidade](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+Depois desse aceite, data, prioridades relativas e piloto do catálogo continuam
+**a definir**. As correspondências abaixo documentam a baseline antiga; requisitos
+de recibos, cadeias e extratos devem ser reavaliados, sem restaurá-los por equivalência.
 
 ## Fontes e responsabilidades
 

@@ -12,6 +12,14 @@
 
 ## 1. Objetivo
 
+**Prioridade humana de 10/10/2026:** entregar e aceitar primeiro a
+[simplificação por projeto](organizacao-simplificada-por-projeto.md) e a
+[conversão descartável](conversao-descartavel-dos-registros.md), com limpeza,
+links diretos às fontes e alinhamento dos guias/orientador. As novas capacidades
+deste catálogo vêm depois. As sugestões P1/P2/P3 e os pilotos abaixo permanecem
+propostas posteriores; requisitos de recibos/rastreamentos devem ser reavaliados
+contra a base simplificada. Consulte o [backlog vigente](../../tasks/todo.md#backlog-vigente).
+
 Evoluir o `jboss-mta-harness` em direção ao **harness de engenharia extensível** já previsto na estratégia do próprio repositório. Ampliar sua capacidade de preparar contexto, orientar o agente e validar resultados em migrações, correções do cotidiano e modernização. As novas capacidades devem aproveitar os scripts, tarefas, contratos, evidências, lotes e pontos de revisão existentes.
 
 O resultado esperado é permitir que o agente escolha e execute ferramentas locais conforme um objetivo técnico, recupere o contexto necessário, fundamente decisões em evidências e conduza a mudança até sua validação. O documento especifica os incrementos a incorporar ao harness atual; não propõe sua substituição nem a construção de um segundo framework.

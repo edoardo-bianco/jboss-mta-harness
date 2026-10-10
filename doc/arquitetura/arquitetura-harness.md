@@ -334,6 +334,14 @@ Nenhum ganho de desempenho, custo ou qualidade é declarado sem medição. Crit�
 
 ## 13. Modernização incremental
 
+**Precedência de 10/10/2026:** a sequência abaixo fica posterior à entrega e ao
+aceite da [simplificação por projeto](../features/organizacao-simplificada-por-projeto.md)
+e da [transição dos registros](../features/conversao-descartavel-dos-registros.md),
+incluindo limpeza e alinhamento dos guias e do agente orientador. Primeiro retirar
+recibos/rastreamentos e oferecer navegação direta às fontes; depois reavaliar as
+equivalências abaixo para não reproduzir controles removidos no novo núcleo.
+Veja o [plano vigente](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+
 A modernização parte dos contratos e ferramentas existentes e extrai uma capacidade por vez. Cada incremento precisa preservar o comportamento conhecido e demonstrar o benefício da nova estrutura antes de ampliar seu uso para outros perfis e clientes.
 
 | Incremento | Resultado verificável |

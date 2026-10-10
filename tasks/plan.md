@@ -1,5 +1,207 @@
 # Plano do agente: evolucao do harness
 
+## Simplificacao prioritaria por projeto - 2026-10-10
+
+**Escopo:** evolucao do harness; analise de viabilidade e planejamento solicitados.
+**Prioridade humana:** SIMP-PROJ antecede modernizacao e qualquer nova funcionalidade
+do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
+Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
+concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
+**Estado:** requisitos incorporados e plano proposto; implementacao, conversao de dados,
+limpeza operacional e aceite ainda nao realizados.
+
+Base examinada: main `5dd8fb385240060f3207b9d3958f9238de19f30e`, inicialmente limpa,
+em `C:/desenvolvimento/repositorio/jboss-mta-harness`. Branch documental criada da
+main: `harness/planejar-simplificacao-projetos`. Nenhuma corretiva de aplicacao integra
+este trabalho. As secoes anteriores cronologicamente, mantidas abaixo, sao historicas;
+esta decisao prevalece sobre suas sugestoes de ordem para evolucoes futuras.
+
+### Requisitos e fontes
+
+- Contrato permanente: [organizacao simplificada por projeto](../doc/features/organizacao-simplificada-por-projeto.md).
+- Transicao: [conversao descartavel](../doc/features/conversao-descartavel-dos-registros.md), dependente do contrato permanente.
+- Originais recebidos, preservados na maquina do desenvolvedor:
+  [organizacao](<C:/Users/edoar/OneDrive/Documents/Edoardo/00_Business_edoardo/00_Software_Architecture/00 Modernizacao_MTR/30_Viisao_estrategica_e_tatica_do_harness_de_modernizacao/feature-simplificacao/organizacao-simplificada-por-projeto.md>) e
+  [conversao](<C:/Users/edoar/OneDrive/Documents/Edoardo/00_Business_edoardo/00_Software_Architecture/00 Modernizacao_MTR/30_Viisao_estrategica_e_tatica_do_harness_de_modernizacao/feature-simplificacao/conversao-descartavel-dos-registros.md>).
+  As copias em doc/features sao as referencias portaveis; os dois links de origem
+  dependem desta maquina. Acrescentados os esclarecimentos humanos desta sessao.
+- Pedido reforcado: **retirar recibos e rastreamentos que dificultam encontrar informacao**.
+  Nao renomear o mecanismo para selo, manifest, mapa permanente ou cadeia oculta.
+- **Todo documento de detalhe deve oferecer links diretos para as fontes/arquivos
+  referenciados**, inclusive MTA, codigo local, POM, configuracao e anexos.
+  Localizacao indisponivel fica explicita; nao inventar arquivo ou ancora.
+- **Concluir com limpeza e alinhamento dos guias e do agente orientador**, incluindo
+  skill Codex, helpers Copilot, prompts, tarefas e exemplos. Isso integra o aceite.
+
+### Parecer de viabilidade
+
+**Viavel no Windows PowerShell 5.1, com alteracao estrutural de risco alto.** A leitura
+do codigo identificou componentes reutilizaveis e pontos de substituicao concretos.
+Nao ha necessidade demonstrada de Node, LangGraph, nova IDE ou banco de dados para
+este recorte. O MCP existente continua opcional; sua adaptacao nao pode tornar Node
+obrigatorio para os demais fluxos. Esta e uma avaliacao estatica, nao uma prova de
+execucao da arquitetura proposta nem uma estimativa de prazo.
+
+| Parte | Evidencia conferida no codigo | Consequencia |
+| --- | --- | --- |
+| Identidade e caminhos | [Harness.psm1](../scripts/Harness.psm1), Get-HarnessMigrationPaths, Get-HarnessProjectKey e Get-HarnessIssueProjectPaths: registro por hash de Source, dossie parcialmente por artifactId, fallback para nome e nome antigo preservado. | Reaproveitar leitura XML segura; substituir as duas convencoes por POM selecionado e pasta exata. Remover fallback e tratar colisao/realinhamento explicitamente. |
+| Leitura MTA | [Harness.psm1](../scripts/Harness.psm1), Get-HarnessMtaCatalog le a atribuicao JSON de output.js sem executar JavaScript; Get-HarnessExternalMtaRuns ainda exige manifest/RunId. | Separar parser de descoberta e ler a origem diretamente. O formato encontrado e uma aplicacao com rulesets; suporte a outros formatos depende de fixtures, sem promessa generica. |
+| Planejamento | [HarnessPlanningInput.ps1](../scripts/HarnessPlanningInput.ps1), Invoke-HarnessRegisteredPlanningCore, e [HarnessPlanning.psm1](../scripts/HarnessPlanning.psm1): retomada por RequestId/Previous e evidencia selada. | Substituir selecao de solicitacao por documentos correntes; manter MTA/EVIDENCIAS, escopo, GO e aceite sem transformar contexto em recibo. |
+| Fichas e contexto | [HarnessIssuePlanning.ps1](../scripts/HarnessIssuePlanning.ps1), New-IssuePlanningEvidence, copia anexos e gera apontamentos-mta.json; [HarnessPrioritizationEvidence.ps1](../scripts/HarnessPrioritizationEvidence.ps1) grava paginas de incidentes. | Retirar extratos/copia MTA; fichas essenciais e links diretos substituem esses derivados. A indisponibilidade da origem limita o detalhe consultavel. |
+| Cobertura de priorizacao | [HarnessPrioritizationState.ps1](../scripts/HarnessPrioritizationState.ps1) acumula exame pela cadeia; [HarnessPrioritizationIndex.ps1](../scripts/HarnessPrioritizationIndex.ps1) deriva o indice dessa historia. | Guardar somente cobertura corrente e base inicial por categoria/escopo; nao perder examinadas sem proposta nem somar mencoes como exame. |
+| Consultas opcionais | [HarnessIssueQueryInput.ps1](../scripts/HarnessIssueQueryInput.ps1), Read-QueryBase exige recibo/hash ou Consolidated; [MCP](../mcp/issues/package.json) expõe consultas existentes. | Adaptar CLI/consultas/MCP para a mesma leitura corrente, sem conservar a dependencia antiga como excecao. |
+| Sprints | [HarnessSprintPlanning.psm1](../scripts/HarnessSprintPlanning.psm1) usa PlanningId/RevisionId/Previous e troca um ponteiro; [HarnessSprintSimulation.ps1](../scripts/HarnessSprintSimulation.ps1) separa calculo de arquivos. | Reusar calculo; manter capacidade, baseline vigente e consumo de fases no cenario corrente, sem depender de revisoes antigas. Mestre em projeto Maven participante. |
+| Build e Sonar | [HarnessBuild.psm1](../scripts/HarnessBuild.psm1) cria pasta/RunId; [HarnessSonar.psm1](../scripts/HarnessSonar.psm1) persiste resultados e [HarnessSonarReview.psm1](../scripts/HarnessSonarReview.psm1) encadeia pareceres. | Ultima tentativa de build, ultimo diagnostico utilizavel e ultima situacao da operacao; parecer/decisao atuais separados de gate tecnico, sem cadeia. |
+| Indices, abertura e limpeza | [HarnessProjectIndex.psm1](../scripts/HarnessProjectIndex.psm1) varre builds/runs/planning/sonar; [acompanhar-log-mta.ps1](../scripts/acompanhar-log-mta.ps1) chama Get-ActiveMtaRun; [HarnessCleanup.psm1](../scripts/HarnessCleanup.psm1) autoriza raizes/padroes legados. | Reconstruir indices por projeto, adaptar chamadores de abertura/log e limitar limpeza ao contrato novo, sem tocar origem externa ou eliminar conteudo humano necessario. |
+| Compartilhamento | [HarnessTransfer.psm1](../scripts/HarnessTransfer.psm1) e [compartilhar-contexto.ps1](../scripts/compartilhar-contexto.ps1) expõem pacotes e recibos. | Retirar essa capacidade e seus chamadores depois de demonstrar copia + reconciliacao comum. Converter legado em utilitario separado. |
+
+O [POM Reference do Maven](https://maven.apache.org/pom.html#Maven_Coordinates)
+confirma que artifactId participa das coordenadas com groupId; nome de pasta igual
+nao prova identidade global. A convencao e o tratamento de colisao sao decisoes do
+harness. [File.Replace](https://learn.microsoft.com/en-us/dotnet/api/system.io.file.replace?view=netframework-4.8.1)
+substitui um arquivo. Inferencia para este projeto: a troca isolada ja usada nos
+indices nao resolve a publicacao consistente de varios documentos; isso exige
+prova de recuperacao propria. Fontes oficiais conferidas em 10/10/2026.
+
+### Desenho e limites da transicao
+
+1. Uma pasta `.harness/projetos/<artifactId>/`, com associacao ao POM em projeto.json,
+   registro humano e arquivos correntes estaveis. O contexto guarda escopo e caminhos,
+   sem identidade de execucao. Indices gerais ficam em `.harness/indices/`.
+2. Um modulo pequeno comum resolve identidade, caminhos, MTA, publicacao e indices;
+   regras de priorizacao, sprints e GO permanecem nas respectivas capacidades.
+   Reaproveitar o estilo PowerShell e testes do repositorio. Nao criar framework de
+   repositorios, sistema de eventos ou executor generico para esta simplificacao.
+3. MTA externo e lido na origem, em memoria por operacao. Validar o conjunto e
+   detectar alteracao durante a leitura antes de publicar. Recencia seleciona o
+   diagnostico consultavel conforme a feature; nao escolhe decisoes ou concede GO.
+   Um MTA novo pode atualizar links gerenciados sem substituir a base reconciliada.
+4. Atual e reconciliado sao destinos reais. Reconciliado contem somente resultado
+   e pendencias da ultima conciliacao, sem espelho de fichas/plano/MTA. Remover
+   rastreamento tecnico persistente; comparacao de conteudo durante uma operacao
+   e recuperacao temporaria de escrita nao se tornam novos recibos.
+5. Publicar conjuntos preparados sob exclusividade local do projeto; leitores
+   do harness nao consomem troca incompleta. Em interrupcao, recuperar antes de
+   liberar. Material temporario permanece apenas enquanto necessario a recuperacao.
+   Editor externo nao obedece esse protocolo: detectar alteracoes concorrentes e
+   preservar texto humano, sem prometer transacao distribuida ou sincronizacao.
+6. O conversor le cadeias antigas somente na transicao e usa o publicador permanente.
+   O nucleo nao importa o conversor nem procura legado como fallback. Aplicar conserva
+   originais; Limpar exige selecao explicita e destino revalidado. A limpeza nao e
+   autorizada por este planejamento e nao alcanca relatorios externos ou Sources.
+7. Projeto novo e projeto convertido devem executar o mesmo fluxo. Retirar recibos
+   reduz a reconstituicao de revisoes passadas; se o MTA antigo sumir, seu detalhe
+   deixa de estar disponivel. Fichas, decisoes e links atuais sustentam continuidade,
+   sem afirmar comparacao historica completa ou resolucao automatica de issues.
+8. Desenvolver as fatias em branch do harness, com checkpoints testaveis. A entrega
+   operacional so ocorre com produtores e consumidores alinhados; nao distribuir
+   uma metade do layout novo dependente da outra metade legada. Modernizacao retoma
+   depois do aceite de SIMP-PROJ e da reavaliacao das propostas sobre a base simples.
+
+### Contratos a alinhar e pontos a fechar
+
+As features definem o alvo solicitado, mas o runtime continua seguindo os contratos
+atuais ate a implementacao. Nao declarar ADRs aceitas ou alterar silenciosamente
+evidencias de migracao nesta entrega documental.
+
+| Fonte atual | Alinhamento requerido na implementacao |
+| --- | --- |
+| [AGENTS.md](../AGENTS.md) e [ADR-0002](../doc/adr/0002-separacao-harness-e-migracao-progressiva.md) | Preservar separacao harness/aplicacao e branch de evolucao; trocar caminhos de solicitacoes pelos correntes. |
+| [ADR-0004](../doc/adr/0004-git-informativo-sem-controle-de-branches.md) | Manter Git informativo e separar GO/aceite; superar requisitos operacionais de identidade tecnica antiga. |
+| [ADR-0005](../doc/adr/0005-planejamento-orientado-pelo-registro.md) | Preservar entrada pelo registro e MTA/EVIDENCIAS; substituir Previous e adocao/cadastro de rodada por leitura atual com pendencias explicitas. |
+| [ADR-0006](../doc/adr/0006-categorias-e-dossie-por-issue.md) | Preservar categorias, cobertura e ficha funcional; retirar copia consolidada e historia por solicitacao. |
+| [ADR-0007](../doc/adr/0007-compartilhamento-de-contextos.md) | Substituir pacote/recibo de transferencia por copia e reconciliacao, preservando associacao local e decisoes. |
+| [ADR-0008](../doc/adr/0008-nucleo-perfis-e-plataforma-do-harness.md) | Modernizacao continua posterior; nao transportar recibos e historicos para o nucleo futuro. |
+| [Contrato de planejamento](../doc/especificacoes/planejamento-copilot.md) e [sprints](../doc/especificacoes/planejamento-sprints.md) | Alterar caminhos/validadores e separar estado corrente de evidencia suficiente; manter regras funcionais de escopo, capacidade e aceite. |
+
+Fechar no primeiro incremento tecnico, antes de codificar consumidores:
+
+- Formatos MTA reconhecidos e arquivo de entrada/data por formato, com fixtures reais
+  sanitizadas. O leitor atual suporta output.js; nao assumir suporte a qualquer HTML.
+- Representacao funcional de cobertura multiprojeto/categoria e de escopos distintos
+  sem SequenceId/Previous, sem duplicar fichas. Proposta: estado corrente por escopo
+  funcional explicito e ranking geral derivado; a feature ainda nao fixa sua estrutura.
+- Nomes seguros e reversiveis das chaves de issues no Windows (`ruleset::regra` nao
+  pode virar pasta literal), sem hash/ID de execucao. Cobrir colisao e comprimento.
+- Conteudo minimo de reconciliado, registro da autorizacao vigente e uma proposta
+  corrente por projeto; frentes independentes usam outra raiz. Mudanca de escopo
+  pede revisao humana, sem restaurar snapshot/recibo permanente como solucao.
+- Procedimento de recuperacao de multiplos arquivos e limite do bloqueio local,
+  incluindo cenarios multiprojeto. Publicacao do mestre de sprints e reconstrução
+  dos indices nao podem deixar referencias a conteudo parcialmente publicado.
+
+Esses pontos sao decisões tecnicas propostas para revisao; nao impedem incorporar
+e priorizar as features. Prazo/custo e ganho de desempenho so podem ser estimados
+apos a prova inicial; nao ha medicao que sustente percentual de ganho.
+
+### Sequencia de implementacao e verificacao
+
+O [checklist SIMP-PROJ](todo.md#simplificacao-prioritaria-por-projeto---2026-10-10)
+detalha dependencias, arquivos, aceite e verificacao de cada tarefa. Trabalhar em
+fatias de aproximadamente 2 a 5 arquivos; dividir novamente qualquer tarefa que
+crescer. Testes, contrato e comportamento da mesma fatia evoluem juntos.
+
+| Etapa | Tarefas | Resultado e checkpoint |
+| --- | --- | --- |
+| Contrato e prova de maior risco | S01-S04 | POM/caminhos, publicacao recuperavel e MTA direto. Projeto novo sem recibo e falha entre gravacoes recuperada. Revisar antes de adaptar consumidores. |
+| Uso corrente por projeto | S05-S09 | Indice, execucao MTA, build, Sonar e pareceres nos destinos correntes. Falha recente visivel e diagnostico completo preservado. |
+| Escolha e trabalho da issue | S10-S15 | Priorizacao, fichas/links, plano/tarefas, reconciliacao, implementacao e consultas opcionais. Retomar sem IDs; GO e aceite continuam separados. |
+| Sprints e entradas | S16-S19 | Cenario mestre corrente, tarefas/menus e prompts sem dependencias de revisoes ou importacao. Mesma capacidade/calendario para mesma entrada funcional. |
+| Conversao e retirada | S20-S23 | Previa, aplicar/validar e descarte separados; nucleo opera com conversor/legado inacessiveis. Remover transferencia e limitar limpeza. |
+| Guias e orientador | S24-S28 | Guias, skill, helpers e instrucoes convergem para os caminhos fixos e links. Ensaio humano encontra informacao sem recibos nem instrucoes antigas. |
+
+Comandos de referencia para a futura execucao, a partir da raiz do harness:
+
+```powershell
+powershell.exe -NoProfile -File .\tests\Test-IssuePlanning.ps1
+powershell.exe -NoProfile -File .\tests\Test-ExternalMtaDiscovery.ps1
+powershell.exe -NoProfile -File .\tests\Test-PrioritizationProgress.ps1
+powershell.exe -NoProfile -File .\tests\Test-PlanningWithoutMcp.ps1
+powershell.exe -NoProfile -File .\tests\Test-SprintSimulation.ps1
+powershell.exe -NoProfile -File .\tests\Test-Workspace.ps1
+powershell.exe -NoProfile -File .\tests\Test-Cleanup.ps1
+npm --prefix .\mcp\issues test
+git diff --check
+```
+
+Os [testes existentes](../tests/) caracterizam parte do contrato antigo e precisam
+ser adaptados junto com o comportamento, preservando verificacoes funcionais e de
+seguranca. Acrescentar testes de armazenamento, MTA direto e conversor; os nomes
+novos serao definidos na implementacao. MCP e testado somente em ambiente preparado
+para ele; ausencia de Node deve ter teste proprio para os demais fluxos. Nao instalar
+runtimes nem executar todas essas suites para uma entrega exclusivamente documental.
+
+### Aceite final e limites da avaliacao
+
+- Projeto novo e convertido funcionam em PS5.1, com espacos/acentos, POM com parent,
+  agregador/modulo, colisao de artifactId e realinhamento de caminho diagnosticados.
+- Duas publicacoes e duas reconciliacoes deixam apenas estado corrente e ultima
+  base reconciliada; nao surgem recibos, revisoes, extratos MTA ou backups permanentes.
+- MTA novo, empate, candidato incompleto, origem inacessivel e alteracao durante
+  leitura sao diagnosticados. Relatorio externo e Source ficam intactos.
+- Documento de detalhe abre o relatorio, fonte local e anexo pelos links; fonte
+  indisponivel e detalhe nao reencontrado aparecem como lacunas. Remover o MTA antigo
+  nao impede ler decisoes/plano e nao autoriza declarar a issue resolvida.
+- Progredir priorizacao preserva cobertura corrente; cenarios mantem baseline,
+  capacidade, limites e consumo ja ocorrido sem navegar por revisoes.
+- Interromper publicacao em cada fronteira de escrita nao libera resultado parcial.
+  Repetir conversao/material recebido nao duplica dados nem sobrescreve trabalho novo.
+- Sem conversor, pacotes, indices gerados ou controles legados, reconstruir indice,
+  planejar, consultar, reconciliar e continuar trabalho. GO/aceite nao sao inferidos.
+- Limpeza remove apenas residuos selecionados e comprovadamente dispensaveis.
+  Guias/skill/helpers/prompts nao orientam mais recibos/rodadas/Previous. Nos dois
+  clientes, o orientador aponta projeto, documento atual e proxima acao com link.
+- Revisao e aceite da simplificacao precedem novas funcionalidades. Pendencias de
+  ensaio anteriores sao reavaliadas contra o contrato novo, sem marca-las concluidas.
+
+Validacao desta entrega documental: links locais/ancoras dos acrescimos e dos dois
+arquivos incorporados conferidos nos 11 documentos alterados; nenhum destino
+quebrado. Historico anterior de plan.md preservado e `git diff --check` sem erros.
+Revisao documental conferiu prioridade, requisitos, dependencias, riscos e distincao
+entre proposta e comportamento entregue. Nenhum teste de runtime ou conversao real
+foi executado por esta avaliacao estatica; viabilidade operacional depende dos
+checkpoints e ensaios acima.
+
 ## Exemplo de complemento ao prompt de sprints - 2026-10-09
 
 Pedido humano: guardar na documentacao uma mensagem clara e copiavel reunindo
