@@ -17,7 +17,15 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 - [x] Registrar precedencia sobre modernizacao e demais capacidades futuras.
 - [x] Conferir links/ancoras dos acrescimos em 11 documentos, diff e requisitos; historico anterior de plan.md preservado. Sem teste de runtime nesta entrega documental.
 
-Implementacao futura: S01-S28 abaixo permanecem abertas. Cada linha representa uma
+Implementacao autorizada por "proceder" em 10/10/2026, em andamento nesta branch.
+
+- [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
+- [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
+- [x] S04a: leitura direta do formato static-report, data/fuso, empate, incompleto e regravacao, sem persistir diagnostico.
+- [x] Quatro testes novos em PowerShell 5.1; revisao independente da recuperacao sem bloqueios remanescentes. Fixtures sinteticas, sem conversao/limpeza de dados reais.
+- [ ] Integrar o nucleo aos produtores/consumidores e concluir os demais criterios S01-S28 abaixo.
+
+Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos
 arquivos existentes; novos modulos/testes estao explicitamente propostos e nao
 devem ser tratados como disponiveis. Dividir a fatia se a implementacao ampliar

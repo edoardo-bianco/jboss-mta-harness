@@ -7,8 +7,10 @@
 do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
-**Estado:** requisitos incorporados e plano proposto; implementacao, conversao de dados,
-limpeza operacional e aceite ainda nao realizados.
+**Estado:** implementacao autorizada por "proceder" em 10/10/2026 e em andamento.
+Nucleo de identidade/publicacao/MTA direto testado em modulo isolado; integracao dos
+fluxos, conversao de dados, limpeza operacional e aceite ainda nao concluidos.
+[Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
 
 Base examinada: main `5dd8fb385240060f3207b9d3958f9238de19f30e`, inicialmente limpa,
 em `C:/desenvolvimento/repositorio/jboss-mta-harness`. Branch documental criada da

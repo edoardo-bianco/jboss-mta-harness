@@ -1,0 +1,179 @@
+# Internal publication protocol. Recovery files exist only while publishing or
+# recovering; no operation ID or persistent receipt is used to read the project.
+function Resolve-ProjectDocument {
+    param($Project,[string]$RelativePath)
+    if ([IO.Path]::IsPathRooted($RelativePath) -or $RelativePath -match '(^|[\\/])\.\.([\\/]|$)' -or $RelativePath -match '(^|[\\/])temporarios([\\/]|$)') { throw 'Documento fora dos destinos correntes.' }
+    $path=Resolve-ProjectPath $RelativePath $Project.Folder
+    if (-not $path.StartsWith($Project.Folder+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Documento fora do projeto.' }
+    $path
+}
+
+function Clear-ProjectPublicationFiles {
+    param($Project)
+    $temporary=Resolve-ProjectPath (Join-Path $Project.TemporaryPath 'publicacao') $Project.Folder
+    if (-not $temporary.StartsWith($Project.Folder+'\temporarios\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Area de recuperacao invalida.' }
+    if (Test-Path -LiteralPath $temporary) {
+        $pending=New-Object 'Collections.Generic.Stack[IO.DirectoryInfo]'
+        $pending.Push((Get-Item -LiteralPath $temporary))
+        while ($pending.Count) {
+            foreach ($child in $pending.Pop().EnumerateFileSystemInfos()) {
+                if ($child.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Link/junction na area de recuperacao.' }
+                if ($child -is [IO.DirectoryInfo]) { $pending.Push($child) }
+            }
+        }
+        [IO.Directory]::Delete($temporary,$true)
+    }
+    if ((Test-Path -LiteralPath $Project.TemporaryPath) -and -not @(Get-ChildItem -LiteralPath $Project.TemporaryPath -Force).Count) { [IO.Directory]::Delete($Project.TemporaryPath) }
+}
+
+function Remove-ProjectPublication {
+    param($Project)
+    # Commit/rollback is complete. Remove the recovery instruction first, so a
+    # crash halfway through cleanup never interprets remaining files as a write.
+    $journal=Resolve-ProjectPath (Join-Path $Project.TemporaryPath 'publicacao/recuperacao.json') $Project.Folder
+    if (Test-Path -LiteralPath $journal -PathType Leaf) { [IO.File]::Delete($journal) }
+    Clear-ProjectPublicationFiles $Project
+}
+
+function Test-ProjectFileBytes {
+    param([string]$Left,[string]$Right)
+    if (-not (Test-Path -LiteralPath $Left -PathType Leaf) -or -not (Test-Path -LiteralPath $Right -PathType Leaf)) { return $false }
+    [Convert]::ToBase64String([IO.File]::ReadAllBytes($Left)) -ceq [Convert]::ToBase64String([IO.File]::ReadAllBytes($Right))
+}
+
+function Restore-ProjectPublication {
+    param($Project)
+    $temporary=Join-Path $Project.TemporaryPath 'publicacao'
+    if (-not (Test-Path -LiteralPath $temporary)) { return }
+    $null=Resolve-ProjectPath $temporary $Project.Folder
+    $journal=Join-Path $temporary 'recuperacao.json'
+    if (Test-Path -LiteralPath $journal) {
+        $entries=Get-Content -LiteralPath $journal -Raw -Encoding UTF8 | ConvertFrom-Json
+        # Validate the complete recovery set before changing any document. An
+        # editor that changed a file outside our lock must not lose its changes.
+        foreach ($entry in $entries) {
+            $destination=Resolve-ProjectDocument $Project $entry.Path
+            $before=Resolve-ProjectPath (Join-Path $temporary ('antes/'+$entry.Path)) $Project.Folder
+            $after=Resolve-ProjectPath (Join-Path $temporary ('depois/'+$entry.Path)) $Project.Folder
+            if (-not (Test-Path -LiteralPath $after -PathType Leaf) -or ($entry.Existed -and -not (Test-Path -LiteralPath $before -PathType Leaf))) { throw 'Conjunto de recuperacao incompleto; preserve temporarios.' }
+            if ((Test-Path -LiteralPath $destination) -and -not (Test-ProjectFileBytes $destination $after) -and -not ($entry.Existed -and (Test-ProjectFileBytes $destination $before))) { throw "Edicao concorrente durante recuperacao: $destination. Preserve e concilie os arquivos em temporarios/publicacao." }
+        }
+        foreach ($entry in $entries) {
+            $destination=Resolve-ProjectDocument $Project $entry.Path
+            if ($entry.Existed -and -not (Test-ProjectFileBytes $destination (Join-Path $temporary ('antes/'+$entry.Path)))) {
+                $working=Join-Path $temporary 'restaurar.tmp'
+                [IO.File]::Copy((Join-Path $temporary ('antes/'+$entry.Path)),$working,$true)
+                Write-ProjectPublishedFile $working $destination
+            }
+            elseif (-not $entry.Existed -and (Test-Path -LiteralPath $destination -PathType Leaf)) { [IO.File]::Delete($destination) }
+        }
+    }
+    Remove-ProjectPublication $Project
+}
+
+function Invoke-WithProjectAccess {
+    param($Project,[scriptblock]$Action)
+    # Only an OS mutex name: this digest is never saved in project data or used
+    # for identity, navigation, history or authorization.
+    $sha=[Security.Cryptography.SHA256]::Create()
+    try { $name=[BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($Project.Folder.ToLowerInvariant()))).Replace('-','') }
+    finally { $sha.Dispose() }
+    $mutex=New-Object Threading.Mutex($false,('Local\HarnessProject_'+$name))
+    $acquired=$false
+    try {
+        try { $acquired=$mutex.WaitOne(0) } catch [Threading.AbandonedMutexException] { $acquired=$true }
+        if (-not $acquired) { throw 'Projeto em uso por outra operacao; aguarde terminar.' }
+        Restore-ProjectPublication $Project
+        & $Action
+    } finally { if ($acquired) { $mutex.ReleaseMutex() }; $mutex.Dispose() }
+}
+
+function Write-ProjectPublishedFile {
+    param([string]$Source,[string]$Destination)
+    $null=[IO.Directory]::CreateDirectory((Split-Path $Destination -Parent))
+    if (Test-Path -LiteralPath $Destination -PathType Leaf) {
+        $original=[Convert]::ToBase64String([IO.File]::ReadAllBytes($Destination))
+        for ($attempt=0;$attempt -lt 8;$attempt++) {
+            if (-not (Test-Path -LiteralPath $Destination -PathType Leaf) -or [Convert]::ToBase64String([IO.File]::ReadAllBytes($Destination)) -cne $original) { throw 'Documento editado durante a substituicao; preserve a contribuicao externa.' }
+            try { [IO.File]::Replace($Source,$Destination,[System.Management.Automation.Language.NullString]::Value); break }
+            catch {
+                $code=$_.Exception.GetBaseException().HResult -band 0xffff
+                if ($code -notin @(32,1175) -or $attempt -eq 7) { throw }
+                Start-Sleep -Milliseconds 200
+            }
+        }
+    } else { [IO.File]::Move($Source,$Destination) }
+}
+
+function Write-ProjectRecoveryInstruction {
+    param([string]$Temporary,$Entries)
+    $preparing=Join-Path $Temporary 'recuperacao.tmp'
+    [IO.File]::WriteAllText($preparing,(ConvertTo-Json -InputObject @($Entries)),(New-Object Text.UTF8Encoding($false)))
+    [IO.File]::Move($preparing,(Join-Path $Temporary 'recuperacao.json'))
+}
+
+function Publish-HarnessProjectFiles {
+    param($Project,[Collections.IDictionary]$Files,[Collections.IDictionary]$Expected=@{})
+    if (-not $Files -or -not $Files.Count) { throw 'Nenhum documento para publicar.' }
+    Invoke-WithProjectAccess $Project {
+        $paths=@{}
+        foreach ($relative in $Files.Keys) {
+            $path=Resolve-ProjectDocument $Project $relative
+            if ($paths.ContainsKey($path)) { throw 'Destinos duplicados na publicacao.' }
+            $paths[$path]=$true
+        }
+        foreach ($relative in $Expected.Keys) {
+            $path=Resolve-ProjectDocument $Project $relative
+            $current=if (Test-Path -LiteralPath $path -PathType Leaf) { [IO.File]::ReadAllText($path) } else { $null }
+            if ($current -cne $Expected[$relative]) { throw "Documento alterado desde a leitura: $path" }
+        }
+        $temporary=Join-Path $Project.TemporaryPath 'publicacao'
+        $entries=@()
+        try {
+            foreach ($relative in $Files.Keys) {
+                $path=Resolve-ProjectDocument $Project $relative
+                $after=Join-Path $temporary ('depois/'+$relative)
+                $null=[IO.Directory]::CreateDirectory((Split-Path $after -Parent))
+                $bytes=if ($Files[$relative] -is [byte[]]) { $Files[$relative] } else { (New-Object Text.UTF8Encoding($false)).GetBytes([string]$Files[$relative]) }
+                [IO.File]::WriteAllBytes($after,$bytes)
+                $existed=Test-Path -LiteralPath $path -PathType Leaf
+                if ($existed) {
+                    $before=Join-Path $temporary ('antes/'+$relative)
+                    $null=[IO.Directory]::CreateDirectory((Split-Path $before -Parent))
+                    [IO.File]::Copy($path,$before)
+                }
+                $entries+=@{Path=$relative;Existed=$existed}
+            }
+            Write-ProjectRecoveryInstruction $temporary $entries
+            foreach ($entry in $entries) {
+                $path=Resolve-ProjectDocument $Project $entry.Path
+                if ($entry.Existed) {
+                    if (-not (Test-ProjectFileBytes $path (Join-Path $temporary ('antes/'+$entry.Path)))) { throw "Documento alterado durante publicacao: $path" }
+                } elseif (Test-Path -LiteralPath $path) { throw "Documento criado durante publicacao: $path" }
+                # Keep the prepared file for crash recovery; Replace consumes
+                # its source, so use a single transient working file.
+                $working=Join-Path $temporary 'escrita.tmp'
+                [IO.File]::Copy((Join-Path $temporary ('depois/'+$entry.Path)),$working,$true)
+                Write-ProjectPublishedFile $working $path
+            }
+            Remove-ProjectPublication $Project
+        } catch {
+            $failure=$_
+            try { Restore-ProjectPublication $Project }
+            catch { throw ("Publicacao falhou: {0}. Recuperacao pendente: {1}" -f $failure.Exception.Message,$_.Exception.Message) }
+            throw $failure
+        }
+    }
+}
+
+function Read-HarnessProjectFiles {
+    param($Project,[string[]]$Paths)
+    Invoke-WithProjectAccess $Project {
+        $result=[ordered]@{}
+        foreach ($relative in $Paths) {
+            $path=Resolve-ProjectDocument $Project $relative
+            $result[$relative]=if (Test-Path -LiteralPath $path -PathType Leaf) { [IO.File]::ReadAllText($path) } else { $null }
+        }
+        $result
+    }
+}
