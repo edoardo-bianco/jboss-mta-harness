@@ -10,9 +10,8 @@ try {
     $context = Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -SkipMigrationInitialization
     $result = New-HarnessProjectIndex $context -UpdateMigration
     Write-Host "Indice dos projetos: $($result.IndexPath)"
-    Write-Host "Copia datada: $($result.SnapshotPath)"
     if ($result.Warnings.Count) { Write-Warning 'Leitura parcial. Confira Limites da leitura no indice.' }
-    Write-Host 'Registros ausentes criados; escolhas e bases dos registros existentes preservadas. Confira avisos por projeto no indice.'
+    Write-Host 'Indice corrente reconstruido por artifactId; escolhas humanas preservadas. Confira os avisos e links por projeto.'
     Write-Host 'Escolha Decisao=ANALISAR AGORA no registro e use Planejamento: planejar. Reconciliacao separada somente se houver conflito concreto ou troca de base desejada; o helper fornece o encaminhamento.'
     if (-not $NoOpen -and $EditorPath) {
         try { Open-HarnessEditor -EditorPath $EditorPath -FilePaths $result.IndexPath -Root $root }

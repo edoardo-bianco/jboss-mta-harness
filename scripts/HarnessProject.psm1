@@ -94,3 +94,15 @@ Export-ModuleMember -Function Get-HarnessProjectStorage,Initialize-HarnessProjec
 Export-ModuleMember -Function Publish-HarnessProjectFiles,Read-HarnessProjectFiles
 . (Join-Path $PSScriptRoot 'HarnessProjectMta.ps1')
 Export-ModuleMember -Function Read-HarnessProjectMta
+. (Join-Path $PSScriptRoot 'HarnessProjectDocuments.ps1')
+Export-ModuleMember -Function Update-HarnessProjectDocuments,Get-HarnessProjectDecisions
+
+function Publish-HarnessWorkspaceIndex {
+    param([string]$Root,[string]$Text)
+    $folder=Resolve-ProjectPath '.harness/indices' $Root
+    # Infrastructure destination; this does not create a Maven project.
+    $destination=[pscustomobject]@{Folder=$folder;TemporaryPath=(Join-Path $folder 'temporarios')}
+    Publish-HarnessProjectFiles $destination @{'projetos.md'=$Text}
+    Join-Path $folder 'projetos.md'
+}
+Export-ModuleMember -Function Publish-HarnessWorkspaceIndex
