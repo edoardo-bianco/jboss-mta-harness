@@ -16,12 +16,18 @@ try {
         if ($ResultPath) { $Action='Review' }
         elseif ($ProjectKey -or $Phase -or $PrepareCertificate) { $Action='Scan' }
         else {
-            $operation=Read-Host 'Sonar: 1 Nova coleta; 2 Rever evidencias/decisao de coleta existente; q cancela'
+            $operation=Read-Host 'Sonar: 1 Nova coleta; 2 Rever diagnostico/decisao corrente; q cancela'
             $Action=switch ($operation) { '1' { 'Scan' } '2' { 'Review' } default { throw 'Selecao cancelada.' } }
         }
     }
     if ($Action -eq 'Review') {
-        if (-not $ResultPath) { $ResultPath=Read-Host 'Caminho do result.json da coleta que deseja rever' }
+        if (-not $ResultPath) {
+            if (-not $ConfigPath) { $ConfigPath=Join-Path $root 'config/harness.local.json' }
+            $context=Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
+            Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
+            $project=Get-HarnessProjectStorage $root (Join-Path $context.Active.path 'pom.xml')
+            $ResultPath=Join-Path $project.Folder 'atual/diagnosticos/sonar/resultado.json'
+        }
         $null=Show-HarnessSonarReview $root $ResultPath
         exit 0 # Sucesso da revisao local; nao e aprovacao tecnica da analise.
     }
@@ -41,7 +47,7 @@ try {
         $Phase=switch ($choice) { '1' { 'ANTES' } '2' { 'DEPOIS' } default { throw 'Selecao cancelada.' } }
     }
     if (-not $PSBoundParameters.ContainsKey('BaselineResultPath')) {
-        $BaselineResultPath=Read-Host 'Caminho do result.json ANTES para comparar issues (Enter deixa comparacao pendente; q cancela)'
+        $BaselineResultPath=Read-Host 'Caminho do resultado.json ANTES corrente ou de evidencias para comparar (Enter deixa pendente; q cancela)'
         if ($BaselineResultPath -eq 'q') { throw 'Selecao cancelada.' }
     }
     Write-Host 'Criterios: issues abertas Blocker/Critical/High e novas chaves exigem corretiva; cobertura minima 80% (meta 85%); duplicidade maxima 5%. Gate corporativo permanece independente.'
@@ -49,8 +55,11 @@ try {
     $result=Invoke-HarnessSonar $context -ProjectKey $ProjectKey -BranchName $BranchName -Phase $Phase -Token $token -BaselineResultPath $BaselineResultPath
     $token.Dispose(); $token=$null
     $result | ConvertTo-Json -Depth 6 | Write-Host
-    Write-Host "Resumo: $(Join-Path (Split-Path $result.ResultPath) 'RESUMO.md')"
-    $null=Show-HarnessSonarReview $root $result.ResultPath
+    Write-Host "Ultima tentativa: $($result.AttemptPath) | Log: $($result.LogPath)"
+    if ($result.DiagnosticPublished) {
+        Write-Host "Resumo: $(Join-Path (Split-Path $result.ResultPath) 'RESUMO.md')"
+        $null=Show-HarnessSonarReview $root $result.ResultPath
+    } else { Write-Host "Coleta incompleta. Diagnostico anterior preservado, quando disponivel: $($result.ResultPath). Use Rever para consulta-lo." }
     if ($result.Status -eq 'SUCCEEDED') { exit 0 }
     if ($result.Status -in @('QUALITY_GATE_FAILED','CRITERIA_FAILED')) { exit 2 }
     exit 1
