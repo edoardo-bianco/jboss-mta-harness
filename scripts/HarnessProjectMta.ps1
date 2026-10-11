@@ -17,6 +17,11 @@ function Read-ProjectMtaCandidate {
     $stream=[IO.File]::Open($catalog,'Open','Read','Read')
     try { $reader=New-Object IO.StreamReader($stream,[Text.Encoding]::UTF8,$true); $raw=$reader.ReadToEnd() }
     finally { if ($reader) { $reader.Dispose() } else { $stream.Dispose() } }
+    if ($stamp -cne (Get-ProjectMtaStamp $Entry $catalog)) {
+        $failure=New-Object IO.IOException 'Relatorio mudou durante a leitura; repetir a operacao.'
+        $failure.Data['MtaChanged']=$true
+        throw $failure
+    }
     $match=[regex]::Match($raw,'(?s)^\s*window\["apps"\]\s*=\s*(\[.*\])\s*;?\s*$')
     if (-not $match.Success) { throw 'Formato de catalogo MTA nao suportado ou incompleto.' }
     $apps=ConvertFrom-Json $match.Groups[1].Value
@@ -54,11 +59,19 @@ function Read-ProjectMtaCandidate {
 
 function Read-HarnessProjectMta {
     param($Project)
+    Invoke-WithProjectAccess $Project {
     $documents=Read-HarnessProjectFiles $Project @('projeto.json')
     if (-not $documents['projeto.json']) { throw 'Associacao projeto.json ausente; inicialize o projeto pelo POM.' }
     $configuration=ConvertFrom-Json $documents['projeto.json']
     $external=$configuration.mta.diretorio
     $origin=if ($external) { Resolve-ProjectPath $external $Project.Root } else { Join-Path $Project.Folder 'atual/diagnosticos/mta' }
+    Read-HarnessMtaDirectory $Project $origin
+    }
+}
+
+function Read-HarnessMtaDirectory {
+    param($Project,[string]$Origin)
+    $origin=Resolve-ProjectPath $Origin $Project.Root
     if (-not (Test-Path -LiteralPath $origin -PathType Container)) { throw "Origem MTA indisponivel: $origin. Nenhum fallback para outra origem." }
     $pending=New-Object 'Collections.Generic.Stack[IO.DirectoryInfo]'
     $pending.Push((Get-Item -LiteralPath $origin))

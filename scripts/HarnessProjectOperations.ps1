@@ -4,7 +4,12 @@ function Set-HarnessProjectOperation {
     $operations=[ordered]@{}
     if ($old['atual/operacao.json']) {
         $current=ConvertFrom-Json $old['atual/operacao.json']
-        foreach ($entry in $current.PSObject.Properties) { $operations[$entry.Name]=$entry.Value }
+        foreach ($entry in $current.PSObject.Properties) {
+            $operations[$entry.Name]=$entry.Value
+            if ($Status -eq 'RUNNING' -and $entry.Name -ne $Name -and $entry.Value.Status -eq 'RUNNING') {
+                $operations[$entry.Name]=[ordered]@{Status='FAILED';DateUtc=[DateTime]::UtcNow.ToString('o');Error='Operacao anterior interrompida; confira o ultimo log.';LogPath=$entry.Value.LogPath}
+            }
+        }
     }
     $operations[$Name]=[ordered]@{Status=$Status;DateUtc=[DateTime]::UtcNow.ToString('o');Error=$ErrorMessage;LogPath=$LogPath}
     $writes=@{'atual/operacao.json'=($operations | ConvertTo-Json -Depth 6)}
@@ -42,9 +47,9 @@ function Get-HarnessProjectTreePublication {
     param($Project,[string]$Prepared,[string]$Destination)
     $prepared=Resolve-ProjectPath $Prepared $Project.Folder
     if (-not (Test-Path -LiteralPath $prepared -PathType Container)) { throw 'Conjunto preparado ausente ou nao e uma pasta; diagnostico corrente preservado.' }
-    $destination=Resolve-ProjectDocument $Project $Destination
+    $destinationPath=Resolve-ProjectDocument $Project $Destination
     $writes=@{}
-    foreach ($base in @($prepared,$destination)) {
+    foreach ($base in @($prepared,$destinationPath)) {
         if (-not (Test-Path -LiteralPath $base -PathType Container)) { continue }
         $pending=New-Object 'Collections.Generic.Stack[IO.DirectoryInfo]'; $pending.Push((Get-Item -LiteralPath $base))
         while ($pending.Count) {
@@ -58,4 +63,28 @@ function Get-HarnessProjectTreePublication {
         }
     }
     $writes
+}
+
+function Get-HarnessProjectMtaLog {
+    param($Project,[switch]$Detailed)
+    $documents=Read-HarnessProjectFiles $Project @('atual/operacao.json')
+    if (-not $documents['atual/operacao.json']) { throw 'Nenhuma operacao MTA registrada para este projeto.' }
+    $operations=ConvertFrom-Json $documents['atual/operacao.json']
+    if (-not $operations.PSObject.Properties['mta']) { throw 'Nenhuma operacao MTA registrada para este projeto.' }
+    $state=$operations.mta; $running=$false
+    if ($state.Status -eq 'RUNNING') {
+        $probe=$null
+        try { $probe=Enter-HarnessProjectAccess $Project -ForOperation }
+        catch { $running=$true }
+        finally { if ($probe) { $probe.ReleaseMutex(); $probe.Dispose() } }
+    }
+    $temporary=Get-HarnessProjectTemporary $Project 'mta'
+    $temporaryConsole=Join-Path $temporary 'console.log'
+    $currentConsole=Join-Path $Project.Folder 'atual/diagnosticos/mta-console.log'
+    if ($state.LogPath -notin @($temporaryConsole,$currentConsole)) { throw 'Caminho de log fora dos destinos desta operacao/projeto.' }
+    $path=if ($state.LogPath -ieq $temporaryConsole) {
+        Join-Path $temporary $(if ($Detailed) { '.metadata/.log' } else { 'console.log' })
+    } else { Join-Path $Project.Folder $(if ($Detailed) { 'atual/diagnosticos/mta-interno.log' } else { 'atual/diagnosticos/mta-console.log' }) }
+    $status=if ($state.Status -eq 'RUNNING' -and -not $running) { 'INTERRUPTED' } else { $state.Status }
+    [pscustomobject]@{Path=$path;Status=$status;Running=$running;Error=$state.Error}
 }

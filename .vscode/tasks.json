@@ -193,14 +193,16 @@
     },
     {
       "label": "MTA: acompanhar log da analise",
-      "detail": "Acompanha o console.log da analise MTA em execucao, sem selecionar projeto. Ctrl+C encerra somente o leitor.",
+      "detail": "Consulta o log MTA corrente do projeto escolhido. Ctrl+C encerra somente o leitor.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
         "-NoProfile",
         "-File",
         "${workspaceFolder}/scripts/acompanhar-log-mta.ps1",
-        "-Active"
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget"
       ],
       "problemMatcher": [],
       "runOptions": {
@@ -214,29 +216,7 @@
     },
     {
       "label": "MTA: acompanhar atividade interna",
-      "detail": "Acompanha automaticamente o log interno da analise MTA em execucao a cada 5 segundos. Nao inicia nem interrompe MTA.",
-      "type": "process",
-      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": [
-        "-NoProfile",
-        "-File",
-        "${workspaceFolder}/scripts/acompanhar-log-mta.ps1",
-        "-Active",
-        "-Detalhado"
-      ],
-      "problemMatcher": [],
-      "runOptions": {
-        "instanceLimit": 1
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": false
-      }
-    },
-    {
-      "label": "MTA: consultar log de execucao anterior",
-      "detail": "Escolha o projeto e a rodada por data/resultado para ler o log salvo, sem executar MTA.",
+      "detail": "Consulta o log interno MTA corrente do projeto a cada 5 segundos. Nao inicia nem interrompe MTA.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
@@ -246,10 +226,12 @@
         "-WorkspacePath",
         "${input:harnessWorkspacePath}",
         "-SelectTarget",
-        "-SelectRun",
-        "-Once"
+        "-Detalhado"
       ],
       "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1
+      },
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",

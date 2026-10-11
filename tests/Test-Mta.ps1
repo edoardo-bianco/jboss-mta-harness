@@ -1,224 +1,83 @@
 #requires -Version 5.1
-$ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $PSScriptRoot
-Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force
-$area = Join-Path $root ('.harness/tests/m' + [guid]::NewGuid().ToString('N').Substring(0,8))
-$fixture = Join-Path $area 'h'
-$app = Join-Path $area 'reactor com espaco'
-$toolsRoot = Join-Path $area 'ferramentas'
-$mtaHome = Join-Path $toolsRoot 'MTA em pasta permitida'
-foreach ($dir in @($fixture, $app, "$app/modulo/src/main/java", "$app/.mvn", "$app/.git", "$app/target", "$toolsRoot/jdk/bin", "$toolsRoot/maven/bin", "$toolsRoot/rulesets/java/test")) { $null = New-Item -ItemType Directory -Path $dir -Force }
-function Assert($condition, $message) { if (-not $condition) { throw $message } }
-Set-Content "$app/pom.xml" '<project><modules><module>modulo</module></modules></project>'
-Set-Content "$app/modulo/pom.xml" '<project/>'
-Set-Content "$app/modulo/src/main/java/Exemplo.java" 'class Exemplo {}'
-Set-Content "$app/.mvn/maven.config" '-Pteste'
-Set-Content "$app/.git/config" 'git fixture'
-Set-Content "$app/target/antigo.txt" 'nao copiar'
-Set-Content "$toolsRoot/rulesets/java/regra.yaml" '- ruleID: fixture'
-Set-Content "$toolsRoot/rulesets/java/test/sonda.yaml" 'nao copiar'
-Set-Content "$toolsRoot/jdk/bin/java.exe" ''
-Set-Content "$toolsRoot/jdk/bin/javac.exe" ''
-Set-Content "$toolsRoot/maven/bin/mvn.cmd" ''
-foreach ($directory in @('jdtls/config_win','jdtls/plugins','static-report','rulesets/java')) { $null = New-Item -ItemType Directory -Path (Join-Path $mtaHome $directory) -Force }
-foreach ($file in @('windows-mta-cli.exe','java-external-provider.exe','fernflower.jar','static-report/index.html')) { Set-Content -LiteralPath (Join-Path $mtaHome $file) 'fixture, nao executar' }
-Set-Content -LiteralPath (Join-Path $mtaHome 'rulesets/java/default.yaml') '- ruleID: default-fixture'
-# Arquivos .exe sao marcadores; a fronteira nativa e simulada em memoria.
-& (Get-Module Harness) {
-    param($FixtureRoot)
-    $script:FixtureRoot = $FixtureRoot
+$ErrorActionPreference='Stop'
+Set-StrictMode -Version Latest
+$root=Split-Path -Parent $PSScriptRoot
+Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force -DisableNameChecking
+function Assert($condition,[string]$message) { if (-not $condition) { throw $message } }
+$area=Join-Path $root ('.harness/tests/mta-corrente-'+[guid]::NewGuid().ToString('N').Substring(0,8))
+$app=Join-Path $area 'app com espaco'; $fixture=Join-Path $area 'harness'; $installation=Join-Path $area 'mta'
+foreach ($dir in @($app,$fixture,"$app/modulo","$app/.git","$app/target","$installation/bin","$installation/jdtls/config_win","$installation/jdtls/plugins","$installation/static-report","$installation/rulesets/java")) { $null=[IO.Directory]::CreateDirectory($dir) }
+[IO.File]::WriteAllText((Join-Path $app 'pom.xml'),'<project><artifactId>api</artifactId><modules><module>modulo</module></modules></project>')
+[IO.File]::WriteAllText((Join-Path $app 'modulo/pom.xml'),'<project><artifactId>modulo</artifactId></project>')
+[IO.File]::WriteAllText((Join-Path $app '.git/config'),'fixture')
+[IO.File]::WriteAllText((Join-Path $app 'target/velho'),'fixture')
+foreach ($file in @('mta.exe','java-external-provider.exe','fernflower.jar','static-report/index.html','bin/java.exe','bin/javac.exe','bin/mvn.cmd','rulesets/java/regra.yaml')) { [IO.File]::WriteAllText((Join-Path $installation $file),'fixture') }
+$config=Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
+$config.tools.mtaExecutable=Join-Path $installation 'mta.exe'; $config.tools.mtaJdkHome=$installation; $config.tools.mavenHome=$installation; $config.mta.rulesPath=Join-Path $installation 'rulesets/java'
+$context=[pscustomobject]@{Root=$fixture;Active=[pscustomobject]@{name='apelido';label='Aplicacao';path=$app};Config=$config}
+$module=Get-Module Harness
+& $module {
+    $script:attempt=0; $script:fail=$false; $script:mutate=$false
     function script:Invoke-HarnessMtaTool {
-        param([string]$Executable, [string[]]$Arguments, [string]$LogPath)
-        if ($Arguments[0] -eq 'version') { return [pscustomobject]@{ExitCode=0; Output='fixture-mta'} }
-        $active = Get-ActiveMtaRun $script:FixtureRoot
-        if ($active.Run -ne (Split-Path -Parent $LogPath)) { throw 'Registro ativo nao aponta para a analise em execucao.' }
-        $inputRoot = $Arguments[[Array]::IndexOf($Arguments, '--input') + 1]
-        $outputRoot = $Arguments[[Array]::IndexOf($Arguments, '--output') + 1]
-        if (-not (Test-Path (Join-Path $inputRoot 'modulo/pom.xml'))) { return [pscustomobject]@{ExitCode=8; Output=''} }
-        $null = New-Item -ItemType Directory -Path (Join-Path $outputRoot 'static-report') -Force
-        [IO.File]::WriteAllText((Join-Path $outputRoot 'environment.txt'), $env:JAVA_HOME)
-        [IO.File]::WriteAllText((Join-Path $outputRoot 'maven-home.txt'), $env:MAVEN_HOME)
-        [IO.File]::WriteAllText((Join-Path $outputRoot 'kantra-dir.txt'), [string]$env:KANTRA_DIR)
-        Set-Content (Join-Path $outputRoot 'static-report/index.html') '<html>fixture only</html>'
-        Set-Content (Join-Path $outputRoot 'output.yaml') '[]'
-        if (Test-Path (Join-Path $inputRoot 'mutate.flag')) { Add-Content (Join-Path $inputRoot 'pom.xml') 'changed' }
-        $exitCode = 0
-        if (Test-Path (Join-Path $inputRoot 'fail.flag')) { $exitCode = 7 }
-        [pscustomobject]@{ExitCode=$exitCode; Output=''}
+        param($Executable,$Arguments,$LogPath)
+        if ($Arguments[0] -eq 'version') { return [pscustomobject]@{ExitCode=0;Output='fixture-mta'} }
+        $script:attempt++
+        $inputRoot=$Arguments[[Array]::IndexOf($Arguments,'--input')+1]
+        $outputRoot=$Arguments[[Array]::IndexOf($Arguments,'--output')+1]
+        if (-not (Test-Path (Join-Path $inputRoot 'modulo/pom.xml')) -or (Test-Path (Join-Path $inputRoot '.git')) -or (Test-Path (Join-Path $inputRoot 'target'))) { throw 'Entrada temporaria do agregador incorreta.' }
+        if ($Arguments -contains '--source' -or $Arguments -notcontains '--enable-default-rulesets=false' -or $Arguments[[Array]::IndexOf($Arguments,'--target')+1] -cne 'eap7') { throw 'Perfil funcional MTA alterado.' }
+        $report=Join-Path $outputRoot 'static-report'; $null=[IO.Directory]::CreateDirectory($report)
+        [IO.File]::WriteAllText((Join-Path $report 'index.html'),('tentativa '+$script:attempt))
+        [IO.File]::WriteAllText((Join-Path $report 'output.js'),'window["apps"] = [{"artifactId":"api","rulesets":[]}];')
+        [IO.File]::WriteAllText((Join-Path $outputRoot 'output.yaml'),'[]')
+        if ($script:attempt -eq 1) { [IO.File]::WriteAllText((Join-Path $report 'obsoleto.js'),'asset anterior') }
+        [IO.File]::WriteAllText($LogPath,('console '+$script:attempt))
+        if ($script:mutate) { [IO.File]::AppendAllText((Join-Path $inputRoot 'pom.xml'),'modificado') }
+        [pscustomobject]@{ExitCode=$(if ($script:fail) { 7 } else { 0 });Output=''}
     }
-} $fixture
-$config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
-$config.activeProject = 'api'
-$config.repositories = @(@{name='api'; path=$app})
-$config.tools.mtaExecutable = Join-Path $mtaHome 'windows-mta-cli.exe'
-$config.tools.mtaJdkHome = "$toolsRoot/jdk"
-$config.tools.mavenHome = "$toolsRoot/maven"
-$config.tools.applicationMavenHome = "$toolsRoot/outro-maven-aplicacao"
-$config.mta.rulesPath = "$toolsRoot/rulesets/java"
-$configPath = Join-Path $fixture 'config.json'
-$config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
-$context = Read-HarnessConfig $configPath $fixture
-Assert ($context.Config.mta.profile -ceq 'eap71-to-eap74-java8') 'Perfil de migracao ausente.'
-# Pasta externa ao harness da fixture; nunca usar C:\mta-runs nos testes.
-$external = Join-Path $area 'mta-runs'
-$config.mta | Add-Member -NotePropertyName runsPath -NotePropertyValue $external -Force
-Write-HarnessJson $configPath $config
-$externalContext = Read-HarnessConfig $configPath $fixture
-$externalSnapshot = New-MtaSnapshot $externalContext
-Assert ($externalSnapshot.Run.StartsWith($external + '\')) 'Snapshot ignorou mta.runsPath.'
-Assert ((Split-Path -Leaf $externalSnapshot.Run) -cmatch '^\d{6}-\d{6}(-[0-9]+)?$') 'Rodada externa deve usar data/hora compacta.'
-Assert ((Split-Path -Leaf (Split-Path -Parent $externalSnapshot.Run)) -ceq $externalContext.Active.label) 'Pasta externa deve identificar o projeto pelo nome.'
-$projectReceipt = Get-Content (Join-Path (Split-Path -Parent $externalSnapshot.Run) 'project.json') -Raw | ConvertFrom-Json
-Assert ($projectReceipt.Source -eq $app -and $projectReceipt.Project -eq 'api') 'Origem do projeto nao identificada.'
-# Instante repetido e nome igual em repositorios diferentes nao sobrescrevem rodadas.
-$fixedDate = '2026-09-30T18:00:00Z'
-$first = & (Get-Module Harness) { param($c,$d) New-HarnessExternalRunDirectory $c $d } $externalContext $fixedDate
-$second = & (Get-Module Harness) { param($c,$d) New-HarnessExternalRunDirectory $c $d } $externalContext $fixedDate
-Assert ($second -ceq ($first + '-2')) 'Colisao no mesmo segundo nao recebeu sufixo sequencial.'
-$homonym = $externalContext | ConvertTo-Json -Depth 12 | ConvertFrom-Json
-$homonym.Active.path = Join-Path $area 'outro-repositorio'
-$third = & (Get-Module Harness) { param($c,$d) New-HarnessExternalRunDirectory $c $d } $homonym $fixedDate
-Assert ((Split-Path -Leaf (Split-Path -Parent $third)) -ceq ($externalContext.Active.label + '-2')) 'Projetos homonimos foram misturados.'
-$thirdAgain = & (Get-Module Harness) { param($c,$d) New-HarnessExternalRunDirectory $c $d } $homonym $fixedDate
-Assert ((Split-Path -Parent $thirdAgain) -ceq (Split-Path -Parent $third)) 'Pasta do projeto homonimo nao foi reutilizada.'
-$externalFound = Find-HarnessMtaRun $fixture 'api' $externalSnapshot.Manifest.RunId $app
-Assert ($externalFound.Run -eq $externalSnapshot.Run) 'Historico nao encontrou rodada externa.'
-$externalResult = Invoke-MtaAnalysis $externalContext
-Assert ($externalResult.Status -eq 'SUCCEEDED') ('MTA externo falhou: ' + $externalResult.Error)
-Assert ((Get-LastMtaReport $externalContext) -eq $externalResult.ReportPath) 'Relatorio externo nao encontrado.'
-# Simula mover apenas o harness, mantendo aplicacao e rodadas externas no lugar.
-$movedRoot = Join-Path $area 'h-movido'
-$null = New-Item -ItemType Directory -Path $movedRoot
-Copy-Item -LiteralPath (Join-Path $fixture '.harness') -Destination $movedRoot -Recurse
-$movedContext = $externalContext | ConvertTo-Json -Depth 20 | ConvertFrom-Json
-$movedContext.Root = $movedRoot
-$reportManifest = Join-Path (Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $externalResult.ReportPath))) 'manifest.json'
-$reportHash = (Get-FileHash -LiteralPath $reportManifest).Hash
-Assert ((Get-LastMtaReport $movedContext) -eq $externalResult.ReportPath) 'Mover harness perdeu ultimo relatorio externo.'
-Assert ((Get-FileHash -LiteralPath $reportManifest).Hash -ceq $reportHash) 'Mover harness reescreveu manifesto historico.'
-# Referencia legada p__<chave>/<RunId> tambem deve sobreviver a mudanca de raiz.
-$legacyId = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-$legacyIndex = Join-Path $movedRoot ('.harness/runs/api/' + $legacyId)
-$legacyRun = Join-Path $external ('p__' + (Get-HarnessProjectKey 'api') + '/' + $legacyId)
-$legacyManifest = @{Project='api'; Source=$app; RunId=$legacyId; CreatedAtUtc='2026-09-29T12:00:00Z'; IndexPath=(Join-Path $fixture ('.harness/runs/api/' + $legacyId))}
-Write-HarnessJson (Join-Path $legacyRun 'manifest.json') $legacyManifest
-Write-HarnessJson (Join-Path $legacyIndex 'location.json') @{Project='api'; Source=$app; RunId=$legacyId; RunsPath=$external}
-Assert ((Find-HarnessMtaRun $movedRoot 'api' $legacyId $app).Run -eq $legacyRun) 'Referencia externa legada perdida apos mover harness.'
-foreach ($field in @('Project','Source','RunId','IndexPath')) {
-    $original = $legacyManifest[$field]
-    $legacyManifest[$field] = if ($field -eq 'IndexPath') { Join-Path $fixture ('.harness/runs/outro/' + $legacyId) } else { 'outra-identidade' }
-    Write-HarnessJson (Join-Path $legacyRun 'manifest.json') $legacyManifest
-    $problem = ''
-    try { Find-HarnessMtaRun $movedRoot 'api' $legacyId $app | Out-Null } catch { $problem = $_.Exception.Message }
-    Assert ($problem -eq 'Manifesto externo nao corresponde a referencia local.') "Identidade $field divergente aceita ou diagnostico ocultado."
-    $legacyManifest[$field] = $original
 }
-Write-HarnessJson (Join-Path $legacyRun 'manifest.json') $legacyManifest
-$externalHash = (Get-FileHash -LiteralPath (Join-Path $externalSnapshot.Run 'manifest.json')).Hash
-$config.mta.runsPath = $null
-Write-HarnessJson $configPath $config
-$context = Read-HarnessConfig $configPath $fixture
-Assert ((Find-HarnessMtaRun $fixture 'api' $externalSnapshot.Manifest.RunId $app).Run -eq $externalSnapshot.Run) 'Trocar configuracao perdeu historico externo.'
-Assert ((Get-FileHash -LiteralPath (Join-Path $externalSnapshot.Run 'manifest.json')).Hash -ceq $externalHash) 'Historico externo foi reescrito.'
-foreach ($invalidStorage in @($fixture, $app, $area, (Join-Path $app 'runs'), [IO.Path]::GetPathRoot($app))) {
-    $config.mta.runsPath = $invalidStorage
-    Write-HarnessJson $configPath $config
-    $rejected = $false
-    try { Read-HarnessConfig $configPath $fixture | Out-Null } catch { $rejected = $true }
-    Assert $rejected 'Pasta externa sobrepondo harness/fontes ou raiz do disco aceita.'
-}
-$config.mta.runsPath = $null
-Write-HarnessJson $configPath $config
-# Um filtro aparentemente mais preciso pode excluir as regras Hibernate do baseline.
-foreach ($case in @(
-    @{field='sources'; value=@('eap7.1')},
-    @{field='targets'; value=@('eap7.4')},
-    @{field='targets'; value=@('eap8')},
-    @{field='targets'; value=@('eap7','eap8')},
-    @{field='mode'; value='source-only'},
-    @{field='profile'; value='outro-perfil'}
-)) {
-    $candidate = $config | ConvertTo-Json -Depth 8 | ConvertFrom-Json
-    $candidate.mta.($case.field) = $case.value
-    Write-HarnessJson $configPath $candidate
-    $rejected = $false
-    try { Read-HarnessConfig $configPath $fixture | Out-Null } catch { $rejected = $true }
-    Assert $rejected "Desvio do perfil deve ser recusado: $($case.field)."
-}
-# JSONs locais anteriores continuam no mesmo perfil, sem alterar o arquivo do usuario.
-$legacy = $config | ConvertTo-Json -Depth 8 | ConvertFrom-Json
-$legacy.mta.PSObject.Properties.Remove('profile')
-$legacy.mta.PSObject.Properties.Remove('sources')
-Write-HarnessJson $configPath $legacy
-$legacyContext = Read-HarnessConfig $configPath $fixture
-Assert ($legacyContext.Config.mta.profile -ceq 'eap71-to-eap74-java8' -and @($legacyContext.Config.mta.sources).Count -eq 0) 'Defaults legados devem preservar o perfil ensaiado.'
-Write-HarnessJson $configPath $config
-$context.Config.mta.rulesPath = $null
-Assert ((Get-MtaRequirements $context) -eq (Join-Path $mtaHome 'rulesets/java')) 'Regras devem vir da pasta configurada, nao do perfil do usuario.'
-$context.Config.mta.rulesPath = "$toolsRoot/rulesets/java"
-$snapshot = New-MtaSnapshot $context
-Assert ((Split-Path -Leaf (Split-Path -Parent $snapshot.Run)) -match '^api__[a-f0-9]{12}$') 'Snapshot deve usar nome e chave do projeto.'
-$runName = 'mta_' + ([DateTimeOffset]::Parse($snapshot.Manifest.CreatedAtUtc)).ToLocalTime().ToString('yyyy-MM-dd_HH-mm-sszzz').Replace(':','') + '__' + $snapshot.Manifest.RunId.Substring(0,12)
-Assert ((Split-Path -Leaf $snapshot.Run) -ceq $runName) 'Pasta MTA deve usar a data do manifesto e o ID curto.'
-Assert (Test-Path (Join-Path $snapshot.Input 'modulo/pom.xml')) 'Reactor nao preservado.'
-Assert (Test-Path (Join-Path $snapshot.Input '.mvn/maven.config')) 'Arquivos auxiliares nao preservados.'
-Assert (-not (Test-Path (Join-Path $snapshot.Input '.git'))) 'Git nao deve ser copiado.'
-Assert (-not (Test-Path (Join-Path $snapshot.Input 'target'))) 'Saida antiga nao deve ser copiada.'
-Assert ($snapshot.Manifest.RuleFiles.Count -eq 1) 'Fixtures das regras nao devem ser analisadas.'
-$arguments = $snapshot.Manifest.Arguments
-Assert ($snapshot.Manifest.Migration.Source -ceq 'EAP 7.1' -and $snapshot.Manifest.Migration.Target -ceq 'EAP 7.4' -and $snapshot.Manifest.Migration.Java -eq 8 -and $snapshot.Manifest.Migration.Namespace -ceq 'javax') 'Intencao de migracao deve acompanhar a evidencia.'
-Assert ($snapshot.Manifest.MtaProfile -ceq 'eap71-to-eap74-java8' -and @($snapshot.Manifest.MtaSources).Count -eq 0) 'Perfil e ausencia de filtro source devem ser registrados.'
-Assert ($arguments[[Array]::IndexOf($arguments, '--target') + 1] -eq 'eap7') 'Target do ensaio anterior deve ser preservado.'
-Assert ($arguments[[Array]::IndexOf($arguments, '--mode') + 1] -eq 'full') 'Modo full deve ser preservado.'
-Assert ($arguments -contains '--enable-default-rulesets=false' -and $arguments -contains '--rules') 'Usar somente as regras explicitas.'
-Assert ($arguments -notcontains '--source' -and $arguments -notcontains '--json-output') 'Nao reintroduzir filtros ou formato descartados no ensaio.'
-$javaBefore = $env:JAVA_HOME
-$pathBefore = $env:PATH
-$kantraBefore = $env:KANTRA_DIR
-$env:KANTRA_DIR = 'C:\caminho-herdado-que-nao-deve-ser-usado'
+$beforeJava=$env:JAVA_HOME; $beforePath=$env:PATH; $beforeKantra=$env:KANTRA_DIR
+$original=[IO.File]::ReadAllText((Join-Path $app 'pom.xml'))
+$first=Invoke-MtaAnalysis $context
+Assert ($first.Status -eq 'SUCCEEDED') ('MTA simulado falhou: '+$first.Error)
+Assert ($first.ReportPath -eq (Join-Path $fixture '.harness/projetos/api/atual/diagnosticos/mta/static-report/index.html')) 'MTA deve usar destino corrente pelo artifactId.'
+Assert (-not $first.PSObject.Properties['RunId']) 'Resultado nao exige RunId.'
+$complete=[IO.File]::ReadAllText($first.ReportPath)
+& $module { $script:fail=$true }
+$failed=Invoke-MtaAnalysis $context
+Assert ($failed.Status -eq 'FAILED' -and $failed.ExitCode -eq 7) 'Falha do MTA deve permanecer falha.'
+Assert ([IO.File]::ReadAllText($first.ReportPath) -ceq $complete) 'Falha nao substitui ultimo diagnostico completo.'
+Assert ((Get-LastMtaReport $context) -eq $first.ReportPath) 'Abertura usa ultimo completo mesmo apos falha.'
+& $module { $script:fail=$false }
+$next=Invoke-MtaAnalysis $context
+Assert ($next.Status -eq 'SUCCEEDED' -and $next.ReportPath -eq $first.ReportPath) 'Novo sucesso substitui no mesmo destino.'
+Assert (-not (Test-Path (Join-Path (Split-Path $next.ReportPath) 'obsoleto.js'))) 'Assets antigos ausentes no novo conjunto devem sair.'
+& $module { $script:mutate=$true }
+$changed=Invoke-MtaAnalysis $context
+Assert ($changed.Status -eq 'FAILED') 'Mudanca da entrada analisada impede publicacao.'
+Assert ([IO.File]::ReadAllText((Join-Path $app 'pom.xml')) -ceq $original) 'Fonte original deve permanecer intacta.'
+Assert ($env:JAVA_HOME -ceq $beforeJava -and $env:PATH -ceq $beforePath -and $env:KANTRA_DIR -ceq $beforeKantra) 'Ambiente deve ser restaurado.'
+Assert (-not (Test-Path (Join-Path $fixture '.harness/projetos/api/temporarios'))) 'Entrada e recuperacao sao descartaveis.'
+Assert (-not (Test-Path (Join-Path $fixture '.harness/runs'))) 'Nao criar historico/manifest/ponteiros.'
+$temporary=Join-Path $fixture '.harness/projetos/api/temporarios'
+$null=[IO.Directory]::CreateDirectory($temporary)
+$outside=Join-Path $area 'fora'; $null=[IO.Directory]::CreateDirectory($outside)
+$junction=Join-Path $temporary 'mta'
+$null=New-Item -ItemType Junction -Path $junction -Target $outside
 try {
-$original = (Get-FileHash "$app/pom.xml").Hash
-$result = Invoke-MtaAnalysis $context
-Assert ($result.Status -eq 'SUCCEEDED') 'Analise valida nao concluiu.'
-$rejected = $false
-try { Get-ActiveMtaRun $fixture | Out-Null } catch { $rejected = $true }
-Assert $rejected 'Analise concluida permaneceu ativa.'
-Assert ($result.Project -eq 'api') 'Projeto incorreto.'
-Assert ((Get-Content (Join-Path (Split-Path $result.ReportPath -Parent) '../maven-home.txt') -Raw) -eq $context.Config.tools.mavenHome) 'MTA deve manter seu Maven independente.'
-Assert ((Get-Content -LiteralPath (Join-Path (Split-Path $result.ReportPath -Parent) '../kantra-dir.txt') -Raw) -eq $mtaHome) 'KANTRA_DIR deve apontar para a instalacao configurada.'
-Assert ($env:KANTRA_DIR -eq 'C:\caminho-herdado-que-nao-deve-ser-usado') 'KANTRA_DIR herdado nao foi restaurado apos sucesso.'
-Assert ((Get-Content (Join-Path (Split-Path $result.ReportPath -Parent) '../environment.txt') -Raw) -eq $context.Config.tools.mtaJdkHome) 'JDK nao foi isolado.'
-Assert ($env:JAVA_HOME -ceq $javaBefore -and $env:PATH -ceq $pathBefore) 'Ambiente do pai alterado.'
-$lastBefore = Get-Content (Join-Path $fixture '.harness/last-api.json') -Raw
-$workspacePath = Join-Path $fixture 'mta.code-workspace'
-Write-HarnessJson $workspacePath @{folders=@(@{name='api do workspace'; path=$app})}
-$workspaceContext = Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target 'api do workspace'
-$workspaceResult = Invoke-MtaAnalysis $workspaceContext
-Assert ($workspaceResult.Status -eq 'SUCCEEDED' -and $workspaceResult.Project -eq $workspaceContext.Active.name) 'MTA nao registrou o projeto escolhido no workspace.'
-Assert ((Get-LastMtaReport $workspaceContext) -eq $workspaceResult.ReportPath) 'Relatorio nao respeitou o alvo do workspace.'
-Assert ((Get-Content (Join-Path $fixture '.harness/last-api.json') -Raw) -ceq $lastBefore) 'Alvo do workspace sobrescreveu historico legado.'
-Set-Content "$app/fail.flag" '1'
-$failed = Invoke-MtaAnalysis $context
-Assert ($failed.Status -eq 'FAILED' -and $failed.ExitCode -eq 7) 'Falha MTA foi ocultada.'
-$rejected = $false
-try { Get-ActiveMtaRun $fixture | Out-Null } catch { $rejected = $true }
-Assert $rejected 'Analise que falhou permaneceu ativa.'
-Assert ($env:KANTRA_DIR -eq 'C:\caminho-herdado-que-nao-deve-ser-usado') 'KANTRA_DIR herdado nao foi restaurado apos falha.'
-Assert ((Get-Content (Join-Path $fixture '.harness/last-api.json') -Raw) -ceq $lastBefore) 'Falha nao pode substituir ultimo sucesso.'
-Remove-Item -LiteralPath "$app/fail.flag"
-Set-Content "$app/mutate.flag" '1'
-$changed = Invoke-MtaAnalysis $context
-Assert ($changed.Status -eq 'INPUT_CHANGED') 'Modificacao pelo analisador deve ser detectada.'
-Assert ((Get-FileHash "$app/pom.xml").Hash -eq $original) 'Fonte real foi alterado.'
-$lock = [IO.File]::Open((Join-Path $fixture '.harness/mta.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
-try {
-    $rejected = $false
-    try { Invoke-MtaAnalysis $context | Out-Null } catch { $rejected = $true }
-    Assert $rejected 'Execucao concorrente nao foi recusada.'
-} finally { $lock.Dispose() }
-Remove-Item -LiteralPath (Join-Path $mtaHome 'java-external-provider.exe')
-$rejected = $false
-try { Get-MtaRequirements $context | Out-Null } catch { $rejected = $true }
-Assert $rejected 'Instalacao incompleta deve ser recusada antes da analise.'
-} finally { $env:KANTRA_DIR = $kantraBefore }
-Write-Output 'PASS: instalacao portavel, ambiente, reactor, regras, erros, integridade e concorrencia (processo simulado).'
+    $rejected=$false; try { Invoke-MtaAnalysis $context | Out-Null } catch { $rejected=$true }
+    Assert $rejected 'Junction temporaria deve impedir analise.'
+    $probe=Join-Path $area 'conferir-lock.ps1'
+    $body=@'
+param($Module,$Root,$Pom)
+$ErrorActionPreference='Stop'
+Import-Module $Module -DisableNameChecking
+$project=Get-HarnessProjectStorage $Root $Pom
+$lease=Enter-HarnessProjectAccess $project -ForOperation
+try { 'LOCK-LIBERADO' } finally { $lease.ReleaseMutex(); $lease.Dispose() }
+'@
+    [IO.File]::WriteAllText($probe,$body)
+    $output=& powershell.exe -NoProfile -File $probe -Module (Join-Path $root 'scripts/HarnessProject.psm1') -Root $fixture -Pom (Join-Path $app 'pom.xml') 2>&1 | Out-String
+    Assert ($LASTEXITCODE -eq 0 -and $output.Contains('LOCK-LIBERADO')) 'Falha antes do preparo deve liberar mutex para outro processo.'
+} finally { [IO.Directory]::Delete($junction) }
+'PASS: MTA corrente, falha preserva diagnostico, perfil, agregador, ambiente e fonte intacta.'

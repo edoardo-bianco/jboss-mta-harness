@@ -26,6 +26,7 @@ Implementacao autorizada por "proceder" em 10/10/2026, em andamento nesta branch
 - [x] S05a: indice geral/corrente por artifactId e links diretos, sem copia datada; preservacao de decisoes e marcadores ambíguos testada.
 - [x] S07a: build grava ultima tentativa no destino fixo, inclusive falha; preserva Java 8, Maven separado, settings e ambiente. Resultado/log/situacao publicados juntos.
 - [x] Retirada transacional de assets, recuperacao apos retirada e concorrencia real entre processos verificadas; produtores MTA/Sonar ainda em adaptacao.
+- [x] S06/S06b: MTA interno publica no destino fixo, protege Source com copia exclusivamente temporaria, conserva completo anterior em falha; abertura e logs selecionam projeto sem RunId. Test-Mta, Test-MtaLog e Test-MtaActive passaram com ferramentas simuladas/processos reais de log.
 - [ ] Integrar o nucleo aos produtores/consumidores e concluir os demais criterios S01-S28 abaixo.
 
 Cada linha abaixo representa uma

@@ -38,6 +38,7 @@ function Invoke-ApplicationBuild {
     }
     $project=Initialize-HarnessProjectStorage $Context.Root $pom
     $lock=Enter-HarnessProjectAccess $project -ForOperation
+    try {
     $previous = @{}
     $pushed = $false
     $result = [ordered]@{Status='FAILED'; ExitCode=$null; Project=$project.Name; Source=$Context.Active.path; Goals=$Goals; JavaHome=$tool.applicationJdk8Home; MavenHome=$tool.applicationMavenHome; SettingsPath=$tool.applicationMavenSettingsPath; JavaVersion=$null; MavenVersion=$null; StartedAtUtc=[DateTime]::UtcNow.ToString('o'); FinishedAtUtc=$null; LogPath=(Join-Path $project.Folder 'atual/build/console.log'); ResultPath=(Join-Path $project.Folder 'atual/build/resultado.json'); Error=$null}
@@ -82,13 +83,12 @@ function Invoke-ApplicationBuild {
         if ($pushed) { Pop-Location }
         foreach ($name in $previous.Keys) { [Environment]::SetEnvironmentVariable($name, $previous[$name], 'Process') }
         $result.FinishedAtUtc = [DateTime]::UtcNow.ToString('o')
-        try {
             $log=if ($temporaryLog -and (Test-Path -LiteralPath $temporaryLog -PathType Leaf)) { [IO.File]::ReadAllText($temporaryLog) } else { [string]$result.Error }
             Set-HarnessProjectOperation $project 'build' $result.Status -ErrorMessage $result.Error -LogPath $result.LogPath -Files @{'atual/build/resultado.json'=($result | ConvertTo-Json -Depth 6);'atual/build/console.log'=$log}
             Remove-HarnessProjectTemporary $project 'build'
-        } finally { $lock.ReleaseMutex(); $lock.Dispose() }
     }
     return [pscustomobject]$result
+    } finally { $lock.ReleaseMutex(); $lock.Dispose() }
 }
 
 Export-ModuleMember -Function Invoke-ApplicationBuild

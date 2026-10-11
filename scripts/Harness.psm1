@@ -3,6 +3,8 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 if ($PSVersionTable.PSVersion.Major -ne 5 -or $PSVersionTable.PSVersion.Minor -ne 1) { throw 'Use Windows PowerShell 5.1 (powershell.exe).' }
 
+Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
+
 function Resolve-HarnessPath {
     param([AllowNull()][string]$Value, [string]$Root)
     if ([string]::IsNullOrWhiteSpace($Value)) { return $null }
@@ -719,89 +721,6 @@ function Find-HarnessMtaRun {
     $matches[0]
 }
 
-function New-HarnessExternalRunDirectory {
-    param($Context, [string]$CreatedAtUtc)
-    $base = $Context.Config.mta.runsPath
-    $label = ([regex]::Replace($Context.Active.label, '[^A-Za-z0-9_-]', '-')).Trim('-','_')
-    if (-not $label) { $label = 'projeto' }
-    if ($label.Length -gt 64) { $label = $label.Substring(0,64) }
-    if ($label -match '^(CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])$') { $label = 'projeto-' + $label }
-    for ($number = 1; ; $number++) {
-        $name = if ($number -eq 1) { $label } else { $label + '-' + $number }
-        $projectPath = Resolve-HarnessPath (Join-Path $base $name) $Context.Root
-        $receipt = Join-Path $projectPath 'project.json'
-        if (Test-Path -LiteralPath $projectPath) {
-            # Nao adotar pastas desconhecidas nem misturar fontes homonimas.
-            if (-not (Test-Path -LiteralPath $receipt -PathType Leaf)) { continue }
-            $identity = Get-Content -LiteralPath $receipt -Raw -Encoding UTF8 | ConvertFrom-Json
-            if ($identity.Project -ceq $Context.Active.name -and
-                (Resolve-HarnessPath $identity.Source $Context.Root) -ieq $Context.Active.path) { break }
-            continue
-        }
-        try { $null = New-Item -ItemType Directory -Path $projectPath -ErrorAction Stop }
-        catch {
-            if (Test-Path -LiteralPath $projectPath) { continue }
-            throw
-        }
-        Write-HarnessJson $receipt @{Project=$Context.Active.name; Label=$Context.Active.label; Source=$Context.Active.path}
-        break
-    }
-    $stamp = ([DateTimeOffset]::Parse($CreatedAtUtc)).ToLocalTime().ToString('yyMMdd-HHmmss', [Globalization.CultureInfo]::InvariantCulture)
-    for ($number = 1; ; $number++) {
-        $name = if ($number -eq 1) { $stamp } else { $stamp + '-' + $number }
-        $run = Resolve-HarnessPath (Join-Path $projectPath $name) $Context.Root
-        if (Test-Path -LiteralPath $run) { continue }
-        # Criacao sem Force reserva o destino, inclusive entre dois harnesses.
-        try { $null = New-Item -ItemType Directory -Path $run -ErrorAction Stop; return $run }
-        catch {
-            if (Test-Path -LiteralPath $run) { continue }
-            throw
-        }
-    }
-}
-
-function New-MtaSnapshot {
-    param($Context)
-    $rules = Get-MtaRequirements $Context
-    Import-Module (Join-Path $PSScriptRoot 'HarnessGit.psm1') -DisableNameChecking
-    $createdAt = [DateTime]::UtcNow.ToString('o')
-    $projectFolder = Get-HarnessProjectFolder $Context.Active
-    do {
-        $id = [guid]::NewGuid().ToString('N')
-        $runFolder = 'mta_' + (Format-HarnessDate $createdAt -ForPath) + '__' + $id.Substring(0,12)
-        $indexPath = Resolve-HarnessPath (Join-Path $Context.Root ('.harness/runs/' + $projectFolder + '/' + $runFolder)) $Context.Root
-    } while (Test-Path -LiteralPath $indexPath)
-    $run = $indexPath
-    if ($Context.Config.mta.runsPath) { $run = New-HarnessExternalRunDirectory $Context $createdAt }
-    $inputPath = Join-Path $run 'input'
-    $outputPath = Join-Path $run 'output'
-    $sourceFiles = @(Get-HarnessFiles $Context.Active.path)
-    $ruleFiles = @(Get-HarnessFiles $rules -Rules)
-    if ($ruleFiles.Count -eq 0) { throw 'Nenhuma regra YAML encontrada.' }
-    Copy-HarnessFiles $Context.Active.path $inputPath $sourceFiles
-    Copy-HarnessFiles $rules (Join-Path $run 'rules') $ruleFiles
-    $arguments = @('analyze','--input',$inputPath,'--output',$outputPath,'--run-local','--mode',$Context.Config.mta.mode,'--enable-default-rulesets=false','--rules',(Join-Path $run 'rules'))
-    foreach ($target in $Context.Config.mta.targets) { $arguments += @('--target',$target) }
-    if ($Context.Config.tools.mavenSettingsPath) { $arguments += @('--maven-settings',$Context.Config.tools.mavenSettingsPath) }
-    $manifest = [ordered]@{
-        RunId=$id; Project=$Context.Active.name; Source=$Context.Active.path; CreatedAtUtc=$createdAt
-        Git=(Get-HarnessGitState $Context)
-        Executable=$Context.Config.tools.mtaExecutable; ExecutableSha256=(Get-FileHash -LiteralPath $Context.Config.tools.mtaExecutable).Hash
-        MtaHome=(Split-Path -Parent $Context.Config.tools.mtaExecutable)
-        MtaProfile=$Context.Config.mta.profile; MtaSources=@($Context.Config.mta.sources)
-        Migration=[ordered]@{Source='EAP 7.1'; Target='EAP 7.4'; Java=8; Namespace='javax'; CorrectedArtifactRuntime='EAP 7.4'}
-        MtaJdkHome=$Context.Config.tools.mtaJdkHome; MavenHome=$Context.Config.tools.mavenHome
-        Arguments=$arguments; SourceFiles=$sourceFiles; RuleFiles=$ruleFiles
-    }
-    if ($run -ine $indexPath) { $manifest.IndexPath = $indexPath }
-    Write-HarnessJson (Join-Path $run 'manifest.json') $manifest
-    if ($run -ine $indexPath) {
-        $relative = (Split-Path -Leaf (Split-Path -Parent $run)) + '/' + (Split-Path -Leaf $run)
-        Write-HarnessJson (Join-Path $indexPath 'location.json') @{Project=$Context.Active.name; Source=$Context.Active.path; RunId=$id; RunsPath=$Context.Config.mta.runsPath; RunRelativePath=$relative}
-    }
-    [pscustomobject]@{Run=$run; Input=$inputPath; Output=$outputPath; Manifest=$manifest}
-}
-
 function Invoke-HarnessMtaTool {
     param([string]$Executable, [string[]]$Arguments, [string]$LogPath)
     $savedPreference = $ErrorActionPreference
@@ -815,119 +734,9 @@ function Invoke-HarnessMtaTool {
     } finally { $ErrorActionPreference = $savedPreference }
 }
 
-function Invoke-MtaAnalysis {
-    param($Context)
-    if (-not $Context.Active) { throw 'Escolha um projeto com -SelectTarget ou -Target; activeProject e o padrao opcional.' }
-    $stateRoot = Resolve-HarnessPath (Join-Path $Context.Root '.harness') $Context.Root
-    $null = [IO.Directory]::CreateDirectory($stateRoot)
-    try { $lock = [IO.File]::Open((Join-Path $stateRoot 'mta.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
-    catch { throw 'Ja existe uma analise MTA em execucao neste harness.' }
-    $snapshot = $null
-    $activeLease = $null
-    $previous = @{}
-    foreach ($name in @('JAVA_HOME','PATH','JVM_MAX_MEM','SONAR_TOKEN','MAVEN_HOME','M2_HOME','JAVA_OPTS','MAVEN_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','KANTRA_DIR')) { $previous[$name] = [Environment]::GetEnvironmentVariable($name, 'Process') }
-    $result = [ordered]@{Status='FAILED'; ExitCode=$null; Project=$Context.Active.name; RunId=$null; ReportPath=$null; ResultPath=$null; SourceUnchanged=$null; SnapshotOriginalFilesUnchanged=$null; UnexpectedAddedFiles=@(); RulesUnchanged=$null; Version=$null; Error=$null}
-    $pushed = $false
-    try {
-        $snapshot = New-MtaSnapshot $Context
-        $result.RunId = $snapshot.Manifest.RunId
-        $result.ReportPath = Join-Path $snapshot.Output 'static-report/index.html'
-        $result.ResultPath = Join-Path $snapshot.Run 'result.json'
-        # O arquivo permanece, mas o handle so fica aberto durante esta analise.
-        # Um registro antigo apos encerramento abrupto nao deve apontar para um build.
-        $activeLease = [IO.File]::Open((Join-Path $snapshot.Run 'active.lock'), 'OpenOrCreate', 'ReadWrite', 'Read')
-        Write-HarnessJson (Join-Path $stateRoot 'active-mta.json') @{RunId=$result.RunId; Project=$Context.Active.name; Label=$Context.Active.label}
-        $tool = $Context.Config.tools
-        $env:KANTRA_DIR = Split-Path -Parent $tool.mtaExecutable
-        $env:JAVA_HOME = $tool.mtaJdkHome
-        $env:MAVEN_HOME = $tool.mavenHome
-        $env:M2_HOME = $tool.mavenHome
-        foreach ($name in @('JAVA_OPTS','MAVEN_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS')) { [Environment]::SetEnvironmentVariable($name,$null,'Process') }
-        $env:PATH = (Join-Path $tool.mtaJdkHome 'bin') + ';' + (Join-Path $tool.mavenHome 'bin') + ';' + (Split-Path -Parent $tool.mtaExecutable) + ';' + $previous.PATH
-        $env:JVM_MAX_MEM = '2g'
-        $env:SONAR_TOKEN = $null
-        Push-Location -LiteralPath $snapshot.Run
-        $pushed = $true
-        Write-Host "Projeto: $($Context.Active.label) | Fonte: $($Context.Active.path)"
-        Write-Host "Instalacao MTA (KANTRA_DIR): $env:KANTRA_DIR"
-        Write-Host "Perfil: $($snapshot.Manifest.MtaProfile) | EAP 7.1 -> EAP 7.4 | Java 8 / javax"
-        Write-Host 'Filtros MTA: target=eap7; source=nenhum (preserva regras Hibernate).'
-        Write-Host "Rodada: $($snapshot.Run) | Modo: $($Context.Config.mta.mode)"
-        $version = Invoke-HarnessMtaTool $tool.mtaExecutable @('version')
-        $result.Version = $version.Output
-        if ($version.ExitCode -eq 0) {
-            $execution = Invoke-HarnessMtaTool $tool.mtaExecutable $snapshot.Manifest.Arguments (Join-Path $snapshot.Run 'console.log')
-            $result.ExitCode = $execution.ExitCode
-        } else { $result.ExitCode = $version.ExitCode; $result.Error = 'Falha ao consultar a versao MTA.' }
-        $sourceAfter = @(Get-HarnessFiles $Context.Active.path)
-        $inputAfter = @(Get-HarnessFiles $snapshot.Input)
-        $rulesAfter = @(Get-HarnessFiles (Join-Path $snapshot.Run 'rules') -Rules)
-        $beforeMap = @{}; $afterMap = @{}
-        foreach ($file in $snapshot.Manifest.SourceFiles) { $beforeMap[$file.path]=$file.sha256 }
-        foreach ($file in $inputAfter) { $afterMap[$file.path]=$file.sha256 }
-        $changed = @($snapshot.Manifest.SourceFiles | Where-Object { $afterMap[$_.path] -cne $_.sha256 })
-        $known = @('.classpath','.project','.settings/org.eclipse.core.resources.prefs','.settings/org.eclipse.jdt.apt.core.prefs','.settings/org.eclipse.jdt.core.prefs','.settings/org.eclipse.m2e.core.prefs')
-        $result.UnexpectedAddedFiles = @($inputAfter | Where-Object { -not $beforeMap.ContainsKey($_.path) -and $_.path -notin $known } | Select-Object -ExpandProperty path)
-        $result.SnapshotOriginalFilesUnchanged = ($changed.Count -eq 0)
-        $result.SourceUnchanged = (($sourceAfter | ConvertTo-Json -Depth 4 -Compress) -ceq ($snapshot.Manifest.SourceFiles | ConvertTo-Json -Depth 4 -Compress))
-        $result.RulesUnchanged = (($rulesAfter | ConvertTo-Json -Depth 4 -Compress) -ceq ($snapshot.Manifest.RuleFiles | ConvertTo-Json -Depth 4 -Compress))
-        if (-not $result.SourceUnchanged -or -not $result.SnapshotOriginalFilesUnchanged -or -not $result.RulesUnchanged -or $result.UnexpectedAddedFiles.Count) { $result.Status='INPUT_CHANGED' }
-        elseif ($result.ExitCode -eq 0 -and (Test-Path -LiteralPath $result.ReportPath -PathType Leaf) -and (Test-Path -LiteralPath (Join-Path $snapshot.Output 'output.yaml'))) {
-            $result.Status='SUCCEEDED'
-            Write-HarnessJson (Join-Path $stateRoot ('last-' + $result.Project + '.json')) @{RunId=$result.RunId}
-        }
-    } catch { $result.Error = $_.Exception.Message }
-    finally {
-        if ($pushed) { Pop-Location }
-        foreach ($name in $previous.Keys) { [Environment]::SetEnvironmentVariable($name,$previous[$name],'Process') }
-        try { if ($result.ResultPath) { Write-HarnessJson $result.ResultPath $result } }
-        finally {
-            if ($activeLease) { $activeLease.Dispose() }
-            $lock.Dispose()
-        }
-    }
-    [pscustomobject]$result
-}
+. (Join-Path $PSScriptRoot 'HarnessMtaExecution.ps1')
 
-function Get-ActiveMtaRun {
-    param([string]$Root)
-    $pointer = Resolve-HarnessPath (Join-Path $Root '.harness/active-mta.json') $Root
-    $notRunning = 'Nenhuma analise MTA em execucao. Inicie MTA: executar analise e aguarde a mensagem Rodada.'
-    if (-not (Test-Path -LiteralPath $pointer -PathType Leaf)) { throw $notRunning }
-    try { $active = Get-Content -LiteralPath $pointer -Raw -Encoding UTF8 | ConvertFrom-Json }
-    catch { throw 'Registro da analise ainda indisponivel. Aguarde a mensagem Rodada e tente novamente.' }
-    if ($active.RunId -cnotmatch '^[a-f0-9]{32}$' -or $active.Project -cnotmatch '^(?:[A-Za-z0-9][A-Za-z0-9_.-]{0,63}|_workspace-[a-f0-9]{24})$') { throw 'Registro da analise ativa invalido.' }
-    $selected = Find-HarnessMtaRun $Root $active.Project $active.RunId
-    $run = $selected.Run
-    $leasePath = Join-Path $run 'active.lock'
-    if (-not (Test-Path -LiteralPath $leasePath -PathType Leaf)) { throw $notRunning }
-    $running = $false
-    try {
-        $probe = [IO.File]::Open($leasePath, 'Open', 'ReadWrite', 'None')
-        $probe.Dispose()
-    } catch [IO.IOException] { $running = $true }
-    if (-not $running) { throw $notRunning }
-    $manifest = $selected.Manifest
-    [pscustomobject]@{Run=$run; Manifest=$manifest; Label=$active.Label}
-}
-
-function Get-LastMtaReport {
-    param($Context)
-    if (-not $Context.Active) { throw 'Escolha um projeto com -SelectTarget ou -Target; activeProject e o padrao opcional.' }
-    $state = Join-Path $Context.Root ('.harness/last-' + $Context.Active.name + '.json')
-    if (-not (Test-Path -LiteralPath $state)) { throw 'Nao ha analise concluida para o projeto ativo.' }
-    $last = Get-Content -LiteralPath $state -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($last.RunId -cnotmatch '^[a-f0-9]{32}$') { throw 'Referencia de relatorio invalida.' }
-    $selected = Find-HarnessMtaRun $Context.Root $Context.Active.name $last.RunId $Context.Active.path
-    $run = $selected.Run
-    $result = Get-Content -LiteralPath (Join-Path $run 'result.json') -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($result.Project -cne $Context.Active.name -or $result.RunId -cne $last.RunId) { throw 'Resultado nao corresponde ao projeto/rodada.' }
-    $path = Join-Path $run 'output/static-report/index.html'
-    if ($result.Status -cne 'SUCCEEDED' -or -not (Test-Path -LiteralPath $path -PathType Leaf)) { throw 'Relatorio ausente ou rodada nao concluida.' }
-    return $path
-}
-
-Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, New-MtaSnapshot, Invoke-MtaAnalysis, Get-ActiveMtaRun, Get-LastMtaReport, Format-HarnessDate, Test-HarnessRunFolder, Get-HarnessProjectKey, Get-HarnessProjectFolder, Get-HarnessMtaRuns, Find-HarnessMtaRun, Get-HarnessFiles, Resolve-HarnessMtaRunDirectory
+Export-ModuleMember -Function Read-HarnessConfig, New-HarnessWorkspace, Write-HarnessJson, Resolve-HarnessPath, Get-MtaRequirements, Invoke-MtaAnalysis, Get-LastMtaReport, Format-HarnessDate, Test-HarnessRunFolder, Get-HarnessProjectKey, Get-HarnessProjectFolder, Get-HarnessMtaRuns, Find-HarnessMtaRun, Get-HarnessFiles, Resolve-HarnessMtaRunDirectory
 Export-ModuleMember -Function Initialize-HarnessMigration, Get-HarnessMtaCatalog, Update-HarnessMigration
 Export-ModuleMember -Function Get-HarnessExternalMtaRuns
 Export-ModuleMember -Function Resolve-HarnessMigrationPath

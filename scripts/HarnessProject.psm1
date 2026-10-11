@@ -93,7 +93,7 @@ Export-ModuleMember -Function Get-HarnessProjectStorage,Initialize-HarnessProjec
 . (Join-Path $PSScriptRoot 'HarnessProjectPublication.ps1')
 Export-ModuleMember -Function Publish-HarnessProjectFiles,Read-HarnessProjectFiles,Enter-HarnessProjectAccess
 . (Join-Path $PSScriptRoot 'HarnessProjectMta.ps1')
-Export-ModuleMember -Function Read-HarnessProjectMta
+Export-ModuleMember -Function Read-HarnessProjectMta,Read-HarnessMtaDirectory
 . (Join-Path $PSScriptRoot 'HarnessProjectDocuments.ps1')
 Export-ModuleMember -Function Update-HarnessProjectDocuments,Get-HarnessProjectDecisions
 
@@ -108,3 +108,4 @@ function Publish-HarnessWorkspaceIndex {
 Export-ModuleMember -Function Publish-HarnessWorkspaceIndex
 . (Join-Path $PSScriptRoot 'HarnessProjectOperations.ps1')
 Export-ModuleMember -Function Set-HarnessProjectOperation,Get-HarnessProjectTemporary,Remove-HarnessProjectTemporary,Get-HarnessProjectTreePublication
+Export-ModuleMember -Function Get-HarnessProjectMtaLog
