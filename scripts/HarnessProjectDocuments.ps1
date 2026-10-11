@@ -44,10 +44,9 @@ function Get-HarnessProjectDecisions {
     Read-ProjectDecisionRows $documents['migracao.md']
 }
 
-function Update-HarnessProjectDocuments {
-    param($Project,$Mta,[switch]$UpdateIssues,[string[]]$Warnings=@())
-    $old=Read-HarnessProjectFiles $Project @('migracao.md','indice.md','atual/operacao.json')
-    $migration=$old['migracao.md']
+function Get-HarnessProjectMigrationText {
+    param($Project,$Mta,[string]$Text,[switch]$UpdateIssues)
+    $migration=$Text
     if (-not $migration) {
         $migration="# Migracao: $($Project.Name)`n`nEdite Decisao, Andamento e Observacao. ANALISAR AGORA seleciona uma issue para planejamento; ADIAR e FORA DO ESCOPO exigem justificativa. Categoria e testes nao concedem GO ou aceite. Issues manuais usam ID DEV-... e categoria manual.`n`n## Direcionamento humano`n`nRegistre objetivo, escopo e decisoes aqui.`n`n<!-- mta:inicio -->`n| ID | Issue | Categoria | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |`n| --- | --- | --- | --- | --- | --- | --- | --- |`n<!-- mta:fim -->`n"
     }
@@ -70,11 +69,18 @@ function Update-HarnessProjectDocuments {
         }
         $migration=Set-ProjectManagedBlock $migration 'mta' ($lines -join "`n")
     }
-    if ($Mta -or -not $old['migracao.md']) {
+    if ($Mta -or -not $Text) {
         $refs=@((Get-HarnessSourceLink $Project.MigrationPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.MigrationPath $Project.Source 'Codigo local'))
         if ($Mta) { $refs+=Get-HarnessSourceLink $Project.MigrationPath $Mta.ReportPath 'MTA atual' }
         $migration=Set-ProjectManagedBlock $migration 'fontes' ($refs -join ' | ')
     }
+    $migration
+}
+
+function Update-HarnessProjectDocuments {
+    param($Project,$Mta,[switch]$UpdateIssues,[string[]]$Warnings=@())
+    $old=Read-HarnessProjectFiles $Project @('migracao.md','indice.md','atual/operacao.json')
+    $migration=Get-HarnessProjectMigrationText $Project $Mta $old['migracao.md'] -UpdateIssues:$UpdateIssues
     $lines=@('# Projeto: '+$Project.Name,'', (Get-HarnessSourceLink $Project.IndexPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.IndexPath $Project.MigrationPath 'Decisoes de migracao'))
     foreach ($entry in @(@('atual/planejamento/plano.md','Plano corrente'),@('atual/planejamento/tarefas.md','Tarefas correntes'),@('atual/planejamento/contexto.json','Contexto corrente'),@('atual/build/resultado.json','Ultimo build'),@('atual/diagnosticos/sonar/resultado.json','Sonar atual'),@('reconciliado/resultado.md','Ultima reconciliacao'))) {
         $path=Join-Path $Project.Folder $entry[0]

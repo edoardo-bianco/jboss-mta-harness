@@ -137,8 +137,15 @@ function Publish-HarnessProjectFiles {
         }
         foreach ($relative in $Expected.Keys) {
             $path=Resolve-ProjectDocument $Project $relative
-            $current=if (Test-Path -LiteralPath $path -PathType Leaf) { [IO.File]::ReadAllText($path) } else { $null }
-            if ($current -cne $Expected[$relative]) { throw "Documento alterado desde a leitura: $path" }
+            $equal=$false
+            if ($Expected[$relative] -is [byte[]]) {
+                $equal=(Test-Path -LiteralPath $path -PathType Leaf) -and
+                    [Convert]::ToBase64String([IO.File]::ReadAllBytes($path)) -ceq [Convert]::ToBase64String($Expected[$relative])
+            } else {
+                $current=if (Test-Path -LiteralPath $path -PathType Leaf) { [IO.File]::ReadAllText($path) } else { $null }
+                $equal=$current -ceq $Expected[$relative]
+            }
+            if (-not $equal) { throw "Documento alterado desde a leitura: $path" }
         }
         $temporary=Join-Path $Project.TemporaryPath 'publicacao'
         $entries=@()
@@ -185,12 +192,16 @@ function Publish-HarnessProjectFiles {
 }
 
 function Read-HarnessProjectFiles {
-    param($Project,[string[]]$Paths)
+    param($Project,[string[]]$Paths,[switch]$AsBytes)
     Invoke-WithProjectAccess $Project {
         $result=[ordered]@{}
         foreach ($relative in $Paths) {
             $path=Resolve-ProjectDocument $Project $relative
-            $result[$relative]=if (Test-Path -LiteralPath $path -PathType Leaf) { [IO.File]::ReadAllText($path) } else { $null }
+            $result[$relative]=$null
+            if (Test-Path -LiteralPath $path -PathType Leaf) {
+                if ($AsBytes) { $result[$relative]=[IO.File]::ReadAllBytes($path) }
+                else { $result[$relative]=[IO.File]::ReadAllText($path) }
+            }
         }
         $result
     }

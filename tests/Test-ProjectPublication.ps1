@@ -54,3 +54,13 @@ Assert (-not (Test-Path (Join-Path $project.Folder 'obsoleto.txt'))) 'Publicacao
 Reject { Get-HarnessProjectTreePublication $project (Join-Path $project.Folder 'ausente') 'atual/planejamento' } 'Pasta preparada ausente nao pode significar apagar diagnostico corrente.'
 Reject { Get-HarnessProjectTreePublication $project $project.PlanPath 'atual/planejamento' } 'Arquivo nao e conjunto preparado valido.'
 'PASS: publicacao, conflito, recuperacao, retirada e leitura consistente sem recibos permanentes.'
+$binary='evidencias/anexo.bin'
+Publish-HarnessProjectFiles $project @{$binary=[byte[]]@(128)}
+$read=Read-HarnessProjectFiles $project @($binary) -AsBytes
+Assert ($read[$binary] -is [byte[]]) 'Leitura binaria deve preservar bytes.'
+Publish-HarnessProjectFiles $project @{$binary=[byte[]]@(129)}
+Reject { Publish-HarnessProjectFiles $project @{$binary=$null} $read } 'Binarios com a mesma decodificacao textual nao podem ser confundidos.'
+$read=Read-HarnessProjectFiles $project @($binary) -AsBytes
+Publish-HarnessProjectFiles $project @{$binary=$null} $read
+Assert (-not (Test-Path -LiteralPath (Join-Path $project.Folder $binary))) 'Retirada binaria deve exigir os bytes lidos.'
+'PASS: igualdade binaria transitoria protege anexos e retirada.'
