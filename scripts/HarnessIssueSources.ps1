@@ -16,7 +16,7 @@ function Read-PrioritizationFicha {
 }
 
 function Get-IssueLocalReference {
-    param([string]$Base,[string]$Relative,[string]$From)
+    param([string]$Base,[string]$Relative,[string]$From,[string[]]$AvailablePaths=@())
     # Referencias relativas escolhidas ao examinar codigo/anexos. Nao inferir
     # equivalencia entre caminhos de outra maquina e arquivos locais.
     $decoded=[Uri]::UnescapeDataString($Relative).Replace('\','/')
@@ -28,12 +28,12 @@ function Get-IssueLocalReference {
         if ((Test-Path -LiteralPath $cursor) -and ((Get-Item -LiteralPath $cursor -Force).Attributes -band [IO.FileAttributes]::ReparsePoint)) { throw 'Referencia por link/junction exige conferencia explicita.' }
         $cursor=Split-Path $cursor -Parent
     }
-    if (Test-Path -LiteralPath $path -PathType Leaf) { Get-HarnessSourceLink $From $path $Relative }
+    if ((Test-Path -LiteralPath $path -PathType Leaf) -or $path -iin $AvailablePaths) { Get-HarnessSourceLink $From $path $Relative }
     else { 'Indisponivel: '+(ConvertTo-ProjectCell $Relative) }
 }
 
 function Get-IssueSourcesText {
-    param($Project,$Mta,[string]$Id,[string]$Category,[string]$Text,[string]$Path,[switch]$EvidenceOnly)
+    param($Project,$Mta,[string]$Id,[string]$Category,[string]$Text,[string]$Path,[switch]$EvidenceOnly,[string[]]$AvailablePaths=@())
     $identity=Read-PrioritizationFicha $Text $Project.Name $Category $Id
     $lines=@((Get-HarnessSourceLink $Path $Project.Pom 'POM'),(Get-HarnessSourceLink $Path $Project.MigrationPath 'Decisoes atuais'))
     if ($Mta) {
@@ -44,7 +44,7 @@ function Get-IssueSourcesText {
     } elseif ($EvidenceOnly) { $lines+='Base EVIDENCIAS: MTA nao consultado neste planejamento. Avaliacao humana preservada.' }
     else { $lines+='MTA indisponivel: detalhes nao consultaveis. Avaliacao humana preservada; nao inferir resolucao.' }
     foreach ($relative in $identity.LocalPaths) { $lines+=Get-IssueLocalReference $Project.Source $relative $Path }
-    foreach ($relative in $identity.EvidencePaths) { $lines+=Get-IssueLocalReference $Project.EvidencePath $relative $Path }
+    foreach ($relative in $identity.EvidencePaths) { $lines+=Get-IssueLocalReference $Project.EvidencePath $relative $Path $AvailablePaths }
     if (-not $identity.LocalPaths.Count) { $lines+='Sem arquivo local vinculado: registrar a lacuna ou os caminhos relativos efetivamente conferidos em LocalPaths.' }
     Set-ProjectManagedBlock $Text 'ficha:fontes' ($lines -join "`n`n")
 }

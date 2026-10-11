@@ -19,7 +19,8 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 
 Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10/2026.
 [Ponto atual e verificacoes](plan.md#retomada-de-11102026).
-S11b/S12/S12b implementados nesta retomada. Proxima fatia: S13 (reconciliacao corrente e copia de colega).
+S11b/S12/S12b implementados. S13 parcialmente implementada e testada; pausa solicitada
+pelo desenvolvedor em 11/10/2026. Retomar a revisao final do checkpoint antes de S14.
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
@@ -36,7 +37,7 @@ S11b/S12/S12b implementados nesta retomada. Proxima fatia: S13 (reconciliacao co
 - [x] S11b junto de S12: retirados apontamentos-mta.json e Consolidated.MtaIssuePath do produtor/validador de planejamento. Consultas permanecem em S15; S11 integral ainda depende dessa integracao.
 - [x] S12: escopo e fontes MTA/EVIDENCIAS em contexto corrente, sem recibos/copias; retomada preserva proposta e sinaliza revisao. Fichas e indice de evidencias mantem referencias por issue; sete suites focais PS5.1 e revisao independente aprovadas.
 - [x] S12b: abertura direta de plano/tarefas, sem selecionar por data ou acessar MTA; ausencia/cancelamento preservam arquivos.
-- [ ] S13: adaptar reconciliacao e copia de colega. A entrada de atualizar registro informa indisponibilidade nesta transicao, sem adotar origem; implementar o fluxo corrente antes da integracao completa.
+- [ ] S13: reconciliacao/copia corrente implementadas em checkpoint; fechar revisao final, conferir referencias de diagnostico e registrar conclusao na ADR. Comparacao, publicacao/rollback, conflitos, portabilidade, CLI e bloqueio de arquivo testados em fixtures; etapa permanece em andamento por pausa humana.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos

@@ -17,7 +17,7 @@ function Reject-Json($Options,[string]$Message) {
     Assert ((Get-PlanningFixtureState $f) -ceq $before) 'Falha de validacao alterou arquivos.'
 }
 Reject-Json $base 'Ambiguidade exige escolha explicita.'
-foreach ($override in @(@{Target='desconhecido'},@{Target='a';SelectTarget=$true},@{Target='a';Operation='manter-migracao'},@{Target='a';SelectMigrationInput=$true},@{Target='a';NonInteractive=$false},@{Target='a';NoOpen=$false})) {
+foreach ($override in @(@{Target='desconhecido'},@{Target='a';SelectTarget=$true},@{Target='a';ReceivedPath='colega'},@{Target='a';SelectMigrationInput=$true},@{Target='a';NonInteractive=$false},@{Target='a';NoOpen=$false})) {
     $options=$base.Clone()
     foreach ($key in $override.Keys) { $options[$key]=$override[$key] }
     Reject-Json $options 'Entrada incoerente deve ser recusada.'

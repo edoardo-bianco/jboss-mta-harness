@@ -4,6 +4,7 @@ Import-Module (Join-Path $root 'scripts/HarnessPlanning.psm1') -Force -DisableNa
 function New-PlanningFixture([int]$Count=2,[string[]]$Names=@('a')) {
     $fixture=New-Fixture $Count $Names
     Copy-Item -LiteralPath (Join-Path $root '.github/prompts/planejar-lotes.prompt.md') -Destination (Join-Path $fixture.Root '.github/prompts/planejar-lotes.prompt.md')
+    Copy-Item -LiteralPath (Join-Path $root '.github/prompts/manter-migracao.prompt.md') -Destination (Join-Path $fixture.Root '.github/prompts/manter-migracao.prompt.md')
     foreach ($project in $fixture.Projects) {
         $text=[IO.File]::ReadAllText($project.MigrationPath).Replace('| A DEFINIR | NAO ANALISADA |','| ANALISAR AGORA | NAO ANALISADA |')
         [IO.File]::WriteAllText($project.MigrationPath,$text)

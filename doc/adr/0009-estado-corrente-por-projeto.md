@@ -96,8 +96,10 @@ sao referencias gerais. Indice explicitamente escolhido permanece associado
 mesmo ausente; a retomada conserva a lacuna. Nao copiar anexos ou texto integral
 do MTA. Fichas ausentes permanecem a elaborar ate exame efetivo pelo condutor.
 
-`Planejamento: atualizar registro de migracao` informa indisponibilidade durante
-a adaptacao da reconciliacao (S13). Consumidores legados nao procuram uma
+`Planejamento: atualizar registro de migracao` ja prepara reconciliacao corrente
+no checkpoint parcial S13. O preparo nao altera decisoes nem conclui a comparacao;
+o fechamento da etapa e sua revisao final permanecem pendentes no plano.
+Consumidores legados nao procuram uma
 solicitacao antiga quando encontram planejamento corrente; implementacao,
 consultas e sprints ainda dependem dos recortes S14-S16.
 Compartilhamento por pacote ainda depende da priorizacao legada e permanece fora

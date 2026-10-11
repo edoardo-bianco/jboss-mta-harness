@@ -9,7 +9,8 @@ Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entre
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
 **Estado:** implementacao autorizada por "proceder" em 10/10/2026, retomada em
 11/10/2026. Nucleo, produtores build/MTA/Sonar, priorizacao e planejamento correntes com
-verificacoes focais aprovadas; proxima fatia S13. Integracao dos demais fluxos, conversao de dados, limpeza
+verificacoes focais aprovadas; S13 em andamento, pausada a pedido do desenvolvedor.
+Integracao dos demais fluxos, conversao de dados, limpeza
 operacional e aceite da simplificacao completa ainda nao concluidos.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
 
@@ -137,9 +138,34 @@ analise real executada. Revisao independente fechou quatro achados: selecao de
 indice ausente, links com parenteses, anexos fora do lote e POM alheio indisponivel.
 Subrecortes: nucleo/fontes; entradas/prompts; abertura/evidencias; testes/documentacao.
 
-**Proximo passo S13:** reconciliacao corrente e arquivos de colega por pasta.
-A Run Task de atualizar registro informa indisponibilidade durante esta adaptacao;
-nao publica recibo novo nem adota origem silenciosamente. Consumidores antigos
+**Checkpoint seguro S13 — pausa solicitada em 11/10/2026:** retomar a revisao final
+da reconciliacao corrente antes de avancar para S14. Branch
+`harness/planejar-simplificacao-projetos`; base desta retomada `375e664`, com
+refatoracao comum ja salva em `460b6e0`. O commit do checkpoint contem este registro.
+
+Implementados e testados: comparacao somente leitura, revisao transitoria,
+publicacao recuperavel da ultima conclusao/documentos/indice, decisao por arquivo,
+origem externa preservada e retirada apenas de recebidos explicitamente resolvidos.
+A Run Task existente prepara o contexto corrente; preparar nao muda escolhas nem
+conclui a comparacao. Material equivalente nao duplica, conflitos ficam pendentes,
+anexos preservam bytes e GO recebido exige revisao local. Copia direta de projeto
+com POM ja reassociado realinha contextos/prompt/fontes sem perder texto humano.
+
+Verificados em PowerShell 5.1: Test-Reconciliation, Test-ReconciliationConflicts,
+Test-PlanningPortable, Test-MigrationRegister, Test-ExternalMtaDiscovery,
+Test-MigrationTask e regressao focal de planejamento, evidencias, fichas e
+publicacao. Fixtures sinteticas; nenhuma conversao, limpeza ou corretiva real.
+Revisao independente corrigiu comparacao de anexos, LF/CRLF, preservacao do
+rascunho concorrente, copia direta e retomada de origem local explicita.
+
+**Pendencias para retomar:** revisar o diff final dos ajustes de portabilidade e
+dos testes adaptados; conferir cobertura dos documentos/links de diagnostico no
+contexto (inclusive Sonar), atualizar a ADR/registro de conclusao de S13 e somente
+entao marcar a etapa concluida. Testes focais nao equivalem ao ensaio humano ou
+ao aceite da simplificacao completa. Nao avancar S14 a partir da mera existencia
+dos arquivos. O checkpoint nao exige conversao ou limpeza de dados reais.
+
+Consumidores antigos
 recusam planejamento corrente em vez de selecionar proposta historica. Implementacao,
 consultas e sprints permanecem em S14-S16. S11 integral ainda depende de S15 para
 retirar `Consolidated.MtaIssuePath` das consultas, sem recriar extrato no produtor.
@@ -147,7 +173,7 @@ Compartilhamento legado tambem depende da antiga cadeia de priorizacao e nao ate
 o estado corrente; substituir por copia/reconciliacao em S13/S22, sem recriar cadeia.
 
 **Limite operacional:** a branch tem produtores novos e consumidores ainda legados.
-Reconciliacao, implementacao, consultas, compartilhamento e sprints ainda exigem adaptacao; o fluxo completo
+Reconciliacao aguarda fechamento de S13; implementacao, consultas, compartilhamento e sprints ainda exigem adaptacao; o fluxo completo
 nao esta pronto para uso/integracao. Na retomada, conferir raiz, branch, HEAD e
 alteracoes locais, preservar trabalho novo e continuar desta fatia.
 

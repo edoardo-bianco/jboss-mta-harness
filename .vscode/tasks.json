@@ -295,7 +295,7 @@
     },
     {
       "label": "Planejamento: atualizar registro de migracao",
-      "detail": "Reconciliacao em adaptacao ao estado corrente. A entrada informa a indisponibilidade e preserva documentos e decisoes.",
+      "detail": "Compara diagnostico, decisoes e trabalho corrente, com pasta opcional recebida de um colega. Prepara revisao; nao concede GO nem altera configuracoes locais.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [

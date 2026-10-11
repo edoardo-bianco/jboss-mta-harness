@@ -2,7 +2,7 @@
 . (Join-Path $PSScriptRoot 'HarnessIssueSources.ps1')
 
 function Select-CurrentPlanningProject {
-    param($Context,[string]$Target,[string]$MigrationPath,[string]$ContextPath,[switch]$Interactive,[switch]$ForOpen)
+    param($Context,[string]$Target,[string]$MigrationPath,[string]$ContextPath,[switch]$Interactive,[switch]$ForOpen,[switch]$ForReconciliation)
     $candidates=@(); $seen=@{}; $unavailable=@()
     $items=@($Context.Projects)
     if ($Target) {
@@ -30,7 +30,7 @@ function Select-CurrentPlanningProject {
                 continue
             }
             $rows=@(Get-HarnessProjectDecisions $project)
-            if ($explicit -or @($rows | Where-Object Decision -EQ 'ANALISAR AGORA').Count) { $candidates+=$project }
+            if ($explicit -or $ForReconciliation -or @($rows | Where-Object Decision -EQ 'ANALISAR AGORA').Count) { $candidates+=$project }
         }
     }
     if (-not $candidates.Count) { throw ('Nenhum projeto correspondente. Atualize o indice dos projetos se faltar registro; para planejar, marque ANALISAR AGORA. '+($unavailable -join ' ')) }
