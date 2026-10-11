@@ -130,6 +130,14 @@ Preparar priorização, fichas ou planejamento não gera um novo arquivo MTA: ne
 | `migracao.md` | Decisões, situação e encaminhamentos, com links para a ficha e para o MTA atual; sem reproduzir o diagnóstico. |
 | Contexto do agente | Escopo e caminhos dos documentos e do MTA; sem criar um arquivo auxiliar com a reprodução de seus dados. |
 
+**Progressao por fatias:** cada publicacao representa o conjunto acumulado das
+issues examinadas no mesmo escopo/categoria, com indice/ranking corrente apontando
+para as fichas individuais. Examinar 20 issues e depois mais 15 resulta em 35
+examinadas no conjunto, inclusive as sem proposta, com seu motivo. A proxima
+fatia exclui todas essas examinadas. As partes sao documentos por projeto/issue,
+sem precisar consultar as execucoes anteriores. Recriar a priorizacao continua
+exigindo escolha explicita; categorias e escopos preservam suas coberturas proprias.
+
 As fichas não transcrevem todas as ocorrências, trechos de código ou recomendações extensas do relatório. O conteúdo completo continua acessível pelo link. Dados resumidos usados para ordenar ou calcular trabalho são derivados para essa finalidade, não um segundo relatório.
 
 **Navegação até a fonte:** fichas, planos e demais documentos de detalhe devem

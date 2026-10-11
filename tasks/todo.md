@@ -17,9 +17,9 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 - [x] Registrar precedencia sobre modernizacao e demais capacidades futuras.
 - [x] Conferir links/ancoras dos acrescimos em 11 documentos, diff e requisitos; historico anterior de plan.md preservado. Sem teste de runtime nesta entrega documental.
 
-Implementacao autorizada por "proceder" em 10/10/2026, pausada a pedido do
-desenvolvedor para retomar no dia seguinte. [Ponto de retomada e verificacoes](plan.md#ponto-de-retomada---pausa-de-10102026).
-Ultimo commit de implementacao: `c0d48bc`. Proxima fatia: S08/S09 (Sonar).
+Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10/2026.
+[Ponto atual e verificacoes](plan.md#retomada-de-11102026).
+Ultimo commit de implementacao: `c0f9b8a`. Proxima fatia: S10/S11 (priorizacao/fichas).
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
@@ -29,7 +29,9 @@ Ultimo commit de implementacao: `c0d48bc`. Proxima fatia: S08/S09 (Sonar).
 - [x] S07a: build grava ultima tentativa no destino fixo, inclusive falha; preserva Java 8, Maven separado, settings e ambiente. Resultado/log/situacao publicados juntos.
 - [x] Retirada transacional de assets, recuperacao apos retirada e concorrencia real entre processos verificadas; produtores MTA/Sonar ainda em adaptacao.
 - [x] S06/S06b: MTA interno publica no destino fixo, protege Source com copia exclusivamente temporaria, conserva completo anterior em falha; abertura e logs selecionam projeto sem RunId. Test-Mta, Test-MtaLog e Test-MtaActive passaram com ferramentas simuladas/processos reais de log.
+- [x] S08/S09: Sonar corrente, tentativa/log separados e parecer humano sem cadeia; baseline explicito e mudancas relevantes exigem reavaliacao. Sete suites focais PS5.1 e revisao independente aprovadas; ensaio Sonar real e integracao completa pendentes.
 - [ ] Integrar o nucleo aos produtores/consumidores e concluir os demais criterios S01-S28 abaixo.
+- [ ] S10/S11: ao progredir, consolidar todas as fatias no conjunto corrente; indice/ranking aponta as fichas acumuladas (20 + 15 = 35), inclusive examinadas sem proposta, sem cadeia de execucoes e sem misturar escopos/categorias.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos

@@ -2,15 +2,15 @@
 
 ## Simplificacao prioritaria por projeto - 2026-10-10
 
-**Escopo:** evolucao do harness; analise de viabilidade e planejamento solicitados.
+**Escopo:** evolucao do harness; implementacao da simplificacao autorizada.
 **Prioridade humana:** SIMP-PROJ antecede modernizacao e qualquer nova funcionalidade
 do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
-**Estado:** implementacao autorizada por "proceder" em 10/10/2026 e pausada a pedido
-do desenvolvedor em 10/10/2026, para retomada no dia seguinte.
-Nucleo de identidade/publicacao/MTA direto testado em modulo isolado; integracao dos
-fluxos, conversao de dados, limpeza operacional e aceite ainda nao concluidos.
+**Estado:** implementacao autorizada por "proceder" em 10/10/2026, retomada em
+11/10/2026. Nucleo e produtores build/MTA/Sonar com verificacoes focais aprovadas;
+proxima fatia S10/S11. Integracao dos demais fluxos, conversao de dados, limpeza
+operacional e aceite da simplificacao completa ainda nao concluidos.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
 
 Base examinada: main `5dd8fb385240060f3207b9d3958f9238de19f30e`, inicialmente limpa,
@@ -20,6 +20,8 @@ este trabalho. As secoes anteriores cronologicamente, mantidas abaixo, sao histo
 esta decisao prevalece sobre suas sugestoes de ordem para evolucoes futuras.
 
 ### Ponto de retomada - pausa de 10/10/2026
+
+Registro historico da pausa; a retomada atual esta na secao de 11/10/2026 abaixo.
 
 Branch `harness/planejar-simplificacao-projetos`; ultimo commit de implementacao
 `c0d48bc` (MTA corrente). Checkout limpo na conferencia anterior a este registro.
@@ -52,8 +54,48 @@ preservar autenticacao, sigilo do token, criterios e comparacao explicita de bas
 Depois seguir [S10-S28](todo.md#simplificacao-prioritaria-por-projeto---2026-10-10),
 incluindo planejamento, conversor, limpeza, guias e orientador.
 
+### Retomada de 11/10/2026
+
+Conferidos raiz, branch `harness/planejar-simplificacao-projetos`, HEAD `4505804`
+e checkout limpo. S08/S09 implementados nos commits `ea934f2` e `c0f9b8a`:
+
+- Sonar publica o ultimo diagnostico utilizavel em
+  `atual/diagnosticos/sonar/resultado.json`, inclusive gate reprovado. A ultima
+  tentativa e seu log ficam em destinos fixos separados; coleta incompleta
+  preserva o diagnostico anterior. Publicacao usa exclusividade/recuperacao do projeto.
+- Comparacao ANTES/DEPOIS continua explicita, por diagnostico corrente ou evidencia
+  selecionada. Quando ANTES e o proprio destino corrente, o resumo explica que
+  o detalhe anterior foi consumido e substituido; nao apresenta o DEPOIS como ANTES.
+  Nao exige RunId/hash persistido nem cria inputs.json ou pastas por execucao.
+- Parecer humano unico em `atual/diagnosticos/sonar-decisao.json`; criterios locais
+  recalculados, justificativa preservada e revisao pendente quando mudam dados,
+  fase ou resultado declarado. Sem Previous/sequencia/historico de decisoes.
+  Filtro, origem e chaves das issues sao validados; dialogo recusa dados alterados
+  depois da exibicao. Revisao pela tarefa resolve projeto sem pedir caminho tecnico.
+
+Passaram em Windows PowerShell 5.1: [coleta](../tests/Test-Sonar.ps1),
+[criterios](../tests/Test-SonarCriteria.ps1), [parecer](../tests/Test-SonarReview.ps1),
+[configuracao](../tests/Test-SonarConfig.ps1), [launcher](../tests/Test-SonarLauncher.ps1),
+[issues](../tests/Test-SonarIssues.ps1) e [API](../tests/Test-SonarApi.ps1).
+Fixtures sinteticas, scanner simulado, launcher/processos reais e servidor HTTP
+local de teste; nenhum envio a Sonar real. Revisao independente fechou os achados
+de links/baseline e validacao do parecer; `git diff --check` aprovado.
+Ensaio com servidor real e regressao integrada continuam pendentes.
+Nenhuma conversao ou limpeza de dados reais foi executada; sem merge/push.
+
+**Proximo passo: S10/S11**, priorizacao corrente, fichas e links diretos.
+
+**Esclarecimento humano para S10/S11:** progredir por fatias consolida o conjunto
+corrente de todas as issues ja examinadas do mesmo escopo/categoria. Exemplo:
+20 examinadas mais 15 novas resultam em 35 no conjunto corrente; indice/ranking
+aponta para cada ficha individual, inclusive as examinadas sem proposta.
+A ultima publicacao representa esse conjunto acumulado, nao apenas a ultima
+fatia. As partes sao documentos funcionais por projeto/issue, sem dependencia
+de pastas ou cadeias de execucoes. A proxima fatia exclui as 35; recriar continua
+sendo escolha explicita. Categorias e escopos distintos permanecem separados.
+
 **Limite operacional:** a branch tem produtores novos e consumidores ainda legados.
-Priorizacao, planejamento, Sonar e sprints ainda exigem adaptacao; o fluxo completo
+Priorizacao, planejamento e sprints ainda exigem adaptacao; o fluxo completo
 nao esta pronto para uso/integracao. Na retomada, conferir raiz, branch, HEAD e
 alteracoes locais, preservar trabalho novo e continuar desta fatia.
 
