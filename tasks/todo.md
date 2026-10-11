@@ -17,7 +17,9 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 - [x] Registrar precedencia sobre modernizacao e demais capacidades futuras.
 - [x] Conferir links/ancoras dos acrescimos em 11 documentos, diff e requisitos; historico anterior de plan.md preservado. Sem teste de runtime nesta entrega documental.
 
-Implementacao autorizada por "proceder" em 10/10/2026, em andamento nesta branch.
+Implementacao autorizada por "proceder" em 10/10/2026, pausada a pedido do
+desenvolvedor para retomar no dia seguinte. [Ponto de retomada e verificacoes](plan.md#ponto-de-retomada---pausa-de-10102026).
+Ultimo commit de implementacao: `c0d48bc`. Proxima fatia: S08/S09 (Sonar).
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.

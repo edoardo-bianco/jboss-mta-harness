@@ -7,7 +7,8 @@
 do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
-**Estado:** implementacao autorizada por "proceder" em 10/10/2026 e em andamento.
+**Estado:** implementacao autorizada por "proceder" em 10/10/2026 e pausada a pedido
+do desenvolvedor em 10/10/2026, para retomada no dia seguinte.
 Nucleo de identidade/publicacao/MTA direto testado em modulo isolado; integracao dos
 fluxos, conversao de dados, limpeza operacional e aceite ainda nao concluidos.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
@@ -17,6 +18,44 @@ em `C:/desenvolvimento/repositorio/jboss-mta-harness`. Branch documental criada 
 main: `harness/planejar-simplificacao-projetos`. Nenhuma corretiva de aplicacao integra
 este trabalho. As secoes anteriores cronologicamente, mantidas abaixo, sao historicas;
 esta decisao prevalece sobre suas sugestoes de ordem para evolucoes futuras.
+
+### Ponto de retomada - pausa de 10/10/2026
+
+Branch `harness/planejar-simplificacao-projetos`; ultimo commit de implementacao
+`c0d48bc` (MTA corrente). Checkout limpo na conferencia anterior a este registro.
+Trabalho local versionado, sem merge/push nesta etapa. Nenhuma conversao ou limpeza
+de dados reais foi executada. Nao ha revisao delegada em andamento.
+
+Ja implementados: identidade por artifactId, publicacao recuperavel, leitura MTA
+direta, indices correntes com preservacao de decisoes, ultima tentativa de build,
+geracao/abertura de MTA e acompanhamento de log por projeto. Fontes:
+[nucleo](../scripts/HarnessProject.psm1), [publicacao](../scripts/HarnessProjectPublication.ps1),
+[indices](../scripts/HarnessProjectIndex.psm1), [build](../scripts/HarnessBuild.psm1),
+[produtor MTA](../scripts/HarnessMtaExecution.ps1) e [logs](../scripts/acompanhar-log-mta.ps1).
+
+Verificacoes focais aprovadas em PowerShell 5.1 antes da pausa:
+[identidade](../tests/Test-ProjectStorage.ps1), [publicacao](../tests/Test-ProjectPublication.ps1),
+[recuperacao](../tests/Test-ProjectRecovery.ps1), [concorrencia](../tests/Test-ProjectConcurrency.ps1),
+[MTA direto](../tests/Test-ProjectMta.ps1), [documentos](../tests/Test-ProjectDocuments.ps1),
+[indices](../tests/Test-ProjectIndex.ps1), [build](../tests/Test-Build.ps1),
+[producao MTA](../tests/Test-Mta.ps1), [consulta de logs](../tests/Test-MtaLog.ps1) e
+[log ativo](../tests/Test-MtaActive.ps1). Ferramentas simuladas e fixtures sinteticas;
+concorrencia/recuperacao incluem processos reais. Revisao apontou liberacao do mutex
+em falha de preparacao MTA; corrigida e coberta por teste com outro processo.
+Regressao completa e ensaio com ferramentas reais ainda pendentes.
+
+**Retomar por S08/S09 (Sonar):** [produtor](../scripts/HarnessSonar.psm1),
+[criterios](../scripts/HarnessSonarCriteria.psm1), [parecer](../scripts/HarnessSonarReview.psm1)
+e [entrada](../scripts/analisar-sonar.ps1) foram lidos, mas ainda nao alterados.
+Adaptar ultimo diagnostico utilizavel, tentativa atual e decisao humana sem cadeia;
+preservar autenticacao, sigilo do token, criterios e comparacao explicita de baseline.
+Depois seguir [S10-S28](todo.md#simplificacao-prioritaria-por-projeto---2026-10-10),
+incluindo planejamento, conversor, limpeza, guias e orientador.
+
+**Limite operacional:** a branch tem produtores novos e consumidores ainda legados.
+Priorizacao, planejamento, Sonar e sprints ainda exigem adaptacao; o fluxo completo
+nao esta pronto para uso/integracao. Na retomada, conferir raiz, branch, HEAD e
+alteracoes locais, preservar trabalho novo e continuar desta fatia.
 
 ### Requisitos e fontes
 
