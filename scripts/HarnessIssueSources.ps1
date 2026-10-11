@@ -33,7 +33,7 @@ function Get-IssueLocalReference {
 }
 
 function Get-IssueSourcesText {
-    param($Project,$Mta,[string]$Id,[string]$Category,[string]$Text,[string]$Path)
+    param($Project,$Mta,[string]$Id,[string]$Category,[string]$Text,[string]$Path,[switch]$EvidenceOnly)
     $identity=Read-PrioritizationFicha $Text $Project.Name $Category $Id
     $lines=@((Get-HarnessSourceLink $Path $Project.Pom 'POM'),(Get-HarnessSourceLink $Path $Project.MigrationPath 'Decisoes atuais'))
     if ($Mta) {
@@ -41,7 +41,8 @@ function Get-IssueSourcesText {
         $issue=@($Mta.Issues | Where-Object Id -CEQ $Id)
         if ($issue.Count) { $lines+='Issue presente no MTA atual. Categoria: '+(ConvertTo-ProjectCell $issue[0].Category)+'. Conferir aplicabilidade no codigo local.' }
         else { $lines+='Issue nao reencontrada no MTA atual; ausencia nao comprova resolucao. Avaliacao humana preservada.' }
-    } else { $lines+='MTA indisponivel: detalhes nao consultaveis. Avaliacao humana preservada; nao inferir resolucao.' }
+    } elseif ($EvidenceOnly) { $lines+='Base EVIDENCIAS: MTA nao consultado neste planejamento. Avaliacao humana preservada.' }
+    else { $lines+='MTA indisponivel: detalhes nao consultaveis. Avaliacao humana preservada; nao inferir resolucao.' }
     foreach ($relative in $identity.LocalPaths) { $lines+=Get-IssueLocalReference $Project.Source $relative $Path }
     foreach ($relative in $identity.EvidencePaths) { $lines+=Get-IssueLocalReference $Project.EvidencePath $relative $Path }
     if (-not $identity.LocalPaths.Count) { $lines+='Sem arquivo local vinculado: registrar a lacuna ou os caminhos relativos efetivamente conferidos em LocalPaths.' }

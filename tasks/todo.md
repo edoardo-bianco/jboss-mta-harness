@@ -19,7 +19,7 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 
 Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10/2026.
 [Ponto atual e verificacoes](plan.md#retomada-de-11102026).
-S10/S11a implementados nesta retomada. Proxima fatia: S11b/S12 (planejamento corrente e retirada do extrato legado).
+S11b/S12/S12b implementados nesta retomada. Proxima fatia: S13 (reconciliacao corrente e copia de colega).
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
@@ -33,7 +33,10 @@ S10/S11a implementados nesta retomada. Proxima fatia: S11b/S12 (planejamento cor
 - [ ] Integrar o nucleo aos produtores/consumidores e concluir os demais criterios S01-S28 abaixo.
 - [x] S10: progredir consolida todas as fatias no conjunto corrente; indice/ranking aponta as fichas acumuladas (20 + 15 = 35), inclusive examinadas sem proposta, sem cadeia de execucoes e sem misturar escopos/categorias. Retomada parcial preserva quota/universo; recriar e explicito.
 - [x] S11a: priorizacao sem extratos MTA, fichas essenciais e fontes diretas; novo MTA/Source atualizam links gerenciados sem perder texto humano. Sete suites focais PS5.1 e revisao independente aprovadas.
-- [ ] S11b junto de S12: retirar apontamentos-mta.json e Consolidated.MtaIssuePath do produtor/validador de planejamento; adaptar as consultas em S15. S11 integral ainda pendente por esta dependencia concreta.
+- [x] S11b junto de S12: retirados apontamentos-mta.json e Consolidated.MtaIssuePath do produtor/validador de planejamento. Consultas permanecem em S15; S11 integral ainda depende dessa integracao.
+- [x] S12: escopo e fontes MTA/EVIDENCIAS em contexto corrente, sem recibos/copias; retomada preserva proposta e sinaliza revisao. Fichas e indice de evidencias mantem referencias por issue; sete suites focais PS5.1 e revisao independente aprovadas.
+- [x] S12b: abertura direta de plano/tarefas, sem selecionar por data ou acessar MTA; ausencia/cancelamento preservam arquivos.
+- [ ] S13: adaptar reconciliacao e copia de colega. A entrada de atualizar registro informa indisponibilidade nesta transicao, sem adotar origem; implementar o fluxo corrente antes da integracao completa.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos

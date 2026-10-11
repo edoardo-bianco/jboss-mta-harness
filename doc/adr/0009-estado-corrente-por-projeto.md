@@ -68,10 +68,38 @@ projeto. O bloco de fontes e regenerado no preparo ou ao atualizar indices, sem
 alterar o texto humano. Caminho ausente e issue nao reencontrada sao lacunas, nao
 resolucao. Relocalizar exige associacao explicita do projeto ao POM atual.
 
-**Dependencia remanescente S11b/S12:** o planejamento legado ainda exige
-`Consolidated.MtaIssuePath` e produz `apontamentos-mta.json`. Sua retirada acompanha
-a substituicao do produtor/validador de planejamento em S12 e das consultas em S15.
-O fluxo corrente de priorizacao nao importa esses modulos nem gera esses extratos.
+### Planejamento corrente (S11b/S12/S12b)
+
+O preparo parte das escolhas ANALISAR AGORA em migracao.md e publica somente
+`atual/planejamento/contexto.json` e `planejar-lotes.prompt.md`. Plano e tarefas
+ficam em `plano.md` e `tarefas.md` nessa mesma pasta; o preparo nao fabrica a
+proposta. Retomar preserva o texto humano e atualiza blocos gerenciados de fontes
+nos documentos existentes, nas fichas e no indice do projeto, em uma publicacao.
+
+O contexto guarda escopo funcional e referencias diretas, com base MTA ou
+EVIDENCIAS. Nao ha RequestId, Previous, snapshot, hashes de entradas nem copias
+consolidadas. O produtor de `apontamentos-mta.json` e seu validador foram retirados.
+As consultas legadas ainda dependem de `Consolidated.MtaIssuePath`; sua adaptacao
+permanece em S15, sem recolocar o extrato no planejamento corrente.
+
+Mudancas conhecidas de escopo/base/referencias sinalizam NeedsReview/ReviewReasons,
+preservando plano, tarefas e GO humano anterior. Esses avisos nao concedem nem
+renovam GO. Arquivos podem mudar no mesmo caminho: o condutor deve reler fontes e
+codigo, comparar com a proposta e pedir revisao humana quando mudar seu alcance.
+Sem ultima reconciliacao disponivel, a proposta e preliminar. Origem MTA invalida
+nao muda automaticamente a base; abrir plano/tarefas independe dessa origem.
+
+Evidencias usam links em `evidencias/LEIA-ME.md`, nas observacoes do registro e
+nas fichas. A tabela do indice tem Issue, Arquivo e Relacao; somente linhas das
+issues escolhidas e linhas gerais (`*`) entram no contexto. Links fora da tabela
+sao referencias gerais. Indice explicitamente escolhido permanece associado
+mesmo ausente; a retomada conserva a lacuna. Nao copiar anexos ou texto integral
+do MTA. Fichas ausentes permanecem a elaborar ate exame efetivo pelo condutor.
+
+`Planejamento: atualizar registro de migracao` informa indisponibilidade durante
+a adaptacao da reconciliacao (S13). Consumidores legados nao procuram uma
+solicitacao antiga quando encontram planejamento corrente; implementacao,
+consultas e sprints ainda dependem dos recortes S14-S16.
 Compartilhamento por pacote ainda depende da priorizacao legada e permanece fora
 do fluxo corrente ate a substituicao por copia/reconciliacao (S13/S22).
 

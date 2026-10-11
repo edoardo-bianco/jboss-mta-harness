@@ -1,75 +1,21 @@
 #requires -Version 5.1
-$ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $PSScriptRoot
-function Assert($condition, $message) { if (-not $condition) { throw $message } }
-$entrySource = Join-Path $root 'scripts/criar-pasta-evidencias.ps1'
-Assert (Test-Path -LiteralPath $entrySource) 'Falta entrada para criar pasta de evidencias.'
-$area = Join-Path $root ('.harness/tests/evidencias-' + [guid]::NewGuid().ToString('N').Substring(0,8))
-$fixture = Join-Path $area 'harness com espacos'
-$scripts = Join-Path $fixture 'scripts'
-$docs = Join-Path $fixture 'doc/guias'
-$app = Join-Path $area 'app um'
-$other = Join-Path $area 'app dois'
-foreach ($path in @($scripts,$docs,$app,$other)) { $null = New-Item -ItemType Directory -Path $path -Force }
-foreach ($path in @($app,$other)) { Set-Content -LiteralPath (Join-Path $path 'pom.xml') '<project />' }
-Copy-Item -LiteralPath $entrySource -Destination $scripts
-Copy-Item -LiteralPath (Join-Path $root 'scripts/Harness.psm1') -Destination $scripts
-Copy-Item -LiteralPath (Join-Path $root 'scripts/HarnessPlanningInput.ps1') -Destination $scripts
-Copy-Item -LiteralPath (Join-Path $root 'doc/guias/modelo-evidencias-complementares.md') -Destination $docs
-$config = Get-Content -LiteralPath (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
-$config.repositories = @()
-$config.activeProject = $null
-$configPath = Join-Path $fixture 'config.json'
-$workspacePath = Join-Path $area 'workspace com espacos.code-workspace'
-$config | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $configPath -Encoding UTF8
-@{folders=@(@{name='Mesmo nome';path=$app},@{name='Mesmo nome';path=$other})} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $workspacePath -Encoding UTF8
-$configBefore = Get-Content -Raw $configPath
-$workspaceBefore = Get-Content -Raw $workspacePath
-$entry = Join-Path $scripts 'criar-pasta-evidencias.ps1'
-$entryArgs = @('-NoProfile','-ExecutionPolicy','Bypass','-File',$entry,'-ConfigPath',$configPath,'-WorkspacePath',$workspacePath,'-SelectTarget','-NoOpen')
-$output = 'q' | & powershell.exe @entryArgs 2>&1 | Out-String
-Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada')) 'Cancelamento nao respeitado.'
-Assert (-not (Test-Path -LiteralPath (Join-Path $fixture '.harness'))) 'Cancelar criou estrutura.'
-$output = '2' | & powershell.exe @entryArgs 2>&1 | Out-String
-Assert ($LASTEXITCODE -eq 0) ('Criacao falhou: ' + $output)
-$base = Join-Path $fixture '.harness/projetos'
-$first = @(Get-ChildItem -LiteralPath $base -Recurse -Filter LEIA-ME.md -File | Where-Object { (Get-Content $_.FullName -Raw).Contains($other) })
-Assert ($first.Count -eq 1 -and $first[0].Name -eq 'LEIA-ME.md') 'Criou arquivos alem do indice.'
-$index = Get-Content -Raw -Encoding UTF8 $first[0].FullName
-Assert ($index.Contains($other) -and -not $index.Contains($app)) 'Identidade de outro projeto.'
-Assert ($index.Contains('Arquivo relativo') -and $index.Contains('Relacao com a correcao') -and $index.Contains('primeiro plano')) 'Faltam instrucoes ou inferiu lote.'
-Assert ($output.Contains($first[0].FullName)) 'Terminal nao informou caminho do indice.'
-Add-Content -LiteralPath $first[0].FullName 'EVIDENCIA MANUAL PRESERVAR'
-$preserved = Get-Content -Raw $first[0].FullName
-$output = '2' | & powershell.exe @entryArgs 2>&1 | Out-String
-Assert ($LASTEXITCODE -eq 0) 'Repeticao falhou.'
-Assert ((Get-Content -Raw $first[0].FullName) -ceq $preserved) 'Repeticao sobrescreveu indice anterior.'
-Assert (@(Get-ChildItem -LiteralPath $base -Directory).Count -eq 2 -and @(Get-ChildItem -LiteralPath $base -Recurse -File).Count -eq 4) 'Repeticao duplicou arquivos do projeto.'
-$editor = Join-Path $scripts 'editor.ps1'
-Set-Content -LiteralPath $editor -Encoding UTF8 -Value '$args | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $PSScriptRoot "editor-args.json")'
-$output = & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -EditorPath $editor 2>&1 | Out-String
-Assert ($LASTEXITCODE -eq 0) ('Criacao com editor falhou: ' + $output)
-Assert (@(Get-ChildItem -LiteralPath $base -Directory).Count -eq 2) 'Projetos homonimos misturados.'
-$editorArgs = Get-Content -Raw (Join-Path $scripts 'editor-args.json') | ConvertFrom-Json
-Assert ($editorArgs.Count -eq 2 -and $editorArgs[0] -eq '--reuse-window' -and (Test-Path -LiteralPath $editorArgs[1])) 'Editor nao recebeu indice criado.'
-Assert ((Get-Content -Raw -Encoding UTF8 $editorArgs[1]).Contains($app)) 'Editor abriu indice do outro projeto.'
-Assert ((Get-Content -Raw $configPath) -ceq $configBefore -and (Get-Content -Raw $workspacePath) -ceq $workspaceBefore) 'Alterou configuracao/workspace.'
-Assert (@(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness') -Directory).Count -eq 1) 'Criou area de MTA/planejamento indevida.'
-Write-Output "PASS: selecao/cancelamento reais, homonimos isolados, repeticao preservada, indice com instrucoes e editor. Fixture: $area"
-
-# Escolha registrada abre a pasta especifica da issue sem duplicar seletores.
-Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force -DisableNameChecking
-$context=Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target $app
-$register=Get-HarnessMigrationPaths $fixture $context.Active
-$text=[IO.File]::ReadAllText($register.MigrationPath).Replace('Total MTA:', "| DEV-CACHE | Cache | manual | - | MANUAL | ANALISAR AGORA | NAO ANALISADA | |`nTotal MTA:")
-[IO.File]::WriteAllText($register.MigrationPath,$text)
-$output=& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -NoOpen 2>&1 | Out-String
-Assert ($LASTEXITCODE -eq 0) ('Pasta da issue falhou: '+$output)
-$issue=Get-HarnessIssuePaths $fixture $context.Active 'DEV-CACHE'
-Assert (Test-Path -LiteralPath $issue.EvidenceIndexPath) 'Escolha nao direcionou anexos para a issue.'
-Assert-HarnessIssueFicha $issue.EvidenceIndexPath $app 'DEV-CACHE'
-Add-Content $issue.EvidenceIndexPath '| log.txt | Erro da issue |'
-$hash=(Get-FileHash $issue.EvidenceIndexPath).Hash
-$output=& powershell.exe -NoProfile -ExecutionPolicy Bypass -File $entry -ConfigPath $configPath -WorkspacePath $workspacePath -Target $app -IssueId 'DEV-CACHE' -NoOpen 2>&1 | Out-String
-Assert ($LASTEXITCODE -eq 0 -and (Get-FileHash $issue.EvidenceIndexPath).Hash -eq $hash) 'Reabrir issue alterou anexos.'
-Write-Output 'PASS: selecao da issue, identidade e preservacao do indice de anexos.'
+$ErrorActionPreference='Stop'; Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'PlanningCurrentFixture.ps1')
+$f=New-PlanningFixture 2
+$cli=Install-PlanningCli $f
+$project=$f.Projects[0]
+$register=[IO.File]::ReadAllText($project.MigrationPath)
+$entry='criar-pasta-evidencias.ps1'
+$result=Invoke-PlanningCli $cli $entry @{Target=$project.Source;NoOpen=$true;IssueId='java::mandatory-1'}
+Assert ($result.Code -eq 0) ('Indice corrente nao foi criado: '+$result.Output)
+$index=Join-Path $project.EvidencePath 'LEIA-ME.md'
+Assert ((Test-Path -LiteralPath $index) -and [IO.File]::ReadAllText($index).Contains('| Issue |')) 'Indice deve permitir relacionar anexos por issue.'
+[IO.File]::AppendAllText($index,"`n| java::mandatory-1 | [Falha](<observacao.md>) | Texto humano |")
+$before=Get-PlanningFixtureState $f
+$result=Invoke-PlanningCli $cli $entry @{Target=$project.Source;NoOpen=$true}
+Assert ($result.Code -eq 0 -and (Get-PlanningFixtureState $f) -ceq $before) 'Retomada deve preservar indice e arquivos; varias issues nao exigem novo seletor.'
+$result=Invoke-PlanningCli $cli $entry @{Target=$project.Source;NoOpen=$true;IssueId='DEV-ALHEIA'}
+Assert ($result.Code -eq 1 -and (Get-PlanningFixtureState $f) -ceq $before) 'Issue alheia deve ser recusada sem escrita.'
+Assert ([IO.File]::ReadAllText($project.MigrationPath) -ceq $register) 'Pasta de evidencias nao deve modificar decisoes.'
+Assert (-not (Test-Path -LiteralPath (Join-Path $f.Root '.harness/planning'))) 'Evidencias nao devem inicializar layout legado.'
+'PASS: pasta corrente de evidencias, indice por issue, preservacao e recusa sem escrita.'

@@ -8,8 +8,8 @@ do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
 **Estado:** implementacao autorizada por "proceder" em 10/10/2026, retomada em
-11/10/2026. Nucleo, produtores build/MTA/Sonar e priorizacao corrente com
-verificacoes focais aprovadas; proxima fatia S11b/S12. Integracao dos demais fluxos, conversao de dados, limpeza
+11/10/2026. Nucleo, produtores build/MTA/Sonar, priorizacao e planejamento correntes com
+verificacoes focais aprovadas; proxima fatia S13. Integracao dos demais fluxos, conversao de dados, limpeza
 operacional e aceite da simplificacao completa ainda nao concluidos.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
 
@@ -115,15 +115,39 @@ MTA novo/vazio, reaparecimento, Source relocalizado e associacao alheia indispon
 Revisao independente fechou os tres achados (retomada, arrays vazios e isolamento).
 Nenhuma conversao, limpeza de dados reais, merge ou push executado.
 
-**Proximo passo S11b/S12:** substituir planejamento corrente e retirar
-`apontamentos-mta.json`/`Consolidated.MtaIssuePath` juntos. O produtor/validador legado
-e as consultas ainda exigem esse extrato; remover somente o arquivo quebraria esses
-consumidores. S11 integral permanece pendente ate essa integracao (consultas S15).
+**S11b/S12/S12b implementados:** planejamento e abertura usam destinos correntes.
+Retirada do produtor/validador de `apontamentos-mta.json` acompanha S12, conforme
+orientacao humana "S11b permanece para S12". O contexto conserva escopo e fontes
+diretas MTA/EVIDENCIAS; nao gera RequestId/Previous, copias de anexos ou extrato.
+Sem proposta, prepara somente contexto/prompt. Retomar atualiza blocos de fontes,
+preservando plano, tarefas, fichas e declaracoes humanas. Mudancas conhecidas de
+escopo/base/referencias pedem revisao; igualdade de caminhos nao comprova conteudo
+inalterado. Abrir os documentos correntes independe do MTA e de recibos legados.
+
+A pasta de evidencias tambem usa o projeto corrente. Indice por issue filtra o
+recorte, preserva relacao humana e admite referencia geral explicita. Indice
+escolhido indisponivel conserva a selecao/lacuna; anexos permanecem na origem.
+Fichas mantem texto manual, acompanham MTA/Source atuais e indicam detalhe ausente.
+
+Passaram em Windows PowerShell 5.1: Test-Planning, Test-PlanningEvidence,
+Test-IssuePlanning, Test-PlanningCli, Test-EvidenceFolder, Test-PrioritizationIncidents
+e Test-Editor. `git diff --check` aprovado.
+Fixtures sinteticas e processos reais de CLI; nenhuma corretiva ou ferramenta de
+analise real executada. Revisao independente fechou quatro achados: selecao de
+indice ausente, links com parenteses, anexos fora do lote e POM alheio indisponivel.
+Subrecortes: nucleo/fontes; entradas/prompts; abertura/evidencias; testes/documentacao.
+
+**Proximo passo S13:** reconciliacao corrente e arquivos de colega por pasta.
+A Run Task de atualizar registro informa indisponibilidade durante esta adaptacao;
+nao publica recibo novo nem adota origem silenciosamente. Consumidores antigos
+recusam planejamento corrente em vez de selecionar proposta historica. Implementacao,
+consultas e sprints permanecem em S14-S16. S11 integral ainda depende de S15 para
+retirar `Consolidated.MtaIssuePath` das consultas, sem recriar extrato no produtor.
 Compartilhamento legado tambem depende da antiga cadeia de priorizacao e nao atende
 o estado corrente; substituir por copia/reconciliacao em S13/S22, sem recriar cadeia.
 
 **Limite operacional:** a branch tem produtores novos e consumidores ainda legados.
-Planejamento, consultas, compartilhamento e sprints ainda exigem adaptacao; o fluxo completo
+Reconciliacao, implementacao, consultas, compartilhamento e sprints ainda exigem adaptacao; o fluxo completo
 nao esta pronto para uso/integracao. Na retomada, conferir raiz, branch, HEAD e
 alteracoes locais, preservar trabalho novo e continuar desta fatia.
 

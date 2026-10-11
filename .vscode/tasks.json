@@ -295,7 +295,7 @@
     },
     {
       "label": "Planejamento: atualizar registro de migracao",
-      "detail": "Adota explicitamente uma rodada MTA local ou recebida no registro, preservando escolhas e preparando o prompt de comparacao. Confira a origem antes de confirmar.",
+      "detail": "Reconciliacao em adaptacao ao estado corrente. A entrada informa a indisponibilidade e preserva documentos e decisoes.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
@@ -324,7 +324,7 @@
     },
     {
       "label": "Planejamento: abrir plano e to-do",
-      "detail": "Escolha projeto e planejamento por data; abra os dois documentos existentes no VS Code.",
+      "detail": "Abra plano e tarefas correntes do projeto no VS Code; escolha o projeto somente quando houver mais de um candidato.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
