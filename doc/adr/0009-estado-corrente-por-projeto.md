@@ -41,6 +41,42 @@ links, leitura direta e publicação. O estado corrente não depende de IDs téc
 
 ## Consequências e transição
 
+### Priorizacao corrente (S10/S11a)
+
+O escopo padrao usa os artifactIds ordenados ordinalmente, separados por `|`;
+o primeiro participante Maven guarda o conjunto. `Scope` permite um nome funcional
+curto quando o caminho excederia o limite do Windows; o mesmo nome nao pode ser
+reassociado silenciosamente a participantes diferentes no mesmo mestre.
+Os caminhos sao `atual/priorizacao/<categoria>/escopos/<escopo>/contexto.json`,
+`priorizacao.md`, `indice.md` e `priorizar-issues.prompt.md`. A ficha de cada
+participante fica em `atual/priorizacao/<categoria>/issues/<issue>/ficha.md`.
+Escopo/categoria/issue usam a codificacao reversivel acima. Nao ha pasta por execucao.
+
+O contexto conserva as identidades da base inicial, as excluidas e as candidatas
+da fatia pendente. O bloco `priorizacao:resultado:inicio/fim` do ranking conserva
+TODAS as examinadas com Project, Id, Position (inteiro ou null) e Reason. Concluir
+exige exatamente a quota de novas examinadas alem das excluidas, cada uma com ficha
+valida. 20 anteriores mais 15 novas publicam 35, inclusive sem recomendacao. O
+indice derivado aponta todas as fichas; existencia de arquivo nao comprova exame.
+Retomada parcial preserva universo/quota; novas candidatas aguardam a proxima fatia.
+Recriar zera cobertura explicitamente, preservando fichas e anotacoes externas aos
+blocos. MTA novo conserva base inicial; novas issues ficam fora dela ate recriacao.
+
+Fichas mantem resumo, roteiro e referencias diretas. `LocalPaths` e `EvidencePaths`
+sao caminhos relativos conferidos, respectivamente a Source e evidencias do
+projeto. O bloco de fontes e regenerado no preparo ou ao atualizar indices, sem
+alterar o texto humano. Caminho ausente e issue nao reencontrada sao lacunas, nao
+resolucao. Relocalizar exige associacao explicita do projeto ao POM atual.
+
+**Dependencia remanescente S11b/S12:** o planejamento legado ainda exige
+`Consolidated.MtaIssuePath` e produz `apontamentos-mta.json`. Sua retirada acompanha
+a substituicao do produtor/validador de planejamento em S12 e das consultas em S15.
+O fluxo corrente de priorizacao nao importa esses modulos nem gera esses extratos.
+Compartilhamento por pacote ainda depende da priorizacao legada e permanece fora
+do fluxo corrente ate a substituicao por copia/reconciliacao (S13/S22).
+
+### Demais consumidores
+
 Detalhes antigos deixam de estar disponíveis quando a origem antiga é removida.
 As fichas conservam o essencial e links ao MTA atual e ao código local. Toda
 referência de detalhe deve ser navegável; fonte ausente é uma lacuna explícita.

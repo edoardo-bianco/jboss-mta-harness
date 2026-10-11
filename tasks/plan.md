@@ -8,8 +8,8 @@ do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
 **Estado:** implementacao autorizada por "proceder" em 10/10/2026, retomada em
-11/10/2026. Nucleo e produtores build/MTA/Sonar com verificacoes focais aprovadas;
-proxima fatia S10/S11. Integracao dos demais fluxos, conversao de dados, limpeza
+11/10/2026. Nucleo, produtores build/MTA/Sonar e priorizacao corrente com
+verificacoes focais aprovadas; proxima fatia S11b/S12. Integracao dos demais fluxos, conversao de dados, limpeza
 operacional e aceite da simplificacao completa ainda nao concluidos.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
 
@@ -83,7 +83,7 @@ de links/baseline e validacao do parecer; `git diff --check` aprovado.
 Ensaio com servidor real e regressao integrada continuam pendentes.
 Nenhuma conversao ou limpeza de dados reais foi executada; sem merge/push.
 
-**Proximo passo: S10/S11**, priorizacao corrente, fichas e links diretos.
+**S10/S11a implementados:** priorizacao corrente, fichas e links diretos.
 
 **Esclarecimento humano para S10/S11:** progredir por fatias consolida o conjunto
 corrente de todas as issues ja examinadas do mesmo escopo/categoria. Exemplo:
@@ -94,8 +94,36 @@ fatia. As partes sao documentos funcionais por projeto/issue, sem dependencia
 de pastas ou cadeias de execucoes. A proxima fatia exclui as 35; recriar continua
 sendo escolha explicita. Categorias e escopos distintos permanecem separados.
 
+S10 conserva base inicial por categoria/escopo e acumula examinadas no mesmo
+ranking/contexto. Fatia pendente retoma universo/quota; progredir exclui todas as
+examinadas, inclusive sem proposta. Recriar e explicito e preserva fichas/anotacoes.
+O indice geral e os indices participantes apontam ao conjunto mestre funcional;
+20 + 15 = 35 e IDs iguais em projetos diferentes foram exercitados por testes.
+
+S11a retira paginas/extratos de incidentes da priorizacao e cria fichas essenciais
+com links ao relatorio/catalogo original, POM, codigo/configuracao e anexos locais.
+Blocos de fontes acompanham novo MTA/associacao explicita de Source, sem apagar
+texto humano; ausencia nao comprova resolucao. Preparacao e indice usam publicacao
+recuperavel com deteccao de edicao concorrente. Prompt/entrada da tarefa adaptados
+ao contexto corrente; MCP/Node nao sao requisitos nem fallback para recibos.
+
+Passaram em Windows PowerShell 5.1: Test-Prioritization, Progress, Categories,
+Index e Incidents, alem de Test-ProjectIndex e Test-ProjectDocuments. Fixtures
+sinteticas; cobertura inclui 20+15, quota fixa de 44 issues, parcial/esgotamento,
+recriacao, categorias/escopos, motivo/ficha/quota invalidos, conflito de escrita,
+MTA novo/vazio, reaparecimento, Source relocalizado e associacao alheia indisponivel.
+Revisao independente fechou os tres achados (retomada, arrays vazios e isolamento).
+Nenhuma conversao, limpeza de dados reais, merge ou push executado.
+
+**Proximo passo S11b/S12:** substituir planejamento corrente e retirar
+`apontamentos-mta.json`/`Consolidated.MtaIssuePath` juntos. O produtor/validador legado
+e as consultas ainda exigem esse extrato; remover somente o arquivo quebraria esses
+consumidores. S11 integral permanece pendente ate essa integracao (consultas S15).
+Compartilhamento legado tambem depende da antiga cadeia de priorizacao e nao atende
+o estado corrente; substituir por copia/reconciliacao em S13/S22, sem recriar cadeia.
+
 **Limite operacional:** a branch tem produtores novos e consumidores ainda legados.
-Priorizacao, planejamento e sprints ainda exigem adaptacao; o fluxo completo
+Planejamento, consultas, compartilhamento e sprints ainda exigem adaptacao; o fluxo completo
 nao esta pronto para uso/integracao. Na retomada, conferir raiz, branch, HEAD e
 alteracoes locais, preservar trabalho novo e continuar desta fatia.
 

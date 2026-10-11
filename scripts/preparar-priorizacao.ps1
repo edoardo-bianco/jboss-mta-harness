@@ -3,7 +3,7 @@
 param(
     [string]$ConfigPath, [string]$WorkspacePath,
     [string]$Percentage, [string]$Category, [switch]$Interactive,
-    [ValidateSet('Recreate','Continue')][string]$Mode, [string]$PreviousRequestId,
+    [ValidateSet('Recreate','Continue')][string]$Mode, [string]$Scope,
     [string]$EditorPath, [switch]$NoOpen,
     [ValidateSet('Text','Json')][string]$OutputFormat = 'Text'
 )
@@ -15,7 +15,7 @@ try {
     $root = Split-Path -Parent $PSScriptRoot
     if (-not $ConfigPath) { $ConfigPath = Join-Path $root 'config/harness.local.json' }
     $context = Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -SkipMigrationInitialization
-    $options = @{Percentage=$Percentage;PreviousRequestId=$PreviousRequestId;Interactive=$Interactive}
+    $options = @{Percentage=$Percentage;Scope=$Scope;Interactive=$Interactive}
     if ($Mode) { $options.Mode = $Mode }
     if ($Category) { $options.Category = $Category }
     $prepared = New-HarnessPrioritizationContext $context @options
@@ -23,12 +23,16 @@ try {
         $prepared | ConvertTo-Json -Depth 12
     } else {
         Write-Host "Indice de priorizacao: $($prepared.PrioritizationIndexPath)"
-        if ($prepared.Status -eq 'EXHAUSTED') { Write-Host 'Nao restam novas issues elegiveis nesta sequencia. Nenhuma solicitacao criada.'; exit 0 }
         if ($prepared.Reused) { Write-Host 'Retomando a fatia ainda sem resultado; percentual e quota originais preservados.' }
         Write-Host "Categoria: $($prepared.Category) | Projetos: $($prepared.Projects.Count) | Percentual: $($prepared.Percentage)% | Base inicial: $($prepared.InitialTotal) | Fatia: $($prepared.SliceSize)"
         foreach ($project in $prepared.Projects) {
             Write-Host "Projeto: $($project.Label) | ID: $($project.Project) | Source: $($project.Source)"
             foreach ($diagnostic in $project.Diagnostics) { Write-Warning ("$($project.Label): " + $diagnostic) }
+        }
+        if ($prepared.Status -eq 'EXHAUSTED') {
+            Write-Host 'Nao restam novas issues elegiveis da base inicial. Cobertura corrente preservada; ausencias nao comprovam resolucao.'
+            Write-Host "Conjunto acumulado: $($prepared.RankingPath)"
+            exit 0
         }
         Write-Host "Prompt preparado: $($prepared.PromptPath)"
         Write-Host "Contexto: $($prepared.ContextPath)"

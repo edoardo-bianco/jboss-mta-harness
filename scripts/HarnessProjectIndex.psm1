@@ -2,6 +2,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot 'HarnessPrioritization.psm1') -DisableNameChecking
 
 function New-HarnessProjectIndex {
     param($Context,[switch]$UpdateMigration)
@@ -24,6 +25,9 @@ function New-HarnessProjectIndex {
         if ($mta) { foreach ($limit in $mta.Diagnostics) { $warnings+=($project.Name+': '+$limit) } }
     }
     if ($warnings.Count) { $lines+=@('','Limites da leitura:')+@($warnings | ForEach-Object { '- '+($_ -replace '[\r\n]+',' ') }) }
+    $prioritization=Update-HarnessPrioritizationIndex $Context.Root -RefreshSources
+    $warnings+=@($prioritization.Warnings)
+    if (Test-Path -LiteralPath $prioritization.IndexPath -PathType Leaf) { $lines+=@('',(Get-HarnessSourceLink $index $prioritization.IndexPath 'Priorizacoes correntes')) }
     $path=Publish-HarnessWorkspaceIndex $Context.Root (($lines -join "`n")+"`n")
     [pscustomobject]@{IndexPath=$path;Warnings=@($warnings);Projects=@($projects)}
 }

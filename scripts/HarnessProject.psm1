@@ -96,6 +96,7 @@ Export-ModuleMember -Function Publish-HarnessProjectFiles,Read-HarnessProjectFil
 Export-ModuleMember -Function Read-HarnessProjectMta,Read-HarnessMtaDirectory
 . (Join-Path $PSScriptRoot 'HarnessProjectDocuments.ps1')
 Export-ModuleMember -Function Update-HarnessProjectDocuments,Get-HarnessProjectDecisions
+Export-ModuleMember -Function Find-ProjectManagedBlock,Set-ProjectManagedBlock,ConvertTo-ProjectCell
 
 function Publish-HarnessWorkspaceIndex {
     param([string]$Root,[string]$Text)

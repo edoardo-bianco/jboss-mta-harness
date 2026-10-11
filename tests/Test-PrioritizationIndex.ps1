@@ -1,122 +1,66 @@
 #requires -Version 5.1
-$ErrorActionPreference = 'Stop'
-Set-StrictMode -Version Latest
-$root = Split-Path -Parent $PSScriptRoot
-Import-Module (Join-Path $root 'scripts/HarnessPrioritization.psm1') -Force -DisableNameChecking
-$module = Get-Module HarnessPrioritization
-function Assert($condition, $message) { if (-not $condition) { throw $message } }
-function Reject($action, $message) { $failed=$false; try { & $action | Out-Null } catch { $failed=$true }; Assert $failed $message }
-$fixture = Join-Path $root ('.harness/tests/prior-index-' + [guid]::NewGuid().ToString('N'))
-$templatePath = Join-Path $fixture 'doc/modelos/indice-priorizacao.template.md'
-$null = [IO.Directory]::CreateDirectory((Split-Path $templatePath -Parent))
-Copy-Item (Join-Path $root 'doc/modelos/indice-priorizacao.template.md') $templatePath
-$indexPath = Join-Path $fixture '.harness/priorizacao/indice-priorizacao.md'
-$history = [Collections.Generic.List[object]]::new()
-function Receipt($category='mandatory', $source='C:\app', $previous=$null, $mode='Start') {
-    $id=[guid]::NewGuid().ToString('N'); $folder=Join-Path $fixture ('.harness/priorizacao/'+$id)
-    $null=[IO.Directory]::CreateDirectory($folder)
-    $issues=@(1..4 | ForEach-Object { [pscustomobject]@{Source=$source;Id="r::$_"} })
-    $r=[pscustomobject]@{
-        Purpose='issue-prioritization';SchemaVersion=2;RequestId=$id;Category=$category
-        SequenceId=$(if ($mode -eq 'Continue') { $previous.SequenceId } else { $id })
-        Mode=$mode;PreparedAtUtc='2026-10-09T12:00:00Z';Percentage=50;InitialTotal=4;SliceSize=2
-        BaselineIssues=$issues;AvailableIssues=$issues;ExcludedIssues=@()
-        Projects=@([pscustomobject]@{Source=$source;Project='app';Label='App | teste';Mta=$null})
-        Previous=$(if ($previous) { [pscustomobject]@{RequestId=$previous.RequestId;RankingSha256=$(if (Test-Path $previous.RankingPath) { (Get-FileHash $previous.RankingPath).Hash } else { $null })} } else { $null })
-        ContextPath=(Join-Path $folder 'context.json');RankingPath=(Join-Path $folder 'priorizacao.md');PromptPath=(Join-Path $folder 'priorizar-issues.prompt.md')
+$ErrorActionPreference='Stop'; Set-StrictMode -Version Latest
+. (Join-Path $PSScriptRoot 'PrioritizationFixture.ps1')
+$f=New-Fixture 4
+$p=New-HarnessPrioritizationContext $f.Context -Percentage 50 -Category mandatory
+$null=Complete-Slice $f $p
+[IO.File]::AppendAllText($p.IndexPath,"\nANOTACAO INDICE")
+[IO.File]::AppendAllText($p.PrioritizationIndexPath,"\nANOTACAO GLOBAL")
+[IO.File]::AppendAllText($p.RankingPath,"\nANOTACAO RANKING")
+$r=Update-HarnessPrioritizationIndex $f.Root
+Assert ($r.Warnings.Count -eq 0) ($r.Warnings -join '; ')
+foreach ($path in @($p.IndexPath,$p.PrioritizationIndexPath,$p.RankingPath)) {
+    Assert ([IO.File]::ReadAllText($path).Contains('ANOTACAO')) 'Regenerar deve preservar texto manual.'
+    foreach ($match in [regex]::Matches([IO.File]::ReadAllText($path),'\]\(<([^>]+)>\)')) {
+        $baseUri=New-Object Uri $path
+        $target=New-Object Uri (([uri]$baseUri.AbsoluteUri),$match.Groups[1].Value)
+        Assert (Test-Path -LiteralPath $target.LocalPath) ('Indice/ranking deve abrir a parte real: '+$target.LocalPath)
     }
-    [IO.File]::WriteAllText($r.ContextPath, ($r | ConvertTo-Json -Depth 10))
-    $history.Add($r)
-    $r
 }
-function Complete($r, $issues, $proposals=@()) {
-    $result=@{RequestId=$r.RequestId;Status='COMPLETED';AnalyzedIssues=@($issues);ProposedIssues=@($proposals)} | ConvertTo-Json -Depth 8
-    [IO.File]::WriteAllText($r.RankingPath, ('<!-- priorizacao:resultado -->'+"`n"+'```json'+"`n$result`n"+'```'+"`n<!-- /priorizacao:resultado -->"))
-}
-function Refresh {
-    & $module { param($r) Update-PrioritizationIndex $r } $fixture | Out-Null
-    [IO.File]::ReadAllText($indexPath)
-}
-$first=Receipt
-$manual="# Indice manual original`r`nMinha observacao e links devem ficar intactos.`r`n"
-[IO.File]::WriteAllText($indexPath,$manual)
-$text=Refresh
-Assert ($text.StartsWith($manual)) 'Indice manual foi alterado.'
-Assert ($text -match 'PENDENTE' -and $text -match '0 de 4') 'Preparo foi contado como exame.'
-Assert ($text -notmatch '\[priorizacao.md\]') 'Criou link para ranking inexistente.'
-Complete $first $first.AvailableIssues[0..1] @($first.AvailableIssues[0])
-$second=Receipt -previous $first -mode Continue
-$text=Refresh
-Assert ($text -match '2 de 4.*50' -and $text.Contains($first.RequestId+'/priorizacao.md')) 'Resultado completo nao entrou no indice com link relativo.'
-Assert ($text -match 'App &#124; teste') 'Rotulo quebrou tabela Markdown.'
-# Legado v2 podia reexaminar uma issue: cobertura deve usar uniao Source/Id.
-Complete $second $second.AvailableIssues[1..2]
-$text=Refresh
-Assert ($text -match '3 de 4.*75') 'Cobertura somou examinadas repetidas.'
-Assert ($text -ceq (Refresh)) 'Atualizacao sem mudancas nao e idempotente.'
-$optional=Receipt -category optional
-$otherScope=Receipt -source 'C:\outro'
-$text=Refresh
-Assert ($text.Contains($optional.RequestId) -and $text.Contains($otherScope.RequestId) -and $text.Contains($first.RequestId)) 'Categoria/escopo independente desapareceu.'
-$crossScope=Receipt -source 'C:\outro-escopo' -previous $otherScope -mode Recreate
-$text=Refresh
-Assert (-not $text.Contains(('Substituida pelo Recreate `'+$crossScope.RequestId+'`'))) 'Recreate de outro escopo substituiu a sequencia anterior.'
-# Mesmo escopo pode continuar mesmo que outra frente tenha referencia historica a ele.
-Complete $otherScope $otherScope.AvailableIssues[0..1]
-$otherNext=Receipt -source 'C:\outro' -previous $otherScope -mode Continue
-$text=Refresh
-Assert ($text -notmatch 'AMBIGUA' -and $text.Contains($otherNext.RequestId)) 'Referencia de outro escopo virou bifurcacao da sequencia.'
-$selected=& $module {
-    param($r,$previous)
-    Select-PrioritizationPrevious @(Read-PrioritizationHistory $r) $previous.Projects -RequestId $previous.RequestId
-} $fixture $otherScope
-Assert ($selected.RequestId -eq $otherNext.RequestId) 'Retomada explicita seguiu referencia de outro escopo.'
-$recreated=Receipt -previous $second -mode Recreate
-$text=Refresh
-Assert ($text -match 'Substitu.da' -and $text.Contains($recreated.RequestId)) 'Recreate nao preservou sequencia substituida.'
-Assert ($text -match '0 de 4') 'Recreate pendente herdou cobertura anterior.'
-$hash=(Get-FileHash $indexPath).Hash
-$fileHashes=@($history | ForEach-Object { Get-FileHash $_.ContextPath })
-# Resultado parcial nao consome cobertura.
-Complete $recreated @($recreated.AvailableIssues[0])
-[IO.File]::WriteAllText($recreated.RankingPath,([IO.File]::ReadAllText($recreated.RankingPath).Replace('COMPLETED','IN_PROGRESS')))
-$text=Refresh
-Assert ($text -match 'NAO_VALIDADA' -and $text -match 'nao concluido') 'Parcial virou fatia concluida.'
-Complete $recreated $recreated.AvailableIssues[0..1]
-$child=Receipt -previous $recreated -mode Continue
-Add-Content $recreated.RankingPath 'mudanca posterior'
-$text=Refresh
-Assert ($text -match 'anterior ausente/alterado' -and $text -match 'N/A') 'Ancestral adulterado conservou cobertura confiavel.'
-# Bifurcacao nao escolhe por recencia, mesmo com timestamps iguais.
-$fork=Receipt -previous $recreated -mode Continue
-$text=Refresh
-Assert ($text -match 'AMBIGUA' -and $text.Contains($child.RequestId) -and $text.Contains($fork.RequestId)) 'Bifurcacao ocultada.'
-foreach ($entry in $fileHashes) { Assert ((Get-FileHash $entry.Path).Hash -eq $entry.Hash) 'Indice reescreveu recibo legado.' }
-# Um marcador ausente/duplicado e conflito, nao autorizacao de sobrescrita.
-$original=[IO.File]::ReadAllText($indexPath)
-[IO.File]::WriteAllText($indexPath,$original+"`n<!-- priorizacao:indice:inicio -->")
-$broken=(Get-FileHash $indexPath).Hash
-Reject { Refresh } 'Marcadores duplicados aceitos.'
-Assert ((Get-FileHash $indexPath).Hash -eq $broken) 'Conflito de marcador sobrescreveu indice.'
-[IO.File]::WriteAllText($indexPath,$original)
-# Publicacao atomica: conflito apos a leitura e falha no replace preservam o original.
-$concurrent=$original+"`nNota humana nova.`n"
-[IO.File]::WriteAllText($indexPath,$concurrent)
-Reject { & $module { param($p,$old) Write-PrioritizationIndexContent $p 'novo indice' $old $true } $indexPath $original } 'Edicao concorrente foi sobrescrita.'
-Assert ([IO.File]::ReadAllText($indexPath) -ceq $concurrent) 'Perdeu a nota concorrente.'
-$lock=[IO.File]::Open($indexPath,'Open','Read','Read')
-try {
-    Reject { & $module { param($p,$old) Write-PrioritizationIndexContent $p 'novo indice' $old $true } $indexPath $concurrent } 'Replace de arquivo bloqueado deveria falhar.'
-} finally { $lock.Dispose() }
-Assert ([IO.File]::ReadAllText($indexPath) -ceq $concurrent) 'Falha de publicacao truncou conteudo humano.'
-Assert (@(Get-ChildItem (Split-Path $indexPath -Parent) -File -Filter '*.tmp').Count -eq 0) 'Publicacao deixou temporario.'
-& $module { param($p,$old) Write-PrioritizationIndexContent $p ($old+'Atualizacao completa') $old $true } $indexPath $concurrent
-Assert ([IO.File]::ReadAllText($indexPath) -ceq ($concurrent+'Atualizacao completa')) 'Publicacao atomica nao concluiu.'
-# Legado Top sem campos de percentual permanece localizavel, sem cobertura inventada.
-$legacy=Receipt -source 'C:\legado'
-foreach ($field in @('SchemaVersion','Category','Mode','SequenceId','Previous','Percentage','InitialTotal','SliceSize','BaselineIssues','AvailableIssues','ExcludedIssues')) { $legacy.PSObject.Properties.Remove($field) }
-$legacy | Add-Member NoteProperty Top 5
-[IO.File]::WriteAllText($legacy.ContextPath,($legacy | ConvertTo-Json -Depth 10))
-$text=Refresh
-Assert ($text.Contains($legacy.RequestId) -and $text -match 'N/A de N/A') 'Legado Top perdeu identidade ou ganhou cobertura ficticia.'
-Write-Output 'PASS: indice automatico, legado, cobertura distinta, escopos/categorias, pendencias, historico e preservacao.'
+Assert ([IO.File]::ReadAllText($p.IndexPath) -match '(?m)^\| Posicao') 'Tabela acumulada deve comecar em linha propria no Markdown.'
+$d=Read-Prepared $p
+$ficha=$d.FichaPaths[0].Path
+$original=[IO.File]::ReadAllText($ficha)
+[IO.File]::WriteAllText($ficha,'Ficha incompleta')
+$r=Update-HarnessPrioritizationIndex $f.Root
+Assert ($r.Warnings.Count -eq 1 -and [IO.File]::ReadAllText($p.IndexPath).Contains('Cobertura nao validada')) 'Ficha invalida invalida indice derivado, sem cobertura antiga.'
+Reject { New-HarnessPrioritizationContext $f.Context -Percentage 50 -Category mandatory -Mode Continue } 'Nao progredir com ficha ausente/invalida.'
+[IO.File]::WriteAllText($ficha,$original)
+$r=Update-HarnessPrioritizationIndex $f.Root
+Assert ($r.Warnings.Count -eq 0) 'Reparar ficha permite reconstruir indice.'
+$saved=[IO.File]::ReadAllText($p.RankingPath)
+$result=Read-Result $p
+$result.AnalyzedIssues+=@($result.AnalyzedIssues[0])
+[IO.File]::WriteAllText($p.RankingPath,(Set-ProjectManagedBlock $saved 'priorizacao:resultado' ($result|ConvertTo-Json -Depth 10)))
+Reject { New-HarnessPrioritizationContext $f.Context -Percentage 50 -Category mandatory -Mode Continue } 'Duplicata nao pode inflar cobertura.'
+[IO.File]::WriteAllText($p.RankingPath,$saved)
+$result=Read-Result $p; $result.AnalyzedIssues[0].Reason=''
+[IO.File]::WriteAllText($p.RankingPath,(Set-ProjectManagedBlock $saved 'priorizacao:resultado' ($result|ConvertTo-Json -Depth 10)))
+Reject { New-HarnessPrioritizationContext $f.Context -Percentage 50 -Category mandatory -Mode Continue } 'Sem proposta exige motivo.'
+[IO.File]::WriteAllText($p.RankingPath,$saved)
+$result=Read-Result $p; $result.AnalyzedIssues[0].Position=1; $result.AnalyzedIssues[1].Position=1
+[IO.File]::WriteAllText($p.RankingPath,(Set-ProjectManagedBlock $saved 'priorizacao:resultado' ($result|ConvertTo-Json -Depth 10)))
+Reject { New-HarnessPrioritizationContext $f.Context -Percentage 50 -Category mandatory -Mode Continue } 'Posicoes de recomendacao devem ser unicas.'
+$result.AnalyzedIssues[1].Position=$null
+[IO.File]::WriteAllText($p.RankingPath,(Set-ProjectManagedBlock $saved 'priorizacao:resultado' ($result|ConvertTo-Json -Depth 10)))
+$valid=Update-HarnessPrioritizationIndex $f.Root
+Assert ($valid.Warnings.Count -eq 0) 'Ranking aceita recomendada e examinada sem proposta no mesmo conjunto.'
+[IO.File]::WriteAllText($p.RankingPath,$saved)
+$result=Read-Result $p; $result.AnalyzedIssues=@($result.AnalyzedIssues[0])
+[IO.File]::WriteAllText($p.RankingPath,(Set-ProjectManagedBlock $saved 'priorizacao:resultado' ($result|ConvertTo-Json -Depth 10)))
+Reject { New-HarnessPrioritizationContext $f.Context -Percentage 50 -Category mandatory -Mode Continue } 'COMPLETED parcial deve ser recusado.'
+[IO.File]::WriteAllText($p.RankingPath,$saved)
+$next=New-HarnessPrioritizationContext $f.Context -Percentage 50 -Category mandatory -Mode Continue
+$result=Read-Result $next; $result.AnalyzedIssues=@()
+[IO.File]::WriteAllText($next.RankingPath,(Set-ProjectManagedBlock ([IO.File]::ReadAllText($next.RankingPath)) 'priorizacao:resultado' ($result|ConvertTo-Json -Depth 10)))
+Reject { New-HarnessPrioritizationContext $f.Context -Percentage 50 -Category mandatory -Mode Continue } 'Nao perder examinadas anteriores em resultado parcial.'
+$other=New-Fixture 1 @('a','b')
+$b=$other.Projects[1]
+Publish-HarnessProjectFiles $b @{'projeto.json'=(@{pom=(Join-Path $other.Root 'ausente/pom.xml');mta=@{diretorio=$null}}|ConvertTo-Json)}
+$single=[pscustomobject]@{Root=$other.Root;Projects=@($other.Context.Projects[0])}
+$p=New-HarnessPrioritizationContext $single -Percentage 100 -Category mandatory
+$null=Complete-Slice $other $p
+$again=New-HarnessPrioritizationContext $single -Percentage 100 -Category mandatory -Mode Continue
+Assert ($again.Status -eq 'EXHAUSTED') 'Associacao alheia indisponivel nao bloqueia escopo valido.'
+Assert ([IO.File]::ReadAllText($p.PrioritizationIndexPath).Contains('Associacao indisponivel')) 'Indice deve informar associacao alheia indisponivel.'
+'PASS: indice derivado, texto humano, ficha/quota/motivo/unicidade, acumulacao e isolamento.'
