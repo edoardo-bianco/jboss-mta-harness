@@ -1,6 +1,7 @@
 #requires -Version 5.1
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
+Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
 
 function Get-SonarMetricNumber {
     param([object[]]$Measures, [string]$Name, [switch]$Coverage)
@@ -64,7 +65,7 @@ function Get-HarnessSonarCriteria {
         SevereIssueKeys=$severeKeys; SevereIssues=$(if ($null -ne $severeKeys) { $severeKeys.Count } else { $null }); NewIssueKeys=$newKeys
         Warnings=@($warnings); Failures=@($failures); Pending=@($pending)
         BaselineComparison=$comparison; IssuesDelta=$delta
-        BaselineRunId=$(if ($Baseline) { $Baseline.RunId } else { $null })
+        BaselineAnalysisId=$(if ($Baseline) { $Baseline.AnalysisId } else { $null })
         BaselineResultPath=$(if ($Baseline) { $Baseline.ResultPath } else { $null })
         ComparisonLimit='Novas no conjunto aberto por chave podem incluir reaberturas ou mudancas de regras; nao comprovam causa no codigo. New Code do servidor e separado. Perfis, exclusoes e conteudo precisam de conferencia. ANTES sem baseline inicia a referencia; DEPOIS sem lista comparavel fica pendente.'
     }
@@ -75,27 +76,33 @@ function Read-HarnessSonarBaseline {
     if (-not $Path) { return $null }
     # Caminho selecionado explicitamente; nunca descobrir a ultima coleta.
     $path=Resolve-HarnessPath $Path $Context.Root
-    $base=Resolve-HarnessPath (Join-Path $Context.Root '.harness/sonar') $Context.Root
-    if (-not $path.StartsWith($base + '\', [StringComparison]::OrdinalIgnoreCase) -or (Split-Path -Leaf $path) -cne 'result.json') { throw 'Escolha um result.json de .harness/sonar deste harness.' }
-    $record=Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
+    if ((Split-Path -Leaf $path) -cne 'resultado.json') { throw 'Escolha explicitamente o resultado.json ANTES, corrente ou em uma pasta de evidencias.' }
+    $project=Get-HarnessProjectStorage $Context.Root (Join-Path $Context.Active.path 'pom.xml')
+    $directory=Split-Path -Parent $path
+    $texts=@{}
+    if ($path -ieq (Join-Path $project.Folder 'atual/diagnosticos/sonar/resultado.json')) {
+        $names=@('resultado.json','measures.json','issues.json')
+        $documents=Read-HarnessProjectFiles $project @($names | ForEach-Object { 'atual/diagnosticos/sonar/'+$_ })
+        foreach ($name in $names) { $texts[$name]=$documents['atual/diagnosticos/sonar/'+$name] }
+    } else {
+        foreach ($name in @('resultado.json','measures.json','issues.json')) { $texts[$name]=[IO.File]::ReadAllText((Join-Path $directory $name)) }
+    }
+    $record=ConvertFrom-Json $texts['resultado.json']
     foreach ($field in @('Project','Source','ServerUrl','ProjectKey','BranchName','ScannerVersion','SettingsPath','ApplicationJavaHome')) {
         if (-not $record.PSObject.Properties[$field] -or [string]$record.$field -cne [string]$Current[$field]) { throw "Baseline incompativel no campo $field." }
     }
     if (($record.Profiles | ConvertTo-Json -Compress) -cne ($Current.Profiles | ConvertTo-Json -Compress)) { throw 'Baseline com perfis Maven diferentes.' }
     if ($record.Phase -cne 'ANTES' -or $record.AnalysisStatus -cne 'SUCCESS' -or $record.MetricsStatus -cne 'MATCHED' -or $record.InputsStatus -cne 'STABLE' -or $record.ScannerExitCode -ne 0) { throw 'Baseline deve ser uma coleta ANTES concluida e estavel.' }
-    if (-not $record.AnalysisId -or -not $record.RunId -or [DateTimeOffset]::Parse($record.FinishedAtUtc) -ge [DateTimeOffset]::Parse($Current.StartedAtUtc)) { throw 'Baseline deve identificar uma analise anterior.' }
-    $measurePath=Resolve-HarnessPath (Join-Path (Split-Path -Parent $path) 'measures.json') $Context.Root
-    $measures=Get-Content -LiteralPath $measurePath -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($measures.AnalysisId -cne $record.AnalysisId -or $measures.ProjectKey -cne $record.ProjectKey -or [string]$measures.BranchName -cne [string]$record.BranchName) { throw 'Metricas do baseline nao correspondem ao recibo.' }
+    if (-not $record.AnalysisId -or [DateTimeOffset]::Parse($record.FinishedAtUtc) -ge [DateTimeOffset]::Parse($Current.StartedAtUtc)) { throw 'Baseline deve identificar uma analise anterior.' }
+    $measures=ConvertFrom-Json $texts['measures.json']
+    if ($measures.AnalysisId -cne $record.AnalysisId -or $measures.ProjectKey -cne $record.ProjectKey -or [string]$measures.BranchName -cne [string]$record.BranchName) { throw 'Metricas do baseline nao correspondem ao resultado.' }
     $total=Get-SonarMetricNumber $measures.Measures 'violations'
     if ($null -eq $total) { throw 'Baseline sem total de issues valido.' }
     $issues=$null
     if ($record.PSObject.Properties['IssuesStatus'] -and $record.IssuesStatus -ceq 'COMPLETE') {
-        $issuePath=Resolve-HarnessPath (Join-Path (Split-Path -Parent $path) 'issues.json') $Context.Root
-        if (-not $record.PSObject.Properties['IssuesSha256'] -or (Get-FileHash -LiteralPath $issuePath -Algorithm SHA256).Hash -cne $record.IssuesSha256) { throw 'Hash das issues do baseline divergente.' }
-        $saved=Get-Content -LiteralPath $issuePath -Raw -Encoding UTF8 | ConvertFrom-Json
-        foreach ($field in @('RunId','AnalysisId','ServerUrl','ProjectKey','BranchName')) {
-            if ([string]$saved.$field -cne [string]$record.$field) { throw 'Issues do baseline nao correspondem ao recibo.' }
+        $saved=ConvertFrom-Json $texts['issues.json']
+        foreach ($field in @('AnalysisId','ServerUrl','ProjectKey','BranchName')) {
+            if ([string]$saved.$field -cne [string]$record.$field) { throw 'Issues do baseline nao correspondem ao resultado.' }
         }
         if ($saved.Snapshot.Status -cne 'COMPLETE' -or $saved.Snapshot.Filter -cne 'resolved=false' -or $saved.Snapshot.Issues -isnot [Array] -or $saved.Snapshot.Count -ne $saved.Snapshot.Issues.Count) { throw 'Lista de issues do baseline incompleta.' }
         $keys=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)
@@ -104,7 +111,10 @@ function Read-HarnessSonarBaseline {
         }
         $issues=$saved.Snapshot.Issues
     }
-    [pscustomobject]@{RunId=$record.RunId; ResultPath=$path; TotalIssues=$total; ServerVersion=$record.ServerVersion; Issues=$issues}
+    foreach ($name in $texts.Keys) {
+        if ([IO.File]::ReadAllText((Join-Path $directory $name)) -cne $texts[$name]) { throw 'Baseline alterado durante leitura; repita a operacao.' }
+    }
+    [pscustomobject]@{AnalysisId=$record.AnalysisId; ResultPath=$path; TotalIssues=$total; ServerVersion=$record.ServerVersion; Issues=$issues}
 }
 
 Export-ModuleMember -Function Get-HarnessSonarCriteria, Read-HarnessSonarBaseline
