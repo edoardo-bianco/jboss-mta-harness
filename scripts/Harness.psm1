@@ -93,11 +93,8 @@ function Read-HarnessWorkspaceProjects {
         $seen[$projectPath] = $true
         $label = Split-Path $projectPath -Leaf
         if ($folder.PSObject.Properties['name'] -and $folder.name) { $label = $folder.name }
-        # Identidade pelo caminho: renomear no Explorer nao perde o historico.
-        $sha = [Security.Cryptography.SHA256]::Create()
-        try { $hash = [BitConverter]::ToString($sha.ComputeHash([Text.Encoding]::UTF8.GetBytes($projectPath.ToLowerInvariant()))).Replace('-', '').ToLowerInvariant() }
-        finally { $sha.Dispose() }
-        [pscustomobject]@{name=('_workspace-' + $hash.Substring(0,24)); label=$label; path=$projectPath}
+        $project=Get-HarnessProjectReference $Root (Join-Path $projectPath 'pom.xml')
+        [pscustomobject]@{name=$project.Name; label=$label; path=$projectPath}
     }
 }
 
@@ -140,7 +137,8 @@ function Read-HarnessConfig {
     if ($WorkspacePath) { $projects = @(Read-HarnessWorkspaceProjects $WorkspacePath $Root) }
     $names = @{}
     foreach ($repo in $projects) {
-        if ((-not $WorkspacePath -and ($repo.name -notmatch '^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$' -or $repo.name -ieq 'harness')) -or $names.ContainsKey($repo.name)) { throw 'Nome de repositorio invalido ou duplicado.' }
+        if (-not $WorkspacePath -and ([string]::IsNullOrWhiteSpace($repo.name) -or $repo.name -ieq 'harness')) { throw 'Alias de repositorio vazio ou reservado: harness identifica a raiz das Run Tasks.' }
+        if ($names.ContainsKey($repo.name)) { throw 'Projeto duplicado ou artifactId em colisao no escopo. Confira os POMs e use outra raiz para projetos distintos.' }
         if (-not $repo.PSObject.Properties['label']) { $repo | Add-Member NoteProperty label $repo.name }
         $names[$repo.name] = $true
         $repo.path = Resolve-HarnessPath $repo.path $Root
@@ -156,17 +154,6 @@ function Read-HarnessConfig {
         $config.tools.$field = Resolve-HarnessPath $config.tools.$field $Root
     }
     $config.mta.rulesPath = Resolve-HarnessPath $config.mta.rulesPath $Root
-    if (-not $config.mta.PSObject.Properties['runsPath']) { $config.mta | Add-Member NoteProperty runsPath $null }
-    $config.mta.runsPath = Resolve-HarnessPath $config.mta.runsPath $Root
-    if ($config.mta.runsPath) {
-        $storage = $config.mta.runsPath
-        if ($storage.Length -le 3) { throw 'mta.runsPath deve ser uma pasta dedicada, nao a raiz do disco.' }
-        foreach ($protected in (@($Root) + @($projects | ForEach-Object { $_.path }))) {
-            if ($storage -ieq $protected -or $storage.StartsWith($protected + '\', [StringComparison]::OrdinalIgnoreCase) -or $protected.StartsWith($storage + '\', [StringComparison]::OrdinalIgnoreCase)) {
-                throw 'mta.runsPath deve ficar fora do harness e dos projetos, sem conter essas pastas.'
-            }
-        }
-    }
     # Compatibilidade com o JSON local anterior, sem reescrever o arquivo.
     if (-not $config.mta.PSObject.Properties['profile']) { $config.mta | Add-Member NoteProperty profile 'eap71-to-eap74-java8' }
     if (-not $config.mta.PSObject.Properties['sources']) { $config.mta | Add-Member NoteProperty sources @() }
@@ -174,9 +161,8 @@ function Read-HarnessConfig {
     if ($config.mta.sources -isnot [Array] -or $config.mta.sources.Count -ne 0) { throw 'Use mta.sources = []. Filtrar source=eap7.1 exclui regras Hibernate do perfil ensaiado.' }
     if ($config.mta.targets -isnot [Array] -or $config.mta.targets.Count -ne 1 -or $config.mta.targets[0] -cne 'eap7') { throw 'Use mta.targets = ["eap7"]. EAP 7.4 e o destino de runtime; nao um target desta CLI ensaiada. Nao usar eap8.' }
     if ($config.mta.mode -cne 'full') { throw 'Use mta.mode = full para preservar a analise de fontes e dependencias do perfil ensaiado.' }
-    if (-not $SkipMigrationInitialization) {
-        foreach ($project in $projects) { $null = Initialize-HarnessMigration $Root $project }
-    }
+    # Ler configuracao nao publica registros. A tarefa de indice inicializa os
+    # destinos correntes; o switch antigo permanece sem efeito ate retirar chamadores.
     [pscustomobject]@{ Root=$Root; ConfigPath=$Path; Config=$config; Active=$active; Projects=$projects; WorkspacePath=$WorkspacePath }
 }
 
@@ -193,9 +179,8 @@ function New-HarnessWorkspace {
         'java.import.generatesMetadataFilesAtProjectRoot'=$false
         'files.exclude'=@{ '**/.harness'=$true }
     }
-    if ($Context.Config.mta.runsPath) {
-        $settings['github.copilot.chat.additionalReadAccessPaths'] = @($Context.Config.mta.runsPath.Replace('\','/'))
-    }
+    $externalRoots=@(Get-HarnessProjectReadRoots $Context.Root @($Context.Projects | ForEach-Object { Join-Path $_.path 'pom.xml' }))
+    if ($externalRoots.Count) { $settings['github.copilot.chat.additionalReadAccessPaths'] = @($externalRoots | ForEach-Object { $_.Replace('\','/') }) }
     if ($Context.Config.tools.applicationJdk8Home) {
         $settings['java.configuration.runtimes'] = @(@{name='JavaSE-1.8'; path=$Context.Config.tools.applicationJdk8Home; default=$true})
         $settings['maven.terminal.useJavaHome'] = $false

@@ -10,7 +10,9 @@ $app = Join-Path $parent 'simtr-outsourcing-api'
 $other = Join-Path $area 'outro repo/simtr-outsourcing-api'
 $docs = Join-Path $area 'documentacao'
 foreach ($dir in @($fixture, $parent, $app, $other, $docs)) { $null = New-Item -ItemType Directory -Path $dir -Force }
-foreach ($dir in @($parent, $app, $other)) { Set-Content -LiteralPath (Join-Path $dir 'pom.xml') '<project><packaging>pom</packaging></project>' }
+Set-Content (Join-Path $parent 'pom.xml') '<project><artifactId>simtr-api</artifactId><packaging>pom</packaging></project>'
+Set-Content (Join-Path $app 'pom.xml') '<project><artifactId>simtr-outsourcing-api</artifactId></project>'
+Set-Content (Join-Path $other 'pom.xml') '<project><artifactId>outro-api</artifactId></project>'
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.PSObject.Properties.Remove('repositories')
 $config.PSObject.Properties.Remove('activeProject')
@@ -53,6 +55,7 @@ $renamed = Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath
 $added = Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target $other
 Assert ($renamed.Active.name -eq $selected.Active.name) 'Renomear no Explorer perdeu o historico.'
 Assert ($added.Active.path -eq $other -and $added.Active.name -ne $renamed.Active.name) 'Projetos homonimos misturaram historicos.'
+Assert ($renamed.Active.name -eq 'simtr-outsourcing-api' -and $added.Active.name -eq 'outro-api') 'Identidade deve vir do artifactId literal, sem hash do caminho.'
 foreach ($target in @('inexistente', 'API renomeada', $docs, $fixture)) {
     $rejected = $false
     try { Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target $target | Out-Null } catch { $rejected = $true }
@@ -62,4 +65,9 @@ foreach ($target in @('inexistente', 'API renomeada', $docs, $fixture)) {
 $rejected = $false
 try { Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -SelectTarget | Out-Null } catch { $rejected = $true }
 Assert $rejected 'Cancelar nao interrompeu a selecao.'
+Set-Content (Join-Path $other 'pom.xml') '<project><artifactId>simtr-outsourcing-api</artifactId></project>'
+$rejected=$false
+try { Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target $app | Out-Null } catch { $rejected=$_.Exception.Message -match 'colisao' }
+Assert $rejected 'Colisao de artifactId deve ser explicita, sem alias automatico.'
+Assert (-not (Test-Path (Join-Path $fixture '.harness'))) 'Escolher projeto nao deve publicar registros.'
 Write-Output 'PASS: projetos do workspace, menu, padrao opcional, adicao/renomeacao, isolamento e configuracoes preservadas.'

@@ -120,3 +120,5 @@ Export-ModuleMember -Function Publish-HarnessWorkspaceIndex
 . (Join-Path $PSScriptRoot 'HarnessProjectOperations.ps1')
 Export-ModuleMember -Function Set-HarnessProjectOperation,Get-HarnessProjectTemporary,Remove-HarnessProjectTemporary,Get-HarnessProjectTreePublication
 Export-ModuleMember -Function Get-HarnessProjectMtaLog
+. (Join-Path $PSScriptRoot 'HarnessProjectReadRoots.ps1')
+Export-ModuleMember -Function Get-HarnessProjectReadRoots
