@@ -2,7 +2,7 @@
 name: revisar-lote
 description: Revisa a proposta corrente pelo mesmo contrato de planejar-lotes.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles']
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', 'harnessissues/auditar_base', 'harnessissues/listar_issues', 'harnessissues/obter_issue']
 ---
 
 Use a entrada Planejamento: planejar e o ContextPath corrente informado.

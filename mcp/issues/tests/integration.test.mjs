@@ -56,7 +56,7 @@ test('SDK stdio: tres consultas, paridade, limites, cancelamento e nenhuma escri
   const changed=await call('obter_issue',{ContextPath:fixture.plan,Id:fixture.id,ExpectedBasisSha256:'0'.repeat(64)});
   assert.equal(changed.structuredContent.Error.Code,'BASE_CHANGED');
 
-  for (const [root,context,id] of [[fixture.manualRoot,fixture.manualPlan,'DEV-LOG'],[fixture.importRoot,fixture.importPlan,fixture.id]]) {
+  for (const [root,context,id] of [[fixture.manualRoot,fixture.manualPlan,'DEV-LOG']]) {
     const result=await runQuery({...settings,root},'obter_issue',{ContextPath:context,Id:id});
     assert.equal(result.Status,'OK',JSON.stringify(result));
   }

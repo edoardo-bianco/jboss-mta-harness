@@ -2,7 +2,7 @@
 name: priorizar-issues
 description: Examinar uma fatia e consolidar a priorizacao corrente por categoria/escopo.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles']
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', 'harnessissues/auditar_base', 'harnessissues/listar_issues', 'harnessissues/obter_issue']
 ---
 
 # Priorizar issues por fatias
@@ -77,7 +77,9 @@ existentes nao autorizam declarar exame, GO ou aceite.
 Saidas permitidas: RankingPath, IndexPath, PrioritizationIndexPath e fichas
 efetivamente examinadas em FichaPaths. Nao alterar registros, contexto, codigo
 da aplicacao, GO ou aceite. Helpers, quando usados, so leem e orientam.
-MCP e opcional: so consultar se suportar este contexto corrente. Nunca exigir
+MCP e opcional: auditar_base/listar_issues/obter_issue aceitam este ContextPath
+corrente, com Source explicito quando houver varios projetos. ExpectedBasisSha256
+detecta mudancas entre paginas; nao e recibo nem comprovante de exame. Nunca exigir
 Node, copiar JSON manualmente ou recorrer a recibos legados para executar a
 priorizacao. Sem consulta compativel, ler os arquivos originais diretamente.
 

@@ -79,8 +79,8 @@ nos documentos existentes, nas fichas e no indice do projeto, em uma publicacao.
 O contexto guarda escopo funcional e referencias diretas, com base MTA ou
 EVIDENCIAS. Nao ha RequestId, Previous, snapshot, hashes de entradas nem copias
 consolidadas. O produtor de `apontamentos-mta.json` e seu validador foram retirados.
-As consultas legadas ainda dependem de `Consolidated.MtaIssuePath`; sua adaptacao
-permanece em S15, sem recolocar o extrato no planejamento corrente.
+As consultas opcionais tambem leem diretamente contexto/registro/MTA correntes,
+sem `Consolidated.MtaIssuePath` ou outro extrato. S11b/S15 concluidas nesse recorte.
 
 Mudancas conhecidas de escopo/base/referencias sinalizam NeedsReview/ReviewReasons,
 preservando plano, tarefas e GO humano anterior. Esses avisos nao concedem nem
@@ -96,9 +96,11 @@ sao referencias gerais. Indice explicitamente escolhido permanece associado
 mesmo ausente; a retomada conserva a lacuna. Nao copiar anexos ou texto integral
 do MTA. Fichas ausentes permanecem a elaborar ate exame efetivo pelo condutor.
 
-Consumidores legados nao procuram uma solicitacao antiga quando encontram
-planejamento corrente; implementacao,
-consultas e sprints ainda dependem dos recortes S14-S16.
+Implementacao usa plano/tarefas correntes e exige conferencia humana do alcance
+do GO. Consultas usam exclusividade somente leitura e recusam recuperacao pendente;
+hashes de paginacao sao transitorios, sem se tornarem requisitos de retomada.
+Falhas de acesso nao selecionam silenciosamente outro relatorio. Sprints ainda
+dependem de S16; consumidores correntes nao procuram uma solicitacao antiga.
 Compartilhamento por pacote ainda depende da priorizacao legada e permanece fora
 do fluxo corrente ate sua retirada em S22.
 

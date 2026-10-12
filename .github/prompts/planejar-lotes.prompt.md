@@ -3,7 +3,7 @@ name: planejar-lotes
 description: Cria ou revisa a proposta corrente a partir das escolhas do registro.
 argument-hint: Use o ContextPath preparado pela tarefa Planejamento: planejar.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles']
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', 'harnessissues/auditar_base', 'harnessissues/listar_issues', 'harnessissues/obter_issue']
 ---
 
 # Planejar o lote corrente

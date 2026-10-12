@@ -221,7 +221,24 @@ recusando corretiva sem GO permanece no aceite integrado.
 S18 deve conferir propagacao de agent/tools no cabecalho dos prompts correntes.
 S22 retira Test-ContextPackage e suas chamadas restantes ao produtor legado de
 implementacao. Suite ampla ainda depende da adaptacao desses consumidores.
-**Proxima etapa: S15**, consultas correntes sem extratos, com MCP opcional.
+S15 implementada: consultas somente leitura usam contexto/registro correntes e
+o mesmo resolvedor de identidade/MTA, sem recuperar publicacoes interrompidas.
+Nao leem recibos antigos ou extratos; MTA e EVIDENCIAS mantem seus significados.
+Raizes permitidas, limites, associacao POM/Source e selecao multiprojeto continuam
+protegidos. Paginas usam hash somente transitorio, incluindo o candidato MTA e
+sua data, para recusar troca de base entre consultas. Falhas de acesso e I/O
+interrompem a consulta, inclusive fora do leitor restrito de arquivos.
+
+Passaram em PowerShell 5.1: Test-ProjectStorage, Test-ProjectRecovery,
+Test-ProjectMta, Test-ProjectReadOnly, Test-IssueQueries, Test-IssueQueryPlanning,
+Test-IssueQueryRoots, Test-IssueQueryEdges, Test-IssueQueryBounds,
+Test-IssueQueryCli e Test-PlanningWithoutMcp. Este ultimo inclui categorias e
+planejamento de issue com PATH sem Node/npm/npx. Tres testes Node 20/MCP
+(contrato e integracao stdio) aprovados, incluindo paridade, cancelamento e
+ausencia de escrita. Revisao independente fechou os achados de selecao por data
+e tratamento de acesso negado. Fixtures sinteticas; nenhum dado real convertido.
+
+**Proxima etapa: S16**, sprints correntes com baseline/calendario preservados.
 Conversao, limpeza e alinhamento de guias/orientador ainda precisam ser concluidos.
 
 ### Requisitos e fontes
