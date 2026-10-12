@@ -1,7 +1,7 @@
 function Get-ProjectMtaStamp {
     param([string]$Entry,[string]$Catalog)
-    $entryInfo=Get-Item -LiteralPath $Entry
-    $catalogInfo=Get-Item -LiteralPath $Catalog
+    $entryInfo=Get-Item -LiteralPath $Entry -ErrorAction Stop
+    $catalogInfo=Get-Item -LiteralPath $Catalog -ErrorAction Stop
     @($entryInfo.Length,$entryInfo.LastWriteTimeUtc.Ticks,$catalogInfo.Length,$catalogInfo.LastWriteTimeUtc.Ticks) -join ':'
 }
 
@@ -53,7 +53,7 @@ function Read-ProjectMtaCandidate {
     # Current static-report sets do not require a generation timestamp. When
     # explicitly present, accept only an ISO value with timezone; else use the
     # recognized entry file's modification time, never an old harness manifest.
-    $date=(Get-Item -LiteralPath $Entry).LastWriteTimeUtc
+    $date=(Get-Item -LiteralPath $Entry -ErrorAction Stop).LastWriteTimeUtc
     $dateSource='modificacao do arquivo de entrada'
     if ($app.PSObject.Properties['generatedAt'] -and ([string]$app.generatedAt) -match '(Z|[+-]\d{2}:\d{2})$') {
         $parsed=[DateTimeOffset]::MinValue
@@ -89,7 +89,13 @@ function Read-HarnessMtaDirectory {
             if ($child.Name -ine 'index.html') { continue }
             try { $candidates+=Read-ProjectMtaCandidate $Project $child.FullName -FileReader $FileReader }
             catch {
-                if ($_.Exception.Data.Contains('MtaChanged') -or $_.Exception.Data.Contains('QueryCode')) { throw }
+                $failure=$_.Exception
+                while ($failure) {
+                    if ($failure.Data.Contains('MtaChanged') -or $failure.Data.Contains('QueryCode') -or
+                        $failure -is [IO.IOException] -or $failure -is [UnauthorizedAccessException] -or
+                        $failure -is [Security.SecurityException]) { throw }
+                    $failure=$failure.InnerException
+                }
                 $problems+=($child.FullName+': '+$_.Exception.Message)
             }
         }

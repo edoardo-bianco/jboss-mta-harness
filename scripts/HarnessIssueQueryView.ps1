@@ -35,7 +35,7 @@ function Get-QueryItems {
         $item=$entries[$key]; $row=$Base.RowsById[$key]
         $truncated=[Collections.Generic.List[object]]::new()
         $availability='NOT_AVAILABLE_IN_REQUEST'
-        $category=if ($Base.IsPlanning) {$null} elseif ($Base.Receipt.SchemaVersion -ge 4) { $Base.Receipt.Category } else {'mandatory'}
+        $category=if ($Base.IsPlanning) {$null} else { $Base.Receipt.Category }
         if ($Base.IsPlanning) { $availability='SELECTED_FOR_PLANNING' }
         elseif ($item.Category -ine $category) { $availability='OUTSIDE_CATEGORY' }
         elseif ($Base.AvailabilityById.ContainsKey($key)) { $availability=$Base.AvailabilityById[$key] }
@@ -45,7 +45,7 @@ function Get-QueryItems {
             Presence=if ($row) {$row.Presence} else {$null}
             Decision=if ($row) {$row.Decision} else {$null}
             Progress=if ($row) {$row.Progress} else {$null}
-            Observation=if ($row) {Limit-QueryText $row.Observation $MaxTextChars 'Observation' $truncated} else {$null}
+            Observation=if ($row) {Limit-QueryText $row.Note $MaxTextChars 'Observation' $truncated} else {$null}
             Availability=$availability;TruncatedFields=@($truncated.ToArray())
         }
     }
@@ -92,9 +92,7 @@ function Get-QueryDetail {
         $pageResult.Items=@($incidents[$offset])
         $pageResult.Paging=[ordered]@{Total=$incidents.Count;Returned=1;Incident=$Incident;Page=$null;PageSize=$null;HasMore=$false}
     }
-    $locationProject=if ($Base.Mta) {
-        [pscustomobject]@{Source=$Base.Project.Source;Mta=[pscustomobject]@{RunId=$Base.Mta.RunId;AnalysisSource=$Base.Mta.AnalysisSource;MtaOrigin=[pscustomobject]@{Run=(Get-QueryProperty $Base.Mta.MtaOrigin 'Run' $Base.Mta.Run)}}}
-    } else {$null}
+    $locationProject=$Base.Project
     $selected=@(foreach ($item in $pageResult.Items) {
         $offset++; $cuts=[Collections.Generic.List[object]]::new()
         $uri=[string](Get-IncidentValue $item 'uri')

@@ -3,7 +3,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $script:QueryAllowedRoots=$null
 Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
-Import-Module (Join-Path $PSScriptRoot 'HarnessPlanning.psm1') -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
 . (Join-Path $PSScriptRoot 'HarnessPrioritizationEvidence.ps1')
 . (Join-Path $PSScriptRoot 'HarnessIssueQueryInput.ps1')
 . (Join-Path $PSScriptRoot 'HarnessIssueQueryPlanning.ps1')
@@ -17,6 +17,7 @@ function Invoke-HarnessIssueQuery {
         [string]$Id,$Incident=$null,[string]$ExpectedBasisSha256,
         [string]$Root=(Split-Path -Parent $PSScriptRoot),[string[]]$AllowedRoots)
     $response=[ordered]@{SchemaVersion=1;Action=$Action;Status='ERROR';ReadOnly=$true;Provenance=$null;Data=$null;Paging=$null;Diagnostics=@();Error=$null}
+    $script:QueryLeases=@{}
     try {
         $script:QueryAllowedRoots=$null
         if ($PSBoundParameters.ContainsKey('AllowedRoots')) {
@@ -61,7 +62,10 @@ function Invoke-HarnessIssueQuery {
         Assert-QueryFiles $base.Files
         $response.Status='OK'
     } catch { $response.Error=Get-QueryError $_; $response.Data=$null; $response.Paging=$null }
-    finally { $script:QueryAllowedRoots=$null }
+    finally {
+        foreach ($lease in $script:QueryLeases.Values) { $lease.ReleaseMutex(); $lease.Dispose() }
+        $script:QueryLeases=@{}; $script:QueryAllowedRoots=$null
+    }
     # Identificadores/caminhos nao podem ser cortados silenciosamente. O teto
     # cobre tambem diagnosticos, mensagens de erro e extensoes livres do recibo.
     if ([Text.Encoding]::UTF8.GetByteCount((ConvertTo-Json -InputObject $response -Depth 50 -Compress)) -gt 256KB) {

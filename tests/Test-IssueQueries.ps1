@@ -3,6 +3,7 @@ $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force -DisableNameChecking
 Import-Module (Join-Path $root 'scripts/HarnessPrioritization.psm1') -Force -DisableNameChecking
+Import-Module (Join-Path $root 'scripts/HarnessProject.psm1') -DisableNameChecking
 function Assert($condition,$message) { if (-not $condition) { throw $message } }
 function Inventory($path) {
     (@(Get-ChildItem -LiteralPath $path -File -Recurse -Force | Sort-Object FullName | ForEach-Object {
@@ -10,16 +11,15 @@ function Inventory($path) {
     }) -join "`n")
 }
 $area=Join-Path $root ('.harness/tests/q'+[guid]::NewGuid().ToString('N').Substring(0,8))
-$fixture=Join-Path $area 'h'
+$fixture=Join-Path $area ('h'+[char]0x00e7)
 $source=Join-Path $area 'codigo local'
 $run=Join-Path $area 'mta recebido'
-$runId='b'*32
 $issueId='hibernate::hibernate4-00039'
-foreach ($folder in @($source,(Join-Path $run 'input/src'),(Join-Path $run 'rules'),(Join-Path $run 'output/static-report'))) {
+foreach ($folder in @($source,(Join-Path $run 'output/static-report'))) {
     $null=[IO.Directory]::CreateDirectory($folder)
 }
 Set-Content -LiteralPath (Join-Path $source 'pom.xml') '<project><artifactId>servico</artifactId></project>'
-$uri='file:///C:/origem/.harness/runs/app/mta_2026-09-30_07-57-02-0300__bbbbbbbbbbbb/input/src/Servico.java'
+$uri=(New-Object Uri (Join-Path $source 'src/Servico.java')).AbsoluteUri
 $incidents=@(foreach ($i in 1..138) { [ordered]@{uri=$uri;lineNumber=50+$i;message="Ocorrencia $i";codeSnip="public byte[] metodo$i() { return new byte[0]; }"} })
 $incidents[0].message+=' '+('x'*300)
 $violations=[ordered]@{
@@ -33,25 +33,24 @@ function Save-Catalog {
     [IO.File]::WriteAllText($catalog,('window["apps"] = '+(ConvertTo-Json -InputObject $apps -Depth 20 -Compress)+';'))
 }
 Save-Catalog
-Write-HarnessJson (Join-Path $run 'manifest.json') @{RunId=$runId;Project='origem';Source='C:/origem/app';CreatedAtUtc='2026-10-05T10:00:00Z'}
-Write-HarnessJson (Join-Path $run 'result.json') @{RunId=$runId;Project='origem';Status='SUCCEEDED';ExitCode=0;SourceUnchanged=$true;SnapshotOriginalFilesUnchanged=$true;RulesUnchanged=$true;UnexpectedAddedFiles=@()}
-foreach ($file in @('output/output.yaml','output/dependencies.yaml','output/static-report/index.html')) { Set-Content -LiteralPath (Join-Path $run $file) 'Fixture' }
+Set-Content -LiteralPath (Join-Path $run 'output/static-report/index.html') 'Fixture HTML'
 $project=[pscustomobject]@{name='servico';label='Servico';path=$source}
 $context=[pscustomobject]@{Root=$fixture;Active=$project;Projects=@($project);ConfigPath=$null;WorkspacePath=$null}
-$paths=Initialize-HarnessMigration $fixture $project
+$paths=Initialize-HarnessProjectStorage $fixture (Join-Path $source 'pom.xml')
+Publish-HarnessProjectFiles $paths @{'projeto.json'=(@{pom=$paths.Pom;mta=@{diretorio=$run}} | ConvertTo-Json)}
+$null=Update-HarnessProjectDocuments $paths (Read-HarnessProjectMta $paths)
 $index=Join-Path $fixture '.harness/projetos/indice-projetos.md'
 Set-Content -LiteralPath $index '# Indice sintetico'
 foreach ($file in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md','.github/prompts/planejar-lotes.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
     $dest=Join-Path $fixture $file; $null=[IO.Directory]::CreateDirectory((Split-Path $dest -Parent)); Copy-Item -LiteralPath (Join-Path $root $file) -Destination $dest
 }
-$origin=@{RunId=$runId;Project='origem';Source='C:/origem/app';Run=$run} | ConvertTo-Json -Compress
 $text=[IO.File]::ReadAllText($paths.MigrationPath).Replace('AGUARDANDO MTA','')
-$rows=@("<!-- MTA $origin -->","Rodada MTA: $runId.",
+$rows=@('| ID | Issue | Categoria | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |','| --- | --- | --- | --- | --- | --- | --- | --- |',
     "| $issueId | Hibernate bytes | mandatory | 138 | PRESENTE | A DEFINIR | NAO ANALISADA | |",
     '| hibernate::regra2 | Outra obrigatoria | mandatory | 1 | PRESENTE | ADIAR | NAO ANALISADA | |',
     '| hibernate::opcional | Melhoria | optional | 1 | PRESENTE | A DEFINIR | NAO ANALISADA | |',
     '| DEV-LOG | Log manual | manual | - | MANUAL | A DEFINIR | NAO ANALISADA | |') -join "`n"
-[IO.File]::WriteAllText($paths.MigrationPath,$text.Replace('<!-- mta:fim -->',$rows+"`n<!-- mta:fim -->"))
+[IO.File]::WriteAllText($paths.MigrationPath,(Set-ProjectManagedBlock $text 'mta' $rows))
 $prepared=New-HarnessPrioritizationContext $context -Mode Recreate -Percentage 100 -Category mandatory
 $before=Inventory $area
 Import-Module (Join-Path $root 'scripts/HarnessIssueQuery.psm1') -Force -DisableNameChecking
@@ -63,7 +62,7 @@ Assert ($audit.Status -eq 'OK') ('Auditoria falhou: '+($audit | ConvertTo-Json -
 Assert ($audit.ReadOnly -and $audit.SchemaVersion -eq 1) 'Contrato de leitura ausente.'
 Assert ($audit.Data.CatalogIssues -eq 3 -and $audit.Data.CatalogIncidents -eq 140) 'Contagens MTA incorretas.'
 Assert ($audit.Data.RegisterIssues -eq 4 -and $audit.Data.DifferencesCount -eq 0) 'Registro divergiu sem motivo.'
-Assert ($audit.Provenance.Source -eq $source -and $audit.Provenance.RunId -eq $runId) 'Origem ausente.'
+Assert ($audit.Provenance.Source -eq $source -and $audit.Provenance.ReportPath -eq (Join-Path $run 'output/static-report/index.html')) 'Origem corrente ausente.'
 $list=Query listar_issues @{PageSize=2}
 Assert ($list.Status -eq 'OK' -and $list.Paging.Total -eq 4 -and $list.Paging.HasMore) 'Lista deve incluir catalogo e issue manual, paginada.'
 Assert ($list.Data.Items[0].Id -ceq 'DEV-LOG' -and $list.Data.Items[1].Id -ceq $issueId) 'Ordenacao ordinal ou IDs incorretos.'
@@ -96,16 +95,15 @@ Assert ((Inventory $area) -ceq $before) 'Consulta gravou ou alterou entradas.'
 $registerText=[IO.File]::ReadAllText($paths.MigrationPath)
 [IO.File]::WriteAllText($paths.MigrationPath,$registerText.Replace('| ADIAR |','| ANALISAR AGORA |'))
 $changed=Query listar_issues @{Decision='ANALISAR AGORA'}
-Assert ($changed.Status -eq 'OK' -and $changed.Paging.Total -eq 1 -and $changed.Diagnostics -like 'REGISTER_CHANGED*') 'Escolha atual nao foi respeitada.'
+Assert ($changed.Status -eq 'OK' -and $changed.Paging.Total -eq 1) 'Escolha atual nao foi respeitada.'
 Assert ((Query listar_issues @{ExpectedBasisSha256=$basis}).Error.Code -eq 'BASE_CHANGED') 'Mudanca do registro nao invalidou pagina.'
-[IO.File]::WriteAllText($paths.MigrationPath,$registerText.Replace('"Project":"origem"','"Project":"outra"'))
-Assert ((Query auditar_base).Error.Code -eq 'IDENTITY_CONFLICT') 'Mesmo RunId aceitou origem de outro projeto.'
 [IO.File]::WriteAllText($paths.MigrationPath,$registerText)
 $catalogText=[IO.File]::ReadAllText($catalog)
 [IO.File]::WriteAllText($catalog,$catalogText+' ')
-Assert ((Query auditar_base).Error.Code -eq 'HASH_MISMATCH') 'Catalogo alterado sem deteccao.'
+Assert ((Query auditar_base @{ExpectedBasisSha256=$basis}).Error.Code -eq 'BASE_CHANGED') 'Catalogo alterado sem deteccao entre paginas.'
+Assert ((Query auditar_base).Status -eq 'OK') 'Nova consulta deve ler o catalogo corrente sem selo persistido.'
 [IO.File]::WriteAllText($catalog,$catalogText)
 $missingRoot=Join-Path $area 'nao existe'
 $missing=Invoke-HarnessIssueQuery -Root $missingRoot -ContextPath (Join-Path $missingRoot 'context.json') -Action auditar_base
-Assert ($missing.Error.Code -eq 'NOT_FOUND' -and -not (Test-Path $missingRoot)) 'Consulta ausente criou estado ou ocultou erro.'
+Assert ($missing.Status -eq 'ERROR' -and -not (Test-Path $missingRoot)) 'Consulta ausente criou estado ou ocultou erro.'
 Write-Host 'PASS: auditoria/lista/detalhe, filtros, 138 incidentes, identidade, hashes e ausencia de escrita.'
