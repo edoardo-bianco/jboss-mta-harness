@@ -208,9 +208,21 @@ Fixtures sinteticas e ferramentas simuladas; nao equivalem ao ensaio humano ou
 ao aceite da simplificacao completa. Nenhuma conversao, limpeza de dados reais,
 corretiva de aplicacao, merge ou push executado.
 
-**Proxima etapa: S14**, preparar implementacao corrente e conferir autorizacao
-aplicavel ao conteudo. S14-S28 continuam pendentes no checklist; os demais fluxos,
-conversao, limpeza e alinhamento de guias/orientador ainda precisam ser concluidos.
+**Continuacao S14-S28 solicitada em 12/10/2026**, a partir de `d861b31` limpo.
+S14 implementada: prepara implementacao/revisao nos mesmos destinos correntes,
+com links diretos, preservando observacoes externas aos blocos gerenciados. Le
+plano/tarefas atuais e explicita revisao de escopo/GO, sem copiar documentos nem
+inferir autorizacao. Menu Git opera no Source escolhido; comparacao de conteudo
+durante o dialogo fica somente em memoria. Plano corrente pode ser consultado
+com MTA indisponivel. Test-Implementation e Test-ImplementationBranch passaram
+em PowerShell 5.1; revisao independente sem bloqueantes. Ensaio humano do agente
+recusando corretiva sem GO permanece no aceite integrado.
+
+S18 deve conferir propagacao de agent/tools no cabecalho dos prompts correntes.
+S22 retira Test-ContextPackage e suas chamadas restantes ao produtor legado de
+implementacao. Suite ampla ainda depende da adaptacao desses consumidores.
+**Proxima etapa: S15**, consultas correntes sem extratos, com MCP opcional.
+Conversao, limpeza e alinhamento de guias/orientador ainda precisam ser concluidos.
 
 ### Requisitos e fontes
 

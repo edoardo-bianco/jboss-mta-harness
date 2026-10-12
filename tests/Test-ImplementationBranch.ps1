@@ -27,12 +27,12 @@ Set-Content -LiteralPath (Join-Path $module 'pom.xml') '<project/>'
 & git -C $app -c user.name=HarnessFixture -c user.email=fixture@example.invalid commit -qm fixture
 if ($LASTEXITCODE) { throw 'Falha ao criar commit da fixture.' }
 $context = [pscustomobject]@{Root=$root;Active=[pscustomobject]@{path=$module}}
-$prepared = [pscustomobject]@{ContextPath=(Join-Path $area 'context.json');PlanPath=(Join-Path $area 'plan.md');TodoPath=(Join-Path $area 'todo.md');ContextSha256=$null;PlanSha256=$null;TodoSha256=$null}
+$prepared = [pscustomobject]@{ContextPath=(Join-Path $area 'context.json');PlanPath=(Join-Path $area 'plan.md');TodoPath=(Join-Path $area 'todo.md');DocumentContents=@{}}
 Set-Content -LiteralPath $prepared.ContextPath '{}'
 function Documents($plan, $todo) {
     Set-Content -LiteralPath $prepared.PlanPath $plan
     Set-Content -LiteralPath $prepared.TodoPath $todo
-    foreach ($name in @('Context','Plan','Todo')) { $prepared.($name + 'Sha256') = (Get-FileHash -LiteralPath $prepared.($name + 'Path')).Hash }
+    foreach ($name in @('Context','Plan','Todo')) { $prepared.DocumentContents[$name] = [IO.File]::ReadAllText($prepared.($name + 'Path')) }
 }
 Documents '**Lote ativo:** HIB-CACHE-001' 'ID do lote: `HIB-CACHE-001`'
 Assert ((Get-ImplementationBatchId $prepared.PlanPath $prepared.TodoPath) -ceq 'HIB-CACHE-001') 'ID explicito igual nao detectado.'

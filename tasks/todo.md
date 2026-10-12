@@ -19,8 +19,8 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 
 Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10 e 12/10/2026.
 [Ponto atual e verificacoes](plan.md#retomada-de-12102026).
-S11b/S12/S12b e S13 implementados e revisados. Proxima etapa: S14;
-as 15 etapas S14-S28 permanecem pendentes.
+S11b/S12/S12b, S13 e S14 implementados e revisados. Proxima etapa: S15;
+as 14 etapas S15-S28 permanecem pendentes.
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
@@ -39,6 +39,7 @@ as 15 etapas S14-S28 permanecem pendentes.
 - [x] S12b: abertura direta de plano/tarefas, sem selecionar por data ou acessar MTA; ausencia/cancelamento preservam arquivos.
 - [x] S13: reconciliacao/copia corrente revisadas; diagnosticos completos protegidos, fontes preservadas/atualizadas e GO local sujeito a revisao. Comparacao, publicacao/rollback, conflitos, portabilidade, CLI e bloqueio de arquivo testados em fixtures; conclusao registrada na ADR. Ensaio humano integrado e aceite global continuam pendentes.
 - [x] Esclarecimento de 12/10: navegacao corrente prefere HTML/Markdown/log legivel a JSON/output.js; indice mostra situacao da operacao. Links existentes e preservacao de dados/notas humanas verificados em Test-ProjectNavigation e Test-ReconciliationSources.
+- [x] S14: preparo de implementacao/revisao corrente, fontes navegaveis e observacoes preservadas, revisao do alcance do GO sem autorizacao inferida. Escolha Git usa o projeto selecionado e compara documentos somente em memoria. Test-Implementation e Test-ImplementationBranch PS5.1 aprovados; revisao independente sem bloqueantes. Ensaio humano do agente permanece no aceite integrado.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos
