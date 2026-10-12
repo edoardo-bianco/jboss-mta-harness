@@ -8,8 +8,8 @@ do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
 **Estado:** implementacao autorizada por "proceder" em 10/10/2026, retomada em
-11/10/2026. Nucleo, produtores build/MTA/Sonar, priorizacao e planejamento correntes com
-verificacoes focais aprovadas; S13 em andamento, pausada a pedido do desenvolvedor.
+11/10/2026 e 12/10/2026. Nucleo, produtores build/MTA/Sonar, priorizacao, planejamento
+e reconciliacao correntes com verificacoes focais aprovadas; revisao final de S13 concluida.
 Integracao dos demais fluxos, conversao de dados, limpeza
 operacional e aceite da simplificacao completa ainda nao concluidos.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
@@ -22,7 +22,7 @@ esta decisao prevalece sobre suas sugestoes de ordem para evolucoes futuras.
 
 ### Ponto de retomada - pausa de 10/10/2026
 
-Registro historico da pausa; a retomada atual esta na secao de 11/10/2026 abaixo.
+Registro historico da pausa; a retomada atual esta na secao de 12/10/2026 abaixo.
 
 Branch `harness/planejar-simplificacao-projetos`; ultimo commit de implementacao
 `c0d48bc` (MTA corrente). Checkout limpo na conferencia anterior a este registro.
@@ -158,7 +158,7 @@ publicacao. Fixtures sinteticas; nenhuma conversao, limpeza ou corretiva real.
 Revisao independente corrigiu comparacao de anexos, LF/CRLF, preservacao do
 rascunho concorrente, copia direta e retomada de origem local explicita.
 
-**Pendencias para retomar:** revisar o diff final dos ajustes de portabilidade e
+**Pendencias registradas na pausa (resolvidas em 12/10/2026):** revisar o diff final dos ajustes de portabilidade e
 dos testes adaptados; conferir cobertura dos documentos/links de diagnostico no
 contexto (inclusive Sonar), atualizar a ADR/registro de conclusao de S13 e somente
 entao marcar a etapa concluida. Testes focais nao equivalem ao ensaio humano ou
@@ -173,12 +173,51 @@ Compartilhamento legado tambem depende da antiga cadeia de priorizacao e nao ate
 o estado corrente; substituir por copia/reconciliacao em S13/S22, sem recriar cadeia.
 
 **Limite operacional:** a branch tem produtores novos e consumidores ainda legados.
-Reconciliacao aguarda fechamento de S13; implementacao, consultas, compartilhamento e sprints ainda exigem adaptacao; o fluxo completo
-nao esta pronto para uso/integracao. Na retomada, conferir raiz, branch, HEAD e
-alteracoes locais, preservar trabalho novo e continuar desta fatia.
+Implementacao, consultas, compartilhamento e sprints ainda exigem adaptacao; o fluxo
+completo nao esta pronto para uso/integracao. Na retomada, conferir raiz, branch,
+HEAD e alteracoes locais, preservar trabalho novo e continuar desta fatia.
+
+### Retomada de 12/10/2026
+
+Conferidos raiz, branch `harness/planejar-simplificacao-projetos`, HEAD `d94553c`
+e checkout inicialmente limpo. **S13 concluida:** revisao final independente sem
+achados remanescentes, com corretivas e testes de regressao registrados abaixo.
+
+- Reconciliacao confere todos os documentos do diagnostico Sonar e a situacao da
+  operacao; edicao durante a revisao interrompe a publicacao e preserva arquivos.
+- Fontes do plano, tarefas e indice conservam fichas, anexos e orientacao. Novo
+  MTA atualiza os links e pede revisao mesmo com contagens iguais. Ficha/anexo
+  aceitos na mesma publicacao ficam disponiveis; notas humanas sao preservadas.
+- Copia por EVIDENCIAS regenera links ao POM/Source local explicitamente associado.
+  Reassociacao no mesmo workspace tambem exige revisao do alcance do GO anterior.
+- Esclarecimento de navegacao aplicado: MTA abre HTML; Sonar abre RESUMO.md;
+  build abre console.log; planejamento e priorizacao abrem orientacoes Markdown.
+  Situacao das operacoes fica legivel no indice, atualizada na mesma publicacao
+  dos dados estruturados. JSON/output.js continuam disponiveis aos consumidores.
+
+Passaram 20 suites focais em Windows PowerShell 5.1 nesta retomada:
+Test-ProjectNavigation, Test-ProjectDocuments, Test-ProjectIndex, Test-Build,
+Test-Mta, Test-Sonar, Test-ReconciliationSources, Test-IssuePlanning,
+Test-PrioritizationIncidents, Test-PrioritizationIndex, Test-Reconciliation,
+Test-ReconciliationConflicts, Test-PlanningPortable, Test-PlanningReassociation,
+Test-Planning, Test-PlanningEvidence, Test-MigrationTask, Test-ExternalMtaDiscovery,
+Test-MigrationRegister e Test-ProjectPublication. A ultima corretiva de fontes
+foi validada novamente por ReconciliationSources, ReconciliationConflicts e
+PlanningPortable, incluindo MTA -> EVIDENCIAS -> MTA. `git diff --check` aprovado.
+Fixtures sinteticas e ferramentas simuladas; nao equivalem ao ensaio humano ou
+ao aceite da simplificacao completa. Nenhuma conversao, limpeza de dados reais,
+corretiva de aplicacao, merge ou push executado.
+
+**Proxima etapa: S14**, preparar implementacao corrente e conferir autorizacao
+aplicavel ao conteudo. S14-S28 continuam pendentes no checklist; os demais fluxos,
+conversao, limpeza e alinhamento de guias/orientador ainda precisam ser concluidos.
 
 ### Requisitos e fontes
 
+- Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
+  navegacao devem abrir documentos significativos, preferindo relatorio HTML ou
+  Markdown legivel quando disponivel, em vez de JSON tecnico. Preservar dados
+  estruturados para os consumidores; nao fabricar relatorios ou links ausentes.
 - Contrato permanente: [organizacao simplificada por projeto](../doc/features/organizacao-simplificada-por-projeto.md).
 - Transicao: [conversao descartavel](../doc/features/conversao-descartavel-dos-registros.md), dependente do contrato permanente.
 - Originais recebidos, preservados na maquina do desenvolvedor:

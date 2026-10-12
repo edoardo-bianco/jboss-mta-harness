@@ -154,6 +154,13 @@ preservando texto manual. Validar abertura em caminhos com espaços e acentos.
 
 Gerar links Markdown para o relatório na origem. Não exigir um arquivo redirecionador, cópia local ou comando exclusivo de uma IDE para abri-lo. Usar links relativos quando aplicáveis e o formato de caminho externo compatível com o ambiente.
 
+Esclarecimento de 12/10/2026: o índice do projeto e as demais referências de
+navegação priorizam documentos legíveis. Abrir o relatório HTML da ferramenta
+quando disponível, ou o resumo Markdown correspondente, em vez do JSON técnico.
+Dados estruturados continuam disponíveis aos consumidores; referências a código,
+POM, configuração ou anexos apontam aos próprios arquivos quando forem a fonte
+necessária. Não inventar uma apresentação nem um destino inexistente.
+
 O resolvedor identifica o MTA atual; preparar priorização, atualizar fichas/índices ou reconciliar atualiza os links gerenciados, inclusive em `migracao.md`, preservando o texto humano. Não há edição manual de caminhos por execução. Ao receber arquivos de um colega, regenerar esses links para a origem local configurada.
 
 Se o novo MTA não contiver um detalhe antes referenciado, manter a ficha e indicar a ausência; oferecer o link para a entrada do relatório atual. Não inventar âncora nem concluir automaticamente que a issue foi resolvida. Rotular os links como “MTA atual” para não confundir a consulta atual com uma evidência histórica.

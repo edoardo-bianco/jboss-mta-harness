@@ -96,14 +96,40 @@ sao referencias gerais. Indice explicitamente escolhido permanece associado
 mesmo ausente; a retomada conserva a lacuna. Nao copiar anexos ou texto integral
 do MTA. Fichas ausentes permanecem a elaborar ate exame efetivo pelo condutor.
 
-`Planejamento: atualizar registro de migracao` ja prepara reconciliacao corrente
-no checkpoint parcial S13. O preparo nao altera decisoes nem conclui a comparacao;
-o fechamento da etapa e sua revisao final permanecem pendentes no plano.
-Consumidores legados nao procuram uma
-solicitacao antiga quando encontram planejamento corrente; implementacao,
+Consumidores legados nao procuram uma solicitacao antiga quando encontram
+planejamento corrente; implementacao,
 consultas e sprints ainda dependem dos recortes S14-S16.
 Compartilhamento por pacote ainda depende da priorizacao legada e permanece fora
-do fluxo corrente ate a substituicao por copia/reconciliacao (S13/S22).
+do fluxo corrente ate sua retirada em S22.
+
+### Reconciliacao e navegacao correntes (S13)
+
+`Planejamento: atualizar registro de migracao` prepara o contexto corrente sem
+alterar decisoes nem concluir a comparacao. A revisao usa estado transitorio e
+publica a ultima conclusao em `reconciliado/resultado.md`, com fontes e pendencias.
+Diagnosticos Sonar, operacao corrente, documentos e fontes examinados recebem
+protecao contra alteracoes concorrentes; esses controles nao viram recibos.
+
+Copiar arquivos nao transfere GO. A conciliacao decide por arquivo, preserva a
+origem externa e retira da pasta recebido somente itens explicitamente resolvidos.
+Material equivalente nao duplica; conflito preserva contribuicoes. Associar o
+POM local permite realinhar fontes/contextos, incluindo base EVIDENCIAS. Mudancas
+de Source/POM e de referencia MTA exigem revisao da proposta e do alcance do GO,
+mesmo quando os totais de issues permanecem iguais.
+
+Fontes do plano, tarefas e indice preservam fichas, anexos e texto humano. Links
+de navegacao preferem documentos legiveis existentes: relatorio HTML do MTA,
+RESUMO.md do Sonar, console.log do build e orientacoes Markdown de planejamento
+e priorizacao. A situacao da operacao aparece no indice e e publicada com seus
+dados estruturados. JSON/output.js continuam servindo aos consumidores tecnicos.
+
+Revisao final de S13 concluida em 12/10/2026; provas em
+[fontes da reconciliacao](../../tests/Test-ReconciliationSources.ps1),
+[portabilidade](../../tests/Test-PlanningPortable.ps1),
+[reassociacao](../../tests/Test-PlanningReassociation.ps1) e
+[navegacao](../../tests/Test-ProjectNavigation.ps1), alem das suites registradas no
+[plano](../../tasks/plan.md#retomada-de-12102026). Fixtures sinteticas nao substituem
+ensaio humano integrado nem o aceite da simplificacao completa.
 
 ### Demais consumidores
 
