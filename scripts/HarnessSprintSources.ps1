@@ -30,13 +30,19 @@ function Get-HarnessSprintSources {
         $references+=Get-SprintReference (Join-Path $root $relative) $root 'Contrato'
     }
     $entries=@(foreach ($item in $Projects) {
+        $pomReference=Get-SprintReference (Join-Path $item.path 'pom.xml') $root 'POM'
         $project=Get-HarnessProjectStorage $root (Join-Path $item.path 'pom.xml')
         if (-not (Test-Path -LiteralPath $project.ConfigPath -PathType Leaf)) { throw 'Projeto sem associacao: use Workspace: atualizar indice dos projetos.' }
         $lease=Enter-HarnessProjectAccess $project
         try {
             $entry=[pscustomobject][ordered]@{Project=$project.Name;Label=$project.Name;Source=$project.Source;Pom=$project.Pom;MigrationPath=$project.MigrationPath;Issues=@();Diagnostics=@();References=@();RegisterValid=$false}
-            $files=Read-HarnessProjectFiles $project @('migracao.md','indice.md','atual/planejamento/plano.md','atual/planejamento/tarefas.md')
-            foreach ($pair in @(@($project.Pom,'POM'),@($project.ConfigPath,'Associacao'),@($project.MigrationPath,'Registro'))) {
+            $observed=@{}
+            $files=Read-HarnessProjectFiles $project @('projeto.json','migracao.md','indice.md','atual/planejamento/plano.md','atual/planejamento/tarefas.md')
+            $config=ConvertFrom-Json $files['projeto.json']
+            if ((Resolve-ProjectPath $config.pom $root) -ine $project.Pom) { throw 'Associacao do POM mudou durante a leitura.' }
+            foreach ($relative in $files.Keys) { $observed[(Join-Path $project.Folder $relative)]=$files[$relative] }
+            $entry.References+=@($pomReference)
+            foreach ($pair in @(@($project.ConfigPath,'Associacao'),@($project.MigrationPath,'Registro'))) {
                 $entry.References+=Get-SprintReference $pair[0] $root $pair[1]
             }
             if ($files['migracao.md']) {
@@ -47,7 +53,7 @@ function Get-HarnessSprintSources {
                         [pscustomobject]@{Source=$project.Source;Id=$row.Id;Title=$row.Title;Category=$row.Category;Count=$row.Count;Presence=$row.Presence;Decision=$row.Decision;Progress=$row.Progress;Observation=$row.Note;FichaPaths=@()}
                     })
                     try {
-                        $evidence=Get-CurrentPlanningEvidence $project $rows
+                        $evidence=Get-CurrentPlanningEvidence $project $rows -ObservedFiles $observed
                         foreach ($input in $evidence.Inputs) { $entry.References+=Get-SprintReference $input.Path $root 'Evidencia' }
                         foreach ($ficha in $evidence.Fichas | Where-Object Status -EQ 'DISPONIVEL') {
                             $entry.References+=Get-SprintReference $ficha.Path $root 'Ficha'
@@ -68,9 +74,19 @@ function Get-HarnessSprintSources {
                     Where-Object { $_.Path -notmatch '(?i)[\\/]atual[\\/]sprints[\\/]' })
             }
             $entry.References=@($entry.References | Sort-Object Path -Unique)
+            # Protect text actually parsed, not a hash sampled after that read.
+            foreach ($path in $observed.Keys) {
+                $reference=@($entry.References | Where-Object Path -IEQ $path)
+                if (-not $reference.Count) {
+                    $reference=@(Get-SprintReference $path $root 'Documento corrente')
+                    $entry.References+=$reference
+                }
+                $reference[0] | Add-Member -NotePropertyName Contents -NotePropertyValue $observed[$path]
+            }
+            Assert-SprintReferences $entry $root
             $references+=$entry.References
             $entry
-        } finally { $lease.Dispose() }
+        } finally { $lease.ReleaseMutex(); $lease.Dispose() }
     })
     if (@($entries | Group-Object Project | Where-Object Count -GT 1).Count) { throw 'Projetos duplicados ou colisao de artifactId no escopo.' }
     [pscustomobject]@{Projects=$entries;References=@($references | Sort-Object Path -Unique)}
@@ -79,6 +95,10 @@ function Get-HarnessSprintSources {
 function Assert-SprintReferences {
     param($Inputs,[string]$Root)
     foreach ($reference in $Inputs.References) {
+        if ($reference.PSObject.Properties['Contents']) {
+            $text=if (Test-Path -LiteralPath $reference.Path -PathType Leaf) { [IO.File]::ReadAllText($reference.Path) } else {$null}
+            if ($text -cne $reference.Contents) { throw "Entrada mudou durante a leitura: $($reference.Path). Repita a operacao." }
+        }
         $current=Get-SprintReference $reference.Path $Root $reference.Kind
         if ($reference.Status -ne $current.Status -or $reference.Sha256 -cne $current.Sha256) { throw "Entrada mudou durante a operacao: $($reference.Path). Repita a leitura." }
     }

@@ -23,15 +23,18 @@ function Get-IssuePlanningHistory {
 
 # Entradas correntes sao referencias diretas; nao copiar anexos nem diagnostico.
 function Get-CurrentPlanningEvidence {
-    param($Project,$Rows,[string]$EvidenceIndexPath)
+    param($Project,$Rows,[string]$EvidenceIndexPath,[hashtable]$ObservedFiles)
     if ($EvidenceIndexPath) { $index=Resolve-HarnessPath $EvidenceIndexPath $Project.Root }
     else { $index=Join-Path $Project.EvidencePath 'LEIA-ME.md' }
+    if ($null -ne $ObservedFiles) { $ObservedFiles[$index]=$null }
     $references=@(); $warnings=@(); $fichas=@()
     if (Test-Path -LiteralPath $index -PathType Leaf) {
         $references+=@([pscustomobject]@{Value=$index;Base=$Project.Root;Relation='Indice de evidencias'})
         $sources=@()
         $issueTable=$false
-        foreach ($line in ([IO.File]::ReadAllText($index) -split '\r?\n')) {
+        $indexText=[IO.File]::ReadAllText($index)
+        if ($null -ne $ObservedFiles) { $ObservedFiles[$index]=$indexText }
+        foreach ($line in ($indexText -split '\r?\n')) {
             if ($line -match '^\s*\|\s*Issue\s*\|') { $issueTable=$true; continue }
             if ($issueTable -and $line -notmatch '^\s*\|') { $issueTable=$false }
             $relation='Anexo geral do indice'
@@ -54,6 +57,7 @@ function Get-CurrentPlanningEvidence {
         $relative=Get-PrioritizationFichaRelativePath $row.Category $row.Id
         $path=Join-Path $Project.Folder $relative
         $read=Read-HarnessProjectFiles $Project @($relative)
+        if ($null -ne $ObservedFiles) { $ObservedFiles[$path]=$read[$relative] }
         if ($read[$relative]) {
             $null=Read-PrioritizationFicha $read[$relative] $Project.Name $row.Category $row.Id
             $fichas+=@([pscustomobject]@{Id=$row.Id;Category=$row.Category;Path=$path;Status='DISPONIVEL'})
