@@ -18,20 +18,21 @@ function Resolve-ProjectPath {
     $full
 }
 
-function Get-HarnessProjectStorage {
-    param([Parameter(Mandatory=$true)][string]$Root,[Parameter(Mandatory=$true)][string]$Pom)
+function Get-HarnessProjectReference {
+    param([Parameter(Mandatory=$true)][string]$Root,[Parameter(Mandatory=$true)][string]$Pom,[scriptblock]$FileReader)
     $Root=Resolve-ProjectPath ([IO.Path]::GetFullPath($Root)) $Root
     $Pom=Resolve-ProjectPath $Pom $Root
     if (-not (Test-Path -LiteralPath $Pom -PathType Leaf)) { throw "POM ausente: $Pom" }
     $settings=New-Object Xml.XmlReaderSettings
     $settings.DtdProcessing=[Xml.DtdProcessing]::Prohibit; $settings.XmlResolver=$null
-    $reader=[Xml.XmlReader]::Create($Pom,$settings)
+    $inputReader=if ($FileReader) { New-Object IO.StringReader ([string](& $FileReader $Pom)) } else { $null }
+    $reader=if ($inputReader) { [Xml.XmlReader]::Create($inputReader,$settings) } else { [Xml.XmlReader]::Create($Pom,$settings) }
     try {
         $xml=New-Object Xml.XmlDocument; $xml.XmlResolver=$null; $xml.Load($reader)
         $nodes=$xml.SelectNodes("/*[local-name()='project']/*[local-name()='artifactId']")
         if ($nodes.Count -ne 1) { throw 'POM deve declarar um project.artifactId literal.' }
         $name=$nodes[0].InnerText.Trim()
-    } finally { $reader.Dispose() }
+    } finally { $reader.Dispose(); if ($inputReader) { $inputReader.Dispose() } }
     if (-not $name -or $name -match '[<>:"/\\|?*\x00-\x1f]' -or $name.Contains('${') -or $name -match '[. ]$' -or $name -match '^(?i:CON|PRN|AUX|NUL|COM[0-9]|LPT[0-9])(?:\.|$)' -or $name.Length -gt 255) { throw 'artifactId nao pode ser usado como pasta literal no Windows; confira o POM.' }
     $folder=Resolve-ProjectPath (Join-Path $Root ('.harness/projetos/'+$name)) $Root
     $configPath=Join-Path $folder 'projeto.json'
@@ -40,6 +41,13 @@ function Get-HarnessProjectStorage {
         PlanPath=(Join-Path $folder 'atual/planejamento/plano.md');TodoPath=(Join-Path $folder 'atual/planejamento/tarefas.md');
         ContextPath=(Join-Path $folder 'atual/planejamento/contexto.json');EvidencePath=(Join-Path $folder 'evidencias');
         ReconciledPath=(Join-Path $folder 'reconciliado');TemporaryPath=(Join-Path $folder 'temporarios')}
+    $project
+}
+
+function Get-HarnessProjectStorage {
+    param([Parameter(Mandatory=$true)][string]$Root,[Parameter(Mandatory=$true)][string]$Pom)
+    $project=Get-HarnessProjectReference $Root $Pom
+    $Root=$project.Root; $Pom=$project.Pom; $folder=$project.Folder; $name=$project.Name
     $documents=Read-HarnessProjectFiles $project @('projeto.json')
     if ($documents['projeto.json']) {
         $config=ConvertFrom-Json $documents['projeto.json']
@@ -90,6 +98,7 @@ function Get-HarnessSourceLink {
 }
 
 Export-ModuleMember -Function Get-HarnessProjectStorage,Initialize-HarnessProjectStorage,ConvertTo-HarnessFunctionalPath,Get-HarnessSourceLink
+Export-ModuleMember -Function Get-HarnessProjectReference
 . (Join-Path $PSScriptRoot 'HarnessProjectPublication.ps1')
 Export-ModuleMember -Function Publish-HarnessProjectFiles,Read-HarnessProjectFiles,Enter-HarnessProjectAccess
 . (Join-Path $PSScriptRoot 'HarnessProjectMta.ps1')

@@ -73,7 +73,8 @@ function Restore-ProjectPublication {
 }
 
 function Enter-HarnessProjectAccess {
-    param($Project,[switch]$ForOperation)
+    param($Project,[switch]$ForOperation,[switch]$ReadOnly)
+    if ($ForOperation -and $ReadOnly) { throw 'Operacao e leitura pura sao acessos distintos.' }
     # Only an OS mutex name: this digest is never saved in project data or used
     # for identity, navigation, history or authorization.
     $sha=[Security.Cryptography.SHA256]::Create()
@@ -90,6 +91,8 @@ function Enter-HarnessProjectAccess {
             # inspect the complete current state while the next one is prepared.
             $publication=Enter-HarnessProjectAccess $Project
             try { } finally { $publication.ReleaseMutex(); $publication.Dispose() }
+        } elseif ($ReadOnly) {
+            if (Test-Path -LiteralPath (Join-Path $Project.TemporaryPath 'publicacao')) { throw 'Recuperacao de publicacao pendente; consulta somente leitura nao altera o projeto. Atualize o indice antes de consultar.' }
         } else { Restore-ProjectPublication $Project }
         return $mutex
     } catch { if ($acquired) { $mutex.ReleaseMutex() }; $mutex.Dispose(); throw }

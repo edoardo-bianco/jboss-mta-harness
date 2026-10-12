@@ -6,17 +6,22 @@ function Get-ProjectMtaStamp {
 }
 
 function Read-ProjectMtaCandidate {
-    param($Project,[string]$Entry)
+    param($Project,[string]$Entry,[scriptblock]$FileReader)
     $catalog=Join-Path (Split-Path $Entry -Parent) 'output.js'
     $null=Resolve-ProjectPath $catalog $Project.Root
     if (-not (Test-Path -LiteralPath $catalog -PathType Leaf)) { throw 'Conjunto incompleto: output.js ausente.' }
     $stamp=Get-ProjectMtaStamp $Entry $catalog
     # Share read only while reading: a writer cannot replace/truncate this file
     # unnoticed during this read. Never evaluate JavaScript from the report.
-    $reader=$null
-    $stream=[IO.File]::Open($catalog,'Open','Read','Read')
-    try { $reader=New-Object IO.StreamReader($stream,[Text.Encoding]::UTF8,$true); $raw=$reader.ReadToEnd() }
-    finally { if ($reader) { $reader.Dispose() } else { $stream.Dispose() } }
+    if ($FileReader) {
+        $null=& $FileReader $Entry
+        $raw=[string](& $FileReader $catalog)
+    } else {
+        $reader=$null
+        $stream=[IO.File]::Open($catalog,'Open','Read','Read')
+        try { $reader=New-Object IO.StreamReader($stream,[Text.Encoding]::UTF8,$true); $raw=$reader.ReadToEnd() }
+        finally { if ($reader) { $reader.Dispose() } else { $stream.Dispose() } }
+    }
     if ($stamp -cne (Get-ProjectMtaStamp $Entry $catalog)) {
         $failure=New-Object IO.IOException 'Relatorio mudou durante a leitura; repetir a operacao.'
         $failure.Data['MtaChanged']=$true
@@ -70,7 +75,7 @@ function Read-HarnessProjectMta {
 }
 
 function Read-HarnessMtaDirectory {
-    param($Project,[string]$Origin)
+    param($Project,[string]$Origin,[scriptblock]$FileReader)
     $origin=Resolve-ProjectPath $Origin $Project.Root
     if (-not (Test-Path -LiteralPath $origin -PathType Container)) { throw "Origem MTA indisponivel: $origin. Nenhum fallback para outra origem." }
     $pending=New-Object 'Collections.Generic.Stack[IO.DirectoryInfo]'
@@ -82,9 +87,9 @@ function Read-HarnessMtaDirectory {
             if ($child.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Link/junction na origem MTA: $($child.FullName)" }
             if ($child -is [IO.DirectoryInfo]) { $pending.Push($child); continue }
             if ($child.Name -ine 'index.html') { continue }
-            try { $candidates+=Read-ProjectMtaCandidate $Project $child.FullName }
+            try { $candidates+=Read-ProjectMtaCandidate $Project $child.FullName -FileReader $FileReader }
             catch {
-                if ($_.Exception.Data.Contains('MtaChanged')) { throw }
+                if ($_.Exception.Data.Contains('MtaChanged') -or $_.Exception.Data.Contains('QueryCode')) { throw }
                 $problems+=($child.FullName+': '+$_.Exception.Message)
             }
         }
