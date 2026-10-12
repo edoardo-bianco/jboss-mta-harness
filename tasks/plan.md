@@ -238,7 +238,31 @@ planejamento de issue com PATH sem Node/npm/npx. Tres testes Node 20/MCP
 ausencia de escrita. Revisao independente fechou os achados de selecao por data
 e tratamento de acesso negado. Fixtures sinteticas; nenhum dado real convertido.
 
-**Proxima etapa: S16**, sprints correntes com baseline/calendario preservados.
+S16 implementada em fatias: fontes correntes, nucleo de cenario/calculo e entrada
+CLI. Scenario funcional fica em `atual/sprints/<cenario>/` sob mestre Maven
+participante explicitamente escolhido para escopo multiprojeto. Indices apontam
+ao mesmo plano e podem ser reconstruidos. Contexto guarda participantes/caminhos;
+dados editaveis guardam premissas. Resultado conserva somente ultimo calculo,
+B0 conhecida/fixada, inclusoes acumuladas e calendario/consumo necessarios a
+continuidade. Sem DataSnapshot, hashes persistidos, GUID, revisoes ou ponteiros.
+
+Preparo e falhas preservam o ultimo calculo. Reassociacao de Source conserva
+Project/Id e a cobertura. Inicio publicado permanece fixo; referencia nao
+retrocede. Publicacao conjunta de plano/resultado usa recuperacao do nucleo;
+mutex transitorio comum protege descoberta, mestre unico e indices. Conteudos
+efetivamente lidos sao comparados antes de publicar, inclusive contra editor
+externo que altere o registro entre leitura e amostragem de hash.
+
+Passaram em PowerShell 5.1 Test-SprintSources, Test-SprintPlanning (inclui CLI),
+Test-SprintWorkflow, Test-SprintLifecycle, Test-SprintConcurrency,
+Test-SprintValidation (25 casos), Test-SprintSimulation e Test-SprintEnsaio
+(48 casos), alem de Test-IssuePlanning pela leitura compartilhada de evidencias.
+Workflow manteve previsao em 16/10 e reestimativa em 19/10, consumo de fase ao
+avancar referencia, Gantt/notas e bytes iguais ao validar novamente. Revisao
+independente fechou tres riscos de concorrencia. Ensaio com agente humano e
+atualizacao dos prompts de sprints permanecem no recorte integrado S19/S28.
+
+**Proxima etapa: S17**, configuracao/workspace e Run Tasks correntes.
 Conversao, limpeza e alinhamento de guias/orientador ainda precisam ser concluidos.
 
 ### Requisitos e fontes

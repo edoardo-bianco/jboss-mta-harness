@@ -99,8 +99,8 @@ do MTA. Fichas ausentes permanecem a elaborar ate exame efetivo pelo condutor.
 Implementacao usa plano/tarefas correntes e exige conferencia humana do alcance
 do GO. Consultas usam exclusividade somente leitura e recusam recuperacao pendente;
 hashes de paginacao sao transitorios, sem se tornarem requisitos de retomada.
-Falhas de acesso nao selecionam silenciosamente outro relatorio. Sprints ainda
-dependem de S16; consumidores correntes nao procuram uma solicitacao antiga.
+Falhas de acesso nao selecionam silenciosamente outro relatorio. Sprints tambem
+usam fontes correntes; nenhum desses consumidores procura solicitacao antiga.
 Compartilhamento por pacote ainda depende da priorizacao legada e permanece fora
 do fluxo corrente ate sua retirada em S22.
 
@@ -132,6 +132,22 @@ Revisao final de S13 concluida em 12/10/2026; provas em
 [navegacao](../../tests/Test-ProjectNavigation.ps1), alem das suites registradas no
 [plano](../../tasks/plan.md#retomada-de-12102026). Fixtures sinteticas nao substituem
 ensaio humano integrado nem o aceite da simplificacao completa.
+
+### Sprints correntes (S16)
+
+Cenario funcional tem unico mestre Maven participante, com contexto, premissas,
+plano e ultimo resultado no mesmo destino. Resultado conserva B0 fixada quando
+conhecida, inclusoes acumuladas e Simulation com calendario/consumo de fases;
+nao duplica todas as entradas nem exige revisoes, selo ou ponteiro. Relocalizacao
+preserva Project/Id. Preparo/falha nao apagam o calculo anterior, apresentado
+como ultimo calculo, sem validar edicoes posteriores por sua mera existencia.
+
+Exclusividade transitoria comum protege descoberta e indices; publicacao do
+projeto troca plano/resultado juntos. Textos lidos e hashes de concorrencia
+ficam somente em memoria. Indices participantes podem reconstruir seus links
+sem recalcular o mestre. Provas em Test-SprintWorkflow, Test-SprintLifecycle e
+Test-SprintConcurrency; contrato em planejamento-sprints.md. Prompts e ensaio
+integrado ainda dependem de S19/S28.
 
 ### Demais consumidores
 
