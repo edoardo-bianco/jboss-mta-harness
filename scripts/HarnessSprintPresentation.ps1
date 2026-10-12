@@ -12,7 +12,7 @@ function New-SprintDraftMarkdown {
     if ($PreviousMarkdown) {
         $old=Get-SprintCalculatedBlock $PreviousMarkdown
         $previous=$PreviousMarkdown.Replace($old,$block)
-        return "<!-- Revisao $($Receipt.RevisionId); origem $($Receipt.Previous.RevisionId) -->`r`n$previous"
+        return $previous
     }
     $labels=($Receipt.Projects | ForEach-Object Label) -join ', '
     $old=Get-SprintCalculatedBlock $Template
@@ -87,7 +87,8 @@ function ConvertTo-SprintMarkdown {
     $lines=New-Object 'Collections.Generic.List[string]'
     $lines.Add('<!-- sprints:inicio -->')
     $lines.Add('')
-    $lines.Add(('**Revisao:** {0} | **Estado:** {1} | **Viabilidade:** {2}' -f $Receipt.RevisionId,$Data.State,$simulation.Feasibility))
+    $lines.Add(('**Cenario:** {0} | **Estado:** {1} | **Viabilidade:** {2}' -f $Receipt.Scenario,$Data.State,$simulation.Feasibility))
+    $lines.Add('Ultimo calculo publicado. Edicoes posteriores nas premissas/fontes exigem nova conferencia e validacao; este resultado nao comprova aceite.')
     $lines.Add(('Data de referencia: {0}. Sprints de 14 dias corridos; carga em dias-pessoa por papel.' -f (Format-SprintCell $Data.Constraints.ReferenceDate)))
     $lines.Add('')
     $lines.Add('| Restricao | Valor |')
@@ -201,17 +202,16 @@ function ConvertTo-SprintMarkdown {
     foreach ($project in $Receipt.Projects) {
         foreach ($item in $project.Diagnostics) { $lines.Add('- '+(Format-SprintCell ($project.Label+': '+$item))) }
         $missing=@($project.Issues | Where-Object { $_.Category -in $Data.ScopeCategories -and @($_.FichaPaths).Count -eq 0 })
-        if ($missing.Count) { $lines.Add('- '+(Format-SprintCell ($project.Label+': '+$missing.Count+' issues sem ficha; confira contexto.json.'))) }
+        if ($missing.Count) { $lines.Add('- '+(Format-SprintCell ($project.Label+': '+$missing.Count+' issues sem ficha; confira o registro e as fontes abaixo.'))) }
     }
     $lines.Add('')
     $lines.Add('### Documentos de referencia')
     $lines.Add('')
-    foreach ($reference in $Receipt.References | Where-Object { $_.Kind -in @('Indice','Registro','Contrato','Ranking candidato','Plano candidato') }) {
-        $path=$reference.Path.Replace('\','/')
-        $lines.Add(('- [{0}](<{1}>) - {2}' -f (Format-SprintCell $reference.Kind),$path,$reference.Status))
+    foreach ($reference in $Receipt.References | Where-Object { $_.Kind -ne 'Associacao' -and $_.Path -notmatch '(?i)(\.json|output\.js)$' }) {
+        $link=if ($reference.Path -match '^https?://') { '['+$reference.Kind+'](<'+$reference.Path+'>)' } else { Get-HarnessSourceLink $Receipt.SprintPlanPath $reference.Path $reference.Kind }
+        $lines.Add(('- {0} - {1}' -f $link,$reference.Status))
     }
-    $lines.Add(('- [Dados desta revisao](<{0}>) e [contexto com fichas, anexos e hashes](<{1}>).' -f $Receipt.SprintDataPath.Replace('\','/'),$Receipt.ContextPath.Replace('\','/')))
-    if ($Receipt.Previous) { $lines.Add(('- [Revisao anterior](<{0}>).' -f $Receipt.Previous.SprintPlanPath.Replace('\','/'))) }
+    $lines.Add('- '+(Get-HarnessSourceLink $Receipt.SprintPlanPath $Receipt.SprintDataPath 'Editar premissas e estimativas'))
     $lines.Add('')
     $lines.Add('Validacao aritmetica nao concede GO, aceite humano ou aprovacao do Quality Gate corporativo.')
     $lines.Add('<!-- sprints:fim -->')
