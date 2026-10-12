@@ -1,6 +1,6 @@
 function Set-HarnessProjectOperation {
     param($Project,[ValidatePattern('^[a-z][a-z0-9-]*$')][string]$Name,[ValidateSet('RUNNING','SUCCEEDED','FAILED')][string]$Status,[string]$ErrorMessage,[string]$LogPath,[Collections.IDictionary]$Files=@{})
-    $old=Read-HarnessProjectFiles $Project @('atual/operacao.json')
+    $old=Read-HarnessProjectFiles $Project @('atual/operacao.json','indice.md')
     $operations=[ordered]@{}
     if ($old['atual/operacao.json']) {
         $current=ConvertFrom-Json $old['atual/operacao.json']
@@ -13,11 +13,14 @@ function Set-HarnessProjectOperation {
     }
     $operations[$Name]=[ordered]@{Status=$Status;DateUtc=[DateTime]::UtcNow.ToString('o');Error=$ErrorMessage;LogPath=$LogPath}
     $writes=@{'atual/operacao.json'=($operations | ConvertTo-Json -Depth 6)}
+    if ($old['indice.md']) {
+        $writes['indice.md']=Set-ProjectManagedBlock $old['indice.md'] 'operacoes' (Get-ProjectOperationsText $writes['atual/operacao.json'])
+    }
     foreach ($path in $Files.Keys) {
         if ($writes.ContainsKey($path)) { throw 'Situacao da operacao deve ser gerada pelo publicador.' }
         $writes[$path]=$Files[$path]
     }
-    Publish-HarnessProjectFiles $Project $writes @{'atual/operacao.json'=$old['atual/operacao.json']}
+    Publish-HarnessProjectFiles $Project $writes $old
 }
 
 function Get-HarnessProjectTemporary {

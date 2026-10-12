@@ -17,7 +17,7 @@ function Get-PrioritizationIndexContent {
         "Examinadas acumuladas: $(@($Result.AnalyzedIssues).Count) / $($Data.InitialTotal). Estado da fatia: $($Result.Status).",
         "Elegiveis fora da base inicial: $($Data.OutsideBaseline). Recriar e uma escolha explicita; ausencia no MTA nao comprova resolucao.",
         (Get-HarnessSourceLink $Data.IndexPath $Data.RankingPath 'Ranking acumulado'),
-        (Get-HarnessSourceLink $Data.IndexPath $Data.ContextPath 'Contexto corrente'),
+        (Get-HarnessSourceLink $Data.IndexPath $Data.PromptPath 'Orientacao da priorizacao'),
         (Get-HarnessSourceLink $Data.IndexPath $Data.ContractPath 'Contrato'),
         (Get-PrioritizationRows $Data $Result $Data.IndexPath))
     foreach ($project in $Data.Projects) {

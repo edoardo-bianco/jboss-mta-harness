@@ -37,7 +37,7 @@ function Get-IssueSourcesText {
     $identity=Read-PrioritizationFicha $Text $Project.Name $Category $Id
     $lines=@((Get-HarnessSourceLink $Path $Project.Pom 'POM'),(Get-HarnessSourceLink $Path $Project.MigrationPath 'Decisoes atuais'))
     if ($Mta) {
-        $lines+=@((Get-HarnessSourceLink $Path $Mta.ReportPath 'Relatorio MTA atual'),(Get-HarnessSourceLink $Path $Mta.CatalogPath 'Catalogo MTA original'))
+        $lines+=Get-HarnessSourceLink $Path $Mta.ReportPath 'Relatorio MTA atual'
         $issue=@($Mta.Issues | Where-Object Id -CEQ $Id)
         if ($issue.Count) { $lines+='Issue presente no MTA atual. Categoria: '+(ConvertTo-ProjectCell $issue[0].Category)+'. Conferir aplicabilidade no codigo local.' }
         else { $lines+='Issue nao reencontrada no MTA atual; ausencia nao comprova resolucao. Avaliacao humana preservada.' }

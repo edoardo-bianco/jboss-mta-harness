@@ -10,7 +10,7 @@ $data=Read-Prepared $p
 $ficha=@($data.FichaPaths | Where-Object Status -eq 'DISPONIVEL')[0].Path
 Assert (@($data.FichaPaths | Where-Object Status -eq 'A ELABORAR').Count -eq 1) 'Ausencia de ficha deve permanecer lacuna, sem inventar exame.'
 $text=[IO.File]::ReadAllText($ficha)
-foreach ($label in @('Relatorio MTA atual','Catalogo MTA original','src/Exemplo.java','observacao.md','Analise manual preservada')) { Assert ($text.Contains($label)) ('Fonte/texto ausente: '+$label) }
+foreach ($label in @('Relatorio MTA atual','src/Exemplo.java','observacao.md','Analise manual preservada')) { Assert ($text.Contains($label)) ('Fonte/texto ausente: '+$label) }
 foreach ($match in [regex]::Matches($text,'\]\(<([^>]+)>\)')) {
     $baseUri=New-Object Uri $ficha
     $target=New-Object Uri (([uri]$baseUri.AbsoluteUri),$match.Groups[1].Value)

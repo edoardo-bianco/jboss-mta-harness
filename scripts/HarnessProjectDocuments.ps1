@@ -69,12 +69,21 @@ function Get-HarnessProjectMigrationText {
         }
         $migration=Set-ProjectManagedBlock $migration 'mta' ($lines -join "`n")
     }
-    if ($Mta -or -not $Text) {
-        $refs=@((Get-HarnessSourceLink $Project.MigrationPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.MigrationPath $Project.Source 'Codigo local'))
-        if ($Mta) { $refs+=Get-HarnessSourceLink $Project.MigrationPath $Mta.ReportPath 'MTA atual' }
-        $migration=Set-ProjectManagedBlock $migration 'fontes' ($refs -join ' | ')
-    }
+    $refs=@((Get-HarnessSourceLink $Project.MigrationPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.MigrationPath $Project.Source 'Codigo local'))
+    if ($Mta) { $refs+=Get-HarnessSourceLink $Project.MigrationPath $Mta.ReportPath 'MTA atual' }
+    $migration=Set-ProjectManagedBlock $migration 'fontes' ($refs -join ' | ')
     $migration
+}
+
+function Get-ProjectOperationsText {
+    param([string]$Json)
+    $operations=ConvertFrom-Json $Json
+    $lines=@('## Situacao das operacoes','')
+    foreach ($entry in $operations.PSObject.Properties) {
+        $state=$entry.Value
+        $lines+='- '+(ConvertTo-ProjectCell $entry.Name)+': '+(ConvertTo-ProjectCell $state.Status)+' ('+(ConvertTo-ProjectCell $state.DateUtc)+'). '+(ConvertTo-ProjectCell $state.Error)
+    }
+    $lines -join [Environment]::NewLine
 }
 
 function Update-HarnessProjectDocuments {
@@ -82,14 +91,16 @@ function Update-HarnessProjectDocuments {
     $old=Read-HarnessProjectFiles $Project @('migracao.md','indice.md','atual/operacao.json')
     $migration=Get-HarnessProjectMigrationText $Project $Mta $old['migracao.md'] -UpdateIssues:$UpdateIssues
     $lines=@('# Projeto: '+$Project.Name,'', (Get-HarnessSourceLink $Project.IndexPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.IndexPath $Project.MigrationPath 'Decisoes de migracao'))
-    foreach ($entry in @(@('atual/planejamento/plano.md','Plano corrente'),@('atual/planejamento/tarefas.md','Tarefas correntes'),@('atual/planejamento/contexto.json','Contexto corrente'),@('atual/build/resultado.json','Ultimo build'),@('atual/diagnosticos/sonar/resultado.json','Sonar atual'),@('reconciliado/resultado.md','Ultima reconciliacao'))) {
+    foreach ($entry in @(@('atual/planejamento/plano.md','Plano corrente'),@('atual/planejamento/tarefas.md','Tarefas correntes'),@('atual/planejamento/planejar-lotes.prompt.md','Orientacao do planejamento'),@('atual/build/console.log','Log da ultima tentativa de build'),@('atual/diagnosticos/sonar/RESUMO.md','Relatorio Sonar atual'),@('reconciliado/resultado.md','Ultima reconciliacao'))) {
         $path=Join-Path $Project.Folder $entry[0]
         if (Test-Path -LiteralPath $path -PathType Leaf) { $lines+=Get-HarnessSourceLink $Project.IndexPath $path $entry[1] }
     }
     if ($Mta) { $lines+=@('',(Get-HarnessSourceLink $Project.IndexPath $Mta.ReportPath 'MTA atual'),'Consultar diagnostico nao reconcilia decisoes nem concede GO.'); $Warnings+=@($Mta.Diagnostics) }
-    if ($old['atual/operacao.json']) { $lines+=@('',(Get-HarnessSourceLink $Project.IndexPath (Join-Path $Project.Folder 'atual/operacao.json') 'Situacao das operacoes')) }
+    if ($old['atual/operacao.json']) {
+        $lines+=Set-ProjectManagedBlock '' 'operacoes' (Get-ProjectOperationsText $old['atual/operacao.json'])
+    }
     if ($Warnings.Count) { $lines+=@('','Limites da leitura:')+@($Warnings | ForEach-Object { '- '+(ConvertTo-ProjectCell $_) }) }
     $writes=@{'indice.md'=($lines -join "`n")+"`n"}
     if ($migration -cne $old['migracao.md']) { $writes['migracao.md']=$migration }
-    Publish-HarnessProjectFiles $Project $writes @{'migracao.md'=$old['migracao.md'];'indice.md'=$old['indice.md']}
+    Publish-HarnessProjectFiles $Project $writes $old
 }

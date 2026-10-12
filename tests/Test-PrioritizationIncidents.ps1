@@ -8,7 +8,7 @@ $next=New-HarnessPrioritizationContext $f.Context -Percentage 34 -Category manda
 $d=Read-Prepared $next
 $ficha=$d.FichaPaths[0].Path
 $text=[IO.File]::ReadAllText($ficha)
-foreach ($label in @('Relatorio MTA atual','Catalogo MTA original','src/Exemplo.java','pom.xml','observacao.md','Analise manual preservada')) {
+foreach ($label in @('Relatorio MTA atual','src/Exemplo.java','pom.xml','observacao.md','Analise manual preservada')) {
     Assert ($text.Contains($label)) ('Ficha deve incluir fonte/texto: '+$label)
 }
 foreach ($match in [regex]::Matches($text,'\]\(<([^>]+)>\)')) {

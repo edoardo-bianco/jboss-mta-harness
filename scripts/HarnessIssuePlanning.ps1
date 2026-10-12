@@ -86,14 +86,14 @@ function Get-CurrentPlanningEvidence {
 }
 
 function Get-CurrentPlanningSources {
-    param($Data,$Project,[string]$From)
+    param($Data,$Project,[string]$From,[string[]]$AvailablePaths=@())
     $lines=@((Get-HarnessSourceLink $From $Project.Pom 'POM'),(Get-HarnessSourceLink $From $Project.MigrationPath 'Decisoes e recorte atuais'),
-        (Get-HarnessSourceLink $From $Data.ContextPath 'Contexto de planejamento'),(Get-HarnessSourceLink $From $Data.ContractPath 'Contrato corrente'))
+        (Get-HarnessSourceLink $From $Data.PromptPath 'Orientacao do planejamento'),(Get-HarnessSourceLink $From $Data.ContractPath 'Contrato corrente'))
     foreach ($pair in @(@($Project.PlanPath,'Plano corrente'),@($Project.TodoPath,'Tarefas correntes'),@($Data.ReconciledPath,'Ultima reconciliacao'))) {
-        if (Test-Path -LiteralPath $pair[0] -PathType Leaf) { $lines+=Get-HarnessSourceLink $From $pair[0] $pair[1] }
+        if ((Test-Path -LiteralPath $pair[0] -PathType Leaf) -or $pair[0] -iin $AvailablePaths) { $lines+=Get-HarnessSourceLink $From $pair[0] $pair[1] }
     }
     if ($Data.PlanningBasis -eq 'MTA' -and $Data.Mta) {
-        $lines+=@((Get-HarnessSourceLink $From $Data.Mta.ReportPath 'MTA atual'),(Get-HarnessSourceLink $From $Data.Mta.CatalogPath 'Catalogo original'))
+        $lines+=Get-HarnessSourceLink $From $Data.Mta.ReportPath 'MTA atual'
     } else { $lines+='Base EVIDENCIAS: nenhum resultado MTA atribuido a esta proposta.' }
     foreach ($ficha in $Data.FichaPaths) {
         if ($ficha.Status -eq 'DISPONIVEL') { $lines+=Get-HarnessSourceLink $From $ficha.Path ('Ficha: '+$ficha.Id) }
@@ -104,7 +104,7 @@ function Get-CurrentPlanningSources {
         elseif ($input.Status -eq 'REFERENCIA EXTERNA') { $lines+='['+(ConvertTo-ProjectCell $input.Relation)+'](<'+$input.Path+'>)' }
         else { $lines+='Evidencia indisponivel: '+(ConvertTo-ProjectCell $input.Path) }
     }
-    if (-not (Test-Path -LiteralPath $Data.ReconciledPath -PathType Leaf)) { $lines+='Sem reconciliacao anterior disponivel: proposta preliminar.' }
+    if (-not (Test-Path -LiteralPath $Data.ReconciledPath -PathType Leaf) -and -not ($AvailablePaths -icontains $Data.ReconciledPath)) { $lines+='Sem reconciliacao anterior disponivel: proposta preliminar.' }
     if ($Data.NeedsReview) { $lines+=@($Data.ReviewReasons | ForEach-Object { ConvertTo-ProjectCell $_ }) }
     $lines+='Preparar/retomar nao concede GO ou aceite. Releia as fontes: mesmo caminho nao comprova conteudo inalterado.'
     $lines -join ([Environment]::NewLine+[Environment]::NewLine)
