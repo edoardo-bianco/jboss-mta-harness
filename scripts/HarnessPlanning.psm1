@@ -18,6 +18,7 @@ Export-ModuleMember -Function Complete-HarnessReconciliation
 Export-ModuleMember -Function New-HarnessReconciliationContext
 Export-ModuleMember -Function New-HarnessCurrentPlanning,Get-HarnessCurrentPlanning
 Export-ModuleMember -Function New-HarnessImplementationPrompt
+Export-ModuleMember -Function Get-CurrentPlanningEvidence
 
 function Get-MtaPlanningRunFromPath {
     param([string]$RunPath, [string]$Root)
