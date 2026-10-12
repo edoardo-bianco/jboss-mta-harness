@@ -71,3 +71,26 @@ Assert ([IO.File]::ReadAllText($context.PromptPath).Contains($lp.ContextPath.Rep
 $continued=New-HarnessCurrentPlanning $local.Context
 Assert ($continued.ContextPath -eq $lp.ContextPath -and $continued.NeedsReview) 'Planejar depois da copia deve retomar sem caminho estrangeiro nem GO automatico.'
 'PASS: pasta recebida/externa/copia direta, contextos realinhados, GO local, anexos exatos e mesclagem por decisao.'
+
+# Copia com base humana deve regenerar fontes do registro sem consultar MTA.
+$peer=New-PlanningFixture 1
+$pp=$peer.Projects[0]
+Set-ManualPlanningChoice $pp
+$null=New-HarnessCurrentPlanning $peer.Context
+Publish-HarnessProjectFiles $pp @{'atual/planejamento/plano.md'='Plano por evidencias';'atual/planejamento/tarefas.md'='Roteiro manual'}
+$local=New-PlanningFixture 1
+$lp=$local.Projects[0]
+$source=Join-Path $local.Root 'checkout-local-diferente'
+$null=[IO.Directory]::CreateDirectory($source)
+Copy-Item -LiteralPath $lp.Pom -Destination (Join-Path $source 'pom.xml')
+Publish-HarnessProjectFiles $lp @{'projeto.json'=(@{pom=(Join-Path $source 'pom.xml')} | ConvertTo-Json)}
+$lp=Get-HarnessProjectStorage $local.Root (Join-Path $source 'pom.xml')
+$copy=@{}
+$files=(Get-HarnessReconciliationComparison $pp -PlanningBasis EVIDENCIAS).Local
+foreach ($key in $files.Keys) { if ($key -ne 'projeto.json' -and $null -ne $files[$key]) { $copy[$key]=$files[$key] } }
+Publish-HarnessProjectFiles $lp $copy
+$review=Start-HarnessReconciliationReview $lp -PlanningBasis EVIDENCIAS
+$done=Complete-HarnessReconciliation $lp -Conclusion 'Copia por evidencias conferida no Source local.'
+$text=[IO.File]::ReadAllText($lp.MigrationPath)
+Assert ($text.Contains((Get-HarnessSourceLink $lp.MigrationPath $lp.Pom 'POM')) -and $text.Contains((Get-HarnessSourceLink $lp.MigrationPath $lp.Source 'Codigo local'))) 'Registro por evidencias deve apontar ao POM e Source locais depois da copia.'
+'PASS: copia por EVIDENCIAS realinha fontes do registro sem MTA.'

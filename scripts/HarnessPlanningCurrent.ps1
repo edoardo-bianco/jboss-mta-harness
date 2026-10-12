@@ -108,7 +108,7 @@ function New-HarnessCurrentPlanning {
             NeedsReview=$false;ReviewReasons=@();Diagnostics=$warnings}
         if ($previous) {
             if ($previous.NeedsReview) { $data.ReviewReasons+=@($previous.ReviewReasons) }
-            foreach ($field in @('SelectedIssues','PlanningBasis','EvidenceInputs','FichaPaths','Mta')) {
+            foreach ($field in @('Source','Pom','SelectedIssues','PlanningBasis','EvidenceInputs','FichaPaths','Mta')) {
                 if ((ConvertTo-Json -InputObject $previous.$field -Depth 10 -Compress) -cne (ConvertTo-Json -InputObject $data.$field -Depth 10 -Compress)) { $data.ReviewReasons+="Entrada alterada: $field. Reavaliar proposta e alcance do GO humano." }
             }
             $data.ReviewReasons=@($data.ReviewReasons | Select-Object -Unique)

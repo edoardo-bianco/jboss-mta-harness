@@ -1,5 +1,26 @@
 # Reassociacao explicita do POM permite regenerar referencias derivadas copiadas.
 # Nao usa caminhos estrangeiros como destinos e nao muda escopo/decisoes.
+function Get-ReconciliationIndexSources {
+    param([string]$Text,[string]$PreviousMigration,[string]$Migration)
+    # Registro e indice compartilham a pasta. O token publicado no bloco fontes
+    # tambem identifica a linha derivada antiga, inclusive em uma copia recebida.
+    $previous=Find-ProjectManagedBlock $PreviousMigration 'fontes'
+    $current=Find-ProjectManagedBlock $Migration 'fontes'
+    if (-not $current) { return $Text }
+    if ($previous) {
+        foreach ($label in @('POM','Codigo local','MTA atual')) {
+            $pattern='\['+[regex]::Escape($label)+'\]\(<[^>\r\n]+>\)'
+            $before=[regex]::Matches($previous.Value,$pattern)
+            if ($before.Count -gt 1) { throw 'Referencias de fontes ambiguas no registro; preserve e confira.' }
+            if (-not $before.Count) { continue }
+            $line='(?m)^'+[regex]::Escape($before[0].Value)+'[ \t]*\r?$'
+            $Text=[regex]::Replace($Text,$line,'')
+        }
+    }
+    $content=$current.Value -replace '^<!-- fontes:inicio -->\s*','' -replace '\s*<!-- fontes:fim -->$',''
+    Set-ProjectManagedBlock $Text 'fontes' $content
+}
+
 function Get-ReconciliationContextFolder {
     param($Data,$Project,[string]$Name)
     $path=[IO.Path]::GetFullPath($Data.ContextPath).Replace('\','/')
@@ -19,6 +40,11 @@ function Get-ReconciliationPlanningContext {
     $relocated=$origin -ine $Project.Folder -or $data.Pom -ine $Project.Pom -or $data.Source -ine $Project.Source
     foreach ($field in $destinations.Keys) { $data.$field=$Project.$field }
     Assert-CurrentPlanningContext $data $Project
+    $mtaChanged=$false
+    if ($data.PlanningBasis -eq 'MTA' -and $Mta) {
+        $mtaChanged=$null -eq $data.Mta -or $data.Mta.ReportPath -ine $Mta.ReportPath -or $data.Mta.CatalogPath -ine $Mta.CatalogPath
+        $data.Mta=@{ReportPath=$Mta.ReportPath;CatalogPath=$Mta.CatalogPath}
+    }
     if ($relocated) {
         $data.Source=$Project.Source; $data.Pom=$Project.Pom
         $data.PromptPath=Join-Path $Project.Folder 'atual/planejamento/planejar-lotes.prompt.md'
@@ -36,5 +62,5 @@ function Get-ReconciliationPlanningContext {
         $data.NeedsReview=$true
         $data.ReviewReasons=@(@($data.ReviewReasons)+@('Projeto copiado/realocado: conferir origens e proposta no Source local; GO recebido nao autoriza implementacao.') | Select-Object -Unique)
     }
-    [pscustomobject]@{Data=$data;Relocated=$relocated}
+    [pscustomobject]@{Data=$data;Relocated=$relocated;MtaChanged=$mtaChanged}
 }

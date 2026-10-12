@@ -70,7 +70,8 @@ function Get-HarnessReconciliationComparison {
         $paths=@(@(Get-ReconciliationFiles $Project.Folder)+@($received.Keys)+@('projeto.json','migracao.md','indice.md',
             'atual/planejamento/contexto.json','atual/planejamento/plano.md','atual/planejamento/tarefas.md',
             'atual/planejamento/reconciliacao.json','atual/planejamento/planejar-lotes.prompt.md','reconciliado/resultado.md','atual/build/resultado.json','atual/diagnosticos/sonar/resultado.json',
-            'atual/diagnosticos/sonar-decisao.json') | Select-Object -Unique)
+            'atual/diagnosticos/sonar-decisao.json','atual/operacao.json')+
+            @('quality-gate.json','measures.json','issues.json','criteria.json','RESUMO.md' | ForEach-Object {'atual/diagnosticos/sonar/'+$_}) | Select-Object -Unique)
         $local=Read-HarnessProjectFiles $Project $paths -AsBytes
         if ($null -eq $local['migracao.md']) { throw 'Registro ausente; execute Workspace: atualizar indice dos projetos.' }
         $rows=@(Read-ProjectDecisionRows (ConvertFrom-ReconciliationBytes $local['migracao.md']))

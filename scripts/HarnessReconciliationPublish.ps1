@@ -61,7 +61,7 @@ function Complete-HarnessReconciliation {
         }
         $contextRelative='atual/planejamento/contexto.json'
         $planning=Get-ReconciliationPlanningContext $Project $base.Local[$contextRelative] $comparison.Mta
-        if ($planning -and $planning.Relocated) { $reviewNeeded=$true }
+        if ($planning -and ($planning.Relocated -or $planning.MtaChanged)) { $reviewNeeded=$true }
         $reconciliationRelative='atual/planejamento/reconciliacao.json'
         if ($base.Local[$reconciliationRelative]) {
             $prepared=ConvertFrom-Json (ConvertFrom-ReconciliationBytes $base.Local[$reconciliationRelative])
@@ -83,6 +83,13 @@ function Complete-HarnessReconciliation {
             (Get-HarnessSourceLink $Project.PlanPath $resultPath 'Ultima reconciliacao'))
         if ($comparison.Mta) { $references+=Get-HarnessSourceLink $Project.PlanPath $comparison.Mta.ReportPath 'MTA atual' }
         $available=@($writes.Keys | Where-Object { $null -ne $writes[$_] } | ForEach-Object {Join-Path $Project.Folder $_})
+        if ($planning) {
+            foreach ($field in @('FichaPaths','EvidenceInputs')) {
+                foreach ($entry in $planning.Data.$field) {
+                    if ($entry.Path -iin $available) { $entry.Status='DISPONIVEL' }
+                }
+            }
+        }
         $all=@(@($base.Local.Keys)+@($writes.Keys) | Sort-Object -Unique)
         foreach ($relative in $all) {
             if ($relative -notmatch '^atual/priorizacao/[^/]+/issues/[^/]+/ficha\.md$') { continue }
@@ -96,7 +103,9 @@ function Complete-HarnessReconciliation {
             $bytes=if ($writes.ContainsKey($relative)) {$writes[$relative]} else {$base.Local[$relative]}
             if ($null -eq $bytes) { continue }
             $text=ConvertFrom-ReconciliationBytes $bytes
-            $text=Set-ProjectManagedBlock $text 'planejamento:fontes' ($references -join ([Environment]::NewLine+[Environment]::NewLine))
+            $sources=if ($planning) { Get-CurrentPlanningSources $planning.Data $Project (Join-Path $Project.Folder $relative) -AvailablePaths @($available+$resultPath) }
+                else { $references -join ([Environment]::NewLine+[Environment]::NewLine) }
+            $text=Set-ProjectManagedBlock $text 'planejamento:fontes' $sources
             if ($reviewNeeded) {
                 $notice='REVISAO HUMANA DO GO NECESSARIA. Declaracoes e tarefas recebidas nao autorizam execucao local nem comprovam integracao. Conferir o alcance das autorizacoes antes de implementar.'
                 if (Find-ProjectManagedBlock $text 'reconciliacao:autorizacao') { $text=Set-ProjectManagedBlock $text 'reconciliacao:autorizacao' $notice }
@@ -129,8 +138,9 @@ function Complete-HarnessReconciliation {
         $writes['reconciliado/resultado.md']=$result -join [Environment]::NewLine
         $migration=Set-ProjectManagedBlock $migration 'reconciliacao' ('Estado da ultima comparacao: '+$state+'. '+(Get-HarnessSourceLink $Project.MigrationPath $resultPath 'Conclusoes e pendencias')+' Preparar ou reconciliar nao concede GO/aceite.')
         $writes['migracao.md']=$migration
-        $writes['indice.md']=Set-ProjectManagedBlock (ConvertFrom-ReconciliationBytes $base.Local['indice.md']) 'reconciliacao' (Get-HarnessSourceLink $Project.IndexPath $resultPath 'Ultima reconciliacao')
-        if ($planning -and $planning.Relocated) { $writes['indice.md']=Set-ProjectManagedBlock $writes['indice.md'] 'planejamento' (Get-CurrentPlanningSources $planning.Data $Project $Project.IndexPath) }
+        $indexText=Get-ReconciliationIndexSources (ConvertFrom-ReconciliationBytes $base.Local['indice.md']) (ConvertFrom-ReconciliationBytes $base.Local['migracao.md']) $migration
+        $writes['indice.md']=Set-ProjectManagedBlock $indexText 'reconciliacao' (Get-HarnessSourceLink $Project.IndexPath $resultPath 'Ultima reconciliacao')
+        if ($planning) { $writes['indice.md']=Set-ProjectManagedBlock $writes['indice.md'] 'planejamento' (Get-CurrentPlanningSources $planning.Data $Project $Project.IndexPath -AvailablePaths @($available+$resultPath)) }
         foreach ($key in @($writes.Keys)) {
             $value=$writes[$key]
             if ($null -ne $value -and $value -isnot [byte[]]) { $value=(New-Object Text.UTF8Encoding($false)).GetBytes([string]$value); $writes[$key]=$value }
