@@ -262,7 +262,24 @@ avancar referencia, Gantt/notas e bytes iguais ao validar novamente. Revisao
 independente fechou tres riscos de concorrencia. Ensaio com agente humano e
 atualizacao dos prompts de sprints permanecem no recorte integrado S19/S28.
 
-**Proxima etapa: S17**, configuracao/workspace e Run Tasks correntes.
+S17 implementada: configuracao apenas le escolhas, sem inicializar registros
+legados. Projetos do workspace usam artifactId do POM; aliases visuais e settings
+humanos sao preservados. Alias harness permanece reservado a raiz das tarefas.
+Gerador e MCP usam mta.diretorio da associacao corrente, conferindo POM e leitura
+sem escrita. Origens ja cobertas pelo Source/raiz nao precisam de permissao extra;
+ancestrais que ampliariam leitura sao recusados. runsPath antigo e preservado no
+JSON local, mas nao concede acesso nem seleciona diagnostico. Inicializacao ocorre
+na tarefa de indice, que tambem reconstroi links dos cenarios de sprints.
+
+Passaram Test-Workspace, Test-Target, Test-McpRoots, Test-SonarConfig,
+Test-TaskInputs, Test-ProjectIndex e Test-SprintLifecycle em PowerShell 5.1,
+mais os testes Node/MCP de contrato, configuracao e integracao stdio.
+Cancelamentos reais, origem indisponivel sem fallback e ausencia de escrita nas
+consultas verificados em fixtures. Revisao independente sem bloqueantes.
+Por escolha humana de 12/10, manter a extensao Java atual; avaliar Oracle depois
+da simplificacao, sem mudar a configuracao Red Hat/Microsoft nesta entrega.
+
+**Proxima etapa: S18**, prompts correntes e propagacao de cabecalhos.
 Conversao, limpeza e alinhamento de guias/orientador ainda precisam ser concluidos.
 
 ### Requisitos e fontes
