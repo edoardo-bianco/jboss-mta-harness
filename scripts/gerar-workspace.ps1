@@ -11,6 +11,7 @@ try {
     $path = New-HarnessWorkspace $context
     Write-Host "Workspace gerado: $path"
     Write-Host 'Abra esse arquivo no VS Code (File > Open Workspace from File).'
+    Write-Host 'Execute Workspace: atualizar indice dos projetos para reconhecer os POMs e abrir a navegacao corrente.'
     exit 0
 } catch {
     Write-Host ("ERRO ao gerar workspace: " + $_.Exception.Message) -ForegroundColor Red
