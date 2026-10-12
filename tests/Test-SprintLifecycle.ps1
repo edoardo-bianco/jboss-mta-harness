@@ -76,7 +76,8 @@ $null=Read-HarnessSprintContext $f.Root $current.ContextPath
 Assert ([IO.File]::ReadAllText($current.ValidationPath) -ceq $beforeResult -and [IO.File]::ReadAllText($current.SprintPlanPath) -ceq $beforePlan) 'Falha deve restaurar plano/resultado juntos.'
 $null=Complete-HarnessSprintPlan $f.Root $current.ContextPath
 [IO.File]::Delete($f.Projects[0].IndexPath)
-Update-HarnessSprintIndex $f.Root
+Import-Module (Join-Path $PSScriptRoot '../scripts/HarnessProjectIndex.psm1') -DisableNameChecking
+$null=New-HarnessProjectIndex $f.Context
 Assert ([IO.File]::ReadAllText($f.Projects[0].IndexPath).Contains('sprints/migracao/plano.md')) 'Indice deve reconstruir link do mestre sem revisoes.'
 Assert (@(Get-HarnessSprintScenarios $f.Root).Count -eq 1 -and -not (Test-Path (Join-Path $f.Root '.harness/sprints'))) 'Retomada deve independer de historico legado.'
 Write-Host 'PASS: baseline, mestre unico, escopo, relocalizacao, falha recuperavel e indices de sprints.'

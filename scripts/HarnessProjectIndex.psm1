@@ -28,6 +28,8 @@ function New-HarnessProjectIndex {
     $prioritization=Update-HarnessPrioritizationIndex $Context.Root -RefreshSources
     $warnings+=@($prioritization.Warnings)
     if (Test-Path -LiteralPath $prioritization.IndexPath -PathType Leaf) { $lines+=@('',(Get-HarnessSourceLink $index $prioritization.IndexPath 'Priorizacoes correntes')) }
+    Import-Module (Join-Path $PSScriptRoot 'HarnessSprintPlanning.psm1') -DisableNameChecking
+    Update-HarnessSprintIndex $Context.Root
     $path=Publish-HarnessWorkspaceIndex $Context.Root (($lines -join "`n")+"`n")
     [pscustomobject]@{IndexPath=$path;Warnings=@($warnings);Projects=@($projects)}
 }

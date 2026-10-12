@@ -63,7 +63,7 @@
     },
     {
       "label": "Workspace: atualizar indice dos projetos",
-      "detail": "Cria registros ausentes e atualiza o indice, preservando escolhas e origem dos registros existentes; abre o indice e salva copia datada. Avisos indicam o que conferir.",
+      "detail": "Reconhece os POMs, cria registros correntes ausentes e reconstroi os links de projetos, priorizacoes e sprints; preserva decisoes e abre o indice navegavel.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/atualizar-indice-projetos.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-EditorPath", "${execPath}"],
