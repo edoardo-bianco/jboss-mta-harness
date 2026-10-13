@@ -297,6 +297,25 @@ de registro ausente; nenhum bloqueante remanescente. Fixtures sinteticas.
 **Proxima etapa: S19**, prompts e ensaio corrente de sprints.
 Conversao, limpeza e alinhamento de guias/orientador ainda precisam ser concluidos.
 
+### Pausa humana de 12/10/2026
+
+Pausa solicitada pelo desenvolvedor; retomar no proximo dia. Ultima etapa
+concluida e validada: S18, commit `10b9fab`, na branch
+`harness/planejar-simplificacao-projetos`.
+
+S19 apenas iniciada: os templates planejar-sprints e revisar-sprints receberam
+uma primeira adaptacao para Scenario/MasterProject, documentos editaveis
+correntes, ultimo resultado calculado e ausencia de recibos/revisoes imutaveis.
+Esse rascunho ainda nao passou pela revisao independente nem pelos testes da S19.
+Nao marcar a etapa concluida. Conferir geracao dos prompts, referencias/fontes,
+coerencia com o contrato e repetir preparo/revisao/validacao nos mesmos destinos
+com Test-SprintWorkflow e Test-SprintEnsaio, incluindo preservacao de notas.
+
+Na retomada, conferir raiz, branch, HEAD e estado local; preservar trabalho novo.
+S19-S28 continuam pendentes (10 etapas). Nenhuma conversao ou limpeza de dados
+reais, corretiva de aplicacao, merge ou push executado. Extensao Java atual mantida;
+avaliacao da Oracle adiada por escolha humana.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

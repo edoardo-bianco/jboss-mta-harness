@@ -21,6 +21,8 @@ Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10 e 12/1
 [Ponto atual e verificacoes](plan.md#retomada-de-12102026).
 S11-S18 implementados e revisados. Proxima etapa: S19;
 as 10 etapas S19-S28 permanecem pendentes.
+Pausa humana em 12/10: S19 tem rascunho parcial dos dois prompts de sprints;
+retomar pela revisao e pelos testes, conforme [registro da pausa](plan.md#pausa-humana-de-12102026).
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
