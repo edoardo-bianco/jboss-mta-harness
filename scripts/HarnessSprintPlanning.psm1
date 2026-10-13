@@ -97,7 +97,7 @@ function New-HarnessSprintContext {
         $writes[$rel+'/plano.md']=$markdown
         foreach ($name in @('planejar-sprints.prompt.md','revisar-sprints.prompt.md')) {
             $template=[IO.File]::ReadAllText((Join-Path $root ('.github/prompts/'+$name)))
-            $writes[$rel+'/'+$name]=Get-SprintPrompt $template ([string]$old[$rel+'/'+$name]) (Join-Path (Split-Path $paths.ContextPath -Parent) $name) $next
+            $writes[$rel+'/'+$name]=Get-SprintPrompt $template ([string]$old[$rel+'/'+$name]) (Join-Path (Split-Path $paths.ContextPath -Parent) $name) $next $inputs
         }
         Assert-SprintReferences $inputs $root
         Publish-HarnessProjectFiles $master $writes $old

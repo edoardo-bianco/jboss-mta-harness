@@ -128,6 +128,11 @@ PromptPath e ReviewPromptPath ficam nos destinos correntes. Preparar atualiza
 orientacoes/fontes gerenciadas e preserva notas externas a esses blocos. Nao ha
 preparo.json, selo, copia de contrato imutavel ou cadeia de revisoes. O prompt de
 resultado analisa em somente leitura, sem conceder GO ou substituir a tarefa.
+Os prompts oferecem links ao contrato/ADR/guia atuais, indice geral e fontes
+por participante, incluindo codigo, POM, registro, fichas e anexos disponiveis.
+Fontes indisponiveis aparecem como lacunas; o codigo local continua navegavel
+mesmo sem registro/indice. O contrato corrente e a ADR prevalecem sobre exemplos
+historicos dos guias; seus arquivos sao referenciados, sem copias operacionais.
 Repetir a validacao com as mesmas entradas produz os mesmos numeros e documentos.
 Preparar ou falhar na validacao conserva o ultimo resultado. O plano o identifica
 como ultimo calculo: sua existencia nao valida edicoes posteriores nas entradas.

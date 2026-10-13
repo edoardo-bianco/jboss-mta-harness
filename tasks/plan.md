@@ -8,8 +8,9 @@ do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
 **Estado:** implementacao autorizada por "proceder" em 10/10/2026, retomada em
-11/10/2026 e 12/10/2026. Nucleo, produtores build/MTA/Sonar, priorizacao, planejamento
-e reconciliacao correntes com verificacoes focais aprovadas; revisao final de S13 concluida.
+11/10/2026, 12/10/2026 e 13/10/2026. Nucleo, produtores build/MTA/Sonar, priorizacao,
+planejamento, reconciliacao, consumidores correntes e prompts ate S19 com
+verificacoes focais aprovadas.
 Integracao dos demais fluxos, conversao de dados, limpeza
 operacional e aceite da simplificacao completa ainda nao concluidos.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
@@ -22,7 +23,7 @@ esta decisao prevalece sobre suas sugestoes de ordem para evolucoes futuras.
 
 ### Ponto de retomada - pausa de 10/10/2026
 
-Registro historico da pausa; a retomada atual esta na secao de 12/10/2026 abaixo.
+Registro historico da pausa; a retomada atual esta na secao de 13/10/2026 abaixo.
 
 Branch `harness/planejar-simplificacao-projetos`; ultimo commit de implementacao
 `c0d48bc` (MTA corrente). Checkout limpo na conferencia anterior a este registro.
@@ -315,6 +316,36 @@ Na retomada, conferir raiz, branch, HEAD e estado local; preservar trabalho novo
 S19-S28 continuam pendentes (10 etapas). Nenhuma conversao ou limpeza de dados
 reais, corretiva de aplicacao, merge ou push executado. Extensao Java atual mantida;
 avaliacao da Oracle adiada por escolha humana.
+
+### Retomada de 13/10/2026
+
+Conferidos raiz, branch `harness/planejar-simplificacao-projetos`, HEAD `f8bd025`
+e checkout inicialmente limpo. **S19 concluida:** revisao dos prompts de sprints
+e de resultado, com dois ajustes: optional pode ser incluido por decisao humana
+depois de B0 fixada, sem alterar seu denominador; prompts preparados oferecem
+links ao contrato/ADR/guia, indice geral e fontes correntes por participante.
+Codigo local tem link mesmo sem registro/indice, e fontes ausentes ficam explicitas.
+
+Cabecalhos acompanham os templates, notas humanas sobrevivem ao preparo e os
+mesmos destinos sao reutilizados. Contratos sao referencias, sem copia operacional
+ou snapshots. Revisao de resultado continua somente leitura e nao concede GO/aceite.
+Revisao independente fechou os achados, sem regressao concreta remanescente.
+
+Passaram dez suites focais em Windows PowerShell 5.1: Test-SprintPrompts,
+Test-SprintWorkflow, Test-SprintEnsaio (48 casos), Test-SprintPlanning,
+Test-SprintSources, Test-SprintLifecycle, Test-SprintConcurrency,
+Test-SprintValidation (25 casos), Test-Implementation e Test-CurrentPromptLinks.
+`git diff --check` aprovado.
+O novo teste reproduziu a ausencia de links antes da correcao; inclui caminhos
+com percentuais, fontes ausentes, cabecalhos, notas e preparo idempotente.
+Workflow repetiu revisao/validacao com previsao em 19/10 e mesmos bytes, alem
+do cenario inicial de 16/10. Fixtures sinteticas e processos reais de CLI/concorrencia;
+nao substituem ensaio humano integrado ou aceite global.
+
+**Proxima etapa: S20**, previa do conversor descartavel, conforme contrato de
+transicao. S20-S28 permanecem pendentes (nove etapas). Nenhuma conversao ou limpeza
+de dados reais, corretiva de aplicacao, merge ou push executado. Extensao Java
+atual mantida. Conferir raiz, branch, HEAD e estado local antes da proxima fatia.
 
 ### Requisitos e fontes
 

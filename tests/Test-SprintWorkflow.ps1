@@ -35,10 +35,22 @@ $revised=New-HarnessSprintContext $f.Context -ContextPath $current.ContextPath -
 Assert ([IO.File]::ReadAllText($current.ValidationPath) -ceq $resultBefore) 'Preparo nao pode apagar ultimo calculo.'
 $data=Read-SprintData $current
 $data.Work[1].Effort.Dev=[pscustomobject]@{Min=6;Reference=6;Max=6}
+$data.State='PROPOSTA'
 $data.EvidenceReview=[pscustomobject]@{Reviewed=$true;Reason='Evidencia atual relida; mais dois dias-pessoa Dev.'}
 Save-SprintData $current $data
 $updated=Complete-HarnessSprintPlan $f.Root $current.ContextPath
 Assert ($updated.Simulation.ProductionDate -eq '2026-10-19') 'Reestimativa deve respeitar fim de semana.'
+$reviewBefore=Get-PlanningFixtureState $f
+$updatedBytes=[IO.File]::ReadAllText($current.ValidationPath)
+$revisedAgain=New-HarnessSprintContext $f.Context -ContextPath $current.ContextPath -Reason 'Nova premissa de esforco'
+Assert ($revisedAgain.ContextPath -eq $current.ContextPath -and $revisedAgain.ReviewPromptPath -eq $current.ReviewPromptPath) 'Revisar novamente deve manter os destinos do cenario.'
+Assert ([IO.File]::ReadAllText($current.ValidationPath) -ceq $updatedBytes) 'Revisar deve preservar o ultimo resultado publicado.'
+$data=Read-SprintData $current
+$data.State='PROPOSTA'
+$data.EvidenceReview=[pscustomobject]@{Reviewed=$true;Reason='Evidencia atual relida; mais dois dias-pessoa Dev.'}
+Save-SprintData $current $data
+$updatedAgain=Complete-HarnessSprintPlan $f.Root $current.ContextPath
+Assert ($updatedAgain.Simulation.ProductionDate -eq '2026-10-19' -and (Get-PlanningFixtureState $f) -ceq $reviewBefore) 'Mesmo preparo/revisao/validacao deve manter numeros, documentos e notas.'
 $data=Read-SprintData $current
 $data.Constraints.ReferenceDate='2026-10-26'
 $data.Work[0].Effort=[pscustomobject]@{Dev=@{Min=0;Reference=0;Max=0};Architect=@{Min=0;Reference=0;Max=0};DevOps=@{Min=0;Reference=0;Max=0}}

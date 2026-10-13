@@ -92,14 +92,30 @@ function New-SprintWorkTemplate {
 }
 
 function Get-SprintPrompt {
-    param([string]$Template,[string]$Existing,[string]$Path,$Current)
+    param([string]$Template,[string]$Existing,[string]$Path,$Current,$Inputs)
     $header=[regex]::Match($Template,'(?s)^---\r?\n.*?\r?\n---\r?\n')
     $body=if ($header.Success) {$Template.Substring($header.Length)} else {$Template}
     $text=[regex]::Replace($Existing,'(?s)^---\r?\n.*?\r?\n---\r?\n','')
     $text=Set-ProjectManagedBlock $text 'sprints:orientacao' $body.Trim()
-    $links=@('Cenario: '+$Current.Scenario,'ContextPath: '+$Current.ContextPath,
+    $links=@('Cenario: '+$Current.Scenario,'Mestre: '+$Current.MasterProject,'ContextPath: '+$Current.ContextPath,
         (Get-HarnessSourceLink $Path $Current.SprintPlanPath 'Plano corrente'),
         (Get-HarnessSourceLink $Path $Current.SprintDataPath 'Premissas e estimativas editaveis'))
+    $groups=[ordered]@{'Contrato e orientacoes correntes'=@($Inputs.References | Where-Object Kind -In @('Contrato','Indice geral'))}
+    foreach ($participant in $Inputs.Projects) {
+        $links+=Get-HarnessSourceLink $Path $participant.Source ('Codigo local - '+$participant.Project)
+        $groups['Projeto: '+$participant.Project]=$participant.References
+    }
+    foreach ($label in $groups.Keys) {
+        $links+='### '+$label
+        foreach ($reference in $groups[$label]) {
+            if ($reference.Kind -eq 'Associacao') { continue }
+            if ($reference.Status -eq 'REFERENCIA EXTERNA') { $links+='- ['+$reference.Kind+'](<'+$reference.Path+'>)' }
+            elseif ($reference.Status -eq 'DISPONIVEL' -or ($reference.Status -eq 'AUSENTE' -and (Test-Path -LiteralPath $reference.Path -PathType Container))) {
+                $description=$reference.Kind+' - '+[IO.Path]::GetFileName($reference.Path)
+                $links+='- '+(Get-HarnessSourceLink $Path $reference.Path $description)
+            } else { $links+='- Fonte indisponivel ('+$reference.Kind+'): '+$reference.Path }
+        }
+    }
     $text=Set-ProjectManagedBlock $text 'sprints:fontes' ($links -join "`r`n`r`n")
     $header.Value+$text
 }

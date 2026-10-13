@@ -77,12 +77,16 @@ Preserve-os enquanto atualiza a proposta e solicite nova validacao ao concluir.
 ## Preencher dados e narrativa
 
 Edite somente os dados proprios do planejamento permitidos pelo formato pronto
-(Work, Team, Constraints, Estimation, premissas, Decisions, Changes, EvidenceReview e Baseline.Accepted
+(Work, Team, Constraints, Estimation, premissas, Decisions, Changes, EvidenceReview,
+ScopeCategories/ScopeDecision e Baseline.Accepted
 comprovadas conforme o direcionamento humano e os campos efetivamente presentes,
-mais ScopeCategories/ScopeDecision/Baseline.Issues somente na formacao inicial acima) e o
+mais Baseline.Issues somente na formacao inicial acima) e o
 Markdown editorial corrente. Preserve Baseline.Known informado pelo preparo;
 nao declare conhecido um registro ausente/invalido. Preserve as identidades de B0 depois de
-o resultado corrente fixar Baseline.Known=true. Nao edite contexto, escopo de
+o resultado corrente fixar Baseline.Known=true. A escolha humana pode incluir optional
+depois disso: atualize ScopeCategories/ScopeDecision e registre as novas issues em
+Changes.New, sem alterar B0. Retirar trabalho exige Changes.Excluded explicita.
+Nao edite contexto, escopo de
 projetos, resultado.json ou blocos calculados. Simulation pertence somente ao
 resultado produzido pela tarefa; nao a inclua nos dados editaveis.
 Nao escreva planos de corretiva, registros, fichas ou arquivos da aplicacao.

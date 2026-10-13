@@ -146,8 +146,15 @@ Exclusividade transitoria comum protege descoberta e indices; publicacao do
 projeto troca plano/resultado juntos. Textos lidos e hashes de concorrencia
 ficam somente em memoria. Indices participantes podem reconstruir seus links
 sem recalcular o mestre. Provas em Test-SprintWorkflow, Test-SprintLifecycle e
-Test-SprintConcurrency; contrato em planejamento-sprints.md. Prompts e ensaio
-integrado ainda dependem de S19/S28.
+Test-SprintConcurrency; contrato em planejamento-sprints.md.
+
+S19 concluida em 13/10/2026: prompts correntes com fontes diretas por projeto,
+indice geral, contrato/ADR/guia e lacunas explicitas. Preservam cabecalhos atuais,
+notas e destinos; optional pode entrar por decisao humana depois de B0 fixada,
+com inclusoes separadas. Test-SprintPrompts e Test-SprintWorkflow conferem links
+e repeticao de preparo/revisao/validacao sem snapshots ou revisoes extras.
+Revisao de resultado permanece somente leitura. Ensaio humano integrado e aceite
+da simplificacao continuam em S28.
 
 ### Demais consumidores
 

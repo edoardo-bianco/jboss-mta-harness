@@ -17,12 +17,11 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 - [x] Registrar precedencia sobre modernizacao e demais capacidades futuras.
 - [x] Conferir links/ancoras dos acrescimos em 11 documentos, diff e requisitos; historico anterior de plan.md preservado. Sem teste de runtime nesta entrega documental.
 
-Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10 e 12/10/2026.
-[Ponto atual e verificacoes](plan.md#retomada-de-12102026).
-S11-S18 implementados e revisados. Proxima etapa: S19;
-as 10 etapas S19-S28 permanecem pendentes.
-Pausa humana em 12/10: S19 tem rascunho parcial dos dois prompts de sprints;
-retomar pela revisao e pelos testes, conforme [registro da pausa](plan.md#pausa-humana-de-12102026).
+Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10, 12/10 e 13/10/2026.
+[Ponto atual e verificacoes](plan.md#retomada-de-13102026).
+S11-S19 implementados e revisados. Proxima etapa: S20;
+as nove etapas S20-S28 permanecem pendentes.
+A pausa humana de 12/10 permanece como [registro historico](plan.md#pausa-humana-de-12102026).
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
@@ -43,9 +42,10 @@ retomar pela revisao e pelos testes, conforme [registro da pausa](plan.md#pausa-
 - [x] Esclarecimento de 12/10: navegacao corrente prefere HTML/Markdown/log legivel a JSON/output.js; indice mostra situacao da operacao. Links existentes e preservacao de dados/notas humanas verificados em Test-ProjectNavigation e Test-ReconciliationSources.
 - [x] S14: preparo de implementacao/revisao corrente, fontes navegaveis e observacoes preservadas, revisao do alcance do GO sem autorizacao inferida. Escolha Git usa o projeto selecionado e compara documentos somente em memoria. Test-Implementation e Test-ImplementationBranch PS5.1 aprovados; revisao independente sem bloqueantes. Ensaio humano do agente permanece no aceite integrado.
 - [x] S15: consultas opcionais leem contexto/registro/MTA correntes sem escrita, extratos ou fallback legado. Raizes, limites, associacao, multiprojeto e mudancas de base entre paginas protegidos; falhas de acesso nao elegem outro candidato silenciosamente. Sete suites de consultas/fluxo sem Node, quatro do nucleo e tres testes Node/MCP aprovados; revisao independente sem bloqueantes.
-- [x] S16: cenario funcional corrente em participante Maven mestre; indices apontam ao mesmo plano. B0, inclusoes, calendario e consumo preservados no ultimo resultado, sem revisoes/selo/ponteiro ou DataSnapshot. Oito suites de sprints e Test-IssuePlanning PS5.1 passaram; concorrencia entre processos, edicao externa, relocalizacao e rollback exercitados. Revisao independente sem bloqueantes; prompts de sprints ainda requerem S19.
+- [x] S16: cenario funcional corrente em participante Maven mestre; indices apontam ao mesmo plano. B0, inclusoes, calendario e consumo preservados no ultimo resultado, sem revisoes/selo/ponteiro ou DataSnapshot. Oito suites de sprints e Test-IssuePlanning PS5.1 passaram; concorrencia entre processos, edicao externa, relocalizacao e rollback exercitados. Revisao independente sem bloqueantes; prompts de sprints concluidos na S19 abaixo.
 - [x] S17: leitura de configuracao sem criar registros; selecao por artifactId; workspace/MCP usam mta.diretorio por POM, sem permissao pelo runsPath legado. Aliases/settings humanos preservados, cancelamentos testados e indice geral reconstroi links de sprints. Sete suites PS5.1 e integracao MCP aprovadas; revisao independente sem bloqueantes.
 - [x] S18: prompts preparados oferecem links legiveis existentes, preferindo HTML/Markdown/log; ausencia de registro vira lacuna sem link quebrado. Cabecalhos agent/tools de implementacao/revisao acompanham template sem apagar notas humanas. Cinco suites PS5.1 aprovadas em MTA/EVIDENCIAS; revisao independente sem bloqueantes remanescentes.
+- [x] S19: prompts de sprints e revisao de resultado conferidos; fontes diretas por participante, indice geral e contratos atuais sem copias operacionais. Optional posterior a B0 exige decisao humana e inclusoes separadas. Dez suites PS5.1 aprovadas, com preparo/revisao/validacao repetidos nos mesmos destinos, numeros e notas; revisao independente sem achados remanescentes. Ensaio humano integrado continua em S28.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos

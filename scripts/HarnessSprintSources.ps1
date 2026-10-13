@@ -25,8 +25,8 @@ function Get-SprintMarkdownReferences {
 function Get-HarnessSprintSources {
     param($Context,[object[]]$Projects)
     $root=$Context.Root
-    $references=@(Get-SprintReference (Join-Path $root '.harness/indices/projetos.md') $root 'Indice')
-    foreach ($relative in @('doc/features/planejamento-macro-sprints.md','doc/especificacoes/planejamento-sprints.md','doc/modelos/planejamento-sprints.template.md','.github/prompts/planejar-sprints.prompt.md','.github/prompts/revisar-sprints.prompt.md')) {
+    $references=@(Get-SprintReference (Join-Path $root '.harness/indices/projetos.md') $root 'Indice geral')
+    foreach ($relative in @('doc/features/planejamento-macro-sprints.md','doc/especificacoes/planejamento-sprints.md','doc/adr/0009-estado-corrente-por-projeto.md','doc/guias/tools/planejamento-sprints.md','doc/modelos/planejamento-sprints.template.md','.github/prompts/planejar-sprints.prompt.md','.github/prompts/revisar-sprints.prompt.md')) {
         $references+=Get-SprintReference (Join-Path $root $relative) $root 'Contrato'
     }
     $entries=@(foreach ($item in $Projects) {
