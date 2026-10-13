@@ -1,18 +1,23 @@
-function Set-HarnessProjectOperation {
-    param($Project,[ValidatePattern('^[a-z][a-z0-9-]*$')][string]$Name,[ValidateSet('RUNNING','SUCCEEDED','FAILED')][string]$Status,[string]$ErrorMessage,[string]$LogPath,[Collections.IDictionary]$Files=@{})
-    $old=Read-HarnessProjectFiles $Project @('atual/operacao.json','indice.md')
+function Get-HarnessProjectOperationText {
+    param([string]$Previous,[ValidatePattern('^[a-z][a-z0-9-]*$')][string]$Name,[ValidateSet('RUNNING','SUCCEEDED','FAILED')][string]$Status,[string]$ErrorMessage,[string]$LogPath,[string]$DateUtc=[DateTime]::UtcNow.ToString('o'))
     $operations=[ordered]@{}
-    if ($old['atual/operacao.json']) {
-        $current=ConvertFrom-Json $old['atual/operacao.json']
+    if ($Previous) {
+        $current=ConvertFrom-Json $Previous
         foreach ($entry in $current.PSObject.Properties) {
             $operations[$entry.Name]=$entry.Value
             if ($Status -eq 'RUNNING' -and $entry.Name -ne $Name -and $entry.Value.Status -eq 'RUNNING') {
-                $operations[$entry.Name]=[ordered]@{Status='FAILED';DateUtc=[DateTime]::UtcNow.ToString('o');Error='Operacao anterior interrompida; confira o ultimo log.';LogPath=$entry.Value.LogPath}
+                $operations[$entry.Name]=[ordered]@{Status='FAILED';DateUtc=$DateUtc;Error='Operacao anterior interrompida; confira o ultimo log.';LogPath=$entry.Value.LogPath}
             }
         }
     }
-    $operations[$Name]=[ordered]@{Status=$Status;DateUtc=[DateTime]::UtcNow.ToString('o');Error=$ErrorMessage;LogPath=$LogPath}
-    $writes=@{'atual/operacao.json'=($operations | ConvertTo-Json -Depth 6)}
+    $operations[$Name]=[ordered]@{Status=$Status;DateUtc=$DateUtc;Error=$ErrorMessage;LogPath=$LogPath}
+    $operations | ConvertTo-Json -Depth 6
+}
+
+function Set-HarnessProjectOperation {
+    param($Project,[ValidatePattern('^[a-z][a-z0-9-]*$')][string]$Name,[ValidateSet('RUNNING','SUCCEEDED','FAILED')][string]$Status,[string]$ErrorMessage,[string]$LogPath,[Collections.IDictionary]$Files=@{})
+    $old=Read-HarnessProjectFiles $Project @('atual/operacao.json','indice.md')
+    $writes=@{'atual/operacao.json'=(Get-HarnessProjectOperationText $old['atual/operacao.json'] $Name $Status $ErrorMessage $LogPath)}
     if ($old['indice.md']) {
         $writes['indice.md']=Set-ProjectManagedBlock $old['indice.md'] 'operacoes' (Get-ProjectOperationsText $writes['atual/operacao.json'])
     }

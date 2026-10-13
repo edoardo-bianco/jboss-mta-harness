@@ -9,6 +9,7 @@ Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -DisableNameCheck
 . (Join-Path $PSScriptRoot '../../scripts/HarnessIssueSources.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoEvidencias.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoMta.ps1')
+. (Join-Path $PSScriptRoot 'ConversaoBuild.ps1')
 . (Join-Path $PSScriptRoot '../../scripts/HarnessPrioritizationState.ps1')
 . (Join-Path $PSScriptRoot '../../scripts/HarnessPrioritizationIndex.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoPriorizacao.ps1')
@@ -16,7 +17,7 @@ Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -DisableNameCheck
 
 function Invoke-ConversionApply {
     [CmdletBinding()]
-    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@())
+    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado)
     $pomPath=Resolve-ProjectPath $Pom ([IO.Path]::GetFullPath($Workspace))
     # O nome da pasta e os documentos devem observar o mesmo POM. Manter apenas
     # compartilhamento de leitura impede troca/renomeacao durante a publicacao.
@@ -26,7 +27,7 @@ function Invoke-ConversionApply {
         $project=Get-HarnessProjectReference $Workspace $pomPath
         $lease=Enter-HarnessProjectAccess $project -ForOperation
         $inputs=Read-ConversionInputs -Workspace $Workspace -Pom $Pom -SourceLegado $SourceLegado -Registro $Registro -Contexto $Contexto
-        $state=New-ConversionCoreFiles $inputs $MtaDiretorio $PrioritizacaoContexto
+        $state=New-ConversionCoreFiles $inputs $MtaDiretorio $PrioritizacaoContexto $BuildResultado
         $expected=Read-HarnessProjectFiles $project @($state.Files.Keys) -AsBytes
         $writes=[ordered]@{}
         foreach ($relative in $state.Files.Keys) {

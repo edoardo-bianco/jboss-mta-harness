@@ -463,6 +463,21 @@ Revisao independente fechou quatro achados (URL, controles, extratos e provenien
 Nenhum dado real convertido. S21 ainda inclui multiprojeto, cenarios, diagnosticos
 locais e Validar; CLI somente Previa e S22-S28/aceite integrado pendentes.
 
+Sexta fatia S21: ultima tentativa de build selecionada pela data de execucao
+com fuso, incluindo falha. Mtime nao escolhe; empate exige BuildResultado.
+Identidade e caminhos correntes, log byte a byte, ferramentas e Git informativo
+preservados, sem RunId. Source relocalizado conserva SourceAtBuild. Resultado
+e log devem pertencer a mesma tentativa; JSON nao pode assumir papel de log.
+Erro com codigo de saida ausente pode ser preservado com lacuna explicita de log,
+sem inferir a etapa da falha. Conversao nao executa build nem valida codigo atual.
+
+Situacao de operacao e gerada pelo nucleo antes da publicacao; indice usa bloco
+gerenciado que o runtime atualiza. Test-ConversionBuild, Build (ferramentas
+simuladas) e ProjectNavigation passaram em PS5.1. Reaplicacao equivalente, empate,
+escolha invalida, log ausente e trabalho posterior foram exercitados. Revisao
+independente fechou dois achados. S21 ainda inclui Sonar, multiprojeto, cenarios
+e Validar; CLI somente Previa, sem conversao/limpeza real ou aceite integrado.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

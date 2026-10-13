@@ -106,7 +106,7 @@ Export-ModuleMember -Function Read-HarnessProjectMta,Read-HarnessMtaDirectory
 . (Join-Path $PSScriptRoot 'HarnessProjectDocuments.ps1')
 Export-ModuleMember -Function Update-HarnessProjectDocuments,Get-HarnessProjectDecisions
 Export-ModuleMember -Function Get-HarnessProjectMigrationText,Read-ProjectDecisionRows,Resolve-ProjectPath
-Export-ModuleMember -Function Find-ProjectManagedBlock,Set-ProjectManagedBlock,ConvertTo-ProjectCell
+Export-ModuleMember -Function Find-ProjectManagedBlock,Set-ProjectManagedBlock,ConvertTo-ProjectCell,Get-ProjectOperationsText
 
 function Publish-HarnessWorkspaceIndex {
     param([string]$Root,[string]$Text)
@@ -118,7 +118,7 @@ function Publish-HarnessWorkspaceIndex {
 }
 Export-ModuleMember -Function Publish-HarnessWorkspaceIndex
 . (Join-Path $PSScriptRoot 'HarnessProjectOperations.ps1')
-Export-ModuleMember -Function Set-HarnessProjectOperation,Get-HarnessProjectTemporary,Remove-HarnessProjectTemporary,Get-HarnessProjectTreePublication
+Export-ModuleMember -Function Set-HarnessProjectOperation,Get-HarnessProjectOperationText,Get-HarnessProjectTemporary,Remove-HarnessProjectTemporary,Get-HarnessProjectTreePublication
 Export-ModuleMember -Function Get-HarnessProjectMtaLog
 . (Join-Path $PSScriptRoot 'HarnessProjectReadRoots.ps1')
 Export-ModuleMember -Function Get-HarnessProjectReadRoots
