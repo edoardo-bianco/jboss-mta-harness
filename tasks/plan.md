@@ -485,6 +485,39 @@ regras. Test-SonarReview passou em PS5.1 (parecer, dialogo e concorrencia, sem
 JDK/rede/token); revisao independente confirmou equivalencia. Conversao Sonar
 continua pendente neste checkpoint.
 
+### Pausa humana S21 - 13/10/2026
+
+Pedido humano: "quero parar em um ponto seguro". Interromper o desenvolvimento
+depois de salvar este checkpoint. Branch `harness/planejar-simplificacao-projetos`;
+nenhuma conversao/limpeza de dados reais, troca da extensao Java, integracao ou push.
+
+Entregas locais validadas: `bd355d1` (priorizacao uniprojeto), `e98c78c` (anexos
+exclusivos da priorizacao), `6d89469` (ultima tentativa de build) e `fa13aac`
+(avaliador Sonar no nucleo, equivalente ao consumidor anterior).
+
+Conversor Sonar salvo como trabalho em andamento. A aplicacao recusa a familia
+SONAR, inclusive pela API interna; CLI continua somente Previa. O primeiro
+Test-ConversionSonar passou antes dos acrescimos finais, mas a suite ampliada
+nao esta validada e nao deve ser apresentada como concluida. Retomar por:
+
+1. Tratar falha na etapa BASELINE: BaselineResultPath pode ter sido apenas
+   tentado/rejeitado, com BaselineRunId null. Nao validar como base adotada nem
+   atribuir BaselineAnalysisId; preservar ultima falha. Achado P2 aberto.
+2. Preservar proveniencia funcional do parecer humano (AnalysisId, Source,
+   fase/data da coleta de origem), hoje perdida ao gravar Assessment null.
+   Parecer sobre outra coleta permanece pendente de revisao. Achado P2 aberto.
+3. Completar os testes acrescidos: baseline rejeitado/adotado, origens distintas,
+   somente tentativa parcial, selecoes/empates e nova decisao concorrente.
+   Revisar SonarTentativa e a suite Sonar ampliada; conferir novamente build,
+   pois a selecao de datas foi extraida para ConversaoDiagnosticos.ps1.
+4. Fechar revisao antes de habilitar SONAR em New-ConversionCoreFiles. Depois
+   continuar multiprojeto, cenarios e Validar da S21. S22-S28 e aceite integrado
+   permanecem pendentes; nao inferir conclusao pela existencia do checkpoint.
+
+Antes da pausa, Test-ConversionBuild e Test-ConversionCli passaram em PowerShell
+5.1 apos a extracao de datas e a reinstalacao da recusa de Sonar. Diff sem erros
+de espacos. Suite Sonar ampliada continua pendente conforme os itens acima.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

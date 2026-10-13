@@ -26,12 +26,13 @@ function Convert-ConversionMarkdown {
     [regex]::Replace($Text,'\[([^\]\r\n]*)\]\((?:<([^>\r\n]+)>|([^\s\)]+))\)',$evaluator)
 }
 
-function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado) {
+function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa) {
     $project=$Inputs.Project
     if (-not $Inputs.Register) { throw 'Escolha um registro legado unico antes de aplicar.' }
     if (@($Inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $Inputs.Planning.Record) { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
+    # Sonar permanece fora da aplicacao ate fechar os achados/testes da S21.
     if (@($Inputs.Preview.Related | Where-Object Kind -NotIn @('RUNS','PRIORIZACAO','BUILDS')).Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
-    $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
+    $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;SonarInventories=@{};SonarSummary=$null;EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
     $state.Map[$Inputs.Register.Path]=$project.MigrationPath
     $record=$Inputs.Planning.Record
     if ($record) {
@@ -46,11 +47,13 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     }
     Add-ConversionMta $state $MtaDiretorio
     Add-ConversionBuild $state $BuildResultado
+    Add-ConversionSonar $state $SonarResultado $SonarTentativa
     $prioritizations=@(Read-ConversionPrioritization $state $PrioritizacaoContexto)
     $evidence=Read-ConversionEvidence $state $record $prioritizations
     # Todos os destinos devem existir no mapa antes de transformar links.
     Add-ConversionPrioritizationDocuments $state $prioritizations
     Add-ConversionEvidenceDocuments $state $evidence
+    Add-ConversionSonarSummary $state
     $state.Files['projeto.json']=([ordered]@{pom=$project.Pom;mta=[ordered]@{diretorio=$state.MtaDirectory}} | ConvertTo-Json -Depth 5)
     $migration=Convert-ConversionMarkdown $Inputs.Register.Text $Inputs.Register.Path $project.MigrationPath $state
     $migration=[regex]::Replace($migration,'(?m)^Project:[^\r\n]*',('Project: '+$project.Name))
@@ -94,6 +97,9 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     if ($record) { $index+=@((Get-HarnessSourceLink $project.IndexPath $project.PlanPath 'Plano corrente'),(Get-HarnessSourceLink $project.IndexPath $project.TodoPath 'Tarefas correntes')) }
     if ($state.Mta) { $index+=Get-HarnessSourceLink $project.IndexPath $state.Mta.ReportPath 'MTA atual' }
     if ($state.Files.Contains('atual/build/console.log')) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder 'atual/build/console.log') 'Ultima tentativa de build' }
+    if ($state.SonarSummary) { $index+=Get-HarnessSourceLink $project.IndexPath $state.SonarSummary.Target 'Relatorio Sonar atual' }
+    elseif ($state.Files.Contains('atual/diagnosticos/sonar-console.log')) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder 'atual/diagnosticos/sonar-console.log') 'Ultima tentativa Sonar; diagnostico indisponivel' }
+    if ($state.Files.Contains('atual/diagnosticos/sonar-decisao.json')) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder 'atual/diagnosticos/sonar-decisao.json') 'Parecer humano Sonar a revisar' }
     foreach ($relative in @($state.Files.Keys | Where-Object { $_ -like 'atual/priorizacao/*/escopos/*/indice.md' } | Sort-Object)) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder $relative) 'Priorizacao corrente' }
     foreach ($diagnostic in $state.Diagnostics) { $index+='- '+(ConvertTo-ProjectCell $diagnostic) }
     if ($state.Files.Contains('atual/operacao.json')) { $index+=Set-ProjectManagedBlock '' 'operacoes' (Get-ProjectOperationsText $state.Files['atual/operacao.json']) }

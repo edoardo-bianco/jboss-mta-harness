@@ -11,20 +11,12 @@ function Add-ConversionBuild($State,[string]$SelectedResult) {
         if ($record.Sources.Count -ne 1 -or (Split-Path $record.Path -Leaf) -ine 'result.json' -or
             (Resolve-ProjectPath (Get-LegacyValue $data 'ResultPath') $State.Project.Root) -ine $record.Path -or
             (Get-LegacyValue $data 'Status') -cnotin @('SUCCEEDED','FAILED')) { throw 'Resultado de build legado desconhecido ou inconsistente.' }
-        $dates=@(foreach ($field in @('StartedAtUtc','FinishedAtUtc')) {
-            $value=[string](Get-LegacyValue $data $field)
-            $date=[DateTimeOffset]::MinValue
-            if ($value -notmatch '^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$' -or -not [DateTimeOffset]::TryParse($value,[Globalization.CultureInfo]::InvariantCulture,[Globalization.DateTimeStyles]::None,[ref]$date)) { throw 'Build sem data de execucao com fuso; informe resultado verificavel.' }
-            $date
-        })
-        if ($dates[1] -lt $dates[0]) { throw 'Build termina antes do inicio declarado.' }
+        $dates=Get-ConversionExecutionDates $data 'Build'
         $exit=Get-LegacyValue $data 'ExitCode'
         if (($null -ne $exit -and $exit -isnot [int]) -or ($data.Status -ceq 'SUCCEEDED' -and ($null -eq $exit -or $exit -ne 0)) -or ($data.Status -ceq 'FAILED' -and $null -ne $exit -and $exit -eq 0)) { throw 'Status e codigo de saida do build divergentes.' }
-        [pscustomobject]@{Record=$record;Finished=$dates[1]}
+        [pscustomobject]@{Record=$record;Finished=$dates.Finished}
     })
-    $ordered=@($candidates | Sort-Object Finished -Descending)
-    if (@($ordered | Where-Object Finished -EQ $ordered[0].Finished).Count -ne 1) { throw 'Ultimas tentativas de build empatadas; escolha BuildResultado explicitamente.' }
-    $record=$ordered[0].Record; $data=$record.Data; $folder=Split-Path $record.Path -Parent
+    $record=(Select-ConversionNewest $candidates 'BuildResultado').Record; $data=$record.Data; $folder=Split-Path $record.Path -Parent
     $log=Resolve-ProjectPath (Get-LegacyValue $data 'LogPath') $State.Project.Root
     if ((Split-Path $log -Parent) -ine $folder -or (Split-Path $log -Leaf) -ine 'console.log') { throw 'Log do build deve ser console.log da tentativa selecionada.' }
     $targetLog=Join-Path $State.Project.Folder 'atual/build/console.log'

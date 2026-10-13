@@ -26,6 +26,10 @@ implementados e verificados em fixtures; continuar pelos complementos da
 [retomada](plan.md#retomada-s21-s28---13102026), mantendo a CLI somente Previa.
 A pausa humana de 12/10 permanece como [registro historico](plan.md#pausa-humana-de-12102026).
 
+**Pausa humana atual:** [checkpoint S21 de 13/10](plan.md#pausa-humana-s21---13102026).
+Sonar salvo em andamento, com aplicacao bloqueada: fechar os dois P2 e a suite
+ampliada antes de habilitar a familia. Retomar somente quando solicitado.
+
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
 - [x] S04a: leitura direta do formato static-report, data/fuso, empate, incompleto e regravacao, sem persistir diagnostico.
