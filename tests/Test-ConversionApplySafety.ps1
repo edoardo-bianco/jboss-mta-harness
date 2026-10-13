@@ -17,10 +17,10 @@ Assert ($data.SelectedIssues[0].Scope -notmatch '\.harness[/\\]planning') 'Scope
 $text=Get-Content -Raw $project.PlanPath
 Assert ($text -match 'novo-checkout' -and $text -notmatch 'aplicacao[/\\]?%?') 'Raiz e arquivo do Source devem acompanhar associacao explicita.'
 $f=New-ConversionFixture
-Write-ConversionFile $f.Register ([IO.File]::ReadAllText($f.Register).Replace('<!-- mta:inicio -->','<!-- mta:inicio -->'+"`n"+'<!-- MTA {"Run":"C:/mta"} -->'))
+Write-ConversionFile $f.Register ([IO.File]::ReadAllText($f.Register).Replace('<!-- mta:inicio -->','<!-- mta:inicio -->'+"`n"+'<!-- MTA {"RunId":"origem-nao-informada"} -->'))
 $before=Get-ConversionState $f
-Reject { Invoke-ConversionApply $f.Workspace $f.Pom } 'Registro MTA sem plano deve aguardar suporte de origem.'
-Assert ((Get-ConversionState $f) -ceq $before) 'Origem ainda nao suportada nao autoriza publicacao parcial.'
+Reject { Invoke-ConversionApply $f.Workspace $f.Pom } 'Registro MTA sem origem exige escolha explicita.'
+Assert ((Get-ConversionState $f) -ceq $before) 'Origem nao resolvida nao autoriza publicacao parcial.'
 # Simular editor externo tentando trocar artifactId durante preparo/publicacao.
 $f=New-ConversionFixture
 & $conversionModule {

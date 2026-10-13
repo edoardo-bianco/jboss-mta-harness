@@ -139,7 +139,9 @@ function Add-ConversionEvidence($State,$Record) {
             }
             $identity=[ordered]@{Project=$State.Project.Name;Category=$document.Category;Id=$document.Id;LocalPaths=@($local|Sort-Object -Unique);EvidencePaths=@($human|Sort-Object -Unique)}
             $text=Set-ProjectManagedBlock $text 'ficha:identidade' ($identity|ConvertTo-Json -Depth 6)
-            $text=Get-IssueSourcesText $State.Project $null $document.Id $document.Category $text $target -EvidenceOnly:((Get-LegacyValue $Record.Data 'PlanningBasis' 'MTA') -eq 'EVIDENCIAS') -AvailablePaths @($State.Map.Values)
+            $evidenceOnly=(Get-LegacyValue $Record.Data 'PlanningBasis' 'MTA') -eq 'EVIDENCIAS'
+            $mta=if ($evidenceOnly) {$null} else {$State.Mta}
+            $text=Get-IssueSourcesText $State.Project $mta $document.Id $document.Category $text $target -EvidenceOnly:$evidenceOnly -AvailablePaths @($State.Map.Values)
         }
         $State.Files[$document.Relative]=$text
     }

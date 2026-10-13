@@ -425,6 +425,15 @@ publicacao. Test-ConversionHumanEvidence, Apply, ApplySafety e Attachments
 passaram em PS5.1. Revisao independente fechou seis achados; MTA, cobertura,
 sprints e Validar ainda pendentes. Nenhum dado real convertido.
 
+Terceira fatia S21: origem MTA externa configurada sem copia; conjunto interno
+selecionado publicado no destino corrente, sem outros relatorios aninhados.
+Origem indisponivel conserva base MTA e pendencia; conflito de origens exige
+escolha explicita. Inventario/candidatos/datas e conteudo revalidados antes da
+publicacao. Test-ConversionMta, HumanEvidence, ApplySafety e PlanningEvidence
+passaram em PS5.1. MTA inclui injecoes de alteracao de data/novo conjunto e
+reaplicacao idempotente. Revisao independente fechou dois achados. S21 parcial;
+cobertura, sprints, diagnosticos restantes e Validar continuam pendentes.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

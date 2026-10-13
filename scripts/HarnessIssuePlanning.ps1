@@ -98,7 +98,8 @@ function Get-CurrentPlanningSources {
     }
     if ($Data.PlanningBasis -eq 'MTA' -and $Data.Mta) {
         $lines+=Get-HarnessSourceLink $From $Data.Mta.ReportPath 'MTA atual'
-    } else { $lines+='Base EVIDENCIAS: nenhum resultado MTA atribuido a esta proposta.' }
+    } elseif ($Data.PlanningBasis -eq 'MTA') { $lines+='Base MTA: origem atualmente indisponivel. Conferir aplicabilidade e pendencias; nao inferir resolucao.' }
+    else { $lines+='Base EVIDENCIAS: nenhum resultado MTA atribuido a esta proposta.' }
     foreach ($ficha in $Data.FichaPaths) {
         if ($ficha.Status -eq 'DISPONIVEL') { $lines+=Get-HarnessSourceLink $From $ficha.Path ('Ficha: '+$ficha.Id) }
         else { $lines+='Ficha ainda a elaborar: '+(ConvertTo-ProjectCell $ficha.Id) }

@@ -26,13 +26,12 @@ function Convert-ConversionMarkdown {
     [regex]::Replace($Text,'\[([^\]\r\n]*)\]\((?:<([^>\r\n]+)>|([^\s\)]+))\)',$evaluator)
 }
 
-function New-ConversionCoreFiles($Inputs) {
+function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio) {
     $project=$Inputs.Project
     if (-not $Inputs.Register) { throw 'Escolha um registro legado unico antes de aplicar.' }
-    if ($Inputs.Register.Text -match '(?i)<!--\s*MTA\s*\{|Rodada MTA:') { throw 'Registro com origem MTA exige resolucao explicita antes de aplicar.' }
     if (@($Inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $Inputs.Planning.Record) { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
-    if ($Inputs.Preview.Related.Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
-    $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
+    if (@($Inputs.Preview.Related | Where-Object Kind -NE 'RUNS').Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
+    $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
     $state.Map[$Inputs.Register.Path]=$project.MigrationPath
     $record=$Inputs.Planning.Record
     if ($record) {
@@ -45,17 +44,20 @@ function New-ConversionCoreFiles($Inputs) {
             $cursor=if ($previous) { @($Inputs.Records | Where-Object Path -IEQ (Resolve-ProjectPath $previous.ContextPath $project.Root))[0] } else { $null }
         }
     }
+    Add-ConversionMta $state $MtaDiretorio
     Add-ConversionEvidence $state $record
-    $state.Files['projeto.json']=([ordered]@{pom=$project.Pom;mta=[ordered]@{diretorio=$null}} | ConvertTo-Json -Depth 5)
+    $state.Files['projeto.json']=([ordered]@{pom=$project.Pom;mta=[ordered]@{diretorio=$state.MtaDirectory}} | ConvertTo-Json -Depth 5)
     $migration=Convert-ConversionMarkdown $Inputs.Register.Text $Inputs.Register.Path $project.MigrationPath $state
     $migration=[regex]::Replace($migration,'(?m)^Project:[^\r\n]*',('Project: '+$project.Name))
     $migration=[regex]::Replace($migration,'(?m)^Source:[^\r\n]*',('Source: '+$project.Source))
+    $migration=[regex]::Replace($migration,'(?s)<!--\s*MTA\s+\{.*?\}\s*-->','')
+    $migration=[regex]::Replace($migration,'(?m)^Rodada MTA:[^\r\n]*','Origem MTA corrente nos links de fontes. Conversao nao comprova reconciliacao.')
     $migration=[regex]::Replace($migration,'(?m)^\| ID \([^\r\n]+','| ID | Issue | Categoria | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |')
     $migration=Set-ProjectManagedBlock $migration 'conversao' 'Estado preliminar. Conferir decisoes, referencias e alcance do GO humano; converter nao concede autorizacao nem aceite.'
-    $state.Files['migracao.md']=Get-HarnessProjectMigrationText $project $null $migration
+    $state.Files['migracao.md']=Get-HarnessProjectMigrationText $project $state.Mta $migration
     if ($record) {
         $basis=Get-LegacyValue $record.Data 'PlanningBasis' 'MTA'
-        if ($basis -ne 'EVIDENCIAS') { throw 'Base MTA exige resolucao explicita da origem antes de aplicar.' }
+        if ($basis -notin @('MTA','EVIDENCIAS')) { throw 'Base de planejamento desconhecida.' }
         $ids=@(Get-ConversionIssueIds $record.Data)
         $selected=@(foreach ($id in $ids) {
             $rows=@(Read-ProjectDecisionRows $state.Files['migracao.md'] | Where-Object Id -CEQ $id)
@@ -66,7 +68,7 @@ function New-ConversionCoreFiles($Inputs) {
         $promptPath=Join-Path $project.Folder 'atual/planejamento/planejar-lotes.prompt.md'
         $data=[pscustomobject][ordered]@{Purpose='current-planning';Project=$project.Name;Source=$project.Source;Pom=$project.Pom;
             PlanningBasis=$basis;SelectedIssues=$selected;ContextPath=$project.ContextPath;PlanPath=$project.PlanPath;TodoPath=$project.TodoPath;
-            PromptPath=$promptPath;MigrationPath=$project.MigrationPath;EvidenceIndexPath=$state.EvidenceIndexPath;EvidenceInputs=@($state.EvidenceInputs);FichaPaths=@($state.FichaPaths);Mta=$null;
+            PromptPath=$promptPath;MigrationPath=$project.MigrationPath;EvidenceIndexPath=$state.EvidenceIndexPath;EvidenceInputs=@($state.EvidenceInputs);FichaPaths=@($state.FichaPaths);Mta=$(if ($basis -eq 'MTA' -and $state.Mta) {@{ReportPath=$state.Mta.ReportPath;CatalogPath=$state.Mta.CatalogPath}} else {$null});
             ReconciledPath=(Join-Path $project.ReconciledPath 'resultado.md');ContractPath=(Join-Path $codeRoot 'doc/adr/0009-estado-corrente-por-projeto.md');
             NeedsReview=$true;ReviewReasons=@('Conversao de registros: revisao humana da proposta e do alcance do GO necessaria.');Diagnostics=@($state.Diagnostics)}
         Assert-CurrentPlanningContext $data $project
@@ -85,6 +87,8 @@ function New-ConversionCoreFiles($Inputs) {
     }
     $index=@('# Projeto: '+$project.Name,'',(Get-HarnessSourceLink $project.IndexPath $project.Pom 'POM'),(Get-HarnessSourceLink $project.IndexPath $project.MigrationPath 'Decisoes de migracao'))
     if ($record) { $index+=@((Get-HarnessSourceLink $project.IndexPath $project.PlanPath 'Plano corrente'),(Get-HarnessSourceLink $project.IndexPath $project.TodoPath 'Tarefas correntes')) }
+    if ($state.Mta) { $index+=Get-HarnessSourceLink $project.IndexPath $state.Mta.ReportPath 'MTA atual' }
+    foreach ($diagnostic in $state.Diagnostics) { $index+='- '+(ConvertTo-ProjectCell $diagnostic) }
     $index+=@('','Conversao preliminar. Revisao do GO e aceite humanos pendentes.')
     $state.Files['indice.md']=($index -join "`n")+"`n"
     $state
