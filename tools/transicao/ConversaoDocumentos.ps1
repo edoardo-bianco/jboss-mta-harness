@@ -31,8 +31,8 @@ function New-ConversionCoreFiles($Inputs) {
     if (-not $Inputs.Register) { throw 'Escolha um registro legado unico antes de aplicar.' }
     if ($Inputs.Register.Text -match '(?i)<!--\s*MTA\s*\{|Rodada MTA:') { throw 'Registro com origem MTA exige resolucao explicita antes de aplicar.' }
     if (@($Inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $Inputs.Planning.Record) { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
-    if ($Inputs.Preview.Related.Count -or $Inputs.Preview.Attachments.Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
-    $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Diagnostics=(New-Object 'Collections.Generic.List[string]')}
+    if ($Inputs.Preview.Related.Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
+    $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
     $state.Map[$Inputs.Register.Path]=$project.MigrationPath
     $record=$Inputs.Planning.Record
     if ($record) {
@@ -45,6 +45,7 @@ function New-ConversionCoreFiles($Inputs) {
             $cursor=if ($previous) { @($Inputs.Records | Where-Object Path -IEQ (Resolve-ProjectPath $previous.ContextPath $project.Root))[0] } else { $null }
         }
     }
+    Add-ConversionEvidence $state $record
     $state.Files['projeto.json']=([ordered]@{pom=$project.Pom;mta=[ordered]@{diretorio=$null}} | ConvertTo-Json -Depth 5)
     $migration=Convert-ConversionMarkdown $Inputs.Register.Text $Inputs.Register.Path $project.MigrationPath $state
     $migration=[regex]::Replace($migration,'(?m)^Project:[^\r\n]*',('Project: '+$project.Name))
@@ -65,7 +66,7 @@ function New-ConversionCoreFiles($Inputs) {
         $promptPath=Join-Path $project.Folder 'atual/planejamento/planejar-lotes.prompt.md'
         $data=[pscustomobject][ordered]@{Purpose='current-planning';Project=$project.Name;Source=$project.Source;Pom=$project.Pom;
             PlanningBasis=$basis;SelectedIssues=$selected;ContextPath=$project.ContextPath;PlanPath=$project.PlanPath;TodoPath=$project.TodoPath;
-            PromptPath=$promptPath;MigrationPath=$project.MigrationPath;EvidenceIndexPath=$null;EvidenceInputs=@();FichaPaths=@();Mta=$null;
+            PromptPath=$promptPath;MigrationPath=$project.MigrationPath;EvidenceIndexPath=$state.EvidenceIndexPath;EvidenceInputs=@($state.EvidenceInputs);FichaPaths=@($state.FichaPaths);Mta=$null;
             ReconciledPath=(Join-Path $project.ReconciledPath 'resultado.md');ContractPath=(Join-Path $codeRoot 'doc/adr/0009-estado-corrente-por-projeto.md');
             NeedsReview=$true;ReviewReasons=@('Conversao de registros: revisao humana da proposta e do alcance do GO necessaria.');Diagnostics=@($state.Diagnostics)}
         Assert-CurrentPlanningContext $data $project

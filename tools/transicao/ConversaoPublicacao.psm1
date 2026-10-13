@@ -6,6 +6,8 @@ Import-Module (Join-Path $PSScriptRoot '../../scripts/HarnessPlanning.psm1') -Di
 Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -DisableNameChecking
 . (Join-Path $PSScriptRoot 'LegadoLeitura.ps1')
 . (Join-Path $PSScriptRoot 'LegadoPlanejamento.ps1')
+. (Join-Path $PSScriptRoot '../../scripts/HarnessIssueSources.ps1')
+. (Join-Path $PSScriptRoot 'ConversaoEvidencias.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoDocumentos.ps1')
 
 function Invoke-ConversionApply {
@@ -29,6 +31,9 @@ function Invoke-ConversionApply {
             elseif ([Convert]::ToBase64String($expected[$relative]) -cne [Convert]::ToBase64String($bytes)) { throw ('Destino diferente da conversao; preservar trabalho local: '+(Join-Path $project.Folder $relative)) }
         }
         Assert-ConversionUnchanged $inputs.Session $inputs.Inventory
+        foreach ($path in $state.Bytes.Keys) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf) -or [Convert]::ToBase64String([IO.File]::ReadAllBytes($path)) -cne [Convert]::ToBase64String($state.Bytes[$path])) { throw ('Anexo mudou durante a conversao: '+$path) }
+        }
         if ($writes.Count) { Publish-HarnessProjectFiles $project $writes $expected }
         [pscustomobject]@{Status=$(if ($writes.Count) {'CONVERTIDO'} else {'EQUIVALENTE'});Project=$project.Name;Destination=$project.Folder;ChangedFiles=@($writes.Keys);Diagnostics=@($state.Diagnostics);AuthorizationInherited=$false}
     } finally { if ($lease) { $lease.ReleaseMutex(); $lease.Dispose() }; $pomGuard.Dispose() }

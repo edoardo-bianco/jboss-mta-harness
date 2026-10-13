@@ -417,6 +417,14 @@ com planning legado fora do workspace da fixture. Revisao independente fechou
 os quatro achados sobre Scope, origem MTA, POM e Source. Complementos ainda
 recusados; CLI continua somente Previa. S21 permanece parcial.
 
+Segunda fatia S21: fichas/anexos humanos, indice e binarios internos consolidados
+em destinos funcionais; externos continuam referencias. Proveniencia de copias
+e resolvida apenas em memoria, preservando relacoes humanas e relativos Markdown.
+Copias equivalentes convergem; divergencias, travessia e papel ambiguo recusam
+publicacao. Test-ConversionHumanEvidence, Apply, ApplySafety e Attachments
+passaram em PS5.1. Revisao independente fechou seis achados; MTA, cobertura,
+sprints e Validar ainda pendentes. Nenhum dado real convertido.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
