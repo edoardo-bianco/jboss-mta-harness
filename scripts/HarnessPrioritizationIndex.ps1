@@ -4,7 +4,7 @@ function Get-PrioritizationRows {
     foreach ($issue in @($Result.AnalyzedIssues | Sort-Object @{Expression={if ($null -eq $_.Position) {[int]::MaxValue} else {$_.Position}}},Project,Id)) {
         $ficha=@($Data.FichaPaths | Where-Object { $_.Project -ceq $issue.Project -and $_.Id -ceq $issue.Id })
         if ($ficha.Count -ne 1) { throw 'Destino de ficha ausente/duplicado no contexto.' }
-        $position=if ($null -eq $issue.Position) {'Sem proposta'} else {[string]$issue.Position}
+        $position=if ($null -eq $issue.Position) {'Sem posicao'} else {[string]$issue.Position}
         $lines+='| '+$position+' | '+(ConvertTo-ProjectCell $issue.Project)+' | '+(Get-HarnessSourceLink $From $ficha[0].Path (ConvertTo-ProjectCell $issue.Id))+' | '+(ConvertTo-ProjectCell $issue.Reason)+' |'
     }
     $lines -join [Environment]::NewLine
@@ -13,9 +13,10 @@ function Get-PrioritizationRows {
 function Get-PrioritizationIndexContent {
     param($Data,$Result,[string]$Text)
     if (-not $Text) { $Text='# Indice da priorizacao corrente' }
+    $outside=if ($null -eq $Data.OutsideBaseline) {'nao informado; conferir origem atual'} else {[string]$Data.OutsideBaseline}
     $lines=@(('Escopo: '+(ConvertTo-ProjectCell $Data.Scope)),('Categoria: '+(ConvertTo-ProjectCell $Data.Category)),
         "Examinadas acumuladas: $(@($Result.AnalyzedIssues).Count) / $($Data.InitialTotal). Estado da fatia: $($Result.Status).",
-        "Elegiveis fora da base inicial: $($Data.OutsideBaseline). Recriar e uma escolha explicita; ausencia no MTA nao comprova resolucao.",
+        "Elegiveis fora da base inicial: $outside. Recriar e uma escolha explicita; ausencia no MTA nao comprova resolucao.",
         (Get-HarnessSourceLink $Data.IndexPath $Data.RankingPath 'Ranking acumulado'),
         (Get-HarnessSourceLink $Data.IndexPath $Data.PromptPath 'Orientacao da priorizacao'),
         (Get-HarnessSourceLink $Data.IndexPath $Data.ContractPath 'Contrato'),

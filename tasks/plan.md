@@ -434,6 +434,22 @@ passaram em PS5.1. MTA inclui injecoes de alteracao de data/novo conjunto e
 reaplicacao idempotente. Revisao independente fechou dois achados. S21 parcial;
 cobertura, sprints, diagnosticos restantes e Validar continuam pendentes.
 
+Quarta fatia S21: priorizacao de um projeto consolida a cadeia escolhida por
+categoria, base inicial e cobertura real, sem atribuir prioridade global a
+posicoes locais das fatias. v2 parcial/sobreposto conserva a uniao das examinadas;
+quota incompleta permanece IN_PROGRESS. Elegiveis novas sao contadas quando a
+origem as informa; ausencia vira lacuna, nao zero. Escolha invalida, quota ancestral
+inconsistente e fichas humanas divergentes recusam a publicacao.
+
+Mapas de anexos/fichas sao preparados antes de reescrever Markdown. Ficha humana
+posterior, inclusive do plano, substitui apenas a lacuna sintetica; cobertura e
+motivos anteriores permanecem. Duas fichas do lote e links compartilhados com o
+ranking foram exercitados. Test-ConversionPrioritization, PrioritizationLegacy,
+HumanEvidence e Mta passaram em PowerShell 5.1. Revisao independente encerrou os
+achados do recorte; nenhum dado real convertido. Conversao multiprojeto, anexos
+exclusivos da priorizacao, cenarios/diagnosticos e Validar permanecem S21. CLI
+continua somente Previa; S22-S28 e aceite integrado pendentes.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

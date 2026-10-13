@@ -26,11 +26,11 @@ function Convert-ConversionMarkdown {
     [regex]::Replace($Text,'\[([^\]\r\n]*)\]\((?:<([^>\r\n]+)>|([^\s\)]+))\)',$evaluator)
 }
 
-function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio) {
+function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@()) {
     $project=$Inputs.Project
     if (-not $Inputs.Register) { throw 'Escolha um registro legado unico antes de aplicar.' }
     if (@($Inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $Inputs.Planning.Record) { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
-    if (@($Inputs.Preview.Related | Where-Object Kind -NE 'RUNS').Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
+    if (@($Inputs.Preview.Related | Where-Object Kind -NotIn @('RUNS','PRIORIZACAO')).Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
     $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
     $state.Map[$Inputs.Register.Path]=$project.MigrationPath
     $record=$Inputs.Planning.Record
@@ -45,7 +45,11 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio) {
         }
     }
     Add-ConversionMta $state $MtaDiretorio
-    Add-ConversionEvidence $state $record
+    $prioritizations=@(Read-ConversionPrioritization $state $PrioritizacaoContexto)
+    $evidence=Read-ConversionEvidence $state $record
+    # Todos os destinos devem existir no mapa antes de transformar links.
+    Add-ConversionPrioritizationDocuments $state $prioritizations
+    Add-ConversionEvidenceDocuments $state $evidence
     $state.Files['projeto.json']=([ordered]@{pom=$project.Pom;mta=[ordered]@{diretorio=$state.MtaDirectory}} | ConvertTo-Json -Depth 5)
     $migration=Convert-ConversionMarkdown $Inputs.Register.Text $Inputs.Register.Path $project.MigrationPath $state
     $migration=[regex]::Replace($migration,'(?m)^Project:[^\r\n]*',('Project: '+$project.Name))
@@ -88,6 +92,7 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio) {
     $index=@('# Projeto: '+$project.Name,'',(Get-HarnessSourceLink $project.IndexPath $project.Pom 'POM'),(Get-HarnessSourceLink $project.IndexPath $project.MigrationPath 'Decisoes de migracao'))
     if ($record) { $index+=@((Get-HarnessSourceLink $project.IndexPath $project.PlanPath 'Plano corrente'),(Get-HarnessSourceLink $project.IndexPath $project.TodoPath 'Tarefas correntes')) }
     if ($state.Mta) { $index+=Get-HarnessSourceLink $project.IndexPath $state.Mta.ReportPath 'MTA atual' }
+    foreach ($relative in @($state.Files.Keys | Where-Object { $_ -like 'atual/priorizacao/*/escopos/*/indice.md' } | Sort-Object)) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder $relative) 'Priorizacao corrente' }
     foreach ($diagnostic in $state.Diagnostics) { $index+='- '+(ConvertTo-ProjectCell $diagnostic) }
     $index+=@('','Conversao preliminar. Revisao do GO e aceite humanos pendentes.')
     $state.Files['indice.md']=($index -join "`n")+"`n"

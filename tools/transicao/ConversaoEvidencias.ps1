@@ -6,7 +6,7 @@ function Read-ConversionBytes($State,[string]$Path) {
     return ,$State.Bytes[$path]
 }
 
-function Add-ConversionEvidence($State,$Record) {
+function Read-ConversionEvidence($State,$Record) {
     if (-not $Record) { return }
     $entries=@($State.Inputs.Preview.Attachments | Where-Object ContextPath -IEQ $Record.Path)
     if (@($entries | Where-Object { -not $_.Valid }).Count) { throw 'Anexo estruturado invalido; corrija a origem antes de aplicar.' }
@@ -127,8 +127,23 @@ function Add-ConversionEvidence($State,$Record) {
         if ($State.Map.ContainsKey($aliases[$origin])) { $State.Map[$origin]=$State.Map[$aliases[$origin]] }
     }
     if ($index -and $State.Map.ContainsKey($index)) { $State.EvidenceIndexPath=$State.Map[$index] }
-    foreach ($document in $documents) {
+    [pscustomobject]@{Documents=$documents;Relations=$relations;Record=$Record}
+}
+
+function Add-ConversionEvidenceDocuments($State,$Evidence) {
+    if (-not $Evidence) { return }
+    $relations=$Evidence.Relations; $Record=$Evidence.Record
+    foreach ($document in $Evidence.Documents) {
         $target=Join-Path $State.Project.Folder $document.Relative
+        if ($document.Id) {
+            $legacy=[regex]::Matches($document.Text,'(?s)<!-- issue:\s*(\{.*?\})\s*-->')
+            if ($legacy.Count -gt 1) { throw 'Identidade ambigua na ficha do planejamento.' }
+            if ($legacy.Count) {
+                $identity=ConvertFrom-Json $legacy[0].Groups[1].Value
+                if ($identity.Id -cne $document.Id -or (Resolve-ProjectPath $identity.Source $State.Project.Root) -ine $State.Inputs.Preview.LegacySource) { throw 'Ficha do planejamento pertence a outro Source/ID.' }
+                $document.Text=$document.Text.Remove($legacy[0].Index,$legacy[0].Length)
+            }
+        }
         $text=Convert-ConversionMarkdown $document.Text $document.Base $target $State
         if ($document.Id) {
             if ($relations.ContainsKey($document.Path)) { $text=Set-ProjectManagedBlock $text 'conversao:relacoes' (@($relations[$document.Path] | Where-Object { $_ } | Sort-Object -Unique) -join "`n`n") }
@@ -142,6 +157,32 @@ function Add-ConversionEvidence($State,$Record) {
             $evidenceOnly=(Get-LegacyValue $Record.Data 'PlanningBasis' 'MTA') -eq 'EVIDENCIAS'
             $mta=if ($evidenceOnly) {$null} else {$State.Mta}
             $text=Get-IssueSourcesText $State.Project $mta $document.Id $document.Category $text $target -EvidenceOnly:$evidenceOnly -AvailablePaths @($State.Map.Values)
+            if ($State.Files.Contains($document.Relative)) {
+                $old=[string]$State.Files[$document.Relative]
+                $null=Read-PrioritizationFicha $old $State.Project.Name $document.Category $document.Id
+                # A ficha do lote pode acrescentar observacoes, mas nao apagar a
+                # analise humana incorporada da priorizacao. Blocos derivados
+                # podem refletir a base escolhida no planejamento corrente.
+                $bodies=@($old,$text)
+                for ($i=0;$i -lt 2;$i++) {
+                    foreach ($name in @('ficha:identidade','ficha:fontes','conversao:relacoes')) {
+                        $block=Find-ProjectManagedBlock $bodies[$i] $name
+                        if ($block) { $bodies[$i]=$bodies[$i].Remove($block.Index,$block.Length) }
+                    }
+                    $bodies[$i]=$bodies[$i].Replace("`r`n","`n").Trim()
+                }
+                if (-not $bodies[1].Contains($bodies[0])) { throw 'Ficha do planejamento perderia texto humano da priorizacao; resolva o conflito antes de aplicar.' }
+                $relationBlock=Find-ProjectManagedBlock $old 'conversao:relacoes'
+                if ($relationBlock) {
+                    $content=$relationBlock.Value -replace '^<!-- conversao:relacoes:inicio -->\s*','' -replace '\s*<!-- conversao:relacoes:fim -->$',''
+                    $next=Find-ProjectManagedBlock $text 'conversao:relacoes'
+                    if ($next) {
+                        $newContent=$next.Value -replace '^<!-- conversao:relacoes:inicio -->\s*','' -replace '\s*<!-- conversao:relacoes:fim -->$',''
+                        if ($newContent -cne $content) { $content+="`n`n"+$newContent }
+                    }
+                    $text=Set-ProjectManagedBlock $text 'conversao:relacoes' $content
+                }
+            }
         }
         $State.Files[$document.Relative]=$text
     }
