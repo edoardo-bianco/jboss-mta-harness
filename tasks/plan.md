@@ -382,6 +382,41 @@ Nenhuma conversao/limpeza de dados reais, corretiva de aplicacao, merge ou push
 executado. Extensao Java atual mantida. Conferir raiz, branch, HEAD e estado local
 antes de retomar.
 
+### Retomada S21-S28 - 13/10/2026
+
+Pedido humano: prosseguir S21-S28. Conferidos raiz, branch
+`harness/planejar-simplificacao-projetos`, HEAD `b5f0553` e checkout limpo.
+Escopo continua evolucao do harness. Implementar e verificar em fixtures; nao
+converter nem limpar dados reais, trocar extensao Java, integrar/push ou inferir
+aceite humano. A entrega tecnica e o ensaio/aceite humano final sao distintos.
+
+Sequencia de trabalho e checkpoints:
+
+1. S21a: converter registro/plano/tarefas/anexos por referencias conhecidas,
+   publicar pelo nucleo e validar formato corrente, conflito e reaplicacao.
+2. S21b: consolidar priorizacao/cobertura/fichas por categoria e escopo.
+3. S21c: transportar cenarios/diagnosticos aplicaveis e origem MTA, preservando
+   baseline/capacidade e escolhas explicitas; validar independencia/recuperacao.
+4. S22: retirar transferencia por pacote depois de provar copia/reconciliacao.
+5. S23: separar limpeza corrente de descarte legado selecionado e revalidado.
+6. S24-S25: alinhar guias/modelos/HTML em grupos pequenos, conferir links/tasks.
+7. S26-S27: atualizar orientador/helpers e instrucoes para os caminhos correntes.
+8. S28: inventario final, ADRs/arquitetura, regressao integrada e roteiro concreto
+   para ensaio/aceite humano. Nao marcar aceite sem declaracao do desenvolvedor.
+
+Cada fatia recebe testes focais, revisao e commit local antes de ampliar o alcance.
+S21-S28 permanecem pendentes ate suas respectivas verificacoes.
+
+Primeira fatia de S21: publicador de registro/plano/tarefas com base EVIDENCIAS,
+referencias relocalizadas, preservacao dos originais e revisao humana do GO
+explicita. Aplicacao equivalente nao regrava; trabalho posterior bloqueia a
+sobrescrita. POM protegido durante a publicacao. Test-ConversionApply e
+Test-ConversionApplySafety passaram em PS5.1; Preview/Cli tambem passaram.
+Consumidor corrente abriu o plano em processo novo sem modulo do conversor e
+com planning legado fora do workspace da fixture. Revisao independente fechou
+os quatro achados sobre Scope, origem MTA, POM e Source. Complementos ainda
+recusados; CLI continua somente Previa. S21 permanece parcial.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

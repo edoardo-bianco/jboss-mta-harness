@@ -7,7 +7,7 @@ Import-Module (Join-Path $PSScriptRoot '../../scripts/HarnessProject.psm1') -Dis
 . (Join-Path $PSScriptRoot 'LegadoInventario.ps1')
 . (Join-Path $PSScriptRoot 'LegadoAnexos.ps1')
 
-function Get-ConversionPreview {
+function Read-ConversionInputs {
     [CmdletBinding()]
     param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto)
     $project=Get-HarnessProjectReference $Workspace $Pom
@@ -56,13 +56,19 @@ function Get-ConversionPreview {
         $references=@(Get-ConversionReferences $session $proposed $project $source)
         $attachments=@(Get-ConversionAttachments $session $planning.Record)
         Assert-ConversionUnchanged $session $inventory
-        [pscustomobject][ordered]@{Mode='Previa';Project=$project.Name;Pom=$project.Pom;Source=$project.Source;LegacySource=$source;Destination=$project.Folder;
+        $preview=[pscustomobject][ordered]@{Mode='Previa';Project=$project.Name;Pom=$project.Pom;Source=$project.Source;LegacySource=$source;Destination=$project.Folder;
             Register=[pscustomobject]@{Path=$(if ($register) {$register.Path} else {$null});Candidates=@($registers | ForEach-Object Path);Decisions=@(if ($register) {$register.Decisions})};
             Planning=[pscustomobject]@{ContextPath=$planning.ContextPath;Selection=$planning.Selection;Candidates=@($planning.Candidates)};
             Reconciliation=$reconciliation;Related=$related;References=$references;Attachments=$attachments;
             ProposedFiles=@($proposed);Pending=@($session.Pending | Sort-Object -Unique);AuthorizationInherited=$false;DeletionAuthorized=$false;
             DiscardCandidates=@($records | Where-Object { $_.Sources.Count -eq 1 -and -not $_.Path.StartsWith($project.Folder+'\',[StringComparison]::OrdinalIgnoreCase) } | ForEach-Object Path | Sort-Object -Unique);
             DiscardCondition='Somente apos conversao, validacao independente e selecao humana em S21/S23; nenhum diretorio compartilhado, Source ou MTA externo incluido.'}
+        [pscustomobject]@{Preview=$preview;Project=$project;Session=$session;Records=$records;Register=$register;Planning=$planning;Inventory=$inventory}
     } finally { $lease.ReleaseMutex(); $lease.Dispose() }
 }
-Export-ModuleMember -Function Get-ConversionPreview
+function Get-ConversionPreview {
+    [CmdletBinding()]
+    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto)
+    (Read-ConversionInputs @PSBoundParameters).Preview
+}
+Export-ModuleMember -Function Get-ConversionPreview,Read-ConversionInputs
