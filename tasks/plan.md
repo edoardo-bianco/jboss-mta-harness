@@ -9,8 +9,8 @@ Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entre
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
 **Estado:** implementacao autorizada por "proceder" em 10/10/2026, retomada em
 11/10/2026, 12/10/2026 e 13/10/2026. Nucleo, produtores build/MTA/Sonar, priorizacao,
-planejamento, reconciliacao, consumidores correntes e prompts ate S19 com
-verificacoes focais aprovadas.
+planejamento, reconciliacao, consumidores correntes e prompts ate S19, mais a
+previa de conversao S20, com verificacoes focais aprovadas.
 Integracao dos demais fluxos, conversao de dados, limpeza
 operacional e aceite da simplificacao completa ainda nao concluidos.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
@@ -346,6 +346,41 @@ nao substituem ensaio humano integrado ou aceite global.
 transicao. S20-S28 permanecem pendentes (nove etapas). Nenhuma conversao ou limpeza
 de dados reais, corretiva de aplicacao, merge ou push executado. Extensao Java
 atual mantida. Conferir raiz, branch, HEAD e estado local antes da proxima fatia.
+
+**S20 concluida:** retomada a partir de `85e38f7`, checkout limpo na mesma branch.
+Entrega dividida em leitura/associacao ao POM, selecao por vinculos, inventario de
+referencias/anexos e CLI/documentacao. Utilitario isolado em
+[tools/transicao](../tools/transicao/Converter-RegistrosProjeto.ps1), sem
+dependencia do runtime sobre ele; somente `Previa`, em texto ou JSON no terminal.
+
+Destino vem do artifactId direto do POM, com associacao explicita de Source
+relocalizado. Registro/contexto ambiguos exigem escolha; plano segue vinculos e
+Previous, nunca data. Ciclos, outra issue, MigrationPath divergente, documento
+de outra solicitacao e vinculo atual quebrado nao elegem plano historico.
+Recibos anteriores a SelectedIssues recuperam a escolha do MigrationSnapshot;
+sem evidencia suficiente, o escopo fica inconclusivo. CONCLUIDA no legado e
+declaracao humana a conferir: preparo, snapshot, hash ou data nao comprovam
+reconciliacao executada, GO ou aceite. A base proposta permanece preliminar.
+
+A previa expoe decisoes, origens/destinos, referencias indisponiveis, anexos
+estruturados e copias diagnosticas a substituir. Priorizacao, sprints e
+diagnosticos auxiliares ficam candidatos com pendencias explicitas de selecao e
+consolidacao para S21. Descarte e somente informativo. Colisao de POM, mudanca de
+artifactId e recuperacao pendente sao recusadas sem reparo/escrita.
+
+Passaram em Windows PowerShell 5.1: Test-ConversionPreview,
+Test-ConversionConflicts, Test-ConversionInventory, Test-ConversionLegacyLinks,
+Test-ConversionAttachments, Test-ConversionCli e Test-ProjectReadOnly.
+As fixtures comparam caminhos, bytes e datas dos arquivos antes/depois;
+cobrem agregador/modulo, relocalizacao, multiplos registros/pontas, formatos
+legados, snapshots embutidos, MTA externo, CLI e modos futuros recusados.
+Revisao independente fechou os achados, sem bloqueantes para este recorte.
+
+**Proxima etapa: S21**, Aplicar/Validar. S21-S28 permanecem pendentes (oito etapas),
+assim como os checkpoints e o aceite integrado. Limpar permanece em S23.
+Nenhuma conversao/limpeza de dados reais, corretiva de aplicacao, merge ou push
+executado. Extensao Java atual mantida. Conferir raiz, branch, HEAD e estado local
+antes de retomar.
 
 ### Requisitos e fontes
 

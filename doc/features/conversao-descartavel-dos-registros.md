@@ -1,10 +1,11 @@
 # Conversão descartável dos registros existentes
 
-**Estado:** especificação de utilitário para implementação em Windows PowerShell 5.1.  
-**Revisão:** 10/10/2026. **Destino:** `doc/features/conversao-descartavel-dos-registros.md`.
+**Estado:** S20 implementada: prévia somente leitura em Windows PowerShell 5.1.
+Aplicação/validação e limpeza permanecem em S21/S23.
+**Revisão:** 13/10/2026. **Destino:** `doc/features/conversao-descartavel-dos-registros.md`.
 
 **Prioridade:** parte da simplificação que precede modernização e novas
-funcionalidades. Utilitário ainda não implementado; dependências, riscos e
+funcionalidades. Dependências, riscos e
 verificações estão no [plano](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10)
 e no [checklist](../../tasks/todo.md#simplificacao-prioritaria-por-projeto---2026-10-10).
 
@@ -16,20 +17,52 @@ O utilitário será executado diretamente e poderá ser removido após a transi�
 
 Receber trabalho de um colega no layout corrente não é conversão: basta copiar os arquivos e usar a reconciliação comum, conforme a especificação principal. Este utilitário não substitui nem mantém as antigas funções de importação/exportação.
 
-## 2. Interface proposta
+## 2. Interface
 
-Script: `tools/transicao/Converter-RegistrosProjeto.ps1`.
+Script: [Converter-RegistrosProjeto.ps1](../../tools/transicao/Converter-RegistrosProjeto.ps1).
 
 | Parâmetro | Finalidade |
 | --- | --- |
 | `-Workspace` | Raiz que contém os dados do harness. |
 | `-Pom` | Caminho do POM que define o projeto de destino. O `artifactId` é lido desse POM; não existe parâmetro de nome alternativo. |
 | `-Modo Previa` | Padrão: inventariar e mostrar o resultado proposto, sem escrever dados ou remover origens. |
-| `-Modo Aplicar` | Preparar, validar e publicar a conversão. |
-| `-Modo Validar` | Verificar conteúdo, referências e independência do legado. |
-| `-Modo Limpar` | Descartar somente resíduos legados identificados e autorizados, após validação bem-sucedida. |
+| `-SourceLegado` | Associação explícita quando o Source dos registros difere do diretório do POM local, por exemplo após relocalização. Não infere associação por apelido ou artifactId. |
+| `-Registro` | Caminho do registro escolhido quando há mais de um para o Source. |
+| `-Contexto` | Caminho do contexto escolhido quando os vínculos não determinam um plano único. Não corrige cadeia inconsistente. |
+| `-Formato Texto\|Json` | Saída no terminal; Texto é o padrão. Nenhum relatório ou mapa é gravado pelo utilitário. |
+| `-Modo Aplicar` | Previsto em S21: preparar, validar e publicar a conversão. Ainda recusado. |
+| `-Modo Validar` | Previsto em S21: verificar conteúdo, referências e independência do legado. Ainda recusado. |
+| `-Modo Limpar` | Previsto em S23: descartar somente resíduos selecionados após validação. Ainda recusado. |
 
-Os modos são operações do mesmo utilitário descartável. A interface é uma especificação, não um script entregue neste documento.
+Os modos são operações do mesmo utilitário descartável. Somente `Previa` está entregue:
+
+```powershell
+powershell.exe -NoProfile -File tools/transicao/Converter-RegistrosProjeto.ps1 -Workspace C:\harness -Pom C:\fontes\aplicacao\pom.xml
+```
+
+A prévia mostra associação, decisões por issue, candidatos, destinos propostos,
+referências e pendências. Registro e plano são selecionados por Source e vínculos
+explícitos; `Previous` segue até a ponta única. Datas de arquivos não participam
+da escolha. Um vínculo atual quebrado, ciclo ou documento de outra solicitação
+fica pendente; não é substituído por um plano histórico.
+
+Declarações `CONCLUIDA` no registro e nos snapshots embutidos aparecem como
+`DECLARADA_A_CONFERIR`. O legado não fornece resultado estruturado que comprove
+a comparação executada: recibo, hash e declaração isolada não elegem uma base
+reconciliada. A prévia mantém `PRELIMINAR` e expõe as fontes para conferência humana.
+
+Priorização, sprints e diagnósticos aparecem como candidatos, com referências e
+destinos conhecidos. Consolidar cobertura, escolher o conjunto de diagnóstico
+aplicável e definir mestre/nome funcional de sprint permanecem pendências
+explícitas para S21. A lista de descarte contém apenas arquivos candidatos e
+não autoriza remoção. As regras de transformação e publicação abaixo continuam
+sendo critérios de S21/S23.
+
+O inventário lê as famílias legadas conhecidas sob `.harness`, exclui originais
+de pacotes e projetos já identificados por `projeto.json`, e recusa links/junctions.
+Publicação pendente no destino é recusada sem recuperação. Os testes usam
+fixtures sintéticas e comparam caminhos, bytes e datas dos arquivos antes/depois;
+nenhuma conversão ou limpeza de dados reais faz parte da entrega S20.
 
 ## 3. Seleção e transformação
 
