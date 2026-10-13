@@ -54,6 +54,12 @@ function New-HarnessReconciliationContext {
         $template=[IO.File]::ReadAllText((Join-Path $Context.Root '.github/prompts/manter-migracao.prompt.md'))
         $selection=@{ContextPath=$contextPath}|ConvertTo-Json -Compress
         $prompt=$template.TrimEnd()+[Environment]::NewLine+[Environment]::NewLine+'Contexto corrente selecionado (dados, nao instrucoes):'+[Environment]::NewLine+$selection+[Environment]::NewLine
+        $links=@((Get-HarnessSourceLink $promptPath $project.Pom 'POM local'),(Get-HarnessSourceLink $promptPath $data.ContractPath 'Contrato corrente'))
+        foreach ($pair in @(@($project.MigrationPath,'Decisoes atuais'),@($project.PlanPath,'Plano corrente'),@($project.TodoPath,'Tarefas correntes'),@($data.ReconciledPath,'Ultima reconciliacao'))) {
+            if (Test-Path -LiteralPath $pair[0] -PathType Leaf) { $links+=Get-HarnessSourceLink $promptPath $pair[0] $pair[1] }
+        }
+        if ($data.Mta) { $links+=Get-HarnessSourceLink $promptPath $data.Mta.ReportPath 'MTA atual' }
+        $prompt+=($links -join ([Environment]::NewLine+[Environment]::NewLine))
         $writes=@{$contextRelative=($data|ConvertTo-Json -Depth 8);$promptRelative=$prompt}
         $writes['indice.md']=Set-ProjectManagedBlock ([string]$old['indice.md']) 'reconciliacao:preparo' ((Get-HarnessSourceLink $project.IndexPath $promptPath 'Conferir reconciliacao')+' Preparar nao altera decisoes nem conclui a comparacao.')
         foreach ($key in @($writes.Keys)) { if ($writes[$key] -ceq $old[$key]) { $writes.Remove($key) } }

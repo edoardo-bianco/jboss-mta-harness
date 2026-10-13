@@ -27,6 +27,19 @@ $again=New-HarnessImplementationPrompt $f.Context
 Assert ($again.Reused -and $again.PromptPath -eq $prepared.PromptPath) 'Repeticao deve preservar observacoes nos mesmos destinos.'
 foreach ($path in @($again.PromptPath,$again.ResultReviewPromptPath)) { Assert ([IO.File]::ReadAllText($path).Contains('Observacao humana a preservar.')) 'Nota perdida.' }
 foreach ($key in $before.Keys) { Assert ([IO.File]::ReadAllText((Join-Path $p.Folder $key)) -ceq $before[$key]) 'Preparo alterou proposta/decisao/contexto.' }
+# Alterar metadados do template deve atualizar os dois prompts sem perder notas.
+foreach ($operation in @('implementar-lote','revisar-resultado')) {
+    $template=Join-Path $f.Root ('.github/prompts/'+$operation+'.prompt.md')
+    $updated=[IO.File]::ReadAllText($template).Replace('agent: devsquad','agent: agente-da-fixture')
+    $updated=[regex]::Replace($updated,'(?m)^tools:.*$',"tools: ['read/readFile']")
+    [IO.File]::WriteAllText($template,$updated)
+}
+$updated=New-HarnessImplementationPrompt $f.Context
+foreach ($path in @($updated.PromptPath,$updated.ResultReviewPromptPath)) {
+    $text=[IO.File]::ReadAllText($path)
+    Assert ($text -match '(?m)^agent: agente-da-fixture' -and $text -match "(?m)^tools: \['read/readFile'\]" -and $text.Contains('Observacao humana a preservar.')) 'Metadados atuais devem propagar sem apagar observacoes.'
+}
+Assert (-not $updated.Reused -and (New-HarnessImplementationPrompt $f.Context).Reused) 'Atualizacao de cabecalho deve acontecer uma vez nos mesmos arquivos.'
 # MTA indisponivel e alteracao posterior do plano nao impedem preparar a leitura corrente.
 $mta=(Read-Prepared $prepared).Mta.ReportPath
 Move-Item -LiteralPath $mta -Destination ($mta+'.indisponivel')

@@ -36,6 +36,9 @@ function New-HarnessImplementationPrompt {
             $header=[regex]::Match($template,'(?s)\A---\r?\n.*?\r?\n---')
             if (-not $header.Success) { throw "Template sem cabecalho: $operation" }
             $text=if ($old[$relative]) { $old[$relative] } else { $header.Value+"`n`n## Observacoes do desenvolvedor`n`nRegistre observacoes aqui, fora dos blocos gerenciados. Decisoes de escopo/GO pertencem ao plano corrente.`n" }
+            $previousHeader=[regex]::Match($text,'(?s)\A---\r?\n.*?\r?\n---')
+            if (-not $previousHeader.Success) { throw "Prompt corrente sem cabecalho: $path. Preserve as observacoes e confira o documento." }
+            $text=$header.Value+$text.Substring($previousHeader.Length)
             $text=Set-ProjectManagedBlock $text 'implementacao:orientacao' $template.Substring($header.Length).Trim()
             $writes[$relative]=Set-ProjectManagedBlock $text 'implementacao:fontes' ($body -join ([Environment]::NewLine+[Environment]::NewLine))
         }
