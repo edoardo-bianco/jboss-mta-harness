@@ -21,7 +21,7 @@ Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10, 12/10
 [Ponto atual e verificacoes](plan.md#retomada-de-13102026).
 S11-S20 implementados e revisados. Proxima etapa: S21;
 as oito etapas S21-S28 e o aceite integrado permanecem pendentes.
-S21 parcial: registro/plano, anexos humanos, MTA e priorizacao uniprojeto
+S21 parcial: registro/plano, anexos humanos (inclusive priorizacao sem plano), MTA e priorizacao uniprojeto
 implementados e verificados em fixtures; continuar pelos complementos da
 [retomada](plan.md#retomada-s21-s28---13102026), mantendo a CLI somente Previa.
 A pausa humana de 12/10 permanece como [registro historico](plan.md#pausa-humana-de-12102026).

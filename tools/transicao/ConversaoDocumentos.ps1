@@ -46,7 +46,7 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     }
     Add-ConversionMta $state $MtaDiretorio
     $prioritizations=@(Read-ConversionPrioritization $state $PrioritizacaoContexto)
-    $evidence=Read-ConversionEvidence $state $record
+    $evidence=Read-ConversionEvidence $state $record $prioritizations
     # Todos os destinos devem existir no mapa antes de transformar links.
     Add-ConversionPrioritizationDocuments $state $prioritizations
     Add-ConversionEvidenceDocuments $state $evidence

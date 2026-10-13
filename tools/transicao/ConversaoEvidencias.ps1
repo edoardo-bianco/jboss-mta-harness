@@ -6,15 +6,19 @@ function Read-ConversionBytes($State,[string]$Path) {
     return ,$State.Bytes[$path]
 }
 
-function Read-ConversionEvidence($State,$Record) {
-    if (-not $Record) { return }
-    $entries=@($State.Inputs.Preview.Attachments | Where-Object ContextPath -IEQ $Record.Path)
+function Read-ConversionEvidence($State,$Record,$Prioritizations=@()) {
+    $contexts=@(if ($Record) {$Record.Path})+@($Prioritizations | ForEach-Object { $_.Records | ForEach-Object Path })
+    if (-not $contexts.Count) { return }
+    $planData=Get-LegacyValue $Record 'Data'
+    $entries=@($State.Inputs.Preview.Attachments | Where-Object ContextPath -IIn $contexts)
     if (@($entries | Where-Object { -not $_.Valid }).Count) { throw 'Anexo estruturado invalido; corrija a origem antes de aplicar.' }
     $aliases=@{}; $relations=@{}; $diagnostics=@{}; $bases=@{}; $duplicates=@{}
-    $functional=@(Get-LegacyValue $Record.Data 'FichaPath')+@(Get-LegacyValue $Record.Data 'IssueInputs' @() | ForEach-Object { Get-LegacyValue $_ 'FichaPath' })
+    $functional=@(Get-LegacyValue $planData 'FichaPath')+@(Get-LegacyValue $planData 'IssueInputs' @() | ForEach-Object { Get-LegacyValue $_ 'FichaPath' })
     $functional=@($functional | Where-Object { $_ } | ForEach-Object { Resolve-ProjectPath $_ $State.Project.Root })
     foreach ($entry in $entries) {
-        if ($entry.Kind -in @('COPIA_DIAGNOSTICO_LEGADO','EXTRATO_MTA')) { $diagnostics[$entry.Path]=$true }
+        if ($entry.Kind -in @('COPIA_DIAGNOSTICO_LEGADO','EXTRATO_MTA')) {
+            $diagnostics[$entry.Path]=$true
+        }
         if ($entry.OriginPath -and $entry.Available) {
             $origin=Resolve-ProjectPath $entry.OriginPath $State.Project.Root
             $bases[$entry.Path]=$origin
@@ -29,8 +33,8 @@ function Read-ConversionEvidence($State,$Record) {
         }
     }
     foreach ($path in $duplicates.Keys) { $aliases[$path]=$duplicates[$path] }
-    foreach ($item in @(Get-LegacyValue $Record.Data 'IssueInputs' @())) {
-        foreach ($pair in @(@('FichaOrigin',(Get-LegacyValue $item 'FichaPath')),@('EvidenceIndexOrigin',(Get-LegacyValue $Record.Data 'EvidenceIndexPath')))) {
+    foreach ($item in @(Get-LegacyValue $planData 'IssueInputs' @())) {
+        foreach ($pair in @(@('FichaOrigin',(Get-LegacyValue $item 'FichaPath')),@('EvidenceIndexOrigin',(Get-LegacyValue $planData 'EvidenceIndexPath')))) {
             $origin=Get-LegacyValue $item $pair[0]
             if ($origin -and $pair[1] -and (Test-Path -LiteralPath $pair[1] -PathType Leaf)) { $aliases[(Resolve-ProjectPath $origin $State.Project.Root)]=Resolve-ProjectPath $pair[1] $State.Project.Root }
         }
@@ -43,6 +47,16 @@ function Read-ConversionEvidence($State,$Record) {
         }
         $aliases[$origin]=$target
     }
+    # Copias renomeadas mantem o papel da origem, inclusive atraves de aliases.
+    foreach ($path in @($diagnostics.Keys)) {
+        if ($aliases.ContainsKey($path)) { $diagnostics[$aliases[$path]]=$true }
+    }
+    foreach ($origin in $aliases.Keys) {
+        if ($diagnostics.ContainsKey($aliases[$origin])) { $diagnostics[$origin]=$true }
+    }
+    if ($State.Mta) {
+        foreach ($path in $diagnostics.Keys) { $State.Map[$path]=$State.Mta.ReportPath }
+    }
     foreach ($entry in $entries) {
         if (-not $entry.Relation) { continue }
         $path=$entry.Path
@@ -50,13 +64,13 @@ function Read-ConversionEvidence($State,$Record) {
         $relations[$path]=@($relations[$path])+@($entry.Relation)
     }
     $fichas=@{}
-    $ids=@(Get-ConversionIssueIds $Record.Data)
-    $single=Get-LegacyValue $Record.Data 'FichaPath'
+    $ids=@(if ($Record) {Get-ConversionIssueIds $planData})
+    $single=Get-LegacyValue $planData 'FichaPath'
     if ($single) {
         if ($ids.Count -ne 1) { throw 'FichaPath sem issue unica; confira IssueInputs antes de converter.' }
         $fichas[(Resolve-ProjectPath $single $State.Project.Root)]=$ids[0]
     }
-    foreach ($item in @(Get-LegacyValue $Record.Data 'IssueInputs' @())) {
+    foreach ($item in @(Get-LegacyValue $planData 'IssueInputs' @())) {
         $path=Get-LegacyValue $item 'FichaPath'
         if ($path) { $fichas[(Resolve-ProjectPath $path $State.Project.Root)]=[string]$item.Id }
     }
@@ -65,8 +79,20 @@ function Read-ConversionEvidence($State,$Record) {
         if ($aliases.ContainsKey($entry.Path) -and $aliases[$entry.Path] -ine $entry.Path) { continue }
         $pending.Enqueue($entry)
     }
+    # Fichas/rankings ja tem destino proprio. Descobrir somente os anexos
+    # vizinhos dos documentos realmente selecionados, sem copiar os controles.
+    foreach ($priority in $Prioritizations) {
+        $documents=@($priority.Rankings)+@($priority.Fichas.Values | Where-Object HasContent)
+        foreach ($document in $documents) {
+            $directory=Split-Path $document.Path -Parent
+            foreach ($link in @(Get-ConversionLinks $document.Text $document.Path $State.Inputs.Session)) {
+                if ($State.Map.ContainsKey($link) -or $aliases.ContainsKey($link)) { continue }
+                if ($link.StartsWith($directory+'\',[StringComparison]::OrdinalIgnoreCase)) { $pending.Enqueue([pscustomobject]@{Path=$link;Kind='EVIDENCIA'}) }
+            }
+        }
+    }
     $seen=@{}; $documents=@(); $destinations=@{}; $evidence=@(); $fichaPaths=@()
-    $index=Get-LegacyValue $Record.Data 'EvidenceIndexPath'
+    $index=Get-LegacyValue $planData 'EvidenceIndexPath'
     if ($index) { $index=Resolve-ProjectPath $index $State.Project.Root }
     while ($pending.Count) {
         if ($seen.Count -gt 1000) { throw 'Anexos excedem 1000 referencias; delimite as evidencias necessarias.' }
@@ -75,6 +101,10 @@ function Read-ConversionEvidence($State,$Record) {
         if ($entry.Kind -eq 'ORIGEM_MTA') { continue }
         if ($diagnostics.ContainsKey($path)) { $State.Diagnostics.Add('Diagnostico legado requer fonte direta: '+$path); continue }
         $relation=if ($relations.ContainsKey($path)) { @($relations[$path] | Where-Object { $_ } | Sort-Object -Unique) -join '; ' } else { 'Evidencia: '+[IO.Path]::GetFileName($path) }
+        if ($State.Map.ContainsKey($path) -and -not $fichas.ContainsKey($path)) {
+            if ($relations.ContainsKey($path)) { $evidence+=@([pscustomobject]@{Path=$State.Map[$path];Relation=$relation;Status='DISPONIVEL'}) }
+            continue
+        }
         if ($path -match '^https?://') {
             $evidence+=@([pscustomobject]@{Path=$path;Relation=$relation;Status='REFERENCIA EXTERNA'}); continue
         }
@@ -113,7 +143,7 @@ function Read-ConversionEvidence($State,$Record) {
             foreach ($link in @(Get-ConversionLinks $text $base $State.Inputs.Session)) {
                 # Links operacionais nao viram anexos. Somente arquivos vizinhos
                 # aos anexos declarados podem ser descobertos pelo Markdown.
-                if ($State.Map.ContainsKey($link) -or $aliases.ContainsKey($link) -or $link -in @($Record.Path,$Record.Data.PlanPath,$Record.Data.TodoPath)) { continue }
+                if ($State.Map.ContainsKey($link) -or $aliases.ContainsKey($link)) { continue }
                 $directory=Split-Path $base -Parent
                 if ($link.StartsWith($directory+'\',[StringComparison]::OrdinalIgnoreCase)) {
                     $pending.Enqueue([pscustomobject]@{Path=$link;Kind='EVIDENCIA'})

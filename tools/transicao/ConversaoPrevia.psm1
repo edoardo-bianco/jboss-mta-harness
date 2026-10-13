@@ -55,6 +55,7 @@ function Read-ConversionInputs {
         $related=@(Get-ConversionRelated $session $records $project)
         $references=@(Get-ConversionReferences $session $proposed $project $source)
         $attachments=@(Get-ConversionAttachments $session $planning.Record)
+        foreach ($priority in @($records | Where-Object Kind -EQ 'PRIORIZACAO')) { $attachments+=@(Get-ConversionAttachments $session $priority) }
         Assert-ConversionUnchanged $session $inventory
         $preview=[pscustomobject][ordered]@{Mode='Previa';Project=$project.Name;Pom=$project.Pom;Source=$project.Source;LegacySource=$source;Destination=$project.Folder;
             Register=[pscustomobject]@{Path=$(if ($register) {$register.Path} else {$null});Candidates=@($registers | ForEach-Object Path);Decisions=@(if ($register) {$register.Decisions})};

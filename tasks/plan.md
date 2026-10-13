@@ -450,6 +450,19 @@ achados do recorte; nenhum dado real convertido. Conversao multiprojeto, anexos
 exclusivos da priorizacao, cenarios/diagnosticos e Validar permanecem S21. CLI
 continua somente Previa; S22-S28 e aceite integrado pendentes.
 
+Quinta fatia S21: anexos declarados e vizinhos Markdown das priorizacoes
+selecionadas sao preservados mesmo sem plano. Relacoes humanas, URLs externas
+e ausencias ficam visiveis; outra cadeia nao fornece anexos ao conjunto escolhido.
+Prompts apontam ao documento corrente. Extratos MTA, inclusive copias renomeadas
+com proveniencia, mantem papel diagnostico e apontam ao relatorio atual quando
+disponivel, sem virar evidencia humana. Origem ausente continua explicita.
+
+Test-ConversionPriorityEvidence passou em PS5.1 com MTA disponivel e ausente;
+Attachments, HumanEvidence, Prioritization e PrioritizationLegacy tambem passaram.
+Revisao independente fechou quatro achados (URL, controles, extratos e proveniencia).
+Nenhum dado real convertido. S21 ainda inclui multiprojeto, cenarios, diagnosticos
+locais e Validar; CLI somente Previa e S22-S28/aceite integrado pendentes.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

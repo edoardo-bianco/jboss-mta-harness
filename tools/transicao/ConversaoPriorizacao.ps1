@@ -109,6 +109,10 @@ function Read-ConversionPrioritization($State,[string[]]$SelectedContexts=@()) {
             if (($record.Data.SchemaVersion -ge 3 -and ($earlier -join "`n") -cne ($declared -join "`n")) -or @($declared | Where-Object { $_ -cnotin $earlier }).Count) { throw 'Exclusoes legadas nao correspondem as examinadas anteriores.' }
             if ($record.Path -ieq $current.Path) { $beforeLast=@($examined.Values | Select-Object Project,Id) }
             $rankings+=$ranking; $State.Map[$record.Path]=$paths.ContextPath; $State.Map[$ranking.Path]=$paths.RankingPath
+            foreach ($pair in @(@('PromptPath',$paths.PromptPath),@('PrioritizationIndexPath',$paths.IndexPath))) {
+                $origin=Get-LegacyValue $record.Data $pair[0]
+                if ($origin) { $State.Map[(Resolve-ProjectPath $origin $State.Project.Root)]=$pair[1] }
+            }
             foreach ($issue in $ranking.Examined) {
                 if ($issue.Id -cnotin $baselineIds) { throw 'Examinada fora da base inicial.' }
                 $entries=@(Get-LegacyValue $record.Data 'FichaPaths' @() | Where-Object { $_.Id -ceq $issue.Id -and (Resolve-ProjectPath $_.Source $State.Project.Root) -ieq $State.Inputs.Preview.LegacySource })
@@ -158,7 +162,7 @@ function Read-ConversionPrioritization($State,[string[]]$SelectedContexts=@()) {
             Percentage=$percent;InitialTotal=$baseline.Count;SliceSize=$slice;BaselineIssues=$baseline;ExcludedIssues=$excluded;AvailableIssues=$available;
             FichaPaths=@(foreach ($issue in $baseline) {[pscustomobject]@{Project=$State.Project.Name;Id=$issue.Id;Path=(Join-Path $State.Project.Folder (Get-PrioritizationFichaRelativePath $category $issue.Id))}});OutsideBaseline=$outside;ContractPath=(Join-Path $codeRoot 'doc/adr/0009-estado-corrente-por-projeto.md')}
         Assert-PrioritizationContext $data $paths @($State.Project) $category $scope
-        [pscustomobject]@{Data=$data;Paths=$paths;Fichas=$fichas;Rankings=$rankings;Examined=$examined;Assessments=$assessments;Status=$status}
+        [pscustomobject]@{Data=$data;Paths=$paths;Records=$chain;Fichas=$fichas;Rankings=$rankings;Examined=$examined;Assessments=$assessments;Status=$status}
     }
 }
 
@@ -190,6 +194,16 @@ function Add-ConversionPrioritizationDocuments($State,$Prioritizations) {
         $text=(@($priority.Rankings | ForEach-Object { Convert-ConversionMarkdown $_.Text $_.Path $paths.RankingPath $State }) -join "`n`n")
         $text=Set-PrioritizationResult $text $result
         $text=Set-ProjectManagedBlock $text 'priorizacao:fichas' (Get-PrioritizationRows $data $result $paths.RankingPath)
+        if ($State.EvidenceInputs.Count) {
+            $references=@('Evidencias humanas do projeto preservadas nesta conversao:','')
+            foreach ($entry in $State.EvidenceInputs) {
+                $link=if ($entry.Status -eq 'AUSENTE') {ConvertTo-ProjectCell $entry.Path}
+                    elseif ($entry.Path -match '^https?://') {'['+(ConvertTo-ProjectCell $entry.Relation).Replace('[','&#91;').Replace(']','&#93;')+'](<'+$entry.Path.Replace('>','%3E')+'>)'}
+                    else {Get-HarnessSourceLink $paths.RankingPath $entry.Path $entry.Relation}
+                $references+='- '+(ConvertTo-ProjectCell $entry.Relation)+': '+$link+' ('+$entry.Status+').'
+            }
+            $text=Set-ProjectManagedBlock $text 'priorizacao:evidencias' ($references -join "`n")
+        }
         $State.Files[$paths.Relative+'/priorizacao.md']=$text; $State.Files[$paths.Relative+'/contexto.json']=$data|ConvertTo-Json -Depth 15
         $State.Files[$paths.Relative+'/indice.md']=Get-PrioritizationIndexContent $data $result ''
         $template=[IO.File]::ReadAllText((Join-Path $codeRoot '.github/prompts/priorizar-issues.prompt.md'))

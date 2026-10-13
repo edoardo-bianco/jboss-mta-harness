@@ -25,6 +25,14 @@ function Get-ConversionAttachments($Session,$Record) {
     }
     $mtaIssue=Get-LegacyValue $consolidated 'MtaIssuePath'
     if ($mtaIssue) { $entries+=@([pscustomobject]@{Field='Consolidated.MtaIssuePath';Value=$mtaIssue;Origin=$null;Relative=$false;Kind='EXTRATO_MTA'}) }
+    foreach ($project in @(Get-LegacyValue $Record.Data 'Projects' @())) {
+        $mta=Get-LegacyValue $project 'Mta'
+        $incidents=Get-LegacyValue $mta 'IncidentEvidence'
+        $paths=@(Get-LegacyValue $incidents 'IndexPath')+@(Get-LegacyValue $incidents 'Files' @() | ForEach-Object { Get-LegacyValue $_ 'Path' })
+        foreach ($path in @($paths | Where-Object { $_ } | Sort-Object -Unique)) {
+            $entries+=@([pscustomobject]@{Field='Projects.Mta.IncidentEvidence';Value=$path;Origin=$null;Relative=$false;Kind='EXTRATO_MTA'})
+        }
+    }
     foreach ($entry in $entries) {
         $path=$entry.Value; $available=$null; $kind=$entry.Kind; $valid=$true
         try {
