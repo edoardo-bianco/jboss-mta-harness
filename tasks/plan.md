@@ -218,7 +218,7 @@ com MTA indisponivel. Test-Implementation e Test-ImplementationBranch passaram
 em PowerShell 5.1; revisao independente sem bloqueantes. Ensaio humano do agente
 recusando corretiva sem GO permanece no aceite integrado.
 
-S18 deve conferir propagacao de agent/tools no cabecalho dos prompts correntes.
+Propagacao de agent/tools no cabecalho dos prompts correntes conferida na S18 abaixo.
 S22 retira Test-ContextPackage e suas chamadas restantes ao produtor legado de
 implementacao. Suite ampla ainda depende da adaptacao desses consumidores.
 S15 implementada: consultas somente leitura usam contexto/registro correntes e
@@ -279,7 +279,22 @@ consultas verificados em fixtures. Revisao independente sem bloqueantes.
 Por escolha humana de 12/10, manter a extensao Java atual; avaliar Oracle depois
 da simplificacao, sem mudar a configuracao Red Hat/Microsoft nesta entrega.
 
-**Proxima etapa: S18**, prompts correntes e propagacao de cabecalhos.
+S18 implementada: prompts de priorizacao, planejamento e reconciliacao oferecem
+links diretos aos documentos correntes e ao relatorio HTML, preservando o JSON
+como dado tecnico. Registro ausente na priorizacao gera lacuna sem link quebrado.
+Implementacao/revisao atualizam agent/tools a partir do template, conservando
+observacoes humanas e os mesmos destinos. Preparo nao cria proposta ficticia,
+altera escolhas ou concede GO/aceite. Templates explicitam preferencia por
+HTML/Markdown/log legivel para navegacao. Revisar-lote continua encaminhando ao
+contrato corrente de planejar-lotes.
+
+Passaram Test-CurrentPromptLinks, Test-Implementation, Test-Planning,
+Test-Prioritization e Test-MigrationTask em PowerShell 5.1. Cobertura inclui
+MTA/EVIDENCIAS, links existentes, registro ausente, propagacao de cabecalho,
+preservacao de notas e repeticao idempotente. Revisao independente fechou o caso
+de registro ausente; nenhum bloqueante remanescente. Fixtures sinteticas.
+
+**Proxima etapa: S19**, prompts e ensaio corrente de sprints.
 Conversao, limpeza e alinhamento de guias/orientador ainda precisam ser concluidos.
 
 ### Requisitos e fontes
