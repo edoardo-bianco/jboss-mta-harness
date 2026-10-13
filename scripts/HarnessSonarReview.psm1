@@ -5,24 +5,12 @@ Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
 Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
 Import-Module (Join-Path $PSScriptRoot 'HarnessSonarCriteria.psm1') -DisableNameChecking
 
-function Get-HarnessSonarReview {
-    param([string]$Root, [string]$ResultPath)
-    if ([string]::IsNullOrWhiteSpace($ResultPath)) { throw 'Informe o resultado.json Sonar corrente do projeto.' }
-    $path=Resolve-HarnessPath $ResultPath $Root
-    $base=Resolve-HarnessPath (Join-Path $Root '.harness/projetos') $Root
-    if (-not $path.StartsWith($base+'\',[StringComparison]::OrdinalIgnoreCase) -or
-        $path.Substring($base.Length+1) -notmatch '^[^\\]+\\atual\\diagnosticos\\sonar\\resultado\.json$') { throw 'Escolha o resultado Sonar corrente em .harness/projetos/<artifactId>/atual/diagnosticos/sonar/resultado.json.' }
-    $name=$path.Substring($base.Length+1).Split('\')[0]
-    $association=Get-Content -LiteralPath (Join-Path $base ($name+'/projeto.json')) -Raw -Encoding UTF8 | ConvertFrom-Json
-    $project=Get-HarnessProjectStorage $Root $association.pom
-    if ($project.Folder -ine (Join-Path $base $name)) { throw 'Associacao do POM diverge da pasta Sonar.' }
-    $prefix='atual/diagnosticos/sonar/'
-    $decisionPath='atual/diagnosticos/sonar-decisao.json'
-    $documents=Read-HarnessProjectFiles $project @($prefix+'resultado.json'; $prefix+'quality-gate.json'; $prefix+'measures.json'; $prefix+'issues.json'; $prefix+'criteria.json'; $prefix+'RESUMO.md'; $decisionPath; 'atual/operacao.json')
+function Get-HarnessSonarAssessment {
+    param([Collections.IDictionary]$Documents)
     $data=@{}
     foreach ($file in @('resultado.json','quality-gate.json','measures.json','issues.json','criteria.json')) {
-        if (-not $documents[$prefix+$file]) { throw "Diagnostico Sonar corrente incompleto: $file ausente. Confira a ultima tentativa; nenhum legado sera procurado." }
-        $data[$file]=ConvertFrom-Json $documents[$prefix+$file]
+        if (-not $Documents[$file]) { throw "Diagnostico Sonar corrente incompleto: $file ausente. Confira a ultima tentativa; nenhum legado sera procurado." }
+        $data[$file]=ConvertFrom-Json $Documents[$file]
     }
     $result=$data['resultado.json']; $gate=$data['quality-gate.json']; $measures=$data['measures.json']; $issues=$data['issues.json']; $criteria=$data['criteria.json']
     foreach ($field in @('Source','ProjectKey','ServerUrl','AnalysisId','Status','QualityGateStatus','CriteriaStatus')) {
@@ -52,6 +40,27 @@ function Get-HarnessSonarReview {
         BaselineAnalysisId=$criteria.Evaluation.BaselineAnalysisId;NewIssueKeys=$criteria.Evaluation.NewIssueKeys
         OpenIssueKeys=@($issues.Snapshot.Issues | ForEach-Object { $_.key } | Sort-Object -CaseSensitive)
     }
+    [pscustomobject]@{Result=$result;Assessment=$assessment;Evaluation=$evaluation}
+}
+
+function Get-HarnessSonarReview {
+    param([string]$Root, [string]$ResultPath)
+    if ([string]::IsNullOrWhiteSpace($ResultPath)) { throw 'Informe o resultado.json Sonar corrente do projeto.' }
+    $path=Resolve-HarnessPath $ResultPath $Root
+    $base=Resolve-HarnessPath (Join-Path $Root '.harness/projetos') $Root
+    if (-not $path.StartsWith($base+'\',[StringComparison]::OrdinalIgnoreCase) -or
+        $path.Substring($base.Length+1) -notmatch '^[^\\]+\\atual\\diagnosticos\\sonar\\resultado\.json$') { throw 'Escolha o resultado Sonar corrente em .harness/projetos/<artifactId>/atual/diagnosticos/sonar/resultado.json.' }
+    $name=$path.Substring($base.Length+1).Split('\')[0]
+    $association=Get-Content -LiteralPath (Join-Path $base ($name+'/projeto.json')) -Raw -Encoding UTF8 | ConvertFrom-Json
+    $project=Get-HarnessProjectStorage $Root $association.pom
+    if ($project.Folder -ine (Join-Path $base $name)) { throw 'Associacao do POM diverge da pasta Sonar.' }
+    $prefix='atual/diagnosticos/sonar/'
+    $decisionPath='atual/diagnosticos/sonar-decisao.json'
+    $documents=Read-HarnessProjectFiles $project @($prefix+'resultado.json'; $prefix+'quality-gate.json'; $prefix+'measures.json'; $prefix+'issues.json'; $prefix+'criteria.json'; $prefix+'RESUMO.md'; $decisionPath; 'atual/operacao.json')
+    $diagnostic=@{}
+    foreach ($file in @('resultado.json','quality-gate.json','measures.json','issues.json','criteria.json')) { $diagnostic[$file]=$documents[$prefix+$file] }
+    $assessed=Get-HarnessSonarAssessment $diagnostic
+    $result=$assessed.Result; $assessment=$assessed.Assessment; $evaluation=$assessed.Evaluation
     $current=$null; $needsReview=$false
     if ($documents[$decisionPath]) {
         $current=ConvertFrom-Json $documents[$decisionPath]
@@ -59,7 +68,7 @@ function Get-HarnessSonarReview {
             ($current.Decision -ceq 'RegistrarParaDepois' -and ([string]::IsNullOrWhiteSpace($current.Note) -or [string]::IsNullOrWhiteSpace($current.ReviewWhen)))) { throw 'Decisao Sonar invalida; preserve o texto e corrija motivo/gatilho.' }
         $needsReview=(ConvertTo-Json -InputObject $current.Assessment -Depth 20 -Compress) -cne (ConvertTo-Json -InputObject $assessment -Depth 20 -Compress)
     }
-    if ($result.Source -ine $project.Source -or $result.QualityGateStatus -cne $gate.Result.status) { $needsReview=$true }
+    if ($result.Source -ine $project.Source -or $result.QualityGateStatus -cne $assessment.QualityGate.status) { $needsReview=$true }
     $operation=$null
     if ($documents['atual/operacao.json']) {
         $operations=ConvertFrom-Json $documents['atual/operacao.json']
@@ -115,4 +124,4 @@ function Show-HarnessSonarReview {
     $state
 }
 
-Export-ModuleMember -Function Get-HarnessSonarReview, Save-HarnessSonarDecision, Show-HarnessSonarReview
+Export-ModuleMember -Function Get-HarnessSonarReview,Get-HarnessSonarAssessment, Save-HarnessSonarDecision, Show-HarnessSonarReview

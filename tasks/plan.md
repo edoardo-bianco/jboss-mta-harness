@@ -478,6 +478,13 @@ escolha invalida, log ausente e trabalho posterior foram exercitados. Revisao
 independente fechou dois achados. S21 ainda inclui Sonar, multiprojeto, cenarios
 e Validar; CLI somente Previa, sem conversao/limpeza real ou aceite integrado.
 
+Preparo do complemento Sonar: validacao/avaliacao dos cinco documentos extraida
+para Get-HarnessSonarAssessment, sem acesso a disco. O consumidor corrente chama
+o mesmo avaliador; o conversor podera validar antes da publicacao sem duplicar
+regras. Test-SonarReview passou em PS5.1 (parecer, dialogo e concorrencia, sem
+JDK/rede/token); revisao independente confirmou equivalencia. Conversao Sonar
+continua pendente neste checkpoint.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
