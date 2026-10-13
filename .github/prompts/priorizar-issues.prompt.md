@@ -36,6 +36,8 @@ contexto para o estado corrente. O contexto e mutavel e nao e um recibo.
    Detalhes ficam no MTA e arquivos originais, com links Markdown que abrem
    caminhos existentes (relativos ao documento, entre <...>). Nao inventar
    ancora MTA nem link a linha nao conferida.
+   Para navegacao, prefira o relatorio HTML, fichas Markdown e logs legiveis;
+   JSON/output.js continuam como dados de consulta, sem substituir esses links.
 
 Identidade da ficha, em bloco unico (JSON sem cercas):
 

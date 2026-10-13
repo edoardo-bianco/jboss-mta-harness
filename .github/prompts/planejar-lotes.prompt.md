@@ -54,7 +54,13 @@ identificacao, resumo do problema, localizacao relevante, impacto, encaminhament
 manual e lacunas. Preserve texto humano. Links diretos junto das referencias a
 MTA, codigo local, POM, configuracoes e anexos; nao transcrever incidentes inteiros,
 copiar anexos nem criar mapa de copias. Sem destino existente, declare a lacuna,
-sem link ou ancora inventados. Identidade da ficha em bloco unico, JSON sem cercas:
+sem link ou ancora inventados.
+
+Na navegacao, prefira relatorios HTML, documentos Markdown e logs legiveis aos
+JSON tecnicos sempre que houver documento correspondente. O catalogo original
+permanece fonte dos dados; o link do relatorio abre Mta.ReportPath.
+
+Identidade da ficha em bloco unico, JSON sem cercas:
 
 <!-- ficha:identidade:inicio -->
 {"Project":"artifactId literal","Category":"categoria escolhida","Id":"ID funcional","LocalPaths":[],"EvidencePaths":[]}

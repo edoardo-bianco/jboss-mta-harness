@@ -50,6 +50,8 @@ Os helpers continuam somente leitores e orientadores; o condutor faz a publicaca
 - Confira referencias manuais recebidas e ajuste-as na mesclagem quando apontarem
   para caminhos de outra maquina. Os blocos gerenciados de fontes sao regenerados
   automaticamente com POM, Source, MTA e anexos locais.
+  Para navegacao, prefira HTML/Markdown/log legivel ao JSON tecnico quando houver
+  documento correspondente; nao invente relatorio nem substitua a fonte dos dados.
 - Edite SOMENTE arquivos de proposta sob ProposalPath devolvido por Start,
   preservando o caminho relativo funcional (migracao.md,
   atual/planejamento/plano.md, atual/planejamento/tarefas.md,
