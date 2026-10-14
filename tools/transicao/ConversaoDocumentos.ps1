@@ -7,10 +7,13 @@ function Convert-ConversionMarkdown {
         if (-not $uri.IsFile) { return $match.Value }
         $origin=Resolve-ProjectPath $uri.LocalPath $State.Project.Root
         $destination=$origin
+        $associations=@($State.Participants | Where-Object {
+            $origin -ieq $_.LegacySource -or $origin.StartsWith($_.LegacySource+'\',[StringComparison]::OrdinalIgnoreCase)
+        } | Sort-Object @{Expression={$_.LegacySource.Length};Descending=$true})
         if ($State.Map.ContainsKey($origin)) { $destination=$State.Map[$origin] }
-        elseif ($origin -ieq $State.Inputs.Preview.LegacySource) { $destination=$State.Project.Source }
-        elseif ($origin.StartsWith($State.Inputs.Preview.LegacySource+'\',[StringComparison]::OrdinalIgnoreCase)) {
-            $destination=Resolve-ProjectPath (Join-Path $State.Project.Source $origin.Substring($State.Inputs.Preview.LegacySource.Length+1)) $State.Project.Root
+        elseif ($associations.Count) {
+            $association=$associations[0]; $suffix=$origin.Substring($association.LegacySource.Length).TrimStart('\')
+            $destination=if ($suffix) {Resolve-ProjectPath (Join-Path $association.Project.Source $suffix) $State.Project.Root} else {$association.Project.Source}
         } elseif ($origin.StartsWith($State.Inputs.Session.DataRoot+'\',[StringComparison]::OrdinalIgnoreCase)) {
             $State.Diagnostics.Add('Referencia legada sem destino corrente: '+$origin)
             return ($label+' (referencia legada indisponivel: '+(ConvertTo-ProjectCell $origin)+')')
@@ -26,12 +29,15 @@ function Convert-ConversionMarkdown {
     [regex]::Replace($Text,'\[([^\]\r\n]*)\]\((?:<([^>\r\n]+)>|([^\s\)]+))\)',$evaluator)
 }
 
-function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa) {
+function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,$Participants=@()) {
     $project=$Inputs.Project
     if (-not $Inputs.Register) { throw 'Escolha um registro legado unico antes de aplicar.' }
     if (@($Inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $Inputs.Planning.Record) { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
     if (@($Inputs.Preview.Related | Where-Object Kind -NotIn @('RUNS','PRIORIZACAO','BUILDS','SONAR')).Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
     $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;SonarInventories=@{};SonarSummary=$null;EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
+    if (-not @($Participants).Count) { $Participants=@([pscustomobject]@{LegacySource=$Inputs.Preview.LegacySource;Project=$project}) }
+    $state|Add-Member Participants @($Participants)
+    $state|Add-Member PartnerObserved @{}
     $state.Map[$Inputs.Register.Path]=$project.MigrationPath
     $record=$Inputs.Planning.Record
     if ($record) {
@@ -48,6 +54,15 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     Add-ConversionBuild $state $BuildResultado
     Add-ConversionSonar $state $SonarResultado $SonarTentativa
     $prioritizations=@(Read-ConversionPrioritization $state $PrioritizacaoContexto)
+    # Publicacao dos anexos compartilhados sera habilitada com proprietario unico.
+    foreach ($priority in @($prioritizations | Where-Object { $_.Participants.Count -gt 1 })) {
+        if (@($Inputs.Preview.Attachments | Where-Object ContextPath -IIn @($priority.Records.Path)).Count) { throw 'Anexos multiprojeto exigem consolidacao por proprietario antes da aplicacao.' }
+        foreach ($document in @($priority.Rankings)+@($priority.Fichas.Values)) {
+            foreach ($link in @(Get-ConversionLinks $document.Text $document.Path $Inputs.Session)) {
+                if (-not $state.Map.ContainsKey($link) -and $link.StartsWith($Inputs.Session.DataRoot+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Anexo multiprojeto sem proprietario; consolidacao ainda pendente.' }
+            }
+        }
+    }
     $evidence=Read-ConversionEvidence $state $record $prioritizations
     # Todos os destinos devem existir no mapa antes de transformar links.
     Add-ConversionPrioritizationDocuments $state $prioritizations
@@ -99,7 +114,7 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     if ($state.SonarSummary) { $index+=Get-HarnessSourceLink $project.IndexPath $state.SonarSummary.Target 'Relatorio Sonar atual' }
     elseif ($state.Files.Contains('atual/diagnosticos/sonar-console.log')) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder 'atual/diagnosticos/sonar-console.log') 'Ultima tentativa Sonar; diagnostico indisponivel' }
     if ($state.Files.Contains('atual/diagnosticos/sonar-decisao.json')) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder 'atual/diagnosticos/sonar-decisao.json') 'Parecer humano Sonar a revisar' }
-    foreach ($relative in @($state.Files.Keys | Where-Object { $_ -like 'atual/priorizacao/*/escopos/*/indice.md' } | Sort-Object)) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder $relative) 'Priorizacao corrente' }
+    foreach ($priority in $prioritizations) { $index+=Get-HarnessSourceLink $project.IndexPath $priority.Paths.IndexPath 'Priorizacao corrente' }
     foreach ($diagnostic in $state.Diagnostics) { $index+='- '+(ConvertTo-ProjectCell $diagnostic) }
     if ($state.Files.Contains('atual/operacao.json')) { $index+=Set-ProjectManagedBlock '' 'operacoes' (Get-ProjectOperationsText $state.Files['atual/operacao.json']) }
     $index+=@('','Conversao preliminar. Revisao do GO e aceite humanos pendentes.')

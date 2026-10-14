@@ -19,19 +19,48 @@ Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -DisableNameCheck
 . (Join-Path $PSScriptRoot 'ConversaoPriorizacao.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoDocumentos.ps1')
 
+function Get-ConversionParticipants([string]$Workspace,[string]$Pom,[string]$SourceLegado,[Collections.IDictionary]$Participantes) {
+    $current=Get-HarnessProjectReference $Workspace $Pom
+    $source=if ($SourceLegado) {Resolve-ProjectPath $SourceLegado $current.Root} else {$current.Source}
+    $mapping=@{}; $mapping[$source]=$current.Pom
+    foreach ($key in $Participantes.Keys) {
+        $legacy=Resolve-ProjectPath $key $current.Root
+        $pomPath=Resolve-ProjectPath $Participantes[$key] $current.Root
+        if ($mapping.ContainsKey($legacy) -and $mapping[$legacy] -ine $pomPath) { throw 'Source legado associado a POMs diferentes.' }
+        $mapping[$legacy]=$pomPath
+    }
+    $names=@{}; $poms=@{}
+    foreach ($legacy in $mapping.Keys) {
+        $project=Get-HarnessProjectReference $current.Root $mapping[$legacy]
+        if ($names.ContainsKey($project.Name) -or $poms.ContainsKey($project.Pom)) { throw 'Participantes com artifactId/POM duplicado; nao consolidar Sources distintos.' }
+        $names[$project.Name]=[pscustomobject]@{LegacySource=$legacy;Project=$project}
+        $poms[$project.Pom]=$true
+    }
+    $ordered=[string[]]@($names.Keys); [Array]::Sort($ordered,[StringComparer]::Ordinal)
+    foreach ($name in $ordered) { $names[$name] }
+}
+
 function Invoke-ConversionApply {
     [CmdletBinding()]
-    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa)
+    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,[Collections.IDictionary]$Participantes=@{})
     $pomPath=Resolve-ProjectPath $Pom ([IO.Path]::GetFullPath($Workspace))
     # O nome da pasta e os documentos devem observar o mesmo POM. Manter apenas
     # compartilhamento de leitura impede troca/renomeacao durante a publicacao.
-    $pomGuard=[IO.File]::Open($pomPath,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
-    $lease=$null
+    $participants=@(Get-ConversionParticipants $Workspace $pomPath $SourceLegado $Participantes)
+    $guards=@(); $leases=@()
     try {
+        foreach ($entry in $participants) {
+            $guards+=[IO.File]::Open($entry.Project.Pom,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
+            $checked=Get-HarnessProjectReference $Workspace $entry.Project.Pom
+            if ($checked.Name -cne $entry.Project.Name -or $checked.Source -ine $entry.Project.Source) { throw 'POM participante mudou durante a associacao; repita a leitura.' }
+        }
         $project=Get-HarnessProjectReference $Workspace $pomPath
-        $lease=Enter-HarnessProjectAccess $project -ForOperation
+        foreach ($entry in $participants) {
+            if ($entry.Project.Pom -ieq $pomPath) { $leases+=Enter-HarnessProjectAccess $entry.Project -ForOperation }
+            else { $leases+=Enter-HarnessProjectAccess $entry.Project -ReadOnly }
+        }
         $inputs=Read-ConversionInputs -Workspace $Workspace -Pom $Pom -SourceLegado $SourceLegado -Registro $Registro -Contexto $Contexto
-        $state=New-ConversionCoreFiles $inputs $MtaDiretorio $PrioritizacaoContexto $BuildResultado $SonarResultado $SonarTentativa
+        $state=New-ConversionCoreFiles $inputs $MtaDiretorio $PrioritizacaoContexto $BuildResultado $SonarResultado $SonarTentativa $participants
         $expected=Read-HarnessProjectFiles $project @($state.Files.Keys) -AsBytes
         $writes=[ordered]@{}
         foreach ($relative in $state.Files.Keys) {
@@ -48,8 +77,14 @@ function Invoke-ConversionApply {
         }
         if ($state.MtaOrigin -and (Get-ConversionMtaInventory $state.MtaOrigin $project.Root) -cne $state.MtaInventory) { throw 'Conjunto/selecao MTA mudou durante a conversao; repita a leitura.' }
         Assert-ConversionSonarUnchanged $state
+        foreach ($path in $state.PartnerObserved.Keys) {
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf) -or [IO.File]::ReadAllText($path) -cne $state.PartnerObserved[$path]) { throw 'Ficha/associacao participante mudou durante a conversao; repita a leitura.' }
+        }
         if ($writes.Count) { Publish-HarnessProjectFiles $project $writes $expected }
         [pscustomobject]@{Status=$(if ($writes.Count) {'CONVERTIDO'} else {'EQUIVALENTE'});Project=$project.Name;Destination=$project.Folder;ChangedFiles=@($writes.Keys);Diagnostics=@($state.Diagnostics);AuthorizationInherited=$false}
-    } finally { if ($lease) { $lease.ReleaseMutex(); $lease.Dispose() }; $pomGuard.Dispose() }
+    } finally {
+        for ($i=$leases.Count-1;$i -ge 0;$i--) { $leases[$i].ReleaseMutex(); $leases[$i].Dispose() }
+        foreach ($guard in $guards) { $guard.Dispose() }
+    }
 }
 Export-ModuleMember -Function Invoke-ConversionApply

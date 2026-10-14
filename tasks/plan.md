@@ -555,6 +555,21 @@ priorizacao usam a chave funcional Project/ID do nucleo. Test-ConversionPrioriti
 Test-ConversionPrioritizationLegacy e Test-ConversionPriorityEvidence passaram
 em PS5.1. Esta refatoracao ainda nao habilita conversao multiprojeto.
 
+Subfatia multiprojeto sem anexos compartilhados: API interna aceita `Participantes`
+como associacao temporaria Source legado/POM. Cada execucao escreve somente no
+projeto escolhido. Participantes publicam fichas; mestre ordinal publica cobertura
+global apos conferir todas as associacoes e fichas examinadas, preservando
+acrescimos humanos. Mesmo ID em dois projetos, categorias e escopos ficam separados.
+Leases/POMs sao adquiridos em ordem; parceiros nao sao recuperados nem regravados.
+
+Test-ConversionMultiProject passou em PS5.1, incluindo ausencia de associacao de
+participante ainda nao examinado, recusa de motivo sem vinculo a ficha, conteudo
+humano posterior, concorrencia e reaplicacao em ambos os projetos. Dois achados
+da revisao tiveram RED e foram corrigidos. ConversionPrioritization,
+ConversionPrioritizationLegacy, ConversionPriorityEvidence e ConversionApplySafety
+tambem passaram. Anexos multiprojeto ainda sao recusados explicitamente ate definir
+proprietario e preservar a origem dos extratos MTA; CLI permanece somente Previa.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
