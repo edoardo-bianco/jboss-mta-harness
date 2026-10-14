@@ -69,7 +69,7 @@ function Read-ConversionRecords($Session,$Inventory,[string]$Source) {
     }
 }
 function Get-ConversionLinks([string]$Text,[string]$Document,$Session) {
-    foreach ($match in [regex]::Matches($Text,'\[[^\]\r\n]*\]\((?:<([^>\r\n]+)>|([^\s\)]+))\)')) {
+    foreach ($match in [regex]::Matches($Text,'\[[^\]\r\n]*\]\((?:<([^>\r\n]*)>|([^\s\)]+))\)')) {
         $value=if ($match.Groups[1].Success) {$match.Groups[1].Value} else {$match.Groups[2].Value}
         if ($value -match '^https?://|^#') { continue }
         try {
