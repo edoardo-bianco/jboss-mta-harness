@@ -54,16 +54,9 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     Add-ConversionParticipantMta $state
     Add-ConversionBuild $state $BuildResultado
     Add-ConversionSonar $state $SonarResultado $SonarTentativa
-    $prioritizations=@(Read-ConversionPrioritization $state $PrioritizacaoContexto)
-    # Publicacao dos anexos compartilhados sera habilitada com proprietario unico.
-    foreach ($priority in @($prioritizations | Where-Object { $_.Participants.Count -gt 1 })) {
-        if (@($Inputs.Preview.Attachments | Where-Object ContextPath -IIn @($priority.Records.Path)).Count) { throw 'Anexos multiprojeto exigem consolidacao por proprietario antes da aplicacao.' }
-        foreach ($document in @($priority.Rankings)+@($priority.Fichas.Values)) {
-            foreach ($link in @(Get-ConversionLinks $document.Text $document.Path $Inputs.Session)) {
-                if (-not $state.Map.ContainsKey($link) -and $link.StartsWith($Inputs.Session.DataRoot+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Anexo multiprojeto sem proprietario; consolidacao ainda pendente.' }
-            }
-        }
-    }
+    $allPrioritizations=@(Read-ConversionPrioritization $state $PrioritizacaoContexto)
+    $state|Add-Member OwnershipPriorities $allPrioritizations
+    $prioritizations=@($allPrioritizations | Where-Object { $project.Name -cin @($_.Participants | ForEach-Object { $_.Project.Name }) })
     $evidence=Read-ConversionEvidence $state $record $prioritizations
     # Todos os destinos devem existir no mapa antes de transformar links.
     Add-ConversionPrioritizationDocuments $state $prioritizations

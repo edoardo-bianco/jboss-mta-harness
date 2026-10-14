@@ -8,6 +8,7 @@ Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -DisableNameCheck
 . (Join-Path $PSScriptRoot 'LegadoLeitura.ps1')
 . (Join-Path $PSScriptRoot 'LegadoPlanejamento.ps1')
 . (Join-Path $PSScriptRoot '../../scripts/HarnessIssueSources.ps1')
+. (Join-Path $PSScriptRoot 'ConversaoPropriedade.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoEvidencias.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoMta.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoParticipantes.ps1')
@@ -97,7 +98,10 @@ function Invoke-ConversionApply {
         Assert-ConversionSonarUnchanged $state
         Assert-ConversionParticipantMtaUnchanged $state
         foreach ($path in $state.PartnerObserved.Keys) {
-            if (-not (Test-Path -LiteralPath $path -PathType Leaf) -or [IO.File]::ReadAllText($path) -cne $state.PartnerObserved[$path]) { throw 'Ficha/associacao participante mudou durante a conversao; repita a leitura.' }
+            if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw 'Arquivo participante removido durante a conversao.' }
+            $expectedPartner=$state.PartnerObserved[$path]
+            $changed=if ($expectedPartner -is [byte[]]) { [Convert]::ToBase64String([IO.File]::ReadAllBytes($path)) -cne [Convert]::ToBase64String($expectedPartner) } else { [IO.File]::ReadAllText($path) -cne $expectedPartner }
+            if ($changed) { throw 'Arquivo participante mudou durante a conversao; repita a leitura.' }
         }
         if ($writes.Count) { Publish-HarnessProjectFiles $project $writes $expected }
         [pscustomobject]@{Status=$(if ($writes.Count) {'CONVERTIDO'} else {'EQUIVALENTE'});Project=$project.Name;Destination=$project.Folder;ChangedFiles=@($writes.Keys);Diagnostics=@($state.Diagnostics);AuthorizationInherited=$false}

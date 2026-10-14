@@ -8,7 +8,7 @@ function Add-ConversionParticipantMta($State) {
         $options=$participant.Options
         $inputs=Read-ConversionInputs $project.Root $project.Pom -SourceLegado $participant.LegacySource -Registro $options.Registro -Contexto $options.Contexto
         if (-not $inputs.Register) { throw ('Escolha um registro unico para o participante '+$project.Name+'.') }
-        if (-not $options.MtaDiretorio -and @($inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $inputs.Planning.Record) { throw ('Plano do participante ambiguo; informe Contexto ou MtaDiretorio: '+$project.Name) }
+        if (@($inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $inputs.Planning.Record) { throw ('Plano do participante ambiguo; informe Contexto: '+$project.Name) }
         $peer=[pscustomobject]@{Project=$project;Inputs=$inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
         Add-ConversionMta $peer $options.MtaDiretorio -ReferencesOnly
         $sources[$participant.LegacySource]=$peer.Mta
@@ -21,6 +21,7 @@ function Add-ConversionParticipantMta($State) {
     }
     $State|Add-Member ParticipantMta $sources
     $State|Add-Member ParticipantMtaStates $peers
+    $State|Add-Member OwnershipInputs @(@($State.Inputs)+@($peers | ForEach-Object Inputs) | Sort-Object { $_.Project.Name })
 }
 
 function Assert-ConversionParticipantMtaUnchanged($State) {

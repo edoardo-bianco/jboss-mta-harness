@@ -57,7 +57,8 @@ function Get-ConversionRankingAssessment($State,$Ranking,$Issue,[string]$Ficha) 
 }
 
 function Read-ConversionPrioritization($State,[string[]]$SelectedContexts=@()) {
-    $records=@($State.Inputs.Records | Where-Object Kind -EQ 'PRIORIZACAO'); $groups=@{}
+    $inputs=@(Get-LegacyValue $State 'OwnershipInputs' @($State.Inputs))
+    $records=@($inputs | ForEach-Object Records | Where-Object Kind -EQ 'PRIORIZACAO' | Sort-Object Path -Unique); $groups=@{}
     $SelectedContexts=@($SelectedContexts | ForEach-Object { Resolve-ProjectPath $_ $State.Project.Root })
     foreach ($path in $SelectedContexts) { if (@($records | Where-Object Path -IEQ $path).Count -ne 1) { throw 'PrioritizacaoContexto nao pertence ao Source selecionado.' } }
     foreach ($record in $records) {
@@ -176,7 +177,8 @@ function Read-ConversionPrioritization($State,[string[]]$SelectedContexts=@()) {
         $data=[pscustomobject][ordered]@{Purpose='current-prioritization';Scope=$scope;Category=$category;ContextPath=$paths.ContextPath;RankingPath=$paths.RankingPath;PromptPath=$paths.PromptPath;IndexPath=$paths.IndexPath;PrioritizationIndexPath=(Join-Path $State.Project.Root '.harness/indices/priorizacao.md');
             Projects=@(foreach ($participant in $participants) {
                 $project=$participant.Project
-                [pscustomobject]@{Project=$project.Name;Label=$project.Name;Source=$project.Source;Pom=$project.Pom;MigrationPath=$project.MigrationPath;EvidencePath=$project.EvidencePath;Mta=$(if ($project.Name -ceq $State.Project.Name -and $State.Mta) {@{ReportPath=$State.Mta.ReportPath;CatalogPath=$State.Mta.CatalogPath}} else {$null});Diagnostics=@(if ($project.Name -ceq $State.Project.Name) {$State.Diagnostics})}
+                $mta=$State.ParticipantMta[$participant.LegacySource]
+                [pscustomobject]@{Project=$project.Name;Label=$project.Name;Source=$project.Source;Pom=$project.Pom;MigrationPath=$project.MigrationPath;EvidencePath=$project.EvidencePath;Mta=$(if ($mta) {@{ReportPath=$mta.ReportPath;CatalogPath=$mta.CatalogPath}} else {$null});Diagnostics=@(if ($project.Name -ceq $State.Project.Name) {$State.Diagnostics})}
             });
             Percentage=$percent;InitialTotal=$baseline.Count;SliceSize=$slice;BaselineIssues=$baseline;ExcludedIssues=$excluded;AvailableIssues=$available;
             FichaPaths=@(foreach ($issue in $baseline) {

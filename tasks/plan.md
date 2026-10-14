@@ -591,6 +591,26 @@ diferente com configuracao null, opcoes conflitantes em aliases do Source e orig
 interna compartilhada com destinos diferentes. Revisao fechada sem achados abertos.
 Anexos humanos compartilhados e cenarios/Validar continuam pendentes; CLI Previa.
 
+Anexos multiprojeto habilitados na API: universo comum dos planos escolhidos e
+escopos dos participantes explicitos; scopes alcancados exigem associacao completa.
+Fichas/planos/controles mantem destinos fixos. Anexo humano compartilhado pertence
+ao maior consumidor ordinal, inclusive referencias transitivas; converter em ordem
+decrescente evita dependencias circulares. Diagnosticos conservam seu Source real.
+Aliases equivalentes escolhem representante estavel, mesmo fora do contexto alvo.
+Cada chamada escreve somente no projeto escolhido. Antes da cobertura, o mestre
+confere tambem os anexos das fichas examinadas que atesta; mudancas concorrentes,
+ausencia e divergencia impedem publicacao. Acrescimos humanos dos parceiros ficam
+preservados; reaplicacao do proprio destino nao sobrescreve trabalho posterior.
+
+Test-ConversionSharedEvidence, Test-ConversionEvidenceScopes e
+Test-ConversionEvidenceAliases passaram em PS5.1. Achados de universo parcial,
+obrigacoes entre escopos, alias fora da fila local e anexo exclusivo de ficha
+atestada tiveram RED/GREEN e revisao fechada. Regressao aprovada: Apply (inclui
+consumidor sem conversor), MultiProject, PriorityEvidence com MTA disponivel,
+MtaOwnership, PrioritizationLegacy e ParticipantMta. Fixtures sinteticas; nenhuma
+conversao/limpeza real. Cenarios e Validar ainda faltam em S21; S22-S28 e aceite
+humano integrado seguem pendentes. CLI permanece somente Previa.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
