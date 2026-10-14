@@ -676,6 +676,61 @@ edicao/criacao concorrente e junction inserida depois da primeira remocao.
 Revisao independente fechada; commits 2c2664f e 3f5af8a. Descarte legado/CLI em
 implementacao com fixtures; S23 ainda nao concluida, S24-S28 e aceite pendentes.
 
+### Pausa humana S23 - 14/10/2026
+
+Pedido humano: "vamos parar em um ponto seguro". Trabalho pausado apos fechar
+a microfatia CLI em andamento. Retomar somente mediante novo pedido humano.
+Branch: `harness/planejar-simplificacao-projetos`. Ultimo commit funcional:
+`a81e4ca`; API de descarte em `aee4996`. Este checkpoint documental sera salvo
+em commit separado. Nenhuma integracao/push, conversao ou limpeza de dados reais;
+extensao Java mantida. Helpers encerrados sem processos de teste pendentes.
+
+S21-S23 concluidas tecnicamente e revisadas. CLI oferece Previa, Aplicar, Validar
+e Limpar. Descarte exige equivalencia recomposta com o corrente, selecao de folhas
+e confirmacao; consumidores compartilhados/desconhecidos, contribuicoes recebidas
+e alteracoes concorrentes impedem a remocao. Recuperacao com journal restaura
+somente a selecao exata; sem journal, retira apenas o estagio tecnico. Nenhum mapa
+permanente foi criado e nenhuma origem externa e limpa.
+
+Test-ConversionCleanup completo passou em Windows PowerShell 5.1, incluindo
+notas recebidas/orfas e transitivas, edicao/criacao durante a confirmacao e durante
+a segunda verificacao, repeticao segura e tres interrupcoes reais de processos
+(apos remocao, antes do journal e depois de sua retirada). Test-ConversionCli
+passou com previa, selecao, JSON puro, cancelamento textual/explicito, recuperacao
+sem selecao, divergencia posterior a Aplicar recusada e Validar apos descarte.
+Test-ConversionApply tambem passou apos introduzir VerifyOnly; as suites da limpeza
+corrente e do nucleo estao registradas acima. Revisao independente da API, CLI e
+feature sem achados abertos; `git diff --check` aprovado. Evidencias sinteticas
+nao equivalem a aceite humano ou ao ensaio integrado dos clientes.
+
+Proximo passo: S24, os cinco guias de entrada/planejamento/priorizacao/
+compartilhamento/sprints. Houve inventario e leitura preparatoria; nenhum rascunho
+S24 foi incluido neste checkpoint. Guias e instrucoes antigas continuam pendentes
+de alinhamento, incluindo a tarefa de pacotes ja retirada em S22.
+
+Pontos conferidos para retomar a documentacao:
+
+- Caminho corrente: `.harness/projetos/<artifactId>/`; indice geral em
+  `.harness/indices/projetos.md`. Contexto/plano/tarefas em `atual/planejamento/`.
+- Compartilhar por copia preservando estrutura relativa; conciliar pela tarefa
+  atualizar registro, `preparar-planejamento -Operation manter-migracao`, com
+  ReceivedPath opcional ou LocalOnly e motivo concreto. Preparo nao conclui.
+  Registro exige MESCLADO; priorizacao exige a mesma decisao no par contexto/ranking,
+  preservando B0/quota/examinadas. Somente folhas resolvidas dentro de recebido
+  saem; pasta externa permanece. Build/diagnosticos/sprints nao sao adotados por
+  essa conciliacao. Contexto recebido e referencia, nao substituto do local.
+- Progredir priorizacao preserva base inicial e examinadas por Project/Id; parcial
+  retoma quota. MTA novo pode atualizar elegibilidade, sem recriar B0 implicitamente.
+  Novas fora da base ficam em OutsideBaseline. Fichas essenciais e links diretos.
+- Sprints: New/Resume/Revise/Validate, cenario em participante mestre, premissas
+  separadas do ultimo resultado; preservar B0, inclusoes, calendario/consumo,
+  estimativas Min/Reference/Max, capacidade, ausencias e reducao de IA so em Dev.
+- S25/S28 precisam alinhar tambem os contratos ativos planejamento-copilot e
+  consultas-issues, alem dos guias/modelos/cheat sheet. Prompt manter-migracao deve
+  explicar o par contexto/ranking recebido da S22 sem contradizer seus limites.
+  S26-S27 alinham skill/helpers/AGENTS/Copilot; S28 faz inventario final, regressao
+  e ensaio integrado. Aceite humano final continua pendente e separado.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
