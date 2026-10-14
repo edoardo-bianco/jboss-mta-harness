@@ -1,6 +1,9 @@
 function Get-ConversionAttachments($Session,$Record) {
     if (-not $Record) { return }
     $directory=Split-Path $Record.Path -Parent
+    $owner=Get-LegacyValue $Record.Data 'Source'
+    $projects=@(Get-LegacyValue $Record.Data 'Projects' @())
+    if (-not $owner -and $projects.Count -eq 1) { $owner=Get-LegacyValue $projects[0] 'Source' }
     $entries=@()
     foreach ($field in @('FichaPath','EvidenceIndexPath','Run')) {
         $value=Get-LegacyValue $Record.Data $field
@@ -30,10 +33,10 @@ function Get-ConversionAttachments($Session,$Record) {
         $incidents=Get-LegacyValue $mta 'IncidentEvidence'
         $paths=@(Get-LegacyValue $incidents 'IndexPath')+@(Get-LegacyValue $incidents 'Files' @() | ForEach-Object { Get-LegacyValue $_ 'Path' })
         foreach ($path in @($paths | Where-Object { $_ } | Sort-Object -Unique)) {
-            $entries+=@([pscustomobject]@{Field='Projects.Mta.IncidentEvidence';Value=$path;Origin=$null;Relative=$false;Kind='EXTRATO_MTA'})
+            $entries+=@([pscustomobject]@{Field='Projects.Mta.IncidentEvidence';Value=$path;Origin=$null;Relative=$false;Kind='EXTRATO_MTA';OwnerSource=(Get-LegacyValue $project 'Source')})
         }
     }
-    foreach ($entry in $entries) {
+    $resolved=@(foreach ($entry in $entries) {
         $path=$entry.Value; $available=$null; $kind=$entry.Kind; $valid=$true
         try {
             if ($path -match '^https?://') { $kind='REFERENCIA_EXTERNA' }
@@ -57,7 +60,31 @@ function Get-ConversionAttachments($Session,$Record) {
                 }
             }
         } catch { $Session.Pending.Add('Referencia estruturada invalida em '+$Record.Path+' ['+$entry.Field+']: '+$_.Exception.Message); $available=$false; $valid=$false }
-        [pscustomobject]@{ContextPath=$Record.Path;Field=$entry.Field;Path=$path;OriginPath=$entry.Origin;Kind=$kind;Available=$available;Valid=$valid;Relation=(Get-LegacyValue $entry 'Relation' '');Selection='PENDENTE'}
+        $source=Get-LegacyValue $entry 'OwnerSource' $owner
+        if ($source) { $source=Resolve-ProjectPath $source $Session.Workspace }
+        [pscustomobject]@{ContextPath=$Record.Path;Field=$entry.Field;Path=$path;OriginPath=$entry.Origin;Kind=$kind;Available=$available;Valid=$valid;OwnerSource=$source;Relation=(Get-LegacyValue $entry 'Relation' '');Selection='PENDENTE'}
+    })
+    # A proveniencia diagnostica tambem acompanha copias renomeadas. Resolver
+    # depois de inventariar todos os Projects evita depender da ordem dos campos.
+    for ($pass=0;$pass -lt $resolved.Count;$pass++) {
+        $changed=$false
+        foreach ($attachment in $resolved) {
+            if (-not $attachment.Valid -or -not $attachment.OriginPath -or $attachment.OriginPath -match '^https?://') { continue }
+            $origin=Resolve-ProjectPath $attachment.OriginPath $Session.Workspace
+            $diagnostic=@($resolved | Where-Object { $_.Path -ieq $origin -and $_.Kind -in @('COPIA_DIAGNOSTICO_LEGADO','EXTRATO_MTA') })
+            if (-not $diagnostic.Count) { continue }
+            $owners=@($diagnostic | ForEach-Object OwnerSource | Sort-Object -Unique)
+            if ($owners.Count -ne 1) {
+                $attachment.Valid=$false
+                $Session.Pending.Add('Proveniencia MTA com Sources conflitantes: '+$attachment.Path)
+                continue
+            }
+            if ($attachment.Kind -ne 'COPIA_DIAGNOSTICO_LEGADO' -or $attachment.OwnerSource -ine $owners[0]) {
+                $attachment.Kind='COPIA_DIAGNOSTICO_LEGADO'; $attachment.OwnerSource=$owners[0]; $changed=$true
+            }
+        }
+        if (-not $changed) { break }
     }
+    $resolved
     if ($entries.Count) { $Session.Pending.Add('Consolidar fichas/anexos e substituir dependencias de copias diagnosticas por fontes diretas antes de aplicar: '+$Record.Path) }
 }

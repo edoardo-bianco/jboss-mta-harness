@@ -570,6 +570,14 @@ ConversionPrioritizationLegacy, ConversionPriorityEvidence e ConversionApplySafe
 tambem passaram. Anexos multiprojeto ainda sao recusados explicitamente ate definir
 proprietario e preservar a origem dos extratos MTA; CLI permanece somente Previa.
 
+Proveniencia dos extratos MTA corrigida no inventario e nos dois remapeadores:
+OwnerSource acompanha Projects.Mta.IncidentEvidence e copias renomeadas por
+OriginPath. Um extrato de outro Source nao recebe o relatorio do projeto atual
+nem vira evidencia humana. RED reproduzido em memoria contra 99d5e95;
+Test-ConversionMtaOwnership e Test-ConversionPriorityEvidence (com MTA disponivel)
+passaram em PS5.1. A aplicacao de anexos multiprojeto permanece bloqueada ate
+resolver fontes por participante e propriedade dos anexos humanos.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

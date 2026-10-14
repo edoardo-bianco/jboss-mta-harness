@@ -74,6 +74,8 @@ function Add-ConversionMta($State,[string]$MtaDiretorio) {
         $mta.ReportPath=$State.Map[$mta.ReportPath]
         $mta.CatalogPath=$State.Map[$mta.CatalogPath]
     }
-    foreach ($attachment in $State.Inputs.Preview.Attachments | Where-Object Kind -In @('COPIA_DIAGNOSTICO_LEGADO','EXTRATO_MTA')) { $State.Map[$attachment.Path]=$mta.ReportPath }
+    foreach ($attachment in $State.Inputs.Preview.Attachments | Where-Object Kind -In @('COPIA_DIAGNOSTICO_LEGADO','EXTRATO_MTA')) {
+        if ((Get-LegacyValue $attachment 'OwnerSource') -ieq $State.Inputs.Preview.LegacySource) { $State.Map[$attachment.Path]=$mta.ReportPath }
+    }
     $State.Mta=$mta
 }

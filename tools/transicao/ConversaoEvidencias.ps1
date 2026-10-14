@@ -17,7 +17,9 @@ function Read-ConversionEvidence($State,$Record,$Prioritizations=@()) {
     $functional=@($functional | Where-Object { $_ } | ForEach-Object { Resolve-ProjectPath $_ $State.Project.Root })
     foreach ($entry in $entries) {
         if ($entry.Kind -in @('COPIA_DIAGNOSTICO_LEGADO','EXTRATO_MTA')) {
-            $diagnostics[$entry.Path]=$true
+            $owner=Get-LegacyValue $entry 'OwnerSource'
+            if ($diagnostics.ContainsKey($entry.Path) -and $diagnostics[$entry.Path] -ine $owner) { throw 'Extrato MTA declarado para Sources diferentes.' }
+            $diagnostics[$entry.Path]=$owner
         }
         if ($entry.OriginPath -and $entry.Available) {
             $origin=Resolve-ProjectPath $entry.OriginPath $State.Project.Root
@@ -49,13 +51,19 @@ function Read-ConversionEvidence($State,$Record,$Prioritizations=@()) {
     }
     # Copias renomeadas mantem o papel da origem, inclusive atraves de aliases.
     foreach ($path in @($diagnostics.Keys)) {
-        if ($aliases.ContainsKey($path)) { $diagnostics[$aliases[$path]]=$true }
+        if ($aliases.ContainsKey($path)) {
+            $target=$aliases[$path]
+            if ($diagnostics.ContainsKey($target) -and $diagnostics[$target] -ine $diagnostics[$path]) { throw 'Proveniencia diagnostica com Sources conflitantes.' }
+            $diagnostics[$target]=$diagnostics[$path]
+        }
     }
     foreach ($origin in $aliases.Keys) {
-        if ($diagnostics.ContainsKey($aliases[$origin])) { $diagnostics[$origin]=$true }
+        if ($diagnostics.ContainsKey($aliases[$origin])) { $diagnostics[$origin]=$diagnostics[$aliases[$origin]] }
     }
     if ($State.Mta) {
-        foreach ($path in $diagnostics.Keys) { $State.Map[$path]=$State.Mta.ReportPath }
+        foreach ($path in $diagnostics.Keys) {
+            if ($diagnostics[$path] -ieq $State.Inputs.Preview.LegacySource) { $State.Map[$path]=$State.Mta.ReportPath }
+        }
     }
     foreach ($entry in $entries) {
         if (-not $entry.Relation) { continue }
