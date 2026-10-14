@@ -665,6 +665,17 @@ leitores exclusivos, entrada e teste de pacote foram retirados em subfatias;
 serao alinhados nas S24-S28 previstas. S23 em preparo: separar limpeza corrente
 do descarte legado validado. Nenhuma conversao/limpeza real ou aceite humano.
 
+S23 parcial: limpeza corrente agora seleciona somente folhas em
+temporarios/build, mta e sonar de projetos associados. Preview/cancelamento sao
+puros; POMs/operacoes ficam protegidos e a selecao e revalidada depois de LIMPAR.
+Remocao usa a publicacao recuperavel por projeto. A opcao de backups temporarios
+continua separada, preserva nomes humanos e confere caminhos antes de cada folha.
+Test-ProjectTemporaryRemoval, ProjectPublication, ProjectRecovery, Cleanup e
+TaskInputs passaram em PS5.1. Incluem interrupcao real, journal adulterado,
+edicao/criacao concorrente e junction inserida depois da primeira remocao.
+Revisao independente fechada; commits 2c2664f e 3f5af8a. Descarte legado/CLI em
+implementacao com fixtures; S23 ainda nao concluida, S24-S28 e aceite pendentes.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

@@ -19,7 +19,7 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 
 Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10, 12/10 e 13/10/2026.
 [Ponto atual e verificacoes](plan.md#retomada-de-13102026).
-S11-S22 implementados e revisados. Proxima etapa: S23;
+S11-S22 implementados e revisados. S23 parcial: limpeza corrente validada;
 as seis etapas S23-S28 e o aceite integrado permanecem pendentes.
 Conversao e validacao verificadas em fixtures, inclusive multiprojeto e sprints.
 CLI oferece Previa, Aplicar e Validar; Limpar continua bloqueado ate S23.

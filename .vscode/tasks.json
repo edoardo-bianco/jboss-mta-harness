@@ -93,7 +93,7 @@
     },
     {
       "label": "Workspace: limpar execucoes",
-      "detail": "Limpe execucoes e planejamentos locais por projeto ou todos; preserve MTA externo, migracao.md, evidencias e Sonar.",
+      "detail": "Limpe residuos temporarios de build, MTA e Sonar por projeto ou todos, ou backups temporarios; preserve dados correntes, evidencias e conflitos pendentes.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/limpar-execucoes.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}"],
