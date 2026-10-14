@@ -56,7 +56,7 @@ function Assert-PrioritizationContext {
 }
 
 function Read-PrioritizationResult {
-    param($Data,[string]$Text,$Projects)
+    param($Data,[string]$Text,$Projects,[scriptblock]$FichaReader)
     $block=Find-ProjectManagedBlock $Text 'priorizacao:resultado'
     if (-not $block) { throw 'Ranking exige bloco unico priorizacao:resultado:inicio/fim.' }
     $json=$block.Value -replace '^<!-- priorizacao:resultado:inicio -->\s*','' -replace '\s*<!-- priorizacao:resultado:fim -->$',''
@@ -75,7 +75,7 @@ function Read-PrioritizationResult {
         if ($null -ne $issue.Position -and ($issue.Position -isnot [int] -or $issue.Position -lt 1 -or -not $positions.Add($issue.Position))) { throw 'Posicao deve ser inteiro positivo unico ou null para sem proposta.' }
         $project=@($Projects | Where-Object Name -CEQ $issue.Project)[0]
         $relative=Get-PrioritizationFichaRelativePath $Data.Category $issue.Id
-        $ficha=Read-HarnessProjectFiles $project @($relative)
+        $ficha=if ($FichaReader) { & $FichaReader $project $relative } else { Read-HarnessProjectFiles $project @($relative) }
         if (-not $ficha[$relative]) { throw "Falta ficha da issue examinada: $($issue.Project) / $($issue.Id)" }
         $null=Read-PrioritizationFicha $ficha[$relative] $project.Name $Data.Category $issue.Id
     }
