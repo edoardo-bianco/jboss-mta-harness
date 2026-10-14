@@ -4,6 +4,7 @@ $ErrorActionPreference='Stop'; Set-StrictMode -Version Latest
 Import-Module (Join-Path $root 'tools/transicao/ConversaoPublicacao.psm1') -Force -DisableNameChecking
 Import-Module (Join-Path $root 'scripts/HarnessProject.psm1') -DisableNameChecking
 Import-Module (Join-Path $root 'scripts/HarnessSprintPlanning.psm1') -DisableNameChecking
+Import-Module (Join-Path $root 'tools/transicao/ConversaoValidacao.psm1') -DisableNameChecking
 function Copy-SprintValue($Value) { $Value|ConvertTo-Json -Depth 60|ConvertFrom-Json }
 function Save-SprintValue([string]$Path,$Value) { Write-ConversionFile $Path ($Value|ConvertTo-Json -Depth 60) }
 function Get-TestSprintHash($Value) {
@@ -47,6 +48,11 @@ function Add-LegacySprintRevision($Fixture,$Projects,$Data,[string]$RevisionId,$
     [pscustomobject]@{Receipt=[pscustomobject]$receipt;Data=$data;Validation=$validation}
 }
 $f=New-ConversionFixture
+# O consumidor corrente referencia os contratos instalados no workspace ao recalcular.
+foreach ($relative in @('.github/prompts/planejar-sprints.prompt.md','.github/prompts/revisar-sprints.prompt.md','doc/modelos/planejamento-sprints.template.md','doc/features/planejamento-macro-sprints.md','doc/especificacoes/planejamento-sprints.md','doc/adr/0009-estado-corrente-por-projeto.md','doc/guias/tools/planejamento-sprints.md')) {
+    Write-ConversionFile (Join-Path $f.Workspace $relative) ([IO.File]::ReadAllText((Join-Path $root $relative)))
+}
+Write-ConversionFile (Join-Path $f.Workspace '.harness/indices/projetos.md') '# Projetos da fixture'
 $sourceB=Join-Path $f.Area 'backend'; $pomB=Join-Path $sourceB 'pom.xml'
 Write-ConversionFile $pomB '<project><artifactId>backend</artifactId></project>'
 $registerB=Join-Path $f.Workspace '.harness/projetos/backend__123456789abc/migracao.md'
@@ -159,10 +165,18 @@ try {
     Write-ConversionFile $draft.Receipt.SprintPlanPath $originalPlan
 }
 # Consumidor corrente usa o resultado convertido para conservar B0 e inclusoes.
+$before=Get-ConversionState $f
+$integrity=Test-ConversionCurrent $f.Workspace $pomB
+Assert $integrity.Valid ('Cenario convertido deve validar antes da retomada: '+($integrity.Diagnostics|ConvertTo-Json -Compress))
+Assert ((Get-ConversionState $f) -ceq $before) 'Validacao do cenario convertido conserva bytes e datas.'
 $completed=Complete-HarnessSprintPlan $f.Workspace $current.ContextPath
 Assert ($completed.Status -ceq 'VALIDATED' -and $completed.Baseline.Issues.Count -eq 2 -and $completed.NewIssues.Count -eq 2) 'Planejamento convertido deve continuar calculavel sem reconstruir o historico.'
 Assert ($completed.ReferenceDate -ceq '2026-10-19' -and @($completed.Simulation.ConsumedPhaseSprints.IMPLEMENTATION).Count -gt 0) 'Novo calculo usa as premissas escolhidas e preserva consumo de fases.'
 Assert ($completed.Feasibility -ceq 'NAO_AVALIAVEL' -and ($completed.Diagnostics -join ' ') -match 'EvidenceReview') 'Conversao nao dispensa revisao local das fontes ao recalcular.'
+$before=Get-ConversionState $f
+$integrity=Test-ConversionCurrent $f.Workspace $pomB
+Assert (-not $integrity.Valid -and ($integrity.Diagnostics|ConvertTo-Json -Compress) -match 'atual.+planejamento.+plano.md') 'Retomada deve manter pendente a referencia ao plano de aplicacao ainda ausente.'
+Assert ((Get-ConversionState $f) -ceq $before) 'Validar ausencia nao cria plano/contexto ficticio.'
 
 # Um rascunho sem atual.json nao inventa resultado; a associacao pode relocar Source.
 $g=New-ConversionFixture
