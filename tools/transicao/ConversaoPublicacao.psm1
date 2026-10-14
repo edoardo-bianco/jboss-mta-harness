@@ -20,6 +20,11 @@ Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -DisableNameCheck
 . (Join-Path $PSScriptRoot '../../scripts/HarnessPrioritizationIndex.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoPriorizacao.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoDocumentos.ps1')
+. (Join-Path $PSScriptRoot '../../scripts/HarnessSprintPresentation.ps1')
+. (Join-Path $PSScriptRoot '../../scripts/HarnessSprintState.ps1')
+. (Join-Path $PSScriptRoot '../../scripts/HarnessSprintSimulation.ps1')
+. (Join-Path $PSScriptRoot 'ConversaoSprintsLeitura.ps1')
+. (Join-Path $PSScriptRoot 'ConversaoSprints.ps1')
 
 function Get-ConversionParticipants([string]$Workspace,[string]$Pom,[string]$SourceLegado,[Collections.IDictionary]$Participantes) {
     $current=Get-HarnessProjectReference $Workspace $Pom
@@ -55,13 +60,14 @@ function Get-ConversionParticipants([string]$Workspace,[string]$Pom,[string]$Sou
 
 function Invoke-ConversionApply {
     [CmdletBinding()]
-    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,[Collections.IDictionary]$Participantes=@{})
+    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,[Collections.IDictionary]$Participantes=@{},[object[]]$Sprints=@())
     $pomPath=Resolve-ProjectPath $Pom ([IO.Path]::GetFullPath($Workspace))
     # O nome da pasta e os documentos devem observar o mesmo POM. Manter apenas
     # compartilhamento de leitura impede troca/renomeacao durante a publicacao.
     $participants=@(Get-ConversionParticipants $Workspace $pomPath $SourceLegado $Participantes)
     $guards=@(); $leases=@()
     try {
+        if ($Sprints.Count) { $leases+=Enter-SprintAccess ([IO.Path]::GetFullPath($Workspace)) }
         foreach ($entry in $participants) {
             $guards+=[IO.File]::Open($entry.Project.Pom,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::Read)
             $checked=Get-HarnessProjectReference $Workspace $entry.Project.Pom
@@ -79,7 +85,7 @@ function Invoke-ConversionApply {
             if (-not $explicit -and $options.$name) { Set-Variable -Name $name -Value $options.$name }
         }
         $inputs=Read-ConversionInputs -Workspace $Workspace -Pom $Pom -SourceLegado $SourceLegado -Registro $Registro -Contexto $Contexto
-        $state=New-ConversionCoreFiles $inputs $MtaDiretorio $PrioritizacaoContexto $BuildResultado $SonarResultado $SonarTentativa $participants
+        $state=New-ConversionCoreFiles $inputs $MtaDiretorio $PrioritizacaoContexto $BuildResultado $SonarResultado $SonarTentativa $participants $Sprints
         $expected=Read-HarnessProjectFiles $project @($state.Files.Keys) -AsBytes
         $writes=[ordered]@{}
         foreach ($relative in $state.Files.Keys) {

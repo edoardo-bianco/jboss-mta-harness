@@ -26,14 +26,14 @@ function Convert-ConversionMarkdown {
         if ($uri.Fragment) { $link=$link.Replace('>)',($uri.Fragment+'>)')) }
         $link
     }
-    [regex]::Replace($Text,'\[([^\]\r\n]*)\]\((?:<([^>\r\n]+)>|([^\s\)]+))\)',$evaluator)
+    [regex]::Replace($Text,'\[([^\]\r\n]*)\]\((?:<([^>\r\n]*)>|([^\s\)]+))\)',$evaluator)
 }
 
-function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,$Participants=@()) {
+function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,$Participants=@(),$Sprints=@()) {
     $project=$Inputs.Project
     if (-not $Inputs.Register) { throw 'Escolha um registro legado unico antes de aplicar.' }
     if (@($Inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $Inputs.Planning.Record) { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
-    if (@($Inputs.Preview.Related | Where-Object Kind -NotIn @('RUNS','PRIORIZACAO','BUILDS','SONAR')).Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
+    if (@($Inputs.Preview.Related | Where-Object Kind -NotIn @('RUNS','PRIORIZACAO','BUILDS','SONAR','SPRINT')).Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
     $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;SonarInventories=@{};SonarSummary=$null;EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
     if (-not @($Participants).Count) { $Participants=@([pscustomobject]@{LegacySource=$Inputs.Preview.LegacySource;Project=$project}) }
     $state|Add-Member Participants @($Participants)
@@ -52,6 +52,8 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     }
     Add-ConversionMta $state $MtaDiretorio
     Add-ConversionParticipantMta $state
+    foreach ($inputSet in $state.OwnershipInputs) { $state.Map[$inputSet.Register.Path]=$inputSet.Project.MigrationPath }
+    $scenarios=@(Read-ConversionSprints $state $Sprints)
     Add-ConversionBuild $state $BuildResultado
     Add-ConversionSonar $state $SonarResultado $SonarTentativa
     $allPrioritizations=@(Read-ConversionPrioritization $state $PrioritizacaoContexto)
@@ -62,6 +64,7 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     Add-ConversionPrioritizationDocuments $state $prioritizations
     Add-ConversionEvidenceDocuments $state $evidence
     Add-ConversionSonarSummary $state
+    Add-ConversionSprintDocuments $state $scenarios
     $state.Files['projeto.json']=([ordered]@{pom=$project.Pom;mta=[ordered]@{diretorio=$state.MtaDirectory}} | ConvertTo-Json -Depth 5)
     $migration=Convert-ConversionMarkdown $Inputs.Register.Text $Inputs.Register.Path $project.MigrationPath $state
     $migration=[regex]::Replace($migration,'(?m)^Project:[^\r\n]*',('Project: '+$project.Name))
@@ -109,6 +112,9 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     elseif ($state.Files.Contains('atual/diagnosticos/sonar-console.log')) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder 'atual/diagnosticos/sonar-console.log') 'Ultima tentativa Sonar; diagnostico indisponivel' }
     if ($state.Files.Contains('atual/diagnosticos/sonar-decisao.json')) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder 'atual/diagnosticos/sonar-decisao.json') 'Parecer humano Sonar a revisar' }
     foreach ($priority in $prioritizations) { $index+=Get-HarnessSourceLink $project.IndexPath $priority.Paths.IndexPath 'Priorizacao corrente' }
+    foreach ($scenario in $scenarios) {
+        if ($project.Name -cin @($scenario.Participants | ForEach-Object { $_.Project.Name })) { $index+=Get-HarnessSourceLink $project.IndexPath $scenario.Paths.SprintPlanPath ('Sprints: '+$scenario.Scenario+' (mestre '+$scenario.Master.Name+')') }
+    }
     foreach ($diagnostic in $state.Diagnostics) { $index+='- '+(ConvertTo-ProjectCell $diagnostic) }
     if ($state.Files.Contains('atual/operacao.json')) { $index+=Set-ProjectManagedBlock '' 'operacoes' (Get-ProjectOperationsText $state.Files['atual/operacao.json']) }
     $index+=@('','Conversao preliminar. Revisao do GO e aceite humanos pendentes.')

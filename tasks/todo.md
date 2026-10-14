@@ -33,8 +33,10 @@ novos achados; familia habilitada na API interna. CLI continua somente Previa.
 Multiprojeto validado na API: associacoes explicitas, fontes MTA por Source,
 fichas locais, cobertura unica no mestre e anexos compartilhados com proprietario
 estavel, inclusive escopos sobrepostos/planos/aliases. Publicacao por projeto em
-ordem decrescente; testes PS5.1 e revisao concluidos. Continuar cenarios e Validar
-da S21; S22-S28 e aceite humano integrado pendentes.
+ordem decrescente; testes PS5.1 e revisao concluidos. Cenarios de sprints convertidos
+com mestre explicito, B0/consumo preservados, anexos e retomada corrente comprovada;
+testes PS5.1/revisao fechados. Continuar Validar e liberacao da CLI da S21;
+S22-S28 e aceite humano integrado pendentes.
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.

@@ -611,6 +611,22 @@ MtaOwnership, PrioritizationLegacy e ParticipantMta. Fixtures sinteticas; nenhum
 conversao/limpeza real. Cenarios e Validar ainda faltam em S21; S22-S28 e aceite
 humano integrado seguem pendentes. CLI permanece somente Previa.
 
+Conversao de sprints concluida na API interna: escolhas explicitas de contexto,
+cenario funcional e mestre participante. Premissas/narrativa da revisao escolhida
+e ultimo calculo comprovado pelo ponteiro ficam separados. B0, inclusoes
+historicas, dependencias e consumo de fases permanecem; o resultado convertido
+exige revisao local e nao herda GO/aceite. Hashes/cadeia sao conferidos apenas
+durante a transicao, sem recibos no destino. Anexos de estimativa e fontes
+relocalizadas usam links correntes; somente o mestre publica o cenario.
+
+Test-ConversionSprints e Test-ConversionSprintSelection passaram em PS5.1,
+incluindo retomada pelo validador permanente, draft inicial, anexos transitivos,
+adulteracoes, ausencia de ponteiro em cadeia calculada e escolhas reordenadas.
+Os dois ultimos casos tiveram RED/GREEN e revisao independente fechada. Regressao
+Apply, MultiProject e SprintWorkflow aprovada. Validar e liberacao da CLI em
+andamento; S21 permanece parcial, S22-S28 e aceite humano integrado pendentes.
+Nenhum dado real convertido ou limpo; extensao Java preservada.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
