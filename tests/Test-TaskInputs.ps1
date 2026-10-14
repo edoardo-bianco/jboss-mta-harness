@@ -4,7 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 26 -and @($labels | Sort-Object -Unique).Count -eq 26) 'Manter 26 tarefas distintas, incluindo planejamento macro de sprints.'
+Assert ($labels.Count -eq 25 -and @($labels | Sort-Object -Unique).Count -eq 25) 'Manter 25 tarefas distintas, incluindo planejamento macro de sprints e conciliacao pela entrada habitual.'
 $serverLabels=@('Servidor: iniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
@@ -27,10 +27,10 @@ $prioritization = @($tasks.tasks | Where-Object label -eq 'Planejamento: prioriz
 Assert ($prioritization.Count -eq 1 -and $prioritization[0].args -contains '${workspaceFolder}/scripts/preparar-priorizacao.ps1' -and $prioritization[0].args -contains '${input:harnessWorkspacePath}' -and $prioritization[0].args -contains '${execPath}' -and $prioritization[0].args -notcontains '-SelectTarget') 'Priorizacao deve usar o workspace inteiro e abrir prompt.'
 Assert ($prioritization[0].args -contains '-Interactive' -and $prioritization[0].args -notcontains '-SelectTop') 'Priorizacao deve oferecer percentual e recriar/progredir na mesma tarefa.'
 $sharing=@($tasks.tasks | Where-Object label -eq 'Planejamento: compartilhar contexto')
-Assert ($sharing.Count -eq 1 -and $sharing[0].args -contains '${workspaceFolder}/scripts/compartilhar-contexto.ps1' -and $sharing[0].args -contains '-Interactive' -and $sharing[0].args -contains '${input:harnessWorkspacePath}') 'Compartilhar deve oferecer exportar/importar na mesma tarefa do workspace.'
+Assert ($sharing.Count -eq 0) 'Copia/conciliacao corrente substitui a tarefa de pacotes.'
 $sprints=@($tasks.tasks | Where-Object label -eq 'Planejamento: planejar sprints')
 Assert ($sprints.Count -eq 1 -and $sprints[0].args -contains '${workspaceFolder}/scripts/preparar-sprints.ps1' -and $sprints[0].args -contains '-Interactive' -and $sprints[0].args -contains '${execPath}' -and $sprints[0].args -notcontains '-SelectTarget') 'Sprints deve ter tarefa unica com escolha de escopo antes do prompt.'
-$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -notin @('Planejamento: priorizar issues','Planejamento: planejar','Planejamento: compartilhar contexto','Planejamento: planejar sprints') })
+$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -notin @('Planejamento: priorizar issues','Planejamento: planejar','Planejamento: planejar sprints') })
 foreach ($monitor in @($tasks.tasks | Where-Object label -like 'MTA: acompanhar*')) {
     Assert ($monitor.args -notcontains '-Active' -and $monitor.args -contains '-SelectTarget' -and $monitor.args -contains '${input:harnessWorkspacePath}') 'Log corrente deve selecionar o projeto do workspace, sem ponteiro global.'
 }
