@@ -51,6 +51,7 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
         }
     }
     Add-ConversionMta $state $MtaDiretorio
+    Add-ConversionParticipantMta $state
     Add-ConversionBuild $state $BuildResultado
     Add-ConversionSonar $state $SonarResultado $SonarTentativa
     $prioritizations=@(Read-ConversionPrioritization $state $PrioritizacaoContexto)

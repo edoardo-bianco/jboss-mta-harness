@@ -578,6 +578,19 @@ Test-ConversionMtaOwnership e Test-ConversionPriorityEvidence (com MTA disponive
 passaram em PS5.1. A aplicacao de anexos multiprojeto permanece bloqueada ate
 resolver fontes por participante e propriedade dos anexos humanos.
 
+Resolucao MTA por participante concluida: cada origem usa a mesma selecao do
+conversor individual, em memoria e sem copiar assets de parceiros. Participantes
+aceita POM ou descritor com Pom/Registro/Contexto/MtaDiretorio; escolhas conflitantes
+do mesmo Source canonico sao recusadas. Fontes, inventario e conjunto interno ja
+publicado sao conferidos antes da escrita; um caminho nao pode ganhar destinos
+MTA diferentes conforme a ordem de associacao.
+
+Test-ConversionParticipantMta, Test-ConversionMta e Test-ConversionMultiProject
+passaram em PS5.1. Tres achados da revisao tiveram RED/GREEN: conjunto interno
+diferente com configuracao null, opcoes conflitantes em aliases do Source e origem
+interna compartilhada com destinos diferentes. Revisao fechada sem achados abertos.
+Anexos humanos compartilhados e cenarios/Validar continuam pendentes; CLI Previa.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

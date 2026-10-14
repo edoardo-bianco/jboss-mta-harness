@@ -12,7 +12,7 @@ function Get-ConversionMtaInventory([string]$Origin,[string]$Root) {
     @($files | Sort-Object) -join "`n"
 }
 
-function Add-ConversionMta($State,[string]$MtaDiretorio) {
+function Add-ConversionMta($State,[string]$MtaDiretorio,[switch]$ReferencesOnly) {
     $record=$State.Inputs.Planning.Record
     $basis=if ($record) {Get-LegacyValue $record.Data 'PlanningBasis' 'MTA'} else { 'EVIDENCIAS' }
     $origins=@()
@@ -52,7 +52,14 @@ function Add-ConversionMta($State,[string]$MtaDiretorio) {
         return
     }
     foreach ($diagnostic in $mta.Diagnostics) { $State.Diagnostics.Add($diagnostic) }
-    if ($internal) {
+    $State|Add-Member MtaReportOrigin $mta.ReportPath
+    $State|Add-Member MtaCatalogOrigin $mta.CatalogPath
+    if ($internal -and $ReferencesOnly) {
+        $report=Join-Path $State.Project.Folder 'atual/diagnosticos/mta/index.html'
+        $catalog=Join-Path $State.Project.Folder 'atual/diagnosticos/mta/output.js'
+        $State.Map[$mta.ReportPath]=$report; $State.Map[$mta.CatalogPath]=$catalog
+        $mta.ReportPath=$report; $mta.CatalogPath=$catalog
+    } elseif ($internal) {
         $base=Split-Path $mta.ReportPath -Parent
         $pending=New-Object 'Collections.Generic.Stack[string]'; $pending.Push($base)
         while ($pending.Count) {

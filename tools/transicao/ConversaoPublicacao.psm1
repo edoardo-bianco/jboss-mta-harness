@@ -10,6 +10,7 @@ Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -DisableNameCheck
 . (Join-Path $PSScriptRoot '../../scripts/HarnessIssueSources.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoEvidencias.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoMta.ps1')
+. (Join-Path $PSScriptRoot 'ConversaoParticipantes.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoDiagnosticos.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoBuild.ps1')
 . (Join-Path $PSScriptRoot 'ConversaoSonarDecisoes.ps1')
@@ -22,18 +23,29 @@ Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -DisableNameCheck
 function Get-ConversionParticipants([string]$Workspace,[string]$Pom,[string]$SourceLegado,[Collections.IDictionary]$Participantes) {
     $current=Get-HarnessProjectReference $Workspace $Pom
     $source=if ($SourceLegado) {Resolve-ProjectPath $SourceLegado $current.Root} else {$current.Source}
-    $mapping=@{}; $mapping[$source]=$current.Pom
+    $mapping=@{}; $mapping[$source]=[pscustomobject]@{Pom=$current.Pom;Registro=$null;Contexto=$null;MtaDiretorio=$null}
     foreach ($key in $Participantes.Keys) {
         $legacy=Resolve-ProjectPath $key $current.Root
-        $pomPath=Resolve-ProjectPath $Participantes[$key] $current.Root
-        if ($mapping.ContainsKey($legacy) -and $mapping[$legacy] -ine $pomPath) { throw 'Source legado associado a POMs diferentes.' }
-        $mapping[$legacy]=$pomPath
+        $value=$Participantes[$key]
+        if ($value -is [string]) { $value=[pscustomobject]@{Pom=$value} }
+        elseif ($value -is [Collections.IDictionary]) { $value=[pscustomobject]$value }
+        $pomPath=Resolve-ProjectPath (Get-LegacyValue $value 'Pom') $current.Root
+        if ($mapping.ContainsKey($legacy) -and $mapping[$legacy].Pom -ine $pomPath) { throw 'Source legado associado a POMs diferentes.' }
+        $next=[pscustomobject]@{Pom=$pomPath;Registro=(Get-LegacyValue $value 'Registro');Contexto=(Get-LegacyValue $value 'Contexto');MtaDiretorio=(Get-LegacyValue $value 'MtaDiretorio')}
+        if ($mapping.ContainsKey($legacy)) {
+            foreach ($name in @('Registro','Contexto','MtaDiretorio')) {
+                $previous=$mapping[$legacy].$name
+                if ($previous -and $next.$name -and (Resolve-ProjectPath $previous $current.Root) -ine (Resolve-ProjectPath $next.$name $current.Root)) { throw ('Source participante com escolhas conflitantes: '+$name) }
+                if ($previous -and -not $next.$name) { $next.$name=$previous }
+            }
+        }
+        $mapping[$legacy]=$next
     }
     $names=@{}; $poms=@{}
     foreach ($legacy in $mapping.Keys) {
-        $project=Get-HarnessProjectReference $current.Root $mapping[$legacy]
+        $project=Get-HarnessProjectReference $current.Root $mapping[$legacy].Pom
         if ($names.ContainsKey($project.Name) -or $poms.ContainsKey($project.Pom)) { throw 'Participantes com artifactId/POM duplicado; nao consolidar Sources distintos.' }
-        $names[$project.Name]=[pscustomobject]@{LegacySource=$legacy;Project=$project}
+        $names[$project.Name]=[pscustomobject]@{LegacySource=$legacy;Project=$project;Options=$mapping[$legacy]}
         $poms[$project.Pom]=$true
     }
     $ordered=[string[]]@($names.Keys); [Array]::Sort($ordered,[StringComparer]::Ordinal)
@@ -59,6 +71,12 @@ function Invoke-ConversionApply {
             if ($entry.Project.Pom -ieq $pomPath) { $leases+=Enter-HarnessProjectAccess $entry.Project -ForOperation }
             else { $leases+=Enter-HarnessProjectAccess $entry.Project -ReadOnly }
         }
+        $options=@($participants | Where-Object { $_.Project.Pom -ieq $pomPath })[0].Options
+        foreach ($name in @('Registro','Contexto','MtaDiretorio')) {
+            $explicit=Get-Variable -Name $name -ValueOnly
+            if ($explicit -and $options.$name -and (Resolve-ProjectPath $explicit $project.Root) -ine (Resolve-ProjectPath $options.$name $project.Root)) { throw ('Escolhas conflitantes do participante: '+$name) }
+            if (-not $explicit -and $options.$name) { Set-Variable -Name $name -Value $options.$name }
+        }
         $inputs=Read-ConversionInputs -Workspace $Workspace -Pom $Pom -SourceLegado $SourceLegado -Registro $Registro -Contexto $Contexto
         $state=New-ConversionCoreFiles $inputs $MtaDiretorio $PrioritizacaoContexto $BuildResultado $SonarResultado $SonarTentativa $participants
         $expected=Read-HarnessProjectFiles $project @($state.Files.Keys) -AsBytes
@@ -77,6 +95,7 @@ function Invoke-ConversionApply {
         }
         if ($state.MtaOrigin -and (Get-ConversionMtaInventory $state.MtaOrigin $project.Root) -cne $state.MtaInventory) { throw 'Conjunto/selecao MTA mudou durante a conversao; repita a leitura.' }
         Assert-ConversionSonarUnchanged $state
+        Assert-ConversionParticipantMtaUnchanged $state
         foreach ($path in $state.PartnerObserved.Keys) {
             if (-not (Test-Path -LiteralPath $path -PathType Leaf) -or [IO.File]::ReadAllText($path) -cne $state.PartnerObserved[$path]) { throw 'Ficha/associacao participante mudou durante a conversao; repita a leitura.' }
         }
