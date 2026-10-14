@@ -627,6 +627,26 @@ Apply, MultiProject e SprintWorkflow aprovada. Validar e liberacao da CLI em
 andamento; S21 permanece parcial, S22-S28 e aceite humano integrado pendentes.
 Nenhum dado real convertido ou limpo; extensao Java preservada.
 
+Validar/CLI da S21 concluidos: Aplicar encaminha todas as selecoes explicitas;
+Validar importa apenas consumidores permanentes e le os destinos correntes,
+sem recuperar publicacao, gravar relatorio, consultar recibos ou exigir conversor
+no fluxo posterior. Integridade operacional VALIDO nao concede revisao/GO/aceite.
+Associacoes POM, pares de documentos, fichas/anexos de parceiros e cenarios sao
+conferidos sob leases de leitura; adulteracao de destinos nao abre outro projeto.
+
+Test-ConversionValidation, ValidationScopes, Recovery e CLI passaram em PS5.1;
+LegacyLinks e HumanEvidence tambem passaram. Falha apos primeira escrita deixa
+Validar PENDENTE sem alteracao; Aplicar recupera e repeticao fica EQUIVALENTE.
+Conjuntos multiprojeto completos passaram no validador corrente. Tres P2 da revisao
+(destino de sprint, associacao de parceiro e anexo de ficha atestada) corrigidos
+com verificacoes focais e revisao fechada. Nenhum dado real convertido/limpo.
+
+S22 iniciado: testes PlanningPortable e ReconciliationConflicts aprovados.
+Auditoria do substituto revelou que copia/reconciliacao ainda nao adota
+ranking/contexto/cobertura de priorizacao. Completar esse par antes de remover
+HarnessTransfer; manter base inicial e examinadas locais, fontes locais e
+publicacao por projeto. S22-S28 e aceite humano integrado permanecem pendentes.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

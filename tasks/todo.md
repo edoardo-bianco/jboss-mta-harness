@@ -19,23 +19,24 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 
 Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10, 12/10 e 13/10/2026.
 [Ponto atual e verificacoes](plan.md#retomada-de-13102026).
-S11-S20 implementados e revisados. Proxima etapa: S21;
-as oito etapas S21-S28 e o aceite integrado permanecem pendentes.
-S21 parcial: registro/plano, anexos humanos (inclusive priorizacao sem plano), MTA, build, Sonar e priorizacao uniprojeto
-implementados e verificados em fixtures; continuar pelos complementos da
-[retomada](plan.md#retomada-s21-s28---13102026), mantendo a CLI somente Previa.
+S11-S21 implementados e revisados. Proxima etapa: S22;
+as sete etapas S22-S28 e o aceite integrado permanecem pendentes.
+Conversao e validacao verificadas em fixtures, inclusive multiprojeto e sprints.
+CLI oferece Previa, Aplicar e Validar; Limpar continua bloqueado ate S23.
 A pausa humana de 12/10 permanece como [registro historico](plan.md#pausa-humana-de-12102026).
 
 **Retomada autorizada em 14/10:** [registro](plan.md#retomada-de-14102026), a partir do
 [checkpoint S21 de 13/10](plan.md#pausa-humana-s21---13102026).
 Sonar: dois P2 fechados, suite ampliada PS5.1 aprovada e revisao independente sem
-novos achados; familia habilitada na API interna. CLI continua somente Previa.
+novos achados; familia habilitada na API e na CLI de conversao.
 Multiprojeto validado na API: associacoes explicitas, fontes MTA por Source,
 fichas locais, cobertura unica no mestre e anexos compartilhados com proprietario
 estavel, inclusive escopos sobrepostos/planos/aliases. Publicacao por projeto em
 ordem decrescente; testes PS5.1 e revisao concluidos. Cenarios de sprints convertidos
 com mestre explicito, B0/consumo preservados, anexos e retomada corrente comprovada;
-testes PS5.1/revisao fechados. Continuar Validar e liberacao da CLI da S21;
+testes PS5.1/revisao fechados. Validar e CLI concluidos, incluindo recuperacao
+e dependencia apenas dos documentos correntes. S22 em andamento: receber
+ranking/contexto/cobertura antes de retirar HarnessTransfer.
 S22-S28 e aceite humano integrado pendentes.
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
@@ -62,6 +63,7 @@ S22-S28 e aceite humano integrado pendentes.
 - [x] S18: prompts preparados oferecem links legiveis existentes, preferindo HTML/Markdown/log; ausencia de registro vira lacuna sem link quebrado. Cabecalhos agent/tools de implementacao/revisao acompanham template sem apagar notas humanas. Cinco suites PS5.1 aprovadas em MTA/EVIDENCIAS; revisao independente sem bloqueantes remanescentes.
 - [x] S19: prompts de sprints e revisao de resultado conferidos; fontes diretas por participante, indice geral e contratos atuais sem copias operacionais. Optional posterior a B0 exige decisao humana e inclusoes separadas. Dez suites PS5.1 aprovadas, com preparo/revisao/validacao repetidos nos mesmos destinos, numeros e notas; revisao independente sem achados remanescentes. Ensaio humano integrado continua em S28.
 - [x] S20: conversor descartavel entrega Previa somente leitura, associacao explicita ao POM/Source, selecao por vinculos e ambiguidades visiveis. Decisoes, snapshots declarados, anexos estruturados e fontes locais/externas inventariados; nenhuma reconciliacao, GO ou descarte inferidos. Seis suites novas e Test-ProjectReadOnly PS5.1 aprovados, com comparacao antes/depois; revisao independente sem bloqueantes. Aplicar/Validar/Limpar continuam S21/S23.
+- [x] S21: Aplicar/Validar expostos na CLI com selecoes explicitas de fontes, participantes e cenarios. Decisoes, anexos, cobertura e consumo preservados; recuperacao, repeticao equivalente e trabalho posterior protegidos. Validar le somente o corrente, sem recuperar/escrever, e distingue integridade de revisao/GO/aceite. Suites focais PS5.1 e revisao independente aprovadas; conversao/limpeza real e aceite integrado nao executados.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos

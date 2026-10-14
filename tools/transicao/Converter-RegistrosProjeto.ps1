@@ -7,11 +7,40 @@ param(
     [string]$SourceLegado,
     [string]$Registro,
     [string]$Contexto,
+    [string]$MtaDiretorio,
+    [string[]]$PrioritizacaoContexto=@(),
+    [string]$BuildResultado,
+    [string]$SonarResultado,
+    [string]$SonarTentativa,
+    [Collections.IDictionary]$Participantes=@{},
+    [object[]]$Sprints=@(),
     [ValidateSet('Texto','Json')][string]$Formato='Texto'
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
-if ($Modo -ne 'Previa') { throw 'S20 entrega somente Previa. Aplicar/Validar permanecem em S21; Limpar em S23.' }
+if ($Modo -eq 'Limpar') { throw 'Limpar permanece em S23. Aplicar/Validar preservam todos os originais.' }
+if ($Modo -eq 'Validar') {
+    Import-Module (Join-Path $PSScriptRoot 'ConversaoValidacao.psm1') -Force -DisableNameChecking
+    $result=Test-ConversionCurrent -Workspace $Workspace -Pom $Pom
+    if ($Formato -eq 'Json') { $result|ConvertTo-Json -Depth 40; return }
+    "Integridade operacional: $($result.Status) - $($result.Project)"
+    "Destino: $($result.Destination)"
+    foreach ($item in $result.Diagnostics) { "PENDENTE: $item" }
+    $result.Scope
+    return
+}
+if ($Modo -eq 'Aplicar') {
+    Import-Module (Join-Path $PSScriptRoot 'ConversaoPublicacao.psm1') -Force -DisableNameChecking
+    $choices=@{Workspace=$Workspace;Pom=$Pom;SourceLegado=$SourceLegado;Registro=$Registro;Contexto=$Contexto;MtaDiretorio=$MtaDiretorio;PrioritizacaoContexto=$PrioritizacaoContexto;BuildResultado=$BuildResultado;SonarResultado=$SonarResultado;SonarTentativa=$SonarTentativa;Participantes=$Participantes;Sprints=$Sprints}
+    $result=Invoke-ConversionApply @choices
+    if ($Formato -eq 'Json') { $result|ConvertTo-Json -Depth 40; return }
+    "Conversao: $($result.Status) - $($result.Project)"
+    "Destino: $($result.Destination)"
+    foreach ($path in $result.ChangedFiles) { "Publicado: $path" }
+    foreach ($item in $result.Diagnostics) { "CONFERIR: $item" }
+    'Originais preservados. Conferir os documentos correntes com Validar; revisao humana, GO e aceite permanecem separados.'
+    return
+}
 Import-Module (Join-Path $PSScriptRoot 'ConversaoPrevia.psm1') -Force -DisableNameChecking
 $preview=Get-ConversionPreview -Workspace $Workspace -Pom $Pom -SourceLegado $SourceLegado -Registro $Registro -Contexto $Contexto
 if ($Formato -eq 'Json') { $preview | ConvertTo-Json -Depth 40; return }

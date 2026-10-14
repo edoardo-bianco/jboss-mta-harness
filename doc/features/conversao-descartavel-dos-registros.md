@@ -1,8 +1,8 @@
 # Conversão descartável dos registros existentes
 
-**Estado:** S20 implementada: prévia somente leitura em Windows PowerShell 5.1.
-Aplicação/validação e limpeza permanecem em S21/S23.
-**Revisão:** 13/10/2026. **Destino:** `doc/features/conversao-descartavel-dos-registros.md`.
+**Estado:** prévia, aplicação e validação implementadas em Windows PowerShell 5.1.
+Limpeza permanece em S23; aceite humano integrado pendente.
+**Revisão:** 14/10/2026. **Destino:** `doc/features/conversao-descartavel-dos-registros.md`.
 
 **Prioridade:** parte da simplificação que precede modernização e novas
 funcionalidades. Dependências, riscos e
@@ -30,11 +30,16 @@ Script: [Converter-RegistrosProjeto.ps1](../../tools/transicao/Converter-Registr
 | `-Registro` | Caminho do registro escolhido quando há mais de um para o Source. |
 | `-Contexto` | Caminho do contexto escolhido quando os vínculos não determinam um plano único. Não corrige cadeia inconsistente. |
 | `-Formato Texto\|Json` | Saída no terminal; Texto é o padrão. Nenhum relatório ou mapa é gravado pelo utilitário. |
-| `-Modo Aplicar` | Previsto em S21: preparar, validar e publicar a conversão. Ainda recusado. |
-| `-Modo Validar` | Previsto em S21: verificar conteúdo, referências e independência do legado. Ainda recusado. |
+| `-Modo Aplicar` | Consolidar as escolhas e publicar pelo núcleo permanente. Preserva originais e recusa sobrescrever conteúdo diferente no destino. |
+| `-Modo Validar` | Conferir somente o projeto corrente, sem ler legado nem reaplicar conversão. Retorna `VALIDO` ou `PENDENTE`, com diagnósticos no terminal. |
 | `-Modo Limpar` | Previsto em S23: descartar somente resíduos selecionados após validação. Ainda recusado. |
+| `-MtaDiretorio` | Origem explícita quando os vínculos não determinam um conjunto MTA único. Origem externa permanece no local. |
+| `-PrioritizacaoContexto` | Contextos escolhidos para consolidar categorias e escopos; não apaga examinadas anteriores. |
+| `-BuildResultado`, `-SonarResultado`, `-SonarTentativa` | Escolhas explícitas para resolver ambiguidades dos diagnósticos; uma tentativa falha não substitui o último conjunto utilizável. |
+| `-Participantes` | Associação temporária `SourceLegado -> Pom`. Cada valor também pode conter `Pom`, `Registro`, `Contexto` e `MtaDiretorio`; todos devem refletir as mesmas escolhas nas conversões individuais. |
+| `-Sprints` | Lista de escolhas com `Contexto`, `Cenario` funcional e `MestrePom` participante. O mestre publica; os demais recebem links. |
 
-Os modos são operações do mesmo utilitário descartável. Somente `Previa` está entregue:
+Os modos são operações do mesmo utilitário descartável. A execução sem modo continua somente leitura:
 
 ```powershell
 powershell.exe -NoProfile -File tools/transicao/Converter-RegistrosProjeto.ps1 -Workspace C:\harness -Pom C:\fontes\aplicacao\pom.xml
@@ -51,18 +56,45 @@ Declarações `CONCLUIDA` no registro e nos snapshots embutidos aparecem como
 a comparação executada: recibo, hash e declaração isolada não elegem uma base
 reconciliada. A prévia mantém `PRELIMINAR` e expõe as fontes para conferência humana.
 
-Priorização, sprints e diagnósticos aparecem como candidatos, com referências e
-destinos conhecidos. Consolidar cobertura, escolher o conjunto de diagnóstico
-aplicável e definir mestre/nome funcional de sprint permanecem pendências
-explícitas para S21. A lista de descarte contém apenas arquivos candidatos e
-não autoriza remoção. As regras de transformação e publicação abaixo continuam
-sendo critérios de S21/S23.
+Priorização, sprints e diagnósticos aparecem como candidatos na prévia. Aplicar
+exige resolver as ambiguidades e informar os participantes e cenários necessários.
+A lista de descarte contém apenas candidatos e não autoriza remoção.
+
+Exemplo de escolhas em uma sessão PowerShell, depois de conferir a prévia:
+
+```powershell
+$participantes = @{
+    'C:\fontes-antigas\api' = @{ Pom = 'C:\fontes\api\pom.xml'; Contexto = 'C:\harness\.harness\planning\api\context.json' }
+    'C:\fontes-antigas\backend' = 'C:\fontes\backend\pom.xml'
+}
+$cenarios = @(@{ Contexto = 'C:\harness\.harness\sprints\<planejamento>\revisoes\<revisao>\contexto.json'; Cenario = 'migracao'; MestrePom = 'C:\fontes\backend\pom.xml' })
+& .\tools\transicao\Converter-RegistrosProjeto.ps1 -Workspace C:\harness -Pom C:\fontes\backend\pom.xml -SourceLegado C:\fontes-antigas\backend -Modo Aplicar -Participantes $participantes -Sprints $cenarios
+```
+
+Substitua os caminhos pelos candidatos conferidos. Para priorização multiprojeto,
+converta os participantes em ordem decrescente dos nomes Maven: anexos humanos
+compartilhados têm proprietário estável e o mestre só atesta cobertura quando
+as fichas e seus anexos estão disponíveis. Cada chamada escreve somente no
+projeto escolhido. As associações acima existem apenas durante a chamada.
+
+Sprints preservam as premissas da revisão escolhida e o cálculo comprovado pelo
+ponteiro legado, em arquivos separados. O resultado fica `CONVERTED`, com revisão
+pendente. Cadeia calculada sem ponteiro comprovável exige conciliação; não é
+convertida como cenário inicial. B0, inclusões acumuladas e consumo de fases não
+são reconstruídos do registro atual.
+
+Depois de aplicar, `-Modo Validar` usa somente `-Workspace` e `-Pom`. Confere
+identidades, pares de documentos, cobertura, baseline e referências correntes,
+inclusive anexos das fichas de parceiros atestadas pelo ranking. Não recupera
+publicações pendentes nem modifica arquivos. `VALIDO` informa integridade
+operacional: não confirma decisões humanas, reconciliação, GO ou aceite. Referências
+ausentes e dependências legadas resultam em `PENDENTE`, sem reparo automático.
 
 O inventário lê as famílias legadas conhecidas sob `.harness`, exclui originais
 de pacotes e projetos já identificados por `projeto.json`, e recusa links/junctions.
 Publicação pendente no destino é recusada sem recuperação. Os testes usam
 fixtures sintéticas e comparam caminhos, bytes e datas dos arquivos antes/depois;
-nenhuma conversão ou limpeza de dados reais faz parte da entrega S20.
+nenhuma conversão ou limpeza de dados reais faz parte desta implementação.
 
 ## 3. Seleção e transformação
 
