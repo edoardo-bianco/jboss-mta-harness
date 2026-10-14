@@ -60,7 +60,7 @@ function Get-ConversionParticipants([string]$Workspace,[string]$Pom,[string]$Sou
 
 function Invoke-ConversionApply {
     [CmdletBinding()]
-    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,[Collections.IDictionary]$Participantes=@{},[object[]]$Sprints=@())
+    param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,[Collections.IDictionary]$Participantes=@{},[object[]]$Sprints=@(),[switch]$VerifyOnly)
     $pomPath=Resolve-ProjectPath $Pom ([IO.Path]::GetFullPath($Workspace))
     # O nome da pasta e os documentos devem observar o mesmo POM. Manter apenas
     # compartilhamento de leitura impede troca/renomeacao durante a publicacao.
@@ -75,7 +75,7 @@ function Invoke-ConversionApply {
         }
         $project=Get-HarnessProjectReference $Workspace $pomPath
         foreach ($entry in $participants) {
-            if ($entry.Project.Pom -ieq $pomPath) { $leases+=Enter-HarnessProjectAccess $entry.Project -ForOperation }
+            if ($entry.Project.Pom -ieq $pomPath -and -not $VerifyOnly) { $leases+=Enter-HarnessProjectAccess $entry.Project -ForOperation }
             else { $leases+=Enter-HarnessProjectAccess $entry.Project -ReadOnly }
         }
         $options=@($participants | Where-Object { $_.Project.Pom -ieq $pomPath })[0].Options
@@ -108,6 +108,10 @@ function Invoke-ConversionApply {
             $expectedPartner=$state.PartnerObserved[$path]
             $changed=if ($expectedPartner -is [byte[]]) { [Convert]::ToBase64String([IO.File]::ReadAllBytes($path)) -cne [Convert]::ToBase64String($expectedPartner) } else { [IO.File]::ReadAllText($path) -cne $expectedPartner }
             if ($changed) { throw 'Arquivo participante mudou durante a conversao; repita a leitura.' }
+        }
+        if ($VerifyOnly) {
+            if ($writes.Count) { throw 'Conversao ainda incompleta: destino ausente; descarte recusado.' }
+            return $state
         }
         if ($writes.Count) { Publish-HarnessProjectFiles $project $writes $expected }
         [pscustomobject]@{Status=$(if ($writes.Count) {'CONVERTIDO'} else {'EQUIVALENTE'});Project=$project.Name;Destination=$project.Folder;ChangedFiles=@($writes.Keys);Diagnostics=@($state.Diagnostics);AuthorizationInherited=$false}
