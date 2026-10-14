@@ -1,11 +1,24 @@
 # Internal publication protocol. Recovery files exist only while publishing or
 # recovering; no operation ID or persistent receipt is used to read the project.
 function Resolve-ProjectDocument {
-    param($Project,[string]$RelativePath)
-    if ([IO.Path]::IsPathRooted($RelativePath) -or $RelativePath -match '(^|[\\/])\.\.([\\/]|$)' -or $RelativePath -match '(^|[\\/])temporarios([\\/]|$)') { throw 'Documento fora dos destinos correntes.' }
+    param($Project,[string]$RelativePath,[switch]$TemporaryRemoval)
+    if ([IO.Path]::IsPathRooted($RelativePath) -or $RelativePath -match '(^|[\\/])\.\.([\\/]|$)') { throw 'Documento fora dos destinos correntes.' }
+    if ($TemporaryRemoval) {
+        if ($RelativePath.Replace('\','/') -cnotmatch '^temporarios/(build|mta|sonar)/[^/](?:.*[^/])?$') { throw 'Remocao temporaria limitada a folhas de build, mta e sonar.' }
+    } elseif ($RelativePath -match '(^|[\\/])temporarios([\\/]|$)') { throw 'Documento fora dos destinos correntes.' }
     $path=Resolve-ProjectPath $RelativePath $Project.Folder
     if (-not $path.StartsWith($Project.Folder+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Documento fora do projeto.' }
     $path
+}
+function Get-ProjectRecoveryDestination {
+    param($Project,$Entry)
+    $temporaryRemoval=$false
+    if ($Entry.PSObject.Properties['TemporaryRemoval']) {
+        if ($Entry.TemporaryRemoval -isnot [bool]) { throw 'Marcador de remocao temporaria invalido.' }
+        $temporaryRemoval=$Entry.TemporaryRemoval
+        if ($temporaryRemoval -and ($Entry.Remove -isnot [bool] -or -not $Entry.Remove)) { throw 'Recuperacao temporaria exige remocao explicita.' }
+    }
+    Resolve-ProjectDocument $Project $Entry.Path -TemporaryRemoval:$temporaryRemoval
 }
 
 function Clear-ProjectPublicationFiles {
@@ -52,7 +65,7 @@ function Restore-ProjectPublication {
         # Validate the complete recovery set before changing any document. An
         # editor that changed a file outside our lock must not lose its changes.
         foreach ($entry in $entries) {
-            $destination=Resolve-ProjectDocument $Project $entry.Path
+            $destination=Get-ProjectRecoveryDestination $Project $entry
             $before=Resolve-ProjectPath (Join-Path $temporary ('antes/'+$entry.Path)) $Project.Folder
             $after=Resolve-ProjectPath (Join-Path $temporary ('depois/'+$entry.Path)) $Project.Folder
             $removed=$entry.PSObject.Properties['Remove'] -and $entry.Remove
@@ -60,7 +73,7 @@ function Restore-ProjectPublication {
             if ((Test-Path -LiteralPath $destination) -and -not (-not $removed -and (Test-ProjectFileBytes $destination $after)) -and -not ($entry.Existed -and (Test-ProjectFileBytes $destination $before))) { throw "Edicao concorrente durante recuperacao: $destination. Preserve e concilie os arquivos em temporarios/publicacao." }
         }
         foreach ($entry in $entries) {
-            $destination=Resolve-ProjectDocument $Project $entry.Path
+            $destination=Get-ProjectRecoveryDestination $Project $entry
             if ($entry.Existed -and -not (Test-ProjectFileBytes $destination (Join-Path $temporary ('antes/'+$entry.Path)))) {
                 $working=Join-Path $temporary 'restaurar.tmp'
                 [IO.File]::Copy((Join-Path $temporary ('antes/'+$entry.Path)),$working,$true)
@@ -129,17 +142,23 @@ function Write-ProjectRecoveryInstruction {
 }
 
 function Publish-HarnessProjectFiles {
-    param($Project,[Collections.IDictionary]$Files,[Collections.IDictionary]$Expected=@{})
+    param($Project,[Collections.IDictionary]$Files,[Collections.IDictionary]$Expected=@{},[switch]$RemoveTemporaryFiles)
     if (-not $Files -or -not $Files.Count) { throw 'Nenhum documento para publicar.' }
+    if ($RemoveTemporaryFiles) {
+        foreach ($relative in $Files.Keys) {
+            $null=Resolve-ProjectDocument $Project $relative -TemporaryRemoval
+            if ($null -ne $Files[$relative] -or -not $Expected.Contains($relative) -or $Expected[$relative] -isnot [byte[]]) { throw 'Remocao temporaria exige valor null e Expected byte[] para cada folha.' }
+        }
+    }
     Invoke-WithProjectAccess $Project {
         $paths=@{}
         foreach ($relative in $Files.Keys) {
-            $path=Resolve-ProjectDocument $Project $relative
+            $path=Resolve-ProjectDocument $Project $relative -TemporaryRemoval:$RemoveTemporaryFiles
             if ($paths.ContainsKey($path)) { throw 'Destinos duplicados na publicacao.' }
             $paths[$path]=$true
         }
         foreach ($relative in $Expected.Keys) {
-            $path=Resolve-ProjectDocument $Project $relative
+            $path=Resolve-ProjectDocument $Project $relative -TemporaryRemoval:$RemoveTemporaryFiles
             $equal=$false
             if ($Expected[$relative] -is [byte[]]) {
                 $equal=(Test-Path -LiteralPath $path -PathType Leaf) -and
@@ -154,7 +173,7 @@ function Publish-HarnessProjectFiles {
         $entries=@()
         try {
             foreach ($relative in $Files.Keys) {
-                $path=Resolve-ProjectDocument $Project $relative
+                $path=Resolve-ProjectDocument $Project $relative -TemporaryRemoval:$RemoveTemporaryFiles
                 $after=Join-Path $temporary ('depois/'+$relative)
                 $null=[IO.Directory]::CreateDirectory((Split-Path $after -Parent))
                 if ($null -ne $Files[$relative]) {
@@ -167,11 +186,13 @@ function Publish-HarnessProjectFiles {
                     $null=[IO.Directory]::CreateDirectory((Split-Path $before -Parent))
                     [IO.File]::Copy($path,$before)
                 }
-                $entries+=@{Path=$relative;Existed=$existed;Remove=($null -eq $Files[$relative])}
+                $entry=@{Path=$relative;Existed=$existed;Remove=($null -eq $Files[$relative])}
+                if ($RemoveTemporaryFiles) { $entry.TemporaryRemoval=$true }
+                $entries+=$entry
             }
             Write-ProjectRecoveryInstruction $temporary $entries
             foreach ($entry in $entries) {
-                $path=Resolve-ProjectDocument $Project $entry.Path
+                $path=Resolve-ProjectDocument $Project $entry.Path -TemporaryRemoval:$RemoveTemporaryFiles
                 if ($entry.Existed) {
                     if (-not (Test-ProjectFileBytes $path (Join-Path $temporary ('antes/'+$entry.Path)))) { throw "Documento alterado durante publicacao: $path" }
                 } elseif (Test-Path -LiteralPath $path) { throw "Documento criado durante publicacao: $path" }
