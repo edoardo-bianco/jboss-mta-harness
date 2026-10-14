@@ -4,6 +4,7 @@ function Get-ReconciliationFileKind {
     if ($Relative -ceq 'migracao.md') { return 'REGISTRO' }
     if ($Relative -cin @('atual/planejamento/plano.md','atual/planejamento/tarefas.md')) { return 'DOCUMENTO' }
     if ($Relative -cmatch '^atual/priorizacao/[^/]+/issues/[^/]+/ficha\.md$') { return 'FICHA' }
+    if ($Relative -cmatch '^atual/priorizacao/[^/]+/escopos/[^/]+/(contexto\.json|priorizacao\.md)$') { return 'PRIORIZACAO' }
     if ($Relative -cmatch '^evidencias/.+') { return 'ANEXO' }
     'REFERENCIA'
 }
@@ -19,6 +20,7 @@ function Get-ReconciliationFiles {
             if ($item.PSIsContainer) {
                 if ($AllFiles -or $relative -notmatch '^(temporarios|recebido)(/|$)|^atual/(diagnosticos|build|sprints)(/|$)') { $pending.Push($item.FullName) }
             } elseif ($AllFiles -or (Get-ReconciliationFileKind $relative) -ne 'REFERENCIA' -or
+                $relative -cmatch '^atual/priorizacao/[^/]+/escopos/[^/]+/(indice\.md|priorizar-issues\.prompt\.md)$' -or
                 $relative -cin @('projeto.json','indice.md','atual/planejamento/contexto.json','reconciliado/resultado.md')) { $found+=$relative }
         }
     }
@@ -49,8 +51,9 @@ function Get-ReconciliationMtaStamp {
         Catalog=(Get-FileHash -LiteralPath $Mta.CatalogPath -Algorithm SHA256).Hash}
 }
 function Get-HarnessReconciliationComparison {
-    param($Project,[string]$ReceivedPath,[ValidateSet('MTA','EVIDENCIAS')][string]$PlanningBasis='MTA')
-    $lease=Enter-HarnessProjectAccess $Project -ForOperation
+    param($Project,[string]$ReceivedPath,[ValidateSet('MTA','EVIDENCIAS')][string]$PlanningBasis='MTA',$Access)
+    $ownsAccess=$null -eq $Access
+    if ($ownsAccess) { $Access=Enter-ReconciliationAccess $Project $ReceivedPath }
     try {
         $received=@{}; $origin=$null
         if ($ReceivedPath) {
@@ -103,6 +106,7 @@ function Get-HarnessReconciliationComparison {
             [pscustomobject]@{Path=$relative;Kind=$kind;Status=$status;LocalPath=(Join-Path $Project.Folder $relative);ReceivedPath=(Join-Path $origin $relative)}
         })
         [pscustomobject]@{Project=$Project;PlanningBasis=$PlanningBasis;ReceivedPath=$origin;Local=$local;Received=$received;
-            Documents=$documents;Mta=$mta;MtaStamp=(Get-ReconciliationMtaStamp $mta);Differences=$differences;Diagnostics=$diagnostics}
-    } finally { $lease.ReleaseMutex(); $lease.Dispose() }
+            Documents=$documents;Mta=$mta;MtaStamp=(Get-ReconciliationMtaStamp $mta);Differences=$differences;Diagnostics=$diagnostics;
+            PartnerFiles=(Get-ReconciliationPartnerFiles $Project $Access.Projects $local $received)}
+    } finally { if ($ownsAccess) { Exit-ReconciliationAccess $Access } }
 }

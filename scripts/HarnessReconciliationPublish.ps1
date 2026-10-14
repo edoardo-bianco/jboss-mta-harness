@@ -2,13 +2,16 @@ function Complete-HarnessReconciliation {
     param($Project,[Parameter(Mandatory=$true)][string]$Conclusion,
         [Collections.IDictionary]$Resolutions=@{},[string[]]$Pending=@())
     if ([string]::IsNullOrWhiteSpace($Conclusion)) { throw 'Informe a conclusao baseada no exame das fontes.' }
-    $lease=Enter-HarnessProjectAccess $Project -ForOperation
+    $folder=Get-ReconciliationReviewFolder $Project
+    $preflight=Import-Clixml -LiteralPath (Join-Path $folder 'base.clixml')
+    $access=Enter-ReconciliationAccess $Project $preflight.ReceivedPath
     try {
         $folder=Get-ReconciliationReviewFolder $Project
         $draft=Get-ReconciliationDraft $folder
         $base=Import-Clixml -LiteralPath (Join-Path $folder 'base.clixml')
         $null=Get-HarnessProjectStorage $Project.Root $Project.Pom
-        $comparison=Get-HarnessReconciliationComparison $Project $base.ReceivedPath $base.PlanningBasis
+        if ($base.ReceivedPath -ine $preflight.ReceivedPath) { throw 'Origem mudou durante a abertura da revisao.' }
+        $comparison=Get-HarnessReconciliationComparison $Project $base.ReceivedPath $base.PlanningBasis -Access $access
         Assert-ReconciliationReviewUnchanged $base $comparison
         $writes=@{}; $expected=@{}; $proposed=@{}; $decisions=@(); $reviewNeeded=$false
         foreach ($key in $base.Local.Keys) { $expected[$key]=$base.Local[$key] }
@@ -23,11 +26,13 @@ function Complete-HarnessReconciliation {
             if (-not $comparison.Received.Contains($key) -and -not $proposed.ContainsKey($key)) { throw "Decisao sem documento recebido/proposto: $key" }
         }
         $paths=@(@($comparison.Received.Keys)+@($proposed.Keys) | Sort-Object -Unique)
+        $priorityChoices=Get-ReconciliationPriorityChoices $comparison $proposed $Resolutions
         foreach ($relative in $paths) {
             $kind=Get-ReconciliationFileKind $relative
             $incoming=$comparison.Received.Contains($relative)
             $document=@($comparison.Documents | Where-Object Path -CEQ $relative)
-            $choice=if ($Resolutions.Contains($relative)) {$Resolutions[$relative]}
+            $choice=if ($priorityChoices.ContainsKey($relative)) {$priorityChoices[$relative]}
+                elseif ($Resolutions.Contains($relative)) {$Resolutions[$relative]}
                 elseif ($document.Count -and $document[0].Status -eq 'EQUIVALENTE') {'LOCAL'}
                 elseif ($kind -eq 'REFERENCIA') {'REFERENCIA'} else {'PENDENTE'}
             if ($kind -eq 'REFERENCIA' -and $choice -notin @('LOCAL','DESCARTAR','REFERENCIA','PENDENTE')) { throw "Configuracao/contexto recebido nao pode substituir o local: $relative" }
@@ -59,6 +64,8 @@ function Complete-HarnessReconciliation {
                 $expected[$remove]=$comparison.Received[$relative]; $writes[$remove]=$null
             }
         }
+        $priority=Add-ReconciliationPrioritization $Project $comparison $priorityChoices $writes $expected $access.Projects
+        if ($priority.Links.Count) { $reviewNeeded=$true }
         $contextRelative='atual/planejamento/contexto.json'
         $planning=Get-ReconciliationPlanningContext $Project $base.Local[$contextRelative] $comparison.Mta
         if ($planning -and ($planning.Relocated -or $planning.MtaChanged)) { $reviewNeeded=$true }
@@ -141,6 +148,14 @@ function Complete-HarnessReconciliation {
         $indexText=Get-ReconciliationIndexSources (ConvertFrom-ReconciliationBytes $base.Local['indice.md']) (ConvertFrom-ReconciliationBytes $base.Local['migracao.md']) $migration
         $writes['indice.md']=Set-ProjectManagedBlock $indexText 'reconciliacao' (Get-HarnessSourceLink $Project.IndexPath $resultPath 'Ultima reconciliacao')
         if ($planning) { $writes['indice.md']=Set-ProjectManagedBlock $writes['indice.md'] 'planejamento' (Get-CurrentPlanningSources $planning.Data $Project $Project.IndexPath -AvailablePaths @($available+$resultPath)) }
+        if ($priority.Links.Count) {
+            $scopeLinks=@(foreach ($path in @(@($base.Local.Keys)+@($writes.Keys) | Sort-Object -Unique)) {
+                if ($path -cnotmatch '^atual/priorizacao/[^/]+/escopos/[^/]+/contexto\.json$') { continue }
+                $indexPath=Join-Path $Project.Folder $path.Replace('/contexto.json','/indice.md')
+                if ($writes.ContainsKey($path) -or (Test-Path -LiteralPath $indexPath -PathType Leaf)) { Get-HarnessSourceLink $Project.IndexPath $indexPath 'Priorizacao corrente' }
+            })
+            $writes['indice.md']=Set-ProjectManagedBlock $writes['indice.md'] 'priorizacao' ($scopeLinks -join [Environment]::NewLine)
+        }
         foreach ($key in @($writes.Keys)) {
             $value=$writes[$key]
             if ($null -ne $value -and $value -isnot [byte[]]) { $value=(New-Object Text.UTF8Encoding($false)).GetBytes([string]$value); $writes[$key]=$value }
@@ -149,10 +164,12 @@ function Complete-HarnessReconciliation {
             elseif ($null -ne $value -and $null -ne $before -and [Convert]::ToBase64String($value) -ceq [Convert]::ToBase64String([byte[]]$before)) { $writes.Remove($key) }
         }
         if (-not (Test-ReconciliationDraftUnchanged $folder $draft)) { throw 'Proposta editada durante a conclusao; revisao preservada, nada publicado.' }
+        Assert-ReconciliationReferencesUnchanged $priority.Observed
+        Assert-ReconciliationReviewUnchanged $base (Get-HarnessReconciliationComparison $Project $base.ReceivedPath $base.PlanningBasis -Access $access)
         if ($writes.Count) { Publish-HarnessProjectFiles $Project $writes $expected }
         $removed=Remove-ReconciliationReview $Project -Expected $draft
         $diagnostics=@()
         if (-not $removed) { $diagnostics+='Resultado publicado, mas a revisao foi editada durante a publicacao. Rascunho preservado; confira as diferencas antes de reiniciar.' }
         [pscustomobject]@{Project=$Project.Name;State=$state;ReconciledPath=$resultPath;NeedsReview=$reviewNeeded;ChangedFiles=@($writes.Keys);Pending=$Pending;Diagnostics=$diagnostics}
-    } finally { $lease.ReleaseMutex(); $lease.Dispose() }
+    } finally { Exit-ReconciliationAccess $access }
 }

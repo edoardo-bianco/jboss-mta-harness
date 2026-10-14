@@ -36,7 +36,7 @@ function Test-ReconciliationDraftUnchanged {
 }
 function Start-HarnessReconciliationReview {
     param($Project,[string]$ReceivedPath,[ValidateSet('MTA','EVIDENCIAS')][string]$PlanningBasis='MTA',[switch]$Restart)
-    $lease=Enter-HarnessProjectAccess $Project -ForOperation
+    $access=Enter-ReconciliationAccess $Project $ReceivedPath
     try {
         $folder=Get-ReconciliationReviewFolder $Project
         if ($Restart) { $null=Remove-ReconciliationReview $Project }
@@ -48,19 +48,20 @@ function Start-HarnessReconciliationReview {
             return [pscustomobject]@{Folder=$folder;ProposalPath=(Join-Path $folder 'proposta');Reused=$true;Documents=@($base.Documents)}
         }
         if (Test-Path -LiteralPath $folder) { throw 'Revisao temporaria incompleta; preserve e reinicie explicitamente.' }
-        $comparison=Get-HarnessReconciliationComparison $Project $ReceivedPath $PlanningBasis
+        $comparison=Get-HarnessReconciliationComparison $Project $ReceivedPath $PlanningBasis -Access $access
         $null=[IO.Directory]::CreateDirectory((Join-Path $folder 'proposta'))
         $base=[pscustomobject]@{Project=$Project.Name;Pom=$Project.Pom;ReceivedPath=$comparison.ReceivedPath;PlanningBasis=$PlanningBasis;
-            Local=$comparison.Local;Received=$comparison.Received;Documents=$comparison.Documents;MtaStamp=$comparison.MtaStamp}
+            Local=$comparison.Local;Received=$comparison.Received;Documents=$comparison.Documents;MtaStamp=$comparison.MtaStamp;PartnerFiles=$comparison.PartnerFiles}
         $base | Export-Clixml -LiteralPath $basePath -Depth 20 -Encoding UTF8
         [pscustomobject]@{Folder=$folder;ProposalPath=(Join-Path $folder 'proposta');Reused=$false;Documents=$comparison.Documents}
-    } finally { $lease.ReleaseMutex(); $lease.Dispose() }
+    } finally { Exit-ReconciliationAccess $access }
 }
 function Assert-ReconciliationReviewUnchanged {
     param($Base,$Comparison)
     if ($Base.Project -cne $Comparison.Project.Name -or $Base.Pom -ine $Comparison.Project.Pom) { throw 'Revisao nao corresponde ao POM local.' }
-    foreach ($field in @('Local','Received')) {
-        $expected=$Base.$field; $current=$Comparison.$field
+    foreach ($field in @('Local','Received','PartnerFiles')) {
+        $expected=if ($Base.PSObject.Properties[$field]) {$Base.$field} else {@{}}
+        $current=$Comparison.$field
         if (@($expected.Keys).Count -ne @($current.Keys).Count) { throw "Conjunto $field alterado durante a revisao; confira e reinicie explicitamente." }
         foreach ($path in $expected.Keys) {
             if (-not $current.Contains($path)) { throw "Documento alterado durante a revisao: $path" }
