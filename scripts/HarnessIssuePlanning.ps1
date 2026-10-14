@@ -1,27 +1,4 @@
-# Planejamento por projeto/issue; recibos legados permanecem no leitor original.
-function Get-IssuePlanningHistory {
-    param($Context, [switch]$IncludePrepared)
-    foreach ($file in @(Get-HarnessIssueReceipts $Context.Root)) {
-        $record=Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
-        if ((Resolve-HarnessPath $record.Source $Context.Root) -ine $Context.Active.path) { continue }
-        if ($record.RequestId -cnotmatch '^[a-f0-9]{32}$') { throw 'Identidade da solicitacao invalida.' }
-        $paths=Get-HarnessIssuePaths $Context.Root $Context.Active $record.IssueId
-        $folder=Join-Path $paths.Folder ('p_'+$record.RequestId.Substring(0,12))
-        if ($record.LayoutVersion -ne 2 -or $record.RequestId -cnotmatch '^[a-f0-9]{32}$' -or
-            $record.Purpose -ne 'application-remediation' -or (Resolve-HarnessPath $record.Source $Context.Root) -ine $Context.Active.path -or
-            (Split-Path $file.FullName -Parent) -ine $folder) { throw 'Identidade/destino do planejamento por issue divergente.' }
-        foreach ($pair in @(@('ContextPath','contexto-', '.json'),@('PlanPath','plan-','.md'),@('TodoPath','todo-','.md'))) {
-            if ((Resolve-HarnessPath $record.($pair[0]) $Context.Root) -ine (Join-Path $folder ($pair[1]+$paths.Stem+$pair[2]))) { throw 'Destino da issue divergente do recibo.' }
-        }
-        if (@($record.SelectedIssues).Count -ne 1 -or $record.SelectedIssues[0].Id -cne $record.IssueId) { throw 'Selecao da issue divergente.' }
-        if ((Resolve-HarnessPath $record.MigrationPath $Context.Root) -ine (Get-HarnessMigrationPaths $Context.Root $Context.Active).MigrationPath) { throw 'Registro de outro projeto no contexto da issue.' }
-        $null=Get-HarnessPlanningBasis $record
-        if (-not $IncludePrepared -and (-not (Test-Path -LiteralPath $record.PlanPath) -or -not (Test-Path -LiteralPath $record.TodoPath))) { continue }
-        $record
-    }
-}
-
-# Entradas correntes sao referencias diretas; nao copiar anexos nem diagnostico.
+# Evidencias e fontes do planejamento corrente.
 function Get-CurrentPlanningEvidence {
     param($Project,$Rows,[string]$EvidenceIndexPath,[hashtable]$ObservedFiles)
     if ($EvidenceIndexPath) { $index=Resolve-HarnessPath $EvidenceIndexPath $Project.Root }

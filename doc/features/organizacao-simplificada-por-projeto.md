@@ -189,13 +189,11 @@ A lista inicial de componentes a conferir inclui [Harness.psm1](../../scripts/Ha
 [HarnessBuild.psm1](../../scripts/HarnessBuild.psm1),
 [HarnessCleanup.psm1](../../scripts/HarnessCleanup.psm1) e as famílias
 [HarnessPrioritization](../../scripts/HarnessPrioritization.psm1),
-[HarnessSprint](../../scripts/HarnessSprintPlanning.psm1),
-[HarnessTransfer](../../scripts/HarnessTransfer.psm1) e
+[HarnessSprint](../../scripts/HarnessSprintPlanning.psm1) e
 [HarnessSonar](../../scripts/HarnessSonar.psm1). Essa lista orienta o inventário,
-não substitui a inspeção do código vigente. Na família HarnessTransfer, retirar
-os fluxos de importação/exportação e seus chamadores; conservar apenas eventual
-lógica de comparação útil à reconciliação comum, sem manter uma camada de
-transferência com outro nome.
+não substitui a inspeção do código vigente. A família HarnessTransfer e a tarefa
+de pacotes foram retiradas em S22. A conciliação corrente recebe documentos de
+análise e plano por cópia, mantendo conflitos e autorização local separados.
 
 ### Publicação e recuperação
 
@@ -212,6 +210,21 @@ Cenários multiprojeto têm um único registro mestre sob um dos projetos Maven 
 ### Compartilhamento por cópia e reconciliação
 
 Eliminar as funções próprias de importação e exportação. Os arquivos correntes do projeto são o material compartilhável, sem formato de pacote, manifest, recibo ou cadastro de transferência.
+
+Na priorização, contexto e ranking do escopo formam um par: adotar ou mesclar
+exige decisão explícita igual para ambos. Preservar a base inicial e todas as
+issues examinadas localmente; uma união acima da quota continua pendente até
+uma mesclagem válida. Não recalcular percentual ou recriar a base implicitamente.
+Os participantes são associados pelos POMs locais e o mestre é o primeiro em
+ordem ordinal. Conciliar primeiro fichas/anexos dos parceiros e por último o
+ranking do mestre. Cada publicação altera somente o projeto escolhido.
+
+Fichas, anexos e referências transitivas devem estar disponíveis no conjunto
+final. Caminhos conhecidos são realinhados; narrativa e motivos são preservados.
+O índice do escopo, o prompt e os links do projeto são regenerados localmente.
+O índice geral de priorização é derivado e pode ser reconstruído pela operação
+de índice/continuidade; a conciliação não publica em outros projetos. A cobertura
+recebida exige conferência local e não concede GO ou aceite.
 
 O colega copia a pasta do projeto ou os documentos necessários pelo mecanismo habitual de arquivos. Compartilhar planos, tarefas, registros, base reconciliada e evidências pertinentes; índices gerais, temporários e material recebido pendente não fazem parte do trabalho a transmitir.
 

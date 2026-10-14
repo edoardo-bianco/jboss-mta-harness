@@ -647,6 +647,24 @@ ranking/contexto/cobertura de priorizacao. Completar esse par antes de remover
 HarnessTransfer; manter base inicial e examinadas locais, fontes locais e
 publicacao por projeto. S22-S28 e aceite humano integrado permanecem pendentes.
 
+S22 concluida: conciliar recebe contexto/ranking como par com decisao explicita,
+preserva B0/quota e todas as examinadas locais. Fichas/anexos candidatos do alvo
+podem completar o conjunto; parceiros precisam estar adotados. Associacoes e
+POMs sao conferidos sob locks ordinais, com nova conferencia antes de publicar.
+Textos e cobertura usam Project/ID; links e derivados locais sao realinhados.
+O indice geral permanece derivado, reconstruido pela operacao propria.
+
+Test-ReconciliationPrioritization passou em PS5.1: par incompleto/divergente,
+perda de cobertura, B0 diferente, uniao acima da quota, reposicao de ficha,
+anexos so na narrativa, transicao entre Sources, concorrencia e isolamento de
+planos/categorias alheios. Achados da revisao tiveram correcoes/RED-GREEN;
+revisao fechada sem remanescentes. PlanningPortable, ReconciliationConflicts,
+PlanningEvidence e TaskInputs tambem passaram. A familia HarnessTransfer,
+leitores exclusivos, entrada e teste de pacote foram retirados em subfatias;
+25 Run Tasks, sem chamadores ativos nos scripts/testes/tools. Guias e helpers
+serao alinhados nas S24-S28 previstas. S23 em preparo: separar limpeza corrente
+do descarte legado validado. Nenhuma conversao/limpeza real ou aceite humano.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
