@@ -6,6 +6,10 @@ function Convert-ConversionIssues($State,$Issues) {
     }
 }
 
+function Get-ConversionIssueKeys($Issues) {
+    foreach ($issue in $Issues) { Get-PrioritizationIssueKey $issue }
+}
+
 function Read-ConversionRanking($State,$Record) {
     $path=Resolve-ProjectPath $Record.Data.RankingPath $State.Project.Root
     if ((Split-Path $path -Parent) -ine (Split-Path $Record.Path -Parent)) { throw 'Ranking fora da solicitacao selecionada.' }
@@ -21,15 +25,15 @@ function Read-ConversionRanking($State,$Record) {
     $excluded=@(Convert-ConversionIssues $State $Record.Data.ExcludedIssues)
     $percent=ConvertTo-PrioritizationPercentage ([string]$Record.Data.Percentage)
     if ($baseline.Count -ne $Record.Data.InitialTotal -or $Record.Data.SliceSize -ne [Math]::Min($available.Count,[Math]::Ceiling($baseline.Count*$percent/100)) -or
-        @($available+$excluded | Where-Object Id -CNotIn @($baseline | ForEach-Object Id)).Count -or @($available | Where-Object Id -CIn @($excluded | ForEach-Object Id)).Count) { throw 'Quota, disponibilidade ou exclusoes inconsistentes na cadeia legada.' }
-    if (@($examined | Where-Object Id -CNotIn @($available | ForEach-Object Id)).Count -or @($proposed | Where-Object Id -CNotIn @($examined | ForEach-Object Id)).Count -or
+        @(Get-ConversionIssueKeys ($available+$excluded) | Where-Object { $_ -cnotin @(Get-ConversionIssueKeys $baseline) }).Count -or @(Get-ConversionIssueKeys $available | Where-Object { $_ -cin @(Get-ConversionIssueKeys $excluded) }).Count) { throw 'Quota, disponibilidade ou exclusoes inconsistentes na cadeia legada.' }
+    if (@(Get-ConversionIssueKeys $examined | Where-Object { $_ -cnotin @(Get-ConversionIssueKeys $available) }).Count -or @(Get-ConversionIssueKeys $proposed | Where-Object { $_ -cnotin @(Get-ConversionIssueKeys $examined) }).Count -or
         $examined.Count -gt $Record.Data.SliceSize -or ($result.Status -eq 'COMPLETED' -and $Record.Data.SchemaVersion -ge 3 -and $examined.Count -ne $Record.Data.SliceSize)) { throw 'Exame/proposta fora da fatia ou quota inconsistente.' }
     [pscustomobject]@{Path=$path;Text=($text.Remove($blocks[0].Index,$blocks[0].Length));Result=$result;Examined=$examined;Proposed=$proposed;Excluded=$excluded;Available=$available;Version=$Record.Data.SchemaVersion}
 }
 
 function Get-ConversionRankingAssessment($State,$Ranking,$Issue,[string]$Ficha) {
     $rows=@()
-    $recommended=$Issue.Id -cin @($Ranking.Proposed | ForEach-Object Id)
+    $recommended=(Get-PrioritizationIssueKey $Issue) -cin @(Get-ConversionIssueKeys $Ranking.Proposed)
     foreach ($line in $Ranking.Text -split '\r?\n') {
         if ($line -notmatch '^\s*\|') { continue }
         $cells=@($line.Trim().Trim('|').Split('|') | ForEach-Object { $_.Trim() })
@@ -94,18 +98,18 @@ function Read-ConversionPrioritization($State,[string[]]$SelectedContexts=@()) {
         $scope=$State.Project.Name; $paths=Get-PrioritizationPaths $State.Project $category $scope
         $baseline=@(Convert-ConversionIssues $State $current.Data.BaselineIssues)
         if ($baseline.Count -ne $current.Data.InitialTotal) { throw 'Denominador diverge da base inicial.' }
-        $baselineIds=@($baseline | ForEach-Object Id | Sort-Object -CaseSensitive)
+        $baselineKeys=@(Get-ConversionIssueKeys $baseline | Sort-Object -CaseSensitive)
         $rankings=@(); $examined=[Collections.Specialized.OrderedDictionary]::new([StringComparer]::Ordinal)
         $beforeLast=@()
         $fichas=New-Object 'Collections.Generic.Dictionary[string,object]' ([StringComparer]::Ordinal)
         $assessments=New-Object 'Collections.Generic.Dictionary[string,object]' ([StringComparer]::Ordinal)
         foreach ($record in $chain) {
-            $other=@(Convert-ConversionIssues $State $record.Data.BaselineIssues | ForEach-Object Id | Sort-Object -CaseSensitive)
-            if (($other -join "`n") -cne ($baselineIds -join "`n") -or $record.Data.InitialTotal -ne $current.Data.InitialTotal) { throw 'Base inicial mudou dentro da sequencia.' }
+            $other=@(Get-ConversionIssueKeys @(Convert-ConversionIssues $State $record.Data.BaselineIssues) | Sort-Object -CaseSensitive)
+            if (($other -join "`n") -cne ($baselineKeys -join "`n") -or $record.Data.InitialTotal -ne $current.Data.InitialTotal) { throw 'Base inicial mudou dentro da sequencia.' }
             $ranking=Read-ConversionRanking $State $record
             if ($record.Path -ine $current.Path -and $ranking.Result.Status -ne 'COMPLETED') { throw 'Fatia anterior incompleta nao comprova cobertura excluida.' }
-            $earlier=@($examined.Values | ForEach-Object Id | Sort-Object -CaseSensitive)
-            $declared=@($ranking.Excluded | ForEach-Object Id | Sort-Object -CaseSensitive)
+            $earlier=@(Get-ConversionIssueKeys $examined.Values | Sort-Object -CaseSensitive)
+            $declared=@(Get-ConversionIssueKeys $ranking.Excluded | Sort-Object -CaseSensitive)
             if (($record.Data.SchemaVersion -ge 3 -and ($earlier -join "`n") -cne ($declared -join "`n")) -or @($declared | Where-Object { $_ -cnotin $earlier }).Count) { throw 'Exclusoes legadas nao correspondem as examinadas anteriores.' }
             if ($record.Path -ieq $current.Path) { $beforeLast=@($examined.Values | Select-Object Project,Id) }
             $rankings+=$ranking; $State.Map[$record.Path]=$paths.ContextPath; $State.Map[$ranking.Path]=$paths.RankingPath
@@ -114,14 +118,15 @@ function Read-ConversionPrioritization($State,[string[]]$SelectedContexts=@()) {
                 if ($origin) { $State.Map[(Resolve-ProjectPath $origin $State.Project.Root)]=$pair[1] }
             }
             foreach ($issue in $ranking.Examined) {
-                if ($issue.Id -cnotin $baselineIds) { throw 'Examinada fora da base inicial.' }
+                $key=Get-PrioritizationIssueKey $issue
+                if ($key -cnotin $baselineKeys) { throw 'Examinada fora da base inicial.' }
                 $entries=@(Get-LegacyValue $record.Data 'FichaPaths' @() | Where-Object { $_.Id -ceq $issue.Id -and (Resolve-ProjectPath $_.Source $State.Project.Root) -ieq $State.Inputs.Preview.LegacySource })
                 if ($entries.Count -gt 1 -or ($record.Data.SchemaVersion -ge 4 -and $entries.Count -ne 1)) { throw 'Ficha da examinada ausente/ambigua.' }
                 $path=if ($entries.Count) {Resolve-ProjectPath $entries[0].Path $State.Project.Root} else {$null}
                 if ($path -and $record.Data.SchemaVersion -lt 4 -and $null -eq (Read-ConversionText $State.Inputs.Session $path)) { $path=$null }
                 $reason=Get-ConversionRankingAssessment $State $ranking $issue $path
-                $assessments[$issue.Id]=@($assessments[$issue.Id])+@([pscustomobject]@{Text=$reason;Path=$ranking.Path})
-                $examined[$issue.Id]=[pscustomobject]@{Project=$State.Project.Name;Id=$issue.Id;Position=$null;Reason=''}
+                $assessments[$key]=@($assessments[$key])+@([pscustomobject]@{Text=$reason;Path=$ranking.Path})
+                $examined[$key]=[pscustomobject]@{Project=$issue.Project;Id=$issue.Id;Position=$null;Reason=''}
                 if ($path) {
                     $text=Read-ConversionText $State.Inputs.Session $path
                     if ($null -eq $text) { throw ('Ficha examinada indisponivel: '+$path) }
@@ -130,16 +135,16 @@ function Read-ConversionPrioritization($State,[string[]]$SelectedContexts=@()) {
                     $identity=ConvertFrom-Json $markers[0].Groups[1].Value
                     if ($identity.Id -cne $issue.Id -or (Resolve-ProjectPath $identity.Source $State.Project.Root) -ine $State.Inputs.Preview.LegacySource) { throw 'Identidade divergente na ficha legada.' }
                     $human=$text.Remove($markers[0].Index,$markers[0].Length)
-                    if ($fichas.ContainsKey($issue.Id) -and $fichas[$issue.Id].HasContent -and $fichas[$issue.Id].Text -cne $human) { throw 'Fichas divergentes da mesma issue examinada; escolha o conteudo corrente explicitamente.' }
-                    $fichas[$issue.Id]=[pscustomobject]@{Path=$path;Text=$human;HasContent=$true}
+                    if ($fichas.ContainsKey($key) -and $fichas[$key].HasContent -and $fichas[$key].Text -cne $human) { throw 'Fichas divergentes da mesma issue examinada; escolha o conteudo corrente explicitamente.' }
+                    $fichas[$key]=[pscustomobject]@{Issue=$issue;Path=$path;Text=$human;HasContent=$true}
                     $State.Map[$path]=Join-Path $State.Project.Folder (Get-PrioritizationFichaRelativePath $category $issue.Id)
-                } elseif (-not $fichas.ContainsKey($issue.Id)) {
-                    $fichas[$issue.Id]=[pscustomobject]@{Path=$ranking.Path;Text=('# '+$issue.Id+"`n`n"+$reason+"`n`nDetalhamento adicional nao fornecido no legado. Conferir codigo, evidencias e roteiro antes da corretiva.");HasContent=$false}
+                } elseif (-not $fichas.ContainsKey($key)) {
+                    $fichas[$key]=[pscustomobject]@{Issue=$issue;Path=$ranking.Path;Text=('# '+$issue.Id+"`n`n"+$reason+"`n`nDetalhamento adicional nao fornecido no legado. Conferir codigo, evidencias e roteiro antes da corretiva.");HasContent=$false}
                 }
             }
         }
         $excluded=$beforeLast
-        $available=@($rankings[-1].Available | Where-Object Id -CNotIn @($excluded | ForEach-Object Id))
+        $available=@($rankings[-1].Available | Where-Object { (Get-PrioritizationIssueKey $_) -cnotin @(Get-ConversionIssueKeys $excluded) })
         $percent=ConvertTo-PrioritizationPercentage ([string]$current.Data.Percentage)
         $slice=[int][Math]::Min($available.Count,[Math]::Ceiling($baseline.Count*$percent/100))
         $status=$rankings[-1].Result.Status
@@ -154,7 +159,7 @@ function Read-ConversionPrioritization($State,[string[]]$SelectedContexts=@()) {
                 if ($issue.PSObject.Properties['Source'] -and (Resolve-ProjectPath $issue.Source $State.Project.Root) -ine (Resolve-ProjectPath $participant.Source $State.Project.Root)) { throw 'Elegibilidade legada contem outro Source.' }
                 [pscustomobject]@{Source=$participant.Source;Id=$issue.Id}
             } })
-            $outside=@(Convert-ConversionIssues $State $eligible | Where-Object Id -CNotIn $baselineIds).Count
+            $outside=@(Convert-ConversionIssues $State $eligible | Where-Object { (Get-PrioritizationIssueKey $_) -cnotin $baselineKeys }).Count
         } else { $State.Diagnostics.Add('Elegiveis fora da base inicial nao informadas no contexto legado; conferir origem atual.') }
         $codeRoot=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
         $data=[pscustomobject][ordered]@{Purpose='current-prioritization';Scope=$scope;Category=$category;ContextPath=$paths.ContextPath;RankingPath=$paths.RankingPath;PromptPath=$paths.PromptPath;IndexPath=$paths.IndexPath;PrioritizationIndexPath=(Join-Path $State.Project.Root '.harness/indices/priorizacao.md');
@@ -172,13 +177,14 @@ function Add-ConversionPrioritizationDocuments($State,$Prioritizations) {
         $data=$priority.Data; $paths=$priority.Paths; $fichas=$priority.Fichas
         $category=$data.Category; $scope=$data.Scope
         foreach ($issue in $priority.Examined.Values) {
-            $issue.Reason=(@($priority.Assessments[$issue.Id] | Where-Object { $_ } | ForEach-Object { Convert-ConversionMarkdown $_.Text $_.Path $paths.RankingPath $State } | Select-Object -Unique) -join "`n")
+            $issue.Reason=(@($priority.Assessments[(Get-PrioritizationIssueKey $issue)] | Where-Object { $_ } | ForEach-Object { Convert-ConversionMarkdown $_.Text $_.Path $paths.RankingPath $State } | Select-Object -Unique) -join "`n")
         }
-        foreach ($id in $fichas.Keys) {
+        foreach ($key in $fichas.Keys) {
+            $ficha=$fichas[$key]; $id=$ficha.Issue.Id
             # Uma lacuna sintetica nao disputa o texto humano da ficha do lote.
-            if (-not $fichas[$id].HasContent -and @($State.FichaPaths | Where-Object { $_.Id -ceq $id -and $_.Category -ceq $category -and $_.Status -eq 'DISPONIVEL' }).Count) { continue }
+            if (-not $ficha.HasContent -and @($State.FichaPaths | Where-Object { $_.Id -ceq $id -and $_.Category -ceq $category -and $_.Status -eq 'DISPONIVEL' }).Count) { continue }
             $relative=Get-PrioritizationFichaRelativePath $category $id; $target=Join-Path $State.Project.Folder $relative
-            $ficha=$fichas[$id]; $text=Convert-ConversionMarkdown $ficha.Text $ficha.Path $target $State
+            $text=Convert-ConversionMarkdown $ficha.Text $ficha.Path $target $State
             $local=@(); $evidence=@()
             foreach ($link in @(Get-ConversionLinks $text $target $State.Inputs.Session)) {
                 if ($link.StartsWith($State.Project.Source+'\',[StringComparison]::OrdinalIgnoreCase)) { $local+=$link.Substring($State.Project.Source.Length+1) }

@@ -541,6 +541,20 @@ novos achados concretos; `git diff --check` aprovado. Fixtures sinteticas, sem
 scanner/servidor Sonar real. Multiprojeto, cenarios e Validar continuam em S21;
 S22-S28 e aceite integrado pendentes.
 
+Desenho da proxima fatia S21: associacao temporaria `SourceLegado -> Pom` para
+participantes, sem mapa persistido. Cada chamada publica somente seu projeto;
+participantes publicam fichas antes do mestre ordinal da priorizacao. O mestre
+confere fichas/associacoes dos demais sob acesso ordenado e preserva acrescimos
+humanos. Cobertura e quota continuam globais por categoria/escopo e Project/ID.
+Anexos compartilhados precisam de proprietario unico; extratos MTA preservam o
+Source ao mapear links. Cenarios terao nome/mestre explicitos e conservarao B0,
+calendario/consumo do ultimo calculo comprovado. Validar e CLI seguem depois.
+
+Primeira subfatia preparatoria: conjuntos e dicionarios da conversao de
+priorizacao usam a chave funcional Project/ID do nucleo. Test-ConversionPrioritization,
+Test-ConversionPrioritizationLegacy e Test-ConversionPriorityEvidence passaram
+em PS5.1. Esta refatoracao ainda nao habilita conversao multiprojeto.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
