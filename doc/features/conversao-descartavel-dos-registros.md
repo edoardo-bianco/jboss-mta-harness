@@ -1,7 +1,7 @@
 # Conversão descartável dos registros existentes
 
-**Estado:** prévia, aplicação e validação implementadas em Windows PowerShell 5.1.
-Limpeza permanece em S23; aceite humano integrado pendente.
+**Estado:** prévia, aplicação, validação e descarte implementados em Windows
+PowerShell 5.1 e verificados em fixtures. Aceite humano integrado pendente.
 **Revisão:** 14/10/2026. **Destino:** `doc/features/conversao-descartavel-dos-registros.md`.
 
 **Prioridade:** parte da simplificação que precede modernização e novas
@@ -32,7 +32,9 @@ Script: [Converter-RegistrosProjeto.ps1](../../tools/transicao/Converter-Registr
 | `-Formato Texto\|Json` | Saída no terminal; Texto é o padrão. Nenhum relatório ou mapa é gravado pelo utilitário. |
 | `-Modo Aplicar` | Consolidar as escolhas e publicar pelo núcleo permanente. Preserva originais e recusa sobrescrever conteúdo diferente no destino. |
 | `-Modo Validar` | Conferir somente o projeto corrente, sem ler legado nem reaplicar conversão. Retorna `VALIDO` ou `PENDENTE`, com diagnósticos no terminal. |
-| `-Modo Limpar` | Previsto em S23: descartar somente resíduos selecionados após validação. Ainda recusado. |
+| `-Modo Limpar` | Sem seleção, mostrar arquivos elegíveis e motivos, sem escrita. Com seleção explícita, revalidar e descartar somente esses arquivos. |
+| `-Descartar` | Lista de arquivos individuais apresentados pela prévia de Limpar; diretórios e raízes compartilhadas são recusados. Exclusivo de Limpar. |
+| `-Confirmacao` | `LIMPAR` confirma descarte; `RECUPERAR` trata uma interrupção anterior. Outro texto cancela. Obrigatório para execução em JSON; no terminal, a confirmação pode ser solicitada interativamente. Exclusivo de Limpar. |
 | `-MtaDiretorio` | Origem explícita quando os vínculos não determinam um conjunto MTA único. Origem externa permanece no local. |
 | `-PrioritizacaoContexto` | Contextos escolhidos para consolidar categorias e escopos; não apaga examinadas anteriores. |
 | `-BuildResultado`, `-SonarResultado`, `-SonarTentativa` | Escolhas explícitas para resolver ambiguidades dos diagnósticos; uma tentativa falha não substitui o último conjunto utilizável. |
@@ -137,7 +139,40 @@ O destino recebe somente os dados correntes previstos no contrato. Relatórios M
 
 Falha anterior à publicação não altera os registros ativos. Falha durante a publicação usa a recuperação definida no contrato permanente. Reexecutar sobre destino equivalente não duplica dados; se houver trabalho novo no destino, apresentar o conflito e não sobrescrevê-lo.
 
-`Aplicar` não apaga originais. `Limpar` revalida o destino e remove apenas o material legado explicitamente selecionado para descarte, mais os temporários de conferência e recuperação. Caminhos que abranjam fontes, origem MTA externa, dados novos ou registros de outros projetos não podem entrar nesse descarte. Não remover indiscriminadamente uma raiz compartilhada de registros.
+`Aplicar` não apaga originais. `Limpar` recompõe a conversão somente em memória e
+confere a equivalência com o destino corrente. Use as mesmas escolhas de origem,
+contexto, participantes e cenários usadas na aplicação. Trabalho posterior no
+destino ou originais alterados impedem o descarte automático; não sobrescreva
+esse trabalho para contornar a recusa.
+
+Primeiro execute `-Modo Limpar` sem `-Descartar` para obter a prévia. Depois
+informe somente os arquivos conferidos em `-Descartar` e confirme `LIMPAR`.
+Em uma sessão PowerShell, a lista pode ser passada como array:
+
+```powershell
+& .\tools\transicao\Converter-RegistrosProjeto.ps1 -Workspace C:\harness -Pom C:\fontes\aplicacao\pom.xml -Modo Limpar
+# Substitua pelos caminhos individuais elegíveis da prévia:
+$selecionados = @('C:\harness\.harness\planning\legado\plano.md')
+& .\tools\transicao\Converter-RegistrosProjeto.ps1 -Workspace C:\harness -Pom C:\fontes\aplicacao\pom.xml -Modo Limpar -Descartar $selecionados -Confirmacao LIMPAR -Formato Json
+```
+
+A seleção é conferida novamente depois da confirmação. Fontes, origens MTA,
+projetos correntes, originais de pacotes e diretórios são preservados. Referências
+de outro projeto ou consumidor desconhecido, inclusive notas recebidas e links
+transitivos, impedem descartar a folha. Alterações concorrentes cancelam a escrita.
+Nenhum mapa de descarte permanece como requisito do projeto convertido.
+
+Interrupção pode deixar `RECUPERACAO_PENDENTE`. A prévia continua somente leitura.
+Com journal, repita exatamente os arquivos exibidos e use `-Confirmacao RECUPERAR`
+para restaurar a transação. Sem journal, omita `-Descartar`: a recuperação retira
+somente o estágio técnico e preserva os originais no estado em que estão.
+`RECUPERADO` não inicia novo descarte. Depois, confira novamente a prévia.
+Repetir uma seleção inteiramente ausente retorna `SEM_RESIDUOS` se o destino
+continuar válido; não inclui arquivos novos. Ausência parcial sem journal é recusada.
+
+A limpeza corrente pela tarefa **Workspace: limpar execucoes** é separada:
+limita-se aos resíduos temporários de build/MTA/Sonar e à opção própria de backups
+temporários. Ela não elimina o legado nem os documentos correntes da migração.
 
 A limpeza encerra a transição sem incorporar arquivo histórico ou backup ao projeto novo. O pacote do conversor pode então ser removido; não é necessário executá-lo novamente para reconhecer novos relatórios MTA.
 

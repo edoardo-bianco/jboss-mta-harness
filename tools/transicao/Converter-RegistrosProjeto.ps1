@@ -14,11 +14,37 @@ param(
     [string]$SonarTentativa,
     [Collections.IDictionary]$Participantes=@{},
     [object[]]$Sprints=@(),
+    [string[]]$Descartar=@(),
+    [string]$Confirmacao,
     [ValidateSet('Texto','Json')][string]$Formato='Texto'
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
-if ($Modo -eq 'Limpar') { throw 'Limpar permanece em S23. Aplicar/Validar preservam todos os originais.' }
+if ($Modo -ne 'Limpar' -and ($PSBoundParameters.ContainsKey('Descartar') -or $PSBoundParameters.ContainsKey('Confirmacao'))) {
+    throw 'Descartar e Confirmacao sao exclusivos do modo Limpar.'
+}
+$choices=@{Workspace=$Workspace;Pom=$Pom;SourceLegado=$SourceLegado;Registro=$Registro;Contexto=$Contexto;MtaDiretorio=$MtaDiretorio;PrioritizacaoContexto=$PrioritizacaoContexto;BuildResultado=$BuildResultado;SonarResultado=$SonarResultado;SonarTentativa=$SonarTentativa;Participantes=$Participantes;Sprints=$Sprints}
+if ($Modo -eq 'Limpar') {
+    Import-Module (Join-Path $PSScriptRoot 'ConversaoLimpeza.psm1') -Force -DisableNameChecking
+    $execute=$Descartar.Count -gt 0 -or $PSBoundParameters.ContainsKey('Confirmacao')
+    if ($execute) {
+        if ($Formato -eq 'Json' -and -not $PSBoundParameters.ContainsKey('Confirmacao')) { throw 'Limpar em Json exige Confirmacao explicita; use a previa antes de selecionar arquivos.' }
+        $cleanup=@{Descartar=$Descartar}
+        if ($PSBoundParameters.ContainsKey('Confirmacao')) { $cleanup.ConfirmText=$Confirmacao }
+        if ($Formato -eq 'Json') { $result=Invoke-ConversionCleanup @choices @cleanup 6>$null }
+        else { $result=Invoke-ConversionCleanup @choices @cleanup }
+    } else { $result=Get-ConversionCleanupPreview @choices }
+    if ($Formato -eq 'Json') { $result|ConvertTo-Json -Depth 40; return }
+    "Descarte legado: $($result.Status)"
+    if ($execute) { foreach ($path in $result.RemovedFiles) { "Removido: $path" } }
+    else {
+        foreach ($item in $result.Candidates) { "Elegivel: $($item.Eligible) | $($item.Path) -> $($item.Destination) | $($item.Reason)" }
+        if ($result.RecoveryPath) { "Recuperacao pendente: $($result.RecoveryPath). Use os arquivos exibidos em Descartar e Confirmacao RECUPERAR; sem arquivos exibidos, omita Descartar." }
+        'Previa somente leitura. Selecione arquivos em Descartar e confirme LIMPAR para remover; outro texto cancela.'
+    }
+    'Integridade operacional nao concede revisao humana, GO ou aceite.'
+    return
+}
 if ($Modo -eq 'Validar') {
     Import-Module (Join-Path $PSScriptRoot 'ConversaoValidacao.psm1') -Force -DisableNameChecking
     $result=Test-ConversionCurrent -Workspace $Workspace -Pom $Pom
@@ -31,7 +57,6 @@ if ($Modo -eq 'Validar') {
 }
 if ($Modo -eq 'Aplicar') {
     Import-Module (Join-Path $PSScriptRoot 'ConversaoPublicacao.psm1') -Force -DisableNameChecking
-    $choices=@{Workspace=$Workspace;Pom=$Pom;SourceLegado=$SourceLegado;Registro=$Registro;Contexto=$Contexto;MtaDiretorio=$MtaDiretorio;PrioritizacaoContexto=$PrioritizacaoContexto;BuildResultado=$BuildResultado;SonarResultado=$SonarResultado;SonarTentativa=$SonarTentativa;Participantes=$Participantes;Sprints=$Sprints}
     $result=Invoke-ConversionApply @choices
     if ($Formato -eq 'Json') { $result|ConvertTo-Json -Depth 40; return }
     "Conversao: $($result.Status) - $($result.Project)"

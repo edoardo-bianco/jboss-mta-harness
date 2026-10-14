@@ -63,7 +63,7 @@ function Read-ConversionInputs {
             Reconciliation=$reconciliation;Related=$related;References=$references;Attachments=$attachments;
             ProposedFiles=@($proposed);Pending=@($session.Pending | Sort-Object -Unique);AuthorizationInherited=$false;DeletionAuthorized=$false;
             DiscardCandidates=@($records | Where-Object { $_.Sources.Count -eq 1 -and -not $_.Path.StartsWith($project.Folder+'\',[StringComparison]::OrdinalIgnoreCase) } | ForEach-Object Path | Sort-Object -Unique);
-            DiscardCondition='Somente apos conversao, validacao independente e selecao humana em S21/S23; nenhum diretorio compartilhado, Source ou MTA externo incluido.'}
+            DiscardCondition='Use Modo Limpar sem Descartar para conferir elegibilidade apos a conversao; descarte exige arquivos selecionados e confirmacao. Diretorios, Source e MTA externo sao preservados.'}
         [pscustomobject]@{Preview=$preview;Project=$project;Session=$session;Records=$records;Register=$register;Planning=$planning;Inventory=$inventory}
     } finally { $lease.ReleaseMutex(); $lease.Dispose() }
 }
