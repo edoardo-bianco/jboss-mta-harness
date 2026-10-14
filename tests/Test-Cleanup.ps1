@@ -1,179 +1,249 @@
 #requires -Version 5.1
-$ErrorActionPreference = 'Stop'
-$root = Split-Path -Parent $PSScriptRoot
-Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force -DisableNameChecking
+$ErrorActionPreference='Stop'; Set-StrictMode -Version Latest
+$root=Split-Path -Parent $PSScriptRoot
+Import-Module (Join-Path $root 'scripts/HarnessProject.psm1') -Force -DisableNameChecking
 Import-Module (Join-Path $root 'scripts/HarnessCleanup.psm1') -Force -DisableNameChecking
-function Assert($condition, $message) { if (-not $condition) { throw $message } }
-$fixture = Join-Path $root ('.harness/tests/c' + [guid]::NewGuid().ToString('N').Substring(0,8))
-$source = Join-Path $fixture 'app'
-$other = Join-Path $fixture 'other'
-$run = Join-Path $fixture '.harness/runs/old/11111111111111111111111111111111'
-$build = Join-Path $fixture '.harness/builds/readable/build_2026-09-27_10-00-00-0300__222222222222'
-$planning = Join-Path $fixture '.harness/planning/readable/mta_date/plano_date'
-$evidencePlanning = Join-Path $fixture '.harness/planning/readable/evidencias/plano_evidence'
-Write-HarnessJson "$evidencePlanning/context.json" @{Project='new';Source=$source;RunId=$null;PlanningBasis='EVIDENCIAS';RequestId='eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'}
-Write-HarnessJson "$run/manifest.json" @{Project='old';Source=$source;RunId='11111111111111111111111111111111'}
-Write-HarnessJson "$run/result.json" @{Status='SUCCEEDED'}
-Write-HarnessJson "$build/result.json" @{Project='new';Source=$source;RunId='22222222222222222222222222222222'}
-Write-HarnessJson "$planning/context.json" @{Project='new';Source=$source;RunId='11111111111111111111111111111111';RequestId='33333333333333333333333333333333'}
-Set-Content "$planning/plan.md" 'proposta'
-Set-Content "$planning/todo.md" 'pendente'
-$sonarBaseline = "$fixture/.harness/sonar/app/sonar-baseline/result.json"
-Write-HarnessJson $sonarBaseline @{Phase='ANTES'; AnalysisId='preservar'}
-$sonarHash = (Get-FileHash $sonarBaseline).Hash
-$preservedData = @('.harness/projetos/app/migracao.md', '.harness/projetos/app/evidencias/LEIA-ME.md', '.harness/evidencias/print.txt')
-foreach ($file in $preservedData) {
-    $path = Join-Path $fixture $file
-    $null = [IO.Directory]::CreateDirectory((Split-Path -Parent $path))
-    Set-Content -LiteralPath $path 'decisoes e evidencias a preservar'
+function Assert($Value,[string]$Message) { if (-not $Value) { throw $Message } }
+function Write-CleanupFixture([string]$Path,[string]$Text='preservar') {
+    $null=[IO.Directory]::CreateDirectory((Split-Path $Path -Parent))
+    [IO.File]::WriteAllText($Path,$Text,(New-Object Text.UTF8Encoding($false)))
 }
-Write-HarnessJson "$fixture/.harness/runs/other/44444444444444444444444444444444/manifest.json" @{Project='other';Source=$other;RunId='44444444444444444444444444444444'}
-foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/settings.xml','.harness/workspace-backups/backup.json','.github/prompts/planejar-lotes.prompt.md')) { Write-HarnessJson (Join-Path $fixture $file) @{preserve=$true} }
-Write-HarnessJson "$fixture/.harness/last-old.json" @{RunId='11111111111111111111111111111111'}
-Write-HarnessJson "$fixture/.harness/last-other.json" @{RunId='44444444444444444444444444444444'}
-Write-HarnessJson "$fixture/.harness/active-mta.json" @{Project='old';RunId='11111111111111111111111111111111'}
-$before = @(Get-ChildItem -LiteralPath $fixture -Recurse -File | Get-FileHash)
-$selection = @(Get-HarnessCleanupPaths $fixture -Source $source)
-Assert ($selection.Count -eq 6 -and $selection -contains $evidencePlanning) 'Selecao deve incluir MTA/build/planejamento MTA e EVIDENCIAS e ponteiros do mesmo Source.'
-foreach ($file in $before) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash -eq $file.Hash) 'Preview alterou arquivo.' }
-Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'cancelar' | Out-Null
-Assert (Test-Path -LiteralPath $run) 'Cancelamento removeu historico.'
-Write-HarnessJson "$fixture/.harness/runs/old/55555555555555555555555555555555/manifest.json" @{Project='old';Source=$other;RunId='55555555555555555555555555555555'}
-Write-HarnessJson "$fixture/.harness/last-old.json" @{RunId='55555555555555555555555555555555'}
-Write-HarnessJson "$fixture/.harness/active-mta.json" @{Project='old';RunId='55555555555555555555555555555555'}
-Assert (@(Get-HarnessCleanupPaths $fixture -Source $source).Count -eq 4) 'Ponteiros de outro Source com mesmo Project nao podem ser removidos.'
-Write-HarnessJson "$fixture/.harness/last-old.json" @{RunId='11111111111111111111111111111111'}
-Write-HarnessJson "$fixture/.harness/active-mta.json" @{Project='old';RunId='11111111111111111111111111111111'}
-foreach ($lock in @('mta.lock','planning.lock')) {
-$lease = [IO.File]::Open("$fixture/.harness/$lock", 'OpenOrCreate','ReadWrite','None')
-try {
-    $rejected=$false
-    try { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null } catch { $rejected=$true }
-    Assert $rejected 'Limpeza durante MTA/build aceita.'
-} finally { $lease.Dispose() }
+function New-CleanupFixture([switch]$RootSource) {
+    $area=Join-Path $root ('.harness/tests/cleanup-'+[guid]::NewGuid().ToString('N').Substring(0,8))
+    $projects=@(foreach ($name in @('a','b')) {
+        $source=if ($RootSource -and $name -ceq 'a') {$area} else {Join-Path $area ('app-'+$name)}
+        $pom=Join-Path $source 'pom.xml'; Write-CleanupFixture $pom ('<project><artifactId>'+$name+'</artifactId></project>')
+        Initialize-HarnessProjectStorage $area $pom
+    })
+    foreach ($project in $projects) {
+        foreach ($family in @('build','mta','sonar')) { Write-CleanupFixture (Join-Path $project.TemporaryPath ($family+'/tentativa/log.bin')) ('scratch '+$project.Name+' '+$family) }
+        foreach ($relative in @('migracao.md','indice.md','atual/planejamento/plano.md','atual/build/resultado.json','atual/mta/index.html','atual/sonar/resultado.json','atual/priorizacao/mandatory/escopos/p/priorizacao.md','atual/sprints/macro/contexto.json','evidencias/anexo.bin','reconciliado/notas.md','recebido/contexto.json','temporarios/reconciliacao/base.clixml')) { Write-CleanupFixture (Join-Path $project.Folder $relative) ('oficial '+$relative) }
+    }
+    foreach ($relative in @('.harness/runs/antigo/run/manifest.json','.harness/builds/antigo/run/result.json','.harness/planning/antigo/run/plano/context.json','.harness/sonar/baseline/result.json','.harness/last-antigo.json','.harness/active-mta.json','.harness/workspace-backups/oficial.json','externo/mta/index.html','externo/mta/output.js','config/harness.local.json','.harness/maven/settings.xml')) { Write-CleanupFixture (Join-Path $area $relative) ('legado e externo preservados '+$relative) }
+    $receipt=@{Project='antigo';Source=$projects[0].Source;RunId='11111111111111111111111111111111'}|ConvertTo-Json -Compress
+    foreach ($relative in @('.harness/runs/antigo/run/manifest.json','.harness/builds/antigo/run/result.json','.harness/planning/antigo/run/plano/context.json','.harness/last-antigo.json','.harness/active-mta.json')) { Write-CleanupFixture (Join-Path $area $relative) $receipt }
+    [pscustomobject]@{Root=$area;Projects=$projects}
 }
-$link = Join-Path $run 'junction'
-$null = New-Item -ItemType Junction -Path $link -Target $source
-try {
-    $rejected=$false
-    try { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null } catch { $rejected=$true }
-    Assert $rejected 'Junction dentro do historico deveria bloquear toda a limpeza.'
-    Assert (Test-Path "$source/pom.xml") 'Limpeza seguiu junction.'
-} finally {
-    # Remover somente o link de teste, nunca seu destino ou uma arvore calculada.
-    [IO.Directory]::Delete($link)
+function Get-CleanupState([string]$Folder) {
+    $pending=New-Object 'Collections.Generic.Stack[IO.DirectoryInfo]'; $pending.Push((New-Object IO.DirectoryInfo $Folder)); $states=@()
+    while ($pending.Count) {
+        foreach ($item in $pending.Pop().EnumerateFileSystemInfos()) {
+            if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) { $states+=($item.FullName+' JUNCTION'); continue }
+            if ($item -is [IO.DirectoryInfo]) { $pending.Push($item); continue }
+            $sha=[Security.Cryptography.SHA256]::Create()
+            try { $hash=[BitConverter]::ToString($sha.ComputeHash([IO.File]::ReadAllBytes(('\\?\'+$item.FullName)))) } finally { $sha.Dispose() }
+            $states+=($item.FullName+' '+$item.LastWriteTimeUtc.Ticks+' '+$hash)
+        }
+    }
+    ($states|Sort-Object) -join [Environment]::NewLine
 }
-Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null
-Assert (-not (Test-Path -LiteralPath $run) -and -not (Test-Path -LiteralPath $build) -and -not (Test-Path -LiteralPath $planning)) 'Limpeza de projeto incompleta.'
-Assert (-not (Test-Path -LiteralPath $evidencePlanning)) 'Limpeza de planejamento por evidencias incompleta.'
-Assert (Test-Path "$fixture/.harness/runs/other/44444444444444444444444444444444/manifest.json") 'Limpeza atingiu outro projeto.'
-Assert (Test-Path "$fixture/.harness/runs/old/55555555555555555555555555555555/manifest.json") 'Limpeza atingiu outro Source com mesmo Project.'
-foreach ($file in $preservedData) {
-    $path = Join-Path $fixture $file
-    Assert ((Get-FileHash -LiteralPath $path).Hash -eq ($before | Where-Object Path -EQ $path).Hash) 'Limpeza por projeto alterou registro/evidencias.'
+function Reject-Cleanup($Fixture,[scriptblock]$Action,[string]$Pattern,[string]$Message) {
+    $before=Get-CleanupState $Fixture.Root; $failed=$false
+    try { $null=& $Action } catch { Assert ($_.Exception.Message -match $Pattern) ($Message+' Erro inesperado: '+$_.Exception.Message); $failed=$true }
+    Assert $failed $Message
+    Assert ((Get-CleanupState $Fixture.Root) -ceq $before) 'Recusa de limpeza preserva bytes e datas de todos os arquivos.'
 }
-Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null
-Assert ((Get-FileHash $sonarBaseline).Hash -eq $sonarHash) 'Limpeza apagou ou alterou baseline Sonar.'
-foreach ($file in $preservedData) {
-    $path = Join-Path $fixture $file
-    Assert ((Get-FileHash -LiteralPath $path).Hash -eq ($before | Where-Object Path -EQ $path).Hash) 'Limpeza geral alterou registro/evidencias.'
+function Assert-CleanupSelectionRemoved($Fixture,[string]$Before,[string[]]$Paths) {
+    $remaining=@($Before -split '\r?\n'|Where-Object { $line=$_; -not @($Paths|Where-Object {$line.StartsWith($_+' ',[StringComparison]::OrdinalIgnoreCase)}).Count }) -join [Environment]::NewLine
+    Assert ((Get-CleanupState $Fixture.Root) -ceq $remaining) 'Limpeza deve retirar somente as folhas selecionadas, preservando bytes e datas do restante.'
 }
-foreach ($area in @('runs','builds','planning')) { Assert (-not (Test-Path "$fixture/.harness/$area")) 'Limpeza total incompleta.' }
-foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/settings.xml','.harness/workspace-backups/backup.json','.github/prompts/planejar-lotes.prompt.md')) {
-    $path = Join-Path $fixture $file
-    Assert ((Get-FileHash -LiteralPath $path).Hash -eq ($before | Where-Object Path -EQ $path).Hash) 'Limpeza alterou arquivo protegido.'
+function Invoke-CleanupPromptMutation($Fixture,[string]$Mode,[switch]$TemporaryBackups) {
+    $target=Join-Path $Fixture.Projects[0].TemporaryPath 'build/tentativa/log.bin'
+    if ($Mode -eq 'new') { $target=Join-Path $Fixture.Projects[0].TemporaryPath 'build/tentativa/novo.bin' }
+    if ($TemporaryBackups) {
+        $name=if ($Mode -eq 'new') {'novo.bin'} else {'log.bin'}
+        $target=Join-Path $Fixture.Root ('.harness/backups-temporarios/ensaio/'+$name)
+    }
+    $module=Get-Module HarnessCleanup
+    & $module {
+        param($Root,$Target,$Mode,$Snapshot)
+        $script:cleanupRoot=$Root; $script:cleanupTarget=$Target; $script:cleanupMode=$Mode; $script:cleanupSnapshot=$Snapshot
+        $script:cleanupAfterPrompt=$null
+        function script:Read-Host {
+            param([string]$Prompt)
+            if ($script:cleanupMode -eq 'time') { [IO.File]::SetLastWriteTimeUtc($script:cleanupTarget,([IO.File]::GetLastWriteTimeUtc($script:cleanupTarget).AddSeconds(2))) }
+            else { [IO.File]::WriteAllText($script:cleanupTarget,'contribuicao durante a confirmacao') }
+            $script:cleanupAfterPrompt=& $script:cleanupSnapshot $script:cleanupRoot
+            'LIMPAR'
+        }
+    } $Fixture.Root $target $Mode ${function:Get-CleanupState}
+    $failed=$false
+    try { Invoke-HarnessCleanup $Fixture.Root -All:(-not $TemporaryBackups) -TemporaryBackups:$TemporaryBackups 6>$null|Out-Null }
+    catch { Assert ($_.Exception.Message -match 'mud|alter|nov|selec|conjunto|leitura|confirm') $_.Exception.Message; $failed=$true }
+    finally { & $module { Remove-Item Function:\Read-Host } }
+    Assert $failed ('Mudanca durante confirmacao deve recusar todo o conjunto: '+$Mode)
+    $postPrompt=& $module { $script:cleanupAfterPrompt }
+    Assert ($null -ne $postPrompt -and (Get-CleanupState $Fixture.Root) -ceq $postPrompt) 'Nenhum arquivo pode ser removido apos edicao, nova folha ou mudanca de data durante a confirmacao.'
 }
-Assert (@(Get-HarnessCleanupPaths $fixture -All).Count -eq 0) 'Repeticao da limpeza deve ficar vazia.'
-Write-Output 'PASS: preview, cancelamento, projeto, todos, bloqueio e preservacao de fontes/config/cache/templates/backups.'
 
-$temporary = Join-Path $fixture '.harness/backups-temporarios'
-Write-HarnessJson "$temporary/ensaio/proveniencia.json" @{test=$true}
-$longFile = Join-Path $temporary ('ensaio/' + ('x' * 200) + '.class')
-[IO.File]::WriteAllText(('\\?\' + $longFile.Replace('/','\')), 'fixture de caminho longo')
-$remaining = "$fixture/.harness/runs/other/77777777777777777777777777777777/manifest.json"
-Write-HarnessJson $remaining @{Project='other';Source=$other;RunId='77777777777777777777777777777777'}
-Assert (@(Get-HarnessCleanupPaths $fixture -All) -notcontains $temporary) 'Limpeza de execucoes passou a incluir backups.'
-$preview = @(Get-HarnessCleanupPaths $fixture -TemporaryBackups)
-Assert ($preview.Count -eq 1 -and $preview[0] -eq $temporary) 'Preview de temporarios deve conter somente a pasta central.'
-$rejected=$false
-try { Get-HarnessCleanupPaths $fixture -All -TemporaryBackups | Out-Null } catch { $rejected=$true }
-Assert $rejected 'Escopos misturados aceitos.'
-Invoke-HarnessCleanup $fixture -TemporaryBackups -ConfirmText 'cancelar' | Out-Null
-Assert (Test-Path $temporary) 'Cancelamento apagou backup.'
-$link = Join-Path $temporary 'junction'
-$null = New-Item -ItemType Junction -Path $link -Target $source
+$f=New-CleanupFixture; $a=$f.Projects[0]; $b=$f.Projects[1]
+$before=Get-CleanupState $f.Root
+$selection=@(Get-HarnessCleanupPaths $f.Root -Source $a.Source)
+$expected=@('build','mta','sonar'|ForEach-Object { Join-Path $a.TemporaryPath ($_+'/tentativa/log.bin') })
+Assert ($selection.Count -eq 3 -and @($expected|Where-Object {$_ -notin $selection}).Count -eq 0) 'Preview deve selecionar somente folhas de build/MTA/Sonar correntes do Source associado.'
+Assert ((Get-CleanupState $f.Root) -ceq $before) 'Preview deve ser somente leitura, sem recibos nem recuperacao.'
+Invoke-HarnessCleanup $f.Root -Source $a.Source -ConfirmText cancelar 6>$null|Out-Null
+Assert ((Get-CleanupState $f.Root) -ceq $before) 'Cancelamento deve ser somente leitura.'
+Reject-Cleanup $f { Get-HarnessCleanupPaths $f.Root -All -TemporaryBackups } 'somente|escolha|escopo' 'Escopos de limpeza nao podem ser misturados.'
+Invoke-HarnessCleanup $f.Root -Source $a.Source -ConfirmText LIMPAR 6>$null|Out-Null
+Assert-CleanupSelectionRemoved $f $before $expected
+$before=Get-CleanupState $f.Root; $all=@(Get-HarnessCleanupPaths $f.Root -All)
+Assert ($all.Count -eq 3 -and @($all|Where-Object {-not $_.StartsWith($b.TemporaryPath+'\',[StringComparison]::OrdinalIgnoreCase)}).Count -eq 0) 'Limpeza geral seleciona somente o restante do outro projeto corrente.'
+Invoke-HarnessCleanup $f.Root -All -ConfirmText LIMPAR 6>$null|Out-Null
+Assert-CleanupSelectionRemoved $f $before $all
+Assert (@(Get-HarnessCleanupPaths $f.Root -All).Count -eq 0) 'Limpeza corrente repetida fica vazia sem consultar recibos legados.'
+
+# Journal pendente bloqueia ate a previa; nenhuma recuperacao e executada pela limpeza.
+$pending=New-CleanupFixture; $project=$pending.Projects[0]; $current='atual/planejamento/plano.md'
+Write-CleanupFixture (Join-Path $project.Folder $current) 'conteudo novo interrompido'
+Write-CleanupFixture (Join-Path $project.TemporaryPath ('publicacao/antes/'+$current)) 'conteudo anterior'
+Write-CleanupFixture (Join-Path $project.TemporaryPath ('publicacao/depois/'+$current)) 'conteudo novo interrompido'
+$journal=ConvertTo-Json -InputObject @(@{Path=$current;Existed=$true;Remove=$false})
+Write-CleanupFixture (Join-Path $project.TemporaryPath 'publicacao/recuperacao.json') $journal
+Reject-Cleanup $pending { Get-HarnessCleanupPaths $pending.Root -Source $project.Source } 'recupera|publicac|pendente' 'Preview deve recusar journal pendente sem recuperar documentos.'
+Reject-Cleanup $pending { Invoke-HarnessCleanup $pending.Root -All -ConfirmText LIMPAR 6>$null } 'recupera|publicac|pendente' 'Limpeza nao deve recuperar publicacao pendente.'
+
+foreach ($mode in @('edit','new','time')) { $changed=New-CleanupFixture; Invoke-CleanupPromptMutation $changed $mode }
+
+# Um produtor em outro processo detem o mutex de operacao, mesmo com preview preparado.
+$locked=New-CleanupFixture; $peer=$locked.Projects[1]
+$child=Join-Path $locked.Root 'segurar-operacao.ps1'; $ready=Join-Path $locked.Root 'pronto'; $release=Join-Path $locked.Root 'liberar'
+[IO.File]::WriteAllText($child,@'
+param($ModulePath,$Workspace,$Pom,$Ready,$Release)
+$ErrorActionPreference='Stop'
+Import-Module $ModulePath -Force -DisableNameChecking
+$project=Get-HarnessProjectStorage $Workspace $Pom
+$lease=Enter-HarnessProjectAccess $project -ForOperation
 try {
-    $rejected=$false
-    try { Invoke-HarnessCleanup $fixture -TemporaryBackups -ConfirmText 'LIMPAR' | Out-Null } catch { $rejected=$true }
-    Assert $rejected 'Junction em temporarios aceita.'
+    [IO.File]::WriteAllText($Ready,'operacao ativa')
+    $deadline=[DateTime]::UtcNow.AddSeconds(30)
+    while (-not [IO.File]::Exists($Release) -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 25 }
+} finally { $lease.ReleaseMutex(); $lease.Dispose() }
+'@,(New-Object Text.UTF8Encoding($false)))
+$arguments=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$child+'"'),('"'+(Join-Path $root 'scripts/HarnessProject.psm1')+'"'),('"'+$locked.Root+'"'),('"'+$peer.Pom+'"'),('"'+$ready+'"'),('"'+$release+'"'))
+$process=Start-Process powershell.exe -ArgumentList $arguments -WindowStyle Hidden -PassThru
+try {
+    $deadline=[DateTime]::UtcNow.AddSeconds(10)
+    while (-not [IO.File]::Exists($ready) -and -not $process.HasExited -and [DateTime]::UtcNow -lt $deadline) { Start-Sleep -Milliseconds 25 }
+    Assert ([IO.File]::Exists($ready)) 'Filho deve deter o mutex antes de testar limpeza.'
+    Reject-Cleanup $locked { Invoke-HarnessCleanup $locked.Root -All -ConfirmText LIMPAR 6>$null } 'operac|uso|aguarde|andamento' 'Limpeza geral deve recusar produtor ativo antes de remover o primeiro projeto.'
+} finally { [IO.File]::WriteAllText($release,'liberar'); Assert ($process.WaitForExit(10000)) 'Filho deve liberar o mutex e terminar.'; $process.Dispose() }
+
+# Junction em scratch nunca autoriza seguir ou apagar a fonte apontada.
+$linked=New-CleanupFixture; $project=$linked.Projects[0]; $link=Join-Path $project.TemporaryPath 'build/junction'
+$null=New-Item -ItemType Junction -Path $link -Target $project.Source
+try { Reject-Cleanup $linked { Invoke-HarnessCleanup $linked.Root -All -ConfirmText LIMPAR 6>$null } 'junction|link' 'Junction dentro de temporarios bloqueia a limpeza.' }
+finally { [IO.Directory]::Delete($link) }
+
+# Source igual ao workspace e permitido; Source/MTA dentro de um candidato nao.
+$workspace=New-CleanupFixture -RootSource; $before=Get-CleanupState $workspace.Root
+$paths=@(Get-HarnessCleanupPaths $workspace.Root -Source $workspace.Root)
+Assert ($paths.Count -eq 3) 'Source no workspace pode limpar somente sua area .harness dedicada.'
+Invoke-HarnessCleanup $workspace.Root -Source $workspace.Root -ConfirmText LIMPAR 6>$null|Out-Null
+Assert-CleanupSelectionRemoved $workspace $before $paths
+foreach ($kind in @('Source','Mta')) {
+    $protected=New-CleanupFixture; $project=$protected.Projects[0]
+    $inside=Join-Path $project.TemporaryPath ('build/origem-'+$kind)
+    $config=Get-Content -LiteralPath $project.ConfigPath -Raw|ConvertFrom-Json
+    if ($kind -eq 'Source') { $config.pom=Join-Path $inside 'pom.xml'; Write-CleanupFixture $config.pom '<project><artifactId>a</artifactId></project>' }
+    else { $config.mta.diretorio=$inside; Write-CleanupFixture (Join-Path $inside 'index.html') 'MTA configurado'; Write-CleanupFixture (Join-Path $inside 'output.js') 'catalogo configurado' }
+    Write-CleanupFixture $project.ConfigPath ($config|ConvertTo-Json -Depth 10)
+    Reject-Cleanup $protected { Invoke-HarnessCleanup $protected.Root -All -ConfirmText LIMPAR 6>$null } 'source|fonte|origem|MTA|config|proteg|sobrep' ('Origem configurada dentro do candidato impede apagar: '+$kind)
+}
+'PASS: limpeza corrente por Source/todos, previa, cancelamento, preservacao, concorrencia e bloqueios.'
+
+# Backups de exercicio sao uma selecao separada de folhas, sem nomes reservados internos.
+$backups=New-CleanupFixture; $temporary=Join-Path $backups.Root '.harness/backups-temporarios'
+$backupPaths=@(
+    (Join-Path $temporary 'ensaio/log.bin'),
+    (Join-Path $temporary 'ensaio/temporarios/publicacao/recuperacao.json'),
+    (Join-Path $temporary 'ensaio/recebido/nota.md')
+)
+foreach ($path in $backupPaths) { Write-CleanupFixture $path 'copia humana, nao protocolo ativo' }
+$longFile=Join-Path $temporary ('ensaio/'+('x'*200)+'.class')
+[IO.File]::WriteAllText(('\\?\'+$longFile),'fixture de backup com caminho longo')
+$backupPaths+=@($longFile)
+Assert ($longFile.Length -gt 260) 'Fixture de backup realmente cobre caminho longo no Windows.'
+$before=Get-CleanupState $backups.Root
+$preview=@(Get-HarnessCleanupPaths $backups.Root -TemporaryBackups)
+Assert ($preview.Count -eq 4 -and @($backupPaths|Where-Object {$_ -notin $preview}).Count -eq 0) 'Preview de backups retorna somente as quatro folhas exatas, incluindo nomes humanos e caminho longo.'
+Assert ((Get-CleanupState $backups.Root) -ceq $before) 'Preview dos backups nao cria nem altera arquivos.'
+Assert (@(Get-HarnessCleanupPaths $backups.Root -All|Where-Object {$_.StartsWith($temporary+'\',[StringComparison]::OrdinalIgnoreCase)}).Count -eq 0) 'Limpeza de produtores nao inclui backups temporarios.'
+Invoke-HarnessCleanup $backups.Root -TemporaryBackups -ConfirmText cancelar 6>$null|Out-Null
+Assert ((Get-CleanupState $backups.Root) -ceq $before) 'Cancelar backups preserva todas as folhas e datas.'
+$link=Join-Path $temporary 'junction'; $null=New-Item -ItemType Junction -Path $link -Target $backups.Projects[0].Source
+try {
+    Reject-Cleanup $backups { Get-HarnessCleanupPaths $backups.Root -TemporaryBackups } 'junction|link' 'Preview de backup recusa junction sem percorrer a fonte.'
+    Reject-Cleanup $backups { Invoke-HarnessCleanup $backups.Root -TemporaryBackups -ConfirmText LIMPAR 6>$null } 'junction|link' 'Limpeza de backup recusa junction.'
 } finally { [IO.Directory]::Delete($link) }
-# Executar o menu real, apontado somente para a fixture; preview nao exclui.
-$null = New-Item -ItemType Directory -Path "$fixture/scripts" -Force
-foreach ($name in @('Harness.psm1','HarnessCleanup.psm1','limpar-execucoes.ps1')) { Copy-Item -LiteralPath (Join-Path $root "scripts/$name") -Destination "$fixture/scripts/$name" }
-$menuOutput = @('3') | & powershell.exe -NoProfile -File "$fixture/scripts/limpar-execucoes.ps1" -Preview 2>&1
-Assert ($LASTEXITCODE -eq 0 -and ($menuOutput -join "`n").Contains($temporary)) 'Menu 3 nao selecionou backups temporarios.'
-Invoke-HarnessCleanup $fixture -TemporaryBackups -ConfirmText 'LIMPAR' | Out-Null
-Assert (-not (Test-Path $temporary)) 'Backup temporario nao removido.'
-Assert (Test-Path $remaining) 'Limpeza de backups atingiu execucoes.'
-foreach ($file in @('config/harness.local.json','app/pom.xml','.harness/maven/settings.xml','.harness/workspace-backups/backup.json','.github/prompts/planejar-lotes.prompt.md')) {
-    $path = Join-Path $fixture $file
-    Assert ((Get-FileHash -LiteralPath $path).Hash -eq ($before | Where-Object Path -EQ $path).Hash) 'Limpeza de temporarios alterou arquivo protegido.'
+$before=Get-CleanupState $backups.Root
+Invoke-HarnessCleanup $backups.Root -TemporaryBackups -ConfirmText LIMPAR 6>$null|Out-Null
+Assert-CleanupSelectionRemoved $backups $before $backupPaths
+Assert (-not [IO.Directory]::Exists($temporary)) 'Depois das folhas, somente diretorios vazios devem ser retirados.'
+Assert (@(Get-HarnessCleanupPaths $backups.Root -TemporaryBackups).Count -eq 0) 'Repetir preview de backups removidos retorna vazio.'
+foreach ($mode in @('edit','new','time')) {
+    $changed=New-CleanupFixture
+    Write-CleanupFixture (Join-Path $changed.Root '.harness/backups-temporarios/ensaio/log.bin') 'backup observado'
+    Invoke-CleanupPromptMutation $changed $mode -TemporaryBackups
 }
-Assert (@(Get-HarnessCleanupPaths $fixture -TemporaryBackups).Count -eq 0) 'Preview de temporarios removidos deveria ficar vazio.'
-Write-Output 'PASS: backups centralizados, menu 3, cancelamento, junction, isolamento e preservacao de configuracao/cache/workspace.'
+$protectedBackup=New-CleanupFixture; $project=$protectedBackup.Projects[0]
+$configured=Join-Path $protectedBackup.Root '.harness/backups-temporarios/ensaio/mta-configurado'
+Write-CleanupFixture (Join-Path $configured 'index.html') 'origem ativa nao e copia descartavel'
+$config=Get-Content -LiteralPath $project.ConfigPath -Raw|ConvertFrom-Json
+$config.mta.diretorio=$configured; Write-CleanupFixture $project.ConfigPath ($config|ConvertTo-Json -Depth 10)
+Reject-Cleanup $protectedBackup { Invoke-HarnessCleanup $protectedBackup.Root -TemporaryBackups -ConfirmText LIMPAR 6>$null } 'origem|MTA|config|proteg|sobrep' 'MTA configurado dentro de backups tambem impede apagar a origem.'
+'PASS: backups temporarios isolados, nomes humanos, caminho longo, junction e concorrencia.'
 
-# Rodadas externas sao permanentes; somente indices e ponteiros locais sao limpos.
-$external = $fixture + '-external'
-$null = [IO.Directory]::CreateDirectory($external)
-$sentinel = Join-Path $external 'arquivo-do-desenvolvedor.txt'
-Set-Content -LiteralPath $sentinel 'preservar'
-foreach ($id in @('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa','bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb')) {
-    $index = Join-Path $fixture ('.harness/runs/external/' + $id)
-    $externalRun = Join-Path $external ('p__' + (Get-HarnessProjectKey 'external') + '/' + $id)
-    $location = @{Project='external'; Source=$source; RunId=$id; RunsPath=$external}
-    if ($id.StartsWith('b')) {
-        $location.RunRelativePath = 'external/260930-151210'
-        $externalRun = Join-Path $external $location.RunRelativePath
-        Write-HarnessJson (Join-Path $external 'external/project.json') @{Project='external'; Source=$source}
+# Troca tardia por junction depois da primeira retirada nao pode atingir original externo.
+$late=New-CleanupFixture; $backupRoot=Join-Path $late.Root '.harness/backups-temporarios'
+$first=Join-Path $backupRoot 'a/primeiro.bin'; $second=Join-Path $backupRoot 'b/segundo.bin'
+$swapped=Join-Path $backupRoot 'c'; $last=Join-Path $swapped 'original.bin'
+$outside=Join-Path $late.Root 'originais-externos'; $externalFile=Join-Path $outside 'original.bin'; $moved=Join-Path $late.Root 'pasta-deslocada'
+foreach ($path in @($first,$second,$last,$externalFile)) { Write-CleanupFixture $path 'mesmos bytes para provar que hash nao identifica junction' }
+[IO.File]::SetLastWriteTimeUtc($externalFile,[IO.File]::GetLastWriteTimeUtc($last))
+$externalBefore=Get-CleanupState $outside; $lastBytes=[IO.File]::ReadAllBytes($last)
+$module=Get-Module HarnessCleanup
+& $module {
+    param($Root,$First,$Second,$Swapped,$Moved,$Outside)
+    $script:cleanupNativeOriginal=${function:Get-CleanupNativePath}
+    $script:lateRoot=$Root; $script:lateFirst=$First; $script:lateSecond=$Second; $script:lateSwapped=$Swapped; $script:lateMoved=$Moved; $script:lateOutside=$Outside; $script:lateInjected=$false
+    function script:Get-CleanupNativePath {
+        param([string]$Path)
+        if (-not $script:lateInjected -and $Path -ieq $script:lateSecond -and -not [IO.File]::Exists($script:lateFirst)) {
+            foreach ($item in @($script:lateSwapped,$script:lateMoved,$script:lateOutside)) { if (-not [IO.Path]::GetFullPath($item).StartsWith($script:lateRoot+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Destino da fixture fora da area isolada.' } }
+            [IO.Directory]::Move($script:lateSwapped,$script:lateMoved)
+            $null=New-Item -ItemType Junction -Path $script:lateSwapped -Target $script:lateOutside
+            $script:lateInjected=$true
+        }
+        & $script:cleanupNativeOriginal $Path
     }
-    Write-HarnessJson (Join-Path $externalRun 'manifest.json') @{Project='external'; Source=$source; RunId=$id; IndexPath=$index}
-    Write-HarnessJson (Join-Path $externalRun 'output/resultado.json') @{preservar='MTA'}
-    Write-HarnessJson (Join-Path $index 'location.json') $location
-    Write-HarnessJson "$fixture/.harness/last-external.json" @{RunId=$id}
-    $externalBefore = @(Get-ChildItem -LiteralPath $external -Recurse -File | Get-FileHash)
-    $preview = @(Get-HarnessCleanupPaths $fixture -Source $source)
-    Assert ($preview -notcontains $externalRun -and $preview -contains $index -and $preview -notcontains $external) 'Preview deve incluir somente indice local, nunca rodada externa.'
-    Assert (@($preview | Where-Object { -not $_.StartsWith((Join-Path $fixture '.harness') + '\') }).Count -eq 0) 'Preview saiu de .harness.'
-    Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'cancelar' | Out-Null
-    Assert (Test-Path $externalRun) 'Cancelamento removeu rodada externa.'
-    $locationPath = Join-Path $index 'location.json'
-    $location.Source = $other
-    Write-HarnessJson $locationPath $location
-    Assert (@(Get-HarnessCleanupPaths $fixture -Source $source) -notcontains $index) 'Indice local de outro Source foi selecionado.'
-    $location.Source = $source
-    Write-HarnessJson $locationPath $location
-    if ($location.ContainsKey('RunRelativePath')) {
-        $location.RunRelativePath = '../external/260930-151210'
-        Write-HarnessJson $locationPath $location
-        Assert (@(Get-HarnessCleanupPaths $fixture -Source $source) -contains $index) 'Limpeza local tentou resolver RunRelativePath externo.'
-    }
-    $link = Join-Path $externalRun 'junction'
-    $null = New-Item -ItemType Junction -Path $link -Target $source
-    try {
-        if ($id.StartsWith('a')) { Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null }
-        else { Invoke-HarnessCleanup $fixture -All -ConfirmText 'LIMPAR' | Out-Null }
-        Assert (Test-Path -LiteralPath $link) 'Limpeza alterou link dentro da rodada externa.'
-    } finally { [IO.Directory]::Delete($link) }
-    Assert ((Test-Path $externalRun) -and -not (Test-Path $index)) 'Limpeza deve remover indice e preservar rodada externa.'
-    Assert (-not (Test-Path "$fixture/.harness/last-external.json")) 'Ponteiro local externo nao removido.'
-    $externalAfter = @(Get-ChildItem -LiteralPath $external -Recurse -File | Get-FileHash)
-    Assert ($externalAfter.Count -eq $externalBefore.Count) 'Limpeza alterou quantidade de arquivos externos.'
-    foreach ($file in $externalBefore) { Assert ((Get-FileHash -LiteralPath $file.Path).Hash -eq $file.Hash) 'Limpeza alterou conteudo MTA externo.' }
-    Assert (Test-Path $sentinel) 'Limpeza atingiu arquivo externo nao registrado.'
-    if ($id.StartsWith('b')) { Assert (Test-Path (Join-Path $external 'external/project.json')) 'Limpeza removeu identidade do projeto.' }
+} $late.Root $first $second $swapped $moved $outside
+$failed=$false
+try { Invoke-HarnessCleanup $late.Root -TemporaryBackups -ConfirmText LIMPAR 6>$null|Out-Null }
+catch { Assert ($_.Exception.Message -match 'junction|link') $_.Exception.Message; $failed=$true }
+finally {
+    & $module { ${function:Get-CleanupNativePath}=$script:cleanupNativeOriginal }
+    if (Test-Path -LiteralPath $swapped) { if ((Get-Item -LiteralPath $swapped).Attributes -band [IO.FileAttributes]::ReparsePoint) { [IO.Directory]::Delete($swapped) } }
+    if ([IO.Directory]::Exists($moved)) { [IO.Directory]::Move($moved,$swapped) }
 }
-$missingIndex = Join-Path $fixture '.harness/runs/missing/cccccccccccccccccccccccccccccccc'
-Write-HarnessJson "$missingIndex/location.json" @{Project='missing'; Source=$source; RunId='cccccccccccccccccccccccccccccccc'; RunsPath='Z:/mta-indisponivel'}
-Invoke-HarnessCleanup $fixture -Source $source -ConfirmText 'LIMPAR' | Out-Null
-Assert (-not (Test-Path $missingIndex)) 'Limpeza local exigiu armazenamento externo disponivel.'
-Write-Output 'PASS: indices locais por projeto/todos; MTA externo intacto e independente da limpeza.'
+Assert (& $module { $script:lateInjected }) 'Fixture deve trocar a terceira subpasta somente depois da primeira retirada.'
+Assert $failed 'Junction inserida durante o loop deve interromper a limpeza restante.'
+Assert ((Get-CleanupState $outside) -ceq $externalBefore) 'Original externo com mesmos bytes e data jamais pode ser apagado pela junction tardia.'
+Assert ([Convert]::ToBase64String([IO.File]::ReadAllBytes($last)) -ceq [Convert]::ToBase64String($lastBytes)) 'Copia original deslocada pela fixture permanece intacta.'
+'PASS: junction inserida apos primeira retirada preserva original externo.'
+
+# O menu real conserva as tres operacoes e preview nao escreve na fixture.
+$menu=New-CleanupFixture; $scripts=Join-Path $menu.Root 'scripts'; $null=[IO.Directory]::CreateDirectory($scripts)
+foreach ($file in Get-ChildItem -LiteralPath (Join-Path $root 'scripts') -File|Where-Object Name -Match '^Harness.*\.(ps1|psm1)$') { Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $scripts $file.Name) }
+Copy-Item -LiteralPath (Join-Path $root 'scripts/limpar-execucoes.ps1') -Destination (Join-Path $scripts 'limpar-execucoes.ps1')
+$menuBackup=Join-Path $menu.Root '.harness/backups-temporarios/ensaio/log.bin'; Write-CleanupFixture $menuBackup 'backup de menu'
+$before=Get-CleanupState $menu.Root
+$menuOutput=@('2')|& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $scripts 'limpar-execucoes.ps1') -Preview 2>&1
+$menuText=$menuOutput -join [Environment]::NewLine
+Assert ($LASTEXITCODE -eq 0) ('Menu deve executar somente a previa: '+$menuText)
+Assert ($menuText -match '1\.[^\r\n]*tempor' -and $menuText -match '2\.[^\r\n]*tempor' -and $menuText -match '3\.[^\r\n]*backups') ('Menu deve conservar 1/2/3 com texto de temporarios correntes e backups: '+$menuText)
+Assert ($menuText.Contains((Join-Path $menu.Projects[0].TemporaryPath 'build/tentativa/log.bin'))) 'Opcao 2 em preview deve selecionar folha corrente.'
+$menuOutput=@('3')|& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $scripts 'limpar-execucoes.ps1') -Preview 2>&1
+Assert ($LASTEXITCODE -eq 0 -and ($menuOutput -join [Environment]::NewLine).Contains($menuBackup)) 'Opcao 3 em preview seleciona somente backup temporario.'
+Assert ((Get-CleanupState $menu.Root) -ceq $before) 'Menus em preview preservam bytes e datas de todos os arquivos.'
+'PASS: menus correntes 1/2/3 e preview sem escrita.'
