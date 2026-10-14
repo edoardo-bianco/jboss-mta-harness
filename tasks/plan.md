@@ -518,6 +518,29 @@ Antes da pausa, Test-ConversionBuild e Test-ConversionCli passaram em PowerShell
 5.1 apos a extracao de datas e a reinstalacao da recusa de Sonar. Diff sem erros
 de espacos. Suite Sonar ampliada continua pendente conforme os itens acima.
 
+### Retomada de 14/10/2026
+
+Pedido humano: "Retomar agora S21-S28". Conferidos raiz, branch
+`harness/planejar-simplificacao-projetos`, HEAD `b98a9d3` e checkout limpo.
+Retomar pelos dois achados Sonar e testes ampliados do checkpoint acima;
+depois seguir multiprojeto, cenarios, Validar e S22-S28 em fatias verificadas.
+Ensaios usam fixtures; nenhuma conversao/limpeza de dados reais, troca de
+extensao Java, integracao ou push integra esta retomada. Aceite humano separado.
+
+Sonar S21 concluido nesta fatia: baseline rejeitado na etapa BASELINE nao vira
+base adotada; parecer conserva Source, AnalysisId, servidor/chave/branch e fase/
+datas da coleta original, mantendo revisao local pendente. Familia SONAR liberada
+na API interna apos teste e revisao; CLI permanece somente Previa ate concluir S21.
+
+RED dos dois achados reproduzido antes das corretivas. Test-ConversionSonar passou
+em Windows PowerShell 5.1, com baseline rejeitado/adotado, coleta parcial isolada,
+origens distintas, empates/selecoes explicitas, Source relocalizado, parecer de
+outra coleta, reaplicacao e nova decisao concorrente. Test-ConversionBuild,
+Test-ConversionCli e Test-SonarReview tambem passaram. Revisao independente sem
+novos achados concretos; `git diff --check` aprovado. Fixtures sinteticas, sem
+scanner/servidor Sonar real. Multiprojeto, cenarios e Validar continuam em S21;
+S22-S28 e aceite integrado pendentes.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

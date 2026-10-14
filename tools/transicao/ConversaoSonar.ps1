@@ -11,7 +11,9 @@ function Convert-ConversionSonarResult($State,$Record,[string]$Relative,[bool]$P
     $current.CriteriaPath=if ($Published) {Join-Path $State.Project.Folder 'atual/diagnosticos/sonar/criteria.json'} else {$null}
     $current.BaselineResultPath=$null; $current['BaselineAnalysisId']=$null
     $baselinePath=Get-LegacyValue $data 'BaselineResultPath'
-    if ($baselinePath) {
+    # O caminho e preenchido antes da validacao da base. Somente RunId
+    # declarado comprova que a coleta legada chegou a adota-la.
+    if ($baselinePath -and (Get-LegacyValue $data 'BaselineRunId')) {
         $path=Resolve-ProjectPath $baselinePath $State.Project.Root
         $baseline=@($State.Inputs.Records | Where-Object { $_.Kind -eq 'SONAR' -and $_.Path -ieq $path })
         if ($baseline.Count -eq 1) {
@@ -94,8 +96,14 @@ function Add-ConversionSonar($State,[string]$SelectedResult,[string]$SelectedAtt
     $decisions=@(foreach ($candidate in $candidates) { Read-ConversionSonarDecision $State $candidate.Record })
     if ($decisions.Count) {
         $decision=Select-ConversionNewest $decisions 'a decisao Sonar a preservar'
-        $entry=$decision.Entry
-        $State.Files['atual/diagnosticos/sonar-decisao.json']=@{RecordedAtUtc=$entry.RecordedAtUtc;Decision=$entry.Decision;Note=$entry.Note;ReviewWhen=$entry.ReviewWhen;Assessment=$null;Scope='Decisao declarada no legado, preservada para revisao local; nao concede GO ou aceite.'}|ConvertTo-Json -Depth 10
+        $entry=$decision.Entry; $origin=$decision.Record.Data
+        # A proveniencia original permite distinguir o parecer da coleta atual.
+        # Nao equivale ao assessment corrente completo: revisao local e obrigatoria.
+        $assessment=[ordered]@{}
+        foreach ($field in @('Source','ProjectKey','ServerUrl','BranchName','AnalysisId','Phase','StartedAtUtc','FinishedAtUtc')) {
+            $assessment[$field]=Get-LegacyValue $origin $field
+        }
+        $State.Files['atual/diagnosticos/sonar-decisao.json']=@{RecordedAtUtc=$entry.RecordedAtUtc;Decision=$entry.Decision;Note=$entry.Note;ReviewWhen=$entry.ReviewWhen;Assessment=$assessment;Scope='Decisao declarada no legado, preservada para revisao local; nao concede GO ou aceite.'}|ConvertTo-Json -Depth 10
         $State.Diagnostics.Add('Decisao humana Sonar preservada; revisar o parecer no conjunto corrente.')
     }
     if (-not $chosen) { $State.Diagnostics.Add('Nenhuma coleta Sonar completa; ultima tentativa preservada, diagnostico indisponivel.'); return }

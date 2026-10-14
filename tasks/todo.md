@@ -21,14 +21,16 @@ Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10, 12/10
 [Ponto atual e verificacoes](plan.md#retomada-de-13102026).
 S11-S20 implementados e revisados. Proxima etapa: S21;
 as oito etapas S21-S28 e o aceite integrado permanecem pendentes.
-S21 parcial: registro/plano, anexos humanos (inclusive priorizacao sem plano), MTA, build e priorizacao uniprojeto
+S21 parcial: registro/plano, anexos humanos (inclusive priorizacao sem plano), MTA, build, Sonar e priorizacao uniprojeto
 implementados e verificados em fixtures; continuar pelos complementos da
 [retomada](plan.md#retomada-s21-s28---13102026), mantendo a CLI somente Previa.
 A pausa humana de 12/10 permanece como [registro historico](plan.md#pausa-humana-de-12102026).
 
-**Pausa humana atual:** [checkpoint S21 de 13/10](plan.md#pausa-humana-s21---13102026).
-Sonar salvo em andamento, com aplicacao bloqueada: fechar os dois P2 e a suite
-ampliada antes de habilitar a familia. Retomar somente quando solicitado.
+**Retomada autorizada em 14/10:** [registro](plan.md#retomada-de-14102026), a partir do
+[checkpoint S21 de 13/10](plan.md#pausa-humana-s21---13102026).
+Sonar: dois P2 fechados, suite ampliada PS5.1 aprovada e revisao independente sem
+novos achados; familia habilitada na API interna. CLI continua somente Previa.
+Continuar multiprojeto, cenarios e Validar da S21; S22-S28 pendentes.
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
