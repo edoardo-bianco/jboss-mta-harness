@@ -57,6 +57,10 @@ function Get-HarnessSonarCriteria {
         $pending+='Comparacao por chave pendente: informe um ANTES com lista completa de issues.'
     }
     $status=if ($failures.Count) { 'FAIL' } elseif ($pending.Count) { 'UNVERIFIED' } elseif ($warnings.Count) { 'WARN' } else { 'PASS' }
+    if ($Baseline -and $Baseline.PSObject.Properties['RemoteComparison'] -and $Baseline.RemoteComparison) {
+        $warnings+='Comparacao com resultado do servidor: codigo local e configuracao da analise nao conferidos; revisar a aplicabilidade.'
+        if ($status -ceq 'PASS') { $status='WARN' }
+    }
     [pscustomobject]@{
         Policy='open-severe-new-zero_coverage80-goal85_duplication5-v2'
         Status=$status; Coverage=$coverage; MinimumCoverage=80; CoverageWarningBelow=85
@@ -69,6 +73,26 @@ function Get-HarnessSonarCriteria {
         BaselineResultPath=$(if ($Baseline) { $Baseline.ResultPath } else { $null })
         ComparisonLimit='Novas no conjunto aberto por chave podem incluir reaberturas ou mudancas de regras; nao comprovam causa no codigo. New Code do servidor e separado. Perfis, exclusoes e conteudo precisam de conferencia. ANTES sem baseline inicia a referencia; DEPOIS sem lista comparavel fica pendente.'
     }
+}
+
+function Get-HarnessSonarOrigin {
+    param($Record)
+    $present=if ($Record -is [Collections.IDictionary]) { $Record.Contains('Origin') } else { $null -ne $Record.PSObject.Properties['Origin'] }
+    if (-not $present) { return 'SCAN' }
+    if ($Record.Origin -cnotin @('SCAN','SERVER')) { throw 'Origem Sonar desconhecida.' }
+    $Record.Origin
+}
+
+function Assert-HarnessSonarBaselineChronology {
+    param($Baseline, [Collections.IDictionary]$Current)
+    if (-not $Baseline -or -not $Baseline.RemoteComparison) { return }
+    if ($Baseline.AnalysisId -ceq $Current.AnalysisId) { throw 'ANTES e DEPOIS identificam a mesma analise.' }
+    if (-not $Current.AnalysisDateUtc) { throw 'Comparacao com download exige data real da analise atual.' }
+    $previousDate=$Baseline.AnalysisDateUtc
+    # Um scan antigo sem data remota terminou depois de sua analise. Usar esse
+    # limite conservador; nunca apresentar a data do download como data de analise.
+    if (-not $previousDate -and $Baseline.Origin -ceq 'SCAN') { $previousDate=$Baseline.FinishedAtUtc }
+    if (-not $previousDate -or [DateTimeOffset]::Parse($previousDate) -ge [DateTimeOffset]::Parse($Current.AnalysisDateUtc)) { throw 'Baseline nao comprova analise anterior ao resultado atual.' }
 }
 
 function Read-HarnessSonarBaseline {
@@ -88,12 +112,18 @@ function Read-HarnessSonarBaseline {
         foreach ($name in @('resultado.json','measures.json','issues.json')) { $texts[$name]=[IO.File]::ReadAllText((Join-Path $directory $name)) }
     }
     $record=ConvertFrom-Json $texts['resultado.json']
-    foreach ($field in @('Project','Source','ServerUrl','ProjectKey','BranchName','ScannerVersion','SettingsPath','ApplicationJavaHome')) {
+    $origin=Get-HarnessSonarOrigin $record
+    $remoteComparison=$origin -ceq 'SERVER' -or (Get-HarnessSonarOrigin $Current) -ceq 'SERVER'
+    $fields=@('Project','Source','ServerUrl','ProjectKey','BranchName')
+    if (-not $remoteComparison) { $fields+=@('ScannerVersion','SettingsPath','ApplicationJavaHome') }
+    foreach ($field in $fields) {
         if (-not $record.PSObject.Properties[$field] -or [string]$record.$field -cne [string]$Current[$field]) { throw "Baseline incompativel no campo $field." }
     }
-    if (($record.Profiles | ConvertTo-Json -Compress) -cne ($Current.Profiles | ConvertTo-Json -Compress)) { throw 'Baseline com perfis Maven diferentes.' }
-    if ($record.Phase -cne 'ANTES' -or $record.AnalysisStatus -cne 'SUCCESS' -or $record.MetricsStatus -cne 'MATCHED' -or $record.InputsStatus -cne 'STABLE' -or $record.ScannerExitCode -ne 0) { throw 'Baseline deve ser uma coleta ANTES concluida e estavel.' }
-    if (-not $record.AnalysisId -or [DateTimeOffset]::Parse($record.FinishedAtUtc) -ge [DateTimeOffset]::Parse($Current.StartedAtUtc)) { throw 'Baseline deve identificar uma analise anterior.' }
+    if (-not $remoteComparison -and ($record.Profiles | ConvertTo-Json -Compress) -cne ($Current.Profiles | ConvertTo-Json -Compress)) { throw 'Baseline com perfis Maven diferentes.' }
+    if ($record.Phase -cne 'ANTES' -or $record.AnalysisStatus -cne 'SUCCESS' -or $record.MetricsStatus -cne 'MATCHED') { throw 'Baseline deve ser uma coleta ANTES concluida.' }
+    if ($origin -ceq 'SCAN' -and ($record.InputsStatus -cne 'STABLE' -or $record.ScannerExitCode -ne 0)) { throw 'Baseline de scan deve ter entradas estaveis e scanner concluido.' }
+    if ($origin -ceq 'SERVER' -and (-not $record.PSObject.Properties['AnalysisDateUtc'] -or -not $record.AnalysisDateUtc -or $record.InputsStatus -cne 'UNVERIFIED' -or $null -ne $record.ScannerExitCode)) { throw 'Baseline remoto sem proveniencia valida.' }
+    if (-not $record.AnalysisId -or (-not $remoteComparison -and [DateTimeOffset]::Parse($record.FinishedAtUtc) -ge [DateTimeOffset]::Parse($Current.StartedAtUtc))) { throw 'Baseline deve identificar uma analise anterior.' }
     $measures=ConvertFrom-Json $texts['measures.json']
     if ($measures.AnalysisId -cne $record.AnalysisId -or $measures.ProjectKey -cne $record.ProjectKey -or [string]$measures.BranchName -cne [string]$record.BranchName) { throw 'Metricas do baseline nao correspondem ao resultado.' }
     $total=Get-SonarMetricNumber $measures.Measures 'violations'
@@ -114,7 +144,9 @@ function Read-HarnessSonarBaseline {
     foreach ($name in $texts.Keys) {
         if ([IO.File]::ReadAllText((Join-Path $directory $name)) -cne $texts[$name]) { throw 'Baseline alterado durante leitura; repita a operacao.' }
     }
-    [pscustomobject]@{AnalysisId=$record.AnalysisId; ResultPath=$path; TotalIssues=$total; ServerVersion=$record.ServerVersion; Issues=$issues}
+    [pscustomobject]@{AnalysisId=$record.AnalysisId; ResultPath=$path; TotalIssues=$total; ServerVersion=$record.ServerVersion; Issues=$issues
+        Origin=$origin;RemoteComparison=$remoteComparison;FinishedAtUtc=$record.FinishedAtUtc
+        AnalysisDateUtc=$(if ($record.PSObject.Properties['AnalysisDateUtc']) { $record.AnalysisDateUtc } else { $null })}
 }
 
-Export-ModuleMember -Function Get-HarnessSonarCriteria, Read-HarnessSonarBaseline
+Export-ModuleMember -Function Get-HarnessSonarCriteria, Read-HarnessSonarBaseline, Get-HarnessSonarOrigin, Assert-HarnessSonarBaselineChronology

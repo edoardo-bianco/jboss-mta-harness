@@ -47,6 +47,18 @@ Assert ($saved.Decision -eq 'CorrigirAgora' -and -not (Test-Path (Join-Path $run
 Assert ((Get-FileHash $path).Hash -eq $hash -and $saved.Result.QualityGateStatus -eq 'ERROR') 'Decisao alterou evidencia/gate.'
 $decisionText=Get-Content -Raw $saved.DecisionPath
 Assert ($decisionText -notmatch 'Previous|Sha256|RunId|Sequence') 'Parecer restaurou recibos.'
+$legacyDecision=ConvertFrom-Json $decisionText
+foreach ($field in @('Origin','AnalysisDateUtc','AnalysisRevision','LocalSourceStatus','InputsStatus')) { $legacyDecision.Assessment.PSObject.Properties.Remove($field) }
+Write-HarnessJson $saved.DecisionPath $legacyDecision
+$legacyText=Get-Content -Raw $saved.DecisionPath
+Assert (-not (Get-HarnessSonarReview $fixture $path).NeedsReview) 'Upgrade de formato nao deve invalidar parecer sobre scan antigo intacto.'
+Assert ((Get-Content -Raw $saved.DecisionPath) -ceq $legacyText) 'Consulta nao deve regravar parecer antigo.'
+$remoteResult=Get-Content -Raw $path | ConvertFrom-Json
+$remoteResult | Add-Member Origin SERVER
+Write-HarnessJson $path $remoteResult
+Assert ((Get-HarnessSonarReview $fixture $path).NeedsReview) 'Origem SERVER nao pode herdar parecer antigo de scan.'
+Write-HarnessJson $path $record
+[IO.File]::WriteAllText($saved.DecisionPath,$decisionText)
 foreach ($field in @('Phase','CriteriaStatus')) {
     $altered=Get-Content -Raw $path | ConvertFrom-Json
     $altered.$field=if ($field -eq 'Phase') { 'DEPOIS' } else { 'FAIL' }

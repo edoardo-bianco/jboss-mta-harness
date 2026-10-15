@@ -69,8 +69,7 @@ function Invoke-SonarTool {
 
 function Get-HarnessSonarSettings {
     param($Context)
-    if (-not $Context.Active) { throw 'Escolha o projeto Maven.' }
-    if (-not $Context.Config.PSObject.Properties['sonar']) { throw 'Adicione o bloco sonar do harness.example.json ao JSON local.' }
+    $connection=Get-HarnessSonarConnection $Context
     $settings = $Context.Config.sonar
     $debug=$false
     if ($settings -and $settings.PSObject.Properties['debug']) {
@@ -80,13 +79,7 @@ function Get-HarnessSonarSettings {
     foreach ($field in @('serverUrl','scannerJdkHome','scannerVersion','ceTimeoutSeconds','profiles')) {
         if (-not $settings -or -not $settings.PSObject.Properties[$field]) { throw "Preencha sonar.$field conforme harness.example.json." }
     }
-    if (@($settings.PSObject.Properties.Name | Where-Object { $_ -match '(token|password|login|credential)' }).Count) { throw 'Remova credenciais do JSON. O token sera solicitado com entrada oculta.' }
-    $url = Get-SonarServerBase $settings.serverUrl
-    $authScheme = 'Bearer'
-    if ($settings.PSObject.Properties['apiAuthScheme']) {
-        if ($settings.apiAuthScheme -isnot [string] -or $settings.apiAuthScheme -cnotin @('Bearer','Basic')) { throw 'sonar.apiAuthScheme deve ser Bearer ou Basic.' }
-        $authScheme = $settings.apiAuthScheme
-    }
+    $url=$connection.ServerUrl; $authScheme=$connection.AuthScheme
     if ($settings.scannerVersion -cnotmatch '^5\.\d+\.\d+\.\d+$') { throw 'Use uma versao fixa 5.x do sonar-maven-plugin, compativel com seu servidor.' }
     if ($settings.ceTimeoutSeconds -isnot [int] -or $settings.ceTimeoutSeconds -lt 1 -or $settings.ceTimeoutSeconds -gt 3600) { throw 'ceTimeoutSeconds deve ser inteiro entre 1 e 3600.' }
     if ($settings.profiles -isnot [Array]) { throw 'sonar.profiles deve ser uma lista de perfis Maven.' }
@@ -107,7 +100,7 @@ function Get-HarnessSonarSettings {
 
 function Assert-SonarCurrentAnalysis {
     param([string]$ServerUrl, [string]$ProjectKey, [string]$BranchName, [string]$AnalysisId,
-        [ValidateSet('Bearer','Basic')][string]$AuthScheme = 'Bearer')
+        [ValidateSet('Bearer','Basic')][string]$AuthScheme = 'Bearer', [switch]$PassThru)
     $query = @{project=$ProjectKey; p='1'; ps='1'}
     $queueQuery = @{component=$ProjectKey}
     if ($BranchName) { $query.branch=$BranchName; $queueQuery.branch=$BranchName }
@@ -115,6 +108,7 @@ function Assert-SonarCurrentAnalysis {
     if (@($reply.analyses).Count -ne 1 -or $reply.analyses[0].key -cne $AnalysisId) { throw 'Analise atual diferente; metricas nao vinculadas.' }
     $queue = Invoke-SonarApiGet $ServerUrl 'api/ce/component' $queueQuery -AuthScheme $AuthScheme
     if (@($queue.queue).Count -gt 0 -or ($queue.PSObject.Properties['current'] -and $queue.current -and $queue.current.status -in @('PENDING','IN_PROGRESS'))) { throw 'Outra analise em processamento; metricas nao vinculadas.' }
+    if ($PassThru) { $reply.analyses[0] }
 }
 
 function Get-HarnessSonarIssues {
@@ -165,6 +159,7 @@ function Get-HarnessSonarIssues {
 }
 
 . (Join-Path $PSScriptRoot 'HarnessSonarDiagnostic.ps1')
+. (Join-Path $PSScriptRoot 'HarnessSonarDownload.ps1')
 
 function Invoke-HarnessSonar {
     param($Context, [string]$ProjectKey, [string]$BranchName,
@@ -179,6 +174,7 @@ function Invoke-HarnessSonar {
     try {
     $previous=@{}; $pushed=$false; $run=$null; $scannerLog=$null; $plain=$null; $criteria=$null; $gate=$null
     $result = [ordered]@{
+        Origin='SCAN'; AnalysisDateUtc=$null; AnalysisRevision=$null; LocalSourceStatus='NOT_CHECKED'
         Status='FAILED'; ScannerExitCode=$null; AnalysisStatus='UNVERIFIED'; QualityGateStatus='UNVERIFIED'; MetricsStatus='UNVERIFIED'
         TechnicalStatus='UNVERIFIED'; IssuesStatus='UNVERIFIED'; DiagnosticPublished=$false
         LogLevel=$(if ($settings.Debug) { 'DEBUG' } else { 'INFO' }); LogPath=$null
@@ -261,6 +257,8 @@ function Invoke-HarnessSonar {
         $after=@(Get-HarnessFiles $Context.Active.path)
         if (($sourceFiles | ConvertTo-Json -Depth 4 -Compress) -cne ($after | ConvertTo-Json -Depth 4 -Compress)) { throw 'Entradas mudaram durante o scan; coleta nao e baseline estavel.' }
         $result.InputsStatus='STABLE'
+        $result.LocalSourceStatus='STABLE_DURING_SCAN'
+        Assert-HarnessSonarBaselineChronology $baseline $result
         $result.Stage='CRITERIA'
         $criteria=Get-HarnessSonarCriteria -Measures $allMeasures -Baseline $baseline -IssueSnapshot $issueSnapshot -Phase $Phase
         $result.CriteriaStatus=$criteria.Status; $result.BaselineComparison=$criteria.BaselineComparison
@@ -288,4 +286,4 @@ function Invoke-HarnessSonar {
     } finally { $lock.ReleaseMutex(); $lock.Dispose() }
 }
 
-Export-ModuleMember -Function Get-HarnessSonarSettings, Invoke-HarnessSonar
+Export-ModuleMember -Function Get-HarnessSonarSettings, Get-HarnessSonarConnection, Invoke-HarnessSonar, Receive-HarnessSonar

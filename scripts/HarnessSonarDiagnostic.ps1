@@ -15,7 +15,12 @@ function Read-HarnessSonarDiagnostic {
     }
     $gate=$gateReply
     $result.Stage='METRICS'
-    Assert-SonarCurrentAnalysis $settings.ServerUrl $ProjectKey $BranchName $result.AnalysisId -AuthScheme $settings.AuthScheme
+    $current=Assert-SonarCurrentAnalysis $settings.ServerUrl $ProjectKey $BranchName $result.AnalysisId -AuthScheme $settings.AuthScheme -PassThru
+    if (Get-SonarApiField $current 'date') {
+        $metadata=ConvertFrom-SonarAnalysis $current
+        if ($result.AnalysisDateUtc -and ($result.AnalysisDateUtc -cne $metadata.DateUtc -or $result.AnalysisRevision -cne $metadata.Revision)) { throw 'Proveniencia da analise mudou durante a coleta.' }
+        $result.AnalysisDateUtc=$metadata.DateUtc; $result.AnalysisRevision=$metadata.Revision
+    }
     $metrics=@('ncloc','coverage','duplicated_lines_density','violations','blocker_violations','critical_violations','bugs','vulnerabilities','code_smells','new_violations','new_coverage','new_duplicated_lines_density')
     $query=@{component=$ProjectKey; metricKeys=($metrics -join ',')}
     if ($BranchName) { $query.branch=$BranchName }
@@ -56,10 +61,18 @@ function Publish-HarnessSonarDiagnostic {
     $result.TechnicalStatus=if ($result.QualityGateStatus -ceq 'ERROR' -or $result.CriteriaStatus -ceq 'FAIL') { 'NON_COMPLIANT' }
         elseif ($result.Status -ceq 'SUCCEEDED') { 'COMPLIANT' } else { 'UNVERIFIED' }
     if ($result.ResultPath) {
-        $result.DiagnosticPublished=$result.Stage -ceq 'COMPLETE' -and $result.IssuesStatus -ceq 'COMPLETE' -and $result.InputsStatus -ceq 'STABLE'
+        $origin=Get-HarnessSonarOrigin $result
+        $inputsReady=$result.InputsStatus -ceq 'STABLE' -or ($origin -ceq 'SERVER' -and $result.AnalysisStatus -ceq 'SUCCESS' -and $result.MetricsStatus -ceq 'MATCHED' -and $result.AnalysisDateUtc)
+        $result.DiagnosticPublished=$result.Stage -ceq 'COMPLETE' -and $result.IssuesStatus -ceq 'COMPLETE' -and $inputsReady
         Write-SonarJson (Join-Path $run 'resultado.json') $result
         $lines=@('# Coleta SonarQube', '', "Projeto: $($result.ProjectLabel)", "Estado declarado pelo operador: $($result.Phase)", "Inicio: $(Format-HarnessDate $result.StartedAtUtc)", "Servidor: $($result.ServerUrl)", "Chave: $($result.ProjectKey)", "AnalysisId: $($result.AnalysisId)", "Resultado da operacao: $($result.Status)", "Processamento: $($result.AnalysisStatus)", "Quality Gate do servidor: $($result.QualityGateStatus)", "Criterios do harness: $($result.CriteriaStatus)", "Metricas: $($result.MetricsStatus)", "[Dashboard]($($result.DashboardUrl))", '')
         $lines += @("Autenticacao da API: $($result.ApiAuthScheme)", "Autenticacao do scanner: $($result.ScannerAuthScheme)", '')
+        $lines+=@("Origem da coleta: $origin", "Data da analise no servidor: $($result.AnalysisDateUtc)")
+        if ($result.AnalysisRevision) {
+            $revision=([string]$result.AnalysisRevision).Replace('&','&amp;').Replace('<','&lt;').Replace('>','&gt;').Replace('[','&#91;').Replace(']','&#93;')
+            $lines+='Revisao SCM informada pelo servidor: '+$revision
+        }
+        if ($origin -ceq 'SERVER') { $lines+=@('Download da ultima analise concluida; codigo local nao conferido. Source identifica somente o projeto associado.', 'Scanner/JDK/configuracao da analise desconhecidos. Criterios e gate descrevem o conteudo analisado no servidor.', '') }
         $lines+=@("Resultado tecnico: $($result.TechnicalStatus)", "Issues: $($result.IssuesStatus)", "Log: $($result.LogLevel)", 'Decisao humana corrente: [parecer](../sonar-decisao.json), quando registrado. Gate e aceite sao independentes.', '')
         if ($gate) {
             $lines+=@('## Condicoes do Quality Gate corporativo', '', '| Metrica | Comparador | Limite | Valor | Estado |', '| --- | --- | --- | --- | --- |')

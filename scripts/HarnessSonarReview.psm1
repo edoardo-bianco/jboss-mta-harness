@@ -31,6 +31,11 @@ function Get-HarnessSonarAssessment {
     # declarada na coleta, sem eleger outra referencia por recencia.
     $evaluation=Get-HarnessSonarCriteria -Measures $measures.Measures -IssueSnapshot $issues.Snapshot
     $assessment=[ordered]@{
+        Origin=(Get-HarnessSonarOrigin $result)
+        AnalysisDateUtc=$(if ($result.PSObject.Properties['AnalysisDateUtc']) { $result.AnalysisDateUtc } else { $null })
+        AnalysisRevision=$(if ($result.PSObject.Properties['AnalysisRevision']) { $result.AnalysisRevision } else { $null })
+        LocalSourceStatus=$(if ($result.PSObject.Properties['LocalSourceStatus']) { $result.LocalSourceStatus } else { 'NOT_CHECKED' })
+        InputsStatus=$(if ($result.PSObject.Properties['InputsStatus']) { $result.InputsStatus } else { 'UNVERIFIED' })
         Source=$result.Source;ProjectKey=$result.ProjectKey;ServerUrl=$result.ServerUrl;BranchName=$result.BranchName;AnalysisId=$result.AnalysisId
         Phase=$result.Phase;DeclaredStatus=$result.Status;DeclaredCriteriaStatus=$result.CriteriaStatus;CollectedCriteriaStatus=$criteria.Evaluation.Status
         QualityGate=$gate.Result;Policy=$evaluation.Policy;LocalCriteriaStatus=$evaluation.Status
@@ -66,7 +71,16 @@ function Get-HarnessSonarReview {
         $current=ConvertFrom-Json $documents[$decisionPath]
         if ($current.Decision -cnotin @('CorrigirAgora','RegistrarParaDepois','Interromper') -or
             ($current.Decision -ceq 'RegistrarParaDepois' -and ([string]::IsNullOrWhiteSpace($current.Note) -or [string]::IsNullOrWhiteSpace($current.ReviewWhen)))) { throw 'Decisao Sonar invalida; preserve o texto e corrija motivo/gatilho.' }
-        $needsReview=(ConvertTo-Json -InputObject $current.Assessment -Depth 20 -Compress) -cne (ConvertTo-Json -InputObject $assessment -Depth 20 -Compress)
+        $recorded=$current.Assessment
+        if (-not $result.PSObject.Properties['Origin'] -and -not $recorded.PSObject.Properties['Origin']) {
+            # Pareceres anteriores ao download nao registravam proveniencia.
+            # Normalizar somente o scan antigo, em memoria; SERVER exige revisao.
+            $compatible=[ordered]@{}
+            foreach ($field in @('Origin','AnalysisDateUtc','AnalysisRevision','LocalSourceStatus','InputsStatus')) { $compatible[$field]=$assessment[$field] }
+            foreach ($property in $recorded.PSObject.Properties) { $compatible[$property.Name]=$property.Value }
+            $recorded=$compatible
+        }
+        $needsReview=(ConvertTo-Json -InputObject $recorded -Depth 20 -Compress) -cne (ConvertTo-Json -InputObject $assessment -Depth 20 -Compress)
     }
     if ($result.Source -ine $project.Source -or $result.QualityGateStatus -cne $assessment.QualityGate.status) { $needsReview=$true }
     $operation=$null
@@ -104,6 +118,8 @@ function Show-HarnessSonarReview {
     param([string]$Root, [string]$ResultPath)
     $state=Get-HarnessSonarReview $Root $ResultPath
     Write-Host "Projeto: $($state.Result.ProjectKey) | Source: $($state.Result.Source)"
+    Write-Host "Origem: $($state.Assessment.Origin) | Data da analise: $($state.Assessment.AnalysisDateUtc) | Fonte local: $($state.Assessment.LocalSourceStatus)"
+    if ($state.Assessment.Origin -ceq 'SERVER') { Write-Host 'Download do servidor; codigo local e configuracao da analise nao conferidos.' }
     Write-Host "Diagnostico: $($state.Result.Status) | Gate corporativo: $($state.Result.QualityGateStatus) | Criterios na coleta: $($state.Result.CriteriaStatus)"
     if ($state.Operation -and $state.Operation.Status -ne 'SUCCEEDED') { Write-Warning "Ultima operacao Sonar: $($state.Operation.Status). $($state.Operation.Error). Exibindo o ultimo diagnostico utilizavel." }
     if ($state.Summary) { Write-Host $state.Summary }
