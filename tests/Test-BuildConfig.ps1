@@ -7,6 +7,7 @@ $area = Join-Path $root ('.harness/tests/' + [guid]::NewGuid().ToString('N'))
 $fixture = Join-Path $area 'harness'
 $app = Join-Path $area 'app com espaco'
 $null = New-Item -ItemType Directory -Path $app -Force
+Set-Content (Join-Path $app 'pom.xml') '<project><artifactId>app</artifactId></project>'
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 Assert ($null -ne $config.tools.PSObject.Properties['applicationMavenHome']) 'Falta Maven independente da aplicacao.'
 $config.repositories = @(@{name='app'; path=$app})
