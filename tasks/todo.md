@@ -1,5 +1,15 @@
 # To-do do agente: evolucao do harness
 
+## Acrescimo Sonar confirmado - 15/10/2026
+
+[Escopo e verificacao](plan.md#download-do-diagnostico-sonar-existente---15102026).
+S25 parcial: guias de ferramentas alinhados em `947537a`; retomar S25-S28 depois.
+
+- [ ] Extrair coleta/publicacao Sonar comuns, preservando o scan e seus testes.
+- [ ] Baixar ultima analise concluida do projeto/branch, inclusive pipeline, sem Java/Maven.
+- [ ] Integrar opcao na task existente e documentar evidencias para reconciliacao.
+- [ ] Revisar e validar PS5.1; preservar aceite integrado e ensaio corporativo pendentes.
+
 ## Simplificacao prioritaria por projeto - 2026-10-10
 
 **SIMP-PROJ e a primeira entrega de evolucao:** concluir simplificacao, transicao,

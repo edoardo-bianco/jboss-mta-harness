@@ -777,6 +777,53 @@ Workspace, ProjectNavigation, ProjectIndex, JbossWorkspace e BuildConfig
 aprovados em PS5.1. Revisao independente sem achados; extensoes/configuracoes
 Java preservadas. S25 em andamento; S26-S28 e aceite integrado pendentes.
 
+### Download do diagnostico Sonar existente - 15/10/2026
+
+Acrescimo solicitado durante S25: baixar o resultado Sonar para alinhamento.
+O desenvolvedor confirmou buscar a ultima analise concluida do projeto/branch,
+inclusive quando enviada pela pipeline. S25 segue parcial depois de `947537a`;
+retomar S25-S28 apos esta capacidade. Nenhum aceite integrado foi concedido.
+
+Objetivo: na task **Aplicacao: analisar SonarQube**, acrescentar **3 Baixar ultima
+analise concluida**, sem executar scanner, Java ou Maven. Reusar servidor,
+autenticacao e entrada oculta de token; escolher chave/branch, fase ANTES/DEPOIS
+e eventual baseline pelos menus existentes. A tarefa publica nos destinos Sonar
+correntes do projeto e o indice permite navegar ate o resumo/JSONs. Download nao
+altera migracao.md, plano ou tarefas: a reconciliacao continua etapa explicita.
+
+Criterios: somente GET; analise mais recente concluida identificada no servidor,
+data real da analise e revisao SCM quando fornecida; conferencia antes/depois da
+coleta de metricas e issues para detectar concorrencia; nenhuma afirmacao de que
+o Source local e o codigo analisado pela pipeline. Gate e criterios humanos
+permanecem separados. Falha ou coleta parcial preserva o ultimo diagnostico
+utilizavel e registra a tentativa. Sem analise, autenticacao negada, pagina
+incompleta ou analise trocada nao produzem sucesso. Resultado completo com gate
+reprovado continua sendo evidencia utilizavel, sem aceite.
+
+Comparacao ANTES/DEPOIS exige baseline explicita e origem compativel. Download
+nao inventa exit code, scanner, JDK, settings ou estabilidade dos fontes locais.
+Quando esses dados nao sao conhecidos, registrar a limitacao da comparacao; a
+comparacao por chaves nao comprova causa nem equivalencia de codigo/configuracao.
+
+Implementar em fatias: (1) extrair coleta/publicacao comuns e manter scan
+equivalente; (2) coletor do servidor e testes sem ferramentas instaladas;
+(3) menu/CLI, guia e navegacao; (4) revisao independente e regressao Sonar.
+Scripts seguem PowerShell 5.1, funcoes HarnessSonar e DTOs ja existentes, sem
+dependencias novas. Exemplo de uso avancado: `powershell.exe -NoProfile -File
+.\scripts\analisar-sonar.ps1 -Action Download -SelectTarget` (uma linha).
+Testes: `powershell.exe -NoProfile -File .\tests\Test-Sonar.ps1`, nova suite de
+download, Test-SonarCriteria, Test-SonarIssues, Test-SonarReview e CLI isolada.
+Mocks verificam que nenhum processo de scanner e invocado, restauracao do token,
+origem, falhas, concorrencia e publicacao. Servidor corporativo real depende do
+ensaio do desenvolvedor; nao acessar credenciais ou enviar analises para testar.
+
+Fontes: modulos locais HarnessSonar, HarnessSonarApi, HarnessSonarCriteria e
+HarnessSonarReview; [Web API oficial](https://docs.sonarsource.com/sonarqube-server/extension-guide/web-api).
+O contrato detalhado dos endpoints pertence ao `/web_api` do servidor instalado.
+Sempre manter testes PS5.1, dados de ensaio em `.harness/tests` e segredo fora dos
+arquivos. Mudanca de politica corporativa ou nova dependencia exige necessidade
+explicita; nunca executar corretivas, conceder GO ou aceitar lote pelo download.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de
