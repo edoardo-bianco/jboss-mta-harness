@@ -1,89 +1,76 @@
 # Escopo do Copilot
 
-Siga [AGENTS.md](../AGENTS.md) e a
-[ADR-0002](../doc/adr/0002-separacao-harness-e-migracao-progressiva.md).
+Siga [AGENTS.md](../AGENTS.md), a
+[ADR-0002](../doc/adr/0002-separacao-harness-e-migracao-progressiva.md) e a
+[ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md).
 
-Evolucao do harness (incluindo prompts e Run Tasks) usa `tasks/plan.md` e
-`tasks/todo.md`. Migracao da aplicacao usa exclusivamente os destinos PlanPath e
-TodoPath do contexto para seus planos/tarefas. Nao misture esses trabalhos.
+Evolucao do harness usa tasks/plan.md e tasks/todo.md, em branch harness/<objetivo>
+derivada da principal, com checkout conferido, validacao/revisao antes de integrar.
+Migracao usa os destinos PlanPath/TodoPath correntes do projeto. Nao misture
+evolucao do harness com corretivas da aplicacao.
 
-Para alterar o harness, use branch propria `harness/<objetivo>` a partir da sua
-principal. Nao escreva evolucoes do harness diretamente na principal, na branch
-EAP 7.4 ou na branch do lote. Confira o checkout antes de editar; com migracao
-em andamento, use checkout isolado. Integre mudancas revisadas/validadas na
-principal e alinhe a migracao separadamente, conforme AGENTS.md.
+Project e o artifactId literal do POM. projeto.json associa POM/Source local e
+mta.diretorio; indices em .harness/indices/projetos.md e no projeto localizam
+trabalho/evidencias. Registro atual concentra escolhas; indice/ranking nao as
+substitui. Use links a HTML/Markdown/log existentes para navegar.
+Referencias manuais em Markdown/chat podem indicar o diagnostico atual ou ultimo
+build, conferindo origem/conteudo. Ultima tentativa pode diferir do diagnostico
+utilizavel. Nao exigir ID de execucao/hash; prompts gerados podem ser regravados.
 
-Planeje somente um lote consistente por vez. O ciclo e proposta, revisao/GO humano,
-execucao autorizada, verificacoes automaticas e revisao/aceite humano do resultado.
-Depois, com aceite e pedido de continuidade, reconcilie as evidencias disponiveis;
-comparacao com novo MTA fica pendente se nao houver rodada. Nao declarar conclusao
-global sem evidencia. O prompt de planejamento nao autoriza executar corretivas.
+Planejamento: planejar cria, retoma ou revisa um lote consistente por projeto
+nos mesmos destinos atuais, com fichas proprias por issue. Contexto mutavel nao
+e recibo; nao ha Previous, snapshots ou copia consolidada obrigatorios.
+NeedsReview aponta mudancas conhecidas; caminhos iguais nao provam conteudo igual.
+Pergunte apenas o essencial para escopo/solucao/aceite e preserve rascunhos.
+PENDENTE historico nao e bloqueio generico. Proposta nova fica nao aprovada.
 
-Pre-planejamento opcional priorizar-issues compara os projetos explicitamente
-incluidos no contexto e examina uma fatia de 0,01%..100,00% sobre o total inicial
-fixo, recomendando por risco/repetibilidade/alcance. Com historico, perguntar
-recriar/progredir; progresso exclui todos os IDs examinados na sequencia,
-com ou sem proposta. Toda examinada tem linha com posicao ou motivo e ficha
-de evidencias/referencias/roteiro para continuidade manual pelo desenvolvedor.
-Categoria e escopo delimitam a sequencia; v2/v3 permanecem mandatory. Novos recibos
-v4 escrevem RankingPath e as fichas examinadas em FichaPaths por Source/Id;
-em legado sem FichaPaths, as fichas ficam no ranking. Nao escolhe pelo humano,
-nao altera registros nem planeja lotes. Escolha humana precede o planejamento usual.
-Helpers explicam/revisam a lista no chat; executar o prompt e etapa separada.
+Priorizacao opcional usa categoria/escopo e fatia de 0,01%..100,00% sobre B0 fixa.
+Progredir exclui todas as examinadas acumuladas por Project/Id, com ou sem
+recomendacao; recriar e explicito. Cada examinada tem ficha, posicao/motivo e
+referencias. Mencao nao e exame e falha operacional nao consome quota.
+Preservar cobertura acumulada, categorias/escopos e notas humanas nos indices.
+Nao escolher pelo humano, alterar registro, planejar ou implementar nessa etapa.
 
-Quando MCP harnessIssues estiver disponivel, use as tres consultas de leitura
-conforme o [guia por etapa](../doc/guias/tools/consultas-issues.md#consultas-por-etapa).
-Resposta verificada/paginada pode substituir a leitura dos mesmos incidentes em
-derivados; conferir codigo local continua necessario. Sem MCP, priorizacao e
-planejamento seguem pelos arquivos sem exigir Node, consulta manual ou JSON copiado.
-Consultas nao ampliam poderes dos helpers nem comprovam exame, GO ou aceite.
+MCP harnessIssues e opcional e somente leitura conforme o
+[guia por etapa](../doc/guias/tools/consultas-issues.md#consultas-por-etapa).
+Resposta valida/paginada dispensa releitura dos mesmos incidentes; conferir codigo
+local continua necessario. Sem MCP/Node, seguir pelos arquivos sem JSON copiado.
+Consulta nao marca exame, GO ou aceite; helpers permanecem leitores/orientadores.
 
-Novos planos usam dossie por projeto/issue e os destinos identificaveis do recibo,
-sob a pasta do artifactId Maven. Ficha/anexos sao entradas; plano/to-do seguem os
-modelos do contrato. A mesma regra em projetos diferentes tem documentos separados.
-Planejamento: compartilhar contexto exporta analise concluida ou plano consolidado.
-Importar exige Source local explicito e preserva originais, conforme
-[ADR-0007](../doc/adr/0007-compartilhamento-de-contextos.md). Em plano importado,
-entradas alteradas interrompem a retomada para reavaliacao; nao prometer sucessor
-automatico. CONSOLIDATED permite preparar implementacao sem MTA original, conferindo
-codigo e alcance do GO. Importar nao concede execucao/aceite nem autoriza sobrescrita.
+MTA usa relatorio/catalogo original, sem executar output.js nem copiar incidentes.
+EVIDENCIAS usa entradas humanas reais, sem inventar MTA/categoria. Ausencia de
+origem e lacuna, sem fallback. doc/ e base local por busca/leitura com citacao;
+nao afirmar RAG semantico implementado.
 
-Siga a [ADR-0005](../doc/adr/0005-planejamento-orientado-pelo-registro.md).
-Planejamento: planejar cria, retoma ou atualiza a proposta pelo registro existente;
-nao exigir menu de operacao ou selecao repetida de projeto/rodada. Para ZIP recebido,
-orientar importacao antes de inicializar registros. Sem pacote a importar e sem
-registro, orientar Workspace: atualizar indice dos projetos. Indice localiza, registro atual
-concentra escolha/recorte/evidencias; ranking antigo nao revoga escolha atual.
-PlanningBasis=MTA|EVIDENCIAS permite proposta por evidencias humanas sem fabricar
-MTA. Conferir integridade da base real. Em contexto local, origem/evidencias/contrato/template
-iguais retomam a solicitacao; mudancas geram recibo com Previous. Escolhas
-e observacoes atuais sao lidas sem reescrever historico. Link antigo segue Previous
-ate o unico sucessor; bifurcacao pede escolha. Nao escolher plano/rodada por recencia.
-Reconciliar so por motivo concreto; PENDENTE historico nao e gate generico.
-Perguntas essenciais antecedem a proposta completa, sem par ficticio plan/to-do.
-Helpers continuam leitores e orientam uma etapa com caminho pronto no Copilot;
-execucao usa DevSquad compativel. GO vigente no mesmo escopo nao e pedido novamente.
+Compartilhar segue o [guia de copia](../doc/guias/tools/compartilhamento-contextos.md).
+Nao ha tarefa ZIP. Associar POM local e reconciliar contextos copiados; trabalho
+local exige recebido/ ou pasta externa, sem sobrescrita. Atualizar indice nao
+substitui reconciliacao. GO/aceite recebidos nao se transferem automaticamente.
+Planejamento: atualizar registro de migracao prepara comparacao de diagnostico,
+codigo, decisoes e material recebido opcional. O executor publica registro,
+documentos afetados, indice e ultima conclusao pela API protegida; helpers nao
+publicam. Somente local ainda considera MTA. Preparar nao comprova reconciliacao.
 
-Siga o [contrato vigente](../doc/especificacoes/planejamento-copilot.md): decisoes
-Java 8/javax/EAP 7.4 e Hibernate permanecem. planejar-lotes atende proposta e revisao.
-MigrationPath explicito permite somente andamento/cobertura/referencias das issues
-trabalhadas, preservando escolhas humanas e catalogo. manter-migracao grava apenas
-esse registro; nao concede GO/aceite nem inicia planejamento automaticamente.
+Siga o [contrato](../doc/especificacoes/planejamento-copilot.md): Java 8/javax,
+EAP 7.4 e Hibernate 5.3 quando aplicavel. O planejamento escreve plano/tarefas,
+fichas examinadas e andamento/cobertura/referencias pertinentes, preservando
+escolhas humanas; limpar aviso tecnico NeedsReview nao concede GO.
 
-Siga a [ADR-0004](../doc/adr/0004-git-informativo-sem-controle-de-branches.md):
-o desenvolvedor escolhe a branch. Git e informativo, sem cadastro de politica,
-responsavel ou coordenacao e sem bloqueio automatico por branch/HEAD/estado local.
-Nao exigir novo contexto apenas por essas diferencas. Preserve identidade do
-projeto, hashes MTA e destinos; avalie conteudo relevante para aplicar os achados.
-Os controles Git antigos da ADR-0003 foram substituidos. Nao renovar suas
-pendencias em propostas novas. Gestao de branches fica com o desenvolvedor;
-GO de corretivas, verificacoes tecnicas e aceite humano permanecem separados.
+Ciclo: proposta, revisao/GO, execucao autorizada, verificacoes e aceite humano.
+GO claro aplicavel nao e pedido novamente; mudanca de escopo/solucao/aceite pede
+revisao do alcance sem apagar a decisao. Preparacao, arquivos e testes nao
+concedem GO. Dispensa de precondicao nao dispensa entrega ou verificacao.
+Aplicacao: preparar implementacao do lote prepara implementar-lote/revisar-resultado.
+Executor confere GO e limita-se ao lote; nao infere commit/push/PR, escrita no
+harness, operacao externa ou proximo lote. Usar apoio real compativel disponivel,
+sem simular delegacao ou trocar cliente. Revisao de resultado e somente leitura.
 
-Para executar a corretiva, use implementar-lote com o prompt preparado pela tarefa
-Aplicacao: preparar implementacao do lote. Confira o GO humano vigente e o par
-PlanPath/TodoPath antes de delegar ao devsquad.implement. A preparacao nao concede
-GO; a execucao autorizada limita-se ao lote e nao concede aceite nem autoriza
-commit/push/PR, escrita no harness ou tarefas de outro lote.
+Git e informativo conforme a [ADR-0004](../doc/adr/0004-git-informativo-sem-controle-de-branches.md).
+Branch/HEAD diferentes nao exigem novo contexto por si so; conferir codigo.
+Branches/integracao pertencem ao desenvolvedor, inclusive escolha opcional no
+preparo de implementacao. Aceite e continuidade pedida precedem proximo lote.
+MTA/Sonar comparaveis sao checklist nao bloqueante; registrar limites e nao
+declarar conclusao global sem evidencia. Sonar baixado nao prova Source local.
 
 <!-- mermaid-ai-skills:start -->
 ## Mermaid Diagrams

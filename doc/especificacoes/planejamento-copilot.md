@@ -426,9 +426,10 @@ build ou bloquear entrega. Manter instrumentacao/relatorios; JaCoCo haltOnFailur
 e -Djacoco.haltOnFailure=false no Maven direto. Se POM fixa gate prevalente, relatar
 origem/ajuste no escopo, nunca converter exit code em sucesso. Nao skipTests,
 reduzir meta ou ignorar falhas; compilacao/testes falhos continuam FALHOU.
-Sonar: cobertura global permanece politica separada de 85%; nao mede por si so
-o recorte JaCoCo da corretiva. Blocker/High reprovam avaliacao; cobertura/aumento de issues sao avisos;
-Quality Gate do servidor separado. UNVERIFIED nao e conformidade.
+Sonar segue os [criterios vigentes](../guias/tools/sonar.md#criterios-do-harness-e-comparacao),
+separados da meta JaCoCo de 85% do recorte. O diagnostico informa cada criterio
+e sua avaliacao; Quality Gate do servidor e decisao humana permanecem separados.
+UNVERIFIED nao e conformidade. Nao converter falha tecnica em aviso generico.
 
 Plano/to-do separam "Checklist do desenvolvedor (nao bloqueante)": Sonar ANTES
 quando possivel, DEPOIS/comparacao e novo MTA comparavel. Ausencia nao bloqueia GO,
