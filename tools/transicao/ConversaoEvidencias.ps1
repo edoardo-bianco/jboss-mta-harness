@@ -92,7 +92,8 @@ function Read-ConversionEvidence($State,$Record,$Prioritizations=@()) {
     $requiredConsumers=@{}; $requiredConsumers[$State.Project.Name]=$true
     foreach ($priority in $Prioritizations) {
         if ((Get-LegacyValue $priority 'Master' $State.Project).Name -ceq $State.Project.Name) {
-            foreach ($issue in @(Get-LegacyValue $priority 'Examined' @{}).Values) { $requiredConsumers[$issue.Project]=$true }
+            $examined=Get-LegacyValue $priority 'Examined' @{}
+            foreach ($issue in $examined.Values) { $requiredConsumers[$issue.Project]=$true }
         }
     }
     $pending=New-Object 'Collections.Generic.Queue[object]'

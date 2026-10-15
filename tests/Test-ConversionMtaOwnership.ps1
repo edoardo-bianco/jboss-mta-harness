@@ -67,9 +67,12 @@ foreach ($path in @($indexB,$pageB,$copyB)) {
     Check-Ownership (-not $state.Map.ContainsKey($path)) ('Add-ConversionMta nao pode atribuir extrato de B ao MTA de A: '+$path)
 }
 # Estado independente para testar o remapeamento dos aliases em Read-ConversionEvidence.
+foreach ($withExamined in @($true,$false)) {
 $evidenceState=New-OwnershipState $project $session $attachments $registerText
 $evidenceState.Mta=$state.Mta
 $priority=[pscustomobject]@{Records=@($record);Rankings=@();Fichas=@{}}
+# Priorizacao pendente pode ter dicionario vazio; origens antigas podem omitir o campo.
+if ($withExamined) { $priority | Add-Member -NotePropertyName Examined -NotePropertyValue ([ordered]@{}) }
 $null=& $publicationModule { param($State,$Priority) Read-ConversionEvidence $State $null @($Priority) } $evidenceState $priority
 foreach ($path in @($indexA,$pageA)) {
     Check-Ownership ($evidenceState.Map.ContainsKey($path) -and $evidenceState.Map[$path] -ieq $state.Mta.ReportPath) ('Leitura de evidencias deve resolver apenas o extrato de A: '+$path)
@@ -78,6 +81,7 @@ foreach ($path in @($indexB,$pageB,$copyB)) {
     Check-Ownership (-not $evidenceState.Map.ContainsKey($path)) ('Read-ConversionEvidence nao pode reatribuir extrato/alias de B: '+$path)
 }
 Check-Ownership ($evidenceState.EvidenceInputs.Count -eq 0 -and $evidenceState.Files.Count -eq 0) 'Extrato ou copia renomeada de B nao pode virar evidencia humana.'
+}
 Check-Ownership ((Get-ConversionState $f) -ceq $before) 'Leitura/conversao em memoria deve preservar todas as fontes e nao publicar arquivos.'
 if ($failures.Count) { throw ($failures -join "`n") }
 'PASS: propriedade dos extratos MTA por Source, copia renomeada e isolamento do MTA entre projetos.'

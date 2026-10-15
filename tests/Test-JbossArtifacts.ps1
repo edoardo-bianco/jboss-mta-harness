@@ -65,7 +65,7 @@ $fixture=Join-Path $area 'harness'
 $scripts=Join-Path $fixture 'scripts'
 $null=[IO.Directory]::CreateDirectory($scripts)
 Copy-Item -Path (Join-Path $root 'scripts/*.psm1') -Destination $scripts
-Copy-Item -LiteralPath (Join-Path $root 'scripts/gerenciar-jboss.ps1') -Destination $scripts
+Copy-Item -Path (Join-Path $root 'scripts/*.ps1') -Destination $scripts
 @'
 function Get-HarnessJbossServer {
     param($Context,$Eap)

@@ -7,7 +7,7 @@ $scripts=Join-Path $area 'scripts'
 $null=[IO.Directory]::CreateDirectory($scripts)
 # Copias sao fixtures: a entrada e os recibos reais ficam isolados do ambiente local.
 Copy-Item -Path (Join-Path $root 'scripts/*.psm1') -Destination $scripts
-Copy-Item -LiteralPath (Join-Path $root 'scripts/gerenciar-jboss.ps1') -Destination $scripts
+Copy-Item -Path (Join-Path $root 'scripts/*.ps1') -Destination $scripts
 $configPath=Join-Path $area 'config.json'
 $jdk=Join-Path $area 'jdk8'
 $null=[IO.Directory]::CreateDirectory((Join-Path $jdk 'bin'))
