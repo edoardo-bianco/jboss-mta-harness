@@ -177,7 +177,7 @@ function New-HarnessWorkspace {
         'java.debug.settings.hotCodeReplace'='auto'
         'java.configuration.updateBuildConfiguration'='disabled'
         'java.import.generatesMetadataFilesAtProjectRoot'=$false
-        'files.exclude'=@{ '**/.harness'=$true }
+        'files.exclude'=@{ '**/.harness'=$false }
     }
     $externalRoots=@(Get-HarnessProjectReadRoots $Context.Root @($Context.Projects | ForEach-Object { Join-Path $_.path 'pom.xml' }))
     if ($externalRoots.Count) { $settings['github.copilot.chat.additionalReadAccessPaths'] = @($externalRoots | ForEach-Object { $_.Replace('\','/') }) }
@@ -223,6 +223,9 @@ function New-HarnessWorkspace {
         $null = [IO.Directory]::CreateDirectory((Split-Path -Parent $backup))
         Copy-Item -LiteralPath $path -Destination $backup
     }
+    # O padrao antigo escondia inclusive os indices e as evidencias oficiais.
+    # Corrigir somente esse filtro, preservando as demais escolhas do Explorer.
+    $document.settings.'files.exclude' | Add-Member NoteProperty '**/.harness' $false -Force
     if (-not $document.PSObject.Properties['launch']) { $document | Add-Member NoteProperty launch ([pscustomobject]@{version='0.2.0'; configurations=@()}) }
     if (-not $document.launch.PSObject.Properties['configurations']) { $document.launch | Add-Member NoteProperty configurations @() }
     $names=@($debugConfigurations | ForEach-Object name)

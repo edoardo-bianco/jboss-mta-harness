@@ -8,6 +8,9 @@ Publish-HarnessProjectFiles $p @{
     'atual/planejamento/contexto.json'='{}';'atual/planejamento/planejar-lotes.prompt.md'='# Orientacao'
     'atual/build/resultado.json'='{}';'atual/build/console.log'='BUILD FAILURE'
     'atual/diagnosticos/sonar/resultado.json'='{}';'atual/diagnosticos/sonar/RESUMO.md'='# Coleta Sonar'
+    'evidencias/LEIA-ME.md'='# Evidencias humanas'
+    'atual/diagnosticos/mta-console.log'='Falha MTA posterior ao relatorio'
+    'atual/diagnosticos/sonar-console.log'='Falha Sonar posterior ao relatorio'
     'atual/operacao.json'=(@{build=@{Status='FAILED';DateUtc='2026-10-12T12:00:00Z';Error='Falha sintetica';LogPath=$log}} | ConvertTo-Json)
 }
 $mta=Read-HarnessProjectMta $p
@@ -19,6 +22,9 @@ foreach ($path in @($mta.ReportPath,(Join-Path $p.Folder 'atual/diagnosticos/son
     Assert ($index.Contains($target)) ('Navegacao deve abrir documento legivel: '+$target)
 }
 Assert ($index.Contains('FAILED') -and $index.Contains('Falha sintetica')) 'Situacao corrente deve ser legivel no indice.'
+foreach ($relative in @('evidencias/LEIA-ME.md','atual/diagnosticos/mta-console.log','atual/diagnosticos/sonar-console.log')) {
+    Assert ($index.Contains($relative)) ('Indice deve abrir evidencia produzida: '+$relative)
+}
 Assert ($index -notmatch '\]\(<?[^)\r\n]*\.json[>)]') 'Indice nao deve mandar o leitor para JSON quando ha documento legivel.'
 [IO.File]::AppendAllText($p.IndexPath,"`nNota humana no indice.")
 Set-HarnessProjectOperation $p build SUCCEEDED -LogPath $log

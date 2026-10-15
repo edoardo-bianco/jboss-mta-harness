@@ -91,9 +91,20 @@ function Update-HarnessProjectDocuments {
     $old=Read-HarnessProjectFiles $Project @('migracao.md','indice.md','atual/operacao.json')
     $migration=Get-HarnessProjectMigrationText $Project $Mta $old['migracao.md'] -UpdateIssues:$UpdateIssues
     $lines=@('# Projeto: '+$Project.Name,'', (Get-HarnessSourceLink $Project.IndexPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.IndexPath $Project.MigrationPath 'Decisoes de migracao'))
-    foreach ($entry in @(@('atual/planejamento/plano.md','Plano corrente'),@('atual/planejamento/tarefas.md','Tarefas correntes'),@('atual/planejamento/planejar-lotes.prompt.md','Orientacao do planejamento'),@('atual/build/console.log','Log da ultima tentativa de build'),@('atual/diagnosticos/sonar/RESUMO.md','Relatorio Sonar atual'),@('reconciliado/resultado.md','Ultima reconciliacao'))) {
+    $lines+=@('','## Trabalho e evidencias','', 'Abra o documento correspondente ao problema. Logs mostram a ultima tentativa; relatorios mostram o ultimo diagnostico utilizavel.','')
+    foreach ($entry in @(
+        @('atual/planejamento/plano.md','Plano corrente'),
+        @('atual/planejamento/tarefas.md','Tarefas correntes'),
+        @('atual/planejamento/planejar-lotes.prompt.md','Orientacao do planejamento'),
+        @('evidencias/LEIA-ME.md','Evidencias e anexos do projeto'),
+        @('atual/build/console.log','Log da ultima tentativa de build'),
+        @('atual/diagnosticos/mta-console.log','Log da ultima tentativa MTA'),
+        @('atual/diagnosticos/mta-interno.log','Log interno da ultima tentativa MTA'),
+        @('atual/diagnosticos/sonar/RESUMO.md','Relatorio Sonar atual'),
+        @('atual/diagnosticos/sonar-console.log','Log da ultima tentativa Sonar'),
+        @('reconciliado/resultado.md','Ultima reconciliacao'))) {
         $path=Join-Path $Project.Folder $entry[0]
-        if (Test-Path -LiteralPath $path -PathType Leaf) { $lines+=Get-HarnessSourceLink $Project.IndexPath $path $entry[1] }
+        if (Test-Path -LiteralPath $path -PathType Leaf) { $lines+='- '+(Get-HarnessSourceLink $Project.IndexPath $path $entry[1]) }
     }
     if ($Mta) { $lines+=@('',(Get-HarnessSourceLink $Project.IndexPath $Mta.ReportPath 'MTA atual'),'Consultar diagnostico nao reconcilia decisoes nem concede GO.'); $Warnings+=@($Mta.Diagnostics) }
     if ($old['atual/operacao.json']) {
