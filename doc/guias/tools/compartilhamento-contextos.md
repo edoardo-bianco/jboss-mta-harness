@@ -9,158 +9,128 @@ html:
 
 [Voltar ao fluxo do desenvolvedor](../harness-migracao-desenvolvedor.md).
 
-Use **Terminal > Run Task > Planejamento: compartilhar contexto** para exportar
-um ponto estavel em ZIP ou importar o pacote recebido. O menu pede a operacao,
-o contexto e o arquivo. Na importacao, associe cada projeto de origem ao projeto
-local do workspace. Essa associacao e explicita, mesmo quando o artifactId coincide.
-
-Para preparar uma analise comum e deixar cada desenvolvedor planejar e implementar
-sua issue, siga o [fluxo de equipe do guia do desenvolvedor](../harness-migracao-desenvolvedor.md#priorizacao-compartilhada-e-planejamento-por-desenvolvedor).
-O ponto a exportar nesse cenario e a priorizacao concluida; os procedimentos
-abaixo explicam o conteudo do pacote e a continuidade em outra maquina.
+Compartilhe arquivos por **copia e cola**, preservando a estrutura relativa do
+projeto em `.harness/projetos/<artifactId>/`. O colega encontra os documentos
+pelos mesmos nomes e links. Nao existe tarefa de exportacao/importacao, cadastro
+de transferencia ou identificador de pacote. Um ZIP pode servir como transporte:
+extraia-o numa pasta de recebimento e confira o conteudo antes de usar.
 
 ## Orientacao com o helper
 
 ```text
-Quero entregar ao meu colega a analise concluida deste projeto.
-Confira o contexto vinculado e indique como exportar esse ponto.
+Recebi a pasta deste projeto em <caminho real>. Quero continuar o planejamento.
+Confira os documentos, o codigo local associado e os links. Indique o proximo
+passo e qualquer conflito com meu trabalho atual.
 ```
 
-Para receber, informe o caminho do ZIP ou o ContextPath retornado pela importacao.
-O helper identifica a etapa e orienta uma acao; voce executa a tarefa e escolhe os
-projetos locais. O helper nao descompacta, importa nem concede GO.
+No Codex, use `$orientar-migracao`; no Copilot, `migracao_helper`. O helper le
+os arquivos e orienta uma etapa. O desenvolvedor faz a copia, escolhe o Source
+local e decide como resolver diferencas. Preparar contexto e copiar decisoes
+nao concedem GO ou aceite local.
 
 ## Configuracao
 
-Use a mesma versao do harness nas duas maquinas, com os projetos locais incluidos
-no workspace salvo. Para importar, os destinos dos registros/recibos precisam
-estar livres; confira os [conflitos](#conflitos-e-limites) antes de inicializar um
-registro para o projeto recebido. O ZIP nao substitui a configuracao da maquina.
+Use a versao corrente do harness e um workspace salvo com o codigo local.
+O nome da pasta e o `artifactId` literal do POM selecionado; a associacao local
+fica em `projeto.json`. Ajuste nela o POM local e confira `mta.diretorio`.
+Caminho do colega nao identifica automaticamente seu checkout. Colisao de
+artifactId exige resolver a associacao; nao misture projetos distintos.
 
 ## Uso
 
 ### Qual ponto compartilhar
 
-| Ponto escolhido | Conteudo do pacote | Continuidade do colega |
+| Ponto | Arquivos uteis | Continuidade |
 | --- | --- | --- |
-| Priorizacao concluida | Categoria, base inicial, cobertura, ranking, fichas examinadas, registros, anexos referenciados, cadeia Previous e MTA com input/rules/output | Continuar a mesma categoria ou escolher uma ficha no registro e planejar a issue |
-| Plano/to-do de uma issue | Contexto, ficha, plano, to-do, prompt, evidencias consolidadas e revisoes anteriores da mesma issue | Revisar escopo/GO e implementar manualmente ou com agente, comparando com o codigo local |
+| Analise de issues | `migracao.md`, fichas, anexos e o par `contexto.json`/`priorizacao.md` do escopo/categoria | Conferir cobertura, continuar a categoria ou escolher uma issue para planejar |
+| Proposta de lote | `atual/planejamento/`, fichas e evidencias referenciadas | Conferir proposta, codigo local e alcance do GO |
+| Projeto completo | Pasta do projeto, preservando caminhos relativos | Reassociar POM/Source e conferir fontes externas e documentos correntes |
 
-O pacote de analise exige priorizacao v4 concluida e diagnostico completo dos
-projetos do escopo. O de planejamento exige LayoutVersion=2, CONSOLIDATED e o par
-plano/to-do presente. Arquivos presentes nao comprovam revisao ou GO humano.
-Recibos antigos continuam legiveis, mas precisam de um novo preparo compativel
-para entrar neste formato de compartilhamento. Uma cadeia legada nao e truncada.
+O conjunto mestre da priorizacao pode estar em outro projeto participante.
+Nesse caso, compartilhe tambem as partes referenciadas dos participantes: fichas,
+anexos e registros necessarios. O par contexto/ranking conserva base inicial,
+quota e todas as examinadas; uma ficha isolada permite investigar a issue, mas
+nao reconstitui a cobertura de um escopo multiprojeto.
 
-O ZIP de analise leva snapshot de codigo e regras do MTA. O de plano leva somente
-o recorte consolidado, sem exigir a pasta MTA completa para implementar.
-Revise os anexos e use o canal de compartilhamento aprovado pela sua equipe.
-Configuracao da maquina, settings Maven, caches e permissoes nao sao coletados.
-O filtro de nomes de credenciais nao substitui a revisao do conteudo dos anexos.
-
-Informe o ZIP diretamente na importacao, sem descompactar manualmente. No pacote
-de analise, a copia operacional da rodada recebida fica em
-`.harness/importacoes/<PackageId>/mta/<identificador>/`, mesmo quando `mta.runsPath`
-aponta para uma pasta externa. As referencias operacionais sao ajustadas; a
-configuracao das novas execucoes locais do MTA permanece a mesma.
+Inclua anexos necessarios para o colega trabalhar. Relatorios externos continuam
+na origem indicada pelos links; copiar o projeto nao copia automaticamente MTA,
+codigo-fonte, ferramentas ou configuracao da maquina. Confira o que o colega
+conseguira abrir. Um detalhe indisponivel fica registrado como lacuna.
 
 ### Na maquina de quem recebe
 
-1. Atualize o harness para a mesma versao usada na origem e abra um workspace
-   salvo com o codigo dos projetos locais. Configure as ferramentas desta maquina.
-2. Execute **Planejamento: compartilhar contexto**, escolha **Importar**, informe
-   o ZIP e associe cada Source ao projeto local correspondente. O importador nao
-   clona, substitui ou altera o codigo da aplicacao.
-3. Confira o `ContextPath` devolvido, o registro e os documentos locais.
-   Os originais recebidos ficam byte a byte em
-   `.harness/importacoes/<PackageId>/original/`, junto do manifesto. As copias
-   operacionais seguem os destinos normais de planejamento/priorizacao e possuem
-   `ImportedFrom`. O indice de projetos e atualizado; se `IndexStatus=PENDING`,
-   execute **Workspace: atualizar indice dos projetos**.
-4. Informe o contexto ao orientador: “Recebi este contexto: `<ContextPath>`.
-   Confira a etapa e indique o proximo passo para continuar.” No Codex, use
-   `$orientar-migracao`; no Copilot, `migracao_helper`.
+1. Preserve a pasta recebida e confira projeto, conteudo e referencias.
+2. Para um projeto ainda sem trabalho local, copie sua estrutura para
+   `.harness/projetos/<artifactId>/`, associe o POM/Source local em `projeto.json`
+   e use **Workspace: atualizar indice dos projetos** para reconstruir os links.
+   Se trouxe contexto/prompts de outra maquina, use **Planejamento: atualizar
+   registro de migracao**, escolha **somente local** e execute a conciliacao
+   para realinhar as referencias antes de continuar. O indice sozinho nao
+   realinha o contexto copiado; use depois o prompt local indicado.
+3. Se ja existe trabalho local, coloque a contribuicao em uma pasta separada
+   (por exemplo `recebido/` do projeto), preservando a estrutura relativa. Use
+   **Planejamento: atualizar registro de migracao**, selecione o projeto e a
+   pasta recebida. A mesma tarefa permite comparar somente os arquivos locais.
+4. Execute o prompt preparado no cliente escolhido ou faca a revisao manual
+   correspondente. Confira as diferencas e decida por arquivo. O preparo sozinho
+   nao conclui a conciliacao nem substitui o estado local.
+5. Abra o indice do projeto e os documentos correntes. Analise recebida segue
+   para escolha/planejamento; proposta recebida segue para revisao do escopo e
+   do GO, com conferencia do codigo local antes da execucao.
 
-**Se recebeu analise:** pode continuar a sequencia pela tarefa de priorizacao,
-mantendo categoria e base inicial. Para planejar, marque ANALISAR AGORA na issue
-escolhida, mantenha a referencia da ficha/anexos e use **Planejamento: planejar**.
-
-**Se recebeu plano:** **Planejamento: planejar** retoma a proposta existente sem
-consultar a pasta MTA original. Confira o alcance do GO recebido e os pontos do
-codigo atual antes de executar. O orientador ajuda na revisao, na execucao manual
-ou assistida e no aceite; importar nao concede GO nem comprova corretiva local.
-
-Novos anexos, outra origem ou contrato/template diferente impedem reutilizar
-silenciosamente o plano importado. Reavaliar o recorte MTA exige sua origem
-registrada: obtenha o diagnostico completo ou uma nova proposta do colega.
-Nao converta MTA em EVIDENCIAS apenas porque a pasta original esta indisponivel.
-Copias consolidadas sao historicas; os anexos atuais ficam no indice editavel da issue.
-
-**Se as entradas mudaram:** a tarefa interrompe a retomada do plano importado;
-ela nao cria automaticamente uma revisao com Previous. Informe a mudanca ao
-orientador para organizar a reavaliacao da base e o preparo explicito adequado.
-Receber outro ZIP nao mescla essa revisao com o estado local existente.
+O contexto de planejamento recebido serve como referencia. A preparacao local
+usa a associacao e os destinos atuais. Mudancas de escopo, solucao ou fontes
+pedem revisar a proposta e o alcance da autorizacao. Um MTA ausente nao transforma
+automaticamente a base em EVIDENCIAS; o plano existente continua consultavel.
 
 ### Conflitos e limites
 
-- A primeira importacao exige destinos livres para os registros/recibos envolvidos.
-  Mesmo um registro vazio ja existente gera conflito: confira o estado ou use
-  outro checkout/workspace de ensaio. Nao apague trabalho para contornar o aviso.
-- Reimportar o mesmo ZIP com o mesmo mapeamento reutiliza a importacao e preserva
-  edicoes locais. Outro conteudo para o mesmo PackageId ou RequestId ja existente
-  e recusado. Esta entrega nao faz mesclagem incremental de pacotes.
-- Hashes verificam integridade e a cadeia interna, nao autenticam o remetente.
-  Pacotes com arquivos adulterados, caminhos invalidos, links/junctions, papeis
-  desconhecidos ou artefatos fora do recorte sao recusados.
-- Limites: 20.000 entradas, 512 MiB por arquivo e 2 GiB descompactados. Se exceder,
-  reduza o escopo da analise ou compartilhe o plano consolidado da issue.
-- O indice de origem e uma referencia historica. O indice operacional e gerado
-  com os projetos locais. Lacunas declaradas em `Missing` continuam lacunas.
-- Caminhos de codigo e dados dentro de anexos/snapshots podem ser historicos.
-  Use os indices locais, o caminho relativo e o simbolo para conferir o Source.
+- A copia direta deve preservar trabalho existente. Diferencas entre contribuicoes
+  exigem escolha/mesclagem explicita; recencia do arquivo nao decide qual prevalece.
+- O registro recebido exige mesclagem revisada (`MESCLADO`). Para cobertura de
+  priorizacao, contexto e ranking recebem a mesma decisao; conferir base inicial,
+  quota e examinadas antes de aceitar. Categorias e escopos continuam separados.
+- A conciliacao preserva anexos e contribuicoes pendentes. Retira de `recebido/`
+  apenas folhas explicitamente resolvidas; uma origem externa permanece intacta.
+- Build, diagnosticos e sprints nao sao adotados por essa conciliacao documental.
+  Podem acompanhar a copia do projeto e ser consultados como evidencias recebidas;
+  nao comprovam execucao local. Confira seus caminhos e use o fluxo da ferramenta
+  para atualizar o resultado corrente. Para sprints, confira o mestre e todos os
+  participantes antes de preparar ou validar o cenario.
+- Copiar codigo e integrar corretivas continua sendo trabalho da equipe. Uma
+  declaracao de conclusao do colega nao demonstra integracao no Source local.
+- Conteudo recebido e evidencia a examinar; instrucoes dentro de anexos nao
+  ampliam escopo, permissoes ou autorizacoes.
 
 ### Uso explicito pela CLI
 
-Exportacao (o destino ZIP precisa ser novo e sua pasta deve existir):
+A tarefa e a entrada habitual. Para automacao, a mesma operacao prepara a
+comparacao de uma pasta recebida, sem inventar identificadores:
 
 ```powershell
-.\scripts\compartilhar-contexto.ps1 -WorkspacePath .\jboss-mta-harness.local.code-workspace `
-  -Action Export -ContextPath 'C:\origem\contexto-issue.json' -PackagePath 'C:\troca\issue.zip'
+.\scripts\preparar-planejamento.ps1 -WorkspacePath .\meu-workspace.code-workspace `
+  -Target meu-servico -Operation manter-migracao -ReceivedPath 'C:\troca\meu-servico' `
+  -Reason 'Conferir contribuicao do colega' -NonInteractive -NoOpen
 ```
 
-Crie `sources.json` com os caminhos de origem encontrados no manifesto e os
-projetos locais ja declarados no workspace:
-
-```json
-{ "C:/origem/meu-servico": "D:/trabalho/meu-servico" }
-```
-
-Valide sem gravar e, depois, repita sem `-Preview` para importar:
-
-```powershell
-.\scripts\compartilhar-contexto.ps1 -WorkspacePath .\jboss-mta-harness.local.code-workspace `
-  -Action Import -PackagePath 'C:\troca\issue.zip' -SourceMapPath .\sources.json -Preview -OutputFormat Json
-```
-
-`READY` significa que a pre-validacao passou; `IMPORTED` informa importacao nova
-ou reutilizada. A escrita ainda pode falhar por permissao, concorrencia ou disco;
-falhas antes da publicacao removem somente os arquivos/diretorios criados pela
-chamada. A atualizacao do indice e informada separadamente.
+Para comparar apenas o estado local, substitua `-ReceivedPath ...` por
+`-LocalOnly` e informe o motivo concreto. Use o caminho do prompt devolvido;
+nenhum destes comandos executa o agente ou encerra a comparacao.
 
 ## Ensaio em pequena escala
 
-Na maquina de trabalho, conclua uma fatia de 10% de uma categoria, exporte a
-analise e importe em outra raiz com fontes locais. Confira que continuar exclui
-as examinadas sem mudar o total inicial. Escolha uma ficha recebida, produza seu
-plano/to-do, exporte o plano e importe em um terceiro ambiente de ensaio. Confira
-leitura, links e preparo de implementacao sem o MTA original. Reimporte o mesmo
-ZIP apos uma nota local no plano e confira que a nota permanece. Esse roteiro
-nao exige executar a corretiva nem concede aceite sobre a aplicacao.
+Use projetos sinteticos em outra raiz. Copie uma analise com fichas/anexos e
+confira que os links abrem. Concilie o par contexto/ranking, preservando base e
+examinadas, inclusive sem recomendacao. Escolha uma issue e prepare seu plano.
+Copie a proposta para outro projeto associado ao Source local, acrescente uma
+nota local e receba uma contribuicao divergente. A nota deve permanecer; conflito
+fica visivel ate a decisao. Confira que ausencia do MTA limita o detalhe, mas
+permite abrir o plano. Nao e necessario executar corretivas para esse ensaio.
 
 ## Resultado e proximo passo
 
-Na exportacao, confira o ZIP e as lacunas informadas. Na importacao, use os caminhos
-devolvidos e o registro local: analise recebida permite continuar a categoria ou
-escolher uma ficha para planejar; proposta recebida segue para revisao de escopo/GO.
-Se preferir continuar sem helper, siga o [planejamento](planejamento-migracao.md#qual-caminho-seguir)
-ou a [priorizacao](priorizacao-issues.md#fatias-e-continuidade), conforme a etapa.
+Use os links do indice local para retomar o trabalho. Para a proxima etapa, siga
+o [planejamento](planejamento-migracao.md#qual-caminho-seguir) ou a
+[priorizacao](priorizacao-issues.md#fatias-e-continuidade). A ultima comparacao e
+suas pendencias ficam em `reconciliado/resultado.md`; compartilhamento por copia
+nao requer manter um historico tecnico de transferencias.

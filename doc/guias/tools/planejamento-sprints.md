@@ -26,7 +26,7 @@ Confira o que ja esta registrado e me indique a tarefa e a proxima acao.
 Se houver um cenario vinculado, quero recuperar suas restricoes e lacunas.
 ```
 
-Para retomar, indique o planejamento/revisao ou seu `contexto.json` quando o
+Para retomar, indique o cenario ou seu `contexto.json` quando o
 helper ainda nao tiver essa referencia. Ele recupera os arquivos e entrega a
 mensagem com o caminho real. O helper nao executa a tarefa, nao preenche os
 arquivos e nao valida o cronograma. A elaboracao ocorre no executor do prompt
@@ -59,7 +59,9 @@ Sem executor, o preenchimento manual mantem os mesmos arquivos e a validacao.
 1. Execute **Planejamento: planejar sprints** e escolha **Novo cenario**.
 2. Selecione **Todos os projetos do workspace** ou **Subconjunto**. Confira a
    previa de nomes/Sources e lacunas antes de confirmar o escopo.
-3. Confirme o escopo e suas lacunas. A tarefa prepara as referencias/contexto;
+3. Informe um nome funcional para o cenario e escolha o projeto mestre entre os
+   participantes quando houver mais de um. Confirme o escopo e suas lacunas.
+   A tarefa prepara as referencias/contexto;
    datas, equipe, prazo e limites sao perguntados pelo prompt executado.
 4. Abra o prompt preparado pelo caminho exibido. No Codex, envie ao agente
    principal: **Execute o prompt deste arquivo: `<caminho real>`**. No Copilot,
@@ -74,12 +76,12 @@ Sem executor, o preenchimento manual mantem os mesmos arquivos e a validacao.
    **Validar e gerar cronograma** para a revisao selecionada.
    Para reunir essas respostas numa mensagem, adapte o
    [exemplo de complemento](#exemplo-de-complemento-ao-prompt).
-6. Leia `validacao.json` e `planejamento-sprints.md`: lacunas, gargalos, limites
+6. Leia `resultado.json` e `plano.md`: lacunas, gargalos, limites
    e premissas precisam estar explicitos antes de considerar a previsao.
 7. Execute o prompt de analise `revisar-sprints.prompt.md` oferecido pela tarefa.
    Ele explica o resultado em somente leitura e aponta divergencias concretas.
    Para alterar dados ou narrativa, use **Revisar**, execute o prompt principal
-   preparado para a nova revisao e valide novamente pela mesma tarefa.
+   atualizado nos mesmos destinos e valide novamente pela mesma tarefa.
 
 A validacao do retorno do agente e deterministica. Se o cronograma nao atender
 as restricoes, confira a comparacao de limites e a secao **Fora do horizonte /
@@ -113,7 +115,7 @@ explicitamente as escolhas que esta mudando e o motivo, sem repetir todo o exemp
 
 ```text
 Use estas decisoes como complemento ao prompt principal. Preserve contexto,
-destinos, IDs e revisao preparados. Nao reinicie o planejamento nem repita
+destinos e cenario preparados. Nao reinicie o planejamento nem repita
 perguntas ja respondidas aqui. Pergunte apenas lacunas ou contradicoes relevantes.
 
 ESCOPO
@@ -184,79 +186,56 @@ calculados. Enviar respostas ao agente nao executa a tarefa de validacao.
 
 | Acao | Quando usar | Resultado a conferir |
 | --- | --- | --- |
-| Novo cenario | Primeira visao, outro conjunto de projetos ou alternativa independente solicitada pelo humano. | Novo PlanningId, escopo concreto e restricoes/lacunas. |
-| Retomar | Continuar o preenchimento da revisao escolhida com as mesmas entradas. | Mesmos destinos e escolhas preservadas. |
-| Revisar | Mudaram fontes, restricoes, equipe ou o escopo, com motivo concreto. | Novo RevisionId, motivo e referencia anterior preservada. |
-| Validar e gerar cronograma | JSON e narrativa estao preenchidos ou voce quer conferir as lacunas atuais. | Calculos/diagnosticos, validacao.json e blocos calculados atualizados. |
+| Novo cenario | Primeira visao ou alternativa independente solicitada | Nome funcional, mestre Maven e participantes confirmados |
+| Retomar | Continuar o cenario escolhido | Mesmos destinos, escolhas e ultimo calculo preservados |
+| Revisar | Fontes, restricoes, equipe ou escopo mudaram | Motivo e referencias atualizados no mesmo conjunto corrente |
+| Validar e gerar cronograma | Conferir premissas/estimativas e calcular | Plano e resultado publicados juntos, com limites/lacunas |
 
-Escolha o cenario/revisao pelo vinculo ou pela lista apresentada; a tarefa nao
-elege um arquivo pela data de modificacao. Retomar conserva a lista concreta
-de Sources: adicionar uma pasta ao workspace nao amplia o cenario anterior.
-Revisar pergunta se deseja manter essa lista ou atualizar a selecao de projetos.
-Atualizar exige escolher Todos/Subconjunto, conferir a previa e confirmar
-PREPARAR, com motivo da revisao. B0 congelada permanece fixa; inclusoes
-posteriores ficam separadas em Changes.New.
-Mudanca de fonte exige revisar, sem editar hashes do contexto para aceita-la.
-Depois que validacao.json existir, a revisao validada e preservada. Para mudar
-seus dados ou narrativa, escolha Revisar e informe o motivo. Retomar pode
-consultar os arquivos; editar uma revisao ja validada faz a tarefa rejeitar
-a republicacao, preservando os resultados anteriores.
+Escolha o cenario pelo nome e participantes; data de arquivo nao escolhe a frente.
+Retomar conserva a lista concreta de projetos. Revisar pergunta se deseja manter
+a lista ou atualizar a selecao; alteracao exige motivo e confirmacao PREPARAR.
+B0 formada permanece fixa; inclusoes posteriores ficam separadas em Changes.New.
+
+Premissas e narrativa sao editadas no lugar. Revisar atualiza as orientacoes e
+as referencias; nao cria uma cadeia de revisoes. Validar calcula com as entradas
+atuais, preservando B0, inclusoes e consumo anterior de fases. Se o preparo ou
+validacao falhar, o ultimo calculo permanece disponivel e identificado como tal;
+sua existencia nao valida edicoes posteriores.
 
 ### Arquivos e preenchimento manual
 
-Cada revisao usa os caminhos informados pelo preparo:
+O projeto mestre guarda o conjunto corrente, e os indices dos participantes
+abrem o mesmo plano:
 
 ```text
-.harness/sprints/<PlanningId>/
-  atual.json
-  revisoes/<RevisionId>/
-    contexto.json
-    preparo.json
-    planejamento-sprints.json
-    planejamento-sprints.md
-    planejar-sprints.prompt.md
-    revisar-sprints.prompt.md
-    validacao.json
+.harness/projetos/<mestre>/atual/sprints/<cenario>/
+  contexto.json
+  planejamento-sprints.json
+  plano.md
+  planejar-sprints.prompt.md
+  revisar-sprints.prompt.md
+  resultado.json
 ```
 
-`preparo.json` vincula os hashes do contexto e do prompt de analise; preserve o selo.
-`atual.json` e o ponteiro da revisao consistente; ele so e atualizado pela
-validacao apropriada. `validacao.json` e produzido pelo calculador. Essas saidas
-nao substituem uma decisao humana. Uma validacao estrutural pode publicar um
-rascunho `NAO_AVALIAVEL`; isso nao declara que o prazo cabe. Os arquivos locais
-nao acompanham clone/pull.
+O contexto informa participantes, fontes e destinos. O desenvolvedor pode
+complementar o pedido com links legiveis aos registros, fichas e ultimas
+evidencias, como no [planejamento manual](planejamento-migracao.md#montar-as-referencias-manualmente).
+Nao e necessario interpretar hashes ou IDs de execucao. A operacao automatizada
+usa o contexto preparado e os dados editaveis do cenario escolhido.
 
-O contexto declara ContextPath, PromptPath, SprintDataPath, SprintPlanPath,
-ValidationPath, ReviewPromptPath (novos contextos) e Previous. Projects identifica cada projeto/Source, registro,
-base, origem, issues, lacunas e candidatos de planejamento/priorizacao.
-References lista caminhos, hashes, disponibilidade e tipo das fontes usadas.
-Essas referencias sao somente leitura; nao altere o contexto para adicionar
-chaves ou aceitar uma fonte modificada.
+Leia o JSON inicial, WorkTemplate/StaffingTemplate e o
+[contrato dos dados](../../especificacoes/planejamento-sprints.md).
+Work registra macroatividades, estimativas restantes, dependencias, fase,
+prioridade, fontes, confianca, premissas e aceite; Team registra disponibilidade;
+Constraints registra restricoes humanas. Dados ausentes ficam a estimar.
+Nao converta pontos MTA ou contagem de issues em dias automaticamente.
 
-Leia o JSON inicial, WorkTemplate do contexto e o
-[contrato dos dados](../../especificacoes/planejamento-sprints.md) como formato de preenchimento:
-mantenha os nomes e tipos dos campos prontos. Work registra macroatividades e estimativas restantes por
-papel; Team registra disponibilidade; Constraints registra restricoes informadas.
-Cada atividade referencia Source/Id, dependencias, fase, prioridade, faixa de
-esforco, origem, confianca, premissas e aceite. Dados ausentes ficam a estimar,
-sem conversao automatica de pontos MTA ou quantidade de issues em dias.
-Use StaffingTemplate para Team.Staffing, uma linha por sprint, e confirme
-Team.RolesAreDistinct conforme as pessoas disponiveis; null nao significa
-que ha capacidades independentes confirmadas.
-
-O agente ou autor manual edita somente dados proprios autorizados e narrativa.
-Preserve contexto, escopo/referencias/hashes, baseline B0 apos seu congelamento
-confirmado na validacao, arquivos anteriores e
-os marcadores `<!-- sprints:inicio -->` e `<!-- sprints:fim -->` no Markdown.
-O trecho entre esses marcadores e atualizado somente pelo renderizador; fora
-dele, o texto editorial pode ser completado. Os blocos calculados sao atualizados pela
-validacao. Nao substitua dados humanos por inferencia nem preencha resultados
-calculados manualmente para aparentar viabilidade.
-
-Se JSON e Markdown manualmente editados divergirem, concilie explicitamente
-antes de validar. O JSON fornece os dados do calculo; a narrativa explica
-objetivos, premissas e decisoes, sem contradizer esses dados. Erro nao autoriza
-reescrever historico nem trocar a base de modo silencioso.
+Edite os dados proprios autorizados em `planejamento-sprints.json` e a narrativa
+de `plano.md`. Preserve os marcadores `<!-- sprints:inicio -->` e
+`<!-- sprints:fim -->`: somente o calculador atualiza o trecho entre eles e
+`resultado.json`. Fora do bloco, preserve notas e concilie texto que ficou
+desatualizado. A narrativa explica as premissas do JSON; divergencias exigem
+conferencia antes da validacao, sem fabricar viabilidade.
 
 ### Equipe, limites e estimativas
 
@@ -291,7 +270,7 @@ sem percentual padrao ou ganho garantido. Se a estimativa ja incluia IA, concili
 a base primeiro para evitar desconto duplo. QA sem dimensionamento e reforco
 eventual de equipe continuam premissas/alternativas, fora da capacidade base.
 
-O inicio de sprints ja publicado fica fixo; outro calendario exige Novo cenario.
+O inicio de sprints ja publicado fica fixo; outro inicio exige Novo cenario.
 ReferenceDate nao retrocede nas revisoes, e sprints ja encerradas permanecem
 como historico. O consumo anterior de cada fase continua contando no teto,
 inclusive entre revisoes na sprint em andamento. Informe esforco e ausencias
@@ -328,17 +307,17 @@ Arquivos adicionais fornecidos pelo desenvolvedor podem fundamentar as faixas
 em Work.References e EstimateSource. O executor precisa le-los e registrar fonte,
 confianca, premissas e motivo de qualquer mudanca, incluindo impacto em
 dependencias, risco e prazo. Caminho inexistente ou nao lido nao e evidencia.
-Na validacao, EstimateEvidence captura os caminhos/hashes usados; preserve essa
-saida. Se as fontes mudarem, Revisar permite comparar as referencias anteriores,
-atuais e InputChanges. Uma EvidenceReview pendente exige comparacao e
-justificativa antes de afirmar viabilidade, preservando a revisao anterior.
+Na validacao, EstimateEvidence informa caminho e situacao das referencias.
+Se as fontes mudaram, releia e confira o efeito nas estimativas antes de validar.
+EvidenceReview registra essa conferencia e sua justificativa; nao e selo,
+autorizacao ou comparacao automatica entre versoes antigas.
 
 ### Baseline, progresso e revisao
 
 Antes do congelamento de B0, o prompt registra ScopeCategories como mandatory
 ou mandatory + optional, conforme a escolha humana registrada em ScopeDecision
 (obrigatoria para incluir optional), e forma Baseline.Issues
-com as identidades Source/Id correspondentes de Projects.Issues. Baseline.Known
+com as identidades Project/Id e Source local correspondentes de Projects.Issues. Baseline.Known
 e informado pelo preparo conforme a disponibilidade/validade dos registros;
 o agente nao altera esse campo por inferencia. A primeira validacao com denominador conhecido declara
 BaselineFrozen=true e fixa esse conjunto e seu denominador; inclusoes posteriores ficam
@@ -355,7 +334,7 @@ e realizado; uma contagem agregada nao prova resolucao de todas as ocorrencias.
 Todas as pendentes do recorte devem estar em Work, mesmo a estimar; Unscheduled
 e a saida calculada das nao alocadas e seus motivos, sem exclusao silenciosa.
 
-Uma revisao nova preserva a anterior e declara motivo e impacto. O calculo
+Uma revisao atualiza o mesmo cenario e registra motivo e impacto. O calculo
 explicita escopo nao estimado, bloqueado ou fora do horizonte. Se faltarem
 evidencias para comparar, registre a limitacao; nao declare recuperacao do prazo
 ou conclusao global por reduzir o catalogo.
@@ -380,17 +359,10 @@ diarios permanece apenas na matriz por sprint. A tabela de prazos compara janela
 informadas e conclusao prevista; N/A nao demonstra atendimento. Trabalho em
 Unscheduled continua no escopo, parcialmente ou totalmente sem alocacao.
 Se o resultado calculado exigir ajustar objetivos/HUs ou outra parte
-editorial, use Revisar antes de editar a revisao publicada e valide a nova revisao.
-Lacunas e conflitos exigem completar a revisao ou criar revisao com motivo
-pela mesma tarefa. Para detalhar a corretiva escolhida, volte ao
+editorial, concilie a narrativa corrente e valide novamente. Use Revisar para
+atualizar referencias e premissas com motivo concreto pela mesma tarefa. Para detalhar a corretiva escolhida, volte ao
 [planejamento por issue](planejamento-migracao.md#qual-caminho-seguir).
 
-Apos atualizar o harness, use **Revisar** para adotar estes campos, o template e
-os prompts corrigidos num planejamento ja validado. Informe o motivo e preserve
-as datas/equipe/escopo confirmados. Nao edite a publicacao antiga nem os hashes
-para aceitar a mudanca de contrato. O prompt principal concilia a narrativa da
-nova revisao; o prompt de analise posterior explica o novo resultado sem altera-lo.
-
-O [template editorial](../../modelos/planejamento-sprints.template.md) mantem a
-forma da visao sintetica. A [feature MACRO-01](../../features/planejamento-macro-sprints.md)
-registra requisitos e limites da capacidade; este guia concentra o uso cotidiano.
+Apos atualizar o harness, use **Revisar** para atualizar orientacoes do cenario,
+preservando datas, equipe e escopo confirmados. Consulte o plano pelo indice do
+projeto mestre ou dos participantes. Nao e preciso localizar revisoes por IDs.

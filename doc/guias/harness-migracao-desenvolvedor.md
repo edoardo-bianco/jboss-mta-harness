@@ -46,7 +46,7 @@ que a detalha. Configuracao, menus, comandos e alternativas de execucao ficam
 nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 
 O [cheat sheet das Run Tasks](../arquitetura/cheat-sheet-run-tasks.md) oferece
-uma consulta compacta das 27 tarefas, incluindo o planejamento por sprints.
+uma consulta compacta das 25 tarefas, incluindo o planejamento por sprints.
 
 **Para receber orientacao, siga o [guia de orientacao da migracao com Codex ou GitHub Copilot](orientacao-migracao.md).**
 Ele explica a skill `orientar-migracao`, o papel `migracao_helper`, como iniciar,
@@ -67,7 +67,7 @@ Veja [o roteiro manual e o formato das fichas](tools/priorizacao-issues.md#plane
 | Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Importe uma aplicacao externa no workspace. |
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
-| ZIP de analise ou plano recebido de um colega | [Compartilhar contextos](tools/compartilhamento-contextos.md): importar, associar Sources locais e continuar da etapa recebida. |
+| Arquivos de analise ou plano recebidos de um colega | [Compartilhar por copia](tools/compartilhamento-contextos.md): preservar a estrutura do projeto, conferir Source local e continuar da etapa recebida. |
 | Preparo a priorizacao para a equipe e cada desenvolvedor vai planejar suas issues | [Priorizacao compartilhada e planejamento por desenvolvedor](#priorizacao-compartilhada-e-planejamento-por-desenvolvedor). |
 | Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |
@@ -95,12 +95,17 @@ O guia de workspace explica a configuracao do ambiente e a selecao dos projetos.
 | Fatia | Quantidade de issues a examinar, calculada pelo percentual do total inicial fixo da sequencia. |
 | Ranking e ficha | Ranking compara as examinadas; a ficha de cada issue detalha achados, evidencias, lacunas e roteiro. |
 | Registro de migracao | Guarda a escolha atual, observacoes e andamento por issue. O indice localiza esse registro. |
-| Contexto / recibo | Arquivo que identifica as entradas e os destinos de uma solicitacao; seu caminho e informado como ContextPath. |
-| Plano, to-do e lote | A proposta da corretiva, suas tarefas e o recorte coerente a executar. Novos planejamentos pertencem a uma issue de um projeto. |
+| Contexto corrente | Referencias e recorte do projeto em caminhos fixos; ContextPath localiza o arquivo preparado pela tarefa. O desenvolvedor tambem pode montar referencias legiveis no pedido. |
+| Plano, tarefas e lote | Proposta corrente da corretiva, passos e recorte coerente de issues do projeto. |
 | Planejamento por sprints | Visao macro de prazo, equipe e trabalho restante; referencia os lotes e preserva suas revisoes/GO separados. Veja o [guia](tools/planejamento-sprints.md). |
 
-Os nomes concretos dos arquivos vem da tarefa/recibo. Nao crie `plan.md` e
-`todo.md` avulsos: use os caminhos informados, que identificam a issue.
+Os documentos ficam em `.harness/projetos/<artifactId>/`: `migracao.md`,
+`indice.md`, `atual/planejamento/plano.md` e `tarefas.md`, fichas e evidencias.
+O indice geral `.harness/indices/projetos.md` leva aos links de cada projeto.
+A parte dinamica do pedido pode ser [montada pelo desenvolvedor](tools/planejamento-migracao.md#montar-as-referencias-manualmente)
+com projeto, objetivo e referencias aos arquivos correntes. Guias e contratos
+formam a base local de consulta do agente, recuperada conforme a etapa e citada
+por links; busca semantica/RAG automatizado permanece uma evolucao futura.
 
 ## Roteiro: onde estou e o que escolho
 
@@ -156,13 +161,13 @@ compilacao/testes precisam de tratamento. Build e MTA sao operacoes separadas.
 
 ### 3. Obter ou reutilizar o diagnostico MTA
 
-O **MTA** identifica pontos de atencao para a migracao e preserva o codigo
-analisado e seus resultados. Uma rodada existente ou recebida pode alimentar
-o planejamento, desde que sua aplicabilidade ao codigo local seja conferida.
+O **MTA** identifica pontos de atencao para a migracao. O relatorio corrente,
+local ou recebido, pode alimentar o planejamento quando sua aplicabilidade ao
+codigo local for conferida. Fontes e detalhes sao consultados diretamente.
 
 **Guias da etapa:** [MTA: configuracao e uso](tools/mta.md), para produzir e
 consultar o diagnostico; [Planejamento: MTA existente ou recebido](tools/planejamento-migracao.md#compartilhar-o-mta-e-planejar-em-outra-maquina),
-para reutilizar uma rodada. Esse segundo caminho dispensa repetir a analise
+para reutilizar um relatorio. Esse segundo caminho dispensa repetir a analise
 apenas para preparar uma proposta.
 
 **Resultado esperado e continuidade:** diagnostico identificado, com divergencias
@@ -178,7 +183,7 @@ dos projetos e um registro de migracao por projeto. O indice resume evidencias
 e pendencias; o registro preserva decisoes, prioridades e andamento.
 O desenvolvedor decide o que merece analise agora e o que fica para depois.
 
-Se faltar o registro e nao houver ZIP de contexto para importar, execute
+Se faltar o registro, execute
 **Workspace: atualizar indice dos projetos** e
 confira o link criado. No registro, marque **Decisao = ANALISAR AGORA** e descreva
 recorte/evidencias nas observacoes. **Andamento** continua refletindo o trabalho
@@ -188,7 +193,7 @@ O indice localiza os documentos; sua escolha atual fica no registro, sem precisa
 ser repetida no indice, ranking e prompt.
 
 **Guia da etapa:** [Planejamento: indice, registro e caminhos de retomada](tools/planejamento-migracao.md#qual-caminho-seguir).
-Ele explica como consultar o historico, interpretar os estados e atualizar o registro.
+Ele explica como consultar os documentos correntes, interpretar estados e atualizar o registro.
 
 Se ainda nao escolheu a issue, use o [guia de priorizacao de issues](tools/priorizacao-issues.md).
 A Run Task **Planejamento: priorizar issues** prepara uma comparacao opcional
@@ -207,39 +212,23 @@ o escopo atual pode retomar a etapa 6.
 
 #### Priorizacao compartilhada e planejamento por desenvolvedor
 
-Quando uma pessoa prepara a analise comum e cada desenvolvedor vai planejar e
-implementar suas issues, o fluxo recomendado e **compartilhar a priorizacao
-concluida**. Nao e necessario elaborar os planos individuais na maquina de quem
-prioriza. A equipe combina quem trabalha em cada issue; o ranking recomenda
-prioridades, sem distribuir trabalho ou conceder GO automaticamente.
+Quando uma pessoa prepara a analise comum, pode compartilhar a priorizacao
+concluida por copia. Cada desenvolvedor confere os fontes locais, escolhe sua
+issue e prepara o lote. A equipe coordena o trabalho; ranking nao distribui
+responsabilidades nem concede GO.
 
 | Quem | Responsabilidade e passagem |
 | --- | --- |
-| Quem prepara a analise comum | Concluir a fatia/sequencia pretendida, conferir ranking, fichas e evidencias referenciadas e exportar a analise por **Planejamento: compartilhar contexto**. |
-| Cada desenvolvedor que recebe | Importar o ZIP pela mesma tarefa, associar os projetos aos fontes locais e usar o ContextPath devolvido. |
-| Quem planeja sua issue | Registrar a escolha **ANALISAR AGORA** e o recorte, vinculando ou preservando a referencia da ficha; usar **Planejamento: planejar** e executar o prompt preparado ou elaborar manualmente plano/to-do. |
-| Quem implementa | Conferir o plano, o codigo local e o GO; seguir a [etapa 6](#6-implementar-o-lote-autorizado), depois verificacoes e aceite. |
+| Quem prepara a analise | Concluir a fatia; copiar o par contexto/ranking, fichas e anexos dos participantes, preservando estrutura relativa. |
+| Quem recebe | Copiar para a pasta do projeto, conferir associacao ao POM local e links; conciliar contribuicoes se ja existir trabalho local. |
+| Quem planeja | Registrar ANALISAR AGORA, recorte e referencia da ficha; preparar a proposta pela tarefa ou redigir nos mesmos destinos. |
+| Quem implementa | Conferir plano, codigo e GO; seguir a [etapa 6](#6-implementar-o-lote-autorizado), depois verificacoes e aceite. |
 
-O preparo do plano recupera a ficha e os anexos **referenciados** no registro ou
-indice de evidencias da issue. O executor usa o plano/to-do e essas evidencias
-consolidadas, conferindo o codigo local. Uma ficha pronta nao substitui o plano;
-preparar o prompt nao significa executa-lo. Consulte o
-[dossie e a passagem entre colegas](tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas).
-
-Antes da primeira importacao, configure a maquina e abra o workspace com os
-fontes locais; importe antes de inicializar registros para os projetos recebidos.
-Se ja houver registro/trabalho local, preserve-o e confira os
-[conflitos e limites](tools/compartilhamento-contextos.md#conflitos-e-limites): o
-importador nao mescla pacotes nem substitui registros existentes. O ZIP nao
-sincroniza as corretivas no codigo local.
-
-O [conteudo e ponto de exportacao](tools/compartilhamento-contextos.md#qual-ponto-compartilhar)
-e o [procedimento de importacao e continuidade](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe)
-ficam no guia de compartilhamento. A sequencia exportada leva suas fichas e
-historico; 100% examinadas significa cobertura da analise, nao issues resolvidas,
-e nao e requisito para compartilhar uma fatia concluida. Se o plano/to-do ja
-estiver elaborado e a intencao for entrega-lo ao implementador, compartilhe o
-**planejamento da issue** em vez de exigir que ele refaca a proposta.
+Consulte [onde copiar e como continuar](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe).
+Fichas e anexos sao referencias diretas; copiar documentos nao sincroniza o
+codigo da aplicacao. Uma ficha nao substitui o plano. Se a proposta ja existe,
+compartilhe plano/tarefas e suas referencias para evitar refaze-la.
+100% examinadas significa cobertura da analise, nao issues resolvidas.
 
 ### 5. Planejar e revisar um lote
 
@@ -248,16 +237,13 @@ e evidencias para propor um lote consistente de corretivas. Plano e to-do
 delimitam escopo, cobertura, verificacoes e criterios de aceite.
 A revisao humana decide se a proposta esta pronta para receber GO.
 
-Use apenas **Terminal > Run Task > Planejamento: planejar**. A tarefa recupera
-registro e referencias; prepara o contexto da proposta ou retoma a solicitacao vinculada.
-Em contexto local, se evidencias, origem MTA, contrato ou template mudaram,
-prepara um contexto sucessor preservando o anterior; use o prompt indicado. Observacoes
-e escolhas atuais sao recuperadas sem pedir que voce atualize o historico.
-Nao ha menu para escolher "planejar/replanejar" ou repetir a rodada. Havendo varios
-registros possiveis, pergunta somente qual usar. Uma proposta com base EVIDENCIAS
-usa as entradas humanas, sem inventar MTA. A falta do MTA de uma proposta existente
-nao muda sua base. Em [plano importado](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe),
-entradas alteradas interrompem a retomada para reavaliacao explicita.
+Use **Terminal > Run Task > Planejamento: planejar**. A tarefa recupera registro
+e referencias e prepara ou retoma o contexto nos mesmos destinos correntes.
+Plano, tarefas e texto humano sao preservados. Mudancas de escopo, base ou
+referencias pedem revisao da proposta e do alcance do GO.
+Havendo varios registros possiveis, pergunta somente qual usar. A base EVIDENCIAS
+usa as entradas humanas; MTA indisponivel permanece uma lacuna da base MTA.
+Arquivos recebidos seguem a [conferencia local](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe).
 
 Para elaborar com IA, execute o prompt preparado no cliente atual. Se faltar uma decisao essencial,
 o agente pergunta antes de concluir PlanPath/TodoPath. Responda no mesmo chat; nao
@@ -266,7 +252,7 @@ na proposta. Veja os [passos e a mensagem curta por cliente](tools/planejamento-
 Para elaborar manualmente, use as fichas/evidencias e redija plano e to-do nos
 caminhos indicados pelo contexto do lote. Siga o [roteiro manual](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao)
 e os mesmos criterios de escopo, revisao e GO.
-Novas propostas usam [dossie e modelos padronizados por issue](tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas),
+Propostas usam [fichas e modelos padronizados](tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas),
 com ficha/anexos de entrada e passos que outro colega pode executar manualmente
 ou com agente de codificacao. A pasta usa artifactId; o orientador continua leitor.
 
@@ -330,8 +316,8 @@ Ela nao e uma etapa obrigatoria antes de cada planejamento. Marcar uma escolha
 ou acrescentar observacao coerente permite seguir para **Planejar**. Um bloco
 antigo PENDENTE exige conferir o motivo, sem invalidar a escolha atual nem ser
 marcado CONCLUIDA automaticamente. Para adotar uma nova origem/catalogo,
-use **Planejamento: atualizar registro de migracao** para escolher a rodada local
-ou recebida, conferir a troca de origem e abrir o prompt de comparacao. Siga o
+use **Planejamento: atualizar registro de migracao** para conferir o diagnostico
+corrente e as diferencas, com pasta recebida opcional, e abrir o prompt de comparacao. Siga o
 [procedimento unico de adocao](tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente);
 o helper orienta essa tarefa e a passagem ao executor, sem executar scripts.
 Contradicao de decisoes/evidencias sem troca de base segue o prompt pertinente,
@@ -354,7 +340,7 @@ concluir suas verificacoes e obter aceite humano final, com as pendencias resolv
 
 Para retomar com apoio, informe sua intencao em uma frase. Exemplo: "Acrescentei
 evidencias no registro e quero revisar o planejamento". O helper confere projeto,
-fontes, escolhas, evidencias e solicitacao vinculada; so pergunta um caminho/ID
+fontes, escolhas, evidencias e documentos correntes; so pergunta qual projeto ou fonte
 se houver mais de uma possibilidade. Retomar em outro chat ou trocar entre Codex
 e Copilot usa os mesmos arquivos, sem repetir a escolha ou GO vigente.
 
@@ -380,7 +366,7 @@ Cada guia oferece mensagem de exemplo, resultado esperado e retorno ao fluxo pri
 | [Orientacao da migracao](orientacao-migracao.md) | Receber ajuda em qualquer etapa, no Codex ou Copilot. | [Iniciar](orientacao-migracao.md#iniciar-no-codex-ou-no-copilot), [retomar](orientacao-migracao.md#retomar-em-outro-chat-ou-cliente), [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa). |
 | [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas da categoria escolhida entre projetos; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-com-o-helper), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
 | [Planejamento por sprints](tools/planejamento-sprints.md) | Prever/revisar a migracao de um ou mais projetos no periodo e equipe informados. | [Primeira execucao](tools/planejamento-sprints.md#primeira-execucao), [acoes e retomada](tools/planejamento-sprints.md#escolher-a-acao-da-mesma-tarefa), [dados e preenchimento manual](tools/planejamento-sprints.md#arquivos-e-preenchimento-manual). |
-| [Compartilhamento de contextos](tools/compartilhamento-contextos.md) | Entregar analise ou plano a outro colega; continuar em outra maquina. | [Ponto de exportacao](tools/compartilhamento-contextos.md#qual-ponto-compartilhar), [importacao](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe), [limites](tools/compartilhamento-contextos.md#conflitos-e-limites). |
+| [Compartilhamento de contextos](tools/compartilhamento-contextos.md) | Entregar analise ou plano a outro colega; continuar em outra maquina. | [O que copiar](tools/compartilhamento-contextos.md#qual-ponto-compartilhar), [recebimento](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe), [limites](tools/compartilhamento-contextos.md#conflitos-e-limites). |
 | [Consultas de issues](tools/consultas-issues.md) | Conferir base e recuperar recortes de um contexto preparado. | Auditoria, filtros e incidentes paginados por MCP (Node >=20) ou CLI PowerShell; leitura sem alterar cobertura, escolhas ou planos. Configuracao e alternativa manual no guia. |
 | <a id="comecar-na-maquina-de-trabalho"></a><a id="extensoes-java-no-vs-code"></a><a id="escolher-o-projeto-em-cada-tarefa"></a><a id="ensaiar-e-depois-usar-os-projetos-corporativos"></a><a id="configuracao-da-maquina"></a><a id="duas-opcoes-para-configurar-o-workspace"></a><a id="opcao-a-editar-o-json-local-e-gerar-novamente"></a><a id="opcao-b-configurar-o-workspace-manualmente"></a><a id="limpar-execucoes-locais"></a><a id="pastas-locais-e-backups-temporarios"></a><a id="tarefa-e-script-correspondente"></a>[Workspace](tools/workspace.md) | Preparar ou ajustar o ambiente; selecionar projetos. | [Configuracao](tools/workspace.md#configuracao), [uso](tools/workspace.md#uso), [limpeza e dados locais](tools/workspace.md#limpar-execucoes-locais), [catalogo de tarefas](tools/workspace.md#tarefa-e-script-correspondente). |
 | <a id="build-maven-da-aplicacao-com-java-8"></a><a id="usar-a-extensao-maven-padrao-do-vs-code"></a>[Build da aplicacao](tools/maven.md) | Executar a Run Task de build ou usar Maven direto; etapas 2 e 7. | [Configuracao](tools/maven.md#configuracao), [Run Task do harness](tools/maven.md#opcao-a-run-task-do-harness), [painel Maven/terminal](tools/maven.md#opcao-b-maven-direto). |
