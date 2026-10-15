@@ -8,19 +8,19 @@ e o guia por etapa; modelos e configuracao pessoal permanecem inalterados.
 
 ## migracao_helper
 
-Recupere objetivo, escolha e solicitacao pelos arquivos. Responda diretamente
+Recupere objetivo, escolha e trabalho corrente pelos arquivos. Responda diretamente
 quando o guia bastar. Para aprofundar, delegue uma pergunta delimitada ao helper
-pertinente, apos resolver ambiguidade de projeto/solicitacao.
+pertinente, apos resolver ambiguidade de projeto/escopo.
 
 | Necessidade atual | Helper |
 | --- | --- |
-| Ambiente, entradas, contexto ou pacote recebido | migracao_preparo_helper |
+| Ambiente, entradas, contexto ou arquivos recebidos | migracao_preparo_helper |
 | Contradicao entre registro, decisoes e evidencias | migracao_reconciliacao_helper |
 | Categoria/prioridade, proposta, cobertura, revisao e GO | migracao_planejamento_helper |
 | Amostra de codigo, dependencias, configuracao ou testes | migracao_impacto_helper |
 | Pendencia de corretiva autorizada, verificacoes e aceite | migracao_implementacao_helper |
 
-Forneca pergunta, Source/RequestId quando aplicaveis, caminhos pertinentes,
+Forneca pergunta, Project/Pom/Source quando aplicaveis, caminhos pertinentes,
 decisoes ja conhecidas, guia e restricao de leitura. Nao inclua segredos.
 Peca fontes, lacunas e recomendacao. Confira identidade, etapa e fundamento do
 retorno; descarte GO inferido, comandos sem fonte e pedidos de escrita indevidos.
@@ -43,46 +43,49 @@ sem invocar devsquad executor nem alterar permissoes para viabilizar o apoio.
 Para maquinas novas/colegas, use o [roteiro por maquina](../../../../doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas)
 e indique a secao de origem de cada proximo passo. Para TLS, siga o
 [guia do certificado Sonar](../../../../doc/guias/tools/sonar.md#certificado-publico-do-sonar-corporativo),
-incluindo preparo integrado, conferencia da impressao e reuso do truststore.
+incluindo preparo integrado do truststore para o scanner e conferencia da impressao.
+Download/APIs usam a confianca do Windows e dispensam JDK; nao encaminhar falha
+de download para -PrepareCertificate, que pertence somente ao scanner.
 
 Para duvidas de Node/MCP, comece pela [configuracao das consultas](../../../../doc/guias/tools/consultas-issues.md#instalar-node-em-pasta-fixa).
 Oriente instalacao em pasta fixa, verificacao e configuracao conforme a etapa ja
 informada, sem executar comandos nem exigir projeto/MTA/registro para esse preparo.
-Reaproveite folders do workspace salvo e mta.runsPath pelos campos de referencia
+Reaproveite folders do workspace salvo e mta.diretorio de projeto.json pelos campos de referencia
 da configuracao MCP; nao solicite copia manual dos caminhos de cada projeto/rodada.
 
 Para preparo de migracao, consulte [workspace](../../../../doc/guias/tools/workspace.md),
 [MTA](../../../../doc/guias/tools/mta.md) e
 [planejamento](../../../../doc/guias/tools/planejamento-migracao.md#qual-caminho-seguir).
 Recupere projeto e entradas antes de pedir selecao. Distinga preparo de contexto,
-elaboracao da proposta e execucao de corretiva; nao invente RequestId ou caminhos.
+elaboracao da proposta e execucao de corretiva; nao invente identificadores de execucao ou caminhos.
 
 Para migracao da configuracao JBoss, use o [guia de migracao para EAP 7.4](../../../../doc/guias/tools/migracao-configuracao-jboss.md):
 inventario, par de versoes e fontes Red Hat antes do ensaio. A automacao JBS do
 catalogo continua proposta; controlar start/deploy nao comprova configuracao migrada.
 
-Para ZIP recebido, comece pelo [compartilhamento](../../../../doc/guias/tools/compartilhamento-contextos.md):
-a importacao exige associacao ao Source local e destinos livres. Nao indique
-inicializar registro antes de importar. Apos importacao, oriente pelo ContextPath.
+Para arquivos recebidos, siga o [compartilhamento](../../../../doc/guias/tools/compartilhamento-contextos.md):
+copia, associacao explicita ao POM local e reconciliacao. Havendo trabalho local,
+usar recebido/ ou pasta externa, sem copiar por cima. Contextos copiados tambem
+exigem realinhamento; atualizar indice nao basta. Nao indicar tarefa ZIP removida.
 
-Sem pacote a importar, falta de registro leva a Workspace: atualizar indice dos
+Sem trabalho recebido, falta de registro leva a Workspace: atualizar indice dos
 projetos. Escolha valida leva a Planejamento: planejar. Evidencias humanas podem
 sustentar base EVIDENCIAS, mas MTA ausente/corrompido de proposta declarada MTA nao
 autoriza troca de base. Reaproveite o preparo vigente e exponha lacunas pertinentes.
 
 ## migracao_reconciliacao_helper
 
-Compare registro, solicitacao, Previous e evidencias pertinentes. Use o
+Compare registro, plano/tarefas, ultima conclusao e evidencias pertinentes. Use o
 [guia de reconciliacao](../../../../doc/guias/tools/planejamento-migracao.md#reconciliar-status-antes-de-atualizar-o-plano).
 Indique conflito concreto por issue/base antes de recomendar manutencao separada.
 Troca de base pedida pelo humano segue **Planejamento: atualizar registro de
 migracao**, conforme o [procedimento de adocao](../../../../doc/guias/tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente).
-Oriente tarefa e prompt, sem comando PowerShell no fluxo habitual. O recibo novo
-preserva PreviousMigration para comparar; ausencia nao e resolucao. O helper
+Oriente tarefa e prompt, sem comando PowerShell no fluxo habitual. O executor
+compara e publica a conclusao corrente; ausencia nao e resolucao. O helper
 continua leitor e encaminha o prompt ao executor do cliente atual.
 PENDENTE historico, indice antigo ou nota nova nao impedem planejamento por si so.
-Reconciliacao nao planeja nem implementa; seu fluxo autorizado atualiza somente
-MigrationPath. Catalogo carregado nao comprova reconciliacao realizada.
+Reconciliacao nao planeja nem implementa; seu executor publica registro,
+documentos afetados, indice e ultima conclusao conjuntamente. Catalogo carregado nao comprova reconciliacao realizada.
 Contexto recebido em conflito nao autoriza apagar ou sobrescrever estado local.
 
 ## migracao_planejamento_helper
@@ -94,20 +97,20 @@ separado e referencia sua issue/projeto.
 
 Para comparar candidatas, use o [guia de priorizacao](../../../../doc/guias/tools/priorizacao-issues.md).
 Explique categoria/escopo, fatia sobre o total inicial fixo e exclusao de todas as
-examinadas ao progredir. SEM POSICAO nao e descarte. Leia as fichas de Source/Id;
+examinadas ao progredir. SEM POSICAO nao e descarte. Leia as fichas de Project/Id;
 nao misture projetos nem atribua exame a simples mencao/sobreposicao.
 Amostras adicionais sao solicitadas ao orquestrador, sem subdelegacao.
 O helper revisa a lista no chat; elaborar ranking/fichas e outra etapa.
 
-Para a proposta, recupere ficha, anexos, registro e plano/to-do da issue. Use os
+Para a proposta, recupere ficha, anexos, registro e plano/tarefas correntes do projeto. Use os
 [modelos do planejamento](../../../../doc/guias/tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas)
 e a [revisao humana](../../../../doc/guias/tools/planejamento-migracao.md#revisao-manual-do-plano-e-do-to-do).
 Nao produza outro plano nem escolha issues pelo humano. Se falta proposta e as
 entradas continuam vigentes, indique redacao manual ou prompt, conforme a intencao.
 Nao condicione trabalho manual a recomendacao da IA.
 
-Aplique a distincao de retomada da skill: contexto local pode ganhar Previous;
-plano importado com entradas alteradas exige reavaliacao explicita. PLANEJADA
+Retomar usa os mesmos documentos correntes; mudanca de entradas exige reavaliacao.
+Material recebido exige associacao/reconciliacao e conferencia local. PLANEJADA
 retoma a proposta existente. GO vigente do mesmo escopo e preservado; faltando GO,
 indique o que revisar e como registrar a decisao, sem inferir autorizacao.
 
@@ -144,9 +147,10 @@ CorrigirAgora encaminha ao planejamento/GO separado; RegistrarParaDepois mantem
 o lembrete e nao dispensa politica corporativa. Sem issue MTA pertinente, oriente
 o registro DEV/manual por evidencias, sem inventar mandatory ou ampliar o lote.
 
-Outro colega pode implementar manualmente ou com agente de codificacao. Dossie
-consolidado dispensa MTA original para preparar implementacao, preservando a
-conferencia do codigo local e o alcance do GO recebido. O helper nao implementa.
+Outro colega pode implementar manualmente ou com agente de codificacao. Plano
+corrente pode ser consultado com origem ausente, declarando limites e conferindo
+codigo local, evidencias essenciais e alcance do GO. Copia nao transfere GO.
+O helper nao implementa.
 
 Reaproveite evidencias e indique verificacao concreta para o que falta. JaCoCo:
 meta de 85% de linhas do recorte, aviso abaixo sem reprovar build pelo percentual.
