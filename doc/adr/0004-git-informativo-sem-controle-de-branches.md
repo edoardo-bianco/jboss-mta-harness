@@ -7,6 +7,12 @@ html:
 
 # ADR-0004: Git informativo, sem controle de branches no harness
 
+**Atualizacao operacional — 15/10/2026:** a [ADR-0009](0009-estado-corrente-por-projeto.md)
+rege o estado corrente desta versao; integracao e aceite humano sao acompanhados
+no [plano](../../tasks/plan.md).
+Git continua informativo. As referencias abaixo a recibos, snapshots e hashes
+persistidos sao historicas; diferencas Git nao exigem novo contexto por si so.
+
 Status: aceita pelo desenvolvedor em 2026-09-28.
 Substitui os requisitos de cadastro e bloqueio Git da ADR-0003. Preserva a
 separacao entre evolucao do harness e corretivas da aplicacao da ADR-0002.

@@ -7,6 +7,12 @@ html:
 
 # ADR-0002: separar evolucao do harness e migracao progressiva das aplicacoes
 
+**Atualizacao operacional — 15/10/2026:** a [ADR-0009](0009-estado-corrente-por-projeto.md)
+rege o estado corrente desta versao; integracao e aceite humano sao acompanhados
+no [plano](../../tasks/plan.md).
+Permanecem separacao harness/aplicacao, lote delimitado e GO/aceite humanos.
+Os caminhos antigos de planning/priorizacao e o rastreamento abaixo sao historicos.
+
 Status: aceita pelo desenvolvedor em 2026-09-27.
 
 Complemento em 2026-10-04: a [ADR-0005](0005-planejamento-orientado-pelo-registro.md)
