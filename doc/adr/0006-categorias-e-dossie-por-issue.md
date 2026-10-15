@@ -1,5 +1,12 @@
 # ADR-0006: categorias e dossie por issue
 
+**Atualizacao operacional — 15/10/2026:** a [ADR-0009](0009-estado-corrente-por-projeto.md)
+substitui o mecanismo abaixo nesta versao; integracao e aceite humano ficam no
+[plano](../../tasks/plan.md). O corpo preserva o registro da decisao anterior.
+Permanecem categorias independentes e fichas por issue. Recibos v4, hashes,
+dossies consolidados e Previous abaixo sao historicos; o fluxo corrente usa
+B0/examinadas acumuladas, fontes diretas e um plano/tarefas por projeto.
+
 Status: aceita para implementacao; ensaio humano na maquina de trabalho pendente.
 Data: 2026-10-06.
 
