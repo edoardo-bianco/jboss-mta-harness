@@ -68,6 +68,7 @@ Copy-Item -LiteralPath (Join-Path $root 'scripts') -Destination $fixture -Recurs
 $config = Get-Content -LiteralPath (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @()
 $config.activeProject = $null
+$config.sonar.serverUrl = 'http://localhost:9000'
 $configPath = Join-Path $fixture 'config.json'
 $config | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $configPath -Encoding UTF8
 $originalConfig = (Get-FileHash $configPath).Hash
@@ -88,6 +89,10 @@ $sonarArguments = @($sonarTask[0].args | ForEach-Object {
 $sonarArguments += @('-ConfigPath', $configPath)
 $output = 'q' | & powershell.exe @sonarArguments 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Token Sonar')) 'Cancelamento Sonar deve preceder pedido de token e envio.'
+$output=@('3','1','q') | & powershell.exe @sonarArguments 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Nenhum scanner sera executado') -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Token Sonar')) ('Menu de download deve chegar a chave sem toolchain ou rede: '+$output)
+$output=@('1','q') | & powershell.exe @sonarArguments -Action Download 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Nenhum scanner sera executado') -and $output.Contains('Selecao cancelada')) ('Action Download deve chegar a chave sem toolchain: '+$output)
 $implementationArguments = @($implementationTask[0].args | ForEach-Object {
     $_.Replace('${workspaceFolder}', $fixture).Replace('${input:harnessWorkspacePath}', $workspacePath).Replace('${execPath}', (Join-Path $fixture 'editor-ausente.exe'))
 })

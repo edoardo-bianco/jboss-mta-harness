@@ -810,7 +810,8 @@ equivalente; (2) coletor do servidor e testes sem ferramentas instaladas;
 (3) menu/CLI, guia e navegacao; (4) revisao independente e regressao Sonar.
 Scripts seguem PowerShell 5.1, funcoes HarnessSonar e DTOs ja existentes, sem
 dependencias novas. Exemplo de uso avancado: `powershell.exe -NoProfile -File
-.\scripts\analisar-sonar.ps1 -Action Download -SelectTarget` (uma linha).
+.\scripts\analisar-sonar.ps1 -Action Download -WorkspacePath
+.\jboss-mta-harness.local.code-workspace -SelectTarget` (uma linha).
 Testes: `powershell.exe -NoProfile -File .\tests\Test-Sonar.ps1`, nova suite de
 download, Test-SonarCriteria, Test-SonarIssues, Test-SonarReview e CLI isolada.
 Mocks verificam que nenhum processo de scanner e invocado, restauracao do token,
@@ -823,6 +824,15 @@ O contrato detalhado dos endpoints pertence ao `/web_api` do servidor instalado.
 Sempre manter testes PS5.1, dados de ensaio em `.harness/tests` e segredo fora dos
 arquivos. Mudanca de politica corporativa ou nova dependencia exige necessidade
 explicita; nunca executar corretivas, conceder GO ou aceitar lote pelo download.
+
+Implementado tecnicamente: extracao comum em `1a3f505`, coletor e proveniencia em
+`1253f6c`; menu/CLI e guia nesta fatia. Testes PS5.1 passaram: SonarDownload,
+Sonar, SonarCriteria, SonarReview, SonarConfig, SonarIssues, SonarLauncher e
+TaskInputs. Regressao cobre cronologia remota apesar de relogio local divergente,
+baselines mistos, preservacao de parecer SCAN anterior e token restaurado apos
+falha de publicacao. Revisao independente concluida com corretivas verificadas.
+Links do guia e diff conferidos. APIs reais nao acessadas; ensaio corporativo e
+aceite humano integrado pendentes. Retomar agora S25-S28 no mesmo checkout.
 
 ### Requisitos e fontes
 

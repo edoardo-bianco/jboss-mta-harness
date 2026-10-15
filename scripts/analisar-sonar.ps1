@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param([string]$ConfigPath, [string]$WorkspacePath, [string]$Target, [switch]$SelectTarget,
     [string]$ProjectKey, [string]$BranchName, [ValidateSet('ANTES','DEPOIS')][string]$Phase, [string]$BaselineResultPath,
-    [switch]$PrepareCertificate, [ValidateSet('Scan','Review')][string]$Action, [string]$ResultPath)
+    [switch]$PrepareCertificate, [ValidateSet('Scan','Review','Download')][string]$Action, [string]$ResultPath)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 $token=$null
@@ -16,8 +16,8 @@ try {
         if ($ResultPath) { $Action='Review' }
         elseif ($ProjectKey -or $Phase -or $PrepareCertificate) { $Action='Scan' }
         else {
-            $operation=Read-Host 'Sonar: 1 Nova coleta; 2 Rever diagnostico/decisao corrente; q cancela'
-            $Action=switch ($operation) { '1' { 'Scan' } '2' { 'Review' } default { throw 'Selecao cancelada.' } }
+            $operation=Read-Host 'Sonar: 1 Executar scanner e coletar; 2 Rever diagnostico/decisao corrente; 3 Baixar ultima analise concluida; q cancela'
+            $Action=switch ($operation) { '1' { 'Scan' } '2' { 'Review' } '3' { 'Download' } default { throw 'Selecao cancelada.' } }
         }
     }
     if ($Action -eq 'Review') {
@@ -32,13 +32,18 @@ try {
         exit 0 # Sucesso da revisao local; nao e aprovacao tecnica da analise.
     }
     if ($ResultPath) { throw 'ResultPath somente pode ser usado com Action Review.' }
+    if ($Action -eq 'Download' -and $PrepareCertificate) { throw 'Download usa a confianca HTTPS do Windows; PrepareCertificate prepara o JDK somente para Scan.' }
     if (-not $ConfigPath) { $ConfigPath=Join-Path $root 'config/harness.local.json' }
     $context=Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
-    $settings=Get-HarnessSonarSettings $context
+    $settings=if ($Action -eq 'Download') { Get-HarnessSonarConnection $context } else { Get-HarnessSonarSettings $context }
     Write-Host "Projeto: $($context.Active.label) | Fonte: $($context.Active.path)"
     Write-Host "SonarQube: $($settings.ServerUrl)"
-    Initialize-HarnessSonarCertificate -ServerUrl $settings.ServerUrl -ScannerJdkHome $settings.Jdk -PrepareCertificate:$PrepareCertificate
-    Write-Host 'Execute antes o build/testes Java 8 do mesmo estado e gere o XML de cobertura. Esta tarefa envia as fontes ao servidor informado.'
+    if ($Action -eq 'Download') {
+        Write-Host 'Baixar a ultima analise concluida do projeto/branch, inclusive de pipeline. Nenhum scanner sera executado; codigo local nao conferido.'
+    } else {
+        Initialize-HarnessSonarCertificate -ServerUrl $settings.ServerUrl -ScannerJdkHome $settings.Jdk -PrepareCertificate:$PrepareCertificate
+        Write-Host 'Execute antes o build/testes Java 8 do mesmo estado e gere o XML de cobertura. Esta tarefa envia as fontes ao servidor informado.'
+    }
     if (-not $ProjectKey) { $ProjectKey=Read-Host 'Chave do projeto existente no SonarQube (q cancela)' }
     if (-not $ProjectKey -or $ProjectKey -eq 'q') { throw 'Selecao cancelada.' }
     if (-not $PSBoundParameters.ContainsKey('BranchName')) { $BranchName=Read-Host 'Branch Sonar (Enter usa principal do servidor; requer edicao com suporte)' }
@@ -52,12 +57,14 @@ try {
     }
     Write-Host 'Criterios: issues abertas Blocker/Critical/High e novas chaves exigem corretiva; cobertura minima 80% (meta 85%); duplicidade maxima 5%. Gate corporativo permanece independente.'
     $token=Read-Host 'Token Sonar do usuario (entrada oculta, nao sera salvo)' -AsSecureString
-    $result=Invoke-HarnessSonar $context -ProjectKey $ProjectKey -BranchName $BranchName -Phase $Phase -Token $token -BaselineResultPath $BaselineResultPath
+    $operationParameters=@{Context=$context;ProjectKey=$ProjectKey;BranchName=$BranchName;Phase=$Phase;Token=$token;BaselineResultPath=$BaselineResultPath}
+    $result=if ($Action -eq 'Download') { Receive-HarnessSonar @operationParameters } else { Invoke-HarnessSonar @operationParameters }
     $token.Dispose(); $token=$null
     $result | ConvertTo-Json -Depth 6 | Write-Host
     Write-Host "Ultima tentativa: $($result.AttemptPath) | Log: $($result.LogPath)"
     if ($result.DiagnosticPublished) {
         Write-Host "Resumo: $(Join-Path (Split-Path $result.ResultPath) 'RESUMO.md')"
+        Write-Host 'Use Workspace: atualizar indice dos projetos para atualizar os links; reconciliar registro/plano continua uma etapa separada.'
         $null=Show-HarnessSonarReview $root $result.ResultPath
     } else { Write-Host "Coleta incompleta. Diagnostico anterior preservado, quando disponivel: $($result.ResultPath). Use Rever para consulta-lo." }
     if ($result.Status -eq 'SUCCEEDED') { exit 0 }

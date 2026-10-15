@@ -23,7 +23,15 @@ Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
 [configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
 
 Use **Terminal > Run Task > Aplicacao: analisar SonarQube**, da pasta `harness`.
-A mesma tarefa atende ao servidor Docker local e ao corporativo: o endpoint
+A mesma tarefa oferece tres operacoes:
+
+| Opcao | Uso |
+| --- | --- |
+| 1 Executar scanner e coletar | Enviar o codigo local e coletar o resultado; exige toolchain e build preparados. |
+| 2 Rever diagnostico/decisao corrente | Consultar os arquivos locais e registrar o parecer, sem rede/token. |
+| 3 Baixar ultima analise concluida | Buscar resultado existente no servidor, inclusive de pipeline, sem scanner, Java ou Maven. |
+
+A tarefa atende ao servidor Docker local e ao corporativo: o endpoint
 e o esquema de autenticacao das APIs e do scanner ficam no JSON local. O harness nao
 instala/inicia Docker, cria projetos no Sonar nem altera a politica de qualidade
 do servidor.
@@ -402,7 +410,7 @@ e [logs do scanner](https://docs.sonarsource.com/sonarqube-server/analyzing-sour
    aplicacao nem verifica automaticamente se os binarios sao atuais.
 2. Para cobertura, gere previamente o XML JaCoCo com a configuracao aprovada
    do projeto e confira sua importacao no Sonar. O scanner nao gera cobertura.
-3. Execute **Aplicacao: analisar SonarQube**, escolha **1 Nova coleta** e confirme o projeto.
+3. Execute **Aplicacao: analisar SonarQube**, escolha **1 Executar scanner e coletar** e confirme o projeto.
 4. Informe a **chave exata do projeto existente no Sonar**. Ela e diferente da
    identidade interna do workspace e nao e inferida pelo nome da pasta.
 5. Informe branch Sonar somente se a edicao do servidor suportar. Enter usa a
@@ -455,8 +463,8 @@ Mudancas nas entradas durante o scan invalidam a coleta.
 | Campo | Significado |
 | --- | --- |
 | ApiAuthScheme | Esquema usado nas consultas do harness: Bearer ou Basic; nao contem credencial. |
-| ScannerExitCode | Saida do Maven; zero nao confirma o processamento nem o Gate. |
-| AnalysisStatus | SUCCESS somente depois de CE confirmar task, projeto e analysisId. |
+| ScannerExitCode | Saida do Maven no scan; nulo no download. Zero nao confirma o processamento nem o Gate. |
+| AnalysisStatus | SUCCESS apos confirmacao CE no scan ou identificacao da analise concluida no download. |
 | QualityGateStatus | Resultado do servidor para aquele analysisId; ERROR e reprovacao. |
 | MetricsStatus | MATCHED somente com analise atual conferida antes/depois da leitura e sem fila concorrente observada. |
 | MissingMetrics | Metricas nao retornadas; ausencia nao e zero nem conformidade. |
@@ -465,9 +473,11 @@ Mudancas nas entradas durante o scan invalidam a coleta.
 | BaselineComparison | COMPARED quando comparou chaves com o ANTES selecionado; PENDING sem comparacao disponivel. |
 | TechnicalStatus | NON_COMPLIANT com gate/criterio reprovado; COMPLIANT quando Status=SUCCEEDED; UNVERIFIED nos demais casos. Nao e aceite humano. |
 | HumanDecision | PENDING no resultado da coleta. O parecer corrente fica em sonar-decisao.json e e reavaliado contra os dados ao rever. |
-| LogLevel / LogPath | INFO/DEBUG e caminho do log do scanner desta execucao. |
+| LogLevel / LogPath | INFO/DEBUG e caminho do log da tentativa, de scanner ou download. |
 | Status | SUCCEEDED com coleta concluida, Gate OK e criterios PASS/WARN; QUALITY_GATE_FAILED com Gate ERROR; CRITERIA_FAILED com criterio reprovado; FAILED/UNVERIFIED nos demais casos. |
-| InputsStatus | STABLE quando a conferencia das entradas antes/depois do scan nao detecta mudancas. |
+| InputsStatus | STABLE quando as entradas nao mudam durante o scan local; UNVERIFIED no download, que nao verifica os fontes locais. |
+| Origin / AnalysisDateUtc / AnalysisRevision | SCAN ou SERVER; data real da analise e revisao SCM quando fornecidas pelo servidor. Data do download nao substitui data da analise. |
+| LocalSourceStatus | NOT_CHECKED no download: Source e a associacao local, sem prova de equivalencia com o codigo analisado. |
 
 Exit code da tarefa: 0 para SUCCEEDED, 2 para QUALITY_GATE_FAILED/CRITERIA_FAILED e 1 para
 falha/coleta nao verificada. O timeout limita a espera pelo processamento CE;
@@ -476,6 +486,49 @@ O Maven usa sua rotina normal e pode ser interrompido pelo operador no terminal.
 Nao rode outros scans do mesmo projeto/branch durante a coleta. A API de metricas
 e a API de issues nao recebem analysisId: a conferencia antes/depois reduz mistura de analises,
 mas nao constitui snapshot transacional do servidor.
+
+### Baixar a ultima analise concluida
+
+Use quando a pipeline ou outro computador ja analisou o projeto, ou quando
+precisar recuperar o resultado apos o processamento no servidor.
+
+1. Confira `sonar.serverUrl` e `apiAuthScheme` no JSON local e o projeto Maven no
+   workspace. Campos de JDK/Maven/scanner nao sao exigidos para esse download.
+   HTTPS usa a confianca de certificados do Windows; o download nao prepara um JDK.
+2. Execute **Aplicacao: analisar SonarQube > 3 Baixar ultima analise concluida**.
+   Escolha o projeto local, informe a chave Sonar e a branch. Enter na branch usa
+   a principal do servidor; outra branch depende do suporte do servidor.
+3. Declare **DEPOIS** para alinhamento apos a corretiva, ou ANTES para guardar uma
+   referencia. A fase e declarada por voce; nao comprova o estado do codigo.
+4. Se houver ANTES comparavel, informe seu `resultado.json`; Enter deixa a
+   comparacao pendente. Digite o token de leitura do projeto na entrada oculta.
+5. Confira o resumo, a data da analise e a revisao SCM quando disponivel. O download
+   le metricas, issues abertas e Quality Gate, sem iniciar outra analise.
+6. Use **Workspace: atualizar indice dos projetos** para atualizar os links ao
+   resumo e ao log. Para alinhar decisoes/proposta, siga a
+   [reconciliacao](planejamento-migracao.md#reconciliar-status-antes-de-atualizar-o-plano),
+   escolhendo somente local quando nao houver material recebido de colega.
+
+Pelo terminal, a mesma operacao e `powershell.exe -NoProfile -File
+.\scripts\analisar-sonar.ps1 -Action Download -WorkspacePath
+.\jboss-mta-harness.local.code-workspace -SelectTarget` (em uma linha).
+Nao e necessario localizar IDs de tarefas ou da analise no Sonar.
+
+A coleta recebe `Origin=SERVER`: pode vir da pipeline ou de outro scanner, sem
+presumir qual produtor executou. `Source` identifica o projeto local associado;
+o harness nao afirma que esse checkout corresponde ao codigo do servidor.
+Scanner, JDK, settings, perfis e exit code desconhecidos ficam nulos.
+
+As APIs de metricas/issues descrevem o estado atual. A tarefa confere a analise
+antes e depois da leitura; analise trocada ou processamento concorrente impedem
+a publicacao. Nao e um download arbitrario de historico antigo. Falha de acesso,
+ausencia de analise ou pagina incompleta preservam o diagnostico anterior.
+O resultado/log da tentativa explicam a etapa; ajuste a causa e repita a opcao 3.
+
+Download completo com gate reprovado continua sendo evidencia utilizavel.
+Sem ANTES comparavel, DEPOIS fica UNVERIFIED para comparacao; isso nao significa
+que o download falhou. Confira tambem DiagnosticPublished e o estado da operacao.
+O download nao altera registro, plano, tarefas, GO ou aceite.
 
 ### Criterios do harness e comparacao
 
@@ -511,10 +564,16 @@ e [metricas 9.9](https://docs.sonarsource.com/sonarqube-server/9.9/user-guide/me
 
 Escolha explicitamente o `resultado.json` ANTES, corrente ou copiado para uma
 pasta de evidencias, com `measures.json` e `issues.json` ao lado. Deve ter
-processamento concluido, metricas vinculadas, entradas estaveis e data anterior
-a nova coleta. Conferem-se Project/Source, servidor/versao, chave/branch Sonar,
-scanner, JDK da aplicacao, settings e perfis Maven registrados. Divergencias
-recusam a comparacao; branch/HEAD Git nao sao criterios de bloqueio.
+processamento concluido, metricas vinculadas e origem compativel.
+Entre scans locais, conferem-se entradas estaveis, Project/Source, servidor/versao,
+chave/branch Sonar, scanner, JDK da aplicacao, settings e perfis Maven registrados.
+
+Se alguma coleta vier de download, a comparacao usa a identidade remota e a
+cronologia real das analises, sem atribuir a pipeline a configuracao local.
+A mesma analise nao pode ser ANTES e DEPOIS. Para um scan antigo sem data remota,
+seu termino serve somente como limite conservador; sem ordem demonstravel, a
+comparacao e recusada. Um aviso explicita codigo/configuracao nao conferidos.
+Divergencias de identidade recusam a comparacao; branch/HEAD Git nao bloqueiam.
 
 Se escolher o resultado corrente como ANTES, ele e lido **antes da substituicao**.
 O resumo identifica a analise consumida, mas o caminho corrente passa a conter
@@ -609,7 +668,8 @@ FAILED/UNVERIFIED; nao ha fallback silencioso para metricas de outra analise.
 
 Testes: `tests/Test-Sonar.ps1` (Maven/API simulados), `tests/Test-SonarCriteria.ps1`,
 `tests/Test-SonarConfig.ps1`, `tests/Test-SonarIssues.ps1`, `tests/Test-SonarReview.ps1`,
-`tests/Test-SonarLauncher.ps1`, `tests/Test-SonarCertificate.ps1` e `tests/Test-SonarApi.ps1`
+`tests/Test-SonarDownload.ps1`, `tests/Test-SonarLauncher.ps1`,
+`tests/Test-SonarCertificate.ps1` e `tests/Test-SonarApi.ps1`
 (HTTP real em loopback com token sintetico). Nao equivalem a homologacao no
 Sonar Docker ou corporativo do operador.
 

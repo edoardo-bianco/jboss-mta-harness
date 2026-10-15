@@ -5,10 +5,10 @@
 [Escopo e verificacao](plan.md#download-do-diagnostico-sonar-existente---15102026).
 S25 parcial: guias de ferramentas alinhados em `947537a`; retomar S25-S28 depois.
 
-- [ ] Extrair coleta/publicacao Sonar comuns, preservando o scan e seus testes.
-- [ ] Baixar ultima analise concluida do projeto/branch, inclusive pipeline, sem Java/Maven.
-- [ ] Integrar opcao na task existente e documentar evidencias para reconciliacao.
-- [ ] Revisar e validar PS5.1; preservar aceite integrado e ensaio corporativo pendentes.
+- [x] Extrair coleta/publicacao Sonar comuns, preservando o scan e seus testes (`1a3f505`).
+- [x] Baixar ultima analise concluida do projeto/branch, inclusive pipeline, sem Java/Maven (`1253f6c`).
+- [x] Integrar opcao 3 na task existente e documentar evidencias para reconciliacao.
+- [x] Revisar e validar PS5.1; preservar aceite integrado e ensaio corporativo pendentes.
 
 ## Simplificacao prioritaria por projeto - 2026-10-10
 
