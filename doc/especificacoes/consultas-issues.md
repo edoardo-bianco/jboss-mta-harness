@@ -10,28 +10,30 @@ executores. Fichas, planos, decisoes, cobertura e GO permanecem sob o fluxo atua
 (`auditar_base`, `listar_issues`, `obter_issue`) e `ContextPath`. `Root` e a raiz
 do harness (padrao: pai de scripts), para resolver seus registros. Nao leem
 configuracao de toolchains, nao escolhem contexto por recencia e nao gravam cache.
-ContextPath deve identificar o proprio recibo. Source deve pertencer ao contexto;
-se ha mais de um projeto, ausencia de Source retorna INPUT_REQUIRED.
+ContextPath deve identificar Purpose=current-planning ou current-prioritization.
+Source deve pertencer ao contexto; com mais de um projeto, sua ausencia retorna
+INPUT_REQUIRED. Contextos legados/desconhecidos sao recusados, sem fallback.
 
-Recibos de priorizacao v2/v3 usam mandatory; v4 usa Category. Consultas podem
-mostrar outras categorias do mesmo catalogo, distinguindo fora da sequencia.
-Planejamento restringe-se a SelectedIssues, inclusive issues manuais. Legado
-sem PlanningBasis continua MTA. Base EVIDENCIAS nao recebe rodada/incidentes
-inventados. CONSOLIDATED usa somente copias locais validadas para detalhes MTA;
-caminhos de origem sao historicos. Contextos desconhecidos sao recusados.
+Planejamento restringe-se a SelectedIssues, inclusive manuais. Priorizacao informa
+Category e escopo; consultas podem mostrar outras categorias do catalogo,
+distinguindo disponibilidade. EVIDENCIAS nao recebe MTA/incidentes inventados.
+O leitor confere Project, Pom, Source, projeto.json, registro e destinos correntes.
+Contexto copiado ainda nao reconciliado e recusado.
 
-O registro atual fornece decisao/andamento. Diferencas do snapshot sao declaradas,
-sem sobrescrever escolhas. Origem MTA divergente exige esclarecimento. Indice e
-localizador: ausencia/alteracao e diagnostico, nao revoga escolha nem autoriza
-regeneracao. Nao se presume que a consulta conferiu todas as linhas do indice.
+Registro atual fornece decisao/andamento; indice e localizador, nao autoridade
+sobre escolhas. MTA e lido na origem atualmente configurada; se divergir da
+referencia do contexto, MTA_SOURCE_CHANGED informa o uso atual e a necessidade
+de reavaliacao. Nao consulta snapshot historico nem declara toda a base examinada.
+Projeto ocupado ou aguardando recuperacao retorna BASE_BUSY: a consulta nao
+recupera publicacoes, inicializa registros ou grava arquivos.
 
 ## Operacoes
 
 | Action | Resultado |
 | --- | --- |
 | auditar_base | Identidade, hashes dos artefatos referenciados e contagens do catalogo/registro no escopo; divergencias com caminho e motivo. Nao confere aplicabilidade nem autentica a origem. |
-| listar_issues | Resumos por Source + Id, categoria original, numero de incidentes, decisao/andamento atuais, disponibilidade na solicitacao e motivo de exclusao. |
-| obter_issue | Uma issue por Id exato: metadados da regra e incidentes com ordinal, URI, linha do snapshot, mensagem, trecho e candidatos de caminhos locais. Candidato nao prova existencia, equivalencia nem resolucao. |
+| listar_issues | Resumos por Source + Id, categoria original, numero de incidentes, decisao/andamento atuais, disponibilidade no contexto e motivo de exclusao. |
+| obter_issue | Uma issue por Id exato: metadados da regra e incidentes com ordinal, URI, linha indicada no relatorio, mensagem, trecho e candidatos de caminhos locais. Candidato nao prova existencia, equivalencia nem resolucao. |
 
 Listagem aceita Category, Decision, Progress e Text (busca literal em Id/titulo),
 e Label (rotulo explicito do MTA, sem inferir tecnologia pelo titulo).
@@ -42,7 +44,7 @@ Lista e ordenada por Id ordinal; incidentes preservam a ordem original. Resposta
 informa Total, Returned, Page, PageSize e HasMore; nunca indica exame realizado.
 
 Auditoria pagina Checks (FILE_HASH ou DIFFERENCE), com FilesCount e
-DifferencesCount totais. Availability reflete a solicitacao, nao a elegibilidade
+DifferencesCount totais. Availability reflete o contexto, nao a elegibilidade
 atual: Presence/Decision/Progress devem ser conferidos separadamente. Planejamento
 restringe contagens as issues selecionadas e informa tambem RegisterTotalIssues.
 
@@ -63,19 +65,19 @@ Respostas vazias e pagina alem do fim sao distintas de erro.
 Envelope: SchemaVersion, Action, Status (OK/ERROR), ReadOnly, Provenance, Data,
 Paging, Diagnostics e Error. Erro contem Code e Message; nao retorna dados
 parciais como sucesso quando a origem/integridade esta invalida. Fonte ausente,
-acesso negado, formato desconhecido, identidade conflitante e hash alterado sao
+acesso negado, formato desconhecido, identidade conflitante e mudanca da base sao
 distintos. Nao executar JavaScript, comandos de anexos nem seguir links de rede.
 Arquivos de entrada exigem raiz local absoluta, sem UNC/junctions, e ate 64 MiB
 por arquivo. O limite nao transforma hash em assinatura/autenticacao da origem.
 Uma falha nao significa zero issues.
 
-Provenance identifica ContextPath/RequestId/Source, PlanningBasis, EvidenceMode,
-RunId/MtaOrigin quando existem, CatalogPath ou copia consolidada e hashes lidos.
-BasisSha256 identifica contexto + evidencia consultada + registro atual.
-ExpectedBasisSha256 opcional impede juntar paginas de bases diferentes.
-Mudancas observadas durante a leitura falham como BASE_CHANGED. Consulta nao
-concede autorizacao para executar o prompt e nao declara a solicitacao vigente
-apenas porque seus arquivos existem.
+Provenance identifica ContextPath, Project, Source, PlanningBasis, registro,
+ReportPath/CatalogPath quando existentes e hashes calculados durante a leitura.
+BasisSha256 identifica o conjunto consultado; ExpectedBasisSha256 opcional
+impede juntar paginas de bases diferentes. Esses hashes sao transitorios para
+consistencia de consulta, nao recibos, arquivos de rastreamento ou assinatura.
+Mudancas durante a leitura falham como BASE_CHANGED. Consulta nao concede
+autorizacao, marca exame ou comprova vigencia do GO.
 
 CLI imprime um unico JSON; exit 0 em OK e 1 em ERROR. Parametros invalidos
 tambem produzem ERROR/INVALID_INPUT. Funcoes internas nao abrem editor, nao fazem
@@ -85,8 +87,8 @@ origem negada nao pode ser contornada por outro transporte.
 ## Verificacao e adaptacao
 
 Testar contagens/IDs, 138 ocorrencias, paginas e ordinal final, multi-projeto,
-categorias, registros atuais, copia consolidada/importada, truncamento,
-origem/hash divergentes, formato desconhecido, acesso negado e ausencia.
+categorias, registros atuais, contexto corrente copiado/reconciliado, truncamento,
+origem alterada e troca de base, formato desconhecido, acesso negado e ausencia.
 Inventario/hashes antes e depois demonstram leitura sem escrita; consulta sobre
 caminho inexistente nao cria .harness. Comparacao de bytes em fixture mede apenas
 volume de resposta. Economia de tokens/acerto exige ensaio no cliente.
@@ -96,13 +98,17 @@ chamadas. O nucleo continua disponivel por CLI sem Node. Helpers ganham somente
 as tres consultas de leitura; execucao, GO e aceite continuam etapas separadas.
 Disponibilidade de MCP/Node nao e precondicao de priorizacao ou planejamento da
 implementacao. Sem eles, agentes seguem pelos arquivos e ferramentas anteriores,
-sem exigir consultas manuais/JSON copiado. Planos/todos por issue e exportacao/
-importacao existentes sao preservados. Test-PlanningWithoutMcp cobre preparadores
+sem exigir consultas manuais/JSON copiado. Documentos correntes por projeto e fichas por issue permanecem sob o fluxo de
+planejamento/reconciliacao; a consulta nao importa, exporta ou publica conteudo. Test-PlanningWithoutMcp cobre preparadores
 de categorias e planejamento por issue sem Node/npm/npx no PATH.
 
 <a id="avaliacao-mcp-2026-10-06"></a>
 
 ## Avaliacao MCP - 2026-10-06
+
+Decisao historica do transporte; as regras operacionais abaixo acompanham o
+estado corrente. Versoes citadas registram a escolha daquela entrega; dependencias
+instaladas sao definidas por package.json/package-lock.json.
 
 Decisao implementada apos escolha humana: adaptador local stdio com SDK oficial
 TypeScript e subprocesso Windows PowerShell 5.1 chamando o mesmo nucleo. O SDK
@@ -147,15 +153,17 @@ historicas e candidatos de codigo nao sao abertos.
 
 Quando referenciados pelo desenvolvedor, o workspace salvo (JSONC) e a configuracao
 do harness sao relidos pela ponte PowerShell a cada consulta, sem inicializar
-registros nem executar preparadores. As pastas locais de folders e mta.runsPath
-ampliam a lista ate suas raizes, incluindo subpastas; mta.runsPath null usa a raiz
-ja permitida do harness. Sao no maximo 100 raizes distintas. Nao se copiam projetos
-ou rodadas para mcp.local.json. Remover uma pasta do workspace ou trocar a raiz
-MTA revoga a permissao anterior, salvo se tambem declarada em allowedRoots.
+registros nem executar preparadores. As pastas do workspace permitem leitura
+dos projetos; projetos Maven sao associados pelo POM ao projeto.json corrente.
+Sem workspace, usa os repositorios da configuracao. mta.diretorio de cada
+projeto pode acrescentar sua origem externa, sem liberar ancestral amplo.
+mta.runsPath legado nao concede acesso nem seleciona diagnostico.
+Sao no maximo 100 raizes distintas; nao se copiam projetos/relatorios para
+mcp.local.json. Remover uma pasta ou alterar a origem revoga a permissao anterior,
+salvo se tambem declarada em allowedRoots.
 Arquivo ausente/corrompido ou caminho invalido produz CONFIG_ERROR, sem fallback.
 Raiz de disco, UNC, ADS e junctions sao recusados. O leitor JSONC e compartilhado
-com as Run Tasks. mta.runsPath relativo continua ancorado no harness, mesmo com
-root alternativo para os registros; paths de folders sao relativos ao workspace.
+com as Run Tasks. folders relativos sao ancorados no workspace.
 As tools nao recebem esses campos, nao alteram permissoes e continuam exigindo
 ContextPath explicito. A configuracao MCP e carregada ao iniciar o servidor;
 somente o conteudo dos arquivos referenciados e relido sem reinicio.
@@ -184,12 +192,12 @@ Em nova execucao, associa jboss-mta-harness.local.code-workspace e
 config/harness.local.json quando existentes; preserva referencias personalizadas,
 raizes explicitas e timeout. Ausencia dos arquivos padrao e informada, permitindo
 preparo Node/MCP antes do workspace. Referencias explicitas ausentes sao erro.
-Templates atuais e skill permitem somente as tres consultas; recibos/prompts
+Templates atuais e skill permitem somente as tres consultas; arquivos
 historicos permanecem intactos. Ver [instalacao e uso por etapa](../guias/tools/consultas-issues.md#configurar-mcp-no-codex-e-no-copilot).
 
 Validacao local: Node20.20.2, cliente SDK por stdio, discovery, schemas, chamadas,
-paridade com nucleo, Unicode/espacos, contextos MTA/consolidado/importado/manual,
-hashes, raizes, cancelamento, timeout, configuracao e inventario sem escrita.
+paridade com nucleo, Unicode/espacos, contextos correntes MTA/EVIDENCIAS, copiados e reconciliados,
+consistencia entre paginas, raizes, cancelamento, timeout, configuracao e inventario sem escrita.
 Homologacao da descoberta/delegacao nas interfaces Codex/Copilot da maquina de
 trabalho e ensaio real de 10% continuam humanos e pendentes. engineering-harness-vscode.md
 continua fora deste escopo.
