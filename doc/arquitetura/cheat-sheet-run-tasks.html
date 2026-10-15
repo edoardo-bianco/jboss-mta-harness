@@ -27,10 +27,10 @@
       <div class="crossnote markdown-preview  ">
 
 <h1 id="cheat-sheet-run-tasks-do-harness">Cheat sheet — Run Tasks do harness</h1>
-<p><strong>Data:</strong> 09/10/2026. <strong>Escopo:</strong> operações do harness de migração JBoss.
-<strong>Baseline operacional:</strong> <code>main</code> em <code>17f80c22084dd26437eda3bd106698dcacc8a33e</code>, após a integração de sprints pela <a href="https://github.com/edoardo-bianco/jboss-mta-harness/pull/26">PR #26</a>.</p>
+<p><strong>Data:</strong> 15/10/2026. <strong>Escopo:</strong> operações do harness de migração JBoss.
+<strong>Referência operacional:</strong> estado corrente por projeto da <a href="../adr/0009-estado-corrente-por-projeto.md">ADR-0009</a>. Validação técnica registrada no <a href="../../tasks/plan.md">plano</a>; aceite integrado humano separado.</p>
 <h2 id="consulta-rapida">Consulta rápida</h2>
-<p>A jornada operacional parte da configuração do ambiente, passa pelo diagnóstico e planejamento e chega à implementação, verificação e operação da aplicação. As <strong>27 entradas</strong> de <a href="../../.vscode/tasks.json"><code>.vscode/tasks.json</code></a> oferecem essas ações. A matriz mantém seus nomes operacionais e propõe a organização por domínio/subdomínio. <strong>D</strong> executa uma operação determinística; <strong>P</strong> prepara material para acionamento explícito posterior do agente. Uma tarefa pode combinar P e D em ações diferentes. O acionamento do agente de codificação permanece uma ação explícita do desenvolvedor.</p>
+<p>A jornada operacional parte da configuração do ambiente, passa pelo diagnóstico e planejamento e chega à implementação, verificação e operação da aplicação. As <strong>25 entradas</strong> de <a href="../../.vscode/tasks.json"><code>.vscode/tasks.json</code></a> oferecem essas ações. A matriz mantém seus nomes operacionais e propõe a organização por domínio/subdomínio. <strong>D</strong> executa uma operação determinística; <strong>P</strong> prepara material para acionamento explícito posterior do agente. Uma tarefa pode combinar P e D em ações diferentes. O acionamento do agente de codificação permanece uma ação explícita do desenvolvedor.</p>
 <table>
 <thead>
 <tr>
@@ -66,14 +66,14 @@
 <tr>
 <td><code>Workspace: atualizar indice dos projetos</code></td>
 <td>Trabalho / descoberta</td>
-<td>Localizar projetos e registros; inicializar registros conforme as entradas disponíveis, sem substituir origem por recência.</td>
+<td>Associar projetos ao POM, inicializar registros e reconstruir links dos documentos e evidências correntes; preservar decisões humanas.</td>
 <td>D</td>
 <td><a href="../../scripts/atualizar-indice-projetos.ps1">atualizar-indice-projetos.ps1</a></td>
 </tr>
 <tr>
 <td><code>Workspace: limpar execucoes</code></td>
 <td>Evidências / retenção</td>
-<td>Selecionar limpeza de execuções e temporários; preservar dossiês oficiais e vínculos protegidos pelo contrato.</td>
+<td>Limpar resíduos temporários e backups selecionados; preservar trabalho corrente, evidências e origens externas. Descarte legado tem procedimento separado.</td>
 <td>D</td>
 <td><a href="../../scripts/limpar-execucoes.ps1">limpar-execucoes.ps1</a></td>
 </tr>
@@ -87,49 +87,42 @@
 <tr>
 <td><code>MTA: executar analise</code></td>
 <td>Diagnóstico / análise</td>
-<td>Executar MTA no escopo escolhido; produzir snapshot, diagnóstico, logs e recibos.</td>
+<td>Executar MTA no projeto escolhido e publicar diagnóstico corrente; manter última tentativa/log separados do último relatório utilizável.</td>
 <td>D</td>
 <td><a href="../../scripts/executar-mta.ps1">executar-mta.ps1</a></td>
 </tr>
 <tr>
 <td><code>MTA: acompanhar log da analise</code></td>
 <td>Diagnóstico / acompanhamento</td>
-<td>Acompanhar log da execução ativa.</td>
+<td>Acompanhar o log corrente da última tentativa do projeto.</td>
 <td>D</td>
 <td><a href="../../scripts/acompanhar-log-mta.ps1">acompanhar-log-mta.ps1</a></td>
 </tr>
 <tr>
 <td><code>MTA: acompanhar atividade interna</code></td>
 <td>Diagnóstico / acompanhamento</td>
-<td>Exibir acompanhamento detalhado da execução ativa.</td>
-<td>D</td>
-<td><a href="../../scripts/acompanhar-log-mta.ps1">acompanhar-log-mta.ps1</a></td>
-</tr>
-<tr>
-<td><code>MTA: consultar log de execucao anterior</code></td>
-<td>Diagnóstico / histórico</td>
-<td>Selecionar projeto/execução e consultar seu log.</td>
+<td>Exibir o log interno corrente do projeto.</td>
 <td>D</td>
 <td><a href="../../scripts/acompanhar-log-mta.ps1">acompanhar-log-mta.ps1</a></td>
 </tr>
 <tr>
 <td><code>MTA: abrir ultimo relatorio</code></td>
 <td>Diagnóstico / apresentação</td>
-<td>Abrir relatório para consulta; essa conveniência não adota a rodada no planejamento.</td>
+<td>Abrir o relatório utilizável na origem configurada; atualizar o registro exige reconciliação explícita.</td>
 <td>D</td>
 <td><a href="../../scripts/abrir-relatorio-mta.ps1">abrir-relatorio-mta.ps1</a></td>
 </tr>
 <tr>
 <td><code>Planejamento: planejar sprints</code></td>
 <td>Planejamento de portfólio / escopo, calendário e capacidade</td>
-<td>Novo/Retomar/Revisar prepara contexto macro dos projetos; Validar calcula cronograma, prazo, capacidade, fases e cenários, preservando histórico.</td>
+<td>Novo/Retomar/Revisar prepara o cenário corrente dos projetos; Validar calcula cronograma, prazo, capacidade e fases, preservando baseline e consumo.</td>
 <td>P: <code>planejar-sprints</code> + D: validação</td>
 <td><a href="../../scripts/preparar-sprints.ps1">preparar-sprints.ps1</a>, <a href="../guias/tools/planejamento-sprints.md">guia</a>, <a href="../especificacoes/planejamento-sprints.md">contrato</a></td>
 </tr>
 <tr>
 <td><code>Planejamento: priorizar issues</code></td>
 <td>Trabalho / triagem</td>
-<td>Selecionar categoria, projetos e fatia; recriar/progredir/retomar conforme histórico; preparar contexto para ranking e fichas.</td>
+<td>Selecionar categoria, projetos e fatia; recriar/progredir/retomar o conjunto corrente; preparar ranking cumulativo e fichas.</td>
 <td>P: <code>priorizar-issues</code></td>
 <td><a href="../../scripts/preparar-priorizacao.ps1">preparar-priorizacao.ps1</a>, <a href="../guias/tools/priorizacao-issues.md">guia</a></td>
 </tr>
@@ -143,30 +136,23 @@
 <tr>
 <td><code>Planejamento: atualizar registro de migracao</code></td>
 <td>Trabalho / reconciliação</td>
-<td>Apresentar origem atual/nova, exigir <code>ADOTAR</code> e preparar a reconciliação; adoção não prova resolução das issues.</td>
+<td>Preparar comparação de fontes locais e arquivos recebidos opcionais; o agente revisa e publica a conclusão, sem inferir resolução ou transferir GO.</td>
 <td>P: <code>manter-migracao</code></td>
 <td><a href="../../scripts/preparar-planejamento.ps1">preparar-planejamento.ps1</a></td>
 </tr>
 <tr>
 <td><code>Planejamento: criar pasta de evidencias</code></td>
 <td>Evidências / coleta</td>
-<td>Criar ou localizar índice de evidências do projeto; vincular ao dossiê da issue quando identificada.</td>
+<td>Criar ou localizar evidencias/LEIA-ME.md do projeto; relacionar arquivos a issues ou ao projeto.</td>
 <td>D</td>
 <td><a href="../../scripts/criar-pasta-evidencias.ps1">criar-pasta-evidencias.ps1</a></td>
 </tr>
 <tr>
 <td><code>Planejamento: abrir plano e to-do</code></td>
 <td>Trabalho / retomada</td>
-<td>Localizar e abrir os documentos vinculados; presença dos arquivos não comprova GO.</td>
+<td>Abrir plano e tarefas correntes do projeto; presença dos arquivos não comprova GO.</td>
 <td>D</td>
 <td><a href="../../scripts/abrir-planejamento.ps1">abrir-planejamento.ps1</a></td>
-</tr>
-<tr>
-<td><code>Planejamento: compartilhar contexto</code></td>
-<td>Evidências / intercâmbio</td>
-<td>Exportar análise concluída ou proposta por issue; importar ZIP com associação aos projetos locais e preservação dos originais.</td>
-<td>D</td>
-<td><a href="../../scripts/compartilhar-contexto.ps1">compartilhar-contexto.ps1</a>, <a href="../guias/tools/compartilhamento-contextos.md">guia</a></td>
 </tr>
 <tr>
 <td><code>Aplicacao: preparar implementacao do lote</code></td>
@@ -185,7 +171,7 @@
 <tr>
 <td><code>Aplicacao: analisar SonarQube</code></td>
 <td>Mudança e qualidade / análise de qualidade</td>
-<td>Executar análise ANTES/DEPOIS ou rever coleta existente; consultar Gate, métricas/issues e registrar decisões locais sobre critérios.</td>
+<td>Executar scanner, rever diagnóstico ou baixar a última análise concluída do projeto/branch, inclusive da pipeline; consultar Gate, métricas/issues e registrar decisões locais.</td>
 <td>D</td>
 <td><a href="../../scripts/analisar-sonar.ps1">analisar-sonar.ps1</a>, <a href="../guias/tools/sonar.md">Sonar</a></td>
 </tr>
@@ -234,9 +220,10 @@
 </tbody>
 </table>
 <p>Os menus dessas tarefas concentram suas variantes; não há uma tarefa por projeto, arquivo ou função auxiliar. As opções completas permanecem nos guias vinculados. Debug por attach é uma configuração de depuração da IDE, não uma Run Task adicional. As consultas <code>auditar_base</code>, <code>listar_issues</code> e <code>obter_issue</code> têm MCP/CLI próprios e também não são entradas desse inventário.</p>
+<p>No workspace, abra <code>.harness/indices/projetos.md</code> e siga o link do projeto para <code>indice.md</code>. Ele reúne registro, plano, tarefas, fichas, evidências, diagnósticos e logs existentes. Após copiar arquivos ou gerar novas saídas, use <strong>Workspace: atualizar indice dos projetos</strong> para reconstruir os links. Para compartilhar, copie as pastas conforme o <a href="../guias/tools/compartilhamento-contextos.md">guia</a>; não há tarefa de importar/exportar ZIP.</p>
 <h2 id="planejamento-por-sprints">Planejamento por sprints</h2>
 <p>A <a href="../features/planejamento-macro-sprints.md">MACRO-01</a> amplia a visão por issue para escopo, calendário e capacidade de trabalho. A tarefa seleciona os projetos; o prompt reúne as datas, o prazo, a equipe e as estimativas ainda ausentes. Depois do preenchimento, <strong>Validar e gerar cronograma</strong>, na mesma tarefa, produz JSON e Markdown com tabelas, matriz e Gantt. O <a href="../guias/tools/planejamento-sprints.md">guia</a> concentra o procedimento completo; o <a href="../modelos/planejamento-sprints.template.md">template</a> orienta a narrativa.</p>
-<p>O cálculo confere prazos e limites, incluindo fases já consumidas. <code>NAO_CABE</code> e <code>EM_RISCO</code> mostram motivos calculados e esforço não alocado, inclusive na faixa superior; <code>NAO_AVALIAVEL</code> explicita dados essenciais ausentes. Retomar preserva o contexto; Revisar exige motivo e conserva a revisão anterior. O cronograma não concede GO de lote, aceite da migração ou autorização de implantação. A capacidade foi integrada e testada localmente; homologação corporativa permanece pendente.</p>
+<p>O cálculo confere prazos e limites, incluindo fases já consumidas. <code>NAO_CABE</code> e <code>EM_RISCO</code> mostram motivos calculados e esforço não alocado, inclusive na faixa superior; <code>NAO_AVALIAVEL</code> explicita dados essenciais ausentes. Retomar e Revisar usam o mesmo cenário corrente e preservam o trabalho humano; Revisar registra o motivo e pede reavaliação. O cronograma não concede GO de lote, aceite da migração ou autorização de implantação. A capacidade foi integrada e testada localmente; homologação corporativa permanece pendente.</p>
 <h2 id="referencias">Referências</h2>
 <p>A <a href="arquitetura-harness.md#5-arquitetura-de-comportamento">arquitetura do harness</a> apresenta os fluxos, os limites de autoridade e a evolução por capacidades. O <a href="../guias/harness-migracao-desenvolvedor.md">guia do desenvolvedor</a> detalha a operação cotidiana. Os links de implementação e guias da matriz apontam para arquivos do repositório.</p>
 

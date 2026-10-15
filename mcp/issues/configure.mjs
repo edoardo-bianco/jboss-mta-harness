@@ -62,6 +62,6 @@ if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta
   }
   const result=configureClients(harnessRoot,realpathSync(process.execPath));
   console.log(JSON.stringify(result,null,2));
-  console.log('Confira workspacePath e harnessConfigPath em config/mcp.local.json. As raizes de folders e mta.runsPath serao lidas a cada consulta; allowedRoots fica para excecoes explicitas. Reinicie os clientes e confira as tres tools.');
+  console.log('Confira workspacePath e harnessConfigPath em config/mcp.local.json. Os projetos do workspace e mta.diretorio de projeto.json serao lidos a cada consulta; allowedRoots fica para excecoes explicitas. Reinicie os clientes e confira as tres tools.');
   if (!result.workspacePath || !result.harnessConfigPath) console.log('Arquivo padrao ausente: indique o workspace/configuracao em uso pelos campos acima, ou execute novamente este configurador depois de prepara-los.');
 }

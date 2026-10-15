@@ -108,7 +108,8 @@ Apos atualizar o harness com Git, continue usando seu workspace local. Se precis
 recarregar a interface/extensoes, use **Ctrl+Shift+P > Developer: Reload Window**;
 isso nao gera workspace nem atualiza prompts salvos. Para usar instrucoes novas,
 prepare outro prompt na operacao desejada, reutilizando o MTA existente quando
-aplicavel. Na manutencao do registro, pode escolher somente registro/evidencias.
+aplicavel. Na manutencao do registro, escolha somente local quando nao houver material recebido;
+essa opcao tambem considera o MTA configurado.
 Plano, tarefas e indices preservam texto humano fora dos blocos gerenciados.
 O prompt de planejamento e regenerado: mantenha referencias escritas manualmente
 em arquivo proprio ou no chat. Guias e contratos sao consultados por referencia.

@@ -291,7 +291,7 @@ testado; igualdade de codigo por si so nao comprova equivalencia do binario.
 
 O agente `planejar-lotes` nao executa os comandos deste guia. O desenvolvedor ou
 a etapa autorizada de execucao coleta as evidencias e disponibiliza seus caminhos
-ao planejador, sem substituir os recibos historicos do harness.
+ao planejador e registre as referencias no trabalho corrente do projeto.
 
 **Depois da revisao/integracao:** registre o resultado nas evidencias do lote e
 volte a [reconciliacao e continuidade](harness-migracao-desenvolvedor.md#8-reconciliar-e-decidir-a-continuidade).
