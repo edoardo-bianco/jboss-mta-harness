@@ -731,6 +731,52 @@ Pontos conferidos para retomar a documentacao:
   S26-S27 alinham skill/helpers/AGENTS/Copilot; S28 faz inventario final, regressao
   e ensaio integrado. Aceite humano final continua pendente e separado.
 
+### Retomada S24-S28 - 15/10/2026
+
+Continuacao solicitada pelo desenvolvedor. Conferidos raiz, branch
+`harness/planejar-simplificacao-projetos`, HEAD `89115c2` e checkout limpo.
+S24 inicia pelos cinco guias; seguir S25-S28 em fatias documentais verificadas.
+Aplicadas as skills using-agent-skills, incremental-implementation,
+documentation-and-adrs, git-workflow-and-versioning e code-review-and-quality.
+Dados reais e extensao Java preservados; aceite integrado permanece humano.
+
+Esclarecimento nesta retomada: guias, contratos e instrucoes formam a base local
+de consulta do agente, recuperada conforme a etapa e citada por links. A parte
+dinamica do prompt tambem pode ser montada pelo desenvolvedor com projeto,
+objetivo e referencias legiveis ao registro, plano e evidencias correntes.
+Nao exigir IDs de execucao nem hashes. Resolver "ultimo" pelos destinos correntes,
+distinguindo ultima tentativa de ultimo diagnostico utilizavel; explicitar data,
+fonte e lacunas. Recencia nao escolhe escopo nem concede GO/aceite. Documentar
+esse uso manual em guias/modelos; motor de busca semantica e evolucao separada,
+sem acrescentar dependencias nesta simplificacao.
+
+O desenvolvedor reforcou compartilhamento por copia/cola e retirada completa
+da operacao ZIP (ja retirada na S22; alinhar instrucoes remanescentes). Pediu
+tambem navegacao simples das evidencias pelo workspace/indices. Causa localizada:
+`files.exclude` ocultava toda `.harness` no workspace inicial, gerador e arquivo
+local. Corretiva focal expoe essa pasta preservando outros filtros, acrescenta
+links de evidencias e logs MTA/Sonar existentes ao indice do projeto. Testes
+Workspace e ProjectNavigation reproduziram as duas falhas antes da corretiva
+e passaram em PS5.1 depois. Conferencia no cliente real ainda pendente.
+
+O pedido de navegacao e **padrao geral do modelo**, para qualquer maquina;
+nao se limita ao workspace pessoal deste checkout. Nenhum projeto real foi
+convertido para demonstrar a navegacao. A pasta atual de projetos esta vazia
+neste checkout; as provas usam fixtures sinteticas.
+
+S24 concluida tecnicamente em `f51c649`: cinco guias principais alinham os
+destinos correntes, cobertura cumulativa, copia/cola e referencias manuais.
+Revisao independente fechou realinhamento do contexto copiado, ancoras de
+orientacao e transporte da pasta completa do relatorio MTA. Conferidas 129
+referencias locais/ancoras, sem falhas. PlanningPortable, ConversionApply,
+PrioritizationProgress, SprintWorkflow e TaskInputs passaram em PowerShell 5.1.
+Fixtures novas/convertidas cobrem os roteiros; nao equivalem ao ensaio humano.
+
+Navegacao salva em `d21178c`; ajuste das duas fixtures antigas em `766d122`.
+Workspace, ProjectNavigation, ProjectIndex, JbossWorkspace e BuildConfig
+aprovados em PS5.1. Revisao independente sem achados; extensoes/configuracoes
+Java preservadas. S25 em andamento; S26-S28 e aceite integrado pendentes.
+
 ### Requisitos e fontes
 
 - Esclarecimento humano de 12/10/2026: indice do projeto e demais referencias de

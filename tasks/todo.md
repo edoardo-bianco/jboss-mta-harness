@@ -18,12 +18,13 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 - [x] Conferir links/ancoras dos acrescimos em 11 documentos, diff e requisitos; historico anterior de plan.md preservado. Sem teste de runtime nesta entrega documental.
 
 Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10, 12/10 e 13/10/2026.
-[Ponto atual e verificacoes](plan.md#pausa-humana-s23---14102026).
-S11-S23 implementados e revisados. Limpeza corrente e descarte legado validados;
-S24-S28 e o aceite integrado permanecem pendentes.
+[Ponto atual e verificacoes](plan.md#retomada-s24-s28---15102026).
+S11-S24 implementados e revisados. Limpeza corrente e descarte legado validados;
+S25 em andamento; S26-S28 e o aceite integrado permanecem pendentes.
 Conversao e validacao verificadas em fixtures, inclusive multiprojeto e sprints.
 CLI oferece Previa, Aplicar, Validar e Limpar com selecao/confirmacao explicitas.
-Pausa solicitada em 14/10: retomar somente mediante novo pedido humano, por S24.
+Retomada solicitada em 15/10, com navegacao padrao pelo workspace/indices e
+referencias dinamicas legiveis que o desenvolvedor tambem pode montar.
 A pausa humana de 12/10 permanece como [registro historico](plan.md#pausa-humana-de-12102026).
 
 **Retomada autorizada em 14/10:** [registro](plan.md#retomada-de-14102026), a partir do
@@ -38,7 +39,7 @@ com mestre explicito, B0/consumo preservados, anexos e retomada corrente comprov
 testes PS5.1/revisao fechados. Validar e CLI concluidos, incluindo recuperacao
 e dependencia apenas dos documentos correntes. S22 concluida: copia/conciliacao
 recebe ranking/contexto/cobertura e a familia HarnessTransfer foi retirada.
-S23 concluida tecnicamente; S24-S28 e aceite humano integrado pendentes.
+S23 concluida tecnicamente; retomada documental atual registrada acima.
 
 - [x] S01a: registrar contrato do nucleo na [ADR-0009](../doc/adr/0009-estado-corrente-por-projeto.md); integracao e aceite continuam pendentes.
 - [x] S02a/S03a: identidade, caminhos e publicacao recuperavel em modulo isolado, ainda sem trocar os consumidores antigos.
@@ -67,6 +68,10 @@ S23 concluida tecnicamente; S24-S28 e aceite humano integrado pendentes.
 - [x] S21: Aplicar/Validar expostos na CLI com selecoes explicitas de fontes, participantes e cenarios. Decisoes, anexos, cobertura e consumo preservados; recuperacao, repeticao equivalente e trabalho posterior protegidos. Validar le somente o corrente, sem recuperar/escrever, e distingue integridade de revisao/GO/aceite. Suites focais PS5.1 e revisao independente aprovadas; conversao/limpeza real e aceite integrado nao executados.
 - [x] S22: copia/conciliacao recebe analise e plano, inclusive par contexto/ranking, cobertura cumulativa e anexos transitivos dos participantes. B0, quota, fontes locais, escolhas e GO separados; parceiros protegidos sem bloquear categorias/planos alheios. HarnessTransfer, entrada/tarefa e leitores exclusivos retirados; 25 Run Tasks. ReconciliationPrioritization, PlanningPortable, ReconciliationConflicts, PlanningEvidence e TaskInputs passaram em PS5.1; revisao fechada e busca de chamadores ativos vazia.
 - [x] S23: limpeza corrente limitada a residuos temporarios e backups separados; descarte legado recomposto/validado, folhas explicitamente selecionadas, referencias compartilhadas/desconhecidas e concorrencia recusadas. API e CLI com previa pura, confirmacao, recuperacao de tres interrupcoes reais e repeticao segura. Test-ProjectTemporaryRemoval, ProjectPublication, ProjectRecovery, Cleanup, TaskInputs, ConversionApply, ConversionCleanup e ConversionCli passaram em PS5.1; revisao independente fechada. Nenhum dado real convertido/limpo; aceite humano integrado pendente.
+
+- [x] S24: cinco guias principais alinhados ao estado corrente, copia/cola, referencias manuais e fontes diretas; revisao independente fechada. Conferidas 129 referencias/ancoras; PlanningPortable, ConversionApply, PrioritizationProgress, SprintWorkflow e TaskInputs aprovados em PS5.1. Ensaio humano dos clientes permanece separado.
+- [x] Navegacao pedida em 15/10: workspace inicial/gerador expoem .harness; regeneracao corrige filtro antigo preservando demais settings. Indice abre evidencias e logs existentes, separando tentativa/diagnostico. Workspace, ProjectNavigation, ProjectIndex, JbossWorkspace e BuildConfig PS5.1 aprovados; revisao independente concluida.
+- [ ] S25: demais guias/modelos/cheat sheet, incluindo roteiro de navegacao padrao; em andamento.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos
