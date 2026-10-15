@@ -15,7 +15,7 @@ a etapa atual e receber uma proxima acao. A skill
 instrucoes compartilhadas pelos clientes. `migracao_helper` e o papel de orientador
 que aplica essas instrucoes e consulta os helpers especializados quando pertinente.
 
-O helper le indice, registro, recibos, planos, prompts preparados e evidencias.
+O helper le indice, registro, contexto corrente, planos, prompts e evidencias.
 Ele responde com **uma proxima acao**, motivo, caminho/mensagem prontos e resultado
 a conferir. Voce executa as tarefas, escolhe prioridades, concede GO e aceita o
 resultado. Nao precisa conhecer os nomes dos campos internos para pedir ajuda.
@@ -28,11 +28,12 @@ de priorizacao/planejamento; a CLI e uma alternativa opcional para consulta pont
 Os perfis continuam sem executar tarefas/corretivas. Confira origem, paginas e
 truncamentos antes de usar a resposta como evidencia.
 
-Para um ZIP recebido, indique **Planejamento: compartilhar contexto** e associe
-os projetos locais. Depois informe ao orientador o ContextPath devolvido pela
-tarefa. Analise recebida segue para escolha/planejamento; proposta recebida segue
-para revisao de escopo/GO e execucao manual ou assistida. Veja o
-[roteiro entre colegas](tools/compartilhamento-contextos.md).
+Para arquivos recebidos de colega, siga o [roteiro de copia entre projetos](tools/compartilhamento-contextos.md):
+associe o POM local, preserve as contribuicoes e reconcilie os documentos pela
+tarefa **Planejamento: atualizar registro de migracao**. ZIP pode transportar os
+arquivos, mas nao ha importacao/exportacao de pacote pelo harness.
+Analise recebida segue para escolha/planejamento; proposta recebida exige
+conferencia de escopo/GO e codigo local antes da execucao.
 
 Navegacao: [configuracao](#configuracao) · [iniciar](#iniciar-no-codex-ou-no-copilot) ·
 [retomar](#retomar-em-outro-chat-ou-cliente) · [pedidos por etapa](#pedidos-por-etapa) ·
@@ -116,10 +117,11 @@ Quero iniciar a migracao do projeto X, que ja esta no workspace.
 Confira o contexto existente e me oriente no proximo passo.
 ```
 
-O helper localiza indice/registro e a solicitacao vinculada. Pede caminho, projeto
-ou ID somente quando os arquivos nao resolvem a ambiguidade. Se faltar registro,
-orienta **Workspace: atualizar indice dos projetos**. Nao escolhe rodada ou
-solicitacao apenas por ser a mais recente.
+O helper parte de `.harness/indices/projetos.md` e do `indice.md` do projeto.
+O registro `migracao.md` concentra escolhas; o trabalho corrente fica em
+`.harness/projetos/<artifactId>/atual/`. Pede projeto ou caminho somente quando
+os arquivos nao resolvem a ambiguidade. Se faltar registro, orienta
+**Workspace: atualizar indice dos projetos**. Nao exige IDs de solicitacao.
 
 Execute a acao indicada e retorne com o resultado. O helper confere a saida e
 orienta a seguinte. Para comparar candidatas antes de escolher, use o exemplo
@@ -133,7 +135,7 @@ Quando a tarefa preparar um prompt:
 - **Codex:** abra uma nova conversa no mesmo workspace, com o agente principal,
   sem selecionar `migracao_helper` nem invocar `$orientar-migracao`. Nessa conversa
   de execucao, envie `Execute o prompt deste arquivo:` seguido do caminho fornecido.
-  O prompt e seu recibo recuperam a etapa, as escolhas e os limites; nao e preciso
+  O prompt e seu contexto recuperam a etapa, as escolhas e os limites; nao e preciso
   copia-los novamente. A conversa com o helper permanece para orientacao e pode
   ser retomada depois com o resultado.
 - **Copilot:** abra o prompt preparado e use **Executar Prompt**, com o agente
@@ -148,13 +150,14 @@ Veja o [procedimento de planejamento e execucao](tools/planejamento-migracao.md#
 ### Continuar manualmente a partir de uma ficha
 
 Pode ser outro colega quem implementa. O orientador recupera a ficha e os anexos
-do projeto/issue, confere se existe plano/to-do e indica a etapa que falta.
+do projeto/issue, confere se existe plano/tarefas correntes e indica a etapa que falta.
 Os documentos seguem [estrutura padronizada e dossie por issue](tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas).
 Com somente analise, orienta elaborar o plano; com proposta, revisar GO; com GO,
 seguir execucao manual ou por agente de codificacao conforme a escolha humana.
-O orientador continua leitor. Contexto consolidado dispensa MTA original para
-implementar, mas exige conferir o codigo local. Para tornar o contexto operacional
-em outra raiz, use a [importacao com associacao aos projetos locais](tools/compartilhamento-contextos.md).
+O orientador continua leitor. Documentos e evidencias suficientes permitem
+implementar sem acesso ao MTA original, conferindo o codigo local e as lacunas.
+Para usar os documentos em outra raiz, siga a [associacao ao POM e reconciliacao](tools/compartilhamento-contextos.md).
+O contexto tecnico precisa apontar para os destinos locais correntes.
 
 O helper e opcional e tambem orienta trabalho manual. Diga, por exemplo:
 
@@ -174,20 +177,44 @@ Veja [a ficha e o roteiro manual](tools/priorizacao-issues.md#planejar-e-impleme
 
 ### Retomar em outro chat ou cliente
 
-Pode trocar de chat ou de cliente. O novo helper rele os mesmos registros e a
-solicitacao vinculada, reconhecendo escolhas e GO vigentes sem reconstruir todo
-o historico da conversa. Informe o projeto e a situacao real:
+Pode trocar de chat ou de cliente. O novo helper rele o registro e os documentos
+correntes, reconhecendo escolhas e o alcance do GO sem reconstruir todo o
+historico da conversa. Informe o projeto e a situacao real:
 
 ```text
-Quero retomar a migracao do projeto X. Confira o registro, a solicitacao vinculada
+Quero retomar a migracao do projeto X. Confira o registro, o plano corrente
 e as evidencias; identifique a etapa atual e me oriente em uma proxima acao.
 ```
 
-Se houver mais de uma frente, indique a que deseja continuar quando solicitado.
-`ContextPath` e o caminho do recibo (`contexto-<projeto>-<issue>.json` nos novos
-planos ou `context.json` na priorizacao e em layouts legados); o helper deve localiza-lo e
-apresenta-lo, nao exigir que voce invente o caminho. GO vigente do mesmo escopo
-e preservado; mudanca de escopo exige revisao da autorizacao.
+Se houver mais de um projeto ou escopo, indique qual deseja continuar.
+`ContextPath` aponta para o `contexto.json` corrente; o helper deve localiza-lo,
+sem exigir que voce invente nomes ou hashes. GO vigente do mesmo escopo e
+preservado; mudanca de escopo/solucao exige revisao da autorizacao.
+
+### Referencias que o desenvolvedor pode escrever
+
+Voce pode montar a parte dinamica do pedido com projeto, objetivo, caminhos e
+evidencias atuais. Por exemplo:
+
+```text
+No projeto X, confira o registro, o plano corrente, o ultimo build e o diagnostico
+Sonar atual. Use tambem evidencias/LEIA-ME.md e o guia de configuracao JBoss EAP 7.4.
+Indique as fontes consultadas e as lacunas antes de propor o proximo passo.
+```
+
+Use os [indices navegaveis](tools/workspace.md#navegar-pelas-evidencias-do-projeto)
+para copiar links. O agente confere data, estado e finalidade: log da ultima
+tentativa pode corresponder a uma falha, enquanto o relatorio conserva o ultimo
+diagnostico utilizavel. Recencia nao escolhe escopo nem concede GO/aceite.
+
+Mantenha instrucoes humanas duraveis no registro, no indice de evidencias ou em
+arquivo proprio. O prompt de planejamento gerado pode ser substituido no preparo;
+nao use esse arquivo como unico lugar de suas anotacoes. Um pedido manual no chat
+nao substitui o contexto tecnico exigido pelas tarefas automaticas.
+
+Os guias e contratos de `doc/` formam a base de conhecimento local: o agente busca
+e le os trechos pertinentes e cita seus caminhos, sem carregar toda a documentacao
+em cada prompt. Busca semantica/RAG com indexador vetorial nao esta implementada.
 
 ### Helpers especializados e delegacao
 
@@ -239,7 +266,7 @@ da etapa. Voce pode entrar diretamente onde parou.
 | 6. Implementar o lote autorizado | [Preparo da implementacao](tools/planejamento-migracao.md#orientar-implementacao). |
 | 7. Verificar e aceitar o resultado | [Verificacoes e aceite](tools/planejamento-migracao.md#orientar-verificacoes-e-aceite), com [Maven](tools/maven.md#orientacao-com-o-helper), [Sonar](tools/sonar.md#orientacao-com-o-helper) e [JBoss](tools/jboss.md#orientacao-com-o-helper). |
 | 8. Reconciliar e decidir continuidade | [Reconciliacao](tools/planejamento-migracao.md#orientar-reconciliacao-e-continuidade). |
-| Compartilhar ou receber analise/plano | [Exportacao/importacao](tools/compartilhamento-contextos.md#orientacao-com-o-helper). |
+| Compartilhar ou receber analise/plano | [Copia e reconciliacao](tools/compartilhamento-contextos.md#orientacao-com-o-helper). |
 
 ## Resultado e proximo passo
 
@@ -249,7 +276,7 @@ a lacuna. Retorne com o resultado real, falha ou decisao para receber a proxima
 orientacao. Nao envie credenciais ou logs brutos com segredos ao chat.
 
 **Ensaio nas extensoes:** confira descoberta/delegacao e orientacao em cada cliente,
-usando a mesma escolha/solicitacao. A resposta deve reconhecer a decisao atual,
+usando o mesmo projeto e escolha. A resposta deve reconhecer a decisao atual,
 oferecer uma acao pronta para aquele cliente e relatar somente o apoio utilizado.
 Revisao de arquivos nao comprova obediencia do agente nem validacao nativa.
 

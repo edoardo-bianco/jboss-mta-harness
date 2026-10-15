@@ -28,7 +28,7 @@ Os testes usam Windows PowerShell 5.1 e fixtures em `.harness/tests`, sem MTA/JB
 reais. Cobrem stdio, paridade, configuracao, limites e ciclo de vida dos filhos.
 `tests/Test-IssueQueryRoots.ps1` cobre a restricao opcional de caminhos do nucleo.
 `tests/Test-PlanningWithoutMcp.ps1` executa as regressoes de categorias e plano
-por issue com Node/npm/npx ausentes do PATH e configuracao MCP indisponivel.
+por projeto com Node/npm/npx ausentes do PATH e configuracao MCP indisponivel.
 O [guia de consultas](tools/consultas-issues.md) explica instalacao e alternativa CLI.
 
 Scripts, tarefas, prompts, skills/perfis, exemplo de configuracao, workspace inicial,
@@ -93,7 +93,7 @@ Crie documentos apenas quando houver conteudo proprio: atualizar o guia responsa
 
 ### Padrao dos guias operacionais
 
-Os sete guias de `tools/` usam o mesmo cabecalho de exportacao e uma abertura
+Os guias operacionais de `tools/` usam o mesmo cabecalho de exportacao e uma abertura
 curta: finalidade, etapa do fluxo, link de retorno ao desenvolvedor e navegacao.
 Preserve a ordem das secoes principais abaixo; detalhes proprios ficam em subsecoes.
 
@@ -136,88 +136,46 @@ ficticias para nao iniciar/parar servidores da maquina. Ensaio opt-in:
 e debug 8790: start/JDWP, deploy v1/v2 com HTTP, rollback HTTP e stop. Exige as
 instalacoes locais configuradas e portas livres. Nao executa breakpoint no VS Code.
 
-Para Git e limpeza, execute `powershell.exe -NoProfile -File .\tests\Test-Git.ps1`
-e `powershell.exe -NoProfile -File .\tests\Test-Cleanup.ps1`. Usam repositorios e
-historicos de teste em `.harness/tests/`; nao trocam a branch nem apagam historicos
-reais do desenvolvedor.
+Os demais testes usam fixtures isoladas em `.harness/tests/`. Execute a suite
+afetada em Windows PowerShell 5.1, por exemplo:
 
-Para testar o planejamento, execute `powershell.exe -NoProfile -File .\tests\Test-Planning.ps1`. Verifica selecao de rodadas, isolamento por projeto, evidencia invalida, contexto fixo, pastas legiveis e compatibilidade com o historico antigo. Testa abertura de plano/to-do com editor simulado e cancelamento pela entrada real, sem iniciar Maven, MTA ou Copilot.
+```powershell
+powershell.exe -NoProfile -File .\tests\Test-Planning.ps1
+powershell.exe -NoProfile -File .\tests\Test-ProjectNavigation.ps1
+```
 
-`tests/Test-PlanningEvidence.ps1` verifica a entrada unica pelo registro, base
-MTA ou EVIDENCIAS, escolhas preservadas, retomada sem duplicacao, alteracao de
-evidencias/contrato com Previous e solicitacao anterior ainda sem plano. Inclui
-ambiguidade entre registros, estado em coluna errada, origem malformada e reabertura
-sem regredir andamento. `tests/Test-PlanningCli.ps1` cobre a interface estruturada
-JSON e compatibilidade dos parametros avancados. Ambos usam fixtures isoladas.
+| Area | Suites e verificacao |
+| --- | --- |
+| Armazenamento por projeto | `Test-ProjectStorage`, `Publication`, `Recovery`, `Concurrency` e `ReadOnly`: identidade Maven, destinos, publicacao, exclusividade e recuperacao. Os nomes completos possuem prefixo `Test-Project` e extensao `.ps1`. |
+| Indices e navegacao | `Test-ProjectIndex.ps1`, `Test-ProjectNavigation.ps1` e `Test-ProjectDocuments.ps1`: links existentes, operacoes/diagnosticos, texto humano e documentos correntes. |
+| Planejamento | `Test-Planning.ps1`, `Test-PlanningEvidence.ps1`, `Test-PlanningCli.ps1` e `Test-IssuePlanning.ps1`: registro, escopo, fontes diretas, base MTA/EVIDENCIAS, fichas, lacunas e destinos. |
+| Copia e reconciliacao | `Test-PlanningPortable.ps1`, `Test-PlanningReassociation.ps1` e suites `Test-Reconciliation*.ps1`: POM local, copia direta/pasta recebida, conflitos, mesclagem por decisao e realinhamento. Nao existe mais teste ou operacao de pacote ZIP. |
+| Priorizacao | `Test-Prioritization.ps1`, `Progress`, `Categories`, `Incidents` e `Index`: categoria/escopo, B0 fixa, quota, examinadas acumuladas, fichas e indice derivado. Os nomes completos possuem prefixo `Test-Prioritization` e extensao `.ps1`. |
+| Implementacao | `Test-Implementation.ps1` e `Test-ImplementationBranch.ps1`: preparo corrente e escolha explicita de branch em repositorios ficticios; nao executam corretivas nem concedem GO. |
+| Sprints | Suites `Test-Sprint*.ps1`: fontes, cenario/mestre, estimativas, baseline, consumo, validacao, publicacao e prompts. Nao aprovam compromisso humano de prazo. |
+| MTA | `Test-Mta.ps1`, `Test-MtaLog.ps1`, `Test-MtaActive.ps1`, `Test-ProjectMta.ps1` e `Test-ExternalMtaDiscovery.ps1`: produtor simulado, leitura direta e acompanhamento da operacao/ultimo log, sem rodada historica no runtime. |
+| Build | `Test-Build.ps1` e `Test-BuildConfig.ps1`: ferramentas separadas, Java 8, ultima tentativa, falhas e restauracao do ambiente. |
+| Sonar | `Test-Sonar.ps1`, `Test-SonarDownload.ps1`, `Test-SonarCriteria.ps1`, `Test-SonarIssues.ps1` e `Test-SonarReview.ps1`: scan/download simulados, origem, comparacao, criterios e parecer corrente. Launcher/certificado/API possuem suites proprias; API usa HTTP real somente em loopback. |
+| Workspace e entradas | `Test-Workspace.ps1`, `Test-Target.ps1`, `Test-TaskInputs.ps1`, `Test-Editor.ps1` e `Test-EvidenceFolder.ps1`: configuracao, selecao, Explorer, argumentos reais, cancelamento, editor simulado e indice de evidencias. |
+| Consultas | Suites `Test-IssueQuer*.ps1`, `Test-McpRoots.ps1` e testes Node de `mcp/issues`: somente leitura, paginas, limites, origens correntes e permissoes. |
+| Conversao e limpeza | Suites `Test-Conversion*.ps1`, `Test-Cleanup.ps1` e `Test-ProjectTemporaryRemoval.ps1`: previa/aplicacao/validacao/limpeza em fixtures, sem conversao ou limpeza dos registros reais. |
 
-`tests/Test-Prioritization.ps1` verifica o preparo de priorizacao entre projetos:
-escopo do workspace, registros/rodadas recebidas, lacunas/conflitos, integridade,
-percentual de 0,01 a 100,00, historico, preservacao das entradas, lock, CLI/JSON,
-menus recriar/progredir, retomada sem pedir percentual novamente e editor simulado.
-`tests/Test-PrioritizationProgress.ps1` verifica denominador inicial fixo, quota
-arredondada, exclusao acumulada de todas as examinadas, recriacao, esgotamento,
-resultados incompletos/duplicados, varias pontas e hash de ranking ancestral.
-Confere tambem o mesmo ID em Sources distintos e mudancas de decisoes/evidencias.
-Execute com `powershell.exe -NoProfile -File .\tests\Test-PrioritizationProgress.ps1`.
-A qualidade da lista e a orientacao/delegacao nativas seguem para a
-[validacao manual](tools/priorizacao-issues.md#validacao-manual).
+Testes simulados nao comprovam que uma aba abriu no VS Code, que o cliente
+descobriu/delegou helpers ou que uma corretiva foi aceita. A qualidade do ranking
+e a orientacao nativa seguem para a [validacao manual](tools/priorizacao-issues.md#validacao-manual).
+A conversao deve permanecer independente do runtime corrente; o fluxo usual nao
+procura recibos antigos nem depende de arquivos do conversor.
 
-`tests/Test-PrioritizationCategories.ps1` verifica sequencias independentes por
-categoria e fichas por Source/Id. `tests/Test-IssuePlanning.ps1` cobre pasta pelo
-artifactId, nomes por issue, anexos, revisoes e implementacao consolidada sem MTA
-original. `tests/Test-ContextPackage.ps1` exporta/importa analise e plano entre
-raizes isoladas, confere SourceMap, Previous, originais, links, preview, CLI,
-conflitos, idempotencia, integridade e rollback. Nao comprova a qualidade do plano
-nem o aceite da aplicacao.
+Para ensaiar cobertura com Maven real, execute em uma linha:
 
-`tests/Test-PrioritizationIndex.ps1` verifica o indice derivado pelo template:
-cobertura distinta, sequencias por escopo/categoria, Recreate/Continue, legado,
-pendencias, bifurcacao, notas manuais, links, idempotencia e publicacao atomica
-com falha/conflito. A suite Progress tambem verifica a reconciliacao do indice
-quando Continue recusa resultado parcial ou uma ficha v4 ausente. Execute com
-`powershell.exe -NoProfile -File .\tests\Test-PrioritizationIndex.ps1`.
+```powershell
+powershell.exe -NoProfile -File .\tests\Test-BuildCoverage.ps1 -Jdk8Home <caminho-do-jdk8> -MavenHome <caminho-do-maven>
+```
 
-`tests/Test-PlanningPortable.ps1` verifica MTA recebido de outra maquina, alertas
-do POM e continuidade sem indice local. `tests/Test-LongPaths.ps1` verifica copia,
-hashes e armazenamento externo em fixtures de caminhos longos.
-
-Para testar o preparo de implementacao, execute `powershell.exe -NoProfile -File .\tests\Test-Implementation.ps1`.
-Verifica identidade/destinos/hashes, preservacao do historico, menus, cancelamento
-e abertura simulada do editor. Nao executa corretivas nem comprova o GO ou a
-delegacao no Copilot; esse ensaio permanece separado dos testes de scripts.
-
-`powershell.exe -NoProfile -File .\tests\Test-ImplementationBranch.ps1` verifica
-as tres escolhas e o fallback, com criacao de branches somente em repositorios
-ficticios: nomes invalidos/existentes, cancelamento, HEAD destacado e preservacao
-de arquivos/indice. Nao altera branches da aplicacao real.
-
-Para testar configuracao e analise: execute `powershell.exe -NoProfile -File .\tests\Test-Workspace.ps1` e `powershell.exe -NoProfile -File .\tests\Test-Mta.ps1`. Criam fixtures em `.harness/tests/`; o primeiro cobre workspace inicial vazio e importacao de aplicacoes externas, e o segundo simula a chamada ao processo MTA. Os testes independem de playgrounds reais ou exemplos internos ao harness.
-
-Para testar o build e sua configuracao: execute `powershell.exe -NoProfile -File .\tests\Test-Build.ps1` e `powershell.exe -NoProfile -File .\tests\Test-BuildConfig.ps1`. Verificam ferramentas separadas, Java 8, falhas, restauracao do ambiente e geracao do workspace, com chamadas de build simuladas.
-
-Para ensaiar cobertura com Maven real, execute `powershell.exe -NoProfile -File
-.\tests\Test-BuildCoverage.ps1 -Jdk8Home <caminho-do-jdk8> -MavenHome <caminho-do-maven>`
-em uma linha. O ensaio usa fixture isolada em `.harness/tests/`, dependencias e
-settings padrao da maquina: cobertura baixa gera aviso/exit 0, enquanto teste
-reprovado e erro de compilacao continuam falhando. Nao executa Sonar nem MTA.
-
-Para testar o acompanhamento e o historico, execute `powershell.exe -NoProfile -File .\tests\Test-MtaLog.ps1`. Usa logs ficticios e verifica novas linhas durante a leitura e selecao de rodadas anteriores, sem executar MTA. `powershell.exe -NoProfile -File .\tests\Test-MtaActive.ps1` verifica a deteccao da analise ativa sem selecao de projeto e recusa registros antigos e builds como fonte de observabilidade MTA.
-
-Para testar a selecao dos projetos do workspace, execute `powershell.exe -NoProfile -File .\tests\Test-Target.ps1`. Verifica o menu, packaging pom, padrao opcional, projetos homonimos, adicao/renomeacao e preservacao do JSON/workspace.
-
-Para testar os argumentos das tarefas, execute `powershell.exe -NoProfile -File .\tests\Test-TaskInputs.ps1`. Verifica as entradas suportadas e executa o script real de build ate o menu, com caminho de workspace contendo espacos; cancela antes de iniciar Maven.
-
-Para testar o registro, execute `powershell.exe -NoProfile -File .\tests\Test-MigrationRegister.ps1`.
-`tests/Test-ProjectIndex.ps1` verifica resumo por Source, ultimas falhas, ausencias,
-MTA externo, documentos incompletos, links e preservacao de entradas/historico.
-
-Para testar a abertura no editor, execute `powershell.exe -NoProfile -File .\tests\Test-Editor.ps1`.
-Verifica a CLI da instalacao selecionada, argumentos e falhas com editor simulado;
-nao comprova que uma aba apareceu no VS Code real.
-
-Para testar a pasta de evidencias, execute `powershell.exe -NoProfile -File .\tests\Test-EvidenceFolder.ps1`.
-Verifica selecao/cancelamento pela entrada real, isolamento de projetos homonimos,
-repeticao sem sobrescrita e abertura do LEIA-ME em editor simulado, sem MTA/Copilot.
+Esse ensaio usa fixture isolada e settings/dependencias padrao da maquina.
+Cobertura baixa gera aviso/exit 0; teste reprovado e compilacao falha continuam
+falhando. Nao executa Sonar nem MTA. Mantenha os ensaios com ferramentas reais
+separados da regressao automatica e confira os parametros de cada suite.
 
 ## Resultado e proximo passo
 
