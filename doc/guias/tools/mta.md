@@ -10,12 +10,12 @@ html:
 [Voltar ao fluxo principal do desenvolvedor](../harness-migracao-desenvolvedor.md#roteiro-onde-estou-e-o-que-escolho).
 
 Analise de migracao com distribuicao Windows do MTA, acompanhamento e leitura
-dos resultados. Os comandos partem da raiz do harness. Para usar uma rodada ja
+dos resultados. Os comandos partem da raiz do harness. Para usar uma analise ja
 recebida no planejamento, siga o [fluxo de MTA recebido](planejamento-migracao.md#compartilhar-o-mta-e-planejar-em-outra-maquina).
 
 **No fluxo principal:** este guia detalha o diagnostico da
 [etapa 3](../harness-migracao-desenvolvedor.md#3-obter-ou-reutilizar-o-diagnostico-mta).
-Com a rodada conferida, siga para [registro e prioridades na etapa 4](../harness-migracao-desenvolvedor.md#4-conferir-o-registro-e-escolher-prioridades).
+Com a analise conferida, siga para [registro e prioridades na etapa 4](../harness-migracao-desenvolvedor.md#4-conferir-o-registro-e-escolher-prioridades).
 Se for uma nova analise de um trabalho em andamento, volte a
 [reconciliacao da etapa 8](../harness-migracao-desenvolvedor.md#8-reconciliar-e-decidir-a-continuidade).
 
@@ -33,7 +33,7 @@ Confira o registro, o build e as evidencias disponiveis e me oriente no proximo
 passo, preservando a origem ja vinculada e indicando as lacunas.
 ```
 
-**Resultado esperado:** orientacao para reutilizar a rodada vinculada, adotar
+**Resultado esperado:** orientacao para consultar o diagnostico corrente, adotar
 explicitamente outra origem ou preparar uma nova analise quando necessaria.
 O helper fornece tarefa/caminho reais; voce executa a operacao. Se estiver
 reavaliando uma corretiva, informe o lote e peca a verificacao da comparabilidade.
@@ -63,7 +63,6 @@ settings opcionais ficam `null` para usar os padroes Maven da maquina.
   },
   "mta": {
     "profile": "eap71-to-eap74-java8",
-    "runsPath": null,
     "rulesPath": null,
     "sources": [],
     "targets": ["eap7"],
@@ -79,7 +78,6 @@ settings opcionais ficam `null` para usar os padroes Maven da maquina.
 | `tools.mavenHome` | Maven usado pelo MTA, com `bin/mvn.cmd`. |
 | `tools.mavenSettingsPath` | Opcional: `settings.xml` aprovado para o MTA. Nunca coloque credenciais neste JSON. |
 | `mta.rulesPath` | `null` usa `rulesets/java` ao lado da CLI; preencha se as regras Java estiverem em outra pasta. |
-| `mta.runsPath` | Pasta dedicada externa para novas rodadas, por exemplo `"C:/mta-runs"`. `null`/ausente mantem `.harness/runs`. |
 | `mta.profile` | `"eap71-to-eap74-java8"`: origem EAP 7.1, destino EAP 7.4, Java 8 e `javax.*`. |
 | `mta.sources`, `mta.targets`, `mta.mode` | Mantenha `[]`, `["eap7"]` e `"full"`. O harness recusa desvios desse perfil. |
 
@@ -89,42 +87,30 @@ settings opcionais ficam `null` para usar os padroes Maven da maquina.
 
 Preservamos `full`, `--run-local`, todas as regras YAML da pasta Java (sem fixtures de teste), `--enable-default-rulesets=false` e ausencia de `--json-output`. O perfil identifica o objetivo; nao reescreve regras nem transforma o conjunto amplo `eap7` em cobertura exata do EAP 7.4. O Copilot/desenvolvedor deve triar a aplicabilidade por versao e dependencia; o corrigido sera validado no EAP 7.4. Nao converter `javax.*` para `jakarta.*` nem trocar o target para `eap8`.
 
-JSONs locais anteriores, sem `profile` e `sources`, recebem esses valores em memoria; caminhos permanecem inalterados. As novas rodadas registram perfil, origem/destino e filtros no manifesto, alem dos argumentos e hashes das regras. Atualizar a distribuicao ou `rulesPath` exige conferir novamente a comparabilidade com o baseline: o nome do perfil sozinho nao garante regras identicas.
+JSONs locais anteriores, sem `profile` e `sources`, recebem esses valores em memoria; caminhos permanecem inalterados. A configuracao define perfil, origem/destino e filtros da analise corrente. Atualizar a distribuicao ou `rulesPath` exige conferir novamente a comparabilidade com o baseline: o nome do perfil sozinho nao garante regras identicas.
 
-### Pasta de rodadas e caminhos longos
+### Origem MTA e caminhos
 
-**Pasta curta externa para projetos com caminhos longos:** em **Workspace:
-configurar caminhos**, acrescente/ajuste somente `runsPath` no bloco `mta` de
-`config/harness.local.json`, preservando os outros campos:
+<a id="pasta-de-rodadas-e-caminhos-longos"></a>
 
-```json
-"runsPath": "C:/mta-runs"
-```
+A associacao do projeto fica em
+`.harness/projetos/<artifactId>/projeto.json`. `mta.diretorio: null` usa o
+diagnostico interno em `atual/diagnosticos/mta/`; um caminho explicito consulta
+o MTA externo diretamente, sem copia ou cadastro de rodada.
 
-Salve e execute novamente **MTA: executar analise**. Nao precisa mover o harness
-nem alterar o workspace. A pasta precisa permitir escrita ao seu usuario e ficar
-fora do harness e dos projetos. Novas rodadas usam
-`C:/mta-runs/<nome-projeto>/yyMMdd-HHmmss/`, por exemplo
-`C:/mta-runs/SIMTR-Outsourcing-api/260930-151210/`, com `input`, `rules`, `output`,
-logs e recibos. A data/hora usa o horario local; o instante UTC e o RunId completo
-continuam no manifesto. Horarios repetidos recebem `-2`, `-3` etc., sem sobrescrever.
-O nome do projeto usa o rotulo do workspace/configuracao, com caracteres seguros
-e limite de 64 caracteres. Nomes iguais de projetos/fontes diferentes recebem
-sufixos numericos. `project.json` na pasta do projeto identifica `Label`, `Project`
-e `Source`; `manifest.json` em cada rodada registra tambem o Git observado.
-Nomes dos fontes e estrutura dos modulos sao preservados. A pasta local da rodada
-guarda `location.json`, incluindo o caminho relativo do destino externo.
-Logs, relatorio e planejamento resolvem essa referencia, inclusive apos trocar
-`runsPath` ou voltar a null. Historico existente nao e movido nem reescrito.
-Rodadas externas anteriores em `p__<chave12>/<RunId>/` continuam acessiveis.
-**Workspace: limpar execucoes** preserva toda a pasta externa, suas rodadas e
-`project.json`; remove somente indices e ponteiros selecionados sob `.harness`.
-Sem esses indices, use a pasta completa da rodada, conforme o roteiro de abertura
-abaixo. Veja os [limites da limpeza](workspace.md#limpar-execucoes-locais).
-Ao mover o harness, leve tambem `.harness/`: os indices continuam validos se a
-aplicacao e a pasta externa permanecerem no lugar. A raiz antiga em `IndexPath`
-e historica; projeto, fonte, RunId e trecho do indice sob `.harness/runs` continuam
-conferidos. Nao e necessario reexecutar MTA ou editar os manifestos.
+O leitor reconhece a pasta de relatorio estatico com `index.html` e `output.js`
+contendo uma aplicacao e seus rulesets. Na origem configurada, escolhe o
+diagnostico pela data de geracao valida com fuso ou pela modificacao de
+`index.html`, com desempate ordinal de caminho. Arquivo indisponivel/invalido
+e lacuna; nao escolhe outra origem silenciosamente. Recencia do diagnostico
+nao altera decisoes, escopo ou GO.
+
+A Run Task de analise publica somente na origem interna. Se configurou origem
+externa, gere nela com sua ferramenta ou escolha explicitamente a origem interna
+em `projeto.json` antes de executar pelo harness. O campo antigo `runsPath`
+nao define novas saidas. Use raiz curta quando ferramentas externas tiverem
+restricoes de comprimento; confira os limites do projeto no ensaio real.
+A limpeza corrente preserva a origem externa.
 
 ## Uso
 
@@ -161,69 +147,63 @@ powershell.exe -NoProfile -File .\scripts\executar-mta.ps1 -WorkspacePath .\jbos
 
 ### Analise e resultados
 
-Sem `mta.runsPath`, cada nova rodada fica em `.harness/runs/<nome>__<chave12>/mta_<data-fuso>__<RunId12>/`, com copia do reactor e das regras, `manifest.json` (argumentos/hashes), `console.log`, `result.json` e `output/static-report/index.html`. A pasta usa o instante CreatedAtUtc do manifesto convertido para horario local com fuso; o ID completo permanece nos recibos. Excluimos `.git`, `.harness`, `.scannerwork`, `node_modules` e pastas Maven `target`; preservamos `.mvn` e os modulos. Modulos/pais externos precisam estar disponiveis no Maven ou incluidos na raiz escolhida. Links/junctions nao sao suportados. As fontes originais e as regras sao conferidas depois da execucao.
+O resultado utilizavel fica em
+`.harness/projetos/<artifactId>/atual/diagnosticos/mta/`; o relatorio produzido
+pelo harness abre em `static-report/index.html`. A ultima tentativa tem
+`mta-console.log` e, quando disponivel, `mta-interno.log`, separados do
+diagnostico. A situacao da operacao fica legivel no indice do projeto.
 
-O snapshot usa caminhos estendidos internamente para enumerar/copiar/calcular
-SHA-256 acima de 260 caracteres no PowerShell 5.1; manifestos e comandos MTA
-mantem caminhos normais. A pasta externa curta tambem reduz o caminho recebido
-pelo MTA/Java. Isso nao certifica todos os limites das ferramentas externas:
-confira `Status`, exit code e integridade na nova rodada real do projeto.
-
-Rodadas antigas em `.harness/runs/<Project>/<RunId>/` continuam acessiveis nas
-mesmas tarefas. O harness le ambos os formatos, inclusive ultimo relatorio,
-analise ativa, logs e planejamento. Confere projeto/fonte e ID completo no
-manifesto; mudar o rotulo do projeto nao perde o historico. Copias com o mesmo
-RunId dentro da area de rodadas sao recusadas como ambiguas.
-
-Uma falha nao substitui o ultimo relatorio concluido do projeto. `SUCCEEDED` confirma a execucao e as verificacoes locais, nao a homologacao no EAP 7.4. Sonar e deploy complementam o ciclo nos momentos indicados no roteiro principal.
-
-Depois de uma corretiva, a nova rodada entra no historico, mas nao troca a base
-ja vinculada no registro. Para adota-la, use **Planejamento: atualizar registro
-de migracao**, seguindo o [procedimento de adocao e comparacao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente).
+A analise usa copias temporarias de fontes/regras para isolar alteracoes do
+analisador. Esses arquivos sao retirados ao terminar; nao formam snapshots
+permanentes nem requisitos para planejar. Fonte ou regra alterada durante a
+operacao interrompe a publicacao. Falha preserva o ultimo diagnostico completo.
+`SUCCEEDED` comprova a execucao/verificacoes locais, nao homologacao EAP 7.4.
 
 ### Abrir e compartilhar relatorios
 
-Se os indices nao estiverem disponiveis, ou a rodada vier de um colega, preserve
-a **pasta completa da rodada**. A tarefa **MTA: abrir ultimo relatorio**, quando
-nao consegue localizar o ultimo relatorio, pede essa pasta (Enter/q cancela).
-Tambem e possivel abrir diretamente, mesmo sem configuracao/cadastro local:
+Use **MTA: abrir ultimo relatorio** ou o link **MTA atual** no indice do projeto.
+A tarefa informa quando o diagnostico disponivel antecede uma tentativa que falhou.
+Para apenas consultar o caminho:
 
 ```powershell
-.\scripts\abrir-relatorio-mta.ps1 -RunPath 'C:\mta-runs\SIMTR-Outsourcing-api\260930-154744'
+.\scripts\abrir-relatorio-mta.ps1 -WorkspacePath .\meu-workspace.code-workspace -SelectTarget -NoOpen
 ```
 
-O caminho acima e ilustrativo: informe a pasta que contem `manifest.json`,
-`result.json`, `input`, `rules` e `output`. O leitor confere resultado, identidade
-interna e evidencias e abre `output/static-report/index.html` na localizacao atual.
-Nao altera origem, indices nem ultimo sucesso local. Para planejar a partir dessa
-rodada, use **Planejamento: atualizar registro de migracao**, opcao **p** para
-a pasta recebida, pelo [caminho de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente)
-e depois use **Planejamento: planejar**. A entrada habitual recupera a origem
-vinculada; nao oferece menu de rodadas nem escolhe a mais recente. Nao basta copiar so o HTML
-para comprovar a integridade de uma rodada completa;
-para compartilhar apenas a visualizacao, envie `static-report` inteira e abra
-seu `index.html` diretamente no navegador.
+Compartilhe a pasta completa do relatorio, preservando os recursos HTML, e
+associe a origem ao projeto local em `projeto.json`. Nao ha importador ZIP.
+Abrir o HTML diretamente permite visualizar o material; planejar tambem exige
+conferir sua aplicabilidade ao codigo local. Quando necessario comparar novo
+diagnostico com decisoes/trabalho corrente, use **Planejamento: atualizar registro
+de migracao** com motivo concreto.
 
-Quando voce so possui trechos/relatorios ou outras evidencias do problema, pode
-referencia-los no registro/LEIA-ME e planejar pela base EVIDENCIAS. O agente confere
-o codigo e explicita os limites, sem inventar manifestos, RunId, categoria mandatory
-ou resultado MTA. Pergunta apenas o essencial para uma proposta coerente.
+Trechos ou outras evidencias humanas podem sustentar base EVIDENCIAS, com limites
+explicitos; relatorio ausente nao muda automaticamente uma proposta de base MTA.
 
 ### Acompanhar a analise MTA
 
-**Acompanhar a execucao atual:** o terminal de **MTA: executar analise** ja mostra a saida. Para abrir um leitor separado, aguarde a mensagem `Rodada` e execute **MTA: acompanhar log da analise**. Ela se vincula automaticamente a analise MTA em execucao neste harness, sem pedir projeto ou workspace; mostra projeto, fontes, RunId e caminho do log. Exibe as ultimas 40 linhas e acompanha novas linhas dessa rodada. `Ctrl+C` encerra somente o leitor. Ele fica nessa rodada e nao muda para outra automaticamente; encerre-o ao concluir e confira o JSON final no terminal original. Se encontrar o resultado ao abrir, mostra-o e encerra. Sem MTA ativo, informa que nao ha analise em execucao; um build ou registro antigo nao conta como analise ativa. Se o log ainda nao existir, informa a situacao sem abrir um log antigo.
+**MTA: acompanhar log da analise** seleciona o projeto e consulta o log corrente.
+Durante a execucao, acompanha o log temporario; ao terminar, usa a ultima tentativa.
+Mostra situacao/caminho, as ultimas 40 linhas e alteracoes enquanto houver analise
+em andamento. `Ctrl+C` encerra somente o leitor. Sem log, informa a lacuna.
 
-**Consultar uma execucao anterior:** execute **MTA: consultar log de execucao anterior**, confirme o workspace e escolha o projeto. Depois escolha a rodada na lista, que mostra data/hora local com fuso, resultado e RunId, da mais recente para a mais antiga. A ordem usa o instante do manifesto, nao a data de copia da pasta. A tarefa exibe o resultado salvo, o caminho do `console.log` e suas ultimas 40 linhas, sem executar MTA nem seguir novas linhas. `SEM RESULTADO` indica ausencia de recibo, nao comprova que a rodada esteja em execucao. Para ler tudo, abra o arquivo pelo caminho exibido. Builds Maven ficam em `.harness/builds/` e nao aparecem nesse historico MTA.
+**MTA: acompanhar atividade interna** usa a mesma selecao com `-Detalhado`.
+Consulta a cada cinco segundos ate quatro linhas resumidas, lendo no maximo
+16 KiB por vez. Silencio ou log atualizado nao certificam travamento/progresso.
+`-Once` faz uma consulta; nenhuma dessas entradas inicia/cancela MTA.
 
-Para escolher uma rodada explicitamente, use `powershell.exe -NoProfile -File .\scripts\acompanhar-log-mta.ps1 -WorkspacePath .\jboss-mta-harness.local.code-workspace -SelectTarget -RunId <id>`. Adicione `-Once` para mostrar somente as ultimas linhas, sem esperar. O leitor nao inicia/cancela MTA nem altera arquivos; nao acompanha os logs internos do JDT.
+```powershell
+.\scripts\acompanhar-log-mta.ps1 -WorkspacePath .\meu-workspace.code-workspace -SelectTarget -Once
+```
 
-**Console sem novas mensagens:** use **MTA: acompanhar atividade interna**. No mesmo script, `-Active -Detalhado` identifica a analise em execucao e consulta `.metadata/.log` da rodada a cada 5 segundos, mostrando horario/idade da ultima gravacao e ate quatro linhas resumidas de mensagens/classes/consultas. Le no maximo 16 KiB por consulta e reabre o arquivo para tolerar rotacao, sem despejar o log inteiro. Nao altera o nivel de log nem a analise. Encerra ao encontrar `result.json` legivel ou com `Ctrl+C`; acrescente `-Once` para fazer apenas uma consulta. Logs atualizados indicam atividade, nao porcentagem/progresso garantido; silencio sozinho tambem nao comprova travamento. Esta visao usa o formato JDT observado na CLI ensaiada e pode ficar indisponivel em outra versao.
+Os logs tambem estao acessiveis pelo indice do projeto. Nao existe selecao de
+execucoes anteriores por ID no fluxo corrente.
 
 ## Resultado e proximo passo
 
-Confira o resultado da rodada, origem, projeto analisado, relatorio e eventuais
-lacunas. Use a rodada vinculada ao registro ou adote outra explicitamente pelo
-[fluxo de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente).
+Confira ultima tentativa, origem, projeto, diagnostico utilizavel e lacunas.
+Compare com as decisoes e o codigo atual pelo
+[fluxo de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente)
+quando houver motivo concreto.
 Depois siga para [registro e prioridades](planejamento-migracao.md#registro-de-migracao-por-projeto).
 Se estiver verificando um lote, registre a comparacao possivel e suas limitacoes;
 nao reencontrar um achado nao comprova sozinho sua resolucao nem concede aceite.

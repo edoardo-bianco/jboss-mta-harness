@@ -76,7 +76,7 @@ ao lado de `tools` e `mta`. Exemplo preenchido para Docker local:
 | --- | --- | --- |
 | `serverUrl` | `null` | Preencher localhost:9000 para Docker local ou URL HTTPS final do Sonar corporativo. |
 | `apiAuthScheme` | `Bearer` | Opcional: `Bearer` ou `Basic`, aplicado nas APIs e no scanner Maven. Ausencia preserva Bearer; para SonarQube 9.9, use Basic. |
-| `debug` | `false` | Booleano opcional: INFO no uso normal; true habilita DEBUG e grava scanner-debug.log na coleta. |
+| `debug` | `false` | Booleano opcional: INFO no uso normal; true habilita DEBUG em sonar-console.log da ultima tentativa. |
 | `scannerJdkHome` | `null` | Preencher caminho do JDK instalado e compativel com scanner/servidor. |
 | `scannerVersion` | `5.8.0.7211` | Versao fixa do plugin Maven; confirmar homologacao e acesso ao repositorio Maven corporativo. |
 | `ceTimeoutSeconds` | `300` | Tempo maximo de espera pelo processamento no servidor, em segundos. |
@@ -180,7 +180,7 @@ override atende a este ambiente; nas demais maquinas, o padrao continua `null`.
    Informe o valor do token somente na entrada oculta do terminal.
 6. Confira `ApiAuthScheme: Basic`, `ScannerAuthScheme: Basic`, `ScannerJavaHome`
    apontando para JDK 17, `ProjectKey` com a chave informada e
-   `BranchName: develop` no novo `result.json`; acompanhe tambem `Stage`,
+   `BranchName: develop` no novo `resultado.json`; acompanhe tambem `Stage`,
    `ScannerExitCode`, `AnalysisStatus` e os criterios no resumo.
 
 Basic envia o token como usuario e senha vazia, conforme a
@@ -371,7 +371,7 @@ senhas ou mudar settings/certificados para contornar a falha.
 
 O padrao e `sonar.debug: false`, inclusive em JSON antigo sem esse campo. A
 tarefa usa `sonar.verbose=false`, `sonar.log.level=INFO` e Maven sem `-e -X`.
-Grava `scanner-info.log` na pasta exclusiva da coleta, alem da saida no terminal.
+Grava `atual/diagnosticos/sonar-console.log` no projeto, alem da saida no terminal.
 WARN e ERROR continuam visiveis. Isso regula o scanner local; nao altera logs
 nem politicas do servidor Sonar corporativo.
 
@@ -379,9 +379,11 @@ Para investigar uma falha, abra a configuracao local pela tarefa **Workspace:
 configurar caminhos** e altere somente `debug` dentro de `sonar` para **true**
 (booleano, sem aspas). Execute **Aplicacao: analisar SonarQube** normalmente.
 Maven recebe `-e -X`, o scanner recebe `sonar.verbose=true` e
-`sonar.log.level=DEBUG`; o arquivo passa a ser `scanner-debug.log`. `result.json`
-informa `LogLevel` e `LogPath`. Depois, volte `debug` a false. Coletas anteriores
-e seus logs sao preservados; nao precisa editar scripts nem usar Tee-Object.
+`sonar.log.level=DEBUG`; o mesmo `sonar-console.log` passa a conter a tentativa
+detalhada. `sonar-tentativa.json` informa `LogLevel` e `LogPath`. Depois, volte
+`debug` a false. A proxima tentativa substitui esse log; preserve previamente
+um trecho necessario, sem segredos, em `evidencias/`. Nao precisa editar scripts
+nem usar Tee-Object.
 
 O launcher mascara o token Sonar antes de mostrar e gravar a saida, inclusive
 representacoes Basic/JSON. DEBUG Maven pode revelar outras propriedades ou
@@ -408,7 +410,7 @@ e [logs do scanner](https://docs.sonarsource.com/sonarqube-server/analyzing-sour
 6. Escolha **1 ANTES** ou **2 DEPOIS**. E identificacao declarada pelo operador,
    nao prova de que a corretiva foi ou nao aplicada. ANTES deve ser coletado e
    preservado antes das alteracoes exigidas pelo plano.
-7. Informe o caminho do `result.json` de uma coleta **ANTES** para comparar
+7. Informe o caminho do `resultado.json` de uma coleta **ANTES** para comparar
    as chaves de issues abertas. Enter deixa a comparacao **PENDING**; nao escolhe a mais
    recente automaticamente. Na primeira coleta ANTES, use Enter.
 8. Digite o token na entrada oculta do terminal. Precisa permitir analise do
@@ -427,24 +429,28 @@ plugins Maven, hooks ou configuracoes externas do projeto.
 O resultado fica em:
 
 ```text
-.harness/sonar/<nome>__<chave>/sonar_<data-hora-fuso>__<id>/
-  result.json
-  inputs.json
-  report-task.txt
-  quality-gate.json
-  measures.json
-  issues.json
-  criteria.json
-  scanner-info.log (ou scanner-debug.log)
-  RESUMO.md
-  decisions/decision_000001.json (quando o operador registrar uma decisao)
+.harness/projetos/<artifactId>/atual/diagnosticos/
+  sonar/                       # ultimo diagnostico utilizavel
+    resultado.json
+    quality-gate.json
+    measures.json
+    issues.json
+    criteria.json
+    RESUMO.md
+  sonar-tentativa.json          # resultado da ultima tentativa
+  sonar-console.log            # log da ultima tentativa
+  sonar-decisao.json            # parecer corrente, quando registrado
 ```
 
-Gate/metricas so existem quando a coleta correspondente foi concluida. O scanner
-pode manter arquivos internos em `scanner-work`; eles nao sao evidencias para
-anexar ao Copilot. `inputs.json` registra hashes dos arquivos de entrada, sem
-copiar os fontes, e nao comprova atualidade dos binarios, testes ou cobertura.
-Git e apenas informativo. Mudancas nas entradas durante o scan invalidam a coleta.
+Abra esses arquivos pelo [indice do projeto](workspace.md#navegar-pelas-evidencias-do-projeto).
+Uma coleta completa substitui o diagnostico corrente, inclusive quando o gate
+reprova. Tentativa incompleta preserva o ultimo diagnostico utilizavel e atualiza
+o resultado/log da tentativa; confira as datas e o estado da operacao.
+
+Arquivos internos do scanner sao temporarios. A conferencia das entradas ocorre
+em memoria durante o scan, sem recibo de hashes ou copia permanente dos fontes.
+Ela nao comprova atualidade dos binarios, testes ou cobertura. Git e informativo.
+Mudancas nas entradas durante o scan invalidam a coleta.
 
 | Campo | Significado |
 | --- | --- |
@@ -458,10 +464,10 @@ Git e apenas informativo. Mudancas nas entradas durante o scan invalidam a colet
 | IssuesStatus | COMPLETE somente com todas as paginas verificadas; UNVERIFIED nao significa zero. |
 | BaselineComparison | COMPARED quando comparou chaves com o ANTES selecionado; PENDING sem comparacao disponivel. |
 | TechnicalStatus | NON_COMPLIANT com gate/criterio reprovado; COMPLIANT quando Status=SUCCEEDED; UNVERIFIED nos demais casos. Nao e aceite humano. |
-| HumanDecision | PENDING no recibo imutavel da coleta. Decisoes posteriores ficam no historico decisions/ e sao mostradas ao rever a coleta. |
+| HumanDecision | PENDING no resultado da coleta. O parecer corrente fica em sonar-decisao.json e e reavaliado contra os dados ao rever. |
 | LogLevel / LogPath | INFO/DEBUG e caminho do log do scanner desta execucao. |
 | Status | SUCCEEDED com coleta concluida, Gate OK e criterios PASS/WARN; QUALITY_GATE_FAILED com Gate ERROR; CRITERIA_FAILED com criterio reprovado; FAILED/UNVERIFIED nos demais casos. |
-| InputsStatus | STABLE quando os hashes de entrada coincidem antes/depois do scan. |
+| InputsStatus | STABLE quando a conferencia das entradas antes/depois do scan nao detecta mudancas. |
 
 Exit code da tarefa: 0 para SUCCEEDED, 2 para QUALITY_GATE_FAILED/CRITERIA_FAILED e 1 para
 falha/coleta nao verificada. O timeout limita a espera pelo processamento CE;
@@ -503,14 +509,19 @@ limites corporativos. As condicoes `new_*` tratam do New Code do servidor, difer
 da comparacao entre coletas. Veja [Quality Gates 9.9](https://docs.sonarsource.com/sonarqube-server/9.9/user-guide/quality-gates)
 e [metricas 9.9](https://docs.sonarsource.com/sonarqube-server/9.9/user-guide/metric-definitions).
 
-O baseline deve estar em `.harness/sonar` deste harness, com processamento
-concluido, metricas vinculadas e entradas estaveis, declarado ANTES e anterior
+Escolha explicitamente o `resultado.json` ANTES, corrente ou copiado para uma
+pasta de evidencias, com `measures.json` e `issues.json` ao lado. Deve ter
+processamento concluido, metricas vinculadas, entradas estaveis e data anterior
 a nova coleta. Conferem-se Project/Source, servidor/versao, chave/branch Sonar,
 scanner, JDK da aplicacao, settings e perfis Maven registrados. Divergencias
 recusam a comparacao; branch/HEAD Git nao sao criterios de bloqueio.
-Os arquivos anteriores permanecem intactos. Coletas antigas com `violations`
-podem fornecer o total, mas sem `issues.json` completo e hash vinculado ao recibo
-nao permitem verificar novas chaves. Isso deixa a comparacao pendente.
+
+Se escolher o resultado corrente como ANTES, ele e lido **antes da substituicao**.
+O resumo identifica a analise consumida, mas o caminho corrente passa a conter
+o DEPOIS; os detalhes anteriores nao sao retidos automaticamente. Para conservar
+o ANTES, copie previamente os arquivos pertinentes para uma pasta descritiva em
+`evidencias/` e registre a referencia no LEIA-ME. Sem lista completa de issues,
+nao e possivel verificar novas chaves; a comparacao fica pendente.
 
 Na primeira coleta ANTES sem baseline, os criterios disponiveis sao avaliados e
 a comparacao permanece PENDING, iniciando a referencia. DEPOIS sem baseline
@@ -534,43 +545,43 @@ Ao concluir a coleta, a mesma tarefa mostra o resumo e pede uma decisao:
 | Corrigir agora | Vincular evidencias ao registro/issue e preparar proposta pelo fluxo existente. Nao executa corretivas nem concede GO. |
 | Registrar para depois | Exige motivo e quando rever (data, lote ou gatilho). Permite continuar outras atividades com pendencia explicita. |
 | Interromper | Registra a decisao de interromper o fluxo por enquanto. |
-| Enter | Conserva a decisao anterior; sem historico, permanece PENDING. |
+| Enter | Conserva a decisao anterior; sem parecer, permanece PENDING. |
 
 Para retomar, execute **Aplicacao: analisar SonarQube > 2 Rever evidencias/decisao**
-e informe o `result.json` selecionado. Nao pede JDK, token ou nova conexao ao Sonar.
-Mostra a decisao atual e o motivo/gatilho; outra escolha cria a proxima entrada
-em `decisions/decision_NNNNNN.json`. A partir da primeira decisao, confere a
-sequencia, o vinculo anterior e os hashes dos JSONs presentes na coleta:
-`result.json`, `inputs.json`, `quality-gate.json`, `measures.json`, `issues.json`
-e `criteria.json`. O `RESUMO.md` exibido e um derivado e nao integra essa verificacao
-de hashes; confira os JSONs vinculados para decidir, especialmente se o resumo
-divergir deles. Nao reescreve result.json, gate, metricas ou decisoes antigas.
+e selecione o projeto. A tarefa abre o `resultado.json` corrente, sem pedir JDK,
+token ou nova conexao ao Sonar. Mostra o parecer e o motivo/gatilho; outra escolha
+atualiza `sonar-decisao.json`. Confere a origem dos JSONs e recalcula os criterios
+locais; ANTES/DEPOIS continua sendo a comparacao declarada na coleta.
+Mudancas nos dados relevantes tornam o parecer pendente de revisao, preservando
+a justificativa anterior. Enter conserva o registro e nao aprova dados alterados.
 O retorno 0 desse modo significa revisao local concluida, nao gate aprovado.
 
-O lembrete e local e aparece na retomada; nao ha agendamento, notificacao ou
-gravacao no Sonar. Referencie a coleta/decisao no registro ou indice de evidencias
-para o helper recupera-la. Nova coleta tem outra decisao, sem herdar aceite.
+O lembrete aparece na retomada; nao ha agendamento, notificacao ou gravacao no
+Sonar. Referencie o diagnostico/parecer no registro ou indice de evidencias.
 Adiamento nao transforma ERROR em OK nem dispensa politica corporativa, release,
-GO ou aceite. O exit code da nova coleta continua refletindo seu resultado tecnico.
+GO ou aceite. O exit code da coleta continua refletindo seu resultado tecnico.
 
 ### Usar como evidencia na revisao
 
-Preserve a coleta ANTES. A tarefa sempre cria outro RunId/pasta; a limpeza atual
-de MTA/build/planejamento **preserva `.harness/sonar`**, inclusive seus baselines.
-As coletas sao locais e nao acompanham clone/pull.
+O diagnostico corrente e substituivel. Preserve manualmente o ANTES quando
+precisar consultar seus detalhes depois. As evidencias e o diagnostico utilizavel
+ficam no diretorio do projeto e sao preservados pela limpeza de temporarios;
+nao acompanham clone/pull.
 
-Pela task **Planejamento: criar pasta de evidencias**, organize copias dos JSONs
-pertinentes e do resumo, listando cada arquivo real no LEIA-ME. Registre servidor,
-chave/branch, analysisId, data de coleta, estado dos fontes, configuracao relevante
-e limitacoes. Data de copia nao substitui data de coleta. Nao copie logs brutos,
-settings privados, credenciais ou scanner-work. Vincule as evidencias a issue
-escolhida e use **Planejamento: planejar**, que recupera a solicitacao pelo registro.
-Inclua o historico de decisao quando pertinente. Se o achado nao corresponde a
-uma issue MTA, registre uma issue `DEV-...`/`manual` com origem Sonar e base
-EVIDENCIAS, conforme o guia de planejamento; nao invente categoria mandatory.
-Agrupe somente achados de um recorte coerente e confira os pontos no codigo atual.
-Em contexto local, entradas alteradas geram revisao com Previous; em plano
-importado, exigem reavaliacao explicita. O agente le os resultados referenciados.
+Pela task **Planejamento: criar pasta de evidencias**, abra `evidencias/LEIA-ME.md`.
+Organize copias pertinentes em subpastas descritivas e relacione cada arquivo
+real a issue na tabela do indice. Registre servidor, chave/branch, analysisId,
+data da coleta, estado dos fontes, configuracao relevante e limitacoes.
+Data de copia nao substitui data de coleta. Nao copie settings privados,
+credenciais ou arquivos internos do scanner. Use **Planejamento: planejar**
+para preparar a proposta corrente a partir do registro; o desenvolvedor tambem
+pode escrever as referencias diretamente no prompt.
+
+Inclua o parecer quando pertinente. Se o achado nao corresponde a uma issue MTA,
+registre uma issue `DEV-...`/`manual` com origem Sonar e base EVIDENCIAS, conforme
+o guia de planejamento; nao invente categoria mandatory. Agrupe somente achados
+de um recorte coerente e confira os pontos no codigo atual. Mudanca nas evidencias
+exige rever a proposta e o GO aplicavel, sem cadeia Previous ou recibos imutaveis.
 Siga o [roteiro de reconciliacao e atualizacao do plano](planejamento-migracao.md#reconciliar-status-antes-de-atualizar-o-plano)
 para alinhar registro, cobertura e proposta com essas evidencias.
 
