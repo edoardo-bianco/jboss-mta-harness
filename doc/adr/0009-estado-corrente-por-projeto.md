@@ -1,8 +1,10 @@
 # ADR-0009 — Estado corrente por projeto, sem recibos
 
-Estado: implementação autorizada em 10/10/2026, em andamento na branch do harness.
-A substituição operacional das regras antigas depende da integração dos consumidores
-e dos critérios de aceite da [feature](../features/organizacao-simplificada-por-projeto.md).
+Estado: implementação autorizada em 10/10/2026; produtores, consumidores e
+instruções alinhados ao fluxo corrente na branch do harness. Regressão integrada
+e aceite humano são acompanhados no [plano](../../tasks/plan.md).
+Esta ADR rege a operação desta versão; integração na principal e aceite da
+[feature](../features/organizacao-simplificada-por-projeto.md) permanecem separados.
 
 ## Decisão
 
@@ -101,8 +103,8 @@ do GO. Consultas usam exclusividade somente leitura e recusam recuperacao penden
 hashes de paginacao sao transitorios, sem se tornarem requisitos de retomada.
 Falhas de acesso nao selecionam silenciosamente outro relatorio. Sprints tambem
 usam fontes correntes; nenhum desses consumidores procura solicitacao antiga.
-Compartilhamento por pacote ainda depende da priorizacao legada e permanece fora
-do fluxo corrente ate sua retirada em S22.
+Compartilhamento por pacote foi retirado em S22. O fluxo usa copia de documentos,
+associacao ao POM local e reconciliacao, sem importador/exportador ZIP.
 
 ### Reconciliacao e navegacao correntes (S13)
 
@@ -156,13 +158,37 @@ e repeticao de preparo/revisao/validacao sem snapshots ou revisoes extras.
 Revisao de resultado permanece somente leitura. Ensaio humano integrado e aceite
 da simplificacao continuam em S28.
 
+### Navegacao, compartilhamento e instrucao (S22-S27)
+
+O modelo inicial e o gerador de workspace mostram .harness no Explorer,
+preservando configuracao Java e demais escolhas locais. A entrada e
+.harness/indices/projetos.md, seguida do indice.md do projeto.
+Links existentes abrem evidencias/LEIA-ME.md, plano/tarefas, fichas, relatorios e
+logs. Ultima tentativa e ultimo diagnostico utilizavel permanecem distintos.
+Atualizar o indice reconstroi a navegacao apos novas saidas ou arquivos copiados.
+
+Importador/exportador ZIP e sua tarefa foram retirados; contribuicoes seguem
+copia e reconciliacao por arquivo, inclusive priorizacao cumulativa multiprojeto.
+Limpeza corrente atua em residuos temporarios/backups selecionados; conversao e
+descarte legado ficam no utilitario separado, com validacao e selecao explicita.
+
+Guias, contratos, skill e perfis Codex/Copilot usam documentos correntes.
+Referencias manuais por projeto/objetivo/evidencias sao aceitas; prompts gerados
+podem ser regravados. doc/ e base local por busca/leitura, sem RAG semantico.
+Os helpers permanecem leitores; proposta, GO e aceite continuam separados.
+
+A tarefa Sonar tambem baixa a ultima analise concluida do servidor para o
+projeto/branch, inclusive da pipeline. Nao executa scanner nem confere igualdade
+com o Source local. Origem/data reais e limites acompanham o diagnostico;
+coleta incompleta preserva o anterior. Detalhes no [guia Sonar](../guias/tools/sonar.md).
+
 ### Demais consumidores
 
 Detalhes antigos deixam de estar disponíveis quando a origem antiga é removida.
 As fichas conservam o essencial e links ao MTA atual e ao código local. Toda
 referência de detalhe deve ser navegável; fonte ausente é uma lacuna explícita.
 
-Esta decisão substitui, quando a integração estiver concluída, as exigências de
+Esta decisão substitui no fluxo corrente as exigências de
 recibos/cadeias das [ADR-0004](0004-git-informativo-sem-controle-de-branches.md),
 [ADR-0005](0005-planejamento-orientado-pelo-registro.md) e
 [ADR-0006](0006-categorias-e-dossie-por-issue.md), e o empacotamento da

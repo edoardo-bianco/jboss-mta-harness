@@ -1,15 +1,16 @@
 # Organização simplificada por projeto
 
-**Estado:** especificação para implementação no harness atual, em Windows PowerShell 5.1.  
-**Revisão:** 10/10/2026. **Destino:** `doc/features/organizacao-simplificada-por-projeto.md`.
+**Estado:** fluxo corrente implementado no harness em Windows PowerShell 5.1; aceite humano integrado pendente.
+**Revisão:** 15/10/2026. **Destino:** `doc/features/organizacao-simplificada-por-projeto.md`.
 
 **Prioridade definida pelo desenvolvedor em 10/10/2026:** entregar esta simplificação
 e a transição dos registros antes de modernizar o harness ou acrescentar outras
 funcionalidades. Esta entrega incorpora os requisitos e o
 [plano de viabilidade e implementação](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10);
-o comportamento ainda não foi implementado. O
+a implementação e as verificações estão registradas por etapa. O
 [checklist](../../tasks/todo.md#simplificacao-prioritaria-por-projeto---2026-10-10)
-separa preparação concluída de execução futura.
+separa conclusão técnica, ensaios de cliente e aceite humano. Nenhum dado real
+foi convertido ou limpo; conversão/descarte continuam ações explícitas.
 
 ## 1. Objetivo e limites
 
@@ -48,7 +49,13 @@ O `artifactId` não é globalmente único; as coordenadas Maven incluem também 
 
 ## 3. Estrutura e responsabilidade dos dados
 
-Todos os registros administrados pelo harness pertencem a `.harness/projetos/<artifactId>/`. Fora dessa área ficam os índices gerais, em `.harness/indices/`, e os componentes compartilhados do produto, como ferramentas e configuração de instalação.
+Os registros de diagnóstico, build, planejamento e reconciliação deste fluxo pertencem a `.harness/projetos/<artifactId>/`. Fora dessa área ficam os índices gerais, em `.harness/indices/`, e os componentes compartilhados do produto, como ferramentas e configuração de instalação.
+
+A operação do servidor JBoss e seu histórico de releases permanecem em
+`.harness/jboss/`, com os recibos e hashes necessários a deploy/rollback,
+conforme o [guia JBoss](../guias/tools/jboss.md). Esta simplificação não remove
+nem realoca esses dados operacionais, assim como preserva identificadores
+nativos de ferramentas e IDs funcionais de issues.
 
 | Caminho relativo ao projeto | Responsabilidade |
 | --- | --- |

@@ -7,8 +7,8 @@ html:
 
 # Arquitetura do Engineering Harness
 
-**Data:** 09/10/2026. **Estado:** arquitetura existente e evolução proposta.
-**Baseline operacional:** `main` em `17f80c22084dd26437eda3bd106698dcacc8a33e`, após a integração de sprints pela [PR #26](https://github.com/edoardo-bianco/jboss-mta-harness/pull/26). Esta revisão incorpora a documentação de arquitetura produzida sobre `6390808` e atualiza sua leitura da base entregue. As decisões propostas estão registradas na [ADR-0008](../adr/0008-nucleo-perfis-e-plataforma-do-harness.md).
+**Revisão operacional:** 15/10/2026. **Estado:** fluxo corrente por projeto e evolução futura proposta.
+**Baseline histórica da proposta:** `main` em `17f80c22084dd26437eda3bd106698dcacc8a33e`, após a integração de sprints pela [PR #26](https://github.com/edoardo-bianco/jboss-mta-harness/pull/26). Esta revisão incorpora a documentação de arquitetura produzida sobre `6390808` e atualiza sua leitura da base entregue. As decisões propostas estão registradas na [ADR-0008](../adr/0008-nucleo-perfis-e-plataforma-do-harness.md).
 
 ## 1. Objetivo
 
@@ -24,6 +24,11 @@ Evoluir por capacidades verificáveis, preservando o ciclo objetivo → contexto
 
 ## 4. Arquitetura existente
 
+As seções 4 e 5 descrevem o fluxo corrente da [ADR-0009](../adr/0009-estado-corrente-por-projeto.md).
+A implementação técnica e o aceite integrado humano são acompanhados no
+[plano](../../tasks/plan.md); mudanças ainda não integradas à principal não se
+confundem com homologação corporativa.
+
 ### 4.1. Estrutura e tecnologias comprovadas
 
 | Elemento | Tecnologia e responsabilidade atual | Evidência |
@@ -31,13 +36,13 @@ Evoluir por capacidades verificáveis, preservando o ciclo objetivo → contexto
 | Entrada operacional | VS Code, tarefas JSON e workspace multifolder; scripts também podem ser chamados pelo terminal. Menus e abertura de arquivos estão acoplados ao fluxo Windows/VS Code. | [Run Tasks](../../.vscode/tasks.json), [workspace](../guias/tools/workspace.md) |
 | Automação | Windows PowerShell 5.1, `.ps1` como entradas e `.psm1` como módulos. Regras, I/O, menus e processos coexistem em parte desses módulos. | [Scripts](../../scripts), [Harness.psm1](../../scripts/Harness.psm1) |
 | Configuração | JSON local reúne projetos, ferramentas, EAP, Sonar e MTA. O campo `mta.profile` seleciona o perfil de análise; o sistema geral de perfis pertence à arquitetura proposta. | [Configuração de exemplo](../../config/harness.example.json) |
-| Estado e conhecimento | JSON, Markdown, snapshots, SHA-256, logs e ZIP sob `.harness/`; templates e contratos versionados. Sem banco de dados central. | [Planejamento](../especificacoes/planejamento-copilot.md), [compartilhamento](../guias/tools/compartilhamento-contextos.md) |
+| Estado e conhecimento | JSON, Markdown e logs correntes sob `.harness/projetos/<artifactId>/`; índices navegáveis, fontes diretas e cópia/reconciliação. Controles transitórios de concorrência; diagnóstico/planejamento não exigem recibos ou ZIP próprios. Operação/releases JBoss mantêm registros próprios em `.harness/jboss/`. Sem banco central. | [Planejamento](../especificacoes/planejamento-copilot.md), [compartilhamento](../guias/tools/compartilhamento-contextos.md) |
 | MCP opcional | JavaScript ESM em Node.js; SDK `@modelcontextprotocol/server` 2.3.1, Zod 4.6.5 e `smol-toml` 1.9.0. Servidor `stdio` com três consultas de leitura; ponte chama PowerShell com entrada/saída JSON. O pacote declara Node `>=20`, não uma política atualizada de suporte LTS. | [Pacote](../../mcp/issues/package.json), [servidor](../../mcp/issues/server.mjs), [ponte](../../mcp/issues/bridge.mjs), [contrato](../../mcp/issues/contract.mjs) |
-| Build e cobertura | Maven 3 e JDK 8 para a aplicação; fases delimitadas, logs e recibos. JaCoCo depende da instrumentação e dos relatórios do projeto; o harness não cria cobertura por conta própria. | [Build](../guias/tools/maven.md), [módulo](../../scripts/HarnessBuild.psm1) |
-| Diagnóstico e qualidade | MTA CLI produz diagnóstico e snapshot; Sonar usa scanner Maven e API, com runtime próprio, coleta CE/Gate/métricas/issues e revisão local dos critérios. | [MTA](../guias/tools/mta.md), [Sonar](../guias/tools/sonar.md) |
+| Build e cobertura | Maven 3 e JDK 8 para a aplicação; fases delimitadas, resultado e log da última tentativa. JaCoCo depende da instrumentação e dos relatórios do projeto; o harness não cria cobertura por conta própria. | [Build](../guias/tools/maven.md), [módulo](../../scripts/HarnessBuild.psm1) |
+| Diagnóstico e qualidade | MTA produz diagnóstico corrente, com tentativa/log separados. Sonar executa scanner ou baixa a última análise concluída do servidor, coleta Gate/métricas/issues e permite revisão local dos critérios. | [MTA](../guias/tools/mta.md), [Sonar](../guias/tools/sonar.md) |
 | Runtime da aplicação | Instalações JBoss EAP 7.1/7.4 standalone, Management CLI, artefatos WAR/EAR e debug Java remoto. Java 8, `javax.*` e Hibernate 5.3 quando aplicável são regras do alvo de migração. | [JBoss](../guias/tools/jboss.md), [contrato técnico](../especificacoes/planejamento-copilot.md) |
 | Agentes e instruções | Prompts Markdown para Copilot/DevSquad; skill comum e helpers declarados para Copilot e Codex. O cliente oferece modelo, ferramentas e delegação; o harness fornece procedimentos e contexto. | [Orientação](../guias/orientacao-migracao.md), [prompts](../../.github/prompts), [papéis](../../.agents/skills/orientar-migracao/references/papeis.md) |
-| Planejamento macro | Motor puro em PowerShell calcula sprints de 14 dias, capacidade por papel, dependências, janelas e limites. Contexto, dados, Markdown e validação ficam sob `.harness/sprints/`, com revisões preservadas. | [Motor](../../scripts/HarnessSprintSimulation.ps1), [orquestração](../../scripts/HarnessSprintPlanning.psm1), [contrato](../especificacoes/planejamento-sprints.md) |
+| Planejamento macro | Motor puro em PowerShell calcula sprints de 14 dias, capacidade por papel, dependências, janelas e limites. Contexto, dados, plano e último resultado ficam em `atual/sprints/<cenario>/` sob um projeto Maven participante, preservando B0 e consumo. | [Motor](../../scripts/HarnessSprintSimulation.ps1), [orquestração](../../scripts/HarnessSprintPlanning.psm1), [contrato](../especificacoes/planejamento-sprints.md) |
 | Verificação do harness | Scripts de teste PowerShell e testes Node de contrato, configuração, integração e ciclo de vida do MCP. | [Testes](../../tests), [testes MCP](../../mcp/issues/tests) |
 
 Node executa o adaptador MCP; Java executa aplicações e ferramentas Java. Trocar a linguagem do harness não muda o alvo das aplicações. Git é ferramenta de desenvolvimento e fonte informativa, não coordenador de frentes de migração.
@@ -46,22 +51,22 @@ Node executa o adaptador MCP; Java executa aplicações e ferramentas Java. Troc
 
 | Decisão consolidada | Consequência arquitetural | Fonte normativa |
 | --- | --- | --- |
-| Preparar contexto e acionar o agente são etapas diferentes. | Recibos e prompts existem independentemente do cliente; preparar não envia nem executa o pedido. | [ADR-0001](../adr/0001-contexto-copilot.md), atualizada pela ADR-0005 |
-| Evolução do harness e corretiva de aplicação têm ciclos e destinos próprios. | `tasks/` pertence ao produto; `PlanPath`/`TodoPath` pertencem à solicitação da aplicação. | [ADR-0002](../adr/0002-separacao-harness-e-migracao-progressiva.md) |
+| Preparar contexto e acionar o agente são etapas diferentes. | Contextos e prompts correntes existem independentemente do cliente; preparar não envia nem executa o pedido. | [ADR-0001](../adr/0001-contexto-copilot.md), atualizada pela [ADR-0009](../adr/0009-estado-corrente-por-projeto.md) |
+| Evolução do harness e corretiva de aplicação têm ciclos e destinos próprios. | `tasks/` pertence ao produto; `PlanPath`/`TodoPath` pertencem ao trabalho corrente da aplicação. | [ADR-0002](../adr/0002-separacao-harness-e-migracao-progressiva.md) |
 | Git é informativo na migração. | Branch/HEAD divergentes não invalidam contexto automaticamente; gestão e integração pertencem ao desenvolvedor. A conveniência de criar branch exige sua escolha explícita. | [ADR-0004](../adr/0004-git-informativo-sem-controle-de-branches.md), que substitui o controle da [ADR-0003](../adr/0003-projeto-branch-e-concorrencia-da-migracao.md) |
-| Registro atual concentra as escolhas; planejamento aceita MTA ou evidências. | Retomada usa vínculos e origem, nunca recência; mudança de base tem regras explícitas e preserva `Previous`. | [ADR-0005](../adr/0005-planejamento-orientado-pelo-registro.md) |
-| Categoria, projeto e issue delimitam os dossiês. | Sequências de priorização separadas; fichas e anexos consolidados sustentam uma proposta identificável. | [ADR-0006](../adr/0006-categorias-e-dossie-por-issue.md) |
-| Compartilhar preserva identidade e origem. | Importação exige associação ao `Source` local, hashes, destinos livres e cadeia `ImportedFrom`; não concede GO ou aceite. | [ADR-0007](../adr/0007-compartilhamento-de-contextos.md) |
+| Registro atual concentra as escolhas; planejamento aceita MTA ou evidências. | Retomada usa documentos correntes e escolhas do registro; mudança relevante de escopo/base exige reavaliação e revisão do alcance do GO. | [ADR-0009](../adr/0009-estado-corrente-por-projeto.md), preservando planejamento pelo registro |
+| Categoria, projeto e issue delimitam os dossiês. | Categorias/escopos mantêm B0 e examinadas acumuladas; fichas referenciam fontes e anexos originais, sem cópias consolidadas. | [ADR-0009](../adr/0009-estado-corrente-por-projeto.md), preservando categorias e fichas |
+| Compartilhar preserva identidade e origem. | Cópia exige associação explícita ao POM local e reconciliação; conflitos preservam contribuições. Não há tarefa ZIP nem transferência de GO/aceite. | [Compartilhamento corrente](../guias/tools/compartilhamento-contextos.md); ADR-0007 histórica |
 | MCP é uma entrada opcional de leitura. | As três consultas não marcam exame, não alteram decisões e não substituem conferência do código. | [Contrato de consultas](../especificacoes/consultas-issues.md) |
-| Cronograma macro passa por validação determinística. | B0 e inclusões históricas são preservadas; `Previous` vincula revisões e `atual.json` só aponta para uma publicação consistente. Limites consideram fases consumidas; falhas de prazo/capacidade e riscos têm justificativas calculadas. | [Contrato de sprints](../especificacoes/planejamento-sprints.md) |
+| Cronograma macro passa por validação determinística. | B0, inclusões acumuladas e consumo de fases são preservados no cenário corrente; plano/resultado são publicados conjuntamente, com recuperação transitória. Limites consideram fases consumidas; falhas de prazo/capacidade e riscos têm justificativas calculadas. | [Contrato de sprints](../especificacoes/planejamento-sprints.md) |
 
 Essas decisões sustentam os contratos operacionais e a continuidade do trabalho. A evolução preserva decisões e evidências históricas; homologações pendentes permanecem no [acompanhamento do harness](../../tasks/todo.md).
 
 ## 5. Arquitetura de comportamento
 
-### 5.1. Matriz completa das Run Tasks da baseline
+### 5.1. Matriz completa das Run Tasks correntes
 
-A jornada operacional parte da configuração do ambiente, passa pelo diagnóstico e planejamento e chega à implementação, verificação e operação da aplicação. O [cheat sheet das Run Tasks](cheat-sheet-run-tasks.md) reúne a matriz completa da baseline, com domínio/subdomínio, efeitos, relação com agentes e referências de implementação e uso.
+A jornada operacional parte da configuração do ambiente, passa pelo diagnóstico e planejamento e chega à implementação, verificação e operação da aplicação. O [cheat sheet das Run Tasks](cheat-sheet-run-tasks.md) reúne as 25 tarefas correntes, com domínio/subdomínio, efeitos, relação com agentes e referências de implementação e uso.
 
 ### 5.2. Fluxos e autoridade
 
@@ -69,14 +74,19 @@ A jornada operacional parte da configuração do ambiente, passa pelo diagnósti
 | --- | --- | --- |
 | Descobrir e orientar | Resolver projeto, perfil e vínculos; expor apenas capacidades disponíveis. | Orientador recupera o estado e indica uma próxima ação. |
 | Investigar | Coletar fatos e evidências com origem, recorte e limites. | Especialistas interpretam código, riscos e comportamento; registram hipóteses como hipóteses. |
-| Propor | Preparar solicitação e destinos; validar identidades e integridade. | Humano ou agente autorizado elabora ranking/plano; recomendação não escolhe pelo desenvolvedor. |
-| Autorizar | Conferir referência da decisão humana para a mesma solicitação e escopo. | Desenvolvedor concede GO; habilitar ferramenta ou responder uma pergunta não equivale a GO. |
+| Propor | Preparar contexto e destinos correntes; conferir identidade e fontes. | Humano ou agente autorizado elabora ranking/plano; recomendação não escolhe pelo desenvolvedor. |
+| Autorizar | Conferir referência da decisão humana para o mesmo lote e escopo. | Desenvolvedor concede GO; habilitar ferramenta ou responder uma pergunta não equivale a GO. |
 | Executar | Validar entradas, runtime, efeitos e destinos; acompanhar processo e registrar resultado. | Desenvolvedor ou executor autorizado aplica a mudança delimitada. |
 | Verificar e aceitar | Produzir resultados reproduzíveis e expor pendências. | Revisão humana aceita ou pede retrabalho. Teste aprovado não decide aceite ou resolução global. |
 
-No alvo, estado da **solicitação**, estado da **execução técnica** e **decisões humanas** permanecem separados. `SUCCEEDED` de um processo significa sucesso técnico daquela operação. Uma proposta nova não herda silenciosamente o GO da anterior. O modo manual usa os mesmos artefatos e critérios do assistido.
+No fluxo corrente, estado do **trabalho**, estado da **execução técnica** e **decisões humanas** permanecem separados. `SUCCEEDED` de um processo significa sucesso técnico daquela operação. Uma proposta nova não herda silenciosamente o GO da anterior. O modo manual usa os mesmos artefatos e critérios do assistido.
 
 ## 6. DDD estratégico: limites do domínio e capacidades
+
+As seções 6 a 13 são propostas da ADR-0008, posteriores ao aceite da simplificação.
+Seus modelos e mecanismos devem ser reavaliados contra a ADR-0009; não autorizam
+restaurar recibos, cadeias ou extratos eliminados. Preservam-se aqui os estudos e
+as fontes, sem apresentá-los como implementação disponível.
 
 ### 6.1. Negócio da aplicação e domínio do harness
 
@@ -97,7 +107,7 @@ Os IDs HAR/SRC/OBJ/DEP/JBS/CHG preservam o catálogo anterior. A primeira coluna
 | Domínio / subdomínios | Contexto responsável e classificação | Capacidades e situação |
 | --- | --- | --- |
 | Trabalho / descoberta, objetivo, triagem, proposta, reconciliação, retomada, revisão e continuidade | **Trabalho**, central | OBJ-02 e parte de CHG-02/03. Fluxo JBoss existente; generalização por perfil proposta. |
-| Evidências / coleta, origem, consolidação, comparação, intercâmbio e retenção | **Evidências**, central | HAR-03 e parte de SRC-06. Recibos, dossiês e ZIP existentes; contrato transversal a extrair. |
+| Evidências / coleta, origem, consolidação, comparação, intercâmbio e retenção | **Evidências**, central | HAR-03 e parte de SRC-06. Documentos correntes, fontes diretas e cópia/reconciliação existentes; contrato transversal a extrair. |
 | Execução / catálogo, configuração, ambiente, perfis e acompanhamento | **Execução**, suporte; processos/arquivos são mecanismos genéricos | HAR-01/02/04. Scripts e MCP existentes; catálogo comum e composição de perfis propostos. |
 | Diagnóstico / preparação, análise, acompanhamento, histórico, apresentação e ingestão de apontamentos | **Diagnóstico**, suporte | OBJ-01. MTA e Sonar existentes; outros analisadores e normalização compartilhada propostos. |
 | Compreensão de código / localização, sintaxe, semântica, relações e seleção de contexto | **Compreensão**, suporte | SRC-01 a SRC-06 / CORE-01. Busca dos clientes disponível; índice próprio e coletores ainda propostos. |
@@ -361,11 +371,11 @@ As fontes oficiais sustentam as características das ferramentas e os fundamento
 
 | Fonte consolidada | Papel nesta arquitetura |
 | --- | --- |
-| [AGENTS.md](../../AGENTS.md) e [ADRs 0001–0007](../adr) | Contratos vigentes e evolução das decisões; ADR-0003 é histórica nos pontos substituídos. |
+| [AGENTS.md](../../AGENTS.md) e [ADR-0009](../adr/0009-estado-corrente-por-projeto.md) | Operação corrente; ADRs anteriores preservam histórico e decisões ainda aplicáveis. ADR-0008 continua proposta. |
 | [Estratégia](../estrategia/estrategia-harness_.md) e [conciliação](../estrategia/conciliacao-evolucao-harness.md) | Direção, base reaproveitável e limites das propostas anteriores. |
 | [Catálogo de domínios e capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) | IDs e recortes HAR/SRC/OBJ/DEP/JBS/CHG que orientam a expansão das capacidades. |
 | [Contrato de planejamento](../especificacoes/planejamento-copilot.md), [consultas](../especificacoes/consultas-issues.md) e [guia do desenvolvedor](../guias/harness-migracao-desenvolvedor.md) | Comportamento implementado, invariantes e operação. |
-| [MACRO-01](../features/planejamento-macro-sprints.md) e [contrato de sprints](../especificacoes/planejamento-sprints.md) | Capacidade integrada à base operacional; cronograma, revisões e justificativas determinísticas. |
+| [MACRO-01](../features/planejamento-macro-sprints.md) e [contrato de sprints](../especificacoes/planejamento-sprints.md) | Capacidade integrada à base operacional; cenário corrente, cronograma e justificativas determinísticas. |
 | [Extensão VS Code](../features/engineering-harness-vscode.md) e [estudo CORE-01](../../tasks/plan.md#exploracao-java-opcional-e-transversal) | Propostas e estudos reconciliados, com estado de entrega explicitado. |
 
 Mudanças de regra exigem decisão registrada e atualização dos contratos afetados. Esse vínculo mantém arquitetura, procedimentos operacionais e histórico coerentes durante a evolução.
