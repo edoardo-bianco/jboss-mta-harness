@@ -174,6 +174,7 @@ checkout separado e exigem os parametros e a configuracao reais apropriados.
 | Workspace e entradas | `Test-Workspace.ps1`, `Test-Target.ps1`, `Test-TaskInputs.ps1`, `Test-Editor.ps1` e `Test-EvidenceFolder.ps1`: configuracao, selecao, Explorer, argumentos reais, cancelamento, editor simulado e indice de evidencias. |
 | Consultas | Suites `Test-IssueQuer*.ps1`, `Test-McpRoots.ps1` e testes Node de `mcp/issues`: somente leitura, paginas, limites, origens correntes e permissoes. |
 | Conversao e limpeza | Suites `Test-Conversion*.ps1`, `Test-Cleanup.ps1` e `Test-ProjectTemporaryRemoval.ps1`: previa/aplicacao/validacao/limpeza em fixtures, sem conversao ou limpeza dos registros reais. |
+| Transicao integrada | `Test-TransitionWorkflow.ps1`: converter, descartar o legado selecionado, ler o projeto corrente e reconciliar contribuicao divergente no mesmo projeto; preservar notas, origem externa, GO pendente e links. |
 
 Testes simulados nao comprovam que uma aba abriu no VS Code, que o cliente
 descobriu/delegou helpers ou que uma corretiva foi aceita. A qualidade do ranking

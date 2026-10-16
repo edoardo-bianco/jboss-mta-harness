@@ -1,5 +1,15 @@
 # To-do do agente: evolucao do harness
 
+## Ensaio autonomo da transicao - 16/10/2026
+
+[Escopo e resultado](plan.md#ensaio-autonomo-da-transicao---16102026).
+
+- [x] Executar conversao, descarte, leitura e reconciliacao do mesmo projeto sintetico em area isolada: `Test-TransitionWorkflow` aprovado.
+- [x] Conferir navegacao, copia, conflitos e recuperacao: oito suites complementares aprovadas, nove no total.
+- [x] Revisar seis perfis Codex e seis Copilot e suas referencias locais; conferencia documental, sem execucao nativa.
+- [x] Descartar temporarios, conferir 71 arquivos locais inalterados e registrar checkpoint local; zero POMs artificiais ou copias temporarias restantes.
+- [ ] Ensaio nativo dos clientes e aceite humano integrado; conversao real depende do acervo escolhido.
+
 ## Execucao do fechamento - 16/10/2026
 
 [Entrega e verificacoes](plan.md#execucao-do-fechamento---16102026).
@@ -15,7 +25,8 @@ MTA; descartar projetos artificiais e logs antigos, conservando resumo em tasks/
 - [x] F7: conferir diff, parser, JSON e residuos; checkpoint local revisado deste conjunto, sem merge/push.
 - [x] Conferencia humana do VS Code recarregado: desenvolvedor confirmou projeto normal e erros interrompidos em 16/10/2026; corretiva Java encerrada.
 - [ ] Aceite integrado S28 dos demais fluxos.
-- [ ] Ensaios de copia/reconciliacao e clientes Codex/Copilot ainda sem relato humano final; homologacao Sonar corporativa separada.
+- [x] Ensaio tecnico de copia/reconciliacao concluido na execucao autonoma acima.
+- [ ] Ensaio nativo Codex/Copilot e homologacao Sonar corporativa, separados da validacao tecnica local.
 
 As secoes abaixo sao historicas; seus destinos `.harness/tests/...` foram
 descartados conforme pedido e nao devem ser anunciados como arquivos existentes.

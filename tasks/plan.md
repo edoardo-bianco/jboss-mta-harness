@@ -1,5 +1,44 @@
 # Plano do agente: evolucao do harness
 
+## Ensaio autonomo da transicao - 16/10/2026
+
+Desenvolvedor autorizou executar o ensaio enquanto trabalha em outro projeto.
+Escopo: evolucao/validacao do harness, com dados sinteticos em copia temporaria
+fora do workspace, pelo executor isolado; nenhum acervo real sera convertido.
+Branch `harness/planejar-simplificacao-projetos`, base `b0af97f`, inicialmente limpa.
+
+**Ensaio tecnico concluido:** nove suites aprovadas em Windows PowerShell 5.1,
+executadas pelo `tests/Invoke-HarnessTests.ps1`, sem exportar logs ou fixtures.
+
+| Suite | Resultado conferido |
+| --- | --- |
+| `Test-TransitionWorkflow.ps1` | Mesmo projeto: previa sem escrita, conversao preservando originais, descarte de cinco folhas selecionadas, leitura pelo consumidor permanente em processo limpo, conflito pendente, mesclagem das duas notas, GO pendente e links correntes existentes. |
+| `Test-ConversionCli.ps1` | Modos publicos, escolhas explicitas, JSON, cancelamento, recuperacao e descarte restrito. |
+| `Test-ConversionValidation.ps1` | Validacao independente dos controles legados, sem escrita e com lacunas explicitas. |
+| `Test-ConversionCleanup.ps1` | Selecao, equivalencia, referencias protegidas, concorrencia, interrupcoes e repeticao. |
+| `Test-ConversionRecovery.ps1` | Falhas na publicacao e recuperacao da conversao. |
+| `Test-ProjectNavigation.ps1` | Destinos navegaveis de diagnosticos, plano, tarefas, fichas e priorizacao. |
+| `Test-PlanningPortable.ps1` | Copia direta/pasta recebida, configuracao local, contextos realinhados, anexos e GO local. |
+| `Test-ReconciliationConflicts.ps1` | Edicao de origem/MTA, rollback e preservacao de rascunho concorrente. |
+| `Test-ReconciliationPrioritization.ps1` | Copia/conciliacao de priorizacao, cobertura e documentos relacionados. |
+
+O novo teste integrado permanece versionado em `tests/`; os projetos que ele
+produziu foram descartados. Revisao do cenario, parser e diff aprovados, sem
+alterar o codigo de producao. Os 71 arquivos locais acompanhados em `.harness`
+e configuracoes pessoais tiveram o mesmo conjunto de caminhos e hashes antes e
+depois. Conferencia final: zero POMs artificiais no repositorio, `.harness/tests`
+ausente e nenhuma pasta `harness-test-*` restante em TEMP. Nenhum dado real
+convertido, Maven/scanner executado, configuracao de extensao alterada ou
+interface aberta no projeto em que o desenvolvedor esta trabalhando.
+
+**Clientes:** seis perfis Codex e seis Copilot conferidos por leitura; apontam
+para a skill/papeis compartilhados, com referencias existentes, Codex somente
+leitura e encaminhamento conforme o cliente. Essa revisao documental nao comprova
+descoberta, selecao, delegacao ou resposta nas interfaces nativas, indisponiveis
+para controle nesta sessao. Essa verificacao e o aceite humano integrado continuam
+pendentes. A conversao do acervo real depende da origem/POM escolhidos. Checkpoint
+local deste conjunto, sem merge/push.
+
 ## Execucao do fechamento - 16/10/2026
 
 Continuacao autorizada pelo desenvolvedor apos a consolidacao abaixo. Duas
