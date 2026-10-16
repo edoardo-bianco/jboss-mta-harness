@@ -1,9 +1,25 @@
 # To-do do agente: evolucao do harness
 
+## Pausa humana - 15/10/2026
+
+[Ponto seguro e roteiro de retomada](plan.md#pausa-humana---ponto-seguro-de-15102026).
+Branch `harness/planejar-simplificacao-projetos`; codigo salvo em `21e836e`.
+S01-S27 concluidas tecnicamente; S28 com regressao/revisoes realizadas e
+fechamento documental pendente. Dez suites finais PS5.1 aprovadas e encerradas.
+Nenhum dado real convertido/limpo; Java preservado; sem merge/push.
+
+- [ ] Finalizar S28 documental: tres links historicos de scripts retirados,
+  dois links gerados do modelo de sprints e conferencia final de links.
+- [ ] Registrar validacao estrutural/limitacao da skill: validador oficial
+  indisponivel por falta de PyYAML; links e revisao de cenarios ja realizados.
+- [ ] Ensaio humano do workspace/navegacao, copia/reconciliacao e clientes
+  Codex/Copilot; ensaio Sonar corporativo da ultima analise concluida.
+- [ ] Aceite humano integrado; integracao na principal em etapa separada.
+
 ## Acrescimo Sonar confirmado - 15/10/2026
 
 [Escopo e verificacao](plan.md#download-do-diagnostico-sonar-existente---15102026).
-S25 parcial: guias de ferramentas alinhados em `947537a`; retomar S25-S28 depois.
+Capacidade concluida tecnicamente em `30c7ad3`; estado atual no checkpoint acima.
 
 - [x] Extrair coleta/publicacao Sonar comuns, preservando o scan e seus testes (`1a3f505`).
 - [x] Baixar ultima analise concluida do projeto/branch, inclusive pipeline, sem Java/Maven (`1253f6c`).
@@ -28,9 +44,9 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 - [x] Conferir links/ancoras dos acrescimos em 11 documentos, diff e requisitos; historico anterior de plan.md preservado. Sem teste de runtime nesta entrega documental.
 
 Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10, 12/10 e 13/10/2026.
-[Ponto atual e verificacoes](plan.md#retomada-s24-s28---15102026).
-S11-S24 implementados e revisados. Limpeza corrente e descarte legado validados;
-S25 em andamento; S26-S28 e o aceite integrado permanecem pendentes.
+[Ponto atual e verificacoes](plan.md#pausa-humana---ponto-seguro-de-15102026).
+S01-S27 implementados e revisados. Limpeza corrente e descarte legado validados;
+S28 documental, ensaio humano e aceite integrado permanecem pendentes.
 Conversao e validacao verificadas em fixtures, inclusive multiprojeto e sprints.
 CLI oferece Previa, Aplicar, Validar e Limpar com selecao/confirmacao explicitas.
 Retomada solicitada em 15/10, com navegacao padrao pelo workspace/indices e
@@ -60,7 +76,7 @@ S23 concluida tecnicamente; retomada documental atual registrada acima.
 - [x] Retirada transacional de assets, recuperacao apos retirada e concorrencia real entre processos verificadas; produtores MTA/Sonar ainda em adaptacao.
 - [x] S06/S06b: MTA interno publica no destino fixo, protege Source com copia exclusivamente temporaria, conserva completo anterior em falha; abertura e logs selecionam projeto sem RunId. Test-Mta, Test-MtaLog e Test-MtaActive passaram com ferramentas simuladas/processos reais de log.
 - [x] S08/S09: Sonar corrente, tentativa/log separados e parecer humano sem cadeia; baseline explicito e mudancas relevantes exigem reavaliacao. Sete suites focais PS5.1 e revisao independente aprovadas; ensaio Sonar real e integracao completa pendentes.
-- [ ] Integrar o nucleo aos produtores/consumidores e concluir os demais criterios S01-S28 abaixo.
+- [x] Integrar tecnicamente o nucleo aos produtores/consumidores; aceite integrado permanece separado.
 - [x] S10: progredir consolida todas as fatias no conjunto corrente; indice/ranking aponta as fichas acumuladas (20 + 15 = 35), inclusive examinadas sem proposta, sem cadeia de execucoes e sem misturar escopos/categorias. Retomada parcial preserva quota/universo; recriar e explicito.
 - [x] S11a: priorizacao sem extratos MTA, fichas essenciais e fontes diretas; novo MTA/Source atualizam links gerenciados sem perder texto humano. Sete suites focais PS5.1 e revisao independente aprovadas.
 - [x] S11b junto de S12/S15: retirados apontamentos-mta.json e Consolidated.MtaIssuePath dos produtores/validadores e das consultas correntes. S11 integral concluida neste recorte.
@@ -81,7 +97,11 @@ S23 concluida tecnicamente; retomada documental atual registrada acima.
 
 - [x] S24: cinco guias principais alinhados ao estado corrente, copia/cola, referencias manuais e fontes diretas; revisao independente fechada. Conferidas 129 referencias/ancoras; PlanningPortable, ConversionApply, PrioritizationProgress, SprintWorkflow e TaskInputs aprovados em PS5.1. Ensaio humano dos clientes permanece separado.
 - [x] Navegacao pedida em 15/10: workspace inicial/gerador expoem .harness; regeneracao corrige filtro antigo preservando demais settings. Indice abre evidencias e logs existentes, separando tentativa/diagnostico. Workspace, ProjectNavigation, ProjectIndex, JbossWorkspace e BuildConfig PS5.1 aprovados; revisao independente concluida.
-- [ ] S25: demais guias/modelos/cheat sheet, incluindo roteiro de navegacao padrao; em andamento.
+- [x] S25: demais guias/modelos/cheat sheet e contratos alinhados ao estado corrente, com navegacao padrao e referencias manuais; revisao independente concluida.
+- [x] S26: skill, papeis e orientadores alinhados; links e cenarios revisados. Ensaio humano dos clientes permanece pendente.
+- [x] S27: AGENTS.md, instrucoes Copilot e wrappers Codex alinhados a ADR-0009; revisao concluida.
+- [x] S28 parcial: inventario, README/arquitetura/ADRs e retirada de funcoes orfas; 106 suites PS5.1 com tres falhas corrigidas/reexecutadas, dez testes MCP e dez suites finais aprovadas.
+- [ ] S28: concluir pendencias documentais do checkpoint e obter aceite humano integrado.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos
@@ -1186,7 +1206,7 @@ continuam a definir. As dependencias de validacao ja registradas permanecem.
 
 | ID | Estado / ordem | Proxima entrega |
 | --- | --- | --- |
-| SIMP-PROJ | Prioridade 1 definida; viabilidade estatica avaliada; implementacao pendente | [Plano](plan.md#simplificacao-prioritaria-por-projeto---2026-10-10) e [tarefas S01-S28](#simplificacao-prioritaria-por-projeto---2026-10-10): organizacao por projeto sem recibos, conversao descartavel, links diretos, limpeza e guias/orientador alinhados antes das demais evolucoes. |
+| SIMP-PROJ | S01-S27 tecnicas concluidas; pausa humana; fechamento S28 e aceite pendentes | [Checkpoint](plan.md#pausa-humana---ponto-seguro-de-15102026) e [tarefas S01-S28](#simplificacao-prioritaria-por-projeto---2026-10-10): organizacao por projeto sem recibos, conversao descartavel, links diretos, limpeza e guias/orientador alinhados antes das demais evolucoes. |
 | SIM-01 a SIM-14 | SIM-01 a SIM-13 implementadas; regressao PASS | Novo ensaio nativo SIM-14/VAL-01 nos dois clientes antes de novos executores. |
 | SDLC-01 | Concluida | Preparo de planejamento/reconciliacao por CLI com escolhas explicitas, validacao antes de escrita e saida estruturada. |
 | SDLC-02 | Concluida | Skill compartilhada de orientacao pelo estado efetivo e pelos guias. |

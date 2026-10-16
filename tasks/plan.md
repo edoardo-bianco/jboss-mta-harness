@@ -1,5 +1,69 @@
 # Plano do agente: evolucao do harness
 
+## Pausa humana - ponto seguro de 15/10/2026
+
+Parada solicitada pelo desenvolvedor. Evolucao do harness na branch
+`harness/planejar-simplificacao-projetos`; ultimo commit de codigo `21e836e`.
+Este registro e o to-do compoem o checkpoint documental seguinte. Sem merge/push,
+corretivas de aplicacao, conversao ou limpeza de dados reais. Extensao Java mantida.
+
+S24-S27 concluidas tecnicamente: guias/modelos/cheat sheet, contratos, skill,
+papeis, wrappers Codex/Copilot e instrucoes normativas alinhados ao estado corrente.
+Workspace inicial e gerador expoem `.harness`; indices oferecem links de evidencias,
+relatorios e logs, distinguindo ultima tentativa de diagnostico utilizavel. Padrao
+reutilizavel, sem depender do workspace pessoal deste checkout. Compartilhamento
+por copia de arquivos, associacao ao POM local e reconciliacao explicita; operacao
+ZIP retirada. Referencias dinamicas podem ser escritas pelo desenvolvedor com
+caminhos legiveis. Documentacao serve de base local de consulta; motor de busca
+semantica/RAG dedicado nao foi implementado nem e requisito desta simplificacao.
+
+Sonar concluido tecnicamente: `Aplicacao: analisar SonarQube`, opcao **3 Baixar
+ultima analise concluida**, busca projeto/branch inclusive de pipeline, sem scanner,
+Java ou Maven. Preserva data/origem remota e nao afirma equivalencia com Source
+local. Coleta incompleta preserva diagnostico anterior; token nao e persistido.
+Commits `1a3f505`, `1253f6c` e `30c7ad3`; ensaio corporativo ainda pendente.
+
+S28 avancada: README, arquitetura, feature e avisos das ADRs historicas alinhados;
+16 funcoes legadas sem consumidores e seus exports retirados em `21e836e`, com
+revisao independente e preservacao das funcoes ainda usadas. Recibos/releases e
+hashes de operacao/rollback JBoss continuam em `.harness/jboss/`; nao pertencem ao
+rastreamento de planejamento retirado. Guias JBoss/EAP 7.4 continuam disponiveis.
+
+Verificacao acumulada nesta retomada:
+
+- Regressao PS5.1 executou 106 suites: 103 passaram inicialmente; as tres falhas
+  (ConversionMtaOwnership, JbossAllServers e JbossArtifacts) foram corrigidas em
+  `0d6421c` e reexecutadas com sucesso. ConversionPriorityEvidence e
+  ConversionSharedEvidence tambem passaram depois da corretiva.
+- Dez testes Node 20/MCP aprovados. Suites opt-in BuildCoverage e JbossReal nao
+  executadas; nenhum servico Sonar/JBoss real foi usado nessa regressao.
+- Dez suites focais apos a retirada do codigo legado: todas aprovadas em PS5.1.
+  Resultado local: `.harness/tests/simplificacao-final/resultado-pos-retirada.json`.
+  A execucao terminou antes da pausa; nao ficou teste em andamento.
+- Revisoes independentes dos incrementos fechadas; 45 links locais da skill
+  conferidos e cenarios de orientacao revisados. O validador oficial da skill nao
+  executou por falta de PyYAML; nenhuma dependencia foi instalada para contornar.
+- Ultima varredura documental: 37 Markdown alterados, 863 links examinados,
+  cinco ocorrencias a classificar/ajustar abaixo. `git diff --check` sem erros
+  antes deste registro. Evidencias locais em `.harness/tests/simplificacao-final/`.
+
+**Retomada:** conferir raiz, branch, HEAD e estado local; preservar quaisquer
+novas alteracoes. Concluir somente o fechamento documental S28 antes do aceite:
+ajustar tres links historicos deste plano para scripts retirados
+(`HarnessPlanningInput.ps1`, `HarnessTransfer.psm1`, `compartilhar-contexto.ps1`);
+classificar os dois links relativos gerados do modelo de sprints
+(`planejamento-sprints.json`, `contexto.json`), validos no destino renderizado;
+repetir a conferencia dos links alterados e registrar a limitacao/validacao
+estrutural da skill. Nao repetir toda a regressao sem mudanca que a justifique.
+
+Depois, ensaio humano integrado: abrir workspace gerado e navegar indice/projeto/
+evidencias; conferir referencias manuais e tentativa versus diagnostico; exercitar
+copia/reconciliacao em fixture com conflito preservado e POM local explicito;
+conferir orientacao nos clientes Codex/Copilot e separacao entre proposta, GO,
+execucao e aceite. Ensaiar opcao 3 com Sonar corporativo quando disponivel.
+Conversao/limpeza real exige selecao e confirmacao proprias; nao e autorizada
+pela existencia dos testes. Aceite integrado e integracao na principal pendentes.
+
 ## Simplificacao prioritaria por projeto - 2026-10-10
 
 **Escopo:** evolucao do harness; implementacao da simplificacao autorizada.
@@ -7,12 +71,10 @@
 do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
-**Estado:** implementacao autorizada por "proceder" em 10/10/2026, retomada em
-11/10/2026, 12/10/2026 e 13/10/2026. Nucleo, produtores build/MTA/Sonar, priorizacao,
-planejamento, reconciliacao, consumidores correntes e prompts ate S19, mais a
-previa de conversao S20, com verificacoes focais aprovadas.
-Integracao dos demais fluxos, conversao de dados, limpeza
-operacional e aceite da simplificacao completa ainda nao concluidos.
+**Estado atual:** pausado a pedido humano em 15/10/2026, no checkpoint acima.
+S01-S27 concluidas tecnicamente; regressao e revisoes da S28 realizadas.
+Fechamento documental S28, ensaio dos clientes e aceite integrado pendentes.
+Nenhuma conversao/limpeza de dados reais ou integracao na principal executada.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
 
 Base examinada: main `5dd8fb385240060f3207b9d3958f9238de19f30e`, inicialmente limpa,
