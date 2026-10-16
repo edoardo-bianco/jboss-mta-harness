@@ -384,6 +384,27 @@ manualmente, defina esse filtro como `false` em `files.exclude`. Se sua
 configuracao pessoal oculta arquivos ignorados pelo Git, confira tambem
 `explorer.excludeGitIgnore`.
 
+As subpastas `.harness/tests`, `.harness/backups-temporarios` e
+`.harness/workspace-backups` ficam ocultas por padrao para reduzir ruido.
+O gerador preserva escolhas explicitas nesses filtros. Arquivos continuam no
+disco e podem ser abertos pelo caminho; indices, projetos e evidencias permanecem
+visiveis.
+
+Adicionar uma aplicacao continua sendo **Add Folder to Workspace** e salvar,
+sem lista adicional para a extensao Java. Testes de desenvolvimento do harness
+usam [execucao isolada](../manutencao-harness.md#testar-os-scripts-do-harness), pois
+ocultar fixtures no Explorer nao impede sua descoberta por extensoes Java.
+O workspace operacional nao deve acumular esses projetos artificiais.
+
+Para simplesmente consultar resultados, tambem e possivel abrir os arquivos
+diretamente em **harness > .harness > projetos > artifactId**. Em cada projeto,
+`atual/diagnosticos/sonar/RESUMO.md` apresenta o Sonar coletado;
+`atual/planejamento/` guarda plano/tarefas existentes e `evidencias/` os anexos.
+Abra Markdown em preview para seguir seus links. Uma pasta ou documento ainda
+nao produzido nao aparece. Ler arquivos existentes nao exige associar um MTA nem
+executar analises; associacao da origem continua necessaria apenas para os fluxos
+que consomem MTA. Os indices permanecem uma alternativa de navegacao.
+
 O indice e Markdown: use a visualizacao de Markdown do VS Code para clicar
 nos links ou siga-os pelo editor. A arvore de pastas tambem permite copia/cola
 e consulta manual. Os arquivos locais nao acompanham clone/pull; para receber

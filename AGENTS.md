@@ -10,6 +10,13 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
 
 - Evolucao do harness inclui scripts, prompts, preparacao de contexto, Run Tasks,
   configuracao, testes e documentacao. Use `tasks/plan.md` e `tasks/todo.md`.
+- Execute suites PowerShell de manutencao por `tests/Invoke-HarnessTests.ps1 -Test
+  Test-Nome.ps1`, em copia temporaria fora do workspace operacional. Fixtures
+  `.harness/tests` pertencem a essa copia e sao descartadas ao terminar. Novos
+  arquivos precisam estar adicionados ao Git para integrar a copia de teste.
+  Nao execute suites diretamente no checkout usado para migrar aplicacoes.
+  Testes Node e ensaios reais exigem checkout separado, fora das pastas abertas.
+  Resultados persistidos sao opcionais; por padrao registrar o resumo em tasks/.
 - Consultas MCP harnessIssues sao opcionais e somente leitura: use auditar_base,
   listar_issues e obter_issue quando disponiveis, conforme o
   [guia por etapa](doc/guias/tools/consultas-issues.md#consultas-por-etapa).

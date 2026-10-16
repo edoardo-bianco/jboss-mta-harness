@@ -9,6 +9,12 @@ derivada da principal, com checkout conferido, validacao/revisao antes de integr
 Migracao usa os destinos PlanPath/TodoPath correntes do projeto. Nao misture
 evolucao do harness com corretivas da aplicacao.
 
+Testes PowerShell do harness usam `tests/Invoke-HarnessTests.ps1 -Test Test-Nome.ps1`:
+copia temporaria fora do workspace operacional, sem configuracao pessoal e com
+descarte das fixtures ao terminar. Nao executar suites diretamente no checkout de
+migracao. Testes Node/ensaios reais usam checkout separado. Registrar resumo em
+tasks/; exportar logs somente quando necessario e explicitamente escolhido.
+
 Project e o artifactId literal do POM. projeto.json associa POM/Source local e
 mta.diretorio; indices em .harness/indices/projetos.md e no projeto localizam
 trabalho/evidencias. Registro atual concentra escolhas; indice/ranking nao as

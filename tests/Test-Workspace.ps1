@@ -28,6 +28,9 @@ $path = New-HarnessWorkspace $context
 Assert (-not (Test-Path (Join-Path $fixture '.harness/projetos/biblioteca'))) 'Gerar workspace nao deve publicar registros; a tarefa de indice inicializa os projetos.'
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.settings.'files.exclude'.'**/.harness' -eq $false) 'Evidencias devem estar visiveis no Explorer.'
+foreach ($filter in @('**/.harness/tests','**/.harness/backups-temporarios','**/.harness/workspace-backups')) {
+    Assert ($workspace.settings.'files.exclude'.$filter -eq $true) 'Novo workspace deve ocultar somente residuos tecnicos.'
+}
 Assert ($workspace.folders.Count -eq 3) 'Workspace deve conter harness e dois repos.'
 Assert ($workspace.folders[0].name -eq 'harness') 'Raiz de tarefas ausente.'
 Assert ($workspace.folders[1].path -eq $app) 'Path com espacos alterado.'
@@ -37,6 +40,8 @@ $workspace.settings.$readAccessKey = @('D:/evidencias escolhidas')
 $workspace.settings | Add-Member NoteProperty 'editor.fontSize' 17
 $workspace.settings.'files.exclude'.'**/.harness' = $true
 $workspace.settings.'files.exclude' | Add-Member NoteProperty '**/minha-pasta' $true
+$workspace.settings.'files.exclude'.'**/.harness/tests'=$false
+$workspace.settings.'files.exclude'.PSObject.Properties.Remove('**/.harness/backups-temporarios')
 $workspace | ConvertTo-Json -Depth 8 | Set-Content $path -Encoding UTF8
 $config.activeProject = 'biblioteca'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
@@ -48,6 +53,7 @@ $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert (@($workspace.settings.$readAccessKey).Count -eq 1 -and $workspace.settings.$readAccessKey[0] -eq 'D:/evidencias escolhidas') 'Gerador alterou permissao escolhida no workspace.'
 Assert ($workspace.settings.'editor.fontSize' -eq 17) 'Gerador alterou outra configuracao do usuario.'
 Assert ($workspace.settings.'files.exclude'.'**/.harness' -eq $false -and $workspace.settings.'files.exclude'.'**/minha-pasta' -eq $true) 'Regenerar deve expor evidencias antes ocultas e preservar outros filtros.'
+Assert ($workspace.settings.'files.exclude'.'**/.harness/tests' -eq $false -and $workspace.settings.'files.exclude'.'**/.harness/backups-temporarios' -eq $true) 'Regenerar deve preservar filtro tecnico explicito e acrescentar somente o ausente.'
 $workspace.settings.$readAccessKey = @()
 Write-HarnessJson $path $workspace
 $null = New-HarnessWorkspace $context

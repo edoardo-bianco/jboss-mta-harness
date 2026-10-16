@@ -22,9 +22,10 @@ Navegacao: [conteudo do repositorio](#o-que-acompanha-o-clone) ·
 ## O que acompanha o clone
 
 O adaptador MCP fica em `mcp/issues`, com SDK e lockfile versionados. Para
-desenvolve-lo, instale as dependencias com `npm.cmd ci --prefix mcp/issues --ignore-scripts`
+desenvolve-lo, use checkout separado, fora das pastas abertas no workspace de
+migracao. Nele, instale as dependencias com `npm.cmd ci --prefix mcp/issues --ignore-scripts`
 e rode `npm.cmd test --prefix mcp/issues` usando Node >=20 no Windows.
-Os testes usam Windows PowerShell 5.1 e fixtures em `.harness/tests`, sem MTA/JBoss
+Os testes usam Windows PowerShell 5.1 e fixtures em `.harness/tests` desse checkout, sem MTA/JBoss
 reais. Cobrem stdio, paridade, configuracao, limites e ciclo de vida dos filhos.
 `tests/Test-IssueQueryRoots.ps1` cobre a restricao opcional de caminhos do nucleo.
 `tests/Test-PlanningWithoutMcp.ps1` executa as regressoes de categorias e plano
@@ -136,13 +137,27 @@ ficticias para nao iniciar/parar servidores da maquina. Ensaio opt-in:
 e debug 8790: start/JDWP, deploy v1/v2 com HTTP, rollback HTTP e stop. Exige as
 instalacoes locais configuradas e portas livres. Nao executa breakpoint no VS Code.
 
-Os demais testes usam fixtures isoladas em `.harness/tests/`. Execute a suite
-afetada em Windows PowerShell 5.1, por exemplo:
+Os demais testes PowerShell usam o executor isolado. Ele copia os arquivos
+versionados com o conteudo corrente (incluindo edicoes ainda nao commitadas) para
+uma pasta temporaria fora do checkout. Novos arquivos devem ser adicionados ao
+Git com `git add` antes da execucao. Configuracao pessoal e `.harness` nao sao
+copiadas. Execute apenas as suites afetadas, por exemplo:
 
 ```powershell
-powershell.exe -NoProfile -File .\tests\Test-Planning.ps1
-powershell.exe -NoProfile -File .\tests\Test-ProjectNavigation.ps1
+powershell.exe -NoProfile -File .\tests\Invoke-HarnessTests.ps1 -Test Test-Planning.ps1,Test-ProjectNavigation.ps1
 ```
+
+Cada suite usa Windows PowerShell 5.1. Fixtures e logs temporarios sao removidos
+apos sucesso ou falha; falhas sao mostradas no terminal e resultam em exit 1.
+Por padrao, o workspace original fica sem residuos. Registre o resumo em tasks/.
+Para guardar logs por necessidade concreta, informe `-ResultsPath <pasta>`; isso
+exporta apenas logs e resultado.json, nunca os projetos artificiais.
+
+Nao execute `Test-*.ps1` diretamente no workspace de migracao: extensoes Java
+podem descobrir os POMs artificiais e disparar builds. Testes Node e ensaios com
+ferramentas reais devem ocorrer em checkout separado, fora das pastas abertas
+no VS Code. Os comandos diretos desses ensaios, abaixo e acima, sao para esse
+checkout separado e exigem os parametros e a configuracao reais apropriados.
 
 | Area | Suites e verificacao |
 | --- | --- |

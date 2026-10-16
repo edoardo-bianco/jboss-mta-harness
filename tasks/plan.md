@@ -1,5 +1,262 @@
 # Plano do agente: evolucao do harness
 
+## Execucao do fechamento - 16/10/2026
+
+Continuacao autorizada pelo desenvolvedor apos a consolidacao abaixo. Duas
+correcoes de escopo foram explicitadas durante a execucao: navegar apenas pelos
+arquivos existentes no Explorer, sem associar MTA nesta maquina nem criar nova
+interface; remover tambem os logs/fixtures acumulados, mantendo somente o resumo
+textual da validacao neste plano. Esses pedidos substituem a preservacao de logs
+em `.harness/tests/simplificacao-final` e a ampliacao de indices propostas em F1/F5.
+
+**Limpeza executada:** toda `.harness/tests` removida, com 63.988 arquivos,
+544.342.286 bytes (aproximadamente 519 MiB) e 3.499 POMs artificiais. Removidas
+tambem builds, ensaios, planning, priorizacao, runs e worktrees de `.harness`,
+somente apos reconfirmar que estavam vazias. Nao havia links/junctions nem
+processos usando as fixtures; a busca nas configuracoes e dados ativos nao
+encontrou referencias a elas. Os 66 arquivos protegidos de configuracao, projeto
+e estado JBoss tiveram hashes identicos antes/depois. Backups de configuracao,
+fontes externos, coleta Sonar e demais dados reais foram preservados.
+O utilitario de limpeza tambem removeu tres backups temporarios de documentacao
+(63.545 bytes); a pasta `backups-temporarios`, entao vazia, foi retirada.
+
+Conferencia antes de descartar logs: o resultado historico continha 106 suites
+com tres falhas naquela rodada; a rodada final posterior continha dez suites
+com zero falhas. Os resultados documentais S28 ja registrados abaixo tambem
+permanecem como resumo historico. Seus antigos caminhos `.harness/tests/...`
+agora sao referencias historicas a arquivos descartados por escolha humana,
+nao evidencias locais ainda disponiveis. Nao foi criado arquivo ZIP ou copia
+alternativa desses projetos artificiais.
+
+**Prevencao implementada:** `tests/Invoke-HarnessTests.ps1` copia somente arquivos
+versionados, com o conteudo corrente, para TEMP fora do checkout; exclui estado
+local e configuracao pessoal; executa suites selecionadas em PS5.1 e apaga a
+copia apos sucesso/falha. Nenhum log persistido por padrao. Exportacao opcional
+por `-ResultsPath` inclui apenas texto/resultado. Ensaios reais ficam separados.
+AGENTS, instrucoes Copilot e guia de manutencao direcionam para esse executor;
+testes Node/ensaios reais devem usar checkout separado, fora das pastas abertas.
+Scripts de teste versionados em `tests/` permanecem no codigo do harness.
+
+**Workspace:** retirado exclusivamente o `jdk.serverVmOptions` introduzido para
+limitar a descoberta a migracao-cache-antes. Nao ha lista manual adicional de
+projetos Java; extensoes/JDKs/Maven mantidos. Gerador e workspace inicial/local
+mantem `.harness` visivel e ocultam apenas pastas tecnicas. A regressao de
+workspace antigo revelou acesso a propriedade ausente sob StrictMode; corrigido
+o merge de filtros, preservando escolhas explicitas, inclusive `false`.
+
+**Validacao focal:** Test-TestIsolation (inclui sucesso/falha, copia da edicao
+corrente, configuracao privada, logs opcionais e junction sem apagar seu destino),
+Test-LongPaths, Test-Workspace, Test-BuildConfig e Test-JbossWorkspace aprovadas
+em execucao isolada. Nao houve Maven, scanner Sonar ou testes da aplicacao.
+Revisao final do diff e parser PowerShell aprovados; JSON dos dois workspaces
+valido, duas pastas locais preservadas, nenhum POM artificial no repositorio e
+nenhuma copia `harness-test-*` restante em TEMP. Checkpoint local deste conjunto
+na branch do harness, sem merge/push; aceite integrado continua separado.
+
+**Navegacao simplificada entregue:** abrir arquivos existentes pelo Explorer;
+o guia mostra `.harness/projetos/<artifactId>/` e destinos legiveis como
+`atual/diagnosticos/sonar/RESUMO.md`. O Sonar real de migracao-cache foi preservado.
+Nenhuma associacao MTA feita ou solicitada novamente; ausencia de MTA nao impede
+ler arquivos existentes. Indices ja suportados continuam opcionais para consulta.
+
+Pendentes humanos de S28: conferir a janela VS Code apos recarregar, os ensaios
+integrados ainda nao relatados e aceite. Homologacao Sonar corporativa e comparacao
+com fonte local permanecem separadas. Nenhum merge/push nesta execucao.
+
+## Fechamento consolidado S28 - 16/10/2026
+
+Escopo vigente: **evolucao do harness**. O desenvolvedor pediu prosseguir com os
+ajustes e deixar o ambiente limpo, depois solicitou consolidar o que deve ser
+feito. Este roteiro organiza essa autorizacao; nao exige novo GO para as mesmas
+correcoes. Nesta consolidacao foram feitas leituras e atualizacao do plano/to-do,
+sem limpeza, transferencia de arquivos, scanner ou nova execucao de testes.
+Branch `harness/planejar-simplificacao-projetos`, HEAD `7efbddb`; preservar os
+ajustes locais ja existentes. As secoes anteriores abaixo permanecem como historico.
+
+**Resultado esperado:** adicionar pastas de aplicacoes e usar o harness sem uma
+segunda lista para Java, sem builds de fixtures no terminal e com entrada unica
+para consultar diagnosticos, priorizar issues e decidir o lote. Workspace limpo
+significa retirar residuos de desenvolvimento, preservando trabalho/evidencias
+das aplicacoes e os scripts de teste versionados em `tests/`.
+
+### F1 - Inventario e selecao da limpeza
+
+Conferir arquivos, tamanhos, referencias ativas e processos antes de selecionar
+residuos. O inventario preliminar encontrou seis diretorios vazios (builds,
+ensaios, planning, priorizacao, runs e worktrees) e 1.966 subpastas em
+`.harness/tests`. Revalidar esses numeros antes de agir. Separar fixtures,
+ferramentas/dependencias auxiliares de teste, logs necessarios e material sem
+origem confirmada; nao tratar toda `.harness` como descartavel.
+
+- Aceite: lista concreta do que sai e do que fica, com caminhos absolutos
+  conferidos dentro do escopo; links/junctions e atividade concorrente tratados.
+- Preservar: `tests/` versionado, projetos/registro/planos/fichas/anexos/conflitos,
+  coleta Sonar, configuracao local, fontes externos e controle/releases JBoss.
+  Backups de workspace e dependencias ainda referenciadas nao sao lixo automatico.
+- Verificacao: inventario e referencias em configuracao/workspace/plano; preservar
+  resultados/logs essenciais em `.harness/tests/simplificacao-final`, com caminhos
+  historicos de fixtures removidas claramente identificados como historicos.
+
+Dependencias: nenhuma. Escopo: pequeno, inspecao e selecao local.
+
+### F2 - Isolar as proximas execucoes de teste
+
+Estabelecer uma entrada de manutencao que execute os testes em checkout/copia
+tecnica isolada, fora das pastas abertas no workspace de migracao. Nesse ambiente,
+fixtures continuam em `.harness/tests` relativo ao checkout de teste. Nao copiar
+configuracao pessoal, tokens ou dados de aplicacoes; nao criar caches Maven ou
+settings alternativos. Manter execucao seletiva e descarte dos temporarios ao
+terminar, preservando resumo/log de falhas para diagnostico.
+
+- Aceite: testes nao criam POMs sinteticos no workspace operacional; scripts de
+  testes continuam disponiveis e projetos reais nao participam da regressao.
+- Verificacao: caso focal de isolamento e finalizacao com sucesso/falha, sem
+  acionar servicos reais; depois executar apenas suites afetadas nesse ambiente.
+- Arquivos provaveis: entrada de testes em `tests/`, helpers necessarios e
+  `doc/guias/manutencao-harness.md`; ajustar instrucoes de agentes para nao voltar
+  a executar suites extensas no checkout usado para migracao.
+
+Dependencias: F1. Escopo: medio; separar adaptacoes de helpers se necessario.
+
+### F3 - Limpar residuos ja acumulados
+
+Preservar primeiro as evidencias selecionadas em F1. Remover as fixtures e
+dependencias descartaveis selecionadas e as seis pastas antigas somente se ainda
+vazias. A autorizacao de limpeza ja foi dada pelo desenvolvedor; revalidar caminhos
+e conteudo na execucao, sem estender o escopo a dados reais. Reutilizar o utilitario
+existente quando o escopo for suportado; a limpeza corrente hoje cobre temporarios
+de projetos e backups temporarios, nao uma limpeza irrestrita de testes.
+
+- Aceite: nenhum POM sintetico residual descobrivel pela extensao Java neste
+  checkout; evidencias selecionadas e estado real preservados.
+- Verificacao: comparar inventarios antes/depois e conferir a integridade dos
+  arquivos preservados; comunicar quantidade/volume removidos e eventuais excecoes.
+- Arquivos provaveis: residuos locais selecionados, plano/to-do; utilitario de
+  manutencao apenas se necessario, sem nova Run Task por pasta ou arquivo.
+
+Dependencias: F1 e F2. Escopo: pequeno, operacao local delimitada.
+
+### F4 - Restaurar adicionar pasta e usar
+
+Retirar exclusivamente o argumento temporario `-Dproject.limitScanRoot=...`
+introduzido nesta sessao, preservando outras opcoes JVM do usuario se existirem.
+Manter extensoes Java e configuracoes JDK/Maven. Consolidar filtros do Explorer:
+indices/projetos/evidencias visiveis, pastas tecnicas ocultas; filtro visual nao
+substitui isolamento dos testes.
+
+- Aceite: nenhuma lista manual adicional para reconhecer aplicacoes; adicionar,
+  remover ou renomear pasta segue o fluxo normal do workspace.
+- Verificacao: workspace recarregado reconhece aplicacao real e nao dispara builds
+  de `.harness/tests`; ensaio de adicao de outro projeto usa fixture valida somente
+  no ambiente isolado, ou projeto real explicitamente escolhido pelo desenvolvedor.
+- Arquivos provaveis: workspace local, workspace inicial, `scripts/Harness.psm1`
+  e `tests/Test-Workspace.ps1`; complementar verificacao no VS Code.
+
+Dependencias: F3. Escopo: pequeno. Ponto de controle: ambiente limpo e importacao
+Java conferidos antes do ensaio integrado de navegacao.
+
+### F5 - Completar a navegacao dos documentos
+
+Usar `.harness/indices/projetos.md` como entrada. Rever o indice geral e o de cada
+projeto para oferecer resumo legivel do diagnostico disponivel e do trabalho
+corrente, links para relatorios originais MTA e resumo Sonar, priorizacao e fichas.
+As fichas precisam encaminhar para evidencias/codigo e decisao em `migracao.md`;
+o registro encaminha para o plano/tarefas do lote. Reutilizar arquivos e a tarefa
+Workspace: atualizar indice dos projetos; nao criar portal ou copias de incidentes.
+
+- Aceite: percurso Projetos -> Resumo MTA/Sonar -> Priorizacao -> Ficha -> Decisao
+  -> Plano/tarefas, com retorno ao indice e sem exigir busca manual por JSON.
+- Verificacao: suites focais de indice/navegacao no ambiente isolado e abertura dos
+  links no workspace; ausencia de fonte aparece como lacuna, sem link inventado.
+- Arquivos provaveis: `HarnessProjectIndex.psm1`, `HarnessProjectDocuments.ps1`,
+  produtores de indice/fichas de priorizacao e seus testes; dividir em resumo por
+  projeto e ligacoes de priorizacao caso o incremento ultrapasse esse recorte.
+
+Dependencias: F4 para o ensaio no cliente. Lacuna conhecida: o projeto real
+`migracao-cache` possui Sonar coletado, mas `projeto.json` ainda tem
+`mta.diretorio=null`. Associacao exige a origem MTA escolhida explicitamente;
+nao selecionar automaticamente por data, pasta ou semelhança de nome.
+
+### F6 - Revisar documentacao e validar o conjunto
+
+Atualizar guias de workspace/manutencao/navegacao e instrucoes afetadas pelo
+isolamento. Explicar testes versionados versus residuos gerados, retirar a
+orientacao de manter lista manual Oracle como se fosse fluxo definitivo e
+conferir os links apos limpeza. Manter a coleta Sonar existente descrita como
+download de analise do servidor, nao como scan do codigo local.
+
+- Aceite: instrucoes reproduzem o comportamento entregue; resultados anteriores
+  continuam rastreaveis e limitacoes reais permanecem visiveis.
+- Verificacao: regressao proporcional aos arquivos alterados, revisao do diff e
+  links. Ensaios pendentes de copia/reconciliacao e orientacao Codex/Copilot usam
+  ambiente isolado; nao repetir indiscriminadamente todas as suites no workspace.
+- Arquivos provaveis: guias responsaveis, AGENTS/instrucoes afetadas, plano/to-do.
+
+Dependencias: F2-F5. Escopo: medio; verificacoes por fatia antes da revisao final.
+
+### F7 - Fechar a entrega para aceite
+
+Registrar o que foi implementado, testado, limpo e preservado, com pendencias e
+evidencias acessiveis. Criar checkpoint local coerente na branch do harness apos
+revisao. Aceite humano integrado e integracao na principal continuam etapas
+separadas; esta consolidacao nao concede aceite nem autoriza merge/push.
+
+- Aceite tecnico: F1-F6 concluidas, workspace sem residuos sinteticos descobriveis,
+  importacao sem cadastro duplicado e percurso de navegacao verificavel.
+- Sonar: download local ja aprovado tecnicamente; decisao humana, comparacao
+  ANTES/DEPOIS e homologacao corporativa permanecem identificadas conforme evidencia.
+- Verificacao humana: abertura do workspace, importacao Java, navegacao e relato
+  dos ensaios; nao declarar S28 integralmente aceita apenas por testes verdes.
+
+Dependencias: F6. Proxima execucao: concluir F1 e implementar F2, mantendo a
+contencao temporaria ate a limpeza verificada em F3.
+
+## Correcao da descoberta Java e visibilidade - 16/10/2026
+
+Evolucao do harness, na branch `harness/planejar-simplificacao-projetos`, HEAD
+`7efbddb`, checkout inicialmente limpo. O desenvolvedor relatou builds repetidos
+de POMs sinteticos em `.harness/tests/conversao-*/aplicacao` apos adicionar
+`migracao-cache-antes` ao workspace. O comando fornecido identifica a extensao
+`oracle.oracle-java-27.0.0`, Maven embarcado e JDK 25. As fixtures foram criadas
+pelos testes anteriores do harness; a protecao contra descoberta Java faltou.
+
+Inspecao somente leitura da extensao instalada confirmou descoberta recursiva
+sem filtro do Explorer e inicializacao Maven (priming). Configuracoes `java.*`
+da extensao Red Hat nao controlam esse fluxo Oracle. O backend instalado respeita
+`project.limitScanRoot`; `jdk.serverVmOptions` permite sobrescrever esse limite.
+Aplicado somente ao workspace local, com referencia a pasta real
+`${workspaceFolder:migracao-cache-antes}`. Esta contencao exige incluir outras
+pastas reais no limite ao ampliar o workspace; nao e exclusao generica por glob.
+Sem alterar/desativar extensoes, POMs, JDKs ou configuracao global da maquina.
+
+Workspace inicial, gerador e workspace local passam a ocultar apenas tests,
+backups-temporarios e workspace-backups dentro de `.harness` por padrao.
+Indices, projetos e evidencias permanecem visiveis; preferencias explicitas nos
+filtros tecnicos sao preservadas ao regenerar. Nenhum arquivo foi apagado.
+`tests/Test-Workspace.ps1` aprovado em Windows PowerShell 5.1: geracao,
+preservacao de settings, aliases, importacao externa e backups. Sem Maven/Sonar
+ou testes da aplicacao. `git diff --check` aprovado. O arquivo local foi relido
+com o limite Oracle e os tres filtros tecnicos presentes. A consulta de processos
+nao encontrou builds de fixtures; isso nao comprova o comportamento apos reinicio.
+A extensao solicitou revisao/confianca nos settings, conforme seu fluxo de
+ativacao; confirmacao apos aceitar/recarregar o VS Code ainda pendente.
+Navegacao integrada e aceite S28 permanecem pendentes.
+
+Revisao solicitada pelo desenvolvedor: manter "adicionar pasta e usar", sem
+lista manual adicional para Java. O limite Oracle aplicado e uma contencao,
+nao a solucao aceita; nao acompanha automaticamente futuras pastas adicionadas.
+Run Tasks continuam descobrindo os projetos do workspace normalmente. Separar
+os testes de desenvolvimento do harness do workspace de migracao e avaliar a
+preservacao/retirada das fixtures existentes antes de remover o limite fixo.
+Nao executar novamente suites extensas neste checkout para investigar esse ponto.
+
+Inventario somente leitura de `.harness`: builds, ensaios, planning, priorizacao,
+runs e worktrees sem nenhuma entrada (incluindo ocultas). tests contem 1.966
+subpastas e 29 arquivos diretos; nao e area vazia. A visibilidade nova revelou
+diretorios locais anteriores; nenhuma pasta foi removida ou transferida.
+Limpeza de diretorios vazios e isolamento de fixtures nao devem tocar projetos,
+evidencias correntes, configuracao da maquina ou origens MTA externas.
+
 ## Retomada documental S28 - 16/10/2026
 
 Continuacao solicitada pelo desenvolvedor a partir do checkpoint `b0ad050`.
@@ -56,11 +313,16 @@ O desenvolvedor informou dispor de Sonar/token e poder adicionar
 `C:/desenvolvimento/repositorio/migracao-cache-antes/pom.xml`: artifactId literal
 `migracao-cache`. O desenvolvedor adicionou a pasta e o workspace local salvo
 foi relido: contem harness e `../migracao-cache-antes`, com Java preservado.
-`docker ps` nao conseguiu conectar ao engine Docker Desktop e a consulta sem
-credenciais a `/api/system/status` nao conseguiu conectar a localhost:9000.
-Proxima acao humana: iniciar a instalacao Sonar existente; depois usar opcao 3 com chave/branch do servidor
-e token somente no terminal. Nenhuma coleta real foi iniciada. Ensaio local nao
-substitui a homologacao corporativa ainda pendente.
+O servidor ficou disponivel posteriormente e o desenvolvedor concluiu a opcao 3
+para a chave `harness-migracao-cache`, branch principal, estado ANTES, sem baseline.
+Resultado local relido em `.harness/projetos/migracao-cache/atual/diagnosticos/sonar/resultado.json`:
+`SUCCEEDED`, `Origin=SERVER`, diagnostico publicado, gate `OK`, criterios `PASS`,
+`LocalSourceStatus=NOT_CHECKED`. Analise do servidor de 25/09/2026, identificador
+`cc16d422-3191-4a9a-a7f0-5d7b8383fce0`; coleta realizada em 16/10/2026.
+Nenhum scanner foi executado nesta coleta. Comparacao e decisao humana permanecem
+pendentes. Ensaio local nao substitui a homologacao corporativa nem comprova
+equivalencia com o codigo local. Atualizacao dos indices e ensaio de navegacao
+aguardam a resolucao do problema de descoberta Java registrado acima.
 
 S28 permanece aberta apenas para ensaios/aceite integrado. Integracao na principal
 e posterior e separada. Nenhum dado real convertido ou limpo, corretiva de

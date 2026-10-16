@@ -177,7 +177,12 @@ function New-HarnessWorkspace {
         'java.debug.settings.hotCodeReplace'='auto'
         'java.configuration.updateBuildConfiguration'='disabled'
         'java.import.generatesMetadataFilesAtProjectRoot'=$false
-        'files.exclude'=@{ '**/.harness'=$false }
+        'files.exclude'=@{
+            '**/.harness'=$false
+            '**/.harness/tests'=$true
+            '**/.harness/backups-temporarios'=$true
+            '**/.harness/workspace-backups'=$true
+        }
     }
     $externalRoots=@(Get-HarnessProjectReadRoots $Context.Root @($Context.Projects | ForEach-Object { Join-Path $_.path 'pom.xml' }))
     if ($externalRoots.Count) { $settings['github.copilot.chat.additionalReadAccessPaths'] = @($externalRoots | ForEach-Object { $_.Replace('\','/') }) }
@@ -226,6 +231,16 @@ function New-HarnessWorkspace {
     # O padrao antigo escondia inclusive os indices e as evidencias oficiais.
     # Corrigir somente esse filtro, preservando as demais escolhas do Explorer.
     $document.settings.'files.exclude' | Add-Member NoteProperty '**/.harness' $false -Force
+    # Reduzir ruido no Explorer sem esconder indices, projetos ou evidencias.
+    # Filtros visuais nao controlam a descoberta de projetos das extensoes Java.
+    $excludes=$document.settings.'files.exclude'
+    foreach ($pattern in @('**/.harness/tests','**/.harness/backups-temporarios','**/.harness/workspace-backups')) {
+        if ($excludes -is [Collections.IDictionary]) {
+            if (-not $excludes.Contains($pattern)) { $excludes[$pattern]=$true }
+        } elseif (-not $excludes.PSObject.Properties[$pattern]) {
+            $excludes | Add-Member NoteProperty $pattern $true
+        }
+    }
     if (-not $document.PSObject.Properties['launch']) { $document | Add-Member NoteProperty launch ([pscustomobject]@{version='0.2.0'; configurations=@()}) }
     if (-not $document.launch.PSObject.Properties['configurations']) { $document.launch | Add-Member NoteProperty configurations @() }
     $names=@($debugConfigurations | ForEach-Object name)

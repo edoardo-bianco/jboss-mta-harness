@@ -1,5 +1,57 @@
 # To-do do agente: evolucao do harness
 
+## Execucao do fechamento - 16/10/2026
+
+[Entrega e verificacoes](plan.md#execucao-do-fechamento---16102026).
+Escopo ajustado pelo desenvolvedor: consulta simples pelo Explorer, sem associar
+MTA; descartar projetos artificiais e logs antigos, conservando resumo em tasks/.
+
+- [x] F1/F3: inventariar e remover toda `.harness/tests` (63.988 arquivos, 3.499 POMs, cerca de 519 MiB) e seis diretorios vazios; 66 arquivos reais conferidos e preservados.
+- [x] Remover tres backups temporarios de documentacao (63.545 bytes) e sua pasta vazia; preservar backups de configuracao.
+- [x] F2: executor isolado, descarte em sucesso/falha, logs somente por escolha explicita.
+- [x] F4: retirar limite Oracle, preservar extensoes/JDKs/Maven e corrigir merge de filtros em workspaces antigos.
+- [x] F5 ajustada: documentar abertura direta dos arquivos existentes no Explorer; nenhuma nova interface/associacao MTA.
+- [x] F6: alinhar instrucoes e validar cinco suites focais isoladas (isolamento, long paths, workspace, build config e JBoss workspace).
+- [x] F7: conferir diff, parser, JSON e residuos; checkpoint local revisado deste conjunto, sem merge/push.
+- [ ] Conferencia humana do VS Code recarregado e aceite integrado S28.
+- [ ] Ensaios de copia/reconciliacao e clientes Codex/Copilot ainda sem relato humano final; homologacao Sonar corporativa separada.
+
+As secoes abaixo sao historicas; seus destinos `.harness/tests/...` foram
+descartados conforme pedido e nao devem ser anunciados como arquivos existentes.
+
+## Fechamento consolidado S28 - 16/10/2026
+
+[Escopo, ordem e criterios de conclusao](plan.md#fechamento-consolidado-s28---16102026).
+Roteiro original, substituido quanto a preservacao de logs e ampliacao da navegacao
+pelo [escopo executado acima](#execucao-do-fechamento---16102026).
+
+- [x] Consolidar os ajustes finais, dependencias e criterios de verificacao.
+- [x] F1: inventario e selecao de residuos, com configuracao e dados reais preservados.
+- [x] F2: testes isolados e limpeza apos sucesso/falha.
+- [x] F3: residuos removidos e resumo registrado, sem manter logs antigos por escolha humana.
+- [x] F4: limite Oracle removido e importacao pelo workspace validada em fixtures isoladas; conferencia no cliente ainda humana.
+- [x] F5: substituida por abertura direta no Explorer; ampliacao de navegacao e associacao MTA dispensadas pelo desenvolvedor.
+- [x] F6: guias/instrucoes alinhados e regressao focal isolada aprovada.
+- [ ] F6: concluir ensaios restantes de copia/reconciliacao e clientes Codex/Copilot.
+- [x] F7: revisar entrega e criar checkpoint local; resumo apresentado, aceite humano integrado permanece pendente acima.
+- [ ] Registrar homologacao Sonar corporativa quando realizada; download local ja comprovado, sem equivalencia automatica com fonte local.
+
+Preservar `tests/` versionado, aplicacoes, configuracao local, evidencias/decisoes,
+MTA externo e estado JBoss. Sem novo scanner, merge ou push implicitos.
+
+## Correcao da descoberta Java e visibilidade - 16/10/2026
+
+[Diagnostico e alcance](plan.md#correcao-da-descoberta-java-e-visibilidade---16102026).
+
+- [x] Identificar builds da extensao Oracle Java sobre fixtures sinteticas.
+- [x] Restringir descoberta Oracle no workspace local ao projeto real adicionado.
+- [x] Ocultar pastas tecnicas no Explorer, mantendo indices/projetos/evidencias.
+- [x] Validar gerador e preservacao de configuracoes existentes (Test-Workspace, PS5.1).
+- [x] Inventariar diretorios antigos: seis vazios; tests com 1.966 subpastas, sem limpeza.
+- [ ] Substituir contencao Oracle por isolamento das fixtures, preservando "adicionar pasta e usar" sem lista manual adicional.
+- [ ] Confirmar no VS Code recarregado que nao ha novos builds de fixtures.
+- [ ] Concluir ensaio de navegacao e aceite integrado S28.
+
 ## Retomada documental S28 - 16/10/2026
 
 [Fechamento documental e roteiro de ensaio](plan.md#retomada-documental-s28---16102026).
@@ -18,8 +70,9 @@ Nenhum dado real convertido/limpo; Java preservado; sem merge/push.
   Codex/Copilot.
 - [x] Projeto migracao-cache-antes adicionado pelo desenvolvedor ao workspace salvo;
   POM conferido com artifactId migracao-cache, configuracao Java preservada.
-- [ ] Ensaio Sonar local: iniciar instalacao existente; opcao 3 com token
-  somente no terminal. Localhost:9000 indisponivel na conferencia desta retomada.
+- [x] Ensaio Sonar local, opcao 3: download publicado para harness-migracao-cache,
+  principal, ANTES; SUCCEEDED, gate OK, criterios PASS. Codigo local nao conferido;
+  decisao humana e comparacao pendentes. Nenhum scanner executado.
 - [ ] Homologacao Sonar corporativa da ultima analise concluida, separada do local.
 - [ ] Aceite humano integrado; integracao na principal em etapa separada.
 
