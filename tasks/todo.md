@@ -13,7 +13,8 @@ MTA; descartar projetos artificiais e logs antigos, conservando resumo em tasks/
 - [x] F5 ajustada: documentar abertura direta dos arquivos existentes no Explorer; nenhuma nova interface/associacao MTA.
 - [x] F6: alinhar instrucoes e validar cinco suites focais isoladas (isolamento, long paths, workspace, build config e JBoss workspace).
 - [x] F7: conferir diff, parser, JSON e residuos; checkpoint local revisado deste conjunto, sem merge/push.
-- [ ] Conferencia humana do VS Code recarregado e aceite integrado S28.
+- [x] Conferencia humana do VS Code recarregado: desenvolvedor confirmou projeto normal e erros interrompidos em 16/10/2026; corretiva Java encerrada.
+- [ ] Aceite integrado S28 dos demais fluxos.
 - [ ] Ensaios de copia/reconciliacao e clientes Codex/Copilot ainda sem relato humano final; homologacao Sonar corporativa separada.
 
 As secoes abaixo sao historicas; seus destinos `.harness/tests/...` foram

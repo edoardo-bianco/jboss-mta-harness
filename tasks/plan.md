@@ -59,9 +59,18 @@ o guia mostra `.harness/projetos/<artifactId>/` e destinos legiveis como
 Nenhuma associacao MTA feita ou solicitada novamente; ausencia de MTA nao impede
 ler arquivos existentes. Indices ja suportados continuam opcionais para consulta.
 
-Pendentes humanos de S28: conferir a janela VS Code apos recarregar, os ensaios
-integrados ainda nao relatados e aceite. Homologacao Sonar corporativa e comparacao
-com fonte local permanecem separadas. Nenhum merge/push nesta execucao.
+**Conferencia humana do workspace concluida:** em 16/10/2026, apos recarregar o
+VS Code, o desenvolvedor confirmou: "Sim, projeto normal e erros pararam".
+Conferencias locais adicionais: nenhum processo usando `.harness/tests`, pasta
+de fixtures ausente e documentos Sonar disponiveis (resumo, resultado, metricas,
+issues, criterios e gate). O POM real permanece disponivel. Nao ha planejamento
+gerado neste projeto; navegar pelos arquivos nao exige fabricar esses documentos.
+Nao foram repetidos testes nem executadas analises nesta conferencia.
+
+Pendentes humanos de S28: os demais ensaios integrados ainda nao relatados e
+aceite. Homologacao Sonar corporativa e comparacao com fonte local permanecem
+separadas. A confirmacao do workspace encerra a corretiva Java, sem representar
+aceite dos outros fluxos. Nenhum merge/push nesta execucao.
 
 ## Fechamento consolidado S28 - 16/10/2026
 
