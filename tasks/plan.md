@@ -1,6 +1,74 @@
 # Plano do agente: evolucao do harness
 
+## Retomada documental S28 - 16/10/2026
+
+Continuacao solicitada pelo desenvolvedor a partir do checkpoint `b0ad050`.
+Conferidos raiz `C:/desenvolvimento/repositorio/jboss-mta-harness`, branch
+`harness/planejar-simplificacao-projetos`, HEAD `b0ad0506fdf5dd43747ceeab0f977a21efc00113`
+e checkout limpo. Escopo desta fatia: fechar as pendencias documentais abaixo,
+conferir links e validar a estrutura da skill. Regressao tecnica anterior mantida;
+nenhuma alteracao de runtime exige repeti-la.
+
+Os tres links do inventario historico para scripts retirados passam a nomes
+literais identificados como legados. O inventario continua descrevendo a base
+anterior a simplificacao; nao apresenta esses scripts como caminhos navegaveis.
+Os links `planejamento-sprints.json` e `contexto.json` do
+[modelo de sprints](../doc/modelos/planejamento-sprints.template.md) sao relativos
+ao `plano.md` gerado em `atual/sprints/<cenario>/` do participante mestre.
+[Get-SprintPaths](../scripts/HarnessSprintState.ps1) define os tres arquivos
+vizinhos; o [preparador](../scripts/HarnessSprintPlanning.psm1) publica o conjunto.
+Esses links devem ser conferidos no destino gerado, sem criar JSONs em doc/modelos.
+
+A conferencia ampliada aos Markdown alterados desde a base da branch encontrou
+mais um link historico para `HarnessPlanningInput.ps1` na
+[conciliacao da estrategia](../doc/estrategia/conciliacao-evolucao-harness.md).
+Aplicado o mesmo tratamento, preservando a baseline descrita nesse documento.
+
+**Fechamento documental concluido.** Verificacoes desta fatia:
+
+- Os dois links relativos do modelo de sprints foram conferidos em plano gerado
+  por fixture sintetica, em Windows PowerShell 5.1; ambos os JSONs existem e sao
+  legiveis. Evidencia local: `.harness/tests/simplificacao-final/links-sprints-s28.json`.
+- O validador oficial `quick_validate.py` aprovou a skill orientar-migracao com
+  PyYAML ja existente em `.harness/tests/docs-coerencia-20261006/deps`, isolado
+  no processo. Nenhuma dependencia instalada. A limitacao registrada na pausa
+  foi resolvida; o check valida estrutura/frontmatter e placeholders, sem provar
+  comportamento, selecao de perfis ou delegacao nos clientes.
+- Conferencia de 914 links locais em 40 Markdown (incluindo 39 links da skill e
+  referencias), sem falhas apos os ajustes; dois destinos gerados classificados
+  pela fixture acima. Revisao do diff e `git diff --check` aprovados. Resultado em
+  `.harness/tests/simplificacao-final/documentacao-s28.json`. Regressao anterior
+  preservada; nao houve alteracao de runtime nem repeticao das 106 suites.
+
+**Ensaio integrado ainda pendente**, com estes resultados concretos a conferir:
+
+| Etapa | Acao e resultado esperado | Evidencia para o aceite |
+| --- | --- | --- |
+| Workspace e navegacao | Abrir workspace gerado; localizar .harness, indice geral e indice de projeto; abrir registro, evidencia, plano/ficha e diagnostico pelos links existentes. | Cliente/workspace usados, caminhos abertos e eventuais lacunas, distinguindo ultima tentativa de diagnostico utilizavel. |
+| Referencias manuais | Informar projeto/objetivo e caminhos legiveis no chat; conferir recuperacao das escolhas e fontes correntes. | Referencias usadas e encaminhamento, sem IDs tecnicos obrigatorios nem escolha por data. |
+| Copia/reconciliacao | Usar fixture com POM local explicitamente associado e contribuicao conflitante em recebido/; comparar pelo fluxo vigente. | Texto local e recebido preservados no conflito; origem externa intacta; conclusao sem GO/aceite transferido. |
+| Codex/Copilot | Conferir orientacao nos dois clientes, com projeto escolhido uma vez e proxima acao/link prontos. | Relato de cada cliente, separando orientacao, proposta, GO, execucao e aceite; nenhuma corretiva executada por helper. |
+| Sonar real | Executar a [opcao 3](../doc/guias/tools/sonar.md#baixar-a-ultima-analise-concluida) no servidor/projeto/branch escolhidos, com token somente no terminal. | RESUMO.md e resultado.json com Origin=SERVER, data da analise, DiagnosticPublished e LocalSourceStatus=NOT_CHECKED; tentativa/log e comparacao pendente quando faltar ANTES. |
+
+Nesta maquina, a configuracao lida aponta a `http://localhost:9000`, com Bearer.
+O desenvolvedor informou dispor de Sonar/token e poder adicionar
+`migracao-cache-antes` ao workspace. POM conferido em
+`C:/desenvolvimento/repositorio/migracao-cache-antes/pom.xml`: artifactId literal
+`migracao-cache`. O desenvolvedor adicionou a pasta e o workspace local salvo
+foi relido: contem harness e `../migracao-cache-antes`, com Java preservado.
+`docker ps` nao conseguiu conectar ao engine Docker Desktop e a consulta sem
+credenciais a `/api/system/status` nao conseguiu conectar a localhost:9000.
+Proxima acao humana: iniciar a instalacao Sonar existente; depois usar opcao 3 com chave/branch do servidor
+e token somente no terminal. Nenhuma coleta real foi iniciada. Ensaio local nao
+substitui a homologacao corporativa ainda pendente.
+
+S28 permanece aberta apenas para ensaios/aceite integrado. Integracao na principal
+e posterior e separada. Nenhum dado real convertido ou limpo, corretiva de
+aplicacao, alteracao da extensao Java, merge ou push nesta fatia.
+
 ## Pausa humana - ponto seguro de 15/10/2026
+
+Registro historico; a continuidade vigente esta na [retomada de 16/10](#retomada-documental-s28---16102026).
 
 Parada solicitada pelo desenvolvedor. Evolucao do harness na branch
 `harness/planejar-simplificacao-projetos`; ultimo commit de codigo `21e836e`.
@@ -71,9 +139,9 @@ pela existencia dos testes. Aceite integrado e integracao na principal pendentes
 do harness, inclusive EVO-01, extensao VS Code e novas capacidades do catalogo.
 Dependencias e homologacoes anteriores continuam visiveis; nao equivalem a entregas
 concluidas. A prioridade nao interrompe o uso da migracao de aplicacoes ja disponivel.
-**Estado atual:** pausado a pedido humano em 15/10/2026, no checkpoint acima.
-S01-S27 concluidas tecnicamente; regressao e revisoes da S28 realizadas.
-Fechamento documental S28, ensaio dos clientes e aceite integrado pendentes.
+**Estado atual:** retomado a pedido humano em 16/10/2026, conforme registro acima.
+S01-S27 concluidas tecnicamente; regressao, revisoes e fechamento documental S28
+realizados. Ensaio dos clientes, Sonar real e aceite integrado pendentes.
 Nenhuma conversao/limpeza de dados reais ou integracao na principal executada.
 [Contrato do incremento](../doc/adr/0009-estado-corrente-por-projeto.md).
 
@@ -930,14 +998,14 @@ execucao da arquitetura proposta nem uma estimativa de prazo.
 | --- | --- | --- |
 | Identidade e caminhos | [Harness.psm1](../scripts/Harness.psm1), Get-HarnessMigrationPaths, Get-HarnessProjectKey e Get-HarnessIssueProjectPaths: registro por hash de Source, dossie parcialmente por artifactId, fallback para nome e nome antigo preservado. | Reaproveitar leitura XML segura; substituir as duas convencoes por POM selecionado e pasta exata. Remover fallback e tratar colisao/realinhamento explicitamente. |
 | Leitura MTA | [Harness.psm1](../scripts/Harness.psm1), Get-HarnessMtaCatalog le a atribuicao JSON de output.js sem executar JavaScript; Get-HarnessExternalMtaRuns ainda exige manifest/RunId. | Separar parser de descoberta e ler a origem diretamente. O formato encontrado e uma aplicacao com rulesets; suporte a outros formatos depende de fixtures, sem promessa generica. |
-| Planejamento | [HarnessPlanningInput.ps1](../scripts/HarnessPlanningInput.ps1), Invoke-HarnessRegisteredPlanningCore, e [HarnessPlanning.psm1](../scripts/HarnessPlanning.psm1): retomada por RequestId/Previous e evidencia selada. | Substituir selecao de solicitacao por documentos correntes; manter MTA/EVIDENCIAS, escopo, GO e aceite sem transformar contexto em recibo. |
+| Planejamento | `HarnessPlanningInput.ps1` (script legado retirado), Invoke-HarnessRegisteredPlanningCore, e [HarnessPlanning.psm1](../scripts/HarnessPlanning.psm1): retomada por RequestId/Previous e evidencia selada. | Substituir selecao de solicitacao por documentos correntes; manter MTA/EVIDENCIAS, escopo, GO e aceite sem transformar contexto em recibo. |
 | Fichas e contexto | [HarnessIssuePlanning.ps1](../scripts/HarnessIssuePlanning.ps1), New-IssuePlanningEvidence, copia anexos e gera apontamentos-mta.json; [HarnessPrioritizationEvidence.ps1](../scripts/HarnessPrioritizationEvidence.ps1) grava paginas de incidentes. | Retirar extratos/copia MTA; fichas essenciais e links diretos substituem esses derivados. A indisponibilidade da origem limita o detalhe consultavel. |
 | Cobertura de priorizacao | [HarnessPrioritizationState.ps1](../scripts/HarnessPrioritizationState.ps1) acumula exame pela cadeia; [HarnessPrioritizationIndex.ps1](../scripts/HarnessPrioritizationIndex.ps1) deriva o indice dessa historia. | Guardar somente cobertura corrente e base inicial por categoria/escopo; nao perder examinadas sem proposta nem somar mencoes como exame. |
 | Consultas opcionais | [HarnessIssueQueryInput.ps1](../scripts/HarnessIssueQueryInput.ps1), Read-QueryBase exige recibo/hash ou Consolidated; [MCP](../mcp/issues/package.json) expõe consultas existentes. | Adaptar CLI/consultas/MCP para a mesma leitura corrente, sem conservar a dependencia antiga como excecao. |
 | Sprints | [HarnessSprintPlanning.psm1](../scripts/HarnessSprintPlanning.psm1) usa PlanningId/RevisionId/Previous e troca um ponteiro; [HarnessSprintSimulation.ps1](../scripts/HarnessSprintSimulation.ps1) separa calculo de arquivos. | Reusar calculo; manter capacidade, baseline vigente e consumo de fases no cenario corrente, sem depender de revisoes antigas. Mestre em projeto Maven participante. |
 | Build e Sonar | [HarnessBuild.psm1](../scripts/HarnessBuild.psm1) cria pasta/RunId; [HarnessSonar.psm1](../scripts/HarnessSonar.psm1) persiste resultados e [HarnessSonarReview.psm1](../scripts/HarnessSonarReview.psm1) encadeia pareceres. | Ultima tentativa de build, ultimo diagnostico utilizavel e ultima situacao da operacao; parecer/decisao atuais separados de gate tecnico, sem cadeia. |
 | Indices, abertura e limpeza | [HarnessProjectIndex.psm1](../scripts/HarnessProjectIndex.psm1) varre builds/runs/planning/sonar; [acompanhar-log-mta.ps1](../scripts/acompanhar-log-mta.ps1) chama Get-ActiveMtaRun; [HarnessCleanup.psm1](../scripts/HarnessCleanup.psm1) autoriza raizes/padroes legados. | Reconstruir indices por projeto, adaptar chamadores de abertura/log e limitar limpeza ao contrato novo, sem tocar origem externa ou eliminar conteudo humano necessario. |
-| Compartilhamento | [HarnessTransfer.psm1](../scripts/HarnessTransfer.psm1) e [compartilhar-contexto.ps1](../scripts/compartilhar-contexto.ps1) expõem pacotes e recibos. | Retirar essa capacidade e seus chamadores depois de demonstrar copia + reconciliacao comum. Converter legado em utilitario separado. |
+| Compartilhamento | `HarnessTransfer.psm1` e `compartilhar-contexto.ps1` (arquivos legados retirados) expunham pacotes e recibos. | Retirar essa capacidade e seus chamadores depois de demonstrar copia + reconciliacao comum. Converter legado em utilitario separado. |
 
 O [POM Reference do Maven](https://maven.apache.org/pom.html#Maven_Coordinates)
 confirma que artifactId participa das coordenadas com groupId; nome de pasta igual

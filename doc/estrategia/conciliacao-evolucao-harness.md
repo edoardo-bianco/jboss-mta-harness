@@ -108,7 +108,7 @@ Os IDs anteriores são preservados para rastreabilidade. Sua correspondência co
 | Constatação | Referências locais |
 | --- | --- |
 | Estado e ensaios ainda pendentes | [Backlog vigente](../../tasks/todo.md#backlog-vigente), [sequência e verificação](../../tasks/plan.md#sequencia-e-verificacao) e [aceite geral de 03/10](../../tasks/todo.md#aceite-manual-e-integracao-nas-principais---2026-10-03). |
-| Planejamento pelo registro e base EVIDENCIAS | [HarnessPlanningInput.ps1](../../scripts/HarnessPlanningInput.ps1), [HarnessPlanning.psm1](../../scripts/HarnessPlanning.psm1), [Test-PlanningEvidence.ps1](../../tests/Test-PlanningEvidence.ps1) e ADR-0005. |
+| Planejamento pelo registro e base EVIDENCIAS | `HarnessPlanningInput.ps1` (fonte da baseline, retirada na simplificação), [HarnessPlanning.psm1](../../scripts/HarnessPlanning.psm1), [Test-PlanningEvidence.ps1](../../tests/Test-PlanningEvidence.ps1) e ADR-0005. |
 | Priorização percentual e continuidade | [Estado de priorização](../../scripts/HarnessPrioritizationState.ps1), [guia](../guias/tools/priorizacao-issues.md), [Test-PrioritizationProgress.ps1](../../tests/Test-PrioritizationProgress.ps1). |
 | Importação e consultas existentes | [HarnessProjectIndex.psm1](../../scripts/HarnessProjectIndex.psm1) e [HarnessSonarApi.psm1](../../scripts/HarnessSonarApi.psm1). |
 | Operações e validações existentes | [HarnessBuild.psm1](../../scripts/HarnessBuild.psm1), [HarnessSonarCriteria.psm1](../../scripts/HarnessSonarCriteria.psm1), [HarnessJboss.psm1](../../scripts/HarnessJboss.psm1) e [HarnessJbossArtifacts.psm1](../../scripts/HarnessJbossArtifacts.psm1). |

@@ -1,19 +1,26 @@
 # To-do do agente: evolucao do harness
 
-## Pausa humana - 15/10/2026
+## Retomada documental S28 - 16/10/2026
 
-[Ponto seguro e roteiro de retomada](plan.md#pausa-humana---ponto-seguro-de-15102026).
-Branch `harness/planejar-simplificacao-projetos`; codigo salvo em `21e836e`.
-S01-S27 concluidas tecnicamente; S28 com regressao/revisoes realizadas e
-fechamento documental pendente. Dez suites finais PS5.1 aprovadas e encerradas.
+[Fechamento documental e roteiro de ensaio](plan.md#retomada-documental-s28---16102026).
+Branch `harness/planejar-simplificacao-projetos`; retomada do checkpoint `b0ad050`,
+com checkout inicialmente limpo. S01-S27 concluidas tecnicamente; S28 com
+regressao/revisoes e fechamento documental realizados. Dez suites finais PS5.1
+aprovadas antes da pausa; nenhuma alteracao de runtime nesta fatia.
 Nenhum dado real convertido/limpo; Java preservado; sem merge/push.
 
-- [ ] Finalizar S28 documental: tres links historicos de scripts retirados,
-  dois links gerados do modelo de sprints e conferencia final de links.
-- [ ] Registrar validacao estrutural/limitacao da skill: validador oficial
-  indisponivel por falta de PyYAML; links e revisao de cenarios ja realizados.
+- [x] Finalizar S28 documental: tres links historicos do plano e um da estrategia
+  classificados como legados; dois links de sprints conferidos no destino gerado.
+- [x] Validar estrutura da skill com quick_validate.py e PyYAML ja existente nas
+  fixtures; sem instalar dependencias. Estrutura nao comprova comportamento nos clientes.
+- [x] Conferir links/ancoras e diff; evidencias em .harness/tests/simplificacao-final/.
 - [ ] Ensaio humano do workspace/navegacao, copia/reconciliacao e clientes
-  Codex/Copilot; ensaio Sonar corporativo da ultima analise concluida.
+  Codex/Copilot.
+- [x] Projeto migracao-cache-antes adicionado pelo desenvolvedor ao workspace salvo;
+  POM conferido com artifactId migracao-cache, configuracao Java preservada.
+- [ ] Ensaio Sonar local: iniciar instalacao existente; opcao 3 com token
+  somente no terminal. Localhost:9000 indisponivel na conferencia desta retomada.
+- [ ] Homologacao Sonar corporativa da ultima analise concluida, separada do local.
 - [ ] Aceite humano integrado; integracao na principal em etapa separada.
 
 ## Acrescimo Sonar confirmado - 15/10/2026
@@ -44,9 +51,9 @@ As pendencias historicas abaixo permanecem; esta ordem prevalece sobre sugestoes
 - [x] Conferir links/ancoras dos acrescimos em 11 documentos, diff e requisitos; historico anterior de plan.md preservado. Sem teste de runtime nesta entrega documental.
 
 Implementacao autorizada por "proceder" em 10/10/2026 e retomada em 11/10, 12/10 e 13/10/2026.
-[Ponto atual e verificacoes](plan.md#pausa-humana---ponto-seguro-de-15102026).
+[Ponto atual e verificacoes](plan.md#retomada-documental-s28---16102026).
 S01-S27 implementados e revisados. Limpeza corrente e descarte legado validados;
-S28 documental, ensaio humano e aceite integrado permanecem pendentes.
+S28 documental concluida; ensaio humano, Sonar real e aceite integrado pendentes.
 Conversao e validacao verificadas em fixtures, inclusive multiprojeto e sprints.
 CLI oferece Previa, Aplicar, Validar e Limpar com selecao/confirmacao explicitas.
 Retomada solicitada em 15/10, com navegacao padrao pelo workspace/indices e
@@ -101,7 +108,8 @@ S23 concluida tecnicamente; retomada documental atual registrada acima.
 - [x] S26: skill, papeis e orientadores alinhados; links e cenarios revisados. Ensaio humano dos clientes permanece pendente.
 - [x] S27: AGENTS.md, instrucoes Copilot e wrappers Codex alinhados a ADR-0009; revisao concluida.
 - [x] S28 parcial: inventario, README/arquitetura/ADRs e retirada de funcoes orfas; 106 suites PS5.1 com tres falhas corrigidas/reexecutadas, dez testes MCP e dez suites finais aprovadas.
-- [ ] S28: concluir pendencias documentais do checkpoint e obter aceite humano integrado.
+- [x] S28 documental: links historicos classificados, links de sprints verificados no plano gerado e skill aprovada pelo validador oficial; verificacao local sem alterar runtime.
+- [ ] S28: concluir ensaios dos clientes/Sonar real e obter aceite humano integrado.
 
 Cada linha abaixo representa uma
 fatia verificavel, com aproximadamente 2 a 5 arquivos. Referencias apontam aos
@@ -1206,7 +1214,7 @@ continuam a definir. As dependencias de validacao ja registradas permanecem.
 
 | ID | Estado / ordem | Proxima entrega |
 | --- | --- | --- |
-| SIMP-PROJ | S01-S27 tecnicas concluidas; pausa humana; fechamento S28 e aceite pendentes | [Checkpoint](plan.md#pausa-humana---ponto-seguro-de-15102026) e [tarefas S01-S28](#simplificacao-prioritaria-por-projeto---2026-10-10): organizacao por projeto sem recibos, conversao descartavel, links diretos, limpeza e guias/orientador alinhados antes das demais evolucoes. |
+| SIMP-PROJ | S01-S27 tecnicas e S28 documental concluidas; ensaios e aceite pendentes | [Retomada](plan.md#retomada-documental-s28---16102026) e [tarefas S01-S28](#simplificacao-prioritaria-por-projeto---2026-10-10): organizacao por projeto sem recibos, conversao descartavel, links diretos, limpeza e guias/orientador alinhados antes das demais evolucoes. |
 | SIM-01 a SIM-14 | SIM-01 a SIM-13 implementadas; regressao PASS | Novo ensaio nativo SIM-14/VAL-01 nos dois clientes antes de novos executores. |
 | SDLC-01 | Concluida | Preparo de planejamento/reconciliacao por CLI com escolhas explicitas, validacao antes de escrita e saida estruturada. |
 | SDLC-02 | Concluida | Skill compartilhada de orientacao pelo estado efetivo e pelos guias. |
