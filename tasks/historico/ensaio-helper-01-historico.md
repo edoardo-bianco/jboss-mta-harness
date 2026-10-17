@@ -1,3 +1,8 @@
+> **Historico arquivado em 17/10/2026.** Registro da evolucao do harness ate esta data,
+> preservado sem alteracao de conteudo (somente links relativos ajustados ao novo local).
+> Nao e backlog ativo: itens abertos aqui nao devem ser executados sem serem trazidos
+> explicitamente para [tasks/plan.md](../plan.md) e [tasks/todo.md](../todo.md).
+
 # Historico do ensaio 01: helpers de migracao
 
 Rodada de 2026-10-04 encerrada pelo desenvolvedor. Este arquivo conserva a coleta
@@ -7,7 +12,7 @@ historicas, nao pendencias atuais. Base ensaiada: e328df2.
 Os 17 achados motivaram a simplificacao implementada em 2c6b6e6 e as corretivas
 da auditoria em 4ff6c68. O encerramento da coleta nao equivale a aprovar todos os
 cenarios de validacao nativa ou a aceitar uma corretiva da aplicacao.
-Estado atual e novo ensaio: [to-do](todo.md). Direcao de trabalho: [plano](plan.md).
+Estado atual e novo ensaio: [to-do](todo-ate-2026-10-17.md). Direcao de trabalho: [plano](plan-ate-2026-10-17.md).
 
 Em 2026-10-05, o desenvolvedor autorizou reiniciar o playground do zero e descartar
 suas analises locais, inclusive o arquivo em .harness/ensaios/ensaio-01-2026-10-04.
@@ -334,7 +339,7 @@ nao constitui falha.
 
 Registro historico das discussoes durante o ensaio; o plano consolidado acima
 passa a orientar a proxima implementacao. Evidencias e criterios iniciais em ENS-01 a
-ENS-15 do [to-do](todo.md#ensaio-acompanhado-do-helper-no-codex---2026-10-04).
+ENS-15 do [to-do](todo-ate-2026-10-17.md#ensaio-acompanhado-do-helper-no-codex---2026-10-04).
 Este registro nao altera contratos, prompts, tarefas ou recibos ja emitidos.
 
 Entrada humana central: migracao.md do projeto escolhido, com prioridades,

@@ -6,8 +6,8 @@ PowerShell 5.1 e verificados em fixtures. Aceite humano integrado pendente.
 
 **Prioridade:** parte da simplificação que precede modernização e novas
 funcionalidades. Dependências, riscos e
-verificações estão no [plano](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10)
-e no [checklist](../../tasks/todo.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+verificações estão no [plano](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10)
+e no [checklist](../../tasks/historico/todo-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
 
 ## 1. Responsabilidade
 

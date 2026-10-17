@@ -223,7 +223,7 @@ incluindo [conversão](../features/conversao-descartavel-dos-registros.md), reti
 de recibos/rastreamentos, links diretos, limpeza e guias/orientador alinhados,
 antes de modernização ou novas funcionalidades. As etapas propostas abaixo vêm
 depois e serão reavaliadas contra o contrato simples. Consulte o
-[plano de viabilidade](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+[plano de viabilidade](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
   
 A sequência abaixo é proposta, sem calendário ainda acordado. Seu planejamento em fatias pequenas e verificáveis permanece como pendência futura no backlog do harness. Cada fatia deverá explicitar caso de uso, benefício esperado, escopo, dependências, critérios de aceite, evidências e reversão; somente a próxima fatia será detalhada mediante continuidade solicitada. A publicação desta estratégia não inicia essas implementações.
   

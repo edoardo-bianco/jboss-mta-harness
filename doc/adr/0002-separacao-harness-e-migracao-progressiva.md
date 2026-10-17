@@ -9,7 +9,7 @@ html:
 
 **Atualizacao operacional — 15/10/2026:** a [ADR-0009](0009-estado-corrente-por-projeto.md)
 rege o estado corrente desta versao; integracao e aceite humano sao acompanhados
-no [plano](../../tasks/plan.md).
+no [plano](../../tasks/historico/plan-ate-2026-10-17.md).
 Permanecem separacao harness/aplicacao, lote delimitado e GO/aceite humanos.
 Os caminhos antigos de planning/priorizacao e o rastreamento abaixo sao historicos.
 

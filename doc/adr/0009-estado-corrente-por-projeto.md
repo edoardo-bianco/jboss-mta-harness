@@ -2,7 +2,7 @@
 
 Estado: implementação autorizada em 10/10/2026; produtores, consumidores e
 instruções alinhados ao fluxo corrente na branch do harness. Regressão integrada
-e aceite humano são acompanhados no [plano](../../tasks/plan.md).
+e aceite humano são acompanhados no [plano](../../tasks/historico/plan-ate-2026-10-17.md).
 Esta ADR rege a operação desta versão; integração na principal e aceite da
 [feature](../features/organizacao-simplificada-por-projeto.md) permanecem separados.
 
@@ -132,7 +132,7 @@ Revisao final de S13 concluida em 12/10/2026; provas em
 [portabilidade](../../tests/Test-PlanningPortable.ps1),
 [reassociacao](../../tests/Test-PlanningReassociation.ps1) e
 [navegacao](../../tests/Test-ProjectNavigation.ps1), alem das suites registradas no
-[plano](../../tasks/plan.md#retomada-de-12102026). Fixtures sinteticas nao substituem
+[plano](../../tasks/historico/plan-ate-2026-10-17.md#retomada-de-12102026). Fixtures sinteticas nao substituem
 ensaio humano integrado nem o aceite da simplificacao completa.
 
 ### Sprints correntes (S16)
@@ -208,4 +208,4 @@ Modernização e novas capacidades continuam posteriores a esta entrega.
 [interrupção e recuperação](../../tests/Test-ProjectRecovery.ps1) e
 [MTA direto](../../tests/Test-ProjectMta.ps1) exercitam o núcleo em PowerShell 5.1.
 Essas provas não equivalem à conclusão dos fluxos listados no
-[checklist](../../tasks/todo.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+[checklist](../../tasks/historico/todo-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).

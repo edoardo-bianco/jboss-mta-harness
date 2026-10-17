@@ -9,7 +9,7 @@ html:
 
 **Atualizacao operacional — 15/10/2026:** a [ADR-0009](0009-estado-corrente-por-projeto.md)
 rege o estado corrente desta versao; integracao e aceite humano sao acompanhados
-no [plano](../../tasks/plan.md).
+no [plano](../../tasks/historico/plan-ate-2026-10-17.md).
 Git continua informativo. As referencias abaixo a recibos, snapshots e hashes
 persistidos sao historicas; diferencas Git nao exigem novo contexto por si so.
 

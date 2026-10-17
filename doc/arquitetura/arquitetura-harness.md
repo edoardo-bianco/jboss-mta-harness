@@ -26,7 +26,7 @@ Evoluir por capacidades verificáveis, preservando o ciclo objetivo → contexto
 
 As seções 4 e 5 descrevem o fluxo corrente da [ADR-0009](../adr/0009-estado-corrente-por-projeto.md).
 A implementação técnica e o aceite integrado humano são acompanhados no
-[plano](../../tasks/plan.md); mudanças ainda não integradas à principal não se
+[plano](../../tasks/historico/plan-ate-2026-10-17.md); mudanças ainda não integradas à principal não se
 confundem com homologação corporativa.
 
 ### 4.1. Estrutura e tecnologias comprovadas
@@ -60,7 +60,7 @@ Node executa o adaptador MCP; Java executa aplicações e ferramentas Java. Troc
 | MCP é uma entrada opcional de leitura. | As três consultas não marcam exame, não alteram decisões e não substituem conferência do código. | [Contrato de consultas](../especificacoes/consultas-issues.md) |
 | Cronograma macro passa por validação determinística. | B0, inclusões acumuladas e consumo de fases são preservados no cenário corrente; plano/resultado são publicados conjuntamente, com recuperação transitória. Limites consideram fases consumidas; falhas de prazo/capacidade e riscos têm justificativas calculadas. | [Contrato de sprints](../especificacoes/planejamento-sprints.md) |
 
-Essas decisões sustentam os contratos operacionais e a continuidade do trabalho. A evolução preserva decisões e evidências históricas; homologações pendentes permanecem no [acompanhamento do harness](../../tasks/todo.md).
+Essas decisões sustentam os contratos operacionais e a continuidade do trabalho. A evolução preserva decisões e evidências históricas; homologações pendentes permanecem no [acompanhamento do harness](../../tasks/historico/todo-ate-2026-10-17.md).
 
 ## 5. Arquitetura de comportamento
 
@@ -299,7 +299,7 @@ Novos plugins usam TypeScript quando o trabalho é orquestrar I/O e interpretar 
 
 ### 11.1. Base de análise e alternativas
 
-O [estudo CORE-01](../../tasks/plan.md#exploracao-java-opcional-e-transversal) prioriza JDT, enquanto o catálogo SRC-03 explora JavaParser/Symbol Solver como alternativa. A necessidade de consultas semânticas independentes de IDE conduz à recomendação de **Eclipse JDT como base Java, com JDT Language Server executado fora da IDE e JDT Core para extração sintática quando necessária**. O adaptador do harness será o cliente; não dependerá de extensões VS Code, índices privados do IntelliJ ou comandos da interface Eclipse.
+O [estudo CORE-01](../../tasks/historico/plan-ate-2026-10-17.md#exploracao-java-opcional-e-transversal) prioriza JDT, enquanto o catálogo SRC-03 explora JavaParser/Symbol Solver como alternativa. A necessidade de consultas semânticas independentes de IDE conduz à recomendação de **Eclipse JDT como base Java, com JDT Language Server executado fora da IDE e JDT Core para extração sintática quando necessária**. O adaptador do harness será o cliente; não dependerá de extensões VS Code, índices privados do IntelliJ ou comandos da interface Eclipse.
 
 | Opção open source | Adequação e limites | Decisão proposta |
 | --- | --- | --- |
@@ -350,7 +350,7 @@ e da [transição dos registros](../features/conversao-descartavel-dos-registros
 incluindo limpeza e alinhamento dos guias e do agente orientador. Primeiro retirar
 recibos/rastreamentos e oferecer navegação direta às fontes; depois reavaliar as
 equivalências abaixo para não reproduzir controles removidos no novo núcleo.
-Veja o [plano vigente](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+Veja o [plano arquivado](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
 
 A modernização parte dos contratos e ferramentas existentes e extrai uma capacidade por vez. Cada incremento precisa preservar o comportamento conhecido e demonstrar o benefício da nova estrutura antes de ampliar seu uso para outros perfis e clientes.
 
@@ -376,7 +376,7 @@ As fontes oficiais sustentam as características das ferramentas e os fundamento
 | [Catálogo de domínios e capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md) | IDs e recortes HAR/SRC/OBJ/DEP/JBS/CHG que orientam a expansão das capacidades. |
 | [Contrato de planejamento](../especificacoes/planejamento-copilot.md), [consultas](../especificacoes/consultas-issues.md) e [guia do desenvolvedor](../guias/harness-migracao-desenvolvedor.md) | Comportamento implementado, invariantes e operação. |
 | [MACRO-01](../features/planejamento-macro-sprints.md) e [contrato de sprints](../especificacoes/planejamento-sprints.md) | Capacidade integrada à base operacional; cenário corrente, cronograma e justificativas determinísticas. |
-| [Extensão VS Code](../features/engineering-harness-vscode.md) e [estudo CORE-01](../../tasks/plan.md#exploracao-java-opcional-e-transversal) | Propostas e estudos reconciliados, com estado de entrega explicitado. |
+| [Extensão VS Code](../features/engineering-harness-vscode.md) e [estudo CORE-01](../../tasks/historico/plan-ate-2026-10-17.md#exploracao-java-opcional-e-transversal) | Propostas e estudos reconciliados, com estado de entrega explicitado. |
 
 Mudanças de regra exigem decisão registrada e atualização dos contratos afetados. Esse vínculo mantém arquitetura, procedimentos operacionais e histórico coerentes durante a evolução.
 

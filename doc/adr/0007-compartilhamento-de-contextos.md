@@ -2,7 +2,7 @@
 
 **Atualizacao operacional — 15/10/2026:** a [ADR-0009](0009-estado-corrente-por-projeto.md)
 substitui o mecanismo abaixo nesta versao; integracao e aceite humano ficam no
-[plano](../../tasks/plan.md). O corpo preserva o registro da decisao anterior.
+[plano](../../tasks/historico/plan-ate-2026-10-17.md). O corpo preserva o registro da decisao anterior.
 A operacao de importar/exportar ZIP foi retirada. O fluxo corrente usa copia,
 associacao explicita ao POM local e reconciliacao de contribuicoes, preservando
 conflitos e a origem externa. GO e aceite continuam humanos e locais.

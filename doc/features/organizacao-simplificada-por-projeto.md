@@ -6,9 +6,9 @@
 **Prioridade definida pelo desenvolvedor em 10/10/2026:** entregar esta simplificação
 e a transição dos registros antes de modernizar o harness ou acrescentar outras
 funcionalidades. Esta entrega incorpora os requisitos e o
-[plano de viabilidade e implementação](../../tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10);
+[plano de viabilidade e implementação](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10);
 a implementação e as verificações estão registradas por etapa. O
-[checklist](../../tasks/todo.md#simplificacao-prioritaria-por-projeto---2026-10-10)
+[checklist](../../tasks/historico/todo-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10)
 separa conclusão técnica, ensaios de cliente e aceite humano. Nenhum dado real
 foi convertido ou limpo; conversão/descarte continuam ações explícitas.
 

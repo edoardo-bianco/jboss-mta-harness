@@ -9,7 +9,7 @@ html:
 
 **Atualizacao operacional — 15/10/2026:** a [ADR-0009](0009-estado-corrente-por-projeto.md)
 rege o estado corrente desta versao; integracao e aceite humano sao acompanhados
-no [plano](../../tasks/plan.md).
+no [plano](../../tasks/historico/plan-ate-2026-10-17.md).
 Permanecem entrada pelo registro, base MTA/EVIDENCIAS e escolhas humanas.
 Previous, recibos e regras de sucessao abaixo foram substituidos por documentos
 correntes, releitura de fontes e revisao do alcance do GO.

@@ -8,7 +8,7 @@ html:
 # Cheat sheet — Run Tasks do harness
 
 **Data:** 15/10/2026. **Escopo:** operações do harness de migração JBoss.
-**Referência operacional:** estado corrente por projeto da [ADR-0009](../adr/0009-estado-corrente-por-projeto.md). Validação técnica registrada no [plano](../../tasks/plan.md); aceite integrado humano separado.
+**Referência operacional:** estado corrente por projeto da [ADR-0009](../adr/0009-estado-corrente-por-projeto.md). Validação técnica registrada no [plano](../../tasks/historico/plan-ate-2026-10-17.md); aceite integrado humano separado.
 
 ## Consulta rápida
 

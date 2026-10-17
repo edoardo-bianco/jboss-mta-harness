@@ -50,10 +50,10 @@ e a [transicao dos registros](doc/features/conversao-descartavel-dos-registros.m
 antes da modernizacao e de novas funcionalidades. O objetivo e retirar recibos e
 rastreamentos por execucao, usar caminhos fixos e oferecer links diretos das fichas
 para suas fontes. A entrega inclui limpeza e alinhamento dos guias e do orientador.
-O [plano de viabilidade](tasks/plan.md#simplificacao-prioritaria-por-projeto---2026-10-10)
+O [plano de viabilidade](tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10)
 registra a implementacao tecnica por etapas. O fluxo corrente ja usa esses caminhos;
 regressao integrada e aceite humano sao acompanhados separadamente no
-[checklist](tasks/todo.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+[checklist](tasks/historico/todo-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
 Nenhum dado real foi convertido ou limpo nesta entrega.
 
 A [arquitetura do Engineering Harness](doc/arquitetura/arquitetura-harness.md)
