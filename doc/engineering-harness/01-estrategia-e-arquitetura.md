@@ -14,9 +14,9 @@ Na prática, o desenvolvedor configura as ferramentas que já possui, escolhe um
 
 **O diferencial não é reunir comandos em um menu. É ligar objetivo, contexto, decisão, execução e verificação sem obrigar o desenvolvedor a reconstruir essa ligação a cada trabalho.**
 
-## 2. Origem e fundamentos
+## 2. Por que evoluir a base existente
 
-### 2.1. De onde vem a ideia
+### 2.1. Origem da ideia
 
 O `jboss-mta-harness` nasceu de um problema concreto: organizar diagnóstico, planejamento, corretivas e validação de uma migração JBoss EAP para 7.4 com apoio de IA e revisão humana. Ao resolver esse problema, ficou evidente que os mesmos procedimentos aparecem em desenvolvimento, qualidade e modernização: entender o problema, localizar evidências, delimitar uma alteração, verificar seus efeitos e decidir como continuar.
 
@@ -60,25 +60,25 @@ Práticas de desenvolvimento seguro, como o NIST SSDF, servem de referência par
 | --- | --- | --- |
 | Migrações tecnológicas | Consolidar EAP 7.4 com Java 8 e `javax` e estender o processo a Quarkus, com versões e restrições próprias. | Lotes executados, verificados e aceitos com evidências por perfil. |
 | SDLC cotidiano | Apoiar requisitos, desenvolvimento, testes, entrega e operação de aplicações JBoss e Quarkus. | Continuidade entre demanda, decisão, alteração e resultado. |
-| Modernização | Apoiar a simplificação do negócio e da arquitetura proposta pelo Fábio, com escolhas tecnológicas explícitas. | Mudanças incrementais fundamentadas no conhecimento da aplicação. |
+| Modernização | Apoiar a simplificação do negócio e da arquitetura proposta pela organização, com escolhas tecnológicas explícitas. | Mudanças incrementais fundamentadas no conhecimento da aplicação. |
 
 No SDLC, o mesmo ciclo se aplica a requisitos e análise (critérios de aceite acordados), arquitetura e planejamento (plano com escopo e justificativa), desenvolvimento (diff relacionado à demanda), revisão e testes (evidências técnicas e funcionais), entrega (versão identificada e reversão definida) e operação (diagnóstico e contexto para o próximo trabalho). O harness integra os sistemas existentes de requisitos, Git, CI/CD e operação, preservando os registros oficiais de cada um; cobrir o SDLC não significa conceder execução irrestrita aos agentes.
 
 Na modernização, o código atual materializa regras e decisões acumuladas e é parte da base de conhecimento. O direcionamento é compreender um fluxo, confirmar suas regras, identificar o que pode ser simplificado e implementar uma mudança delimitada. **A intenção de uma decisão não é inventada a partir do código**: quando desconhecida, permanece como questão a investigar. Testes de caracterização registram o comportamento existente; critérios funcionais próprios expressam as mudanças desejadas. Mudança entre tecnologias é escopo específico, separado da atualização de versões.
 
-## 3. Por que evoluir a base existente
+### 2.4. Preservar o que funciona e desacoplar
 
 O investimento deve preservar o que já funciona e retirar o acoplamento desnecessário a uma tecnologia, IDE ou cliente de IA. O objetivo não é reescrever todas as ferramentas, criar um novo agente universal ou implantar uma plataforma centralizada. A evolução deve permitir que uma capacidade nova seja incorporada por contrato, inclusive quando sua implementação está fora do repositório do harness.
 
 A estratégia anterior já propunha núcleo comum, perfis, adaptadores e expansão para JBoss, Quarkus, SDLC e modernização. Esta consolidação torna explícita a separação entre capacidade, implementação, perfil e tarefa e incorpora a simplificação dos dados já entregue. [R1](03-plano-tatico-e-implementacao.md#fonte-r1) [R2](03-plano-tatico-e-implementacao.md#fonte-r2) [R8](03-plano-tatico-e-implementacao.md#fonte-r8)
 
-## 4. Onde estamos: evidência, decisão e proposta
+## 3. Onde estamos: evidência, decisão e proposta
 
-### 4.1. Base examinada
+### 3.1. Base examinada e limite de verificação
 
 A situação descrita corresponde à `main` em **`5c8d582`**, depois da integração da PR #31, que entregou a simplificação por projeto e a transição dos registros. Foram conferidos no código o layout por projeto, a seleção do MTA na origem, o mestre de sprints, o build com resultado corrente e o servidor MCP. As suítes PowerShell do harness rodam pelo executor isolado; ensaios nativos dos clientes de IA e homologações corporativas continuam pendentes e não são inferidos de testes simulados. [R0](03-plano-tatico-e-implementacao.md#fonte-r0) [S1](03-plano-tatico-e-implementacao.md#fonte-s1) [S2](03-plano-tatico-e-implementacao.md#fonte-s2)
 
-### 4.2. Matriz de situação
+### 3.2. Matriz de situação
 
 | Frente | Situação na `main` (`5c8d582`) | Tratamento nesta proposta |
 | --- | --- | --- |
@@ -92,13 +92,13 @@ A situação descrita corresponde à `main` em **`5c8d582`**, depois da integra�
 | Planejamento macro por sprints | Integrado; homologação pendente. | Preservar regras; contrato em `doc/contratos/`. |
 | Núcleo TypeScript, catálogo de perfis e capacidade externa | Propostos (ADR-0008); não implementados. | Implementar incrementalmente. |
 
-### 4.3. Regra de precedência
+### 3.3. Regra de precedência
 
 Para o desenho futuro, aplicar a definição central e as decisões mais recentes do desenvolvedor. Para descrever o estado entregue, utilizar código e evidência da baseline identificada. Uma decisão desejada não comprova implementação; código antigo não revoga uma decisão posterior.
 
 As regras executáveis do estado corrente pertencem à [ADR-0009](../adr/0009-estado-corrente-por-projeto.md) e aos [contratos](../contratos/). Este conjunto descreve o desenho e aponta para elas, sem criar uma segunda fonte normativa. A simplificação supera as exigências anteriores de pastas por execução, snapshots, cadeias `Previous`/`ImportedFrom`, recibos de transferência e importação/exportação próprias, preservando decisões humanas, escopo, semântica do trabalho e referências úteis.
 
-## 5. Linguagem comum do produto
+## 4. Linguagem comum do produto
 
 | Conceito | Significado e limite |
 | --- | --- |
@@ -114,9 +114,9 @@ As regras executáveis do estado corrente pertencem à [ADR-0009](../adr/0009-es
 
 O versionamento de capacidades e perfis pertence ao **produto**. Não significa manter versões de cada execução nos dados dos projetos.
 
-## 6. Arquitetura-alvo
+## 5. Arquitetura-alvo
 
-### 6.1. Núcleo pequeno, integrações substituíveis
+### 5.1. Núcleo pequeno, integrações substituíveis
 
 Adotar um **monólito modular local com portas e adaptadores**. O núcleo organiza o trabalho e suas invariantes; adaptadores integram interfaces, arquivos, ferramentas e agentes. Uma implementação externa não transforma o harness em um sistema de microserviços. A separação protege o domínio e permite testes sem depender da IDE ou de uma ferramenta concreta. [O1](03-plano-tatico-e-implementacao.md#fonte-o1)
 
@@ -144,13 +144,13 @@ Desenvolvedor pela CLI/menu/IDE       Coding agent pelo MCP opcional
 
 A CLI é a superfície executável de referência. VS Code e IntelliJ a acionam; extensões próprias podem melhorar a experiência depois. O MCP é outra entrada para os mesmos casos de uso, não o núcleo, a autorização ou o protocolo obrigatório entre todas as capacidades.
 
-### 6.2. Local significa controle e instalação locais
+### 5.2. Local significa controle e instalação locais
 
 O harness deve funcionar sem servidor central, banco de dados adicional, broker, contêiner obrigatório ou serviço residente próprio. A execução normal é um processo local; o adaptador MCP pode permanecer ativo enquanto o cliente mantiver a sessão. [O8](03-plano-tatico-e-implementacao.md#fonte-o8)
 
 Isso não promete funcionamento integral sem rede. Um agente pode usar inferência remota; Maven pode precisar de repositórios; Sonar pode apontar para serviço corporativo. Cada capacidade explicita suas dependências. Também não proíbe os servidores que fazem parte do trabalho, como o JBoss local: eles não são infraestrutura central do harness.
 
-### 6.3. Limites de domínio preservados
+### 5.3. Limites de domínio preservados
 
 O domínio do produto é **conduzir trabalho de engenharia com contexto, decisão e evidência**. A evolução adota DDD de forma pragmática: a complexidade e o valor do problema orientam o investimento em modelagem, e a linguagem ubíqua é construída com quem conhece o trabalho. [O34](03-plano-tatico-e-implementacao.md#fonte-o34)
 
@@ -168,13 +168,17 @@ A decomposição retoma o mapa existente sem exigir um pacote, serviço ou agent
 
 O domínio da aplicação analisada continua pertencendo ao produto de negócio. Um grafo de classes não comprova limites de domínio; uma interpretação de regras pelo agente exige validação com quem conhece o negócio.
 
-## 7. Perfis compõem; capacidades são reutilizadas
+## 6. Perfis compõem; capacidades são reutilizadas
 
-| Perfil | Origem e destino | Plataforma Java | Situação |
+| Perfil | Objetivo e composição | Plataforma Java | Situação |
 | --- | --- | --- | --- |
-| Migração JBoss | EAP **7.0 ou 7.1** → EAP **7.4** | Java 8 e `javax.*` | Implementado; origem 7.0/7.1 atendida pela mesma instalação configurada. |
-| Quarkus | Versão de origem → versão de destino escolhida | **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus e o JDK homologado | Proposto. |
-| Modernização | Aplicação atual → arquitetura e tecnologia definidas pela análise | Conforme o destino | Proposto; candidato GitHub Copilot app modernization. |
+| Migração JBoss | EAP **7.0 ou 7.1** → EAP **7.4**: MTA ou evidências, Maven, Sonar e continuidade por issue. | Java 8 e `javax.*` | Implementado; origem 7.0/7.1 atendida pela mesma instalação configurada. |
+| Desenvolvimento Quarkus | **SDLC sem migração**: defeitos e melhorias em aplicação Quarkus, com JDK/BOM/extensões, build/testes, modo de desenvolvimento e procedimentos de entrega do projeto. | **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus e o JDK homologado | Proposto; primeiro piloto de SDLC. |
+| Migração Quarkus | Par origem/destino de versões Quarkus, guias e receitas aplicáveis, comparação e revisão das alterações. | Java 17+, incluindo 25 | Proposto. |
+| Cobertura de código | Capacidade **transversal** que compõe com JBoss ou Quarkus: coleta e interpretação de cobertura, separando testes unitários, de integração e recorte medido, sem duplicar os adaptadores Maven/JaCoCo. | Conforme o perfil composto | Proposto; a política JaCoCo do recorte JBoss não vira regra universal. |
+| Modernização | Aplicação atual → arquitetura e tecnologia definidas pela análise. | Conforme o destino | Proposto; candidato GitHub Copilot app modernization. |
+
+Perfis não são novos bounded contexts automaticamente: `quarkus-desenvolvimento` e `quarkus-migracao` reutilizam as mesmas capacidades, mas selecionam procedimentos e critérios diferentes. O SDLC cotidiano também se aplica a aplicações JBoss fora do lote de migração, usando o mesmo núcleo com objetivo próprio.
 
 **Java 8 é restrição do perfil JBoss, não do núcleo.** Uma capacidade de build atende JBoss e Quarkus com instalações Java diferentes; o núcleo recebe o ambiente resolvido e não contém `if JBoss` para impor Java 8 a todos os projetos. Runtimes de ferramentas também são distintos do runtime da aplicação: o JDT Language Server, por exemplo, exige um JDK moderno mesmo ao analisar projetos Java 8.
 
@@ -182,7 +186,7 @@ No perfil de modernização, o **GitHub Copilot app modernization** é candidato
 
 O perfil define o que usar e sob quais condições. A configuração da máquina informa onde estão as ferramentas e quais clientes estão disponíveis. A tarefa coordena os passos. A implementação pode ser substituída sem alterar o significado público da capacidade.
 
-## 8. Experiência e controle do fluxo
+## 7. Experiência e controle do fluxo
 
 O desenvolvedor abre o projeto na IDE preferida, seleciona o perfil e consulta as tarefas disponíveis. O diagnóstico de ambiente informa caminhos, versões efetivas, restrições e capacidades indisponíveis. Ausência de uma ferramenta não provoca instalação automática ou troca silenciosa de implementação.
 
@@ -192,7 +196,7 @@ No **fluxo conduzido pelo desenvolvedor**, a CLI/menu executa passos conhecidos 
 
 Há diferença entre preparar um contexto, entregar esse contexto ao cliente e executar o cliente programaticamente. Quando a interface do agente não permitir automação compatível, a entrega assistida continua sendo um resultado válido: o harness prepara e o desenvolvedor aciona o agente. Não simular invocação ou conclusão.
 
-## 9. Feedforward e feedback fazem parte do trabalho
+## 8. Feedforward e feedback fazem parte do trabalho
 
 O ciclo proposto é:
 
@@ -204,7 +208,7 @@ O ciclo interno corrige a tarefa atual dentro do escopo autorizado. O ciclo de m
 
 A tarefa determinística deve continuar útil sem LLM. A tarefa híbrida deve produzir resultados e evidências compreensíveis mesmo quando o agente falha ou está indisponível.
 
-## 10. Continuidade sem histórico acumulativo
+## 9. Continuidade sem histórico acumulativo
 
 A simplificação adotada é um requisito de produto, não um detalhe descartável durante a migração para Node. O estado administrado fica por projeto, com caminhos previsíveis, conteúdo corrente e resultado da última reconciliação. `reconciliado` não é cópia de `atual`, backup ou arquivo de diagnósticos anteriores. [S1](03-plano-tatico-e-implementacao.md#fonte-s1)
 
@@ -214,7 +218,7 @@ No perfil Maven, o projeto é nomeado pelo `project.artifactId` do POM seleciona
 
 A consequência é explícita: **rastreabilidade do trabalho corrente não equivale a reconstrução histórica completa**. Se um relatório externo anterior for removido, o harness não promete recuperá-lo. O versionamento do código do harness, dos perfis e das decisões arquiteturais continua no Git do produto; não é um histórico automático das execuções das aplicações.
 
-## 11. Características arquiteturais e limites de ambição
+## 10. Características arquiteturais e limites de ambição
 
 | Característica | Evidência esperada, não apenas intenção |
 | --- | --- |
@@ -230,11 +234,11 @@ Nenhum ganho de produtividade é assumido. Os pilotos devem comparar trabalhos d
 
 Não fazem parte do primeiro incremento: marketplace de plugins, instalação automática de ferramentas, orquestração multiagente irrestrita, workflow engine genérico, banco de evidências, indexação global obrigatória, serviço remoto de observabilidade ou reescrita integral em TypeScript.
 
-## 12. Estratégia de evolução
+## 11. Estratégia de evolução
 
 A próxima prova não é "migrar o harness inteiro para Node". É demonstrar uma **fatia vertical**: configuração local → perfil → capacidade externa → execução → resultado corrente → verificação, acessível por mais de uma interface e sem recriar os controles eliminados.
 
-Com a simplificação já na `main`, o primeiro passo é fixar os contratos mínimos e alinhar o armazenamento JBoss ao princípio da seção 10. Depois, extrair uma capacidade já útil, preservando PowerShell quando necessário. Em seguida, provar uma tarefa híbrida com entrega assistida; só ampliar a automação de agentes e o MCP de execução após comprovar seus limites.
+Com a simplificação já na `main`, o primeiro passo é fixar os contratos mínimos e alinhar o armazenamento JBoss ao princípio da seção 9. Depois, extrair uma capacidade já útil, preservando PowerShell quando necessário. Em seguida, provar uma tarefa híbrida com entrega assistida; só ampliar a automação de agentes e o MCP de execução após comprovar seus limites.
 
 A extensão própria de uma IDE é evolução de experiência. Um segundo perfil é prova de reutilização. Um coding agent alternativo é prova de portabilidade. São avaliações distintas; nenhuma deve bloquear a migração JBoss já em andamento.
 

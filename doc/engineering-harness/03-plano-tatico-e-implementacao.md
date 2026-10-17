@@ -192,7 +192,11 @@ São dois pilotos separáveis.
 
 **Piloto de agente:** escolher uma CLI programática realmente aprovada — candidato inicial `claude -p` — e testar autenticação, permissões, efeitos, retorno, interrupção e rede. Uma falha não dispara outro cliente automaticamente. Manter entrega assistida como modo de operação quando a automação não estiver disponível; GitHub Copilot pela IDE continua caminho de referência.
 
-**Piloto de perfil Quarkus:** reutilizar a capacidade de build e o mesmo fluxo em um recorte Quarkus, com **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus. Candidatos de ferramenta: CLI Quarkus para extensões, build e modo de desenvolvimento; testes da aplicação e do artefato (`@QuarkusIntegrationTest`); atualização por OpenRewrite, documentada como experimental e parcial, executada somente na etapa autorizada de alteração. A equivalência precisa ser demonstrada no projeto escolhido. [O23](#fonte-o23) [O33](#fonte-o33)
+**Piloto de SDLC Quarkus (perfil Desenvolvimento Quarkus):** conduzir **um defeito ou uma melhoria fora de qualquer migração**, com **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus. O mesmo núcleo deve relacionar demanda, decisão, alteração e validação, reutilizando a capacidade de build e as ferramentas do projeto: CLI Quarkus para extensões, build e modo de desenvolvimento; testes da aplicação e do artefato (`@QuarkusIntegrationTest`). Aceite: nenhum pré-requisito de MTA, Java 8 ou `javax` no fluxo. [O23](#fonte-o23)
+
+**Piloto de Migração Quarkus:** posterior ao piloto de SDLC; acrescenta par origem/destino de versões, guias e atualização por OpenRewrite, documentada como experimental e parcial e executada somente na etapa autorizada de alteração. A equivalência precisa ser demonstrada no projeto escolhido. [O33](#fonte-o33)
+
+**Cobertura de código:** compor a capacidade transversal com um dos perfis acima (JBoss ou Quarkus), separando testes unitários, de integração e recorte medido; não duplicar os adaptadores Maven/JaCoCo nem tornar a política JaCoCo do recorte JBoss universal.
 
 **Piloto de perfil de modernização:** avaliar o GitHub Copilot app modernization em um recorte delimitado, comparando o plano gerado com o contrato do harness (proposta → GO → execução → verificação → aceite) e registrando o que foi alterado por receita e por agente. [O27](#fonte-o27)
 
@@ -455,7 +459,7 @@ Foram verificados os três arquivos Markdown finais, com os seguintes resultados
 | --- | --- |
 | Definição central | Preservada literalmente, em uma única ocorrência canônica no conjunto. |
 | Links internos | 76 referências locais verificadas, incluindo arquivos de destino e âncoras; nenhuma referência inválida encontrada. |
-| Fontes externas | 32 URLs distintas no catálogo: nove referências ao repositório e 23 fontes oficiais ou primárias. As duas especificações da Biblioteca têm origem e data identificadas, sem URL GitHub inventada. O teste de links internos não é uma certificação de disponibilidade futura dessas páginas. |
+| Fontes externas | 32 URLs distintas no catálogo: nove referências ao repositório e 23 fontes oficiais ou primárias. Na revisão de 16/10, as duas especificações da simplificação foram identificadas por origem e data, sem URL GitHub inventada; desde 17/10, S1 e S2 apontam para o repositório. O teste de links internos não é uma certificação de disponibilidade futura dessas páginas. |
 | Exemplos JSON | Cinco blocos analisados sintaticamente, sem erro. São exemplos de design, não um SDK executável. |
 | Esquema de entrada do build | Sete casos conferidos com validador JSON Schema Draft 2020-12: fases permitidas aceitas; campo ausente, tipo incorreto, fase não permitida, texto de comando e propriedade livre rejeitados. |
 | Markdown | Blocos de código balanceados e nenhuma marca de preenchimento pendente identificada. |
@@ -485,7 +489,7 @@ Auditoria feita no repositório, com conferência do código da `main` `5c8d582`
 
 | Achado | Tratamento |
 | --- | --- |
-| A11 — Baseline anterior à PR #31 | Situação real descrita na seção 4 e no documento 1, seção 4; R0, R4, S1 e S2 atualizados. |
+| A11 — Baseline anterior à PR #31 | Situação real descrita na seção 4 e no documento 1, seção 3; R0, R4, S1 e S2 atualizados. |
 | A12 — Build descrito com `RunId` | Corrigido: a `main` publica a última tentativa em `atual/build/`. |
 | A13 — Estado JBoss fora do princípio de armazenamento | Layout-alvo no documento 2, seção 9.1; decisões de 17/10 (somente o último, deploy substitui, sem rollback); incremento A. |
 | A14 — Duas fontes normativas para o estado | ADR-0009 e `doc/contratos/` são donos das regras executáveis; o documento 2 aponta para eles. |
@@ -494,6 +498,7 @@ Auditoria feita no repositório, com conferência do código da `main` `5c8d582`
 | A17 — Java 8 tratado como geral | Restrito ao perfil JBoss; Quarkus com Java 17+, incluindo 25. |
 | A18 — Origem EAP divergente | Perfil JBoss atende 7.0 ou 7.1. |
 | A19 — Fundamentos e catálogo fora do conjunto | Origem e fundamentos no documento 1, seção 2; catálogo no anexo A. |
+| A20 — Perfis previstos reduzidos a um "Quarkus" genérico | Restaurados os perfis da arquitetura anterior: Desenvolvimento Quarkus (SDLC sem migração), Migração Quarkus e Cobertura de código transversal (documento 1, seção 6; incremento F). |
 
 Fontes verificadas nesta revisão: O8 (revisão 2026-07-28 do transporte `stdio`), O13, O15 (PowerShell 6+), O24–O27.
 
