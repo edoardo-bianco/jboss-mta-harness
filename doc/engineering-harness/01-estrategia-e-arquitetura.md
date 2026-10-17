@@ -87,7 +87,7 @@ A situação descrita corresponde à `main` em **`5c8d582`**, depois da integra�
 | Build Maven | Publica a última tentativa em `atual/build/` e a situação em `operacao.json`, sem `RunId` ou pasta por execução. | Primeira capacidade a extrair. |
 | MTA, Sonar e planejamento | Integrações e contratos correntes; homologação Sonar corporativa pendente. | Extrair capacidades sem declarar homologação concluída. |
 | Operação JBoss | Implementada para EAP 7.0/7.1 (chave `eap71`) e 7.4. Estado em `.harness/servidores/<servidor>/` (última operação e logs do último start) e último deploy em `projetos/<artifactId>/atual/jboss/<servidor>/`; o deploy substitui o WAR implantado, sem rollback gerenciado. | Extrair capacidades preservando o princípio de armazenamento (seção 9). |
-| Clientes de IA | Prompts, skills e helpers para GitHub Copilot e Codex; Claude Code em uso na evolução do harness. | Claude Code e GitHub Copilot como clientes de referência; nenhum cliente é requisito do núcleo. |
+| Clientes de IA | Prompts, skill comum e seis helpers leitores para GitHub Copilot, Codex e Claude Code (`.claude/agents/`, ponteiro em `.claude/skills/` e MCP em `.mcp.json`); ensaio nativo dos três clientes pendente. | Claude Code e GitHub Copilot como clientes de referência; nenhum cliente é requisito do núcleo. |
 | MCP local de consultas | Servidor `stdio` com SDK 2.3.1, Zod e ponte PowerShell; opcional e de leitura. | Reutilizar conceitos e contratos. |
 | Planejamento macro por sprints | Integrado; homologação pendente. | Preservar regras; contrato em `doc/contratos/`. |
 | Núcleo TypeScript, catálogo de perfis e capacidade externa | Propostos (ADR-0008); não implementados. | Implementar incrementalmente. |

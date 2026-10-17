@@ -111,7 +111,9 @@ identificam problemas distintos. Confira a origem indicada; nao substitua
 silenciosamente por outro contexto/catalogo. A consulta le as decisoes atuais do
 registro e aponta divergencias com o catalogo; nao conserva um snapshot antigo.
 
-## Configurar MCP no Codex e no Copilot
+<a id="configurar-mcp-no-codex-e-no-copilot"></a>
+
+## Configurar MCP no Claude Code, no Codex e no Copilot
 
 O servidor local `harnessIssues` oferece as mesmas tres consultas aos agentes.
 **MCP e opcional.** Priorizacao por categoria/percentual, ranking/fichas e
@@ -181,10 +183,11 @@ Abra o PowerShell na raiz do clone atualizado do harness, onde existe
 Execute o configurador depois que a instalacao das dependencias terminar sem erro.
 Se o Node adequado ja esta no PATH, use `npm.cmd` e `node` respectivamente.
 O configurador grava o caminho real do executavel utilizado, sem trocar Node
-global. Cria/mescla `.codex/config.toml` e `.vscode/mcp.json` somente neste clone;
+global. Cria/mescla `.codex/config.toml`, `.vscode/mcp.json` e `.mcp.json` (Claude Code)
+somente neste clone;
 preserva outros servidores e recusa uma entrada harnessIssues diferente.
 Arquivos locais nao sao versionados nem precisam acompanhar os documentos compartilhados. Se mover o
-clone ou o Node, atualize os caminhos dessas duas entradas. Nao duplique servidores.
+clone ou o Node, atualize os caminhos dessas tres entradas. Nao duplique servidores.
 JSONC com comentarios em mcp.json exige edicao manual; erro de leitura preserva o arquivo.
 O TOML resultante e validado antes de gravar. Se `mcp_servers` estiver em uma
 tabela inline que nao admite acrescentar a secao, o configurador preserva os
@@ -236,18 +239,22 @@ Se `HARNESS_MCP_CONFIG` apontar para arquivo inexistente ou invalido, o servidor
 nao inicia: corrija o caminho/arquivo na configuracao do cliente. Apenas sem essa
 variavel e sem o arquivo padrao o servidor assume leitura restrita ao clone.
 
-Reinicie a sessao do Codex na raiz do harness e reabra/recarregue o workspace
-do VS Code. Aceite a confianca/permissao normal de MCP quando o cliente solicitar.
+Reinicie a sessao do Claude Code ou do Codex na raiz do harness e reabra/recarregue
+o workspace do VS Code. Aceite a confianca/permissao normal de MCP quando o cliente solicitar.
 Esse reinicio e necessario ao mudar `mcp.local.json` ou a configuracao do cliente;
 editar os arquivos ja referenciados e salvar basta para atualizar suas raizes.
 No Codex, o projeto precisa estar confiavel para carregar sua configuracao local.
+No Claude Code, servidores de `.mcp.json` do projeto pedem aprovacao no primeiro uso;
+confira `harnessIssues` em **/mcp** e as ferramentas `mcp__harnessIssues__auditar_base`,
+`mcp__harnessIssues__listar_issues` e `mcp__harnessIssues__obter_issue`.
 No Copilot, confira `harnessIssues` na lista de servidores MCP e as ferramentas
 disponiveis no chat. Deve haver exatamente **auditar_base, listar_issues e
 obter_issue**. Configuracao salva nao comprova descoberta: teste auditar_base
 com um ContextPath real antes de iniciar a fatia. Politica corporativa do cliente
 pode impedir MCP mesmo com Node instalado.
 
-Referencias: [MCP no Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli),
+Referencias: [MCP no Claude Code](https://code.claude.com/docs/en/mcp),
+[MCP no Codex](https://learn.chatgpt.com/docs/extend/mcp?surface=cli),
 [configuracao MCP no VS Code](https://code.visualstudio.com/docs/agents/reference/mcp-configuration).
 
 #### Servidor descoberto, mas consultas indisponiveis no helper
@@ -305,7 +312,8 @@ POM local e reconciliacao conforme o guia de compartilhamento.
 
 ### Orientacao com o helper
 
-No Codex, selecione `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
+No Codex, selecione `$orientar-migracao`; no Copilot, selecione `migracao_helper`;
+no Claude Code, inicie `claude --agent migracao_helper` ou use **/orientar-migracao**.
 Voce pode pedir ajuda antes de ter projeto, MTA ou registro preparado:
 
 ```text

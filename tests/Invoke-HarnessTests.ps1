@@ -30,7 +30,7 @@ $null=[IO.Directory]::CreateDirectory($copy)
 [IO.File]::WriteAllText($marker,$token)
 try {
     foreach ($relative in $files) {
-        if ($relative -match '^(\.harness/|\.git/|mcp/issues/node_modules/)' -or $relative -match '(^|/)[^/]*\.local\.' -or $relative -in @('.codex/config.toml','.vscode/mcp.json')) { continue }
+        if ($relative -match '^(\.harness/|\.git/|mcp/issues/node_modules/)' -or $relative -match '(^|/)[^/]*\.local\.' -or $relative -in @('.codex/config.toml','.vscode/mcp.json','.mcp.json')) { continue }
         $source=[IO.Path]::GetFullPath((Join-Path $root $relative))
         if (-not $source.StartsWith($root+'\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Arquivo versionado fora do checkout.' }
         if (-not (Test-Path -LiteralPath $source -PathType Leaf)) { continue } # Exclusao local ainda nao adicionada ao indice.

@@ -82,7 +82,7 @@ do harness. Os demais documentos possuem finalidades distintas:
 
 | Local | Conteudo |
 | --- | --- |
-| `doc/guias/` | Fluxo do desenvolvedor, [orientacao com Codex/Copilot](orientacao-migracao.md), [comparacao de branches](diagnostico-branches-git-tortoisegit.md) e [modelo de evidencias](modelo-evidencias-complementares.md). |
+| `doc/guias/` | Fluxo do desenvolvedor, [orientacao com Claude Code, Codex ou Copilot](orientacao-migracao.md), [comparacao de branches](diagnostico-branches-git-tortoisegit.md) e [modelo de evidencias](modelo-evidencias-complementares.md). |
 | `doc/guias/tools/` | Configuracao e uso de [workspace](tools/workspace.md), [Maven](tools/maven.md), [MTA](tools/mta.md), [priorizacao](tools/priorizacao-issues.md), [planejamento/reconciliacao](tools/planejamento-migracao.md), [compartilhamento](tools/compartilhamento-contextos.md), [JBoss](tools/jboss.md) e [SonarQube](tools/sonar.md). |
 | `doc/engineering-harness/` | Evolucao do produto: [estrategia e arquitetura](../engineering-harness/01-estrategia-e-arquitetura.md), [system design](../engineering-harness/02-system-design.md) e [plano tatico](../engineering-harness/03-plano-tatico-e-implementacao.md), com o catalogo de capacidades no anexo A. Distingue a base atual das propostas. |
 | `doc/adr/` | Decisoes e justificativas, como [contexto local e acionamento do Copilot](../adr/0001-contexto-copilot.md). |
@@ -99,7 +99,7 @@ Preserve a ordem das secoes principais abaixo; detalhes proprios ficam em subsec
 
 | Secao | Conteudo |
 | --- | --- |
-| Orientacao com o helper | Link para o guia central, entrada Codex/Copilot, pedido de exemplo em bloco `text` e **Resultado esperado**. Um pedido por etapa quando o guia cobre varias. |
+| Orientacao com o helper | Link para o guia central, entrada Claude Code/Codex/Copilot, pedido de exemplo em bloco `text` e **Resultado esperado**. Um pedido por etapa quando o guia cobre varias. |
 | Configuracao | Entradas, ambiente e preparo necessario. Referenciar configuracao comum no Workspace. |
 | Uso | Run Tasks, escolhas e procedimentos da etapa, com limites e verificacoes pertinentes. |
 | Resultado e proximo passo | Evidencia a conferir, pendencias possiveis e link para continuar o fluxo. |

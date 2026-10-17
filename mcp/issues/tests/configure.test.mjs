@@ -30,6 +30,30 @@ test('configuracao local preserva outros servidores, e idempotente e recusa conf
   assert.ok(existsSync(path.join(root,'config/mcp.local.json')));
 });
 
+test('Claude Code recebe harnessIssues em .mcp.json preservando outros servidores e recusando conflito',()=>{
+  const root=mkdtempSync(path.join(harnessRoot,'.harness/tests/mcp-claude-'));
+  const claude=path.join(root,'.mcp.json');
+  writeFileSync(claude,JSON.stringify({mcpServers:{outro:{type:'stdio',command:'outro.exe'}}}));
+  const result=configureClients(root,process.execPath);
+  assert.equal(result.claude,claude);
+  const json=JSON.parse(readFileSync(claude,'utf8'));
+  assert.equal(json.mcpServers.outro.command,'outro.exe');
+  assert.equal(json.mcpServers.harnessIssues.type,'stdio');
+  assert.equal(json.mcpServers.harnessIssues.command,process.execPath);
+  assert.deepEqual(json.mcpServers.harnessIssues.args,[path.join(root,'mcp/issues/server.mjs')]);
+  assert.equal(json.mcpServers.harnessIssues.env.HARNESS_MCP_CONFIG,path.join(root,'config/mcp.local.json'));
+  const saved=readFileSync(claude,'utf8');
+  configureClients(root,process.execPath);
+  assert.equal(readFileSync(claude,'utf8'),saved);
+  json.mcpServers.harnessIssues.command='custom.exe'; writeFileSync(claude,JSON.stringify(json));
+  const vscode=readFileSync(path.join(root,'.vscode/mcp.json'),'utf8');
+  assert.throws(()=>configureClients(root,process.execPath),/Claude Code/);
+  assert.equal(readFileSync(path.join(root,'.vscode/mcp.json'),'utf8'),vscode);
+  writeFileSync(claude,'[]');
+  assert.throws(()=>configureClients(root,process.execPath),/mcpServers/);
+  assert.equal(readFileSync(claude,'utf8'),'[]');
+});
+
 test('configuracao explicita ausente nao assume raizes padrao',()=>{
   const root=mkdtempSync(path.join(harnessRoot,'.harness/tests/mcp-missing-'));
   assert.throws(()=>loadSettings(path.join(root,'ausente.json')),/configuracao.*encontrad/i);
