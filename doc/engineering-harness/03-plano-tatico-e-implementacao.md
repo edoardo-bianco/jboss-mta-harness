@@ -131,7 +131,7 @@ A conciliação com o checkout foi feita em 17/10/2026, depois da integração d
 | Hashes apenas em memória para detectar alteração concorrente | Presente; não são persistidos nem usados em caminhos. |
 | Mestre de sprints em projeto participante | Presente. |
 | Origem EAP 7.0 ou 7.1 | Presente pela chave `eap71`; README e guia central precisam dizer "7.0/7.1". |
-| Estado JBoss por projeto/servidor, sem GUID ou hash | **Lacuna**: `.harness/jboss/<eap>__<hash>/operations|releases/<GUID>/`, com histórico de releases para rollback e recusa de substituir deployment não gerenciado. Decisões para corrigir: incremento A. |
+| Estado JBoss por projeto/servidor, sem GUID ou hash | Presente desde 17/10/2026 (incremento A): `servidores/<servidor>/` e `projetos/<artifactId>/atual/jboss/<servidor>/ultimo-deploy.json`; deploy substitui o WAR, sem rollback. A pasta legada `.harness/jboss/` é removida manualmente. |
 | Backups do workspace com nomes legíveis | **Lacuna menor**: `.harness/workspace-backups/<GUID>.code-workspace`. |
 
 Nenhum arquivo da aplicação, diagnóstico externo ou trabalho local deve ser movido, renomeado ou eliminado para corrigir as lacunas sem operação de conversão explícita.
@@ -142,11 +142,11 @@ A ordem abaixo é uma proposta por dependências e provas de valor, sem estimati
 
 ### Incremento A — Contratos mínimos e armazenamento JBoss
 
-**Escopo:** fixar vocabulário, envelope de capacidade e regras de disponibilidade sobre a simplificação já entregue. Alinhar o estado JBoss ao princípio de armazenamento do documento 2: servidor em `servidores/<servidor>/`, deploy em `projetos/<artifactId>/atual/jboss/<servidor>/ultimo-deploy/`, sem GUID ou hash; nomes legíveis para backups do workspace.
+**Escopo:** fixar vocabulário, envelope de capacidade e regras de disponibilidade sobre a simplificação já entregue. Alinhar o estado JBoss ao princípio de armazenamento do documento 2: servidor em `servidores/<servidor>/`, deploy em `projetos/<artifactId>/atual/jboss/<servidor>/ultimo-deploy.json`, sem GUID ou hash; nomes legíveis para backups do workspace.
 
-**Decisões do desenvolvedor (17/10/2026):** guardar somente a última operação e o último deploy; o deploy sempre substitui o WAR implantado no JBoss pelo novo, mesmo quando o atual não foi implantado pelo harness; a Run Task `Aplicacao: rollback no JBoss` é retirada (reverter é fazer deploy de um WAR anterior escolhido pelo desenvolvedor). Implementação em branch própria, depois da consolidação documental.
+**Decisões do desenvolvedor (17/10/2026):** guardar somente a última operação e o último deploy; o deploy sempre substitui o WAR implantado no JBoss pelo novo, mesmo quando o atual não foi implantado pelo harness; a Run Task `Aplicacao: rollback no JBoss` é retirada (reverter é fazer deploy de um WAR anterior escolhido pelo desenvolvedor). Parte JBoss implementada em 17/10/2026 (branch `harness/jboss-estado-corrente`); contratos mínimos e backups do workspace permanecem.
 
-**Entrega:** produtores e consumidores JBoss ajustados (`HarnessJboss*`, `gerenciar-jboss.ps1`, Run Tasks e guia), retirada do rollback, conversão do estado atual que conserve somente o último resultado e o último deploy (prévia e aplicação separadas) e fixtures.
+**Entrega:** produtores e consumidores JBoss ajustados (`HarnessJboss*`, `gerenciar-jboss.ps1`, Run Tasks e guia), retirada do rollback e fixtures. A pasta legada `.harness/jboss/` não guarda decisões humanas e é removida manualmente, sem conversor.
 
 **Aceite:** nenhuma pasta nomeada por identificador; segunda operação e segundo deploy substituem o resultado corrente; deploy sobre deployment externo ou alterado substitui o WAR e confirma status e conteúdo depois do envio; falha não é declarada sucesso; o caminho principal não depende do conversor ou de operações de importação/exportação.
 

@@ -60,7 +60,8 @@ MTA: executar analise e Aplicacao: deploy no JBoss, conforme necessidade):
   nao reencontrados e limites. Ausencia limita a comparacao, sem afirmar desaparecimento
   nem transformar diagnostico complementar em bloqueio global.
 - Deploy no JBoss EAP 7.4 quando possivel e pertinente: servidor/ambiente autorizado,
-  artefato/hash, recibo, status e logs relevantes. Ausencia de ambiente fica explicita.
+  artefato/hash, ultimo deploy (atual/jboss/<eap>/ultimo-deploy.json), status e logs
+  relevantes. Ausencia de ambiente fica explicita.
 
 Derive do codigo e do plano um roteiro funcional da parte corrigida: precondicoes,
 dados de teste sem segredos, passos concretos (endpoint/tela/operacao), resultado

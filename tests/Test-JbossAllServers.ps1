@@ -60,15 +60,16 @@ catch { Write-Output $_.Exception.Message; exit 1 }
 exit $LASTEXITCODE
 '@ | Set-Content -LiteralPath $runner -Encoding UTF8
 function Get-Receipts {
-    @(Get-ChildItem -LiteralPath (Join-Path $area '.harness/jboss') -Filter result.json -Recurse -ErrorAction SilentlyContinue |
+    @(Get-ChildItem -LiteralPath (Join-Path $area '.harness/servidores') -Filter ultima-operacao.json -Recurse -ErrorAction SilentlyContinue |
         ForEach-Object { Get-Content -LiteralPath $_.FullName -Raw | ConvertFrom-Json })
 }
 function Invoke-Entry {
     param([string[]]$Arguments,[string[]]$Answers=@('q'))
-    $previous=@(Get-Receipts | ForEach-Object RunId)
+    # Somente a ultima operacao por servidor: limpar antes revela o que esta chamada gravou.
+    Remove-Item -Path (Join-Path $area '.harness/servidores/*/ultima-operacao.json') -Force -ErrorAction SilentlyContinue
     $output=$Answers | & powershell.exe -NoProfile -File $runner @Arguments 2>&1 | Out-String
     $exitCode=$LASTEXITCODE
-    [pscustomobject]@{ExitCode=$exitCode;Output=$output;Receipts=@(Get-Receipts | Where-Object RunId -notin $previous)}
+    [pscustomobject]@{ExitCode=$exitCode;Output=$output;Receipts=@(Get-Receipts)}
 }
 foreach ($action in @('Status','Start','StartDebug','Stop')) {
     $result=Invoke-Entry -Arguments @('-Eap','all','-Action',$action)
@@ -109,11 +110,11 @@ foreach ($action in @('Status','Start','StartDebug','Stop')) {
     $result=Invoke-Entry -Arguments @('-Action',$action) -Answers @('q')
     Assert ($result.ExitCode -eq 1 -and $result.Receipts.Count -eq 0 -and $result.Output.Contains('Selecao cancelada')) 'Cancelar deve encerrar sem operacao.'
 }
-foreach ($action in @('AddUser','Deploy','Rollback')) {
+foreach ($action in @('AddUser','Deploy')) {
     $result=Invoke-Entry -Arguments @('-Eap','all','-Action',$action)
-    Assert ($result.ExitCode -eq 1 -and $result.Receipts.Count -eq 0 -and $result.Output.Contains('Todos so se aplica')) 'Todos deve recusar usuario/deploy/rollback antes de qualquer interacao.'
+    Assert ($result.ExitCode -eq 1 -and $result.Receipts.Count -eq 0 -and $result.Output.Contains('Todos so se aplica')) 'Todos deve recusar usuario/deploy antes de qualquer interacao.'
     $result=Invoke-Entry -Arguments @('-Action',$action) -Answers @('3')
-    Assert ($result.ExitCode -eq 1 -and -not $result.Output.Contains('3. Todos')) 'Menu nao deve oferecer Todos para usuario/deploy/rollback.'
+    Assert ($result.ExitCode -eq 1 -and -not $result.Output.Contains('3. Todos')) 'Menu nao deve oferecer Todos para usuario/deploy.'
 }
 Assert (-not (Test-Path (Join-Path $area '.harness/projetos'))) 'Operacoes de servidor criaram registro de aplicacao.'
 Write-Output 'PASS: Todos via CLI/menu, modos, recibos individuais, falha parcial, configuracao invalida, cancelamento e selecao individual; runtime simulado.'

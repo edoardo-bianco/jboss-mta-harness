@@ -16,9 +16,12 @@ $null=[IO.Directory]::CreateDirectory($configuration)
 foreach ($file in Get-ChildItem -LiteralPath (Join-Path $server.Base 'configuration') -File) {
     if ($file.Extension -in @('.xml','.properties')) { Copy-Item -LiteralPath $file.FullName -Destination $configuration }
 }
-$server.Base=Join-Path $area 'base'; $server.State=Join-Path $area 'history'
+$server.Base=Join-Path $area 'base'; $server.State=Join-Path $area ('.harness/servidores/'+$Eap)
 $server.Settings.portOffset=200; $server.ManagementPort=10190; $server.HttpPort=8280; $server.Settings.debugPort=8790
-$context.Active=[pscustomobject]@{name='jboss-smoke';label='JBoss smoke';path=$area}
+Set-Content -LiteralPath (Join-Path $area 'pom.xml') -Value '<project><artifactId>harness-smoke</artifactId><packaging>war</packaging></project>' -Encoding UTF8
+# Dados do ensaio ficam na area isolada, sem registrar projeto no workspace real.
+$context.Root=$area
+$context.Active=[pscustomobject]@{name='harness-smoke';label='JBoss smoke';path=$area}
 $configHash=(Get-FileHash (Join-Path $server.Home 'standalone/configuration/standalone.xml')).Hash
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $started=$false
@@ -40,22 +43,20 @@ try {
         while ($offset -lt $reply.Length) { $count=$stream.Read($reply,$offset,$reply.Length-$offset); if (-not $count) {throw 'JDWP encerrou conexao.'};$offset+=$count }
         Assert ([Text.Encoding]::ASCII.GetString($reply) -eq 'JDWP-Handshake') 'Handshake debug invalido.'
     } finally { $client.Dispose() }
-    $releases=@()
+    $wars=@{}
     foreach ($version in @('v1','v2')) {
         $content=Join-Path $area $version;$null=[IO.Directory]::CreateDirectory($content)
         [IO.File]::WriteAllText((Join-Path $content 'index.html'),$version)
-        $war=Join-Path $area ($version+'.war');[IO.Compression.ZipFile]::CreateFromDirectory($content,$war)
-        $release=Invoke-HarnessJbossRelease $context $server Deploy $war 'harness-smoke.war'
+        $wars[$version]=Join-Path $area ($version+'.war');[IO.Compression.ZipFile]::CreateFromDirectory($content,$wars[$version])
+    }
+    # v1, v2 e novo deploy de v1: cada deploy substitui o WAR implantado.
+    foreach ($version in @('v1','v2','v1')) {
+        $release=Invoke-HarnessJbossDeploy $context $server $wars[$version] 'harness-smoke.war'
         $release | ConvertTo-Json -Depth 5 | Write-Host
         Assert ($release.Status -eq 'SUCCEEDED') "Deploy falhou: $($release.Error)"
-        $releases+=$release
         $http=Invoke-WebRequest "http://127.0.0.1:$($server.HttpPort)/harness-smoke/index.html" -UseBasicParsing
         Assert ($http.Content.Trim() -eq $version) 'HTTP nao corresponde ao artefato implantado.'
     }
-    $rollback=Invoke-HarnessJbossRelease $context $server Rollback -DeploymentName 'harness-smoke.war' -ReleaseId $releases[0].RunId
-    Assert ($rollback.Status -eq 'SUCCEEDED') "Rollback falhou: $($rollback.Error)"
-    $http=Invoke-WebRequest "http://127.0.0.1:$($server.HttpPort)/harness-smoke/index.html" -UseBasicParsing
-    Assert ($http.Content.Trim() -eq 'v1') 'Rollback nao restaurou resposta HTTP v1.'
 } finally {
     if ($started) {
         $stop=Invoke-HarnessJbossOperation $context $server Stop
@@ -64,4 +65,4 @@ try {
     }
     Assert ((Get-FileHash (Join-Path $server.Home 'standalone/configuration/standalone.xml')).Hash -eq $configHash) 'XML original alterado.'
 }
-Write-Output "PASS: $Eap start/debug JDWP, deploy v1/v2 HTTP, rollback HTTP v1, stop e XML original preservado. Evidencias: $area"
+Write-Output "PASS: $Eap start/debug JDWP, deploy v1/v2/v1 com substituicao confirmada por HTTP, stop e XML original preservado. Evidencias: $area"

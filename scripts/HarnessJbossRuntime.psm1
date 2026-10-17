@@ -35,8 +35,8 @@ function Get-HarnessJbossServer {
     $version=$versionMatch.Groups[1].Value
     $allowed=if ($Eap -eq 'eap71') {@('7.0','7.1')} else {@('7.4')}
     if (-not $versionMatch.Success -or $version -notin $allowed) { throw ("Instalacao JBoss nao corresponde a $Eap. Versoes aceitas: "+($allowed -join ', ')+'. Confira version.txt e tools.'+$Eap+'Home.') }
-    $key=Get-HarnessProjectKey $homePath
-    $state=Resolve-HarnessPath (Join-Path $Context.Root ('.harness/jboss/'+$Eap+'__'+$key.Substring(0,12))) $Context.Root
+    # Pasta nomeada pela chave configurada do servidor, sem hash ou identificador.
+    $state=Resolve-HarnessPath (Join-Path $Context.Root ('.harness/servidores/'+$Eap)) $Context.Root
     [pscustomobject]@{Eap=$Eap; Home=$homePath; Base=$base; Jdk=$jdk; Java=$java; Cli=$cli; Version=$version; Settings=$settings; ManagementPort=(9990+$settings.portOffset); HttpPort=(8080+$settings.portOffset); State=$state}
 }
 
@@ -169,6 +169,11 @@ function Start-HarnessJboss {
     foreach ($port in $ports) { if (@(Get-JbossListener $port).Count) { throw "Porta $port ocupada; nenhum processo iniciado." } }
     $java=Invoke-JbossJava $Server @('-version')
     if ($java.ExitCode -ne 0 -or $java.Output -notmatch 'version "1\.8\.') { throw 'Start exige JDK 8 efetivo.' }
+    # Novo start substitui os logs do start anterior; servidor parado ja liberou os arquivos.
+    if (Test-Path -LiteralPath $Run) {
+        try { Remove-Item -LiteralPath $Run -Recurse -Force } catch { throw "Logs do start anterior em uso; confira se o launcher ainda esta ativo: $Run" }
+    }
+    $null=[IO.Directory]::CreateDirectory($Run)
     $launcher=Start-JbossProcess $Server $Run -DebugMode:$DebugMode
     Write-HarnessJson (Join-Path $Run 'process.json') @{ProcessId=$launcher.Id; StartedAtUtc=$launcher.StartTime.ToUniversalTime().ToString('o')}
     $timer=[Diagnostics.Stopwatch]::StartNew(); $lastError=''

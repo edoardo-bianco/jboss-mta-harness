@@ -82,11 +82,11 @@ A situação descrita corresponde à `main` em **`5c8d582`**, depois da integra�
 
 | Frente | Situação na `main` (`5c8d582`) | Tratamento nesta proposta |
 | --- | --- | --- |
-| PowerShell 5.1, Run Tasks e configuração local | Presentes; 25 Run Tasks com prefixos por etapa. | Reutilizar durante a transição. |
+| PowerShell 5.1, Run Tasks e configuração local | Presentes; 24 Run Tasks com prefixos por etapa. | Reutilizar durante a transição. |
 | Dados por projeto, `atual` e último `reconciliado` | **Implementados** (ADR-0009): `.harness/projetos/<artifactId>/`, MTA lido na origem, fichas essenciais, cópia com reconciliação, sem recibos, cadeias ou importador. | Baseline do desenho; não reimplementar. |
 | Build Maven | Publica a última tentativa em `atual/build/` e a situação em `operacao.json`, sem `RunId` ou pasta por execução. | Primeira capacidade a extrair. |
 | MTA, Sonar e planejamento | Integrações e contratos correntes; homologação Sonar corporativa pendente. | Extrair capacidades sem declarar homologação concluída. |
-| Operação JBoss | Implementada para EAP 7.0/7.1 (chave `eap71`) e 7.4, mas o estado ainda fica em `.harness/jboss/<eap>__<hash>/` com uma pasta por operação e por release nomeadas por GUID. | **Lacuna**: alinhar ao princípio de armazenamento (seção 9). |
+| Operação JBoss | Implementada para EAP 7.0/7.1 (chave `eap71`) e 7.4. Estado em `.harness/servidores/<servidor>/` (última operação e logs do último start) e último deploy em `projetos/<artifactId>/atual/jboss/<servidor>/`; o deploy substitui o WAR implantado, sem rollback gerenciado. | Extrair capacidades preservando o princípio de armazenamento (seção 9). |
 | Clientes de IA | Prompts, skill comum e seis helpers leitores para GitHub Copilot, Codex e Claude Code (`.claude/agents/`, ponteiro em `.claude/skills/` e MCP em `.mcp.json`); ensaio nativo dos três clientes pendente. | Claude Code e GitHub Copilot como clientes de referência; nenhum cliente é requisito do núcleo. |
 | MCP local de consultas | Servidor `stdio` com SDK 2.3.1, Zod e ponte PowerShell; opcional e de leitura. | Reutilizar conceitos e contratos. |
 | Planejamento macro por sprints | Integrado; homologação pendente. | Preservar regras; contrato em `doc/contratos/`. |
@@ -212,7 +212,7 @@ A tarefa determinística deve continuar útil sem LLM. A tarefa híbrida deve pr
 
 A simplificação adotada é um requisito de produto, não um detalhe descartável durante a migração para Node. O estado administrado fica por projeto, com caminhos previsíveis, conteúdo corrente e resultado da última reconciliação. `reconciliado` não é cópia de `atual`, backup ou arquivo de diagnósticos anteriores. [S1](03-plano-tatico-e-implementacao.md#fonte-s1)
 
-**Princípio de armazenamento.** Os dados ficam em pastas que nomeiam o projeto e a função do conteúdo — `projetos/<artifactId>/atual/build/`, `atual/diagnosticos/mta/`, `atual/planejamento/` —, navegáveis e interpretáveis por uma pessoa sem ferramenta auxiliar. **`RunId`, GUID, hash ou carimbo de data não formam caminhos nem são necessários para localizar ou retomar o trabalho.** Uma nova execução substitui o conteúdo corrente da mesma função. Hashes podem existir em memória para detectar alteração concorrente durante uma operação; não são persistidos como identidade. O estado JBoss é a lacuna conhecida e o layout-alvo está no [system design](02-system-design.md#estado-local).
+**Princípio de armazenamento.** Os dados ficam em pastas que nomeiam o projeto e a função do conteúdo — `projetos/<artifactId>/atual/build/`, `atual/diagnosticos/mta/`, `atual/planejamento/` —, navegáveis e interpretáveis por uma pessoa sem ferramenta auxiliar. **`RunId`, GUID, hash ou carimbo de data não formam caminhos nem são necessários para localizar ou retomar o trabalho.** Uma nova execução substitui o conteúdo corrente da mesma função. Hashes podem existir em memória para detectar alteração concorrente durante uma operação; não são persistidos como identidade. O estado JBoss segue esse princípio desde 17/10/2026; o layout está no [system design](02-system-design.md#estado-local).
 
 No perfil Maven, o projeto é nomeado pelo `project.artifactId` do POM selecionado, com detecção explícita de colisão. No perfil JBoss, o MTA pode permanecer na origem externa; fichas contêm somente o essencial e links; `migracao.md` conserva decisões humanas. Compartilhamento ocorre por cópia e reconciliação, sem pacote ou recibo de transferência do harness.
 
@@ -238,7 +238,7 @@ Não fazem parte do primeiro incremento: marketplace de plugins, instalação au
 
 A próxima prova não é "migrar o harness inteiro para Node". É demonstrar uma **fatia vertical**: configuração local → perfil → capacidade externa → execução → resultado corrente → verificação, acessível por mais de uma interface e sem recriar os controles eliminados.
 
-Com a simplificação já na `main`, o primeiro passo é fixar os contratos mínimos e alinhar o armazenamento JBoss ao princípio da seção 9. Depois, extrair uma capacidade já útil, preservando PowerShell quando necessário. Em seguida, provar uma tarefa híbrida com entrega assistida; só ampliar a automação de agentes e o MCP de execução após comprovar seus limites.
+Com a simplificação já na `main`, e o armazenamento JBoss alinhado ao princípio da seção 9, o primeiro passo é fixar os contratos mínimos. Depois, extrair uma capacidade já útil, preservando PowerShell quando necessário. Em seguida, provar uma tarefa híbrida com entrega assistida; só ampliar a automação de agentes e o MCP de execução após comprovar seus limites.
 
 A extensão própria de uma IDE é evolução de experiência. Um segundo perfil é prova de reutilização. Um coding agent alternativo é prova de portabilidade. São avaliações distintas; nenhuma deve bloquear a migração JBoss já em andamento.
 

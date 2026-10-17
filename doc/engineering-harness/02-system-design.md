@@ -316,19 +316,19 @@ Esta seção descreve a organização implementada na `main` pela ADR-0009, que 
         priorizacao/<categoria>/       # fichas essenciais do perfil JBoss
         planejamento/                  # plano.md, tarefas.md, contexto.json
         sprints/<cenario>/             # conjunto corrente por cenario funcional
-        jboss/<servidor>/              # proposto: ultimo-deploy/ (WAR e resultado)
+        jboss/<servidor>/              # ultimo-deploy.json (sem copia do WAR)
         operacao.json                  # ultima situacao por operacao, sem lista
       reconciliado/                    # ultimo resultado e pendencias, nao replica
       evidencias/                      # anexos humanos pertinentes
       recebido/                        # entrada temporaria para reconciliacao
       temporarios/                     # preparo e recuperacao transitórios
   servidores/
-    <servidor>/                        # proposto: eap71 (EAP 7.0/7.1), eap74
-      estado.json                      # ultima situacao do servidor
-      ultima-operacao/                 # resultado e logs da ultima operacao
+    <servidor>/                        # eap71 (EAP 7.0/7.1), eap74
+      ultima-operacao.json             # resultado da ultima operacao de servidor
+      ultimo-start/                    # logs do ultimo start, renovados por novo start
 ```
 
-**Lacuna conhecida:** a `main` ainda guarda o estado JBoss em `.harness/jboss/<eap>__<hash>/operations/<GUID>/` e `releases/<GUID>/`, fora do projeto e com uma pasta por execução. O layout acima é o alvo: o que é do servidor (iniciar, parar, consultar, criar usuário) fica em `servidores/<servidor>/`, porque vários projetos podem usar a mesma instalação; o que é da aplicação (deploy) fica no projeto.
+**Implementado em 17/10/2026.** Antes, o estado JBoss ficava em `.harness/jboss/<eap>__<hash>/operations|releases/<GUID>/`, fora do projeto e com uma pasta por execução; essa área não é mais lida nem escrita. No layout atual: o que é do servidor (iniciar, parar, consultar, criar usuário) fica em `servidores/<servidor>/`, porque vários projetos podem usar a mesma instalação; o que é da aplicação (deploy) fica no projeto.
 
 **Decisões do desenvolvedor (17/10/2026):**
 

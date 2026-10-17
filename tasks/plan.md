@@ -24,6 +24,31 @@ ponteiro), suites de prompts/implementacao/isolamento, testes Node de
 configuracao/contrato/ciclo de vida em checkout separado. Ensaio nativo no Claude
 Code permanece com o desenvolvedor.
 
+## Estado JBoss corrente - 17/10/2026
+
+Branch `harness/jboss-estado-corrente`, derivada da `main` em `4c27442`.
+Incremento A do [plano tatico](../doc/engineering-harness/03-plano-tatico-e-implementacao.md), parte JBoss.
+
+**Decisoes do desenvolvedor:** guardar somente o ultimo; o deploy sempre substitui
+o WAR implantado, inclusive deployment externo ou nao gerenciado, sem confirmacao;
+retirar a Run Task `Aplicacao: rollback no JBoss`.
+
+**Entrega:**
+
+- Servidor em `.harness/servidores/<eap71|eap74>/`: `ultima-operacao.json` e
+  `ultimo-start/` (logs renovados somente por novo start). Sem hash do caminho.
+- Deploy por projeto em `atual/jboss/<eap>/ultimo-deploy.json`, publicado com a
+  situacao `jboss-<eap>` em `operacao.json` e link no indice do projeto.
+- WAR de origem aberto somente para leitura durante conferencia e envio; sem copia.
+- `Invoke-HarnessJbossRelease`/`Get-HarnessJbossReleases` substituidos por
+  `Invoke-HarnessJbossDeploy`; `-ReleaseId` e opcao de menu removidos.
+- Pasta legada `.harness/jboss/` nao e lida nem escrita; remocao manual documentada.
+
+**Fora do escopo:** backups do workspace com GUID; contratos minimos do incremento A.
+
+**Verificacao:** suites JBoss (exceto ensaio real opt-in), Run Tasks, navegacao,
+armazenamento e build pelo runner isolado; links Markdown.
+
 ## Consolidacao documental do Engineering Harness - 17/10/2026
 
 Branch `harness/consolidar-documentacao`, derivada da `main` em `5c8d582`.

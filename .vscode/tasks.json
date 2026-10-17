@@ -52,16 +52,6 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
-      "label": "Aplicacao: rollback no JBoss",
-      "detail": "Escolha EAP ativo, aplicacao, deployment e release anterior gerenciada.",
-      "type": "process",
-      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Rollback", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget"],
-      "problemMatcher": [],
-      "runOptions": { "instanceLimit": 1 },
-      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
-    },
-    {
       "label": "Workspace: atualizar indice dos projetos",
       "detail": "Reconhece os POMs, cria registros correntes ausentes e reconstroi os links de projetos, priorizacoes e sprints; preserva decisoes e abre o indice navegavel.",
       "type": "process",
