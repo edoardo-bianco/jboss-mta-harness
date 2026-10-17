@@ -1,7 +1,7 @@
 # Contrato executavel do planejamento por sprints
 
-SchemaVersion=1, Purpose=current-sprint-planning. Requisitos e criterios de aceite:
-[MACRO-01](../features/planejamento-macro-sprints.md). Uso pelo desenvolvedor:
+SchemaVersion=1, Purpose=current-sprint-planning. Regras do cronograma na
+[secao final](#regras-do-cronograma). Uso pelo desenvolvedor:
 [Run Task e prompt](../guias/tools/planejamento-sprints.md). O JSON preparado e
 os templates WorkTemplate/StaffingTemplate em contexto.json fornecem a estrutura
 para o executor; nao e necessario montar arquivos de entrada manualmente.
@@ -178,3 +178,106 @@ entradas editaveis e recusada; resultado nao e uma area de edicao humana.
 Controles transitorios detectam edicoes concorrentes, sem funcionarem como
 controle de acesso ou assinatura digital. O plano e uma proposta de cronograma,
 sem GO de corretiva, aceite de migracao ou dispensa de politicas corporativas.
+
+## Regras do cronograma
+
+Regras herdadas da feature MACRO-01 (08-09/10/2026). Os campos acima prevalecem
+sobre nomes ilustrativos; destinos e continuidade seguem a ADR-0009, sem
+PlanningId, RevisionId, Previous ou ponteiros de revisao.
+
+### Calendario, fases e prazo
+
+Sprints de 14 dias corridos, datas inclusivas:
+`inicio(n) = inicio(1) + 14 x (n - 1)` e `fim(n) = inicio(n) + 13`. Sprints
+consecutivas nao se sobrepoem nem deixam lacunas. Feriados reduzem capacidade e
+nao deslocam a cadencia. Prazo anterior ao inicio e rejeitado.
+
+Os maximos por fase sao tetos, nao duracao obrigatoria nem parcelas somaveis.
+Uma sprint pode conter preparacao e implementacao se houver capacidade e
+dependencias satisfeitas; cada sprint com esforco de uma fase conta uma vez para
+o limite dessa fase, mesmo com varios projetos. Testes de corretiva acompanham a
+implementacao; MaxTestSprints controla a campanha integrada/homologacao. A
+migracao de configuracao JBoss tem fase e dependencias explicitas; trabalho
+compartilhado entre aplicacoes conta uma vez, com referencia aos beneficiarios.
+
+Se o prazo de producao cair no meio de uma sprint, a sprint mantem 14 dias e o
+corte aparece: somente os dias ate a implantacao contam para entregas
+necessarias a producao, sem capacidade integral nem sprint menor inventada. Com
+MaxTotalSprints, toda atividade, inclusive implantacao, termina na intersecao
+desse horizonte com ProductionDeadline. Janela entre a ultima sprint e o prazo
+aparece com capacidade propria, nunca como trabalho escondido.
+
+### Capacidade por papel
+
+Unidade: dias-pessoa por papel. Outra unidade do projeto e preservada e exige
+estimativa comparavel; pontos MTA ou story points nao viram dias.
+
+```text
+capacidade_bruta(papel, sprint) = soma da disponibilidade diaria das pessoas do papel
+capacidade_liquida             = capacidade_bruta - reservas nao alocadas como atividade
+carga(papel, sprint)           = soma do esforco restante alocado ao papel na sprint
+restricao                      = carga <= capacidade_liquida, em cada papel e sprint
+```
+
+Exemplo aritmetico: 2 devs x 10 dias uteis x 80% = 16 dias-pessoa; 1 arquiteto a
+50% = 5; 1 DevOps a 50% = 5. Sao tres capacidades separadas; a formula calcula
+disponibilidade, nao produtividade. Ausencias sao descontadas uma vez. Reserva
+nao esconde carga tecnica conhecida. Acumulo de papeis pela mesma pessoa registra
+a restricao compartilhada, sem somar disponibilidades integrais. O teto de devs
+nao significa equipe disponivel em todas as sprints; arquiteto ou DevOps nao
+viram dev adicional sem alocacao explicita. Homologacao por area externa declara
+responsavel e disponibilidade conhecida, sem inventar testadores.
+
+### Estimar e distribuir
+
+1. Reaproveitar estimativas comparaveis e estimar somente o trabalho restante.
+2. Agrupar por objetivo tecnico, dependencias e entrega verificavel; mesma
+   categoria/regra nao prova esforco igual nem autoriza lote unico entre projetos.
+3. Propor faixa minima/referencia/maxima por papel, com fonte e hipotese, e
+   testar a sensibilidade ao limite superior. Confianca e qualitativa.
+4. Sem evidencia suficiente, marcar "a estimar" e indicar refinamento; nunca
+   esforco zero nem reparticao igual de issues pelas sprints.
+5. Dependencia no meio da sprint exige datas/ordem que comprovem paralelismo;
+   sem isso, alocacao conservadora.
+6. Issue maior que uma sprint e decomposta ou distribuida com continuidade
+   explicita; so conta como concluida com os criterios completos atendidos.
+7. Exibir escopo alocado, bloqueado, nao estimado e fora do horizonte, com motivo
+   e o gargalo real, inclusive arquiteto ou DevOps.
+
+Estados de elaboracao (RASCUNHO, PROPOSTA, REVISADO) e de viabilidade
+(NAO_AVALIAVEL, CABE_NAS_PREMISSAS, EM_RISCO, NAO_CABE) sao distintos.
+CABE_NAS_PREMISSAS exige esforco, dependencias, limites e capacidade compativeis
+e nao representa compromisso aprovado.
+
+### Percentuais, marcos e conclusao
+
+B0 e o conjunto de issues unicas do escopo inicial e `N0 = |B0|`, com fonte,
+categoria, situacao inicial e data de captura. Mesma regra em projetos distintos
+nao e uma unica issue; incidentes, regras, examinadas e concluidas nao se misturam.
+
+```text
+previsto_acumulado(s)  = 100 x issues de B0 previstas concluidas ate s / N0
+realizado_acumulado(t) = 100 x issues de B0 comprovadamente concluidas em t / N0
+```
+
+Cada issue conta uma vez, na conclusao prevista ou comprovada, sem credito
+fracionario. Meta pedida pelo usuario ("20% na Sprint 1") e verificada quanto a
+viabilidade. N0 zero ou desconhecido apresenta N/A. Conclusao comprovada depende
+de evidencias e aceite do [fluxo de migracao](fluxo-migracao.md); alocacao,
+documento, exame ou desaparecimento do achado nao bastam. "100% das issues" nao
+encerra configuracao, testes, homologacao e implantacao. Novas issues,
+reaberturas e exclusoes aparecem separadas, sem alterar N0; falso positivo nao
+vira corretiva concluida.
+
+Cada sprint tem um marco principal observavel (por exemplo, "20 de 100 issues
+concluidas com aceite e configuracao EAP validada em DES"); previsao de marco nao
+e marco atingido.
+
+### Template do plano
+
+O [template](../modelos/planejamento-sprints.template.md) e a fonte unica do
+contrato editorial: cerca de 5-8 macroatividades, uma linha por sprint e um
+paragrafo de objetivo de HU por sprint, referenciando detalhes em vez de
+transcreve-los. Numeros e datas vem dos dados validados; o agente preenche
+narrativa e objetivos. IDs corporativos de HU so aparecem se fornecidos; usar
+rotulo local como `HU proposta S1`. HU nao pressupoe cadastro em sistema externo.

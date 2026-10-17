@@ -21,7 +21,7 @@ $null=Complete-Slice $f $prior
 $current=New-HarnessSprintContext $f.Context -All -MasterProject b
 $sources=Get-HarnessSprintSources $f.Context $f.Context.Projects
 $expected=@($current.SprintPlanPath,$current.SprintDataPath,$globalIndex)
-$expected+=@('doc/adr/0009-estado-corrente-por-projeto.md','doc/especificacoes/planejamento-sprints.md','doc/guias/tools/planejamento-sprints.md' | ForEach-Object { Join-Path $f.Root $_ })
+$expected+=@('doc/adr/0009-estado-corrente-por-projeto.md','doc/contratos/planejamento-sprints.md','doc/guias/tools/planejamento-sprints.md' | ForEach-Object { Join-Path $f.Root $_ })
 foreach ($project in $f.Projects) { $expected+=@($project.Pom,$project.Source,$project.MigrationPath,$project.IndexPath) }
 $expected+=@($sources.References | Where-Object { $_.Status -eq 'DISPONIVEL' -and $_.Kind -in @('Ficha','Evidencia') } | ForEach-Object Path)
 foreach ($prompt in @($current.PromptPath,$current.ReviewPromptPath)) {

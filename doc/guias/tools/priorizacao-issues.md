@@ -145,7 +145,7 @@ revoga escolhas atuais no registro. Para compartilhar, copie a estrutura e as
 referencias conforme o [guia entre colegas](compartilhamento-contextos.md).
 
 <a id="continuar-rodadas-anteriores-a-esta-correcao"></a>
-Dados antigos usam o [conversor separado](../../features/conversao-descartavel-dos-registros.md)
+Dados antigos usam o [conversor separado](../../../tools/transicao/README.md)
 com selecao explicita. O fluxo corrente nao depende deles para continuar.
 
 ### Planejar e implementar manualmente a partir da priorizacao
@@ -217,7 +217,7 @@ tambem pode ser implementada manualmente: registre mudancas, cobertura e verific
 para revisao/aceite. Recomendacao da IA nao e requisito para a escolha humana.
 Para planejar sem agente, prepare o contexto do lote pela tarefa e use a ficha
 para redigir o plano e o to-do nos destinos `PlanPath`/`TodoPath` desse contexto,
-seguindo o [contrato de planejamento](../../especificacoes/planejamento-copilot.md#planejamento-de-um-lote).
+seguindo o [contrato de planejamento](../../contratos/fluxo-migracao.md#planejamento-de-um-lote).
 Defina recorte, comportamento esperado, solucao, dependencias, aceite e reversao;
 complete as lacunas essenciais antes de aprovar e implementar. O roteiro e a
 documentacao de referencia servem tanto ao trabalho humano quanto ao assistido.

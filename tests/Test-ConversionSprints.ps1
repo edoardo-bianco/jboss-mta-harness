@@ -49,7 +49,7 @@ function Add-LegacySprintRevision($Fixture,$Projects,$Data,[string]$RevisionId,$
 }
 $f=New-ConversionFixture
 # O consumidor corrente referencia os contratos instalados no workspace ao recalcular.
-foreach ($relative in @('.github/prompts/planejar-sprints.prompt.md','.github/prompts/revisar-sprints.prompt.md','doc/modelos/planejamento-sprints.template.md','doc/features/planejamento-macro-sprints.md','doc/especificacoes/planejamento-sprints.md','doc/adr/0009-estado-corrente-por-projeto.md','doc/guias/tools/planejamento-sprints.md')) {
+foreach ($relative in @('.github/prompts/planejar-sprints.prompt.md','.github/prompts/revisar-sprints.prompt.md','doc/modelos/planejamento-sprints.template.md','doc/contratos/planejamento-sprints.md','doc/adr/0009-estado-corrente-por-projeto.md','doc/guias/tools/planejamento-sprints.md')) {
     Write-ConversionFile (Join-Path $f.Workspace $relative) ([IO.File]::ReadAllText((Join-Path $root $relative)))
 }
 Write-ConversionFile (Join-Path $f.Workspace '.harness/indices/projetos.md') '# Projetos da fixture'

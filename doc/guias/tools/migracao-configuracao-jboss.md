@@ -16,7 +16,7 @@ seguem seu proprio plano, com Java 8 e `javax.*`. A atividade de servidor sera
 planejada para a proxima sprint; este roteiro nao executa a migracao.
 
 A automacao de inventario/transformacao ainda e proposta **JBS-01 a JBS-05** no
-[catalogo de configuracao JBoss](../../features/evolucao-harness-dominios-capacidades-priorizacao.md#9-domínio-migração-da-configuração-jboss-eap).
+[catalogo de configuracao JBoss](../../engineering-harness/03-plano-tatico-e-implementacao.md#anexo-a).
 Hoje o desenvolvedor pode usar a ferramenta oficial com orientacao do helper,
 apos conferir o caminho aplicavel. Nao existe uma Run Task de migracao automatica.
 

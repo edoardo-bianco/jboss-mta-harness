@@ -8,7 +8,7 @@ html:
 # Guia do desenvolvedor: harness de migracao
 
 O **JBoss MTA Harness** e um ambiente de trabalho no VS Code que organiza a
-migracao de aplicacoes JBoss EAP 7.1 para EAP 7.4, com Java 8 e `javax.*`.
+migracao de aplicacoes JBoss EAP 7.0 ou 7.1 para EAP 7.4, com Java 8 e `javax.*`.
 Seu objetivo e ajudar o desenvolvedor a transformar diagnosticos em corretivas
 delimitadas, implementadas e verificadas, com apoio do Codex ou GitHub Copilot e controle
 humano sobre o escopo e o resultado.
@@ -33,7 +33,7 @@ autorizada; as ferramentas produzem evidencias. Preparar um prompt nao executa
 o agente, e sucesso de build ou reducao de achados nao concede aceite.
 Branches e integracoes continuam sob responsabilidade da equipe.
 
-A [estrategia do harness](../estrategia/estrategia-harness_.md) explica a evolucao
+A [estrategia do harness](../engineering-harness/01-estrategia-e-arquitetura.md) explica a evolucao
 pretendida para outras tecnologias, IDEs e etapas do ciclo de desenvolvimento.
 Quarkus, IntelliJ, novos adaptadores de IA e um nucleo compartilhado sao propostas
 de evolucao. O fluxo disponivel neste guia e o de migracao JBoss no VS Code.
@@ -45,7 +45,7 @@ ela participa e qual resultado permite continuar. Cada etapa destaca o guia
 que a detalha. Configuracao, menus, comandos e alternativas de execucao ficam
 nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 
-O [cheat sheet das Run Tasks](../arquitetura/cheat-sheet-run-tasks.md) oferece
+O [cheat sheet das Run Tasks](cheat-sheet-run-tasks.md) oferece
 uma consulta compacta das 25 tarefas, incluindo o planejamento por sprints.
 
 **Para receber orientacao, siga o [guia de orientacao da migracao com Codex ou GitHub Copilot](orientacao-migracao.md).**
@@ -378,6 +378,6 @@ Cada guia oferece mensagem de exemplo, resultado esperado e retorno ao fluxo pri
 
 <a id="o-que-acompanha-o-clone"></a><a id="documentacao-e-evolucao-do-harness"></a><a id="testar-os-scripts-do-harness"></a>Para alterar a propria ferramenta, siga [Manutencao do harness](manutencao-harness.md).
 Esse trabalho tem plano e testes separados das corretivas da aplicacao.
-A [estrategia](../estrategia/estrategia-harness_.md) apresenta a direcao de evolucao;
-o [contrato de planejamento](../especificacoes/planejamento-copilot.md) define as
+A [estrategia](../engineering-harness/01-estrategia-e-arquitetura.md) apresenta a direcao de evolucao;
+o [contrato de planejamento](../contratos/fluxo-migracao.md) define as
 regras vigentes para o trabalho assistido.

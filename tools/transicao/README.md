@@ -2,7 +2,7 @@
 
 **Estado:** prévia, aplicação, validação e descarte implementados em Windows
 PowerShell 5.1 e verificados em fixtures. Aceite humano integrado pendente.
-**Revisão:** 14/10/2026. **Destino:** `doc/features/conversao-descartavel-dos-registros.md`.
+**Revisão:** 14/10/2026. **Destino:** `tools/transicao/README.md`.
 
 **Prioridade:** parte da simplificação que precede modernização e novas
 funcionalidades. Dependências, riscos e
@@ -11,7 +11,7 @@ e no [checklist](../../tasks/historico/todo-ate-2026-10-17.md#simplificacao-prio
 
 ## 1. Responsabilidade
 
-Converter os registros legados para o contrato de [organização simplificada por projeto](organizacao-simplificada-por-projeto.md). Esse contrato define identidade pelo `project.artifactId`, caminhos, estados e leitura de MTA; o conversor o utiliza, sem manter uma segunda versão dessas regras.
+Converter os registros legados para o contrato de [organização simplificada por projeto](../../doc/engineering-harness/02-system-design.md#estado-local). Esse contrato define identidade pelo `project.artifactId`, caminhos, estados e leitura de MTA; o conversor o utiliza, sem manter uma segunda versão dessas regras.
 
 O utilitário será executado diretamente e poderá ser removido após a transição. O núcleo permanente não o importa, não o executa automaticamente e não depende de mapas de conversão. O script pode chamar os serviços permanentes de publicação e validação; a dependência existe apenas nessa direção.
 
@@ -19,7 +19,7 @@ Receber trabalho de um colega no layout corrente não é conversão: basta copia
 
 ## 2. Interface
 
-Script: [Converter-RegistrosProjeto.ps1](../../tools/transicao/Converter-RegistrosProjeto.ps1).
+Script: [Converter-RegistrosProjeto.ps1](Converter-RegistrosProjeto.ps1).
 
 | Parâmetro | Finalidade |
 | --- | --- |

@@ -422,7 +422,7 @@ links/junctions e destinos fora das areas permitidas.
 Dados correntes, fontes, relatorios externos, fichas, planos, anexos e conflitos
 pendentes sao preservados. A tarefa nao apaga `target/` da aplicacao nem
 converte/descarta dados antigos. Descarte legado pertence ao
-[conversor separado](../../features/conversao-descartavel-dos-registros.md),
+[conversor separado](../../../tools/transicao/README.md),
 com previa, validacao e selecao explicitas.
 
 ```powershell

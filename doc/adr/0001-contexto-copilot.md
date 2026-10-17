@@ -75,7 +75,7 @@ O recibo preserva o retrato do registro usado no preparo; o registro permanece m
 A decisao humana fica no plano, referenciada pelo to-do; formatos antigos continuam legiveis.
 
 Os templates curtos referenciam o contrato tecnico existente em
-[planejamento-copilot](../especificacoes/planejamento-copilot.md); novas decisoes sao
+[fluxo de migracao](../contratos/fluxo-migracao.md); novas decisoes sao
 mantidas ali e nas ADRs, sem criar documentos paralelos. Recibos novos guardam
 copia desse contrato; o caminho original continua como referencia. Prompts e recibos
 historicos nao sao reescritos. Preparacao nunca envia o pedido ao agente.

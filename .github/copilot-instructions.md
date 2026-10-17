@@ -57,7 +57,7 @@ codigo, decisoes e material recebido opcional. O executor publica registro,
 documentos afetados, indice e ultima conclusao pela API protegida; helpers nao
 publicam. Somente local ainda considera MTA. Preparar nao comprova reconciliacao.
 
-Siga o [contrato](../doc/especificacoes/planejamento-copilot.md): Java 8/javax,
+Siga o [contrato](../doc/contratos/fluxo-migracao.md): Java 8/javax,
 EAP 7.4 e Hibernate 5.3 quando aplicavel. O planejamento escreve plano/tarefas,
 fichas examinadas e andamento/cobertura/referencias pertinentes, preservando
 escolhas humanas; limpar aviso tecnico NeedsReview nao concede GO.

@@ -47,7 +47,7 @@
 <td>Execução / configuração</td>
 <td>Configurar ferramentas e integrações locais, com procedimentos de preparo e certificado quando aplicáveis.</td>
 <td>D</td>
-<td><a href="../../scripts/configurar-caminhos.ps1">configurar-caminhos.ps1</a>, <a href="../guias/tools/workspace.md">workspace</a></td>
+<td><a href="../../scripts/configurar-caminhos.ps1">configurar-caminhos.ps1</a>, <a href="tools/workspace.md">workspace</a></td>
 </tr>
 <tr>
 <td><code>Workspace: gerar workspace</code></td>
@@ -82,7 +82,7 @@
 <td>Diagnóstico / preparação</td>
 <td>Verificar ferramentas, configuração e projeto selecionado antes da análise.</td>
 <td>D</td>
-<td><a href="../../scripts/conferir-ambiente.ps1">conferir-ambiente.ps1</a>, <a href="../guias/tools/mta.md">MTA</a></td>
+<td><a href="../../scripts/conferir-ambiente.ps1">conferir-ambiente.ps1</a>, <a href="tools/mta.md">MTA</a></td>
 </tr>
 <tr>
 <td><code>MTA: executar analise</code></td>
@@ -117,21 +117,21 @@
 <td>Planejamento de portfólio / escopo, calendário e capacidade</td>
 <td>Novo/Retomar/Revisar prepara o cenário corrente dos projetos; Validar calcula cronograma, prazo, capacidade e fases, preservando baseline e consumo.</td>
 <td>P: <code>planejar-sprints</code> + D: validação</td>
-<td><a href="../../scripts/preparar-sprints.ps1">preparar-sprints.ps1</a>, <a href="../guias/tools/planejamento-sprints.md">guia</a>, <a href="../especificacoes/planejamento-sprints.md">contrato</a></td>
+<td><a href="../../scripts/preparar-sprints.ps1">preparar-sprints.ps1</a>, <a href="tools/planejamento-sprints.md">guia</a>, <a href="../contratos/planejamento-sprints.md">contrato</a></td>
 </tr>
 <tr>
 <td><code>Planejamento: priorizar issues</code></td>
 <td>Trabalho / triagem</td>
 <td>Selecionar categoria, projetos e fatia; recriar/progredir/retomar o conjunto corrente; preparar ranking cumulativo e fichas.</td>
 <td>P: <code>priorizar-issues</code></td>
-<td><a href="../../scripts/preparar-priorizacao.ps1">preparar-priorizacao.ps1</a>, <a href="../guias/tools/priorizacao-issues.md">guia</a></td>
+<td><a href="../../scripts/preparar-priorizacao.ps1">preparar-priorizacao.ps1</a>, <a href="tools/priorizacao-issues.md">guia</a></td>
 </tr>
 <tr>
 <td><code>Planejamento: planejar</code></td>
 <td>Trabalho / proposta</td>
 <td>Criar, retomar ou atualizar preparo a partir do registro, ficha e anexos; agente ou humano elabora um lote.</td>
 <td>P: <code>planejar-lotes</code></td>
-<td><a href="../../scripts/preparar-planejamento.ps1">preparar-planejamento.ps1</a>, <a href="../guias/tools/planejamento-migracao.md">guia</a></td>
+<td><a href="../../scripts/preparar-planejamento.ps1">preparar-planejamento.ps1</a>, <a href="tools/planejamento-migracao.md">guia</a></td>
 </tr>
 <tr>
 <td><code>Planejamento: atualizar registro de migracao</code></td>
@@ -166,21 +166,21 @@
 <td>Mudança e qualidade / build e testes</td>
 <td>Executar fases delimitadas como <code>clean install</code>, <code>clean verify</code>, <code>test</code> e <code>package</code>; registrar resultado, testes/cobertura disponíveis e falhas.</td>
 <td>D</td>
-<td><a href="../../scripts/construir-aplicacao.ps1">construir-aplicacao.ps1</a>, <a href="../guias/tools/maven.md">Maven</a></td>
+<td><a href="../../scripts/construir-aplicacao.ps1">construir-aplicacao.ps1</a>, <a href="tools/maven.md">Maven</a></td>
 </tr>
 <tr>
 <td><code>Aplicacao: analisar SonarQube</code></td>
 <td>Mudança e qualidade / análise de qualidade</td>
 <td>Executar scanner, rever diagnóstico ou baixar a última análise concluída do projeto/branch, inclusive da pipeline; consultar Gate, métricas/issues e registrar decisões locais.</td>
 <td>D</td>
-<td><a href="../../scripts/analisar-sonar.ps1">analisar-sonar.ps1</a>, <a href="../guias/tools/sonar.md">Sonar</a></td>
+<td><a href="../../scripts/analisar-sonar.ps1">analisar-sonar.ps1</a>, <a href="tools/sonar.md">Sonar</a></td>
 </tr>
 <tr>
 <td><code>Aplicacao: deploy no JBoss</code></td>
 <td>Plataforma / publicação</td>
 <td>Selecionar aplicação/servidor e publicar artefato, com recibo e histórico de releases.</td>
 <td>D</td>
-<td><a href="../../scripts/gerenciar-jboss.ps1">gerenciar-jboss.ps1</a>, <a href="../guias/tools/jboss.md">JBoss</a></td>
+<td><a href="../../scripts/gerenciar-jboss.ps1">gerenciar-jboss.ps1</a>, <a href="tools/jboss.md">JBoss</a></td>
 </tr>
 <tr>
 <td><code>Aplicacao: rollback no JBoss</code></td>
@@ -220,12 +220,12 @@
 </tbody>
 </table>
 <p>Os menus dessas tarefas concentram suas variantes; não há uma tarefa por projeto, arquivo ou função auxiliar. As opções completas permanecem nos guias vinculados. Debug por attach é uma configuração de depuração da IDE, não uma Run Task adicional. As consultas <code>auditar_base</code>, <code>listar_issues</code> e <code>obter_issue</code> têm MCP/CLI próprios e também não são entradas desse inventário.</p>
-<p>No workspace, abra <code>.harness/indices/projetos.md</code> e siga o link do projeto para <code>indice.md</code>. Ele reúne registro, plano, tarefas, fichas, evidências, diagnósticos e logs existentes. Após copiar arquivos ou gerar novas saídas, use <strong>Workspace: atualizar indice dos projetos</strong> para reconstruir os links. Para compartilhar, copie as pastas conforme o <a href="../guias/tools/compartilhamento-contextos.md">guia</a>; não há tarefa de importar/exportar ZIP.</p>
+<p>No workspace, abra <code>.harness/indices/projetos.md</code> e siga o link do projeto para <code>indice.md</code>. Ele reúne registro, plano, tarefas, fichas, evidências, diagnósticos e logs existentes. Após copiar arquivos ou gerar novas saídas, use <strong>Workspace: atualizar indice dos projetos</strong> para reconstruir os links. Para compartilhar, copie as pastas conforme o <a href="tools/compartilhamento-contextos.md">guia</a>; não há tarefa de importar/exportar ZIP.</p>
 <h2 id="planejamento-por-sprints">Planejamento por sprints</h2>
-<p>A <a href="../features/planejamento-macro-sprints.md">MACRO-01</a> amplia a visão por issue para escopo, calendário e capacidade de trabalho. A tarefa seleciona os projetos; o prompt reúne as datas, o prazo, a equipe e as estimativas ainda ausentes. Depois do preenchimento, <strong>Validar e gerar cronograma</strong>, na mesma tarefa, produz JSON e Markdown com tabelas, matriz e Gantt. O <a href="../guias/tools/planejamento-sprints.md">guia</a> concentra o procedimento completo; o <a href="../modelos/planejamento-sprints.template.md">template</a> orienta a narrativa.</p>
+<p>A <a href="../contratos/planejamento-sprints.md#regras-do-cronograma">MACRO-01</a> amplia a visão por issue para escopo, calendário e capacidade de trabalho. A tarefa seleciona os projetos; o prompt reúne as datas, o prazo, a equipe e as estimativas ainda ausentes. Depois do preenchimento, <strong>Validar e gerar cronograma</strong>, na mesma tarefa, produz JSON e Markdown com tabelas, matriz e Gantt. O <a href="tools/planejamento-sprints.md">guia</a> concentra o procedimento completo; o <a href="../modelos/planejamento-sprints.template.md">template</a> orienta a narrativa.</p>
 <p>O cálculo confere prazos e limites, incluindo fases já consumidas. <code>NAO_CABE</code> e <code>EM_RISCO</code> mostram motivos calculados e esforço não alocado, inclusive na faixa superior; <code>NAO_AVALIAVEL</code> explicita dados essenciais ausentes. Retomar e Revisar usam o mesmo cenário corrente e preservam o trabalho humano; Revisar registra o motivo e pede reavaliação. O cronograma não concede GO de lote, aceite da migração ou autorização de implantação. A capacidade foi integrada e testada localmente; homologação corporativa permanece pendente.</p>
 <h2 id="referencias">Referências</h2>
-<p>A <a href="arquitetura-harness.md#5-arquitetura-de-comportamento">arquitetura do harness</a> apresenta os fluxos, os limites de autoridade e a evolução por capacidades. O <a href="../guias/harness-migracao-desenvolvedor.md">guia do desenvolvedor</a> detalha a operação cotidiana. Os links de implementação e guias da matriz apontam para arquivos do repositório.</p>
+<p>A <a href="../engineering-harness/01-estrategia-e-arquitetura.md">arquitetura do harness</a> apresenta os fluxos, os limites de autoridade e a evolução por capacidades. O <a href="harness-migracao-desenvolvedor.md">guia do desenvolvedor</a> detalha a operação cotidiana. Os links de implementação e guias da matriz apontam para arquivos do repositório.</p>
 
 
       </div>

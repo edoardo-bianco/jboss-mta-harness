@@ -4,7 +4,7 @@ Estado: implementação autorizada em 10/10/2026; produtores, consumidores e
 instruções alinhados ao fluxo corrente na branch do harness. Regressão integrada
 e aceite humano são acompanhados no [plano](../../tasks/historico/plan-ate-2026-10-17.md).
 Esta ADR rege a operação desta versão; integração na principal e aceite da
-[feature](../features/organizacao-simplificada-por-projeto.md) permanecem separados.
+[feature](../engineering-harness/02-system-design.md#estado-local) permanecem separados.
 
 ## Decisão
 
@@ -196,7 +196,7 @@ recibos/cadeias das [ADR-0004](0004-git-informativo-sem-controle-de-branches.md)
 planejamento pelo registro, categorias, exame de evidências e decisões humanas.
 A separação da [ADR-0002](0002-separacao-harness-e-migracao-progressiva.md) permanece.
 
-A [conversão](../features/conversao-descartavel-dos-registros.md) é descartável e
+A [conversão](../../tools/transicao/README.md) é descartável e
 separada. O runtime não a importa nem procura legado. Originais reais só serão
 limpos após seleção explícita e validação; os testes usam dados sintéticos.
 Modernização e novas capacidades continuam posteriores a esta entrega.

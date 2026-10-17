@@ -41,7 +41,7 @@ Publish-HarnessProjectFiles $paths @{'projeto.json'=(@{pom=$paths.Pom;mta=@{dire
 $null=Update-HarnessProjectDocuments $paths (Read-HarnessProjectMta $paths)
 $index=Join-Path $fixture '.harness/projetos/indice-projetos.md'
 Set-Content -LiteralPath $index '# Indice sintetico'
-foreach ($file in @('doc/especificacoes/planejamento-copilot.md','.github/prompts/priorizar-issues.prompt.md','.github/prompts/planejar-lotes.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
+foreach ($file in @('doc/contratos/fluxo-migracao.md','.github/prompts/priorizar-issues.prompt.md','.github/prompts/planejar-lotes.prompt.md','doc/modelos/indice-priorizacao.template.md')) {
     $dest=Join-Path $fixture $file; $null=[IO.Directory]::CreateDirectory((Split-Path $dest -Parent)); Copy-Item -LiteralPath (Join-Path $root $file) -Destination $dest
 }
 $text=[IO.File]::ReadAllText($paths.MigrationPath).Replace('AGUARDANDO MTA','')

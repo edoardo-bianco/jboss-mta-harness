@@ -96,5 +96,5 @@ Ensaiar nos dois clientes a orientacao de uma etapa, campos Decisao/Andamento,
 handoff pronto, perguntas essenciais, sobreposicoes e ausencia de gates artificiais.
 Testes automatizados nao comprovam descoberta/delegacao nativa nem qualidade da IA.
 
-Contrato: [fluxo de migracao assistida](../especificacoes/planejamento-copilot.md).
+Contrato: [fluxo de migracao assistida](../contratos/fluxo-migracao.md).
 Uso: [planejamento](../guias/tools/planejamento-migracao.md).
