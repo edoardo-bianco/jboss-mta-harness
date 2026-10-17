@@ -4,17 +4,16 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 25 -and @($labels | Sort-Object -Unique).Count -eq 25) 'Manter 25 tarefas distintas, incluindo planejamento macro de sprints e conciliacao pela entrada habitual.'
+Assert ($labels.Count -eq 24 -and @($labels | Sort-Object -Unique).Count -eq 24) 'Manter 24 tarefas distintas (rollback retirado), incluindo planejamento macro de sprints e conciliacao pela entrada habitual.'
 $serverLabels=@('Servidor: iniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
     Assert ($task.Count -eq 1 -and $task[0].args -contains '${workspaceFolder}/scripts/gerenciar-jboss.ps1') 'Falta tarefa de servidor JBoss.'
     Assert ($task[0].args -notcontains '-SelectTarget' -and $task[0].args -notcontains '-WorkspacePath' -and -not ($task[0].args | Where-Object { $_ -like '${input:*}' })) 'Servidor nao deve solicitar workspace/projeto.'
 }
-foreach ($action in @('Deploy','Rollback')) {
-    $task=@($tasks.tasks | Where-Object { $_.label -eq ('Aplicacao: ' + $action.ToLowerInvariant() + ' no JBoss') })
-    Assert ($task.Count -eq 1 -and $task[0].args -contains $action) 'Release deve ter tarefa com acao explicita.'
-}
+$deployTask=@($tasks.tasks | Where-Object label -eq 'Aplicacao: deploy no JBoss')
+Assert ($deployTask.Count -eq 1 -and $deployTask[0].args -contains 'Deploy') 'Deploy deve ter tarefa com acao explicita.'
+Assert (@($tasks.tasks | Where-Object label -eq 'Aplicacao: rollback no JBoss').Count -eq 0) 'Rollback gerenciado foi retirado; reverter e fazer deploy de outro WAR.'
 $indexTask = @($tasks.tasks | Where-Object label -eq 'Workspace: atualizar indice dos projetos')
 Assert ($indexTask.Count -eq 1 -and $indexTask[0].args -contains '${workspaceFolder}/scripts/atualizar-indice-projetos.ps1' -and $indexTask[0].args -contains '${input:harnessWorkspacePath}' -and $indexTask[0].args -notcontains '-SelectTarget') 'Indice deve abranger workspace sem selecao de alvo.'
 $implementationTask = @($tasks.tasks | Where-Object label -eq 'Aplicacao: preparar implementacao do lote')

@@ -74,13 +74,13 @@ function Get-HarnessJbossServer {
 Export-ModuleMember -Function Get-HarnessJbossServer
 '@ | Set-Content -LiteralPath (Join-Path $scripts 'HarnessJbossRuntime.psm1') -Encoding UTF8
 @'
-function Invoke-HarnessJbossRelease {
-    param($Context,$Server,$Action,$ArtifactPath,$DeploymentName,$ReleaseId)
+function Invoke-HarnessJbossDeploy {
+    param($Context,$Server,$ArtifactPath,$DeploymentName)
     $result=[pscustomobject]@{Status='SUCCEEDED';ArtifactSource=$ArtifactPath;DeploymentName=$DeploymentName;Source=$Context.Active.path}
     $result | ConvertTo-Json -Compress | Add-Content -LiteralPath (Join-Path $Context.Root 'selected.jsonl')
     $result
 }
-Export-ModuleMember -Function Invoke-HarnessJbossRelease
+Export-ModuleMember -Function Invoke-HarnessJbossDeploy
 '@ | Set-Content -LiteralPath (Join-Path $scripts 'HarnessJboss.psm1') -Encoding UTF8
 $config=Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.activeProject='fixture'

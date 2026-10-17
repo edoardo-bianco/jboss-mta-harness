@@ -71,8 +71,8 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   persistidos obrigatorios. NeedsReview/ReviewReasons indicam mudancas conhecidas
   de escopo/base/referencias; caminhos iguais nao comprovam conteudo inalterado.
   Reler evidencias e codigo relevante antes de recomendar ou executar.
-  Git, identidade de issues, identificadores nativos Sonar e releases JBoss
-  mantem suas funcoes proprias; nao remover por busca textual indiscriminada.
+  Git, identidade de issues, identificadores nativos Sonar e nomes de deployment
+  JBoss mantem suas funcoes proprias; nao remover por busca textual indiscriminada.
 - Referencias humanas podem ser escritas em Markdown/chat e apontar ao indice
   e aos resultados correntes. Diferencie ultima tentativa de ultimo diagnostico
   utilizavel. Para preservar ANTES, guarde evidencia nomeada antes da substituicao.

@@ -49,7 +49,7 @@ try {
     Write-Host 'Use Workspace: atualizar indice dos projetos para reconhecer os POMs. MTA externo e associado em .harness/projetos/<artifactId>/projeto.json, campo mta.diretorio; null usa o diagnostico interno corrente. O antigo mta.runsPath nao e usado nem convertido automaticamente.'
     Write-Host 'Preencha os caminhos em tools e salve. Os projetos das tarefas vem do workspace aberto; activeProject e um padrao opcional.'
     Write-Host 'Confira sonar: serverUrl (local/corporativo), apiAuthScheme (APIs e scanner; padrao Bearer; Basic para Sonar 9.9), scannerJdkHome (JDK 17 para Sonar 9.9; build permanece Java 8), scannerVersion (padrao 5.8.0.7211; validar compatibilidade), ceTimeoutSeconds, profiles e debug (false=INFO; true=DEBUG e log detalhado). Token nunca vai no JSON de configuracao; a tarefa solicita entrada oculta.'
-    Write-Host 'Confira eap.eap71/eap74: standaloneConfig, portOffset, debugPort e timeoutSeconds. Use Servidor: iniciar/parar/consultar estado/criar usuario JBoss e Aplicacao: deploy/rollback no JBoss; gere o workspace para atualizar os attaches Java.'
+    Write-Host 'Confira eap.eap71/eap74: standaloneConfig, portOffset, debugPort e timeoutSeconds. Use Servidor: iniciar/parar/consultar estado/criar usuario JBoss e Aplicacao: deploy no JBoss; gere o workspace para atualizar os attaches Java.'
     Write-Host 'Para criar um workspace pelo JSON, preencha repositories e execute Workspace: gerar workspace. Para adicionar projetos no workspace existente, use Add Folder to Workspace.'
     if ($EditorPath) {
         Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -Force -DisableNameChecking

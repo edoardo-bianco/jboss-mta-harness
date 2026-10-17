@@ -9,7 +9,7 @@ html:
 
 [Voltar ao fluxo principal do desenvolvedor](../harness-migracao-desenvolvedor.md#roteiro-onde-estou-e-o-que-escolho).
 
-Controle local de JBoss EAP 7.0/7.1/7.4, usuarios de gerenciamento, deploy, rollback
+Controle local de JBoss EAP 7.0/7.1/7.4, usuarios de gerenciamento, deploy
 e debug Java. Os comandos partem da raiz do harness, em Windows PowerShell 5.1.
 Para preparar a IDE, consulte as [extensoes Java](workspace.md#extensoes-java-no-vs-code).
 
@@ -107,7 +107,7 @@ Confere home, base, XML, versao e Java 8 antes das mutacoes. Porta ocupada nao
 equivale a servidor correto. Processo existente sem gerenciamento fica
 `UNREACHABLE`; nao iniciar outra instancia. Start aguarda `RUNNING`. Stop usa
 shutdown e aguarda a saida do processo identificado, sem encerrar outros Java.
-Em timeout, consulte o recibo e os logs; o processo e preservado para diagnostico.
+Em timeout, consulte o resultado e os logs; o processo e preservado para diagnostico.
 
 No EAP 7.0, o harness usa o protocolo e argumentos da
 [CLI 7.0](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.0/html-single/management_cli_guide/index)
@@ -218,7 +218,6 @@ Elas substituem a antiga tarefa **Aplicacao: gerenciar JBoss**:
 | Servidor: consultar estado JBoss | EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
 | Servidor: criar usuario JBoss | EAP 7.0/7.1/7.4; assistente oficial solicita tipo, nome e senha. Nao exige servidor ativo. |
 | Aplicacao: deploy no JBoss | Workspace, EAP 7.0/7.1/7.4, aplicacao e WAR/EAR descoberto ou caminho manual. |
-| Aplicacao: rollback no JBoss | Workspace, EAP 7.0/7.1/7.4, aplicacao, deployment e release anterior. |
 
 Iniciar, parar e consultar estado nao pedem aplicacao nem workspace: atuam sobre
 o servidor escolhido, inclusive sem projeto Maven disponivel. Nao criam registros
@@ -230,13 +229,13 @@ o novo menu. Se necessario, recarregue a janela do VS Code.
 Escopo atual: Windows, PowerShell 5.1, Java 8 e servidor local standalone.
 
 **3. Todos (legado e EAP 7.4)** executa a acao primeiro no `eap71` (7.0 ou 7.1) e depois no 7.4,
-com as configuracoes, verificacoes de identidade, locks e recibos de cada um.
+com as configuracoes, verificacoes de identidade, locks e resultados de cada um.
 No start, o modo normal/debug escolhido vale para ambos. O terminal mostra cada
 resultado e um resumo final; falha de configuracao ou operacao de um servidor
 nao impede tentar o outro. Se qualquer um falhar, a tarefa termina com codigo 1,
 sem desfazer os sucessos. EAP nao configurado aparece como falha, sem ser omitido.
 Enter/q continua cancelando a selecao; Todos exige escolher a opcao 3.
-Criar usuario, deploy e rollback continuam exigindo um EAP individual.
+Criar usuario e deploy continuam exigindo um EAP individual.
 
 ### Testar o controle do servidor sem deploy
 
@@ -250,16 +249,16 @@ Criar usuario, deploy e rollback continuam exigindo um EAP individual.
    Ao terminar, pare o servidor pela tarefa correspondente.
 
 Para ensaiar **Todos**, repita estado/start/stop escolhendo **3** no menu de EAP.
-Confira as duas entradas no resumo e os recibos individuais, inclusive no modo debug.
+Confira as duas entradas no resumo e o resultado de cada servidor, inclusive no modo debug.
 
 Esse roteiro nao exige selecionar aplicacao nem construir um WAR. Start pode carregar
 aplicacoes ja implantadas no servidor; stop encerra todas elas. Repita no outro EAP
 quando quiser validar as duas instalacoes. Falha ou timeout exige conferir os logs
-e o recibo antes de continuar; nao equivale a sucesso parcial confirmado.
+e o resultado antes de continuar; nao equivale a sucesso parcial confirmado.
 
-### Deploy e rollback
+### Deploy
 
-No Windows, o harness envia a copia da release a CLI com caminho absoluto nativo
+No Windows, o harness envia o WAR/EAR selecionado a CLI com caminho absoluto nativo
 (`C:\...\arquivo.war`), entre aspas para preservar espacos. A CLI antiga do EAP
 7.0 interpreta `C:/...` como relativo e pode formar `JBossHome\C:\...`, causando
 `Path ... doesn't exist` antes do envio do artefato. Esse erro exige atualizar
@@ -270,9 +269,9 @@ o harness com a corretiva de caminho; nao e causado pelo modo debug. O aviso
 2. Execute **Servidor: iniciar JBoss** (normal ou debug) e **Servidor: consultar estado JBoss**; espere RUNNING.
 3. Execute **Aplicacao: deploy no JBoss**, escolha EAP e aplicacao, confirme/selecione o WAR/EAR encontrado (ou informe caminho manual) e um **nome estavel**, por exemplo
    `minha-api.war`, mesmo que o arquivo contenha a versao no nome.
-4. Confira o recibo, o status do deployment e valide a aplicacao funcionalmente.
-5. Para reverter, execute **Aplicacao: rollback no JBoss**, escolha o mesmo EAP/aplicacao/nome e a release anterior mostrada no
-   menu. O harness reimplanta a copia preservada e verifica hash/status no servidor.
+4. Confira o resultado, o status do deployment e valide a aplicacao funcionalmente.
+5. Para voltar a uma versao anterior, faca **deploy do WAR/EAR anterior** com o mesmo
+   nome: um build anterior ou um caminho manual escolhido por voce.
 
 A tarefa procura arquivos `.war` e `.ear` diretamente na pasta `target` do projeto
 selecionado e dos modulos declarados em `<modules>` nos POMs. Exibe os caminhos:
@@ -291,28 +290,36 @@ Confira se o artefato foi reconstruido com os fontes desejados; encontrar o arqu
 nao comprova sua atualidade. O harness exibe caminho, destino e hash e registra a
 associacao ao projeto selecionado, sem inferir sua origem Maven.
 
-Substituicao exige que o deployment atual corresponda ao ultimo recibo do mesmo
-projeto/EAP/nome. Deploy existente sem historico, conteudo alterado externamente,
-estado diferente de OK ou arquivo de rollback adulterado sao recusados. Use outro
-nome para iniciar um historico ou trate a implantacao anterior manualmente.
-O primeiro deploy nao tem release anterior para rollback. Rollback restaura WAR/EAR;
-nao reverte banco, configuracao do servidor nem efeitos externos da aplicacao.
-Nao ha rollback automatico em erro. Falha depois do envio exige conferir o servidor:
-o ultimo sucesso permanece preservado, e uma divergencia impede sobrescrita silenciosa.
+**O deploy sempre substitui o WAR/EAR implantado com o mesmo nome**, inclusive
+quando ele foi implantado fora do harness ou alterado externamente. E uma escolha
+de simplicidade: o harness nao protege contra sobrescrever um deployment externo.
+Durante a conferencia e o envio, o arquivo de origem fica aberto somente para
+leitura, impedindo que um build o altere no meio do deploy. Depois do envio, o
+harness confere status `OK`, nome e conteudo (SHA1) do deployment; divergencia ou
+falha da CLI termina como FAILED e exige conferir o servidor. Nao ha rollback
+gerenciado nem reversao automatica: banco, configuracao do servidor e efeitos
+externos da aplicacao nunca sao revertidos pelo harness.
 
-Recibos, hashes SHA256 (arquivo), SHA1 (conteudo gerenciado JBoss), logs e copias
-de releases ficam em `.harness/jboss/<eap>__<chave>/`. Essa area e permanente e
-fica fora de **Workspace: limpar execucoes**. Nao e backup temporario. Recibos
-de operacao sao por execucao, com `Scope: Server` e `Project`/`Source` nulos nos
-novos recibos de estado/start/stop. Recibos antigos permanecem historicos.
-Releases continuam vinculadas a aplicacao, sao por ID e guardam referencia a anterior.
-Registram tambem caminho do artefato, base/XML do servidor e observacao Git
-informativa. Troca de branch ou ausencia de Git nao bloqueia deploy/rollback.
-Uma release SUCCEEDED confirma conteudo/status do deployment, sem conceder aceite
-funcional ou GO de migracao. O indice dos projetos continua mostrando build/MTA/
-planejamento/Sonar; os recibos JBoss sao consultados pelo caminho exibido na tarefa.
+**Somente o ultimo e guardado**, em pastas nomeadas pelo projeto e pelo servidor,
+sem identificadores ou historico:
 
-Exemplos CLI: projeto e necessario apenas para deploy/rollback. Sem `-Action`,
+| Caminho | Conteudo |
+| --- | --- |
+| `.harness/projetos/<artifactId>/atual/jboss/<eap71\|eap74>/ultimo-deploy.json` | Ultima tentativa de deploy do projeto nesse servidor: artefato, SHA256/SHA1, nome, substituicao, Git informativo, situacao e erro. Aparece no indice do projeto. |
+| `.harness/projetos/<artifactId>/atual/operacao.json` | Situacao corrente `jboss-eap71`/`jboss-eap74`, junto de build, MTA e Sonar. |
+| `.harness/servidores/<eap71\|eap74>/ultima-operacao.json` | Resultado da ultima operacao de servidor (estado, start, start debug ou stop). |
+| `.harness/servidores/<eap71\|eap74>/ultimo-start/` | `stdout.log`, `stderr.log` e `process.json` do ultimo start; renovados somente por um novo start. |
+
+Nenhuma copia do WAR e mantida pelo harness. Uma nova execucao substitui o
+resultado anterior da mesma funcao. Git e informativo: troca de branch ou ausencia
+de Git nao bloqueia deploy. Um deploy SUCCEEDED confirma conteudo/status do
+deployment, sem conceder aceite funcional ou GO de migracao.
+
+A pasta `.harness/jboss/` de versoes anteriores (recibos por execucao e copias de
+releases nomeadas por identificadores) nao e mais lida nem escrita. Ela nao guarda
+decisoes humanas; confira se nao precisa de nenhum log antigo e remova-a manualmente.
+
+Exemplos CLI: projeto e necessario apenas para deploy. Sem `-Action`,
 o script oferece o menu geral de compatibilidade; selecione a acao antes do EAP.
 Parametros antigos de projeto/workspace nao sao utilizados nas operacoes do servidor.
 
@@ -479,10 +486,10 @@ o build/testes Maven do fluxo de validacao.
 6. Ao terminar o ensaio, restaure os fontes temporarios e confirme a resposta
    original; as configuracoes de Hot Code Replace podem permanecer habilitadas.
    Para uma alteracao definitiva, execute build/testes e deploy pelo fluxo normal,
-   gerando outra release rastreavel.
+   substituindo o WAR implantado.
 
 A substituicao afeta a JVM e permanece ate outra substituicao ou recarga da
-aplicacao; desconectar o debugger nao a desfaz. O WAR e os hashes/recibos de deploy
+aplicacao; desconectar o debugger nao a desfaz. O WAR e os hashes do ultimo deploy
 continuam representando o artefato implantado, sem registrar essas mudancas em
 memoria. A resposta de uma nova chamada e a verificacao funcional do ensaio.
 
@@ -510,7 +517,7 @@ A compatibilidade 7.1 tambem e verificada contra a CLI instalada, que usa saida 
 
 ## Resultado e proximo passo
 
-Confira servidor, artefato implantado, recibos/logs e resultado funcional esperado
+Confira servidor, artefato implantado, resultados/logs e resultado funcional esperado
 versus observado. Registre tambem testes negativos/regressao e limitacoes.
 Para uma corretiva, volte a [verificacao e aceite do lote](planejamento-migracao.md#da-proposta-revisada-a-execucao-e-ao-aceite);
 para uma observacao ANTES, preserve as evidencias para a comparacao posterior.
