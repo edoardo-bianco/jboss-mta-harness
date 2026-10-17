@@ -145,7 +145,7 @@ validada no servidor corporativo:
 
 ```json
 "sonar": {
-  "serverUrl": "https://sonar-esteira.apps.produtos4.caixa",
+  "serverUrl": "https://sonar.empresa.example",
   "debug": false,
   "apiAuthScheme": "Basic",
   "scannerJdkHome": "C:\\desenvolvimento\\Java\\jdk-17.0.15+6",
@@ -357,7 +357,7 @@ sequencia diante de 404, sem executar o motor nem homologar o servidor corporati
 Para identificar o proxy efetivo do PowerShell, sem credenciais:
 
 ```powershell
-$destino = [Uri]'https://sonar-esteira.apps.produtos4.caixa'
+$destino = [Uri]'https://sonar.empresa.example'
 $proxy = [Net.WebRequest]::DefaultWebProxy
 if ($null -eq $proxy -or $proxy.IsBypassed($destino)) {
     'PowerShell: acesso direto para esse destino'

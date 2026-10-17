@@ -93,7 +93,7 @@ Separar três responsabilidades:
 | Ambiente local | Caminhos das ferramentas, clientes, certificados e opções aprovadas. | Desenvolvedor, conforme política corporativa. |
 | Projeto | Associação ao POM/fonte, perfil selecionado e origens dos diagnósticos. | Configuração do trabalho local. |
 
-Reaproveitar `harness.local.json` ou o arquivo equivalente realmente presente na branch de evolução. Não criar um segundo cadastro de instalações. Referências ao catálogo local evitam repetir os caminhos do Maven e dos JDKs em cada perfil.
+Reaproveitar `config/harness.local.json`, a configuração local já usada pelo harness. Não criar um segundo cadastro de instalações. Referências ao catálogo local evitam repetir os caminhos do Maven e dos JDKs em cada perfil.
 
 **Precedência proposta:** valores permitidos pelo contrato → defaults do perfil → configuração local validada → parâmetros permitidos da tarefa. Restrições não são sobrescritas por essa precedência. Um alvo incompatível exige correção explícita, não mesclagem silenciosa.
 
@@ -204,7 +204,7 @@ Exemplo de pedido público. Ele solicita uma ação; não concede autorização:
 ```json
 {
   "schemaVersion": "1.0",
-  "project": "simtr-api",
+  "project": "minha-api",
   "profile": "jboss-migracao",
   "capability": "maven.build",
   "input": { "phase": "verify" }
@@ -436,10 +436,10 @@ Comandos ilustrativos a implementar, não comandos já existentes:
 
 ```text
 harness doctor --workspace D:/Trabalho
-harness capabilities --project simtr-api --profile jboss-migracao
-harness run maven.build --project simtr-api --phase verify
-harness task migration.prepare-plan --project simtr-api
-harness reconcile --project simtr-api --source D:/MaterialRecebido/simtr-api
+harness capabilities --project minha-api --profile jboss-migracao
+harness run maven.build --project minha-api --phase verify
+harness task migration.prepare-plan --project minha-api
+harness reconcile --project minha-api --source D:/MaterialRecebido/minha-api
 harness mcp --workspace D:/Trabalho
 ```
 

@@ -60,7 +60,7 @@ Práticas de desenvolvimento seguro, como o NIST SSDF, servem de referência par
 | --- | --- | --- |
 | Migrações tecnológicas | Consolidar EAP 7.4 com Java 8 e `javax` e estender o processo a Quarkus, com versões e restrições próprias. | Lotes executados, verificados e aceitos com evidências por perfil. |
 | SDLC cotidiano | Apoiar requisitos, desenvolvimento, testes, entrega e operação de aplicações JBoss e Quarkus. | Continuidade entre demanda, decisão, alteração e resultado. |
-| Modernização | Apoiar a simplificação do negócio e da arquitetura proposta pelo Fábio, com escolhas tecnológicas explícitas. | Mudanças incrementais fundamentadas no conhecimento da aplicação. |
+| Modernização | Apoiar a simplificação do negócio e da arquitetura proposta pela organização, com escolhas tecnológicas explícitas. | Mudanças incrementais fundamentadas no conhecimento da aplicação. |
 
 No SDLC, o mesmo ciclo se aplica a requisitos e análise (critérios de aceite acordados), arquitetura e planejamento (plano com escopo e justificativa), desenvolvimento (diff relacionado à demanda), revisão e testes (evidências técnicas e funcionais), entrega (versão identificada e reversão definida) e operação (diagnóstico e contexto para o próximo trabalho). O harness integra os sistemas existentes de requisitos, Git, CI/CD e operação, preservando os registros oficiais de cada um; cobrir o SDLC não significa conceder execução irrestrita aos agentes.
 
