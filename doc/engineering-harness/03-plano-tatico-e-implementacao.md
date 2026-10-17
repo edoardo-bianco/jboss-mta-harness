@@ -489,7 +489,7 @@ Auditoria feita no repositório, com conferência do código da `main` `5c8d582`
 
 | Achado | Tratamento |
 | --- | --- |
-| A11 — Baseline anterior à PR #31 | Situação real descrita na seção 4 e no documento 1, seção 4; R0, R4, S1 e S2 atualizados. |
+| A11 — Baseline anterior à PR #31 | Situação real descrita na seção 4 e no documento 1, seção 3; R0, R4, S1 e S2 atualizados. |
 | A12 — Build descrito com `RunId` | Corrigido: a `main` publica a última tentativa em `atual/build/`. |
 | A13 — Estado JBoss fora do princípio de armazenamento | Layout-alvo no documento 2, seção 9.1; decisões de 17/10 (somente o último, deploy substitui, sem rollback); incremento A. |
 | A14 — Duas fontes normativas para o estado | ADR-0009 e `doc/contratos/` são donos das regras executáveis; o documento 2 aponta para eles. |
@@ -498,7 +498,7 @@ Auditoria feita no repositório, com conferência do código da `main` `5c8d582`
 | A17 — Java 8 tratado como geral | Restrito ao perfil JBoss; Quarkus com Java 17+, incluindo 25. |
 | A18 — Origem EAP divergente | Perfil JBoss atende 7.0 ou 7.1. |
 | A19 — Fundamentos e catálogo fora do conjunto | Origem e fundamentos no documento 1, seção 2; catálogo no anexo A. |
-| A20 — Perfis previstos reduzidos a um "Quarkus" genérico | Restaurados os perfis da arquitetura anterior: Desenvolvimento Quarkus (SDLC sem migração), Migração Quarkus e Cobertura de código transversal (documento 1, seção 7; incremento F). |
+| A20 — Perfis previstos reduzidos a um "Quarkus" genérico | Restaurados os perfis da arquitetura anterior: Desenvolvimento Quarkus (SDLC sem migração), Migração Quarkus e Cobertura de código transversal (documento 1, seção 6; incremento F). |
 
 Fontes verificadas nesta revisão: O8 (revisão 2026-07-28 do transporte `stdio`), O13, O15 (PowerShell 6+), O24–O27.
 
