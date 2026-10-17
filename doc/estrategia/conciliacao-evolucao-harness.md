@@ -9,7 +9,14 @@ html:
 
 Registro de 05/10/2026, comparando o [catálogo de 23 capacidades](../features/evolucao-harness-dominios-capacidades-priorizacao.md), baseado em `de5975096d`, com o harness integrado em `d48cf6a`. A análise usa código e documentação locais; não revalida ferramentas externas nem executa pilotos.
 
-**Situação:** proposta incorporada para avaliação futura. Data, prioridade escolhida e piloto continuam **a definir**. As sugestões P1/P2/P3 e a preferência pelo piloto A no catálogo não foram aprovadas como sequência de trabalho.
+**Situação atualizada em 10/10/2026:** a [simplificação por projeto](../features/organizacao-simplificada-por-projeto.md)
+e a [conversão descartável](../features/conversao-descartavel-dos-registros.md)
+têm precedência sobre modernização e novas funcionalidades. A entrega inclui
+retirada de recibos/rastreamentos, links diretos e limpeza/alinhamento dos guias
+e do orientador. [Plano e viabilidade](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+Depois desse aceite, data, prioridades relativas e piloto do catálogo continuam
+**a definir**. As correspondências abaixo documentam a baseline antiga; requisitos
+de recibos, cadeias e extratos devem ser reavaliados, sem restaurá-los por equivalência.
 
 ## Fontes e responsabilidades
 
@@ -20,7 +27,7 @@ planejamento detalhado por issue; nao altera as 23 capacidades da baseline histo
 - A [estratégia](estrategia-harness_.md) mantém a direção: JBoss, núcleo comum, tecnologias, engines, IDEs, SDLC e modernização.
 - O catálogo detalha capacidades, alternativas e possíveis pilotos. Sua baseline e suas fontes históricas permanecem identificadas.
 - Esta conciliação relaciona os escopos e corrige a leitura da baseline antiga; não substitui os contratos nem é outro plano de implementação.
-- O [backlog vigente](../../tasks/todo.md#backlog-vigente) concentra o estado das entregas e verificações. A matriz de prioridade do catálogo concentra a futura escolha das capacidades. Ao escolher um incremento, atualizar essas referências na mesma entrega, sem manter dois checklists da mesma implementação.
+- O [backlog arquivado](../../tasks/historico/todo-ate-2026-10-17.md#backlog-vigente) concentra o estado das entregas e verificações. A matriz de prioridade do catálogo concentra a futura escolha das capacidades. Ao escolher um incremento, atualizar essas referências na mesma entrega, sem manter dois checklists da mesma implementação.
 - [AGENTS.md](../../AGENTS.md), as ADRs [0002](../adr/0002-separacao-harness-e-migracao-progressiva.md), [0004](../adr/0004-git-informativo-sem-controle-de-branches.md), [0005](../adr/0005-planejamento-orientado-pelo-registro.md) e o [contrato vigente](../especificacoes/planejamento-copilot.md) continuam normativos. A proposta não transforma helpers em executores.
 
 ## Correspondência com todas as frentes do backlog
@@ -82,7 +89,7 @@ Os IDs anteriores são preservados para rastreabilidade. Sua correspondência co
 - HAR-04/OBJ-02 ainda descrevem uma entrada sem MTA como trabalho futuro. A ADR-0005 e a implementação atual já permitem planejamento EAP com `PlanningBasis=EVIDENCIAS`, sem fabricar RunId ou snapshot. A ampliação para outros objetivos/perfis continua proposta.
 - A priorização de issues da aplicação já usa 0,01% a 100,00% do total inicial fixo, com recriação ou progresso. Correção após o ensaio de 05/10/2026: o progresso exclui todos os IDs examinados, inclusive sem recomendação, e cada examinada recebe evidências, referências e roteiro para continuidade manual. Isso substitui a exclusão anterior somente por propostas. Ela é distinta da prioridade das capacidades do harness nesta proposta; não usar P1/P2/P3 para alterar esse fluxo.
 - O workspace inicial agora contém apenas o harness; playgrounds/aplicações são externos. Referências históricas a exemplos internos e à branch encerrada do ensaio não são instruções para nova execução.
-- A afirmação de “validação manual completa com aplicação ainda pendente” na base estratégica de 02/10 deve ser lida com o aceite geral de 03/10 registrado em tasks/todo.md. Esse aceite não comprova cenários individuais não registrados e não encerra VAL-01/02/03 nem a futura migração de configuração JBS.
+- A afirmação de “validação manual completa com aplicação ainda pendente” na base estratégica de 02/10 deve ser lida com o aceite geral de 03/10 registrado em tasks/historico/todo-ate-2026-10-17.md. Esse aceite não comprova cenários individuais não registrados e não encerra VAL-01/02/03 nem a futura migração de configuração JBS.
 
 **Novos recortes explícitos a avaliar:** ingestão Fortify, objetivo DDD separado da migração mínima, buscas estrutural/arquitetural/de fluxo, verificações Maven adicionais e adaptador OpenRewrite. Parte deles já cabia na estratégia ampla; agora há fichas, dependências e candidatos. Não há aprovação de instalação, versão, licença, runtime ou suporte por sua inclusão no catálogo.
 
@@ -100,8 +107,8 @@ Os IDs anteriores são preservados para rastreabilidade. Sua correspondência co
 
 | Constatação | Referências locais |
 | --- | --- |
-| Estado e ensaios ainda pendentes | [Backlog vigente](../../tasks/todo.md#backlog-vigente), [sequência e verificação](../../tasks/plan.md#sequencia-e-verificacao) e [aceite geral de 03/10](../../tasks/todo.md#aceite-manual-e-integracao-nas-principais---2026-10-03). |
-| Planejamento pelo registro e base EVIDENCIAS | [HarnessPlanningInput.ps1](../../scripts/HarnessPlanningInput.ps1), [HarnessPlanning.psm1](../../scripts/HarnessPlanning.psm1), [Test-PlanningEvidence.ps1](../../tests/Test-PlanningEvidence.ps1) e ADR-0005. |
+| Estado e ensaios ainda pendentes | [Backlog arquivado](../../tasks/historico/todo-ate-2026-10-17.md#backlog-vigente), [sequência e verificação](../../tasks/historico/plan-ate-2026-10-17.md#sequencia-e-verificacao) e [aceite geral de 03/10](../../tasks/historico/todo-ate-2026-10-17.md#aceite-manual-e-integracao-nas-principais---2026-10-03). |
+| Planejamento pelo registro e base EVIDENCIAS | `HarnessPlanningInput.ps1` (fonte da baseline, retirada na simplificação), [HarnessPlanning.psm1](../../scripts/HarnessPlanning.psm1), [Test-PlanningEvidence.ps1](../../tests/Test-PlanningEvidence.ps1) e ADR-0005. |
 | Priorização percentual e continuidade | [Estado de priorização](../../scripts/HarnessPrioritizationState.ps1), [guia](../guias/tools/priorizacao-issues.md), [Test-PrioritizationProgress.ps1](../../tests/Test-PrioritizationProgress.ps1). |
 | Importação e consultas existentes | [HarnessProjectIndex.psm1](../../scripts/HarnessProjectIndex.psm1) e [HarnessSonarApi.psm1](../../scripts/HarnessSonarApi.psm1). |
 | Operações e validações existentes | [HarnessBuild.psm1](../../scripts/HarnessBuild.psm1), [HarnessSonarCriteria.psm1](../../scripts/HarnessSonarCriteria.psm1), [HarnessJboss.psm1](../../scripts/HarnessJboss.psm1) e [HarnessJbossArtifacts.psm1](../../scripts/HarnessJbossArtifacts.psm1). |

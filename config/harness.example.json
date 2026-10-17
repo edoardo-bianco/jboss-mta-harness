@@ -27,7 +27,6 @@
     "profiles": []
   },
   "mta": {
-    "runsPath": null,
     "profile": "eap71-to-eap74-java8",
     "rulesPath": null,
     "sources": [],

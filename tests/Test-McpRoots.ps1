@@ -2,6 +2,7 @@
 $ErrorActionPreference='Stop'
 $root=Split-Path -Parent $PSScriptRoot
 Import-Module (Join-Path $root 'scripts/HarnessMcpSettings.psm1') -Force -DisableNameChecking
+Import-Module (Join-Path $root 'scripts/HarnessProject.psm1') -DisableNameChecking
 function Assert($condition,$message) { if (-not $condition) { throw $message } }
 function Rejected([scriptblock]$action) {
     try { & $action | Out-Null; return $false } catch { return $true }
@@ -13,21 +14,25 @@ $second=Join-Path $area 'outro projeto'
 $runs=Join-Path $area 'rodadas MTA'
 $newRuns=Join-Path $area 'novas rodadas'
 foreach ($dir in @($fixture,$source,$second,$runs,$newRuns)) { $null=[IO.Directory]::CreateDirectory($dir) }
-foreach ($dir in @($source,$second)) { [IO.File]::WriteAllText((Join-Path $dir 'pom.xml'),'<project/>') }
+foreach ($item in @(@($source,'app'),@($second,'outro'))) { [IO.File]::WriteAllText((Join-Path $item[0] 'pom.xml'),('<project><artifactId>'+$item[1]+'</artifactId></project>')) }
+$projects=@(foreach ($dir in @($source,$second)) { Initialize-HarnessProjectStorage $fixture (Join-Path $dir 'pom.xml') })
 $workspace=Join-Path $fixture 'ensaio.code-workspace'
 $config=Join-Path $fixture 'harness.json'
 $utf8=[Text.UTF8Encoding]::new($false)
 $workspaceJson='{"folders":[{"path":"."},{"path":"../codigo com espacos"},{"path":"../codigo com espacos"},],"settings":{"url":"https://example.invalid/"},/*comentario*/}'
 [IO.File]::WriteAllText($workspace,$workspaceJson,$utf8)
 function Set-MtaRoot($path) {
-    [IO.File]::WriteAllText($config,(@{schemaVersion=1;mta=@{runsPath=$path}} | ConvertTo-Json -Depth 5),$utf8)
+    foreach ($project in $projects) {
+        [IO.File]::WriteAllText($project.ConfigPath,(@{pom=$project.Pom;mta=@{diretorio=$path}} | ConvertTo-Json -Depth 5),$utf8)
+    }
 }
+[IO.File]::WriteAllText($config,'{"schemaVersion":1,"mta":{"runsPath":"C:/legado-ignorado"}}',$utf8)
 Set-MtaRoot '../rodadas MTA'
 $argsRoots=@{Root=$fixture;AllowedRoots=@($fixture);WorkspacePath=$workspace;HarnessConfigPath=$config}
 $workspaceBefore=[IO.File]::ReadAllText($workspace)
 $configBefore=[IO.File]::ReadAllText($config)
 $actual=@(Get-HarnessMcpAllowedRoots @argsRoots)
-Assert ($actual.Count -eq 3 -and $actual -contains $fixture -and $actual -contains $source -and $actual -contains $runs) 'Raizes devem vir do workspace/JSONC e mta.runsPath relativo ao harness, sem duplicatas.'
+Assert ($actual.Count -eq 3 -and $actual -contains $fixture -and $actual -contains $source -and $actual -contains $runs) 'Raizes devem vir do workspace/JSONC e mta.diretorio do projeto corrente, sem duplicatas ou raiz legada.'
 $null=[IO.Directory]::CreateDirectory((Join-Path $runs 'projeto/rodada-nova'))
 Assert ((@(Get-HarnessMcpAllowedRoots @argsRoots) -join '|') -eq ($actual -join '|')) 'Nova rodada nao deve exigir nova permissao.'
 Assert ([IO.File]::ReadAllText($workspace) -ceq $workspaceBefore) 'Consulta alterou workspace.'
@@ -35,7 +40,8 @@ Assert ([IO.File]::ReadAllText($config) -ceq $configBefore) 'Consulta alterou co
 $otherRecords=Join-Path $fixture 'registros'
 $null=[IO.Directory]::CreateDirectory($otherRecords)
 $otherRoots=@(Get-HarnessMcpAllowedRoots -Root $otherRecords -AllowedRoots @($fixture) -WorkspacePath $workspace -HarnessConfigPath $config -PathBase $fixture)
-Assert ($otherRoots -contains $runs) 'Raiz alternativa de registros nao deve mudar a base de mta.runsPath relativo.'
+Assert ($otherRoots -notcontains $runs) 'Raiz alternativa sem associacao corrente nao deve herdar permissao de outra raiz.'
+Assert (-not (Test-Path (Join-Path $otherRecords '.harness'))) 'Ler raizes nao pode inicializar projetos.'
 [IO.File]::WriteAllText($workspace,'{"folders":[{"path":"../codigo com espacos"},{"path":"../rodadas MTA"}]}',$utf8)
 Assert (@(Get-HarnessMcpAllowedRoots @argsRoots).Count -eq 3) 'Raiz MTA tambem aberta no workspace deve ser aceita sem duplicacao.'
 
@@ -46,20 +52,29 @@ Set-MtaRoot $newRuns
 $actual=@(Get-HarnessMcpAllowedRoots @argsRoots)
 Assert ($actual -contains $newRuns -and $actual -notcontains $runs) 'Mudanca de raiz MTA nao deve manter permissao antiga.'
 Set-MtaRoot $null
-Assert (@(Get-HarnessMcpAllowedRoots @argsRoots).Count -eq 2) 'runsPath null usa .harness/runs, ja coberto pela raiz do harness.'
+Assert (@(Get-HarnessMcpAllowedRoots @argsRoots).Count -eq 2) 'Diretorio null usa diagnostico corrente interno, ja coberto pela raiz do harness.'
 $legacy=@(Get-HarnessMcpAllowedRoots -Root $fixture -AllowedRoots @($source))
 Assert ($legacy.Count -eq 2 -and $legacy -contains $fixture -and $legacy -contains $source) 'Configuracao fixa legada foi alterada.'
 
-foreach ($bad in @('C:/','\\servidor\pasta','C:/pasta:ads','${env:USERPROFILE}', '../outro projeto', $fixture)) {
+foreach ($covered in @((Join-Path $second 'target/mta'),(Join-Path $fixture '.harness/projetos/outro/atual/diagnosticos/mta'),$second,$fixture)) {
+    Set-MtaRoot $covered
+    Assert (@(Get-HarnessMcpAllowedRoots @argsRoots).Count -eq 2) 'MTA ja coberto pelo workspace deve ser aceito sem nova permissao.'
+}
+foreach ($bad in @('C:/','\\servidor\pasta','C:/pasta:ads','${env:USERPROFILE}', $area)) {
     Set-MtaRoot $bad
     Assert (Rejected { Get-HarnessMcpAllowedRoots @argsRoots }) ('Raiz MTA invalida aceita: '+$bad)
 }
 Set-MtaRoot $runs
-[IO.File]::WriteAllText($config,'{"schemaVersion":1,"mta":{"runsPath":[]}}',$utf8)
-Assert (Rejected { Get-HarnessMcpAllowedRoots @argsRoots }) 'runsPath com tipo invalido nao pode ser ignorado.'
+[IO.File]::WriteAllText($projects[1].ConfigPath,(@{pom=$projects[1].Pom;mta=@{diretorio=@()}} | ConvertTo-Json -Depth 5),$utf8)
+Assert (Rejected { Get-HarnessMcpAllowedRoots @argsRoots }) 'mta.diretorio com tipo invalido nao pode ser ignorado.'
+Set-MtaRoot $runs
+[IO.File]::WriteAllText($projects[1].ConfigPath,(@{pom=$projects[0].Pom;mta=@{diretorio=$runs}} | ConvertTo-Json -Depth 5),$utf8)
+Assert (Rejected { Get-HarnessMcpAllowedRoots @argsRoots }) 'Associacao a outro POM nao pode conceder leitura.'
+Set-MtaRoot $runs
 [IO.File]::WriteAllText($config,'{invalido',$utf8)
 Assert (Rejected { Get-HarnessMcpAllowedRoots @argsRoots }) 'Configuracao corrompida nao pode usar permissao antiga.'
 Set-MtaRoot $runs
+[IO.File]::WriteAllText($config,'{"schemaVersion":1,"mta":{}}',$utf8)
 [IO.File]::WriteAllText($workspace,'{invalido',$utf8)
 Assert (Rejected { Get-HarnessMcpAllowedRoots @argsRoots }) 'Workspace corrompido nao pode usar permissao antiga.'
 [IO.File]::WriteAllText($workspace,'{"folders":[{"path":"C:/"}]}',$utf8)
@@ -75,4 +90,4 @@ try {
     [IO.File]::WriteAllText($workspace,'{"folders":[{"path":"pasta-vinculada"}]}',$utf8)
     Assert (Rejected { Get-HarnessMcpAllowedRoots @argsRoots }) 'Junction no workspace nao pode conceder acesso.'
 } finally { [IO.Directory]::Delete($link) }
-Write-Host 'PASS: raizes do workspace/MTA, atualizacao, JSONC, legado, limites e leitura sem escrita.'
+Write-Host 'PASS: raizes correntes por POM, workspace/JSONC, alteracao de origem, associacao, limites e leitura sem escrita.'

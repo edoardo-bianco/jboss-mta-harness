@@ -6,7 +6,7 @@ function Assert($condition, $message) { if (-not $condition) { throw $message } 
 $area = Join-Path $root ('.harness/tests/jboss-workspace-' + [guid]::NewGuid().ToString('N'))
 $null = [IO.Directory]::CreateDirectory($area)
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
-$context = [pscustomobject]@{ Root=$area; Config=$config }
+$context = [pscustomobject]@{ Root=$area; Config=$config; Projects=@() }
 $path = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.launch.configurations.Count -eq 2) 'Faltam attaches Java dos dois EAPs.'

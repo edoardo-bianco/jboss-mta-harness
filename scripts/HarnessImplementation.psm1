@@ -50,8 +50,8 @@ function Select-ImplementationBranch {
         } else { throw 'Escolha de branch cancelada ou invalida; Git nao alterado.' }
         if ($observed.Status -ne 'VERIFIED') { throw 'Nao foi possivel criar branch: Git/HEAD indisponivel. Use a opcao 2 para continuar sem alterar Git.' }
         foreach ($key in @('Context','Plan','Todo')) {
-            $hash = (Get-FileHash -LiteralPath $Prepared.($key + 'Path') -Algorithm SHA256).Hash
-            if ($hash -cne $Prepared.($key + 'Sha256')) { throw 'Documentos alterados depois do preparo; prepare novamente antes de criar a branch.' }
+            $text = [IO.File]::ReadAllText($Prepared.($key + 'Path'))
+            if ($text -cne $Prepared.DocumentContents[$key]) { throw 'Documentos alterados depois do preparo; prepare novamente antes de criar a branch.' }
         }
         $current = Get-HarnessGitState $Context
         if ($current.Status -ne 'VERIFIED' -or $current.RepositoryRoot -ine $observed.RepositoryRoot -or

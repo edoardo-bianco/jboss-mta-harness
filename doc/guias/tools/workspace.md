@@ -21,6 +21,7 @@ e quando precisar ajustar o ambiente durante o trabalho.
 | Alterar caminhos ou escolhas da IDE | [JSON local](#configuracao-da-maquina) e [workspace gerado/manual](#duas-opcoes-para-configurar-o-workspace) |
 | Permitir leitura dos relatorios MTA pelo Copilot | [Acesso a pasta MTA](#acesso-do-copilot-a-pasta-mta) |
 | Selecionar ou adicionar aplicacoes | [Projetos](#escolher-o-projeto-em-cada-tarefa) e [exemplos/corporativos](#ensaiar-e-depois-usar-os-projetos-corporativos) |
+| Navegar nos documentos/evidencias | [Indice geral e indice do projeto](#navegar-pelas-evidencias-do-projeto) |
 | Localizar ou limpar saidas | [Pastas locais](#pastas-locais-e-backups-temporarios) e [limpeza](#limpar-execucoes-locais) |
 | Identificar o script de uma Run Task | [Catalogo de tarefas](#tarefa-e-script-correspondente) |
 
@@ -107,8 +108,11 @@ Apos atualizar o harness com Git, continue usando seu workspace local. Se precis
 recarregar a interface/extensoes, use **Ctrl+Shift+P > Developer: Reload Window**;
 isso nao gera workspace nem atualiza prompts salvos. Para usar instrucoes novas,
 prepare outro prompt na operacao desejada, reutilizando o MTA existente quando
-aplicavel. Na manutencao do registro, pode escolher somente registro/evidencias.
-Prompts e copias do contrato de solicitacoes anteriores permanecem historicos.
+aplicavel. Na manutencao do registro, escolha somente local quando nao houver material recebido;
+essa opcao tambem considera o MTA configurado.
+Plano, tarefas e indices preservam texto humano fora dos blocos gerenciados.
+O prompt de planejamento e regenerado: mantenha referencias escritas manualmente
+em arquivo proprio ou no chat. Guias e contratos sao consultados por referencia.
 
 #### Preparar as maquinas dos colegas
 
@@ -206,33 +210,17 @@ Trecho comum para preencher no passo 3 de [Comecar na maquina de trabalho](#come
 
 ### Acesso do Copilot a pasta MTA
 
-O gerador preenche `github.copilot.chat.additionalReadAccessPaths` em `settings`
-do workspace local com `mta.runsPath`, quando este caminho esta configurado e a
-permissao ainda nao existe no workspace. A lista autoriza leitura da pasta e suas
-subpastas pelas ferramentas do Copilot; com `C:/mta-runs`, abrange as rodadas dos
-projetos nessa raiz. A configuracao pertence ao workspace, sem editar User Settings.
+O gerador usa as origens externas `mta.diretorio` de `projeto.json` dos projetos
+correntes para preencher `github.copilot.chat.additionalReadAccessPaths`, quando
+a lista ainda nao foi definida. POM/Source precisam corresponder ao projeto local.
+Caminhos ja cobertos pelo workspace nao exigem permissao extra; uma raiz ancestral
+que ampliaria o acesso e recusada. `mta.runsPath` antigo nao concede acesso.
 
-Para aplicar em outra maquina, confira `mta.runsPath` em
-`config/harness.local.json`, execute **Workspace: gerar workspace** e abra
-`jboss-mta-harness.local.code-workspace`. Esse arquivo e local e nao acompanha
-o clone/atualizacao por Git. O gerador preserva projetos e ajustes existentes.
-
-Para alterar manualmente, use **Ctrl+Shift+P > Preferences: Open Workspace
-Settings (JSON)** e edite a lista dentro de `settings`, preservando os demais campos:
-
-```json
-"github.copilot.chat.additionalReadAccessPaths": [
-  "C:/mta-runs"
-]
-```
-
-Substitua pelo caminho desta maquina ou informe varias pastas. Para limitar a
-uma rodada, use sua pasta completa. Para revogar o acesso configurado aqui,
-deixe `[]`: o gerador preserva listas existentes, inclusive vazias. Remover a
-chave permite que a proxima geracao volte a inicializa-la com `mta.runsPath`.
-Se mudar a pasta de saida MTA, confira tambem esta lista; uma permissao existente
-nao e trocada automaticamente. Com `mta.runsPath=null`, nenhuma nova permissao
-externa e acrescentada. Listas ja definidas permanecem sob controle do usuario.
+Confira a associacao MTA, execute **Workspace: gerar workspace** e abra o arquivo
+local. O gerador preserva permissoes existentes, inclusive lista vazia `[]`.
+Se mudar a origem externa, confira a lista manualmente em **Preferences: Open
+Workspace Settings (JSON)**; uma permissao existente nao e trocada automaticamente.
+Informe somente as pastas necessarias. Configuracao nao comprova leitura real.
 
 O [manifesto oficial do Copilot](https://github.com/microsoft/vscode-copilot-chat/blob/main/package.json)
 registra `additionalReadAccessPaths` com escopo `window`, compativel com workspace.
@@ -336,7 +324,7 @@ Para preparar o ambiente, use o [pedido ao helper deste guia](#orientacao-com-o-
 
 Use **File > Add Folder to Workspace...** para adicionar os projetos Java/Maven e salve o workspace. **Nao e preciso cadastra-los em `repositories` no JSON do harness.** Cada pasta do workspace que contenha `pom.xml` aparece na selecao, incluindo agregadores e projetos com packaging `pom`, `jar` ou `war`. Para escolher um modulo separadamente, adicione tambem a pasta dele ao workspace. Pastas sem POM e a pasta do harness ficam fora da lista.
 
-Em **Terminal > Run Task**, escolha a tarefa da pasta `harness`. Na entrada **Arquivo .code-workspace em uso**, confirme `jboss-mta-harness.local.code-workspace` se esse for o arquivo aberto. Se usar outro, informe seu caminho completo ou relativo a raiz do harness, sem aspas. No build, escolha tambem as fases na lista do VS Code. Para conferir ambiente, build, executar MTA, consultar historico e abrir relatorio, o terminal oferece uma lista numerada de projetos: digite o numero e pressione Enter; `q` cancela. As duas tarefas **MTA: acompanhar...** localizam a analise em execucao automaticamente. **Planejamento: planejar** recupera o registro existente e so pergunta qual usar quando houver varios candidatos; nao repete menus de operacao ou rodada.
+Em **Terminal > Run Task**, escolha a tarefa da pasta `harness`. Na entrada **Arquivo .code-workspace em uso**, confirme `jboss-mta-harness.local.code-workspace` se esse for o arquivo aberto. Se usar outro, informe seu caminho completo ou relativo a raiz do harness, sem aspas. No build, escolha tambem as fases na lista do VS Code. Para conferir ambiente, build, executar MTA e abrir relatorio, o terminal oferece uma lista numerada de projetos: digite o numero e pressione Enter; `q` cancela. As duas tarefas **MTA: acompanhar...** consultam os logs correntes do projeto escolhido. **Planejamento: planejar** recupera o registro existente e so pergunta qual usar quando houver varios candidatos; nao repete menus de operacao ou rodada.
 
 Por exemplo, se `simtr-api` e `simtr-outsourcing-api` estiverem no workspace, ambos aparecem. Escolher um agregador executa o Maven no POM dele e inclui os modulos declarados; escolher um modulo usa o POM desse modulo. O nome da pasta nao determina seu papel.
 
@@ -346,7 +334,12 @@ As tarefas **Workspace: configurar caminhos** e **Workspace: gerar workspace** c
 
 As tarefas recebem o arquivo informado por `${input:harnessWorkspacePath}`, uma entrada `promptString` suportada pelo VS Code. `${workspaceFile}` nao e uma variavel nativa de tarefas; por isso o caminho e solicitado explicitamente, sem presumir qual workspace esta aberto. Veja a [referencia de variaveis do VS Code](https://code.visualstudio.com/docs/reference/variables-reference). Pelo terminal, passe `-WorkspacePath` e `-SelectTarget` para abrir o mesmo menu, ou `-Target "simtr-outsourcing-api"` para selecionar diretamente. Sem `-WorkspacePath`, os scripts mantem a compatibilidade com `repositories`/`activeProject` do JSON.
 
-Historicos de projetos selecionados pelo workspace sao identificados pelo caminho, evitando misturar projetos homonimos e preservando a identidade quando o nome no Explorer muda. Rodadas antigas criadas pelo cadastro JSON continuam acessiveis pela execucao CLI sem `-WorkspacePath`; os arquivos existentes sao preservados.
+O projeto e identificado pelo `artifactId` literal do POM e associado ao POM local
+em `projeto.json`. Renomear a pasta no Explorer nao muda essa identidade. Outro POM
+com o mesmo artifactId exige resolver a colisao; o harness nao cria um hash para
+separa-los. A CLI sem workspace usa os projetos do JSON, mas continua lendo o
+estado corrente. Registros legados exigem conversao explicita; seus originais
+nao sao alterados pelas tarefas correntes.
 
 ### Ensaiar e depois usar os projetos corporativos
 
@@ -371,57 +364,70 @@ as pastas que nao deseja considerar. Remover uma entrada do workspace nao apaga
 codigo nem evidencias; o gerador preserva entradas existentes. Se usa o gerador ou
 CLI sem WorkspacePath, mantenha `repositories` coerente com os projetos desejados.
 
+### Navegar pelas evidencias do projeto
+
+1. Execute **Workspace: atualizar indice dos projetos**. A tarefa abre
+   `.harness/indices/projetos.md`; escolha o projeto pelo nome.
+2. No indice do projeto, abra registro, plano/tarefas, evidencias/anexos, fichas
+   e priorizacoes, cenarios de sprints ou diagnosticos disponiveis.
+3. Para investigar uma falha, abra o log da ultima tentativa de build, MTA ou
+   Sonar. Para o diagnostico utilizavel, abra o HTML MTA ou resumo Sonar.
+   Confira datas e situacao: o relatorio pode anteceder a tentativa que falhou.
+4. Use os links da ficha/indice de evidencias para chegar ao codigo, POM, anexos
+   e detalhe do relatorio. Fonte ausente permanece uma lacuna; nao ha link ficticio.
+
+No Explorer, abra **harness > .harness > indices > projetos.md**. O workspace
+inicial e o gerador deixam `.harness` visivel. Ao atualizar um workspace antigo,
+**Workspace: gerar workspace** corrige o filtro `**/.harness` que antes a ocultava,
+preservando os outros filtros e as configuracoes Java. Em workspace mantido
+manualmente, defina esse filtro como `false` em `files.exclude`. Se sua
+configuracao pessoal oculta arquivos ignorados pelo Git, confira tambem
+`explorer.excludeGitIgnore`.
+
+As subpastas `.harness/tests`, `.harness/backups-temporarios` e
+`.harness/workspace-backups` ficam ocultas por padrao para reduzir ruido.
+O gerador preserva escolhas explicitas nesses filtros. Arquivos continuam no
+disco e podem ser abertos pelo caminho; indices, projetos e evidencias permanecem
+visiveis.
+
+Adicionar uma aplicacao continua sendo **Add Folder to Workspace** e salvar,
+sem lista adicional para a extensao Java. Testes de desenvolvimento do harness
+usam [execucao isolada](../manutencao-harness.md#testar-os-scripts-do-harness), pois
+ocultar fixtures no Explorer nao impede sua descoberta por extensoes Java.
+O workspace operacional nao deve acumular esses projetos artificiais.
+
+Para simplesmente consultar resultados, tambem e possivel abrir os arquivos
+diretamente em **harness > .harness > projetos > artifactId**. Em cada projeto,
+`atual/diagnosticos/sonar/RESUMO.md` apresenta o Sonar coletado;
+`atual/planejamento/` guarda plano/tarefas existentes e `evidencias/` os anexos.
+Abra Markdown em preview para seguir seus links. Uma pasta ou documento ainda
+nao produzido nao aparece. Ler arquivos existentes nao exige associar um MTA nem
+executar analises; associacao da origem continua necessaria apenas para os fluxos
+que consomem MTA. Os indices permanecem uma alternativa de navegacao.
+
+O indice e Markdown: use a visualizacao de Markdown do VS Code para clicar
+nos links ou siga-os pelo editor. A arvore de pastas tambem permite copia/cola
+e consulta manual. Os arquivos locais nao acompanham clone/pull; para receber
+trabalho, siga [onde copiar](compartilhamento-contextos.md#na-maquina-de-quem-recebe).
+O indice e reconstruivel e nao concede GO, aceite ou escolha de prioridade.
+
 ### Limpar execucoes locais
 
-1. Termine build/MTA e preparacao de contexto. Encerre a conversa Codex/Copilot que usa
-   os documentos a apagar; o harness nao controla o agente externo.
-2. Execute **Workspace: limpar execucoes**. Escolha **1** para um projeto ou **2**
-   para todos os projetos; **3** limpa somente backups temporarios de exercicios/ajustes.
-   **q** cancela. Na opcao 1, selecione o projeto do workspace.
-3. Confira os caminhos listados. Nas opcoes **1/2**, a limpeza inclui somente
-   execucoes em `.harness/runs`, `.harness/builds` e `.harness/planning`, com
-   relatorios/snapshots locais, indices de MTA externo, prompts, `plan.md`, `todo.md`
-   e recibos legados. Os dossies em `planning/<artifactId>/issues/` sao preservados,
-   incluindo fichas, anexos e novas propostas. Os ponteiros locais relacionados
-   tambem sao removidos. Na opcao **3**,
-   apenas a pasta central de backups temporarios sera removida.
-4. Digite **LIMPAR** para excluir. Enter ou outro texto cancela. Os scripts recusam
-   links/junctions e caminhos fora das areas autorizadas, e bloqueiam limpeza
-   concorrente com build/MTA/preparacao pelo harness.
-5. O registro e a origem MTA externa permanecem. Confira suas referencias antes de
-   usar **Planejamento: planejar**: planos/recibos apagados nao podem ser retomados.
-   Para reconstruir o preparo preservando as escolhas, peca ao helper o
-   [encaminhamento apropriado](planejamento-migracao.md#recuperar-um-preparo-apos-limpeza).
-   Para adotar outra rodada, use manutencao explicita; Planejar nao oferece menu de MTA.
+Use **Workspace: limpar execucoes** para listar residuos temporarios de build,
+MTA e Sonar de um projeto (opcao 1), de todos (2), ou somente backups temporarios
+de exercicios/ajustes (3). Confira os caminhos da previa e digite **LIMPAR**;
+outra resposta cancela. A tarefa revalida a selecao e recusa atividade concorrente,
+links/junctions e destinos fora das areas permitidas.
 
-A limpeza preserva configuracao, workspace, fontes, Git, `.harness/sonar/`, templates
-versionados dos prompts, cache Maven, backups, `.harness/evidencias/`, `.harness/projetos/`
-e `.harness/priorizacao/`, alem de `.harness/importacoes/` e dos dossies por issue
-em `.harness/planning/`.
-Nao apaga `target/` da aplicacao nem qualquer conteudo MTA externo, registrado ou recebido.
-No menu de projeto, o escopo vem do `Source` dos recibos, incluindo
-pastas antigas e novas. Recibos invalidos bloqueiam a limpeza seletiva; pastas sem
-recibo identificavel permanecem. A opcao todos remove runs/builds e o planejamento
-fora dos dossies por issue.
-Para MTA externo, somente o indice local `location.json` e seus ponteiros entram
-na limpeza. O destino externo nao e consultado e pode estar indisponivel.
-Depois, o historico/ultimo relatorio perde a referencia local; informe a pasta quando
-**MTA: abrir ultimo relatorio** solicitar. Para adotar outra origem no registro,
-peca ao helper o [encaminhamento de manutencao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente)
-com o caminho pronto; Planejar usa a origem vinculada sem menu de rodadas.
-O `migracao.md` mantem decisoes e referencias anteriores; limpa-se o historico de
-execucoes, sem zerar o registro. A opcao 3 continua restrita aos backups temporarios locais.
-
-Para somente listar, sem excluir, execute na raiz:
+Dados correntes, fontes, relatorios externos, fichas, planos, anexos e conflitos
+pendentes sao preservados. A tarefa nao apaga `target/` da aplicacao nem
+converte/descarta dados antigos. Descarte legado pertence ao
+[conversor separado](../../features/conversao-descartavel-dos-registros.md),
+com previa, validacao e selecao explicitas.
 
 ```powershell
 powershell.exe -NoProfile -File .\scripts\limpar-execucoes.ps1 -All -Preview
 ```
-
-Alteracoes permanentes dos prompts devem estar no template correspondente em
-`.github/prompts/`. Uma edicao feita apenas no prompt
-preparado pertence aquela solicitacao e sera apagada com ela. Para conservar um
-plano ou resultado, guarde antes uma copia fora das areas que serao removidas.
 
 #### Reiniciar um ensaio do zero
 
@@ -447,7 +453,7 @@ anexos, evidencias, backups e rodadas MTA que estejam dentro dela. A tarefa
    **10%**. Execute o novo prompt e confira ranking e fichas por projeto/issue.
 7. Escolha uma issue no registro, vincule sua ficha e acrescente anexos pertinentes.
    Execute **Planejamento: planejar** e confira os modelos comuns de plano/to-do
-   nos destinos por artifactId e issue. Depois ensaie outra categoria e a retomada
+   nos destinos correntes por projeto. Depois ensaie outra categoria e a retomada
    da primeira. Revisao/GO precedem a implementacao; aceite vem apos verificacoes.
 
 Esse ensaio usa registros, contextos e prompts novos; nao recupera automaticamente
@@ -456,46 +462,39 @@ entre colegas, siga o [roteiro de compartilhamento](compartilhamento-contextos.m
 
 #### Pastas locais e backups temporarios
 
-`.harness/` guarda dados locais do harness e e ignorada pelo Git. As pastas sao
-criadas conforme o uso; nao precisam existir todas depois de uma limpeza.
-Build usa projeto/data/ID; novos planos usam artifactId/issue/solicitacao e os
-legados conservam seus destinos. MTA externo usa projeto/data compacta.
-Os IDs completos permanecem nos recibos. `.harness/i` e outros worktrees de agentes
-podem existir nesta maquina, mas nao sao resultados nem requisitos do harness.
+A pasta `.harness/` e local e ignorada pelo Git, mas visivel no Explorer.
+O estado funcional fica por projeto, com nomes estaveis e links pelos indices.
 
 | Pasta | Finalidade |
 | --- | --- |
-| `.harness/builds/` | Registro de cada build Maven: `console.log` e `result.json`, com projeto, comando/fases, ferramentas, estado Git coletado, datas, status e exit code. O WAR/JAR e os relatorios de testes continuam no `target/` da aplicacao. |
-| `.harness/runs/` | Rodadas MTA locais ou indices `location.json` das rodadas externas: `manifest.json` identifica entrada, argumentos, hashes e estado Git; `result.json` registra resultado/integridade; `console.log` guarda a saida. Cada rodada possui `input/` (copia dos fontes analisados), `rules/` (regras usadas) e `output/` (achados, dependencias e relatorio HTML com seus arquivos). A copia `input/` e evidencia, nao checkout para corretivas. |
-| `.harness/sonar/` | Resultados Sonar por projeto/data, com RESUMO.md, metricas, criterios e Gate; preservados pela limpeza de execucoes. |
-| `.harness/planning/` | Contextos e prompts com base MTA ou EVIDENCIAS. Novos dossies em `<artifactId>/issues/<issue>/` reunem fichas, anexos e solicitacoes com plano/to-do de nomes identificaveis; sao preservados pela limpeza de execucoes. Legados conservam nomes e destinos. Manutencao usa `registro/solicitacao_<id>` e so reconcilia o registro. Preparar contexto sozinho nao cria plano/to-do nem aprova lote. |
-| `.harness/priorizacao/` | Contexto e prompt por solicitacao para comparar issues entre projetos; `priorizacao.md` e produzido ao executar o prompt. Preservada pela limpeza de execucoes. A lista nao e plano nem escolha humana. |
-| `.harness/importacoes/` | Originais e manifesto recebidos, recibo de importacao e diagnosticos/anexos transportados. Preservada pela limpeza; as copias operacionais dos planos e priorizacoes ficam em seus destinos habituais. |
-| `.harness/backups-temporarios/` | Unico local para copias temporarias de exercicios/ajustes, agrupadas por atividade. Opcao **3** da tarefa lista os caminhos e exige **LIMPAR**. |
-| `.harness/projetos/` | Registro por raiz local e evidencias/LEIA-ME.md; criacao idempotente, sem duplicar por rodada. Preservados pela limpeza, locais e ausentes no clone. |
-| `.harness/projetos/indice-projetos.md` e `indices/` | Ultima acao por projeto e copias datadas dessas consultas, geradas pela tarefa de indice e preservadas pela limpeza. |
-| `.harness/evidencias/` | Evidencias historicas, preservadas e ainda utilizaveis por EvidenceIndexPath. |
-| `.harness/workspace-backups/` | Copia automatica do workspace anterior quando o gerador o substitui; permite recuperar pastas e ajustes manuais. Preservada pela tarefa de limpeza. |
-| `.harness/tests/` | Fixtures e resultados dos testes dos scripts; descartaveis quando nenhum teste estiver rodando. Recriada nos proximos testes. |
-| `%USERPROFILE%\.m2\repository` | Repositorio local padrao do Maven, fora do harness; compartilhado com os demais projetos da maquina, salvo configuracao propria do Maven. |
+| `.harness/indices/` | Indices gerais reconstruiveis; `projetos.md` e a entrada de navegacao. |
+| `.harness/projetos/<artifactId>/` | Associacao ao POM, `indice.md`, `migracao.md`, evidencias, trabalho atual e ultima conciliacao. |
+| `atual/planejamento/` no projeto | Contexto, prompt, `plano.md` e `tarefas.md` correntes. |
+| `atual/priorizacao/` no projeto | Escopos/categorias, cobertura acumulada e fichas por issue. |
+| `atual/sprints/` no mestre | Cenarios funcionais, premissas, plano e ultimo calculo; participantes apontam ao mesmo mestre. |
+| `atual/build/` no projeto | Resultado e log da ultima tentativa; artefatos/testes permanecem em `target/` da aplicacao. |
+| `atual/diagnosticos/` no projeto | Ultimos diagnosticos utilizaveis, logs/tentativas e decisao Sonar corrente. MTA externo e lido na origem. |
+| `evidencias/` no projeto | Anexos humanos e `LEIA-ME.md` com suas relacoes e links. |
+| `reconciliado/` no projeto | Conclusao e pendencias da ultima comparacao, sem espelho dos documentos. |
+| `recebido/` no projeto | Contribuicoes escolhidas para conciliacao, preservando estrutura relativa. |
+| `temporarios/` no projeto | Material de trabalho/recuperacao; nao e arquivo de evidencias oficiais. |
+| `.harness/backups-temporarios/<atividade>/` | Copias indispensaveis de exercicios; somente a opcao 3 limpa essa area. |
+| `.harness/workspace-backups/` | Backups automaticos do gerador, preservados pela limpeza corrente. |
+| `.harness/tests/` | Fixtures/resultados sinteticos dos testes. |
+| `.harness/jboss/` | Controle operacional dos servidores e releases de deploy; consulte [JBoss](jboss.md). |
+| `%USERPROFILE%/.m2/repository` | Cache Maven padrao, fora do harness; sem cache duplicado. |
 
-Na raiz tambem podem aparecer **arquivos de controle**, que nao sao pastas:
-`mta.lock` coordena build/MTA/limpeza; `planning.lock` coordena preparacao/importacao/limpeza.
-Eles podem permanecer vazios depois da execucao; sua existencia nao comprova
-atividade. `active-mta.json` identifica a rodada para acompanhamento, e
-`last-<Project>.json` aponta para a ultima rodada MTA bem-sucedida do projeto.
-Esses ponteiros nao substituem os manifestos nem os resultados salvos.
+Pastas antigas de execucoes podem permanecer ate uma transicao explicita.
+O nucleo corrente nao as usa como alternativa nem exige conservar seus IDs.
+Backups avulsos na raiz de `.harness/` nao fazem parte da organizacao.
+Fontes da aplicacao, configuracao da maquina e workspace permanecem em seus
+locais; `tasks/` pertence apenas a evolucao do harness.
 
-Os fontes continuam no repositorio da aplicacao; o JSON local em `config/`, o
-workspace ativo na raiz do harness e o template em `.github/prompts/`. Os planos
-de evolucao do harness permanecem em `tasks/`, separados dos planos de corretivas.
+Preview dos backups temporarios:
 
-As opcoes **1/2** limpam execucoes e preservam backups; a opcao **3** limpa somente
-`backups-temporarios`, sem apagar execucoes ou backups do workspace. Nao criar
-pastas de backup avulsas para cada ajuste na raiz de `.harness/`. Criar a pasta
-central apenas quando houver algo a preservar. Agentes seguem essa regra em AGENTS.md.
-
-Preview pelo terminal: `powershell.exe -NoProfile -File .\scripts\limpar-execucoes.ps1 -TemporaryBackups -Preview`.
+```powershell
+powershell.exe -NoProfile -File .\scripts\limpar-execucoes.ps1 -TemporaryBackups -Preview
+```
 
 ### Tarefa e script correspondente
 
@@ -519,15 +518,14 @@ Referencia de consulta; para escolher a operacao e a ordem, use o
 | [Aplicacao: rollback no JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
 | [Aplicacao: preparar implementacao do lote](planejamento-migracao.md#preparar-implementacao-do-lote) | `preparar-implementacao.ps1` |
 | [**MTA: executar analise**](mta.md#uso) | **`executar-mta.ps1`** |
-| [**MTA: acompanhar log da analise**](mta.md#acompanhar-a-analise-mta) | **`acompanhar-log-mta.ps1 -Active`** |
-| [**MTA: acompanhar atividade interna**](mta.md#acompanhar-a-analise-mta) | **`acompanhar-log-mta.ps1 -Active -Detalhado`** |
-| [MTA: consultar log de execucao anterior](mta.md#acompanhar-a-analise-mta) | `acompanhar-log-mta.ps1 -SelectTarget -SelectRun -Once` (com workspace informado) |
+| [**MTA: acompanhar log da analise**](mta.md#acompanhar-a-analise-mta) | **`acompanhar-log-mta.ps1 -SelectTarget`** |
+| [**MTA: acompanhar atividade interna**](mta.md#acompanhar-a-analise-mta) | **`acompanhar-log-mta.ps1 -SelectTarget -Detalhado`** |
 | [MTA: abrir ultimo relatorio](mta.md#uso) | `abrir-relatorio-mta.ps1` |
 | [Workspace: conferir configuracao ao abrir](#comecar-na-maquina-de-trabalho) | `conferir-ambiente.ps1 -AoAbrir` |
 | [Planejamento: planejar](planejamento-migracao.md#preparar-e-executar-o-prompt) | `preparar-planejamento.ps1` |
 | [Planejamento: atualizar registro de migracao](planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente) | `preparar-planejamento.ps1 -Operation manter-migracao -SelectMigrationInput` |
+| [Planejamento: planejar sprints](planejamento-sprints.md) | `preparar-sprints.ps1 -Interactive` |
 | [Planejamento: priorizar issues](priorizacao-issues.md#uso-manual-pela-run-task) | `preparar-priorizacao.ps1` |
-| [Planejamento: compartilhar contexto](compartilhamento-contextos.md) | `compartilhar-contexto.ps1` |
 | [Planejamento: criar pasta de evidencias](planejamento-migracao.md#revisar-um-lote-com-evidencias-complementares) | `criar-pasta-evidencias.ps1` |
 | [Planejamento: abrir plano e to-do](planejamento-migracao.md#localizar-documentos-e-identificar-o-historico) | `abrir-planejamento.ps1` |
 

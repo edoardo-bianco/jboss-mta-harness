@@ -18,6 +18,7 @@ test('SDK stdio: tres consultas, paridade, limites, cancelamento e nenhuma escri
   const fixture=JSON.parse(execFileSync(powershell,['-NoProfile','-File',path.join(harnessRoot,'mcp/issues/tests/fixture.ps1')],{encoding:'utf8',env:{...process.env,PSModulePath:path.join(path.dirname(powershell),'Modules')},timeout:90000,maxBuffer:1024*1024}));
   const workspace=path.join(fixture.root,'projetos.code-workspace'), harnessConfig=path.join(fixture.root,'harness.json');
   const workspaceJson=JSON.stringify({folders:[{path:fixture.source}]}), harnessJson=JSON.stringify({schemaVersion:1,mta:{runsPath:fixture.run}});
+  const projectJson=readFileSync(fixture.projectConfig,'utf8');
   writeFileSync(workspace,workspaceJson); writeFileSync(harnessConfig,harnessJson);
   const dynamicConfig=path.join(fixture.root,'mcp-workspace.json');
   writeFileSync(dynamicConfig,JSON.stringify({root:fixture.root,allowedRoots:[fixture.root],workspacePath:workspace,harnessConfigPath:harnessConfig}));
@@ -56,7 +57,7 @@ test('SDK stdio: tres consultas, paridade, limites, cancelamento e nenhuma escri
   const changed=await call('obter_issue',{ContextPath:fixture.plan,Id:fixture.id,ExpectedBasisSha256:'0'.repeat(64)});
   assert.equal(changed.structuredContent.Error.Code,'BASE_CHANGED');
 
-  for (const [root,context,id] of [[fixture.manualRoot,fixture.manualPlan,'DEV-LOG'],[fixture.importRoot,fixture.importPlan,fixture.id]]) {
+  for (const [root,context,id] of [[fixture.manualRoot,fixture.manualPlan,'DEV-LOG']]) {
     const result=await runQuery({...settings,root},'obter_issue',{ContextPath:context,Id:id});
     assert.equal(result.Status,'OK',JSON.stringify(result));
   }
@@ -82,7 +83,14 @@ test('SDK stdio: tres consultas, paridade, limites, cancelamento e nenhuma escri
     writeFileSync(workspace,workspaceJson);
     assert.equal((await dynamicCall('auditar_base')).isError,false);
     writeFileSync(harnessConfig,JSON.stringify({schemaVersion:1,mta:{runsPath:fixture.run+'-outra-raiz'}}));
-    assert.equal((await dynamicCall('auditar_base')).structuredContent.Error.Code,'ACCESS_DENIED');
+    assert.equal((await dynamicCall('auditar_base')).isError,false,'runsPath legado nao governa o MTA corrente');
+    const association=JSON.parse(projectJson);
+    association.mta.diretorio=fixture.run+'-ausente';
+    writeFileSync(fixture.projectConfig,JSON.stringify(association));
+    const unavailable=await dynamicCall('auditar_base');
+    assert.equal(unavailable.structuredContent.Error.Code,'NOT_FOUND');
+    assert.ok(unavailable.structuredContent.Error.Message.includes(association.mta.diretorio));
+    writeFileSync(fixture.projectConfig,projectJson);
     writeFileSync(harnessConfig,'{invalido');
     assert.equal((await dynamicCall('auditar_base')).structuredContent.Error.Code,'CONFIG_ERROR');
     writeFileSync(harnessConfig,harnessJson);
@@ -90,7 +98,7 @@ test('SDK stdio: tres consultas, paridade, limites, cancelamento e nenhuma escri
     const injected=await dynamicCall('auditar_base',{ContextPath:fixture.context,WorkspacePath:workspace});
     assert.equal(injected.isError,true);
   } finally {
-    writeFileSync(workspace,workspaceJson); writeFileSync(harnessConfig,harnessJson);
+    writeFileSync(workspace,workspaceJson); writeFileSync(harnessConfig,harnessJson); writeFileSync(fixture.projectConfig,projectJson);
     await dynamicClient.close();
   }
   assert.equal(dynamicStderr,'');

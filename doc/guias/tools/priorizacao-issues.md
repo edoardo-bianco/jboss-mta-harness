@@ -7,318 +7,146 @@ html:
 
 # Priorizacao de issues: pre-planejamento entre projetos
 
-Use esta etapa opcional para comparar corretivas da categoria escolhida, equilibrando
-risco, repetibilidade da solucao e alcance no codigo. A saida e um relatorio de
-todas as issues examinadas, com recomendacoes, motivos e fichas de continuidade
-manual sustentadas por evidencias e amostras, a partir de uma **fatia de
-0,01% a 100,00% das issues elegiveis**, calculada sobre o total inicial fixo.
-Voce escolhe qual levar ao planejamento. Quem ja escolheu a issue pode seguir
-direto ao [planejamento do lote](planejamento-migracao.md#planejar-lotes-de-correcao-com-copilot).
+[Voltar ao guia do desenvolvedor](../harness-migracao-desenvolvedor.md#4-conferir-o-registro-e-escolher-prioridades).
 
-Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
-[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
-
-<a id="orientacao-pelos-helpers"></a>
+A priorizacao compara uma fatia de issues elegiveis entre os projetos do escopo
+escolhido. Recomenda por risco, repetibilidade e alcance; voce escolhe o problema
+a trabalhar. Cada examinada recebe ficha, inclusive quando nao ha recomendacao.
 
 ## Orientacao com o helper
 
-No Codex, ative `$orientar-migracao`; no Copilot, selecione `migracao_helper`.
-Veja [como iniciar e retomar a orientacao](../orientacao-migracao.md#iniciar-no-codex-ou-no-copilot).
+No Codex, use `$orientar-migracao`; no Copilot, `migracao_helper`.
 
 ```text
-Quero comparar issues mandatory dos projetos deste workspace antes de escolher uma.
-Gostaria de examinar uma fatia de 10%. Confira se existe priorizacao anterior e
-me oriente na retomada ou na escolha entre recriar e progredir, considerando risco,
-repetibilidade e alcance.
+Quero comparar as issues mandatory destes projetos antes de escolher um lote.
+Confira a priorizacao corrente, sua cobertura e lacunas; oriente a proxima fatia.
 ```
 
-**Resultado esperado:** orientacao para preparar/retomar a fatia e a mensagem
-para executar o prompt no cliente atual. O helper pode examinar evidencias e
-recomendar no chat, com apoio de planejamento/impacto quando pertinente. A lista
-so e salva ao executar separadamente o prompt; a escolha da candidata e sua.
-Na retomada, o helper localiza a solicitacao vinculada, sem escolher por recencia.
+O helper le registro, ranking e fichas; nao marca exame nem escreve resultados.
+O executor do prompt ou o desenvolvedor realiza a analise com fontes e codigo.
 
 ## Configuracao
 
 ### Entradas e escopo
 
-O preparador usa o indice existente `.harness/projetos/indice-projetos.md`, os
-`migracao.md` dos projetos selecionados e as rodadas MTA referenciadas nesses
-registros. Nao escolhe a rodada mais recente. `Source` e o codigo local;
-`MtaOrigin/RunId` preservam a origem, inclusive de outra maquina. O snapshot
-`input/` permite conferir o que foi analisado.
+Use workspace salvo com os projetos Maven e a origem MTA associada a cada POM.
+O indice geral em `.harness/indices/projetos.md` leva aos registros e conjuntos
+correntes. Categoria e conjunto de participantes delimitam a cobertura.
+`mandatory`, `optional`, `potential` e outras categorias recebidas permanecem
+separadas. Fonte ausente fica como lacuna; a configuracao nao concede permissao
+de leitura a um caminho que o cliente de IA bloqueia.
 
-Pela Run Task, entram as pastas Maven do workspace salvo, incluindo agregadores.
-Outros projetos citados no indice ficam fora. Pelo terminal sem WorkspacePath,
-entram os projetos da configuracao informada. Ajuste o workspace ou use uma
-configuracao com os projetos desejados para delimitar o conjunto.
-
-O indice precisa existir; se necessario, execute antes
-[Workspace: atualizar indice dos projetos](planejamento-migracao.md#indice-da-situacao-dos-projetos).
-Registros ou evidencias ausentes/conflitantes aparecem como lacunas por projeto;
-os projetos utilizaveis podem continuar. O preparador nao inicializa registros,
-altera prioridades ou atualiza o indice dos projetos.
-Uma reconciliacao antiga PENDENTE nao e pre-requisito generico para esta etapa;
-o agente confere o motivo e registra o impacto real nas candidatas.
-
-Entram issues da categoria escolhida, `PRESENTE`, com decisao `A DEFINIR` ou
-`ANALISAR AGORA` e andamento `NAO ANALISADA` ou `ANALISADA`. Issues adiadas, fora
-do escopo ou ja planejadas/implementadas/verificadas exigem pedido explicito por
-projeto/ID e recorte para reconsideracao. Issues `DEV-...` exigem pedido expresso,
-sem inventar classificacao MTA. Lotes ativos e decisoes anteriores sao preservados.
+MCP e Node sao opcionais. O executor pode ler registro, contexto, relatorio MTA
+e codigo diretamente. Se usar [consultas de issues](consultas-issues.md), respeite
+paginacao/limites e cite o que examinou. Consultar nao registra exame ou decisao.
 
 ## Uso
 
 ### Uso manual pela Run Task
 
-1. Salve o workspace e abra **Terminal > Run Task > Planejamento: priorizar issues**.
-   Escolha a categoria recebida no catalogo: `mandatory`, `optional`, `potential`
-   ou outra. Cada categoria tem sequencia e cobertura separadas. Voltar a mandatory
-   permite progredir sua propria sequencia, sem consumir examinadas de optional.
-2. Se houver priorizacao anterior, escolha **1 recriar** ou **2 progredir**.
-   Recriar inicia nova base, preservando o historico; progredir exclui as issues
-   ja examinadas na sequencia, com ou sem recomendacao. Um preparo ainda sem
-   resultado e retomado quando suas instrucoes continuam atuais.
-   Para uma nova fatia, informe **0,01 a 100,00**, com virgula ou ponto e ate duas
-   casas; `%` e opcional. **q** ou Enter cancela sem preparar arquivos.
-3. Confira os projetos e os avisos no terminal. A tarefa mostra os caminhos reais
-   do contexto, prompt e destino da lista, e abre `priorizar-issues.prompt.md`.
-4. Preferencias/restricoes sao opcionais. O prompt ja contem objetivo, limites e
-   contexto; nao precisa escrever instrucoes adicionais de governanca.
-5. Execute no cliente atual: no **Copilot**, use **Executar Prompt**, com DevSquad
-   e apoio compativel de planejamento. No **Codex**, envie **Execute o prompt deste
-   arquivo:** seguido do caminho completo exibido no terminal, ou anexe o arquivo.
-   O helper deve fornecer a mensagem preenchida. O agente principal aplica skills
-   e subagentes disponiveis; o front matter do Copilot nao seleciona agente no Codex.
-6. Revise `priorizacao.md`, suas fontes, lacunas e justificativas antes de escolher.
-   Confira tambem o apoio efetivamente usado e eventuais erros. Se houver falha
-   de chamada, siga [o diagnostico de subagentes](../orientacao-migracao.md#se-a-chamada-de-subagente-falhar).
+1. Execute **Planejamento: priorizar issues** e escolha a categoria.
+2. Com cobertura existente, escolha **recriar** ou **progredir**. Recriar redefine
+   a base/cobertura explicitamente e preserva fichas/notas; progredir exclui todas
+   as examinadas do mesmo escopo/categoria, recomendadas ou nao.
+3. Para uma nova fatia, informe **0,01% a 100,00%**, com ate duas casas decimais.
+   O preparo pendente retoma a mesma quota e universo. Enter/q cancela.
+4. Confira projetos, fontes, lacunas e os caminhos exibidos. A tarefa prepara
+   contexto/prompt; ainda nao analisa nem escolhe candidatas.
+5. No Codex, envie **Execute o prompt deste arquivo:** seguido do caminho real.
+   No Copilot, abra o prompt e use **Executar Prompt** com perfil compativel.
+   Tambem e possivel realizar o exame e preencher os mesmos documentos manualmente.
+6. Revise ranking/fichas, suas fontes e motivos. O condutor atualiza o indice
+   derivado ao concluir; o preparador confere o conjunto na proxima execucao.
 
-A tarefa **prepara** o contexto; a analise e a escrita ocorrem quando voce
-executa o prompt. Use o `context.json` cuja localizacao a tarefa mostrou;
-o prompt ja contem essa referencia, sem precisar preencher caminho ficticio.
-Voce pode executar em novo chat e depois pedir orientacao ali mesmo. O helper
-recupera os arquivos; nao e obrigatorio voltar ao chat anterior ou regenerar contexto.
-
-Pelo terminal na raiz do harness, substituindo o nome pelo workspace que salvou:
+Exemplo de CLI, na raiz do harness:
 
 ```powershell
-powershell.exe -NoProfile -File .\scripts\preparar-priorizacao.ps1 -WorkspacePath .\meu-workspace.code-workspace -Percentage 10 -Mode Recreate -NoOpen
+.\scripts\preparar-priorizacao.ps1 -WorkspacePath .\meu-workspace.code-workspace -Category mandatory -Percentage 10 -Mode Recreate -NoOpen
 ```
 
-`-Interactive` oferece os menus. Para avancar, use `-Mode Continue -Percentage 10`;
-para retomar preparo ainda sem resultado, `-Mode Continue` basta. Se houver varias
-frentes, informe `-PreviousRequestId` com o ID desejado; nao ha escolha por recencia.
-Uma referencia antiga segue seu unico sucessor. Para automacao, combine
-`-NoOpen -OutputFormat Json` com WorkspacePath ou ConfigPath explicito, sem
-Interactive/EditorPath. Top/SelectTop foram substituidos; contextos anteriores ao percentual exigem
-recriacao. Status EXHAUSTED indica que nao ha novas elegiveis e nenhum arquivo foi criado.
+Para progredir, use `-Mode Continue -Percentage 10`; para retomar a fatia pendente,
+`-Mode Continue`. `-Scope` informa um nome funcional para o escopo quando
+necessario. Nao e ID de execucao nem autoriza trocar silenciosamente participantes.
+Automacao pode usar `-NoOpen -OutputFormat Json`, sem Interactive/EditorPath.
+`EXHAUSTED` significa que nao restam novas elegiveis da base, sem apagar cobertura.
 
 ### Fatias e continuidade
 
-O total inicial conta issues por **projeto/Source + ID completo**, nao ocorrencias.
-Com 200 issues, cada avanco de 10% examina 20 issues ainda disponiveis;
-nao calcula 10% do restante.
-Arredonda para cima e limita ao disponivel: com duas issues, 0,01% resulta em uma
-e 100% em duas. A lista informa percentual solicitado, quota e cobertura efetiva.
-O agente pode recomendar menos que a quota por lacunas ou sobreposicoes.
+O total inicial conta issues distintas por projeto + identificador funcional,
+nao ocorrencias. A quota arredonda para cima e se limita ao disponivel.
+Com 200 issues, cada 10% corresponde a 20; nao e 10% do restante.
+Cada examinada aparece com posicao ou **SEM POSICAO**, motivo e link de ficha.
+Mencao/sobreposicao nao comprova exame da outra issue.
 
-Todos os IDs explicitamente examinados sao excluidos dos proximos avancos,
-inclusive os sem recomendacao. Cada um aparece na tabela com posicao ou
-**SEM POSICAO**, motivo concreto e evidencia necessaria. Continuam pendentes de
-investigacao/corretiva quando cabivel; sair da fila de triagem nao resolve a issue.
-Citacao/overlap de outra issue nao comprova exame dessa outra.
-O prompt grava no proprio ranking um bloco estruturado com IDs examinados/propostos.
-O preparador valida esse resultado. Nos novos recibos (SchemaVersion=4), COMPLETED
-exige exatamente a quota em AnalyzedIssues; uma analise parcial fica IN_PROGRESS
-e deve ser completada no mesmo arquivo. ProposedIssues pode estar vazio.
-100% de issues examinadas nao significa todas as ocorrencias corrigidas/validadas.
+A publicacao conserva **todas as examinadas**: 20 anteriores mais 15 novas
+resultam em 35 no ranking/indice corrente. Todas as 35 sao excluidas do proximo
+avanco. O bloco estruturado do ranking conserva cobertura; o desenvolvedor
+escolhe pelo registro e nao precisa editar JSON para selecionar a issue.
 
-Exemplo com base inalterada de **44 issues e 20%**:
+| Fatia com base de 44 e percentual de 20% | Novas | Acumulado |
+| --- | ---: | ---: |
+| 1 | 9 | 9/44 |
+| 2 | 9 | 18/44 |
+| 3 | 9 | 27/44 |
+| 4 | 9 | 36/44 |
+| 5 | 8 | 44/44 |
 
-| Rodada | Novas examinadas | Cobertura acumulada | Ainda nao examinadas |
-| --- | ---: | ---: | ---: |
-| 1 | 9 | 9/44 | 35 |
-| 2 | 9 | 18/44 | 26 |
-| 3 | 9 | 27/44 | 17 |
-| 4 | 9 | 36/44 | 8 |
-| 5 | 8 | 44/44 | 0 |
+Concluir exige a quota de novas examinadas alem das anteriores, com fichas e
+motivos validos. Parcial permanece `IN_PROGRESS` no mesmo destino e conserva
+universo/quota. Nao reduzir a quota para declarar conclusao.
+100% examinadas nao significa todas corrigidas ou aceitas.
 
-Isso vale mesmo com uma ou nenhuma recomendacao por rodada. A cobertura usa a
-uniao distinta de examinadas anteriores e atuais, nao a quantidade recomendada.
-O resultado liga os relatorios anteriores; as lacunas permanecem nesses documentos.
+Um MTA novo pode atualizar elegibilidade, fontes e lacunas, preservando a base
+inicial. Novas issues fora dela ficam em `OutsideBaseline` ate recriacao explicita.
+Retirada da elegibilidade nao conta como exame nem resolucao. `EXHAUSTED` pode
+ocorrer antes de 100% de cobertura; explique a diferenca. Outro escopo/categoria
+mantem conjunto proprio; nao misture denominadores.
 
-Mudancas de projetos, origem MTA/catalogo ou evidencias exigem recriar a base.
-Decisoes humanas atuais filtram as disponiveis, sem mudar o denominador da sequencia.
-Se retirar uma issue antes de examina-la, ela nao conta como examinada; EXHAUSTED
-pode significar que nao ha novas elegiveis, mesmo sem cobertura de toda a base.
-Se a retirada ocorrer depois do preparo, o agente substitui a issue por outra
-elegivel de AvailableIssues. Se faltarem issues para completar a quota, preserva
-o parcial em IN_PROGRESS e orienta recriar para refletir a nova selecao.
-Projetos com diagnostico indisponivel aparecem como lacunas, fora dessa base.
+### Incidentes e fontes diretas
 
-### Continuar rodadas anteriores a esta correcao
+<a id="incidentes-preparados-para-leitura"></a>
+<a id="acesso-a-rodada-externa"></a>
 
-Depois de atualizar o harness, use **2 progredir** para aproveitar rankings
-concluidos em SchemaVersion=2. O novo preparo desconta a uniao de AnalyzedIssues
-desses resultados, inclusive sem recomendacao; repeticoes antigas contam uma vez.
-Mantem SequenceId, base e arquivos anteriores, criando o proximo recibo na versao 3.
-Nao apague `.harness` nem edite recibos/hashes para adotar a correcao.
-
-Se a primeira rodada examinou nove e recomendou uma, a proxima tera 35 disponiveis
-e quota nove. Se duas rodadas antigas repetiram oito e cobriram dez IDs distintos,
-restarao 34: o progresso real e dez, nao dezoito. Um resultado antigo parcial conta
-somente os IDs que declarou examinados.
-
-Um prompt antigo ainda pendente preserva seu contrato. Pode conclui-lo pelo arquivo
-original e depois progredir; para usar imediatamente as instrucoes novas, escolha
-recriar, sabendo que isso inicia outra base. A tarefa nao substitui silenciosamente
-prompts antigos. Contextos Top anteriores ao percentual exigem recriacao.
-
-### Incidentes preparados para leitura
-
-A tarefa prepara, junto ao recibo, `Mta.IncidentEvidence.IndexPath` por projeto.
-Esse indice liga cada issue disponivel a paginas de ate dez incidentes, com
-URI original, linha, mensagem/recomendacao, trecho e caminhos candidatos no
-snapshot e no Source atual. Todos os incidentes sao preservados; preparar as
-paginas nao significa que o agente leu todos ou confirmou aplicabilidade.
-`Files` registra os caminhos/hashes dos derivados. Retomada os confere; recriar
-produz outra solicitacao e preserva os anteriores. `UNAVAILABLE` traz o erro de
-extracao; sem resposta MCP suficiente, exige conferir os artefatos originais.
-Nao significa zero achados.
-
-Com [MCP disponivel](consultas-issues.md#consultas-por-etapa), o agente recupera os
-incidentes por obter_issue, confere base/projeto, hashes, paginas e truncamentos.
-Uma resposta suficiente dispensa abrir novamente o indice/paginas dos mesmos
-incidentes. Codigo local e evidencias adicionais necessarias continuam exigidos.
-Sem MCP, o agente abre os caminhos literalmente, inclusive em `.harness`, normalmente
-ignorada pelas buscas. O MTA pode preservar URI da maquina/pasta antiga: o trecho
-relativo a `input` aponta candidatos em `AnalysisSource` e `Source`. Conferir
-arquivo/metodo/conteudo antes de usar a linha antiga. Referencias externas ou
-ambiguas ficam explicitas, sem procurar indiscriminadamente em caches.
-
-Se uma execucao antiga concluiu a fatia com falhas de leitura, escolha **recriar**
-apos atualizar o harness. Progredir continuaria excluindo as issues ja declaradas
-em `AnalyzedIssues`; recriar permite reexamina-las com as paginas de incidentes e
-o prompt atualizado, preservando o recibo e o ranking antigos como historico.
-
-### Acesso a rodada externa
-
-Quando o agente precisar ler o MTA fora das pastas ja autorizadas, deve solicitar
-permissao de leitura para `Mta.Run` e indicar os arquivos necessarios. Uma
-autorizacao vigente para a raiz MTA inclui suas rodadas e nao precisa ser pedida
-novamente. Apos a concessao, deve
-tentar novamente o caminho literal e confirmar a leitura, inclusive pelo apoio
-quando ele precisar do arquivo. A leitura efetiva depende de o cliente reconhecer
-e aplicar essa permissao.
-
-O workspace gerado inicializa o acesso de leitura com `mta.runsPath`, preservando
-listas que o desenvolvedor ja definiu. Para usar `C:/mta-runs` em todas as rodadas
-deste workspace, a propriedade em `settings` e:
-
-```json
-"github.copilot.chat.additionalReadAccessPaths": [
-  "C:/mta-runs"
-]
-```
-
-Veja [como aplicar, alterar ou revogar no workspace](workspace.md#acesso-do-copilot-a-pasta-mta),
-incluindo a diferenca de nome entre a referencia do VS Code e o manifesto atual
-do Copilot. Se a pasta nao estiver autorizada, aprove a solicitacao apresentada
-pela ferramenta, quando disponivel, ou configure a pasta no workspace.
-Se a configuracao nao estiver disponivel ou houver politica corporativa impeditiva,
-informar versao, caminho, ferramenta e erro para ajustar o acesso suportado. Nao
-habilitar aprovacao global, editar configuracao pelo prompt ou trocar de ferramenta
-para contornar uma negativa. No Codex, usar a aprovacao/escalacao real da sessao
-quando necessaria e permitida. Concessao no chat nao substitui a permissao tecnica.
-
-Sem acesso essencial, o ranking permanece `IN_PROGRESS`; as issues cujo exame foi
-impedido nao entram em `AnalyzedIssues`. O agente retoma depois da autorizacao.
-Isso difere de uma issue efetivamente examinada que ficou `SEM POSICAO` por uma
-incerteza tecnica. Nao exigir que o humano extraia trechos que o agente ja pode ler.
+As fichas guardam o essencial e links ao relatorio MTA, codigo/POM, configuracao
+e anexos. O detalhe e lido na origem; nao ha paginas de incidentes copiadas por
+preparo. Origem externa exige acesso pelo cliente. Negativa/indisponibilidade
+preserva o parcial e explicita a lacuna, sem fingir que o exame ocorreu.
+Use a associacao do projeto para localizar o MTA; nao escolha outra origem
+silenciosamente quando a selecionada estiver indisponivel.
 
 ### Como avaliar a lista
 
-A analise comeca pelos registros e aprofunda as candidatas promissoras no MTA,
-nas regras/recomendacoes e no codigo atual. Amostras devem representar variacoes
-de uso, modulos, projetos e dependencias, incluindo casos adversos. A lista
-declara pontos lidos, amostra/total e o que permanece nao analisado.
-Se faltar localizacao ou solucao apos a leitura efetiva do relatorio MTA, deve
-pedir essa evidencia. Busca vazia, arquivo externo ou resposta truncada exigem
-recuperar o acesso/leitura primeiro.
-
-| Criterio | O que conferir |
-| --- | --- |
-| Risco | Mudanca de comportamento/API, dependencias e runtime, testes possiveis e reversao. Desconhecido nao significa baixo risco. |
-| Repetibilidade | Transformacao e precondicoes comuns confirmadas nas amostras; igualdade do ID da regra nao comprova a mesma solucao. |
-| Alcance | Ocorrencias MTA separadas dos pontos de alteracao deduplicados, com arquivos/modulos e contagem por projeto. |
-| Potencial | Reducao condicional, sem dupla contagem, promessa de resolucao ou extrapolacao da amostra para todos os usos. |
-| Confianca | Qualidade e atualidade das evidencias, separada do risco. |
-
-Pode haver menos recomendacoes que issues examinadas quando a evidencia nao sustenta mais.
-Todas as examinadas precisam ter uma linha e uma ficha para continuidade manual,
-inclusive as recomendadas, conforme o roteiro abaixo.
-Projetos ausentes e issues excluidas/nao analisadas continuam visiveis. Agrupar
-uma oportunidade comum nao cria um lote entre projetos. Java 8, `javax.*`,
-EAP 7.4 e Hibernate 5.3, quando aplicavel, continuam sendo os alvos.
-
-Cada solicitacao fica em `.harness/priorizacao/<RequestId>/`, com `context.json`,
-prompt preparado e, depois da execucao pelo agente, `priorizacao.md`. O recibo
-preserva snapshots do indice/registros, caminhos e hashes das entradas.
-Nos novos recibos, Category separa as sequencias e FichaPaths declara arquivos
-individuais por projeto/issue, sob `.harness/planning/<artifactId>/issues/`.
+Cada posicao deve ser sustentada por amostras locais, risco, repetibilidade,
+alcance e confianca. Volume de ocorrencias nao equivale ao numero de alteracoes.
+Fonte nao lida e apenas referencia indicada. Potencial de automacao e hipotese
+ate verificacao; a escolha e o GO continuam humanos.
 
 ### Indice automatico das priorizacoes
 
-O arquivo `.harness/priorizacao/indice-priorizacao.md` segue o
-[template de referencia](../../modelos/indice-priorizacao.template.md): sequencia
-ativa, tabela de fatias, cobertura acumulada, substituidas e proximo passo.
-Cada escopo/categoria conserva seus projetos, denominador e sequencia.
+No projeto mestre, o conjunto fica em:
 
-Na mesma tarefa **Planejamento: priorizar issues**, o preparo cria/atualiza esse
-indice e mostra o caminho. A nova fatia aparece como **PENDENTE**, sem exame
-inventado. Ao terminar, o prompt atualiza a linha e a cobertura, identificando
-**conferencia do executor; a conferir pelo preparador**. Na proxima execucao da
-tarefa, inclusive retomada ou esgotamento, o preparador reconcilia os resultados
-com os validadores de quota, fichas e vinculos. Nao ha task adicional nem watcher:
-se Continue recusar um resultado parcial/invalido, o indice tambem recebe esse
-diagnostico, sem criar outra fatia. O preparo usa gravacao atomica e detecta
-edicoes concorrentes observadas antes da substituicao, preservando as notas.
-Gravar um ranking manualmente, fora do prompt, nao dispara um script.
+```text
+atual/priorizacao/<categoria>/escopos/<escopo>/
+  contexto.json
+  priorizacao.md
+  indice.md
+  priorizar-issues.prompt.md
+```
 
-So resultados completos e consistentes entram na tabela de fatias concluidas.
-IN_PROGRESS, fichas ausentes e conflitos aparecem nas pendencias. A cobertura
-conta Source/Id distintos das fatias completas, inclusive examinadas sem proposta.
-No exemplo de 44 issues a 20%, as cinco fatias de 9+9+9+9+8 chegam a 44/44;
-isso indica exame, nao correcao ou aceite. Esse 20% nao e o ganho de IA de sprints.
+Cada participante guarda suas fichas em
+`atual/priorizacao/<categoria>/issues/<issue>/ficha.md`. Os indices geral e dos
+participantes apontam ao mesmo conjunto mestre, sem duplicar a cobertura.
+Navegue pelos links; os nomes funcionais sao codificados quando necessario
+para o Windows. O mestre padrao e o primeiro artifactId na ordenacao ordinal.
 
-Recreate no mesmo escopo/categoria preserva os resultados anteriores como
-substituidos e inicia outra base; referencias a outro escopo nao o substituem.
-Continue acompanha a cadeia. Multiplas pontas ficam explicitas, sem escolher
-pela data. Um indice manual existente permanece literalmente antes do bloco
-automatico, identificado como historico. Notas humanas devem ficar fora dos
-marcadores `priorizacao:indice:inicio/fim`; marcadores invalidos sao diagnosticados.
+O indice e derivado, preserva notas fora dos blocos gerenciados e pode ser
+reconstruido. Ele nao decide a proxima issue, nao comprova exame ou aceite e nao
+revoga escolhas atuais no registro. Para compartilhar, copie a estrutura e as
+referencias conforme o [guia entre colegas](compartilhamento-contextos.md).
 
-Prompts ja preparados antes desta evolucao conservam o contrato antigo. Seus
-resultados entram na reconciliacao do preparador, mas o agente so escreve o indice
-quando PrioritizationIndexPath estiver declarado no contexto novo. Nao edite
-recibos antigos para acrescentar esse campo.
-
-Ao importar uma analise compartilhada, os caminhos do indice/template passam
-para a raiz local nos recibos derivados. O indice agregado da origem nao e
-copiado sobre o local; a proxima priorizacao o reconcilia pelas fatias recebidas.
-O agente cria fichas somente das examinadas; o ranking aponta para esses arquivos.
-Mesmo ID em projetos diferentes mantem fichas distintas, com contexto suficiente
-para compartilhar cada uma. Contextos v2/v3 continuam mandatory e conservam layout.
-
-Uma analise v4 concluida pode ser exportada por **Planejamento: compartilhar
-contexto**. O pacote leva a cadeia da categoria e o diagnostico para continuar a
-sequencia ou planejar uma ficha em outro workspace. Veja o
-[roteiro de exportacao/importacao](compartilhamento-contextos.md).
-CLI aceita `-Category optional` (ou outra recebida); omitida, preserva mandatory.
-Ao passar PreviousRequestId sem Category, a categoria daquela sequencia e retomada.
-Mudancas relevantes posteriores precisam ser explicitadas na analise; snapshot
-nao equivale ao estado atual. A limpeza de execucoes preserva essa pasta.
+<a id="continuar-rodadas-anteriores-a-esta-correcao"></a>
+Dados antigos usam o [conversor separado](../../features/conversao-descartavel-dos-registros.md)
+com selecao explicita. O fluxo corrente nao depende deles para continuar.
 
 ### Planejar e implementar manualmente a partir da priorizacao
 
@@ -343,9 +171,9 @@ Conferir o recurso de email no servidor". A ficha tem quatro blocos:
 | Como prosseguir | Inspecoes/comparacoes em ordem, resultado que confirma/afasta a hipotese e evidencia a guardar; direcao candidata, dependencias/consumidores, decisoes, verificacao observavel e reversao. Se a solucao ainda nao puder ser definida, indicar o que obter primeiro. |
 | Referencias e registro | Links com titulo para documentacao do projeto/oficial (secao e versao pertinentes), registro e indice de evidencias. Distinguir fontes consultadas das apenas indicadas. ID completo para localizar a linha exata e link para a origem MTA do projeto. |
 
-Voce nao precisa decorar IDs nem interpretar hashes. `Source` identifica a pasta
-do projeto; `ID` identifica a regra; `RunId` identifica a rodada MTA. Esses valores
-sao preservados nas referencias tecnicas e nos trechos para copiar ao registro.
+Voce navega por nomes e links. `Source` identifica o codigo local; o identificador
+funcional da issue permite localizar a regra no registro e no MTA. Nao ha ID de
+execucao ou hash a informar para continuar.
 O relatorio usa nomes descritivos na leitura principal e informa a origem comum
 uma vez por projeto. O bloco JSON ao final controla a continuidade automaticamente;
 nao e necessario edita-lo para escolher uma issue.
@@ -393,8 +221,8 @@ seguindo o [contrato de planejamento](../../especificacoes/planejamento-copilot.
 Defina recorte, comportamento esperado, solucao, dependencias, aceite e reversao;
 complete as lacunas essenciais antes de aprovar e implementar. O roteiro e a
 documentacao de referencia servem tanto ao trabalho humano quanto ao assistido.
-Para reavaliar a priorizacao com uma nova base/evidencias, use recriar; progredir
-continua reservado a issues ainda nao examinadas. O helper pode orientar a
+Para redefinir a base/cobertura, use recriar explicitamente. Progredir continua
+reservado a issues ainda nao examinadas da base inicial. O helper pode orientar a
 investigacao da issue explicitamente indicada a partir da ficha e dos arquivos.
 
 ### Levar uma candidata ao planejamento
@@ -423,23 +251,12 @@ JaCoCo**; abaixo da meta gera warning e nao bloqueia o build por si so.
 
 ### Validacao manual
 
-Confira no seu cliente: descoberta da tarefa; orientacao/delegacao dos helpers;
-contexto contendo apenas os projetos do workspace; rodada vinculada ao registro;
-tratamento de lacunas/conflitos; amostras e contagens da lista; e passagem ao
-planejamento somente apos sua escolha explicita. Confira se cada linha abre uma
-ficha com titulo compreensivel, evidencia da avaliacao e proxima acao manual concreta,
-inclusive SEM POSICAO. Compare indice, registros,
-fontes e planos antes/depois: o preparo produz contexto/prompt e paginas de
-incidentes e reconcilia o indice de priorizacao; a execucao do prompt escreve
-ranking/fichas e atualiza esse indice nos destinos declarados. Confira no indice
-a distincao entre conferencia do executor e do preparador, as pendencias e a
-preservacao de notas manuais. O indice dos projetos e os registros permanecem
-inalterados. O helper permanece leitor. Teste acesso externo
-concedido e negado: leitura deve retomar apos concessao; negativa preserva parcial
-sem consumir quota. Preparacao automatizada testada nao comprova a qualidade
-da recomendacao nem a integracao nativa do chat.
-
-Voltar ao [roteiro do desenvolvedor](../harness-migracao-desenvolvedor.md#4-conferir-o-registro-e-escolher-prioridades).
+Confira tarefa, categoria/escopo, quota fixa, cobertura acumulada e links de
+todas as fichas, inclusive SEM POSICAO. Compare registro e codigo; preparar ou
+executar priorizacao nao deve alterar escolhas nem criar plano/tarefas.
+Verifique no cliente a leitura das fontes e a passagem ao planejamento somente
+apos sua escolha. Testes dos scripts nao demonstram qualidade da recomendacao
+ou delegacao nativa. Preserve notas manuais ao reconstruir os indices.
 
 ## Resultado e proximo passo
 

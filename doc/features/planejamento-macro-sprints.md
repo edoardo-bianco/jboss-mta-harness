@@ -373,7 +373,7 @@ texto do agente nao substitui essa verificacao nem autoriza alterar restricoes.
 - [ADR-0002 — separação harness/aplicação](../adr/0002-separacao-harness-e-migracao-progressiva.md), [ADR-0004 — Git informativo](../adr/0004-git-informativo-sem-controle-de-branches.md) e [ADR-0005 — planejamento pelo registro](../adr/0005-planejamento-orientado-pelo-registro.md).
 - [Guia de planejamento](../guias/tools/planejamento-migracao.md) e [migração da configuração JBoss](../guias/tools/migracao-configuracao-jboss.md).
 - [Skill comum de orientação](../../.agents/skills/orientar-migracao/SKILL.md), [helper principal](../../.github/agents/migracao_helper.agent.md) e [prompt de planejamento de lote](../../.github/prompts/planejar-lotes.prompt.md).
-- [Backlog MACRO-01](../../tasks/todo.md#backlog-vigente).
+- [Backlog MACRO-01](../../tasks/historico/todo-ate-2026-10-17.md#backlog-vigente).
 
 **Documentação oficial consultada em 08/10/2026:**
 

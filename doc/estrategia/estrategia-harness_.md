@@ -216,6 +216,14 @@ A intenção de uma decisão não deve ser inventada a partir do código. Quando
 As decisões resultantes atualizam a base do produto. A tecnologia de destino e o desenho arquitetural devem decorrer dessa análise. O harness deverá apoiar tanto a modernização de aplicações JBoss quanto de aplicações Quarkus, selecionando os plugins necessários à origem e ao destino definidos. Uma mudança entre tecnologias constitui um escopo específico, separado da atualização de versões.
   
 ## Plano tático e critérios de avanço
+
+**Ordem definida pelo desenvolvedor em 10/10/2026:** concluir e aceitar a
+[simplificação por projeto](../features/organizacao-simplificada-por-projeto.md),
+incluindo [conversão](../features/conversao-descartavel-dos-registros.md), retirada
+de recibos/rastreamentos, links diretos, limpeza e guias/orientador alinhados,
+antes de modernização ou novas funcionalidades. As etapas propostas abaixo vêm
+depois e serão reavaliadas contra o contrato simples. Consulte o
+[plano de viabilidade](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
   
 A sequência abaixo é proposta, sem calendário ainda acordado. Seu planejamento em fatias pequenas e verificáveis permanece como pendência futura no backlog do harness. Cada fatia deverá explicitar caso de uso, benefício esperado, escopo, dependências, critérios de aceite, evidências e reversão; somente a próxima fatia será detalhada mediante continuidade solicitada. A publicação desta estratégia não inicia essas implementações.
   

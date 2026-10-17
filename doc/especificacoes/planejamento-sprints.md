@@ -1,6 +1,6 @@
 # Contrato executavel do planejamento por sprints
 
-SchemaVersion=1, Purpose=sprint-planning. Requisitos e criterios de aceite:
+SchemaVersion=1, Purpose=current-sprint-planning. Requisitos e criterios de aceite:
 [MACRO-01](../features/planejamento-macro-sprints.md). Uso pelo desenvolvedor:
 [Run Task e prompt](../guias/tools/planejamento-sprints.md). O JSON preparado e
 os templates WorkTemplate/StaffingTemplate em contexto.json fornecem a estrutura
@@ -10,7 +10,7 @@ para o executor; nao e necessario montar arquivos de entrada manualmente.
 
 | Campo | Contrato |
 | --- | --- |
-| PlanningId / RevisionId | Identidades imutaveis do contexto. |
+| Scenario / MasterProject | Nome funcional do cenario e artifactId do participante que guarda o unico conjunto corrente. Sem identidades de execucao/revisao. |
 | State | RASCUNHO, PROPOSTA ou REVISADO; nao significa GO. |
 | ScopeCategories | mandatory; adicionar optional somente com ScopeDecision humana. |
 | Constraints | Datas ISO YYYY-MM-DD: SprintStartDate, ProductionDeadline, ReferenceDate. Limites inteiros nao negativos: MaxPreparationSprints, MaxImplementationSprints, MaxTestSprints, MaxTotalSprints opcional, MaxDevelopers. null significa desconhecido. |
@@ -18,11 +18,11 @@ para o executor; nao e necessario montar arquivos de entrada manualmente.
 | Estimation.AiDeveloperReductionPercent | Percentual de reducao do esforco de Dev informado pelo humano, de 0 a 100; null significa nao informado. Sem padrao de produtividade. So afeta atividades AiAssisted=true. |
 | Team | WorkWeek usa numeros de DayOfWeek (domingo=0, segunda=1, sabado=6); Holidays datas ISO. RolesAreDistinct confirma que devs, arquiteto e DevOps sao pessoas distintas; acumulo de papeis exige redistribuicao explicita, nunca capacidade duplicada. |
 | Team.Staffing | Uma entrada por Sprint (numero a partir de 1), Developers ate o teto, DeveloperAvailability/ArchitectAvailability/DevOpsAvailability de 0 a 1, ReservePercent de 0 a 100, AbsenceDays por Dev/Architect/DevOps em dias-pessoa. Sem entrada nao se presume equipe disponivel. Arquiteto e DevOps limitados a uma pessoa cada. |
-| Baseline | Id B0, Known fornecido pelo preparo, Issues por Source/Id. Antes da formacao, Issues coincide com todas as categorias selecionadas do contexto. BaselineFrozen=true na validacao fixa identidades e denominador; rascunho com Known=false pode completar a base numa revisao. |
+| Baseline | Id B0, Known fornecido pelo preparo, Issues por Project/Id com Source local associado. Antes da formacao, Issues coincide com todas as categorias selecionadas nos registros correntes. Resultado com Known=true fixa identidades e denominador; Known=false permite completar a base no mesmo cenario. Relocalizar Source preserva Project/Id. |
 | Baseline.Accepted | Source, Id, Evidence e AcceptedBy comprovados. Nao inferir aceite de status ou desaparecimento no MTA. |
 | Changes | New, Reopened e Excluded separados; nao reduzem N0. Toda issue atual do recorte deve constar em B0 ou New. Inclusoes ja validadas permanecem em New mesmo se desaparecerem do registro; retirada exige Excluded explicita. Mudancas exigem Reason e Evidence humanas. |
 | Work | Macroatividades com identidades unicas, fases, dependencias e estimativas conforme abaixo. |
-| EvidenceReview | Reviewed booleano e Reason descrevem reexame das estimativas quando InputChanges apontar alteracoes. |
+| EvidenceReview | Reviewed booleano e Reason descrevem conferencia das fontes atuais e premissas usadas para estimar. Ausencia dessa conferencia deixa NAO_AVALIAVEL. Nao e selo ou autorizacao. |
 | Assumptions / Decisions | Premissas e decisoes legiveis, com origem humana ou proposta identificada. |
 
 Work.Issues, Accepted, Reopened e Excluded referenciam somente B0 ou New, sem
@@ -91,10 +91,20 @@ Exemplo de estimativa de **fixture**, sem servir de padrao de produtividade:
 
 ## Saidas e revisao
 
-O executor nao escreve Simulation, EstimateEvidence, validacao.json, atual.json,
-preparo.json ou o bloco Markdown entre sprints:inicio/fim. A tarefa calcula e
-preserva narrativa fora do bloco. EstimateEvidence captura hashes das referencias
-usadas para estimar; caminhos inexistentes/invalidos mantem NAO_AVALIAVEL.
+O cenario ocupa `atual/sprints/<cenario>/` no mestre: `contexto.json` informa
+participantes e caminhos; `planejamento-sprints.json` guarda premissas/estimativas
+editaveis; `plano.md` apresenta o cronograma e conserva narrativa humana fora de
+sprints:inicio/fim. Os indices dos participantes apontam ao mesmo plano mestre.
+Retirar o mestre exige conciliar sua transferencia ou escolher outro cenario;
+nao se cria outro mestre implicitamente.
+
+O executor nao escreve `resultado.json` nem o bloco calculado. A tarefa publica
+plano e resultado juntos. O resultado guarda somente o ultimo calculo: Simulation,
+B0 fixada quando conhecida, inclusoes acumuladas e datas de inicio/referencia.
+Simulation fica somente nesse resultado, sem copia integral das entradas.
+EstimateEvidence informa caminho/status das referencias examinadas; hashes e
+textos usados para detectar edicao concorrente permanecem em memoria.
+Caminhos inexistentes/invalidos usados para estimar mantem NAO_AVALIAVEL.
 Referencias externas permanecem referencias: sua presenca nao prova leitura.
 Diretorios nao sao arquivos de evidencia; use os arquivos efetivamente lidos.
 
@@ -114,22 +124,27 @@ revisao, separando decisoes, propostas e pendencias. Nao duplica viabilidade,
 previsoes ou percentuais fora do bloco; assim o calculo nao deixa estados
 editoriais contraditorios por atualizacao parcial.
 
-Novos contextos capturam ReviewPromptPath na propria revisao, com o prompt
-revisar-sprints e os destinos/IDs explicitos. A referencia do template integra
-o fingerprint; preparo.json sela o snapshot em ReviewPromptSha256. A validacao
-confere o selo e oferece esse caminho somente apos publicar consistentemente.
-Repetir a validacao reutiliza os mesmos bytes. O prompt analisa em somente
-leitura, sem recalcular, editar, conceder GO ou substituir a tarefa deterministica.
-Legados sem ReviewPromptPath nao recebem snapshot silenciosamente: Revisar cria
-nova revisao que captura o contrato atual. Templates atualizados nao reescrevem
-prompts antigos; nao se recalcula uma publicacao antiga para adotar a corretiva.
+PromptPath e ReviewPromptPath ficam nos destinos correntes. Preparar atualiza
+orientacoes/fontes gerenciadas e preserva notas externas a esses blocos. Nao ha
+preparo.json, selo, copia de contrato imutavel ou cadeia de revisoes. O prompt de
+resultado analisa em somente leitura, sem conceder GO ou substituir a tarefa.
+Os prompts oferecem links ao contrato/ADR/guia atuais, indice geral e fontes
+por participante, incluindo codigo, POM, registro, fichas e anexos disponiveis.
+Fontes indisponiveis aparecem como lacunas; o codigo local continua navegavel
+mesmo sem registro/indice. O contrato corrente e a ADR prevalecem sobre exemplos
+historicos dos guias; seus arquivos sao referenciados, sem copias operacionais.
+Repetir a validacao com as mesmas entradas produz os mesmos numeros e documentos.
+Preparar ou falhar na validacao conserva o ultimo resultado. O plano o identifica
+como ultimo calculo: sua existencia nao valida edicoes posteriores nas entradas.
 
-Toda revisao preserva a anterior por Previous e lista InputChanges. A cadeia pode
-conter rascunhos: B0 formada vem do ancestral validado, nao da data do arquivo.
+Revisar atualiza o mesmo conjunto corrente; B0 formada e as inclusoes acumuladas
+vem do ultimo resultado calculado. Nao dependem de revisoes anteriores ou datas
+de arquivos. Leitura e publicacao detectam alteracoes durante a operacao; o
+condutor confere mudancas de conteudo entre operacoes sem recibos de hashes.
 Inicio publicado permanece fixo; ReferenceDate nao retrocede. Sprints encerradas
 mantem sua previsao historica; a nova previsao usa capacidade e esforco restantes.
 Limites de fase incluem sprints ja consumidas, inclusive a sprint em andamento;
-ConsumedPhaseSprints preserva esse consumo entre revisoes sucessivas. Min/Max
+ConsumedPhaseSprints preserva esse consumo no resultado corrente. Min/Max
 variam o esforco futuro sobre o mesmo passado Reference publicado. Historico
 anterior sem FirstWorkDate conta conservadoramente a fase da sprint iniciada.
 Remaining nao e descontado novamente do esforco historico. Marcos com esforco
@@ -138,10 +153,10 @@ Alteracao explicita de projetos exige motivo; novas issues ficam em Changes.New
 quando B0 ja foi formada. Retomar nao inclui projetos novos automaticamente.
 
 Validacao estrutural pode resultar em NAO_AVALIAVEL: nao confundir VALIDATED com
-CABE_NAS_PREMISSAS. Outras classificacoes: EM_RISCO e NAO_CABE. A publicacao usa
-lock, confere hashes e atualiza o ponteiro somente apos gravar dados, Markdown e
-validacao consistentes. Se falhar a troca do ponteiro, a mesma acao pode recuperar
-a publicacao sem recalcular nem reescrever o historico validado.
+CABE_NAS_PREMISSAS. Outras classificacoes: EM_RISCO e NAO_CABE. Um mutex transitorio
+comum serializa descoberta, preparo, validacao e indices de sprints; a publicacao
+recuperavel do projeto troca o conjunto completo. Falha conserva/restaura o ultimo
+resultado e seu Markdown. Indices podem ser reconstruidos sem recalcular o mestre.
 
 ProductionDeadline e obrigatorio para comprovar viabilidade de producao, mesmo
 com MaxTotalSprints. Sem inicio, um MaxTotalSprints explicito permite rascunho
@@ -157,8 +172,9 @@ Markdown reproduz os motivos do JSON, compara limites e consumo historico e
 mostra movimentos e composicao atual do escopo sem alterar B0. Justificativa
 textual do agente nao substitui a validacao nem autoriza aumentar o prazo.
 
-Revisoes publicadas nao sao editadas no lugar. Se houver contribuicao manual,
-preserve-a numa revisao com motivo. Campos calculados editados sao recusados,
-sem sobrescrita silenciosa. Os hashes detectam inconsistencias; nao substituem
+Premissas e narrativa sao editadas no lugar; o bloco calculado e regenerado pela
+tarefa. Preserve contribuicoes humanas fora de seus marcadores. Simulation nas
+entradas editaveis e recusada; resultado nao e uma area de edicao humana.
+Controles transitorios detectam edicoes concorrentes, sem funcionarem como
 controle de acesso ou assinatura digital. O plano e uma proposta de cronograma,
 sem GO de corretiva, aceite de migracao ou dispensa de politicas corporativas.

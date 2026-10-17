@@ -3,37 +3,27 @@ $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'Test-IssueQueries.ps1')
 $parameters=@{Root=$fixture;ContextPath=$prepared.ContextPath;Action='obter_issue';Id=$issueId}
 $before=Inventory $area
-$allowed=Invoke-HarnessIssueQuery @parameters -AllowedRoots @($area)
-Assert ($allowed.Status -eq 'OK') 'Consulta permitida foi recusada.'
-$blocked=Invoke-HarnessIssueQuery @parameters -AllowedRoots @($source)
-Assert ($blocked.Error.Code -eq 'ACCESS_DENIED') 'Contexto fora das raizes foi lido.'
-$blocked=Invoke-HarnessIssueQuery @parameters -AllowedRoots @($fixture,$source)
-Assert ($blocked.Error.Code -eq 'ACCESS_DENIED') 'MTA externo do recibo escapou da restricao.'
-$blocked=Invoke-HarnessIssueQuery @parameters -AllowedRoots @($fixture,$run)
-Assert ($blocked.Error.Code -eq 'ACCESS_DENIED') 'Source/POM externo foi inspecionado.'
-$empty=Invoke-HarnessIssueQuery @parameters -AllowedRoots @()
-Assert ($empty.Error.Code -eq 'INVALID_INPUT') 'Lista vazia desativou restricao.'
-Assert ((Inventory $area) -ceq $before) 'Restricao de leitura escreveu arquivos.'
-$prefix=Invoke-HarnessIssueQuery @parameters -AllowedRoots @($area+'-vizinho')
-Assert ($prefix.Error.Code -eq 'ACCESS_DENIED') 'Prefixo semelhante foi aceito como raiz.'
-$originalRegister=[IO.File]::ReadAllText($paths.MigrationPath)
+Assert ((Invoke-HarnessIssueQuery @parameters -AllowedRoots @($area)).Status -eq 'OK') 'Consulta permitida recusada.'
+foreach ($roots in @(@($source),@($fixture,$source),@($fixture,$run),@($area+'-vizinho'))) {
+    $blocked=Invoke-HarnessIssueQuery @parameters -AllowedRoots $roots
+    Assert ($blocked.Error.Code -eq 'ACCESS_DENIED') ('Raizes insuficientes permitiram leitura: '+($roots -join ','))
+}
+Assert ((Invoke-HarnessIssueQuery @parameters -AllowedRoots @()).Error.Code -eq 'INVALID_INPUT') 'Lista vazia desativou restricao.'
+Assert ((Inventory $area) -ceq $before) 'Restricao escreveu arquivos.'
+$configJson=[IO.File]::ReadAllText($paths.ConfigPath)
 try {
-    [IO.File]::WriteAllText($paths.MigrationPath,$originalRegister.Replace('Source: '+$source,'Source: '+$area+'-externo'))
-    $internalSource=Invoke-HarnessIssueQuery @parameters -AllowedRoots @($area)
-    Assert ($internalSource.Error.Code -eq 'ACCESS_DENIED') 'Source interno do registro escapou da restricao.'
-} finally { [IO.File]::WriteAllText($paths.MigrationPath,$originalRegister) }
-$unrestricted=Invoke-HarnessIssueQuery @parameters
-Assert ($unrestricted.Status -eq 'OK') 'Estado de raizes vazou para chamada CLI seguinte.'
+    $config=$configJson | ConvertFrom-Json; $config.mta.diretorio=$area+'-externo'
+    Write-HarnessJson $paths.ConfigPath $config
+    Assert ((Invoke-HarnessIssueQuery @parameters -AllowedRoots @($area)).Error.Code -eq 'ACCESS_DENIED') 'Origem local configurada escapou da restricao.'
+} finally { [IO.File]::WriteAllText($paths.ConfigPath,$configJson) }
 $receiptJson=[IO.File]::ReadAllText($prepared.ContextPath)
 try {
-    $receipt=$receiptJson | ConvertFrom-Json
-    $other=$receipt.Projects[0] | ConvertTo-Json -Depth 30 | ConvertFrom-Json
-    $other.Source=$area+'-outro-projeto'
-    $receipt.Projects+=@($other)
-    Write-HarnessJson $prepared.ContextPath $receipt
-    $selected=Invoke-HarnessIssueQuery @parameters -Source $source -AllowedRoots @($area)
-    Assert ($selected.Status -eq 'OK') 'Projeto fora do escopo bloqueou selecao permitida.'
-    $selected=Invoke-HarnessIssueQuery @parameters -Source $other.Source -AllowedRoots @($area)
-    Assert ($selected.Error.Code -eq 'ACCESS_DENIED') 'Projeto externo selecionado nao foi recusado.'
+    $data=$receiptJson | ConvertFrom-Json
+    $other=$data.Projects[0] | ConvertTo-Json -Depth 30 | ConvertFrom-Json
+    $other.Source=$area+'-outro-projeto'; $other.Project='outro'
+    $data.Projects+=@($other); Write-HarnessJson $prepared.ContextPath $data
+    Assert ((Invoke-HarnessIssueQuery @parameters -Source $source -AllowedRoots @($area)).Status -eq 'OK') 'Projeto nao selecionado bloqueou leitura permitida.'
+    Assert ((Invoke-HarnessIssueQuery @parameters -Source $other.Source -AllowedRoots @($area)).Error.Code -eq 'ACCESS_DENIED') 'Projeto externo selecionado foi lido.'
 } finally { [IO.File]::WriteAllText($prepared.ContextPath,$receiptJson) }
-Write-Host 'PASS: raizes explicitas, contexto, Source, origem interna, lista vazia e isolamento entre chamadas.'
+Assert ((Invoke-HarnessIssueQuery @parameters).Status -eq 'OK') 'Raizes vazaram para proxima chamada.'
+Write-Host 'PASS: limites de contexto, Source/POM, MTA e isolamento entre chamadas.'

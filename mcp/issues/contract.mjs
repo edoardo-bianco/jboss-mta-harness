@@ -2,8 +2,8 @@ import * as z from 'zod/v4';
 
 const text = z.string().min(1).max(8192);
 const common = {
-  ContextPath: text.describe('Recibo de priorizacao ou planejamento explicitamente selecionado; nunca escolher por recencia.'),
-  Source: text.optional().describe('Projeto local; obrigatorio se o recibo inclui varios projetos.'),
+  ContextPath: text.describe('Contexto corrente de priorizacao ou planejamento do projeto explicitamente selecionado.'),
+  Source: text.optional().describe('Projeto local; obrigatorio se o contexto inclui varios projetos.'),
   ExpectedBasisSha256: z.string().regex(/^[a-fA-F0-9]{64}$/).optional(),
   Page: z.number().int().min(1).max(2147483647).optional(),
   PageSize: z.number().int().min(1).max(50).optional(),
@@ -18,7 +18,7 @@ export const toolSchemas = {
 };
 
 export const descriptions = {
-  auditar_base: 'Confere identidade, hashes e divergencias da base selecionada. Somente leitura; nao confere codigo atual nem concede GO/aceite.',
+  auditar_base: 'Confere identidade e divergencias da base corrente. Hashes transitorios protegem a paginacao. Somente leitura; nao confere codigo atual nem concede GO/aceite.',
   listar_issues: 'Lista issues com filtros e paginas. Availability e do preparo; decisoes e andamento sao atuais. Consulta nao marca exame/cobertura.',
   obter_issue: 'Recupera uma issue e incidentes paginados/por ordinal. Caminhos e linhas sao candidatos do diagnostico; conferir codigo atual. Nao prova resolucao.',
 };

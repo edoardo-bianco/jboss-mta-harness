@@ -42,7 +42,19 @@ as capacidades existentes das propostas e seus criterios de avanco.
 O [catalogo de dominios e capacidades](doc/features/evolucao-harness-dominios-capacidades-priorizacao.md)
 detalha propostas futuras. A [conciliacao com o backlog](doc/estrategia/conciliacao-evolucao-harness.md)
 identifica sobreposicoes, entregas ja atendidas e pendencias preservadas;
-prazo, prioridade e piloto permanecem a definir.
+as prioridades relativas e pilotos posteriores permanecem a definir.
+
+**Prioridade definida em 10/10/2026:** concluir a
+[simplificacao por projeto](doc/features/organizacao-simplificada-por-projeto.md)
+e a [transicao dos registros](doc/features/conversao-descartavel-dos-registros.md)
+antes da modernizacao e de novas funcionalidades. O objetivo e retirar recibos e
+rastreamentos por execucao, usar caminhos fixos e oferecer links diretos das fichas
+para suas fontes. A entrega inclui limpeza e alinhamento dos guias e do orientador.
+O [plano de viabilidade](tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10)
+registra a implementacao tecnica por etapas. O fluxo corrente ja usa esses caminhos;
+regressao integrada e aceite humano sao acompanhados separadamente no
+[checklist](tasks/historico/todo-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+Nenhum dado real foi convertido ou limpo nesta entrega.
 
 A [arquitetura do Engineering Harness](doc/arquitetura/arquitetura-harness.md)
 consolida a base implementada e propoe a evolucao por nucleo, perfis e capacidades,
@@ -64,7 +76,10 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 | Quero prever a migracao por sprints, equipe e prazo | Use **Planejamento: planejar sprints**, conforme o [guia de planejamento macro](doc/guias/tools/planejamento-sprints.md); inclui todos os projetos ou um subconjunto. |
 | Quero conferir uma base ou consultar uma issue preparada | Peca ao helper a [consulta da base ou da issue](doc/guias/tools/consultas-issues.md#consultar-pelo-helper), indicando o contexto se ainda nao estiver identificado. |
 | Quero adotar um novo MTA, local ou recebido | Use **Planejamento: atualizar registro de migracao**, conforme o [guia de adocao e comparacao](doc/guias/tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente). |
-| Recebi um ZIP de analise ou plano do harness | Use **Planejamento: compartilhar contexto** e siga o [guia de importacao](doc/guias/tools/compartilhamento-contextos.md). |
+| Recebi arquivos de analise ou plano de um colega | Siga o [guia de copia](doc/guias/tools/compartilhamento-contextos.md): associar o POM local, preservar contribuicoes e reconciliar. |
+| Quero navegar nas evidencias | Abra `.harness/indices/projetos.md` e o indice do projeto; [roteiro de navegacao](doc/guias/tools/workspace.md#navegar-pelas-evidencias-do-projeto). |
+| Quero baixar o Sonar da pipeline | Use **Aplicacao: analisar SonarQube > 3 Baixar ultima analise concluida**; [origem e limites](doc/guias/tools/sonar.md#baixar-a-ultima-analise-concluida). |
+| Quero migrar/configurar o JBoss EAP 7.4 | Consulte o [guia de migracao da configuracao](doc/guias/tools/migracao-configuracao-jboss.md) e o [guia de operacao](doc/guias/tools/jboss.md). |
 | Quero ajuda para retomar | Use `$orientar-migracao` no Codex ou `migracao_helper` no Copilot, conforme o [guia de orientacao](doc/guias/orientacao-migracao.md). |
 
 **O agente de orientacao e opcional e permanece leitor.** Ele confere os arquivos
@@ -88,15 +103,18 @@ recebe ficha de evidencias, referencias e roteiro; o ranking resume a comparacao
 Depois voce escolhe a issue e seu recorte para planejar.
 
 No planejamento, a entrada e **Planejamento: planejar**: usa a escolha e as
-evidencias do registro para criar ou atualizar a proposta. Sem pacote a importar,
+evidencias do registro para criar ou atualizar a proposta. Sem trabalho recebido,
 se faltar registro, **Workspace: atualizar indice dos projetos** o prepara. Nao e
 necessario repetir projeto, rodada e escolhas em menus sucessivos. Evidencias suficientes permitem
 planejar sem pacote MTA completo; duvidas essenciais sao esclarecidas antes de
 concluir o plano, sem trocar silenciosamente uma base MTA ja declarada.
-Plano e to-do usam modelos padronizados e nomes que identificam projeto/issue,
-na pasta do `artifactId` Maven. O [dossie por issue](doc/guias/tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas)
-reune ficha e evidencias usadas. O plano consolidado recebido permite preparar
-implementacao sem o MTA original; revisar suas entradas exige reavaliacao explicita.
+Plano e tarefas ficam em `atual/planejamento/` na pasta do `artifactId` Maven.
+Cada issue tem [ficha e referencias](doc/guias/tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas).
+Plano recebido exige associacao/reconciliacao, conferencia local e revisao do GO;
+copia nao autoriza execucao. Origem ausente fica explicita, sem afirmar equivalencia.
+Voce pode escrever referencias em Markdown/chat indicando projeto, objetivo e
+resultados correntes, sem IDs de execucao ou hashes. Os guias em `doc/` servem
+como base local para busca/leitura do agente; RAG semantico nao esta implementado.
 
 Para contribuir com a evolucao do harness, consulte [AGENTS.md](AGENTS.md) e as
 [decisoes arquiteturais](doc/adr/). O [contrato de planejamento](doc/especificacoes/planejamento-copilot.md)

@@ -7,6 +7,11 @@
     "java.debug.settings.hotCodeReplace": "auto",
     "java.configuration.updateBuildConfiguration": "disabled",
     "java.import.generatesMetadataFilesAtProjectRoot": false,
-    "files.exclude": {"**/.harness": true}
+    "files.exclude": {
+      "**/.harness": false,
+      "**/.harness/tests": true,
+      "**/.harness/backups-temporarios": true,
+      "**/.harness/workspace-backups": true
+    }
   }
 }

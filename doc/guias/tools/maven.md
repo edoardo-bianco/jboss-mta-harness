@@ -14,8 +14,8 @@ html:
 
 | Caminho | Como iniciar | Configuracao e resultado |
 | --- | --- | --- |
-| **A. Run Task do harness — recomendado para este fluxo** | **Terminal > Run Task > Aplicacao: build Maven (Java 8)** | Usa Java/Maven do JSON local, oferece selecao de projeto e grava log/recibo do harness. |
-| **B. Maven direto** | Painel **MAVEN** do VS Code ou comando `mvn` no terminal da aplicacao. | Usa o ambiente da extensao/terminal; confira Java 8 e Maven. Nao gera o recibo de build do harness. |
+| **A. Run Task do harness — recomendado para este fluxo** | **Terminal > Run Task > Aplicacao: build Maven (Java 8)** | Usa Java/Maven do JSON local, oferece selecao de projeto e grava log/resultado corrente do harness. |
+| **B. Maven direto** | Painel **MAVEN** do VS Code ou comando `mvn` no terminal da aplicacao. | Usa o ambiente da extensao/terminal; confira Java 8 e Maven. Nao gera o resultado corrente do harness. |
 
 Escolha um dos caminhos para cada build. A extensao Maven e opcional para usar
 a Run Task. Este guia cobre o build antes da analise na
@@ -73,7 +73,7 @@ necessidade corporativa explicita.
 2. Confirme o arquivo de workspace em uso, normalmente `jboss-mta-harness.local.code-workspace`.
 3. Na lista de fases Maven, escolha **clean install** para preparar a analise MTA.
 4. No terminal que abrir, escolha o numero do projeto/modulo e confira o caminho exibido.
-5. Aguarde **Status: SUCCEEDED** e **ExitCode: 0**. Confira os testes executados e os caminhos de `console.log`/`result.json`.
+5. Aguarde **Status: SUCCEEDED** e **ExitCode: 0**. Confira os testes executados e os caminhos de `console.log`/`resultado.json`.
 
 A tarefa tambem
 oferece `clean verify`, `clean package`, `test`, `package`, `verify`, `install` e `clean`
@@ -110,11 +110,13 @@ confere Java 8 e Maven 3 antes das fases e restaura o ambiente ao terminar. Opco
 Java/Maven herdadas do terminal e scripts pessoais mavenrc nao sao usados; configuracao
 versionada `.mvn` e settings declarados permanecem aplicaveis. O build ocorre na raiz
 do projeto ativo, incluindo seu reactor. Nao execute outra IDE/CLI escrevendo nesse
-projeto; a tarefa compartilha o lock do MTA deste harness.
+projeto; as operacoes do harness usam exclusividade local por projeto.
 
-Log e recibo ficam em `.harness/builds/<nome>__<chave12>/build_<data-fuso>__<RunId12>/console.log` e `result.json`.
-O nome usa a data/hora de inicio do recibo e o fuso local; o RunId completo permanece
-no JSON. Builds anteriores continuam nos caminhos originais.
+A ultima tentativa fica em `.harness/projetos/<artifactId>/atual/build/`:
+`console.log` e `resultado.json`, inclusive se falhar. Abra o log pelo indice do
+projeto; arquivos/testes produzidos pelo Maven continuam no `target/` da aplicacao.
+Nao ha pasta de build por execucao. Guarde uma evidencia humana escolhida em
+`evidencias/` quando precisar conservar uma comparacao antes da proxima tentativa.
 O codigo de falha do Maven e propagado. `SUCCEEDED` significa Maven exit 0 para as
 fases escolhidas; `clean` sozinho, testes desabilitados no POM ou ausencia de testes
 nao comprovam teste/cobertura. Esta tarefa nao produz manifesto Sonar nem homologa EAP.
@@ -128,7 +130,7 @@ A tarefa de build le o JSON novamente em cada execucao.
 Este caminho executa o Maven pela extensao ou pelo terminal da aplicacao.
 Use o mesmo projeto/POM que sera selecionado no MTA e conclua o build antes da
 analise. A extensao e o comando `mvn` nao chamam o executor do harness nem geram
-seu `result.json`; confira a saida do Maven e os relatorios no `target` do projeto.
+seu `resultado.json`; confira a saida do Maven e os relatorios no `target` do projeto.
 
 #### Usar a extensao Maven padrao do VS Code
 
@@ -144,7 +146,7 @@ e abra um novo; nao interrompa uma execucao em andamento. No painel **MAVEN**, c
 com o botao direito no projeto desejado, escolha **Execute Commands...** e digite
 `--version`, sem `mvn`. Confira Java 1.8 e o Maven configurado. Depois use a mesma
 opcao com `-Djacoco.haltOnFailure=false clean install` e aguarde `BUILD SUCCESS` antes de executar MTA. A propriedade mantem o tratamento de cobertura usado pela Run Task. Confira que o POM selecionado corresponde ao projeto que voce escolhera na tarefa MTA. A extensao usa o POM selecionado
-e nao passa pelo lock/recibo da tarefa do harness: execute uma operacao por vez.
+e nao passa pela exclusividade/publicacao da tarefa do harness: execute uma operacao por vez.
 Configuracoes particulares de pasta podem sobrescrever as do workspace.
 Referencia: [configuracao da extensao Maven](https://github.com/microsoft/vscode-maven#additional-configurations).
 

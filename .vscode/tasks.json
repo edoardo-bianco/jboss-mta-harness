@@ -63,7 +63,7 @@
     },
     {
       "label": "Workspace: atualizar indice dos projetos",
-      "detail": "Cria registros ausentes e atualiza o indice, preservando escolhas e origem dos registros existentes; abre o indice e salva copia datada. Avisos indicam o que conferir.",
+      "detail": "Reconhece os POMs, cria registros correntes ausentes e reconstroi os links de projetos, priorizacoes e sprints; preserva decisoes e abre o indice navegavel.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/atualizar-indice-projetos.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-EditorPath", "${execPath}"],
@@ -93,7 +93,7 @@
     },
     {
       "label": "Workspace: limpar execucoes",
-      "detail": "Limpe execucoes e planejamentos locais por projeto ou todos; preserve MTA externo, migracao.md, evidencias e Sonar.",
+      "detail": "Limpe residuos temporarios de build, MTA e Sonar por projeto ou todos, ou backups temporarios; preserve dados correntes, evidencias e conflitos pendentes.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/limpar-execucoes.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}"],
@@ -193,14 +193,16 @@
     },
     {
       "label": "MTA: acompanhar log da analise",
-      "detail": "Acompanha o console.log da analise MTA em execucao, sem selecionar projeto. Ctrl+C encerra somente o leitor.",
+      "detail": "Consulta o log MTA corrente do projeto escolhido. Ctrl+C encerra somente o leitor.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
         "-NoProfile",
         "-File",
         "${workspaceFolder}/scripts/acompanhar-log-mta.ps1",
-        "-Active"
+        "-WorkspacePath",
+        "${input:harnessWorkspacePath}",
+        "-SelectTarget"
       ],
       "problemMatcher": [],
       "runOptions": {
@@ -214,29 +216,7 @@
     },
     {
       "label": "MTA: acompanhar atividade interna",
-      "detail": "Acompanha automaticamente o log interno da analise MTA em execucao a cada 5 segundos. Nao inicia nem interrompe MTA.",
-      "type": "process",
-      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": [
-        "-NoProfile",
-        "-File",
-        "${workspaceFolder}/scripts/acompanhar-log-mta.ps1",
-        "-Active",
-        "-Detalhado"
-      ],
-      "problemMatcher": [],
-      "runOptions": {
-        "instanceLimit": 1
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": false
-      }
-    },
-    {
-      "label": "MTA: consultar log de execucao anterior",
-      "detail": "Escolha o projeto e a rodada por data/resultado para ler o log salvo, sem executar MTA.",
+      "detail": "Consulta o log interno MTA corrente do projeto a cada 5 segundos. Nao inicia nem interrompe MTA.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
@@ -246,10 +226,12 @@
         "-WorkspacePath",
         "${input:harnessWorkspacePath}",
         "-SelectTarget",
-        "-SelectRun",
-        "-Once"
+        "-Detalhado"
       ],
       "problemMatcher": [],
+      "runOptions": {
+        "instanceLimit": 1
+      },
       "presentation": {
         "reveal": "always",
         "panel": "dedicated",
@@ -284,16 +266,6 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
-      "label": "Planejamento: compartilhar contexto",
-      "detail": "Exporta analise ou plano por issue em ZIP; importa com associacao explicita aos projetos locais, preservando originais e escolhas existentes.",
-      "type": "process",
-      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
-      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/compartilhar-contexto.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-Interactive"],
-      "problemMatcher": [],
-      "runOptions": { "instanceLimit": 1 },
-      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
-    },
-    {
       "label": "Planejamento: planejar",
       "detail": "Cria ou retoma a proposta pelas escolhas e evidencias do migracao.md. Sem registro, orienta atualizar o indice; pergunta somente quando o contexto for ambiguo.",
       "type": "process",
@@ -313,7 +285,7 @@
     },
     {
       "label": "Planejamento: atualizar registro de migracao",
-      "detail": "Adota explicitamente uma rodada MTA local ou recebida no registro, preservando escolhas e preparando o prompt de comparacao. Confira a origem antes de confirmar.",
+      "detail": "Compara diagnostico, decisoes e trabalho corrente, com pasta opcional recebida de um colega. Prepara revisao; nao concede GO nem altera configuracoes locais.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [
@@ -342,7 +314,7 @@
     },
     {
       "label": "Planejamento: abrir plano e to-do",
-      "detail": "Escolha projeto e planejamento por data; abra os dois documentos existentes no VS Code.",
+      "detail": "Abra plano e tarefas correntes do projeto no VS Code; escolha o projeto somente quando houver mais de um candidato.",
       "type": "process",
       "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
       "args": [

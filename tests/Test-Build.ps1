@@ -11,6 +11,7 @@ $jdk = Join-Path $area 'jdk app'
 $maven = Join-Path $area 'maven app'
 foreach ($dir in @($app, "$jdk/bin", "$maven/bin")) { $null = New-Item -ItemType Directory -Path $dir -Force }
 foreach ($file in @("$app/pom.xml", "$jdk/bin/java.exe", "$jdk/bin/javac.exe", "$maven/bin/mvn.cmd", "$area/settings app.xml")) { Set-Content $file '' }
+[IO.File]::WriteAllText((Join-Path $app 'pom.xml'),'<project><artifactId>app</artifactId></project>')
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @(@{name='app'; path=$app})
 $config.activeProject = 'app'
@@ -23,7 +24,7 @@ $configPath = Join-Path $fixture 'config.json'
 Write-HarnessJson $configPath $config
 $workspacePath = Join-Path $fixture 'build.code-workspace'
 Write-HarnessJson $workspacePath @{folders=@(@{name='app'; path=$app})}
-$context = Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target 'app'
+$context = Read-HarnessConfig $configPath $fixture -WorkspacePath $workspacePath -Target 'app' -SkipMigrationInitialization
 $module = Get-Module HarnessBuild
 & $module {
     $script:Calls = @(); $script:Failure = 0; $script:JavaVersion = '1.8.0_504'
@@ -41,12 +42,10 @@ try {
     $env:MAVEN_ARGS = 'deploy'
     $result = Invoke-ApplicationBuild $context 'clean install'
     Assert ($result.Status -eq 'SUCCEEDED' -and $result.ExitCode -eq 0) 'clean install falhou.'
-    Assert ($result.Project -eq $context.Active.name -and $result.Source -eq $app) 'Recibo nao pertence ao projeto escolhido no workspace.'
+    Assert ($result.Project -eq 'app' -and $result.Source -eq $app) 'Resultado nao pertence ao artifactId do projeto escolhido.'
     $run = Split-Path -Parent $result.ResultPath
-    Assert ((Split-Path -Leaf (Split-Path -Parent $run)) -match '^app__[a-f0-9]{12}$') 'Build deve usar nome e chave do projeto.'
-    $runName = 'build_' + ([DateTimeOffset]::Parse($result.StartedAtUtc)).ToLocalTime().ToString('yyyy-MM-dd_HH-mm-sszzz').Replace(':','') + '__' + $result.RunId.Substring(0,12)
-    Assert ((Split-Path -Leaf $run) -ceq $runName -and $result.RunId.Length -eq 32) 'Build deve compartilhar data com recibo e preservar RunId completo.'
-    $resultHash = (Get-FileHash -LiteralPath $result.ResultPath).Hash
+    Assert ($run -eq (Join-Path $fixture '.harness/projetos/app/atual/build')) 'Build deve usar destino fixo por artifactId.'
+    Assert (-not $result.PSObject.Properties['RunId']) 'Resultado nao deve exigir recibo/RunId.'
     $calls = @(& $module { $script:Calls })
     $build = $calls[-1]
     Assert (($build.Arguments[-2..-1] -join ' ') -eq 'clean install') 'Ordem clean install perdida.'
@@ -57,23 +56,22 @@ try {
     Assert ($build.Arguments -contains $context.Config.tools.applicationMavenSettingsPath) 'Settings com espaco perdido.'
     Assert (-not $build.Injected) 'MAVEN_ARGS herdado alterou os comandos.'
     Assert ($env:JAVA_HOME -ceq $beforeJava -and $env:PATH -ceq $beforePath -and $env:MAVEN_ARGS -eq 'deploy') 'Ambiente nao restaurado.'
-    Assert (Test-Path $result.ResultPath) 'Recibo ausente.'
+    Assert (Test-Path $result.ResultPath) 'Resultado corrente ausente.'
     & $module { $script:Failure = 7 }
     $failed = Invoke-ApplicationBuild $context 'test'
     Assert ($failed.Status -eq 'FAILED' -and $failed.ExitCode -eq 7) 'Falha Maven virou sucesso.'
-    Assert ($failed.ResultPath -ne $result.ResultPath -and (Split-Path -Leaf (Split-Path -Parent $failed.ResultPath)) -like 'build_*') 'Falha deve manter recibo em nova pasta legivel.'
-    Assert ((Get-FileHash -LiteralPath $result.ResultPath).Hash -ceq $resultHash) 'Nova execucao alterou recibo anterior.'
+    Assert ($failed.ResultPath -eq $result.ResultPath) 'Falha deve ocupar o mesmo destino corrente.'
+    $current=Get-Content -LiteralPath $failed.ResultPath -Raw | ConvertFrom-Json
+    Assert ($current.Status -eq 'FAILED' -and $current.ExitCode -eq 7) 'Ultima tentativa deve mostrar a falha.'
     Assert ($env:JAVA_HOME -ceq $beforeJava -and $env:PATH -ceq $beforePath) 'Falha nao restaurou ambiente.'
     & $module { $script:Calls = @(); $script:JavaVersion = '25.0.3' }
     $wrong = Invoke-ApplicationBuild $context 'verify'
     Assert ($wrong.Status -eq 'FAILED') 'Java nao 8 aceito.'
     Assert (@(& $module { $script:Calls }).Count -eq 1) 'Maven rodou apos rejeitar Java.'
-    $lock = [IO.File]::Open((Join-Path $fixture '.harness/mta.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
-    try {
-        $rejected = $false
-        try { Invoke-ApplicationBuild $context 'verify' | Out-Null } catch { $rejected = $true }
-        Assert $rejected 'Build concorrente com MTA aceito.'
-    } finally { $lock.Dispose() }
+    Assert (-not (Test-Path (Join-Path $fixture '.harness/mta.lock'))) 'Build nao deixa lock/ponteiro legado em disco.'
+    Assert (-not (Test-Path (Join-Path $fixture '.harness/projetos/app/temporarios'))) 'Temporarios devem ser retirados ao terminar.'
+    $operation=Get-Content (Join-Path $fixture '.harness/projetos/app/atual/operacao.json') -Raw | ConvertFrom-Json
+    Assert ($operation.build.Status -eq 'FAILED' -and $operation.build.Error -match 'Java 8') 'Situacao corrente explica a ultima falha.'
     foreach ($goals in @('clean install & whoami', 'deploy', '')) {
         $rejected = $false
         try { Invoke-ApplicationBuild $context $goals | Out-Null } catch { $rejected = $true }
@@ -84,4 +82,4 @@ try {
     try { Invoke-ApplicationBuild $context 'verify' | Out-Null } catch { $rejected = $true }
     Assert $rejected 'Build sem Maven proprio aceito.'
 } finally { $env:MAVEN_ARGS = $beforeArgs }
-Write-Output 'PASS: clean install, ferramentas separadas, alvo, settings, ambiente, falha, Java 8 e lock.'
+Write-Output 'PASS: build corrente, ferramentas separadas, settings, ambiente, falha, Java 8 e ausencia de recibos.'

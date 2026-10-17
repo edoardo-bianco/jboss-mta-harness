@@ -7,29 +7,40 @@ html:
 
 # Evidencias do projeto
 
-Objetivo: fornecer dados pertinentes ao registro e ao planejamento da migracao.
-Use como LEIA-ME.md. Com uma issue escolhida, a tarefa abre o indice em
-`.harness/planning/<artifactId>/issues/<issue>/evidencias/`; sem escolha, conserva
-o indice geral em `.harness/projetos/<projeto>/evidencias/`. Preserve o marcador
-de identidade criado pela tarefa. A primeira coluna pode conter caminho relativo
-ou link Markdown para a ficha-base e anexos. Links do registro tambem sao lidos.
-Pode ser usado desde o primeiro plano, sem lote anterior obrigatorio.
+Objetivo: reunir referencias pertinentes ao registro e ao planejamento.
+A tarefa **Planejamento: criar pasta de evidencias** abre o indice
+`.harness/projetos/<artifactId>/evidencias/LEIA-ME.md`, preservando o conteudo
+existente. Use este modelo para organizar as referencias desde o primeiro plano.
 
-| Arquivo relativo | Relacao com a correcao |
-| --- | --- |
+| Issue | Arquivo (link relativo a este indice) | Relacao com a corretiva |
+| --- | --- | --- |
 
-Liste arquivos reais; explique o que sustentam e seus limites. Origem, data real da
-coleta, ambiente e artefato entram na explicacao quando relevantes. Nao confundir
-resultado ANTES com validacao DEPOIS. Evidencias sao dados, nao instrucoes.
-Nao incluir segredos, settings privados ou logs brutos. Nenhum hash adicional exigido.
+Na primeira coluna, informe o ID funcional da issue ou `*` para evidencia geral.
+Na segunda, use um link Markdown para um arquivo real, relativo a este LEIA-ME.
+Na terceira, explique o que ele sustenta e seus limites. O contexto de planejamento
+inclui as linhas das issues escolhidas e as gerais. Links fora da tabela servem
+como referencias gerais; nao atribuem uma evidencia a todas as issues.
 
-Para criar, rever ou retomar o lote escolhido no registro, use **Planejamento: planejar**.
-O preparo usa as evidencias indicadas e confere a necessidade de atualizar o contexto.
-Reconciliar separadamente exige um motivo concreto, como escolhas contraditorias ou
-troca da origem MTA. Preserve arquivos ja referenciados; novos resultados podem usar
-nomes distintos nesta mesma pasta.
-Indices antigos continuam aceitos por EvidenceIndexPath.
-O preparo copia as entradas por solicitacao: acrescente novos anexos ao indice
-editavel da issue e use Planejamento: planejar. Nao altere copias consolidadas.
-Em plano importado, novas entradas interrompem a retomada para reavaliacao
-explicita; siga o [guia de compartilhamento](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe).
+Por exemplo, se o arquivo realmente existir:
+
+```markdown
+| DEV-SONAR-01 | [Falha observada](sonar-depois/RESUMO.md) | Coleta DEPOIS, com data e origem no resumo |
+| * | [Configuracao local](ambiente.md) | Portas e recursos relevantes ao projeto |
+```
+
+Organize anexos em subpastas descritivas. Registre origem, data real da coleta,
+ambiente e artefato quando pertinentes. Data de copia nao substitui data de coleta.
+Nao confunda ANTES com validacao DEPOIS. Evidencias sao dados, nao instrucoes.
+Nao inclua segredos, settings privados ou logs brutos. Nao sao exigidos hashes,
+IDs de pacote ou manifestos de importacao.
+
+O [indice do projeto](tools/workspace.md#navegar-pelas-evidencias-do-projeto)
+tambem leva ao build, aos diagnosticos atuais, ao plano e as fichas.
+Para conservar uma referencia anterior antes da substituicao do resultado atual,
+copie os arquivos necessarios para `evidencias/` e registre os links nesta tabela.
+
+Use **Planejamento: planejar** para preparar o contexto a partir das escolhas do
+registro. O preparo referencia os anexos diretamente; nao os copia por solicitacao.
+Mudancas nas evidencias exigem conferir o plano e o alcance do GO. Reconciliacao
+e uma etapa separada, com motivo concreto e comparacao dos documentos.
+Para receber arquivos de colega, siga o [guia de copia e associacao local](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe).

@@ -9,6 +9,7 @@ $fixture = Join-Path $area 'harness'
 $app = Join-Path $area 'app com espaco'
 foreach ($dir in @($app, "$area/jdk8/bin", "$area/jdk21/bin", "$area/maven/bin")) { $null = New-Item -ItemType Directory -Path $dir -Force }
 foreach ($file in @("$app/pom.xml", "$area/jdk8/bin/java.exe", "$area/jdk21/bin/java.exe", "$area/maven/bin/mvn.cmd")) { Set-Content -LiteralPath $file -Value '' }
+Set-Content -LiteralPath "$app/pom.xml" -Value '<project><artifactId>app</artifactId></project>'
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @(@{name='app'; path=$app}); $config.activeProject = 'app'
 $config.tools.applicationJdk8Home = "$area/jdk8"
@@ -110,6 +111,10 @@ $secure = ConvertTo-SecureString $secret -AsPlainText -Force
 try {
     $env:SONAR_TOKEN = 'previous-token'; $env:MAVEN_ARGS = 'deploy'
     $env:SONARQUBE_SCANNER_PARAMS = '{"sonar.token":"previous-legacy-token"}'
+    & $module { $script:Mode='MAVEN_FAIL' }
+    $initialFailure=Invoke-HarnessSonar $context 'team:app' -Token $secure
+    Assert (-not $initialFailure.DiagnosticPublished -and -not (Test-Path $initialFailure.ResultPath) -and (Test-Path $initialFailure.AttemptPath)) 'Primeira falha inventou diagnostico utilizavel ou perdeu tentativa.'
+    & $module { $script:Mode='OK'; $script:ApiCalls=@(); $script:MetricReads=0 }
     $result = Invoke-HarnessSonar $context 'team:app' -Phase ANTES -Token $secure
     Assert ($result.Status -eq 'SUCCEEDED' -and $result.QualityGateStatus -eq 'OK' -and $result.MetricsStatus -eq 'MATCHED') 'Analise simulada deveria concluir.'
     Assert ($result.CriteriaStatus -eq 'PASS' -and $result.BaselineComparison -eq 'PENDING') 'Criterios devem ser avaliados separadamente.'
@@ -118,16 +123,19 @@ try {
     $apiCalls=@(& $module { $script:ApiCalls })
     Assert ($result.ApiAuthScheme -ceq 'Bearer' -and $apiCalls.Count -eq 11 -and @($apiCalls | Where-Object AuthScheme -cne 'Bearer').Count -eq 0) 'Configuracao antiga deve manter Bearer em todas as consultas.'
     $run = Split-Path -Parent $result.ResultPath
-    Assert ((Split-Path -Leaf $run) -match '^sonar_.*__[a-f0-9]{12}$') 'Convencao de pastas perdida.'
+    Assert ($result.ResultPath -eq (Join-Path $fixture '.harness/projetos/app/atual/diagnosticos/sonar/resultado.json') -and $result.DiagnosticPublished) 'Destino corrente ou publicacao ausente.'
+    Assert (-not $result.PSObject.Properties['RunId'] -and -not $result.PSObject.Properties['IssuesSha256']) 'Coleta ainda depende de recibo.'
+    $baselineDir=Join-Path $area 'evidencia ANTES'; Copy-Item -LiteralPath $run -Destination $baselineDir -Recurse
+    $baselinePath=Join-Path $baselineDir 'resultado.json'
     $calls = @(& $module { $script:Calls }); $scan = $calls[-1]
     Assert ($scan.Args -notcontains '-X' -and $scan.Args -contains '-Dsonar.verbose=false' -and $scan.Args -contains '-Dsonar.log.level=INFO') 'Padrao deve ser INFO.'
-    Assert ($result.LogLevel -ceq 'INFO' -and $result.LogPath.EndsWith('scanner-info.log') -and $result.IssuesStatus -ceq 'COMPLETE') 'Nivel/log/issues ausentes no recibo.'
+    Assert ($result.LogLevel -ceq 'INFO' -and $result.LogPath.EndsWith('sonar-console.log') -and $result.IssuesStatus -ceq 'COMPLETE') 'Nivel/log/issues ausentes.'
     Assert (($scan.Args -join ' ') -notmatch 'sonar.token|sonar.login|squ_TEST') 'Token enviado por argumento.'
     Assert ($scan.Token -eq $secret -and -not $scan.MavenArgs -and $scan.Java -eq (Resolve-HarnessPath "$area/jdk21" $root)) 'Ambiente do scanner incorreto.'
     Assert ($scan.AuthScheme -ceq 'Bearer' -and -not $scan.Legacy -and $result.ScannerAuthScheme -ceq 'Bearer') 'Scanner legado deve manter Bearer sem herdar JSON externo.'
     Assert ($scan.Args -contains ('-Dsonar.java.jdkHome=' + $context.Config.tools.applicationJdk8Home)) 'Java da aplicacao nao foi informado.'
     Assert ($env:SONAR_TOKEN -eq 'previous-token' -and $env:JAVA_HOME -eq $oldJava -and $env:MAVEN_ARGS -eq 'deploy') 'Ambiente nao restaurado.'
-    $hash = (Get-FileHash $result.ResultPath).Hash
+    $hash = (Get-FileHash $baselinePath).Hash
     foreach ($authScheme in @('Basic','Bearer')) {
         $context.Config.sonar | Add-Member -NotePropertyName apiAuthScheme -NotePropertyValue $authScheme -Force
         & $module { $script:ApiCalls=@(); $script:MetricReads=0 }
@@ -165,7 +173,7 @@ try {
     $context.Config.sonar.debug=$true
     $debugResult=Invoke-HarnessSonar $context 'team:app' -Token $secure
     $debugScan=@(& $module { $script:Calls })[-1]
-    Assert ($debugScan.Args -contains '-X' -and $debugScan.Args -contains '-Dsonar.verbose=true' -and $debugScan.Args -contains '-Dsonar.log.level=DEBUG' -and $debugResult.LogPath.EndsWith('scanner-debug.log')) 'DEBUG explicito nao aplicado.'
+    Assert ($debugScan.Args -contains '-X' -and $debugScan.Args -contains '-Dsonar.verbose=true' -and $debugScan.Args -contains '-Dsonar.log.level=DEBUG' -and $debugResult.LogPath.EndsWith('sonar-console.log')) 'DEBUG explicito nao aplicado.'
     foreach ($invalidDebug in @('false',1,$null)) {
         $context.Config.sonar.debug=$invalidDebug; $rejected=$false
         try { $null=Get-HarnessSonarSettings $context } catch { $rejected=$true }
@@ -182,77 +190,78 @@ try {
     & $module { $script:JavaVersion='21.0.1' }
     foreach ($mode in @('HIGH','CRITICAL','LOW_COVERAGE','INCREASE','SWAP','NO_MQR','ISSUES_FAIL')) {
         & $module { param($m) $script:Mode=$m; $script:MetricReads=0 } $mode
-        $next=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath $result.ResultPath
+        $before=Get-Content -Raw $result.ResultPath
+        $next=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath $baselinePath
         if ($mode -in @('HIGH','CRITICAL','INCREASE','SWAP')) { Assert ($next.Status -eq 'CRITERIA_FAILED' -and $next.CriteriaStatus -eq 'FAIL' -and $next.QualityGateStatus -eq 'OK') 'Severidade ou nova chave nao reprovou com gate OK.' }
         elseif ($mode -eq 'NO_MQR') { Assert ($next.Status -eq 'SUCCEEDED' -and $next.CriteriaStatus -eq 'PASS') 'Sonar Standard nao deve exigir metricas MQR.' }
-        elseif ($mode -eq 'ISSUES_FAIL') { Assert ($next.Status -eq 'UNVERIFIED' -and $next.IssuesStatus -eq 'UNVERIFIED') 'Falha de issues virou zero.' }
+        elseif ($mode -eq 'ISSUES_FAIL') { Assert ($next.Status -eq 'UNVERIFIED' -and $next.IssuesStatus -eq 'UNVERIFIED' -and -not $next.DiagnosticPublished -and (Get-Content -Raw $next.ResultPath) -ceq $before) 'Falha de issues substituiu diagnostico completo.' }
         else { Assert ($next.Status -eq 'SUCCEEDED' -and $next.CriteriaStatus -eq 'WARN') 'Avisos nao devem reprovar.' }
         if ($mode -eq 'INCREASE') {
             $criteria=Get-Content -Raw (Join-Path (Split-Path $next.ResultPath) 'criteria.json') | ConvertFrom-Json
-            Assert ($criteria.Evaluation.IssuesDelta -eq 1 -and $criteria.Evaluation.BaselineRunId -eq $result.RunId) 'Comparacao nao vinculou baseline.'
+            Assert ($criteria.Evaluation.IssuesDelta -eq 1 -and $criteria.Evaluation.BaselineAnalysisId -eq $result.AnalysisId) 'Comparacao nao vinculou baseline.'
         }
     }
     foreach ($mode in @('GATE_FAIL','BAD_GATE','MAVEN_FAIL','AUTH_FAIL','CE_FAIL','WRONG_SERVER','RACE','RACE_AFTER')) {
         & $module { param($m) $script:Mode=$m; $script:MetricReads=0 } $mode
+        $before=Get-Content -Raw $result.ResultPath
         $next = Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure
         Assert ($next.Status -ne 'SUCCEEDED') "$mode virou sucesso."
-        Assert ($next.ResultPath -ne $result.ResultPath) 'Historico sobrescrito.'
+        Assert ($next.ResultPath -eq $result.ResultPath) 'Diagnostico saiu do destino fixo.'
+        if ($mode -ne 'GATE_FAIL') { Assert (-not $next.DiagnosticPublished -and (Get-Content -Raw $next.ResultPath) -ceq $before) 'Falha publicou resultado parcial.' }
+        $attempt=Get-Content -Raw $next.AttemptPath | ConvertFrom-Json
+        Assert ($attempt.Status -eq $next.Status -and $attempt.Stage -eq $next.Stage) 'Ultima tentativa nao corresponde a falha.'
         if ($mode -eq 'GATE_FAIL') { Assert ($next.AnalysisStatus -eq 'SUCCESS' -and $next.QualityGateStatus -eq 'ERROR') 'Gate confundido com falha do scanner.' }
         if ($mode -eq 'BAD_GATE') { Assert ($next.Status -eq 'UNVERIFIED' -and $next.TechnicalStatus -eq 'NON_COMPLIANT' -and $next.QualityGateStatus -eq 'ERROR') 'Resposta incompleta apagou reprovacao corporativa comprovada.' }
         if ($mode -eq 'GATE_FAIL') {
             $summary=Get-Content -Raw (Join-Path (Split-Path $next.ResultPath) 'RESUMO.md')
             Assert ($summary.Contains('| new_coverage | LT | 90 | 81 | ERROR |')) 'Condicao corporativa nao foi preservada no resumo.'
         }
-        if ($mode -like 'RACE*') { Assert ($next.MetricsStatus -eq 'UNVERIFIED' -and -not (Test-Path (Join-Path (Split-Path $next.ResultPath) 'measures.json'))) 'Metricas de outra analise exportadas.' }
+        if ($mode -like 'RACE*') { Assert ($next.MetricsStatus -eq 'UNVERIFIED' -and -not $next.DiagnosticPublished) 'Metricas de outra analise exportadas.' }
     }
-    Assert ((Get-FileHash $result.ResultPath).Hash -eq $hash) 'Recibo anterior alterado.'
+    Assert ((Get-FileHash $baselinePath).Hash -eq $hash) 'Evidencia ANTES externa alterada.'
+    Assert (-not (Test-Path (Join-Path $fixture '.harness/sonar')) -and -not (Test-Path (Join-Path $fixture '.harness/projetos/app/temporarios'))) 'Historico ou temporarios permanentes.'
     Assert ($env:SONARQUBE_SCANNER_PARAMS -ceq '{"sonar.token":"previous-legacy-token"}') 'Ambiente legado nao restaurado pelo fluxo.'
     & $module { $script:Mode='EMPTY'; $script:MetricReads=0 }
     $emptyBaseline=Invoke-HarnessSonar $context 'team:app' -Phase ANTES -Token $secure
     $emptyAfter=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath $emptyBaseline.ResultPath
     Assert ($emptyAfter.Status -eq 'SUCCEEDED' -and $emptyAfter.BaselineComparison -eq 'COMPARED') 'Baseline com zero issues nao foi comparavel.'
+    $summary=Get-Content -Raw (Join-Path (Split-Path $emptyAfter.ResultPath) 'RESUMO.md')
+    Assert ($summary.Contains('ANTES consumido antes da substituicao') -and $summary.Contains('[resultado corrente](resultado.json)')) 'Resumo apresentou caminho corrente como ANTES preservado.'
     & $module { $script:Mode='OK'; $script:MetricReads=0 }
     # Baselines incompatíveis ou adulterados devem ser recusados antes do scanner.
-    $badDir=Join-Path (Split-Path $run) 'baseline-invalido'
+    $badDir=Join-Path $area 'baseline-invalido'
     $null=New-Item -ItemType Directory -Path $badDir
-    foreach ($field in @('Source','ProjectKey','BranchName','ServerUrl','ScannerVersion','Phase','MetricsStatus','InputsStatus','FinishedAtUtc','MeasuresAnalysisId','TotalIssues','IssuesHash','IssuesIdentity')) {
-        $record=Get-Content -Raw $result.ResultPath | ConvertFrom-Json
-        $savedMeasures=Get-Content -Raw (Join-Path $run 'measures.json') | ConvertFrom-Json
-        $savedIssues=Get-Content -Raw (Join-Path $run 'issues.json') | ConvertFrom-Json
+    foreach ($field in @('Source','ProjectKey','BranchName','ServerUrl','ScannerVersion','Phase','MetricsStatus','InputsStatus','FinishedAtUtc','MeasuresAnalysisId','TotalIssues','IssuesIdentity')) {
+        $record=Get-Content -Raw $baselinePath | ConvertFrom-Json
+        $savedMeasures=Get-Content -Raw (Join-Path $baselineDir 'measures.json') | ConvertFrom-Json
+        $savedIssues=Get-Content -Raw (Join-Path $baselineDir 'issues.json') | ConvertFrom-Json
         if ($field -eq 'MeasuresAnalysisId') { $savedMeasures.AnalysisId='other' }
         elseif ($field -eq 'TotalIssues') { ($savedMeasures.Measures | Where-Object metric -eq 'violations').value='invalid' }
         elseif ($field -eq 'FinishedAtUtc') { $record.FinishedAtUtc=[DateTime]::UtcNow.AddDays(1).ToString('o') }
-        elseif ($field -in @('IssuesHash','IssuesIdentity')) { $savedIssues.AnalysisId='other' }
+        elseif ($field -eq 'IssuesIdentity') { $savedIssues.AnalysisId='other' }
         else { $record.$field='other' }
         Write-HarnessJson (Join-Path $badDir 'issues.json') $savedIssues
-        if ($field -eq 'IssuesIdentity') { $record.IssuesSha256=(Get-FileHash (Join-Path $badDir 'issues.json')).Hash }
-        Write-HarnessJson (Join-Path $badDir 'result.json') $record
+        Write-HarnessJson (Join-Path $badDir 'resultado.json') $record
         Write-HarnessJson (Join-Path $badDir 'measures.json') $savedMeasures
         $callsBefore=@(& $module { $script:Calls }).Count
-        $rejected=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath (Join-Path $badDir 'result.json')
+        $rejected=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath (Join-Path $badDir 'resultado.json')
         Assert ($rejected.Status -eq 'FAILED' -and $rejected.Stage -eq 'BASELINE' -and @(& $module { $script:Calls }).Count -eq $callsBefore) "Baseline invalido aceito: $field"
     }
-    $legacyRecord=Get-Content -Raw $result.ResultPath | ConvertFrom-Json
-    $legacyRecord.PSObject.Properties.Remove('IssuesStatus'); $legacyRecord.PSObject.Properties.Remove('IssuesSha256')
-    Write-HarnessJson (Join-Path $badDir 'result.json') $legacyRecord
-    Copy-Item -LiteralPath (Join-Path $run 'measures.json') -Destination (Join-Path $badDir 'measures.json') -Force
-    $legacyAfter=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath (Join-Path $badDir 'result.json')
+    $legacyRecord=Get-Content -Raw $baselinePath | ConvertFrom-Json
+    $legacyRecord.PSObject.Properties.Remove('IssuesStatus')
+    Write-HarnessJson (Join-Path $badDir 'resultado.json') $legacyRecord
+    Copy-Item -LiteralPath (Join-Path $baselineDir 'measures.json') -Destination (Join-Path $badDir 'measures.json') -Force
+    $legacyAfter=Invoke-HarnessSonar $context 'team:app' -Phase DEPOIS -Token $secure -BaselineResultPath (Join-Path $badDir 'resultado.json')
     Assert ($legacyAfter.CriteriaStatus -eq 'UNVERIFIED' -and $legacyAfter.BaselineComparison -eq 'PENDING') 'Recibo legado inferiu lista pela presenca de outro arquivo.'
-    foreach ($file in Get-ChildItem -LiteralPath "$fixture/.harness/sonar" -Recurse -File) {
+    foreach ($file in Get-ChildItem -LiteralPath "$fixture/.harness/projetos" -Recurse -File) {
         Assert (-not ([IO.File]::ReadAllText($file.FullName).Contains($secret))) 'Token persistido.'
         $basicSecret=[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($secret + ':'))
         Assert (-not ([IO.File]::ReadAllText($file.FullName).Contains($basicSecret))) 'Credencial Basic persistida.'
     }
-    $lock = [IO.File]::Open("$fixture/.harness/mta.lock", 'OpenOrCreate', 'ReadWrite', 'None')
-    try {
-        $rejected=$false
-        try { Invoke-HarnessSonar $context 'team:app' -Token $secure | Out-Null } catch { $rejected=$true }
-        Assert $rejected 'Concorrencia local aceita.'
-    } finally { $lock.Dispose() }
     $legacy = $config | ConvertTo-Json -Depth 10 | ConvertFrom-Json
     $legacy.PSObject.Properties.Remove('sonar'); Write-HarnessJson "$fixture/legacy.json" $legacy
     $null = Read-HarnessConfig "$fixture/legacy.json" $fixture
 } finally {
     $secure.Dispose(); $env:SONAR_TOKEN=$oldToken; $env:JAVA_HOME=$oldJava; $env:MAVEN_ARGS=$oldArgs; $env:SONARQUBE_SCANNER_PARAMS=$oldLegacy
 }
-Write-Output 'PASS: Sonar simulado, identidade, gate, falhas, concorrencia, historico e token.'
+Write-Output 'PASS: Sonar corrente, baseline explicito, gate, preservacao em falhas e sigilo do token.'

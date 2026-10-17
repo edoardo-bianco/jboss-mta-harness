@@ -7,7 +7,7 @@ A partir da raiz do harness, leia .agents/skills/orientar-migracao/SKILL.md
 e a secao migracao_planejamento_helper em .agents/skills/orientar-migracao/references/papeis.md.
 Nao delegue. Devolva orientacao com fontes ao solicitante; ele conduz as decisoes.
 Cliente Codex; recupere escolhas e plano vinculados. Aplique a distincao da skill
-entre retomada local e importada; pergunte apenas decisao essencial ausente.
+entre retomada local e copia recebida; pergunte apenas decisao essencial ausente.
 Se esses arquivos nao forem acessiveis, informe a limitacao e solicite a raiz
 do harness; nao invente procedimentos. Nao execute tarefas nem altere arquivos.
 Pode usar somente as tres consultas MCP harnessIssues de leitura quando expostas,

@@ -2,6 +2,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
 Import-Module (Join-Path $PSScriptRoot 'HarnessSonarApi.psm1') -DisableNameChecking
 Import-Module (Join-Path $PSScriptRoot 'HarnessSonarCriteria.psm1') -DisableNameChecking
 
@@ -68,8 +69,7 @@ function Invoke-SonarTool {
 
 function Get-HarnessSonarSettings {
     param($Context)
-    if (-not $Context.Active) { throw 'Escolha o projeto Maven.' }
-    if (-not $Context.Config.PSObject.Properties['sonar']) { throw 'Adicione o bloco sonar do harness.example.json ao JSON local.' }
+    $connection=Get-HarnessSonarConnection $Context
     $settings = $Context.Config.sonar
     $debug=$false
     if ($settings -and $settings.PSObject.Properties['debug']) {
@@ -79,13 +79,7 @@ function Get-HarnessSonarSettings {
     foreach ($field in @('serverUrl','scannerJdkHome','scannerVersion','ceTimeoutSeconds','profiles')) {
         if (-not $settings -or -not $settings.PSObject.Properties[$field]) { throw "Preencha sonar.$field conforme harness.example.json." }
     }
-    if (@($settings.PSObject.Properties.Name | Where-Object { $_ -match '(token|password|login|credential)' }).Count) { throw 'Remova credenciais do JSON. O token sera solicitado com entrada oculta.' }
-    $url = Get-SonarServerBase $settings.serverUrl
-    $authScheme = 'Bearer'
-    if ($settings.PSObject.Properties['apiAuthScheme']) {
-        if ($settings.apiAuthScheme -isnot [string] -or $settings.apiAuthScheme -cnotin @('Bearer','Basic')) { throw 'sonar.apiAuthScheme deve ser Bearer ou Basic.' }
-        $authScheme = $settings.apiAuthScheme
-    }
+    $url=$connection.ServerUrl; $authScheme=$connection.AuthScheme
     if ($settings.scannerVersion -cnotmatch '^5\.\d+\.\d+\.\d+$') { throw 'Use uma versao fixa 5.x do sonar-maven-plugin, compativel com seu servidor.' }
     if ($settings.ceTimeoutSeconds -isnot [int] -or $settings.ceTimeoutSeconds -lt 1 -or $settings.ceTimeoutSeconds -gt 3600) { throw 'ceTimeoutSeconds deve ser inteiro entre 1 e 3600.' }
     if ($settings.profiles -isnot [Array]) { throw 'sonar.profiles deve ser uma lista de perfis Maven.' }
@@ -106,7 +100,7 @@ function Get-HarnessSonarSettings {
 
 function Assert-SonarCurrentAnalysis {
     param([string]$ServerUrl, [string]$ProjectKey, [string]$BranchName, [string]$AnalysisId,
-        [ValidateSet('Bearer','Basic')][string]$AuthScheme = 'Bearer')
+        [ValidateSet('Bearer','Basic')][string]$AuthScheme = 'Bearer', [switch]$PassThru)
     $query = @{project=$ProjectKey; p='1'; ps='1'}
     $queueQuery = @{component=$ProjectKey}
     if ($BranchName) { $query.branch=$BranchName; $queueQuery.branch=$BranchName }
@@ -114,6 +108,7 @@ function Assert-SonarCurrentAnalysis {
     if (@($reply.analyses).Count -ne 1 -or $reply.analyses[0].key -cne $AnalysisId) { throw 'Analise atual diferente; metricas nao vinculadas.' }
     $queue = Invoke-SonarApiGet $ServerUrl 'api/ce/component' $queueQuery -AuthScheme $AuthScheme
     if (@($queue.queue).Count -gt 0 -or ($queue.PSObject.Properties['current'] -and $queue.current -and $queue.current.status -in @('PENDING','IN_PROGRESS'))) { throw 'Outra analise em processamento; metricas nao vinculadas.' }
+    if ($PassThru) { $reply.analyses[0] }
 }
 
 function Get-HarnessSonarIssues {
@@ -163,6 +158,9 @@ function Get-HarnessSonarIssues {
     [pscustomobject]@{Status='COMPLETE';Filter='resolved=false';Count=$items.Count;Issues=@($items.ToArray())}
 }
 
+. (Join-Path $PSScriptRoot 'HarnessSonarDiagnostic.ps1')
+. (Join-Path $PSScriptRoot 'HarnessSonarDownload.ps1')
+
 function Invoke-HarnessSonar {
     param($Context, [string]$ProjectKey, [string]$BranchName,
         [ValidateSet('ANTES','DEPOIS')][string]$Phase = 'ANTES',
@@ -171,17 +169,17 @@ function Invoke-HarnessSonar {
     if ($ProjectKey -cnotmatch '^(?=.{1,400}$)(?![0-9]+$)[A-Za-z0-9_.:-]+$') { throw 'Informe a chave exata do projeto existente no SonarQube.' }
     if ($BranchName -and $BranchName -cnotmatch '^[A-Za-z0-9_][A-Za-z0-9_./-]{0,199}$') { throw 'Nome de branch Sonar invalido.' }
     if ($Token.Length -eq 0) { throw 'Token vazio; nenhuma analise iniciada.' }
-    $state = Resolve-HarnessPath (Join-Path $Context.Root '.harness') $Context.Root
-    $null = [IO.Directory]::CreateDirectory($state)
-    try { $lock = [IO.File]::Open((Join-Path $state 'mta.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
-    catch { throw 'Ja existe build, MTA, Sonar ou limpeza em execucao neste harness.' }
-    $previous=@{}; $pushed=$false; $run=$null; $plain=$null; $criteria=$null; $gate=$null
+    $project=Initialize-HarnessProjectStorage $Context.Root $settings.Pom
+    $lock=Enter-HarnessProjectAccess $project -ForOperation
+    try {
+    $previous=@{}; $pushed=$false; $run=$null; $scannerLog=$null; $plain=$null; $criteria=$null; $gate=$null
     $result = [ordered]@{
+        Origin='SCAN'; AnalysisDateUtc=$null; AnalysisRevision=$null; LocalSourceStatus='NOT_CHECKED'
         Status='FAILED'; ScannerExitCode=$null; AnalysisStatus='UNVERIFIED'; QualityGateStatus='UNVERIFIED'; MetricsStatus='UNVERIFIED'
-        TechnicalStatus='UNVERIFIED'; IssuesStatus='UNVERIFIED'; IssuesSha256=$null
+        TechnicalStatus='UNVERIFIED'; IssuesStatus='UNVERIFIED'; DiagnosticPublished=$false
         LogLevel=$(if ($settings.Debug) { 'DEBUG' } else { 'INFO' }); LogPath=$null
-        Project=$Context.Active.name; Source=$Context.Active.path; ProjectLabel=$Context.Active.label
-        RunId=[guid]::NewGuid().ToString('N'); Phase=$Phase; PhaseOrigin='OPERATOR'
+        Project=$project.Name; Source=$Context.Active.path; ProjectLabel=$Context.Active.label
+        Phase=$Phase; PhaseOrigin='OPERATOR'
         ServerUrl=$settings.ServerUrl; ServerVersion=$null; ProjectKey=$ProjectKey; BranchName=$BranchName
         ApiAuthScheme=$settings.AuthScheme; ScannerAuthScheme=$settings.AuthScheme
         ScannerVersion=$settings.Version; ScannerJavaHome=$settings.Jdk; ScannerJavaVersion=$null; MavenVersion=$null
@@ -191,24 +189,25 @@ function Invoke-HarnessSonar {
         MissingMetrics=@(); Stage='PREPARE'; Error=$null; ResultPath=$null
         DashboardUrl=($settings.ServerUrl + '/dashboard?id=' + [Uri]::EscapeDataString($ProjectKey))
         HumanDecision='PENDING'; BaselineComparison='PENDING'; CriteriaStatus='NOT_EVALUATED'; InputsStatus='UNVERIFIED'; BuildFreshness='NOT_VERIFIED'
-        BaselineResultPath=$BaselineResultPath; BaselineRunId=$null; CriteriaPath=$null
+        BaselineResultPath=$BaselineResultPath; BaselineAnalysisId=$null; CriteriaPath=$null
+        AttemptPath=(Join-Path $project.Folder 'atual/diagnosticos/sonar-tentativa.json')
     }
     if ($BranchName) { $result.DashboardUrl += '&branch=' + [Uri]::EscapeDataString($BranchName) }
     try {
-        $folder = 'sonar_' + (Format-HarnessDate $result.StartedAtUtc -ForPath) + '__' + $result.RunId.Substring(0,12)
-        $run = Resolve-HarnessPath (Join-Path $state ('sonar/' + (Get-HarnessProjectFolder $Context.Active) + '/' + $folder)) $Context.Root
-        if (Test-Path -LiteralPath $run) { throw 'Pasta de coleta ja existe.' }
+        Remove-HarnessProjectTemporary $project 'sonar'
+        $run=Get-HarnessProjectTemporary $project 'sonar'
         $null = [IO.Directory]::CreateDirectory($run)
-        $result.ResultPath = Join-Path $run 'result.json'
-        $result.LogPath=Join-Path $run ('scanner-' + $result.LogLevel.ToLowerInvariant() + '.log')
+        $result.ResultPath = Join-Path $project.Folder 'atual/diagnosticos/sonar/resultado.json'
+        $result.LogPath=Join-Path $project.Folder 'atual/diagnosticos/sonar-console.log'
+        $scannerLog=Join-Path $run 'scanner.log'
+        Set-HarnessProjectOperation $project 'sonar' 'RUNNING' -LogPath $scannerLog
         $result.Stage='BASELINE'
         $baseline=Read-HarnessSonarBaseline -Path $BaselineResultPath -Context $Context -Current $result
-        if ($baseline) { $result.BaselineResultPath=$baseline.ResultPath; $result.BaselineRunId=$baseline.RunId }
+        if ($baseline) { $result.BaselineResultPath=$baseline.ResultPath; $result.BaselineAnalysisId=$baseline.AnalysisId }
         $result.Stage='PREPARE'
         Import-Module (Join-Path $PSScriptRoot 'HarnessGit.psm1') -DisableNameChecking
         $result['Git'] = Get-HarnessGitState $Context
         $sourceFiles = @(Get-HarnessFiles $Context.Active.path)
-        Write-SonarJson (Join-Path $run 'inputs.json') @{Project=$result.Project; Source=$result.Source; Files=$sourceFiles; Note='Hashes dos arquivos de entrada; nao comprovam atualidade dos binarios ou cobertura.'}
         foreach ($name in @('JAVA_HOME','PATH','MAVEN_HOME','M2_HOME','MAVEN_ARGS','MAVEN_OPTS','JAVA_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','MAVEN_SKIP_RC','MAVEN_BASEDIR','MAVEN_PROJECTBASEDIR','MAVEN_BATCH_PAUSE','MAVEN_BATCH_ECHO','SONAR_TOKEN','SONAR_HOST_URL','SONAR_SCANNER_JSON_PARAMS','SONARQUBE_SCANNER_PARAMS','SONAR_SCANNER_OPTS','SONAR_SCANNER_JAVA_OPTS')) {
             $previous[$name]=[Environment]::GetEnvironmentVariable($name,'Process')
             [Environment]::SetEnvironmentVariable($name,$null,'Process')
@@ -230,8 +229,8 @@ function Invoke-HarnessSonar {
         if ($server.status -cne 'UP') { throw 'Servidor nao esta UP.' }
         $result.ServerVersion=Protect-SonarText ([string]$server.version)
         if ($baseline -and $baseline.ServerVersion -cne $result.ServerVersion) { throw 'Versao do servidor diferente do baseline.' }
-        $project=Invoke-SonarApiGet $settings.ServerUrl 'api/components/show' @{component=$ProjectKey} -AuthScheme $settings.AuthScheme
-        if ($project.component.key -cne $ProjectKey -or $project.component.qualifier -cne 'TRK') { throw 'Projeto existente nao confirmado.' }
+        $sonarProject=Invoke-SonarApiGet $settings.ServerUrl 'api/components/show' @{component=$ProjectKey} -AuthScheme $settings.AuthScheme
+        if ($sonarProject.component.key -cne $ProjectKey -or $sonarProject.component.qualifier -cne 'TRK') { throw 'Projeto existente nao confirmado.' }
         $result.Stage='SCAN'
         $report=Join-Path $run 'report-task.txt'
         $arguments=@('-B','-f',$settings.Pom)
@@ -245,7 +244,7 @@ function Invoke-HarnessSonar {
             ('-Dsonar.scanner.metadataFilePath=' + $report), ('-Dsonar.working.directory=' + (Join-Path $run 'scanner-work')))
         if ($BranchName) { $arguments+=('-Dsonar.branch.name=' + $BranchName) }
         Write-Host "Enviando $($result.ProjectLabel) ao Sonar $($settings.ServerUrl) | Chave: $ProjectKey | Estado declarado: $Phase"
-        $scan=Invoke-SonarTool $settings.Maven $arguments -ScannerAuthScheme $settings.AuthScheme -LogPath $result.LogPath; $result.ScannerExitCode=$scan.ExitCode
+        $scan=Invoke-SonarTool $settings.Maven $arguments -ScannerAuthScheme $settings.AuthScheme -LogPath $scannerLog; $result.ScannerExitCode=$scan.ExitCode
         if ($scan.ExitCode -ne 0) { throw 'Scanner Maven falhou; consulte a saida do terminal.' }
         $result.Stage='COMPUTE_ENGINE'
         $metadata=Read-SonarTaskReport $report $settings.ServerUrl $ProjectKey -BranchName $BranchName
@@ -253,59 +252,18 @@ function Invoke-HarnessSonar {
         Write-Host 'Relatorio enviado. Aguardando processamento no SonarQube...'
         $task=Wait-SonarComputeEngine -ServerUrl $settings.ServerUrl -TaskId $metadata.TaskId -ProjectKey $ProjectKey -BranchName $BranchName -TimeoutSeconds $settings.Timeout -AuthScheme $settings.AuthScheme
         $result.AnalysisId=$task.AnalysisId; $result.AnalysisStatus='SUCCESS'
-        $result.Stage='QUALITY_GATE'
-        $gateReply=Invoke-SonarApiGet $settings.ServerUrl 'api/qualitygates/project_status' @{analysisId=$task.AnalysisId} -AuthScheme $settings.AuthScheme
-        if ($gateReply.projectStatus.status -cnotin @('OK','ERROR','WARN','NONE')) { throw 'Quality Gate desconhecido.' }
-        $result.QualityGateStatus=$gateReply.projectStatus.status
-        Write-SonarJson (Join-Path $run 'quality-gate.json') @{AnalysisId=$task.AnalysisId; ProjectKey=$ProjectKey; Result=$gateReply.projectStatus}
-        if ((Get-SonarApiField $gateReply.projectStatus 'conditions') -isnot [Array]) { throw 'Quality Gate incompleto.' }
-        foreach ($condition in $gateReply.projectStatus.conditions) {
-            foreach ($field in @('metricKey','comparator','status')) {
-                if ([string]::IsNullOrWhiteSpace([string](Get-SonarApiField $condition $field))) { throw 'Condicao do Quality Gate incompleta.' }
-            }
-        }
-        $gate=$gateReply
-        $result.Stage='METRICS'
-        Assert-SonarCurrentAnalysis $settings.ServerUrl $ProjectKey $BranchName $task.AnalysisId -AuthScheme $settings.AuthScheme
-        $metrics=@('ncloc','coverage','duplicated_lines_density','violations','blocker_violations','critical_violations','bugs','vulnerabilities','code_smells','new_violations','new_coverage','new_duplicated_lines_density')
-        $query=@{component=$ProjectKey; metricKeys=($metrics -join ',')}
-        if ($BranchName) { $query.branch=$BranchName }
-        $measures=Invoke-SonarApiGet $settings.ServerUrl 'api/measures/component' $query -AuthScheme $settings.AuthScheme
-        if ($measures.component.key -cne $ProjectKey) { throw 'Metricas de outro projeto.' }
-        # Consulta separada: servidores antigos podem recusar metricas MQR.
-        # Critical no modo Standard nao e substituto automatico para High.
-        $allMeasures=@($measures.component.measures)
-        $severityMetrics=@('software_quality_blocker_issues','software_quality_high_issues')
-        $query.metricKeys=$severityMetrics -join ','
-        $severity=$null
-        try { $severity=Invoke-SonarApiGet $settings.ServerUrl 'api/measures/component' $query -AuthScheme $settings.AuthScheme } catch { $severity=$null }
-        if ($severity) {
-            if ($severity.component.key -cne $ProjectKey) { throw 'Severidades de outro projeto.' }
-            $allMeasures+=@($severity.component.measures)
-        }
-        $metrics+=$severityMetrics
-        $result.Stage='ISSUES'
-        $issueSnapshot=$null
-        try { $issueSnapshot=Get-HarnessSonarIssues $settings.ServerUrl $ProjectKey $BranchName -AuthScheme $settings.AuthScheme }
-        catch { Write-Host 'Issues nao verificadas: resposta incompleta, indisponivel ou limite de coleta excedido. Consulte a API corporativa.' }
-        Assert-SonarCurrentAnalysis $settings.ServerUrl $ProjectKey $BranchName $task.AnalysisId -AuthScheme $settings.AuthScheme
-        if ($issueSnapshot) {
-            $issuePath=Join-Path $run 'issues.json'
-            Write-SonarJson $issuePath @{RunId=$result.RunId; AnalysisId=$task.AnalysisId; ServerUrl=$settings.ServerUrl; ProjectKey=$ProjectKey; BranchName=$BranchName; CollectedAtUtc=[DateTime]::UtcNow.ToString('o'); Snapshot=$issueSnapshot}
-            $result.IssuesSha256=(Get-FileHash -LiteralPath $issuePath -Algorithm SHA256).Hash
-            $result.IssuesStatus='COMPLETE'
-        }
-        $result.MissingMetrics=@($metrics | Where-Object { $_ -cnotin @($allMeasures | ForEach-Object { $_.metric }) })
-        Write-SonarJson (Join-Path $run 'measures.json') @{AnalysisId=$task.AnalysisId; ProjectKey=$ProjectKey; BranchName=$BranchName; CollectedAtUtc=[DateTime]::UtcNow.ToString('o'); Measures=$allMeasures; MissingMetrics=$result.MissingMetrics}
-        $result.MetricsStatus='MATCHED'
+        $diagnostic=Read-HarnessSonarDiagnostic $settings $result $run
+        $gate=$diagnostic.Gate; $allMeasures=$diagnostic.Measures; $issueSnapshot=$diagnostic.Issues
         $after=@(Get-HarnessFiles $Context.Active.path)
         if (($sourceFiles | ConvertTo-Json -Depth 4 -Compress) -cne ($after | ConvertTo-Json -Depth 4 -Compress)) { throw 'Entradas mudaram durante o scan; coleta nao e baseline estavel.' }
         $result.InputsStatus='STABLE'
+        $result.LocalSourceStatus='STABLE_DURING_SCAN'
+        Assert-HarnessSonarBaselineChronology $baseline $result
         $result.Stage='CRITERIA'
         $criteria=Get-HarnessSonarCriteria -Measures $allMeasures -Baseline $baseline -IssueSnapshot $issueSnapshot -Phase $Phase
         $result.CriteriaStatus=$criteria.Status; $result.BaselineComparison=$criteria.BaselineComparison
-        $result.CriteriaPath=Join-Path $run 'criteria.json'
-        Write-SonarJson $result.CriteriaPath @{AnalysisId=$task.AnalysisId; ProjectKey=$ProjectKey; BranchName=$BranchName; Evaluation=$criteria}
+        $result.CriteriaPath=Join-Path (Split-Path $result.ResultPath) 'criteria.json'
+        Write-SonarJson (Join-Path $run 'criteria.json') @{AnalysisId=$task.AnalysisId; ProjectKey=$ProjectKey; BranchName=$BranchName; Evaluation=$criteria}
         $result.Stage='COMPLETE'
         $result.Status=if ($result.QualityGateStatus -ceq 'ERROR') { 'QUALITY_GATE_FAILED' }
             elseif ($criteria.Status -ceq 'FAIL') { 'CRITERIA_FAILED' }
@@ -317,43 +275,15 @@ function Invoke-HarnessSonar {
         if ($result.AnalysisStatus -eq 'SUCCESS') { $result.Status='UNVERIFIED' }
     } finally {
         try {
-            $result.FinishedAtUtc=[DateTime]::UtcNow.ToString('o')
-            $result.TechnicalStatus=if ($result.QualityGateStatus -ceq 'ERROR' -or $result.CriteriaStatus -ceq 'FAIL') { 'NON_COMPLIANT' }
-                elseif ($result.Status -ceq 'SUCCEEDED') { 'COMPLIANT' } else { 'UNVERIFIED' }
-            if ($result.ResultPath) {
-                Write-SonarJson $result.ResultPath $result
-                $lines=@('# Coleta SonarQube', '', "Projeto: $($result.ProjectLabel)", "Source: $($result.Source)", "RunId: $($result.RunId)", "Estado declarado pelo operador: $Phase", "Inicio: $(Format-HarnessDate $result.StartedAtUtc)", "Servidor: $($result.ServerUrl)", "Chave: $ProjectKey", "AnalysisId: $($result.AnalysisId)", "Resultado da operacao: $($result.Status)", "Processamento: $($result.AnalysisStatus)", "Quality Gate do servidor: $($result.QualityGateStatus)", "Criterios do harness: $($result.CriteriaStatus)", "Metricas: $($result.MetricsStatus)", "Dashboard: $($result.DashboardUrl)", '')
-                $lines += @("Autenticacao da API: $($result.ApiAuthScheme)", "Autenticacao do scanner: $($result.ScannerAuthScheme)", '')
-                $lines+=@("Resultado tecnico: $($result.TechnicalStatus)", "Issues: $($result.IssuesStatus)", "Log: $($result.LogLevel) - $($result.LogPath)", 'Decisao na coleta: PENDING. Consulte decisions/ para o historico humano posterior.', '')
-                if ($gate) {
-                    $lines+=@('## Condicoes do Quality Gate corporativo', '', '| Metrica | Comparador | Limite | Valor | Estado |', '| --- | --- | --- | --- | --- |')
-                    foreach ($condition in $gate.projectStatus.conditions) {
-                        $cells=@(foreach ($field in @('metricKey','comparator','errorThreshold','actualValue','status')) {
-                            [string]$value=Get-SonarApiField $condition $field
-                            $value.Replace('|','&#124;').Replace('<','&lt;').Replace('>','&gt;') -replace '[\r\n]',' '
-                        })
-                        $lines+='| ' + ($cells -join ' | ') + ' |'
-                    }
-                    $lines+=@('', 'Condicoes e periodos originais em quality-gate.json; metricas new_* se referem ao New Code do servidor. Decisao local nao altera esse gate.', '')
-                }
-                if ($criteria) {
-                    $lines+=@('| Criterio | Valor | Regra |', '| --- | --- | --- |', "| Blocker | $($criteria.BlockerIssues) | Reprova acima de zero |", "| Critical | $($criteria.CriticalIssues) | Reprova acima de zero |", "| High | $($criteria.HighIssues) | Reprova acima de zero |", "| Cobertura global (%) | $($criteria.Coverage) | Minimo 80%; meta 85% |", "| Duplicidade global (%) | $($criteria.DuplicatedLinesDensity) | Maximo 5% |", "| Total de issues | $($criteria.TotalIssues) | Diferenca apenas informativa |", "| Issues abertas | $($criteria.OpenIssues) | Severidades e novas chaves em issues.json/criteria.json |", '', "Comparacao por chave: $($criteria.BaselineComparison); diferenca de totais: $($criteria.IssuesDelta)", "Baseline selecionado: $($criteria.BaselineResultPath)", '')
-                    foreach ($message in $criteria.Failures) { $lines+='REPROVADO: ' + $message }
-                    foreach ($message in $criteria.Warnings) { $lines+='AVISO: ' + $message }
-                    foreach ($message in $criteria.Pending) { $lines+='PENDENTE: ' + $message }
-                    $lines+=@('', $criteria.ComparisonLimit)
-                }
-                $lines+=@('', 'Arquivos: result.json, inputs.json, report-task.txt, scanner-info.log ou scanner-debug.log e, quando coletados, quality-gate.json, measures.json, issues.json e criteria.json.', 'Campos ausentes nao equivalem a zero. ANTES/DEPOIS e declaracao do operador.', 'O scanner nao gera cobertura: importe o XML JaCoCo produzido pelos testes. Esta coleta nao comprova WAR/runtime, GO ou aceite humano.', "Erro: $($result.Error)")
-                $summary=$lines -join "`r`n"
-                [IO.File]::WriteAllText((Join-Path $run 'RESUMO.md'), (Protect-SonarText $summary), (New-Object Text.UTF8Encoding($false)))
-            }
+            Publish-HarnessSonarDiagnostic $project $result $run $scannerLog $gate $criteria
         } finally {
             if ($pushed) { Pop-Location }
             foreach ($name in $previous.Keys) { [Environment]::SetEnvironmentVariable($name,$previous[$name],'Process') }
-            $plain=$null; $lock.Dispose()
+            $plain=$null
         }
     }
     [pscustomobject]$result
+    } finally { $lock.ReleaseMutex(); $lock.Dispose() }
 }
 
-Export-ModuleMember -Function Get-HarnessSonarSettings, Invoke-HarnessSonar
+Export-ModuleMember -Function Get-HarnessSonarSettings, Get-HarnessSonarConnection, Invoke-HarnessSonar, Receive-HarnessSonar

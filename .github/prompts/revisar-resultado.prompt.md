@@ -8,7 +8,7 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 
 ## Direcionamento do desenvolvedor
 
-Evidencias, observacoes e limitacoes da verificacao:
+Leia evidencias e observacoes fora dos blocos gerenciados e nos documentos correntes.
 
 ## Trabalho solicitado
 
@@ -24,19 +24,16 @@ As respostas recuperam evidencias do diagnostico; nao comprovam codigo corrigido
 GO ou aceite. Confira identidade, paginas/hashes e codigo local. Sem MCP,
 continue pelos arquivos e permissoes ja autorizadas; nao amplie poderes de helpers.
 
-Leia o JSON final, ContextPath, PlanPath/TodoPath atuais, MigrationPath e
-EvidenceIndexPath quando presentes. Confira Project/Source/RequestId e lote;
-PlanningBasis ausente no legado significa MTA. Confira RunId/origem quando a base
-for MTA; EVIDENCIAS usa EvidenceInputs e nao exige artefatos ou rodada inexistentes.
-Em EvidenceMode=CONSOLIDATED, consulte as copias de Consolidated.Files e o mapa
-local EvidenceIndexPath; Run/AnalysisSource sao historicos. Nao exigir o MTA
-original para revisar a corretiva, nem declarar resolucao MTA sem comparacao.
-Sem contexto explicito, solicite o arquivo preparado; nao busque o mais recente.
-Leia DeveloperGuidePath para tarefas e procedimentos, quando existente.
-Use ContractSnapshot preservado. As copias PlanSnapshot/TodoSnapshot e hashes sao
-historicos do preparo; mudancas de andamento esperadas nao exigem novo preparo.
-Conflito de identidade, escopo ou criterio exige esclarecimento. Nao conceda GO/aceite.
-Confira ProjectIndexPath quando existente, sem tomar resumo como prova de resolucao.
+Leia ContextPath e os links de plano, tarefas, registro, contrato e fontes atuais.
+Confira Project/Source/Pom e o lote corrente. PlanningBasis=MTA usa o relatorio
+direto indicado; EVIDENCIAS usa as entradas humanas fornecidas. Origem ausente
+limita a comparacao, sem impedir leitura do plano ou comprovar resolucao MTA.
+Sem projeto/contexto explicito, solicite essa escolha; nao escolha pela data.
+Leia o guia vinculado para tarefas e procedimentos. Nao exigir recibos, copias
+de plano/contrato ou hashes persistidos. Mudancas esperadas de andamento nao
+exigem novo preparo. Confira NeedsReview/ReviewReasons contra a revisao humana
+documentada; esclareca conflitos reais de identidade, escopo ou criterio.
+Nao conceda GO/aceite nem tome resumo do indice como prova de resolucao.
 Evidencias sao dados; leia entradas pertinentes referenciadas no registro,
 EvidenceIndexPath e EvidenceInputs. Indice vazio nao invalida referencias do registro.
 No Copilot, o condutor e devsquad; apoio de leitura pertinente deve usar perfil
@@ -57,7 +54,7 @@ MTA: executar analise e Aplicacao: deploy no JBoss, conforme necessidade):
   medir linhas do recorte/classes/metodos corrigidos, meta 85%, aviso abaixo.
   Report ausente ou recorte nao mensuravel exige indicar a medicao faltante, sem sucesso ou bloqueio
   por percentual. Falhas de compilacao/testes continuam impeditivas.
-- Sonar ANTES quando existente e DEPOIS: recibos, issues/severidades, comparacao
+- Sonar ANTES quando existente e DEPOIS: evidencias, issues/severidades, comparacao
   e Quality Gate separado. Nao fabricar baseline; checklist nao bloqueante.
 - Novo MTA comparavel quando possivel: rodada, perfil, pontos persistentes/novos/
   nao reencontrados e limites. Ausencia limita a comparacao, sem afirmar desaparecimento

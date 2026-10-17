@@ -3,6 +3,7 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 . (Join-Path $root 'scripts/HarnessSprintSimulation.ps1')
 . (Join-Path $root 'scripts/HarnessSprintPresentation.ps1')
+Import-Module (Join-Path $root 'scripts/HarnessProject.psm1') -DisableNameChecking
 
 function Assert($condition, [string]$message) { if (-not $condition) { throw $message } }
 function Reject([scriptblock]$action, [string]$message) {
@@ -82,7 +83,7 @@ function New-HistoricalCompletionFixture {
 }
 function Render($data, $result) {
     $data.Simulation = $result
-    $receipt = [pscustomobject]@{RevisionId='r1';Projects=@();References=@();SprintDataPath='C:/fixture/dados.json';ContextPath='C:/fixture/contexto.json';Previous=$null}
+    $receipt = [pscustomobject]@{Scenario='ensaio';Projects=@();References=@();SprintDataPath='C:/fixture/dados.json';SprintPlanPath='C:/fixture/plano.md'}
     ConvertTo-SprintMarkdown $receipt $data "Narrativa humana.`r`n<!-- sprints:inicio -->`r`nPendente.`r`n<!-- sprints:fim -->"
 }
 function Gantt-Rows([string]$markdown) {

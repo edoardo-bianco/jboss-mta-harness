@@ -2,6 +2,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
 
 function Resolve-McpPath {
     param([string]$Value,[string]$Root,[switch]$Directory)
@@ -38,20 +39,15 @@ function Get-HarnessMcpAllowedRoots {
             -not $config.PSObject.Properties['mta'] -or $config.mta -isnot [pscustomobject]) {
             throw 'Configuracao do harness exige schemaVersion 1 e objeto mta.'
         }
-        $runs=$null
-        if ($config.mta.PSObject.Properties['runsPath']) { $runs=$config.mta.runsPath }
-        if ($null -ne $runs) {
-            if ($runs -isnot [string] -or [string]::IsNullOrWhiteSpace($runs)) { throw 'mta.runsPath exige caminho local ou null.' }
-            $runs=Resolve-McpPath $runs $PathBase
-            foreach ($protected in (@($Root)+$projectRoots)) {
-                if ($runs -ieq $protected -or $runs.StartsWith($protected+'\',[StringComparison]::OrdinalIgnoreCase) -or
-                    $protected.StartsWith($runs+'\',[StringComparison]::OrdinalIgnoreCase)) {
-                    throw 'mta.runsPath deve ficar fora do harness e dos projetos Maven, sem conte-los.'
-                }
+        if (-not $WorkspacePath -and $config.PSObject.Properties['repositories']) {
+            foreach ($repo in $config.repositories) {
+                $source=Resolve-McpPath $repo.path $PathBase -Directory
+                $projectRoots+=$source
+                $null=$roots.Add($source)
             }
-            $null=$roots.Add($runs)
         }
     }
+    foreach ($external in @(Get-HarnessProjectReadRoots $Root @($projectRoots | ForEach-Object { Join-Path $_ 'pom.xml' }))) { $null=$roots.Add($external) }
     if ($roots.Count -gt 100) { throw 'MCP permite no maximo 100 raizes de leitura.' }
     return @($roots)
 }

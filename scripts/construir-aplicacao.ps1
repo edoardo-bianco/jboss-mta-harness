@@ -8,7 +8,7 @@ try {
     Import-Module (Join-Path $PSScriptRoot 'HarnessBuild.psm1') -Force -DisableNameChecking
     $harnessRoot = Split-Path -Parent $PSScriptRoot
     if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
-    $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
+    $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget -SkipMigrationInitialization
     $result = Invoke-ApplicationBuild $context $Goals
     $result | ConvertTo-Json -Depth 5 | Write-Host
     if ($result.Status -ne 'SUCCEEDED') {

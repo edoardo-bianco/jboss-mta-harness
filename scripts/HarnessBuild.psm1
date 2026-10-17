@@ -2,6 +2,7 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
 
 function Invoke-ApplicationTool {
     param([string]$Executable, [string[]]$Arguments, [string]$LogPath)
@@ -35,25 +36,20 @@ function Invoke-ApplicationBuild {
         if ($file -match '["%!^&|<>\r\n]') { throw 'Caminho contem caracteres nao suportados pelo launcher Maven Windows.' }
         if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Arquivo ausente: $file" }
     }
-    $state = Resolve-HarnessPath (Join-Path $Context.Root '.harness') $Context.Root
-    $null = [IO.Directory]::CreateDirectory($state)
-    # Mesmo lock do MTA: nao capturar fontes enquanto o build gera arquivos.
-    try { $lock = [IO.File]::Open((Join-Path $state 'mta.lock'), 'OpenOrCreate', 'ReadWrite', 'None') }
-    catch { throw 'Ja existe build ou analise MTA em execucao neste harness.' }
+    $project=Initialize-HarnessProjectStorage $Context.Root $pom
+    $lock=Enter-HarnessProjectAccess $project -ForOperation
+    try {
     $previous = @{}
     $pushed = $false
-    $result = [ordered]@{Status='FAILED'; ExitCode=$null; Project=$Context.Active.name; Source=$Context.Active.path; Goals=$Goals; RunId=[guid]::NewGuid().ToString('N'); JavaHome=$tool.applicationJdk8Home; MavenHome=$tool.applicationMavenHome; SettingsPath=$tool.applicationMavenSettingsPath; JavaVersion=$null; MavenVersion=$null; StartedAtUtc=[DateTime]::UtcNow.ToString('o'); FinishedAtUtc=$null; LogPath=$null; ResultPath=$null; Error=$null}
+    $result = [ordered]@{Status='FAILED'; ExitCode=$null; Project=$project.Name; Source=$Context.Active.path; Goals=$Goals; JavaHome=$tool.applicationJdk8Home; MavenHome=$tool.applicationMavenHome; SettingsPath=$tool.applicationMavenSettingsPath; JavaVersion=$null; MavenVersion=$null; StartedAtUtc=[DateTime]::UtcNow.ToString('o'); FinishedAtUtc=$null; LogPath=(Join-Path $project.Folder 'atual/build/console.log'); ResultPath=(Join-Path $project.Folder 'atual/build/resultado.json'); Error=$null}
+    $temporaryLog=$null
     try {
         $result['Git'] = Get-HarnessGitState $Context
-        $projectFolder = Get-HarnessProjectFolder $Context.Active
-        do {
-            $result.RunId = [guid]::NewGuid().ToString('N')
-            $runFolder = 'build_' + (Format-HarnessDate $result.StartedAtUtc -ForPath) + '__' + $result.RunId.Substring(0,12)
-            $run = Resolve-HarnessPath (Join-Path $state ('builds/' + $projectFolder + '/' + $runFolder)) $Context.Root
-        } while (Test-Path -LiteralPath $run)
-        $null = [IO.Directory]::CreateDirectory($run)
-        $result.LogPath = Join-Path $run 'console.log'
-        $result.ResultPath = Join-Path $run 'result.json'
+        Remove-HarnessProjectTemporary $project 'build'
+        $temporary=Get-HarnessProjectTemporary $project 'build'
+        $null=[IO.Directory]::CreateDirectory($temporary)
+        $temporaryLog=Join-Path $temporary 'console.log'
+        Set-HarnessProjectOperation $project 'build' 'RUNNING' -LogPath $temporaryLog
         foreach ($name in @('JAVA_HOME','PATH','MAVEN_HOME','M2_HOME','MAVEN_ARGS','MAVEN_OPTS','JAVA_OPTS','JDK_JAVA_OPTIONS','JAVA_TOOL_OPTIONS','_JAVA_OPTIONS','MAVEN_SKIP_RC','MAVEN_BASEDIR','MAVEN_PROJECTBASEDIR','MAVEN_BATCH_PAUSE','MAVEN_BATCH_ECHO','SONAR_TOKEN')) {
             $previous[$name] = [Environment]::GetEnvironmentVariable($name, 'Process')
             [Environment]::SetEnvironmentVariable($name, $null, 'Process')
@@ -79,7 +75,7 @@ function Invoke-ApplicationBuild {
         $arguments = @('-B', '-f', $pom, '-Djacoco.haltOnFailure=false')
         if ($tool.applicationMavenSettingsPath) { $arguments += @('-s', $tool.applicationMavenSettingsPath) }
         $arguments += $Goals.Split(' ')
-        $execution = Invoke-ApplicationTool $maven $arguments $result.LogPath
+        $execution = Invoke-ApplicationTool $maven $arguments $temporaryLog
         $result.ExitCode = $execution.ExitCode
         if ($execution.ExitCode -eq 0) { $result.Status = 'SUCCEEDED' }
     } catch { $result.Error = $_.Exception.Message }
@@ -87,9 +83,12 @@ function Invoke-ApplicationBuild {
         if ($pushed) { Pop-Location }
         foreach ($name in $previous.Keys) { [Environment]::SetEnvironmentVariable($name, $previous[$name], 'Process') }
         $result.FinishedAtUtc = [DateTime]::UtcNow.ToString('o')
-        try { if ($result.ResultPath) { Write-HarnessJson $result.ResultPath $result } } finally { $lock.Dispose() }
+            $log=if ($temporaryLog -and (Test-Path -LiteralPath $temporaryLog -PathType Leaf)) { [IO.File]::ReadAllText($temporaryLog) } else { [string]$result.Error }
+            Set-HarnessProjectOperation $project 'build' $result.Status -ErrorMessage $result.Error -LogPath $result.LogPath -Files @{'atual/build/resultado.json'=($result | ConvertTo-Json -Depth 6);'atual/build/console.log'=$log}
+            Remove-HarnessProjectTemporary $project 'build'
     }
     return [pscustomobject]$result
+    } finally { $lock.ReleaseMutex(); $lock.Dispose() }
 }
 
 Export-ModuleMember -Function Invoke-ApplicationBuild

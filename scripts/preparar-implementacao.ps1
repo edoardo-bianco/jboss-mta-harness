@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param(
     [string]$ConfigPath, [string]$WorkspacePath, [string]$Target, [switch]$SelectTarget,
-    [string]$RequestId, [string]$EditorPath, [switch]$NoOpen
+    [string]$EditorPath, [switch]$NoOpen
 )
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -12,21 +12,22 @@ try {
     Import-Module (Join-Path $PSScriptRoot 'HarnessImplementation.psm1') -Force -DisableNameChecking
     $harnessRoot = Split-Path -Parent $PSScriptRoot
     if (-not $ConfigPath) { $ConfigPath = Join-Path $harnessRoot 'config/harness.local.json' }
-    $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget
-    $selected = Select-MtaPreviousPlanning $context -ForImplementation -RequestId $RequestId
-    $prepared = New-MtaImplementationPrompt $context -RequestId $selected.RequestId
-    Write-Host "Projeto: $($context.Active.label) | Solicitacao: $($prepared.RequestId)"
+    $context = Read-HarnessConfig $ConfigPath $harnessRoot -WorkspacePath $WorkspacePath -SkipMigrationInitialization
+    $prepared = New-HarnessImplementationPrompt $context -Target $Target -Interactive:$SelectTarget
+    $gitContext = [pscustomobject]@{Root=$context.Root;Active=[pscustomobject]@{name=$prepared.Project;label=$prepared.Project;path=$prepared.Source}}
+    Write-Host "Projeto: $($prepared.Project)"
     Write-Host "Plano: $($prepared.PlanPath)"
     Write-Host "To-do: $($prepared.TodoPath)"
     Write-Host "Prompt preparado: $($prepared.PromptPath)"
     Write-Host "Revisao do resultado (apos corretiva): $($prepared.ResultReviewPromptPath)"
-    $null = Select-ImplementationBranch $context $prepared
+    foreach ($reason in $prepared.ReviewReasons) { Write-Host ('Revisao necessaria: '+$reason) }
+    $null = Select-ImplementationBranch $gitContext $prepared
     Write-Host 'Confira o GO humano registrado no plano/to-do antes de executar o prompt no cliente escolhido.'
     Write-Host ('Codex: Execute o prompt deste arquivo: ' + $prepared.PromptPath)
     Write-Host 'Copilot: abra o arquivo e use Executar Prompt em nova conversa Local com devsquad.'
     Write-Host 'Preparar/abrir nao aciona o agente, nao concede GO e nao aplica corretivas. O agente confere o GO antes de editar.'
     Write-Host 'A escolha da branch e do desenvolvedor; preserve trabalho local. Aceite do resultado continua separado.'
-    Write-Host 'Se alterar plano/to-do antes de executar, prepare novamente. O prompt anterior fica preservado.'
+    Write-Host 'O prompt referencia documentos correntes. Releia conteudo, escopo e alcance do GO antes de executar.'
     Write-Host ('Alternativa no chat do Copilot: /implementar-lote Leia o prompt preparado "' + $prepared.PromptPath + '" e implemente somente o lote com GO humano registrado, conforme seu contrato.')
     if (-not $NoOpen) {
         if (-not $EditorPath) { Write-Host 'Abra o prompt acima no VS Code ou informe -EditorPath. O arquivo ja esta salvo.' }

@@ -38,13 +38,13 @@ foreach ($bad in @($null,'101','-1','NaN','1,5')) {
     Assert ((Evaluate '85' $bad).Status -eq 'UNVERIFIED') 'Duplicidade invalida aceita.'
 }
 Assert ((Evaluate $null '0' @((Issue 'critical' 'CRITICAL'))).Status -eq 'FAIL') 'Severa comprovada deve prevalecer sobre metrica ausente.'
-$baseline=[pscustomobject]@{RunId='before';ResultPath='selected/result.json';TotalIssues=2;Issues=@((Issue 'old'))}
+$baseline=[pscustomobject]@{AnalysisId='before';ResultPath='selected/resultado.json';TotalIssues=2;Issues=@((Issue 'old'))}
 $new=Evaluate '85' '0' @((Issue 'replacement')) $baseline 'DEPOIS'
 Assert ($new.Status -eq 'FAIL' -and $new.NewIssueKeys -contains 'replacement' -and $new.IssuesDelta -eq 0) 'Troca de issue com total igual deve ser detectada.'
-Assert ($new.BaselineComparison -eq 'COMPARED' -and $new.BaselineRunId -eq 'before') 'Comparacao perdeu origem.'
+Assert ($new.BaselineComparison -eq 'COMPARED' -and $new.BaselineAnalysisId -eq 'before') 'Comparacao perdeu origem.'
 Assert ((Evaluate '85' '0' @((Issue)) $baseline 'DEPOIS').Status -eq 'PASS') 'Issue persistente nao e nova.'
 Assert ((Evaluate '85' '0' @() $baseline 'DEPOIS').Status -eq 'PASS') 'Reducao sem novas nao deve reprovar.'
-$legacy=[pscustomobject]@{RunId='legacy';ResultPath='legacy/result.json';TotalIssues=2;Issues=$null}
+$legacy=[pscustomobject]@{AnalysisId='legacy';ResultPath='legacy/resultado.json';TotalIssues=2;Issues=$null}
 Assert ((Evaluate '85' '0' @((Issue)) $legacy 'DEPOIS').Status -eq 'UNVERIFIED') 'Baseline sem lista nao prova ausencia de novas.'
 Assert ((Evaluate '85' '0' @((Issue)) $null 'DEPOIS').Status -eq 'UNVERIFIED') 'DEPOIS sem baseline nao prova ausencia de novas.'
 $missing=Evaluate

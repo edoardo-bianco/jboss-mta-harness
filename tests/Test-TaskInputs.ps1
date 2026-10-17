@@ -4,7 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 27 -and @($labels | Sort-Object -Unique).Count -eq 27) 'Manter 27 tarefas distintas, incluindo planejamento macro de sprints.'
+Assert ($labels.Count -eq 25 -and @($labels | Sort-Object -Unique).Count -eq 25) 'Manter 25 tarefas distintas, incluindo planejamento macro de sprints e conciliacao pela entrada habitual.'
 $serverLabels=@('Servidor: iniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
@@ -27,12 +27,12 @@ $prioritization = @($tasks.tasks | Where-Object label -eq 'Planejamento: prioriz
 Assert ($prioritization.Count -eq 1 -and $prioritization[0].args -contains '${workspaceFolder}/scripts/preparar-priorizacao.ps1' -and $prioritization[0].args -contains '${input:harnessWorkspacePath}' -and $prioritization[0].args -contains '${execPath}' -and $prioritization[0].args -notcontains '-SelectTarget') 'Priorizacao deve usar o workspace inteiro e abrir prompt.'
 Assert ($prioritization[0].args -contains '-Interactive' -and $prioritization[0].args -notcontains '-SelectTop') 'Priorizacao deve oferecer percentual e recriar/progredir na mesma tarefa.'
 $sharing=@($tasks.tasks | Where-Object label -eq 'Planejamento: compartilhar contexto')
-Assert ($sharing.Count -eq 1 -and $sharing[0].args -contains '${workspaceFolder}/scripts/compartilhar-contexto.ps1' -and $sharing[0].args -contains '-Interactive' -and $sharing[0].args -contains '${input:harnessWorkspacePath}') 'Compartilhar deve oferecer exportar/importar na mesma tarefa do workspace.'
+Assert ($sharing.Count -eq 0) 'Copia/conciliacao corrente substitui a tarefa de pacotes.'
 $sprints=@($tasks.tasks | Where-Object label -eq 'Planejamento: planejar sprints')
 Assert ($sprints.Count -eq 1 -and $sprints[0].args -contains '${workspaceFolder}/scripts/preparar-sprints.ps1' -and $sprints[0].args -contains '-Interactive' -and $sprints[0].args -contains '${execPath}' -and $sprints[0].args -notcontains '-SelectTarget') 'Sprints deve ter tarefa unica com escolha de escopo antes do prompt.'
-$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -notin @('Planejamento: priorizar issues','Planejamento: planejar','Planejamento: compartilhar contexto','Planejamento: planejar sprints') })
+$projectTasks = @($tasks.tasks | Where-Object { ($_.label -like 'MTA:*' -or $_.label -like 'Aplicacao:*' -or $_.label -like 'Planejamento:*') -and $_.label -notlike 'MTA: acompanhar*' -and $_.label -notin $serverLabels -and $_.label -notin @('Planejamento: priorizar issues','Planejamento: planejar','Planejamento: planejar sprints') })
 foreach ($monitor in @($tasks.tasks | Where-Object label -like 'MTA: acompanhar*')) {
-    Assert ($monitor.args -contains '-Active' -and $monitor.args -notcontains '-SelectTarget' -and -not ($monitor.args | Where-Object { $_ -like '${input:*}' })) 'Observabilidade nao deve solicitar workspace/projeto.'
+    Assert ($monitor.args -notcontains '-Active' -and $monitor.args -contains '-SelectTarget' -and $monitor.args -contains '${input:harnessWorkspacePath}') 'Log corrente deve selecionar o projeto do workspace, sem ponteiro global.'
 }
 foreach ($task in $tasks.tasks) {
     Assert ($task.args -notcontains '${workspaceFile}') 'Regressao: workspaceFile nao e uma variavel suportada em tasks.json.'
@@ -62,12 +62,13 @@ $project = Join-Path $area 'aplicacao externa'
 $workspacePath = Join-Path $area 'workspace com espacos.code-workspace'
 $null = New-Item -ItemType Directory -Path $fixture -Force
 $null = New-Item -ItemType Directory -Path $project -Force
-Set-Content (Join-Path $project 'pom.xml') '<project/>'
+Set-Content (Join-Path $project 'pom.xml') '<project><artifactId>app</artifactId></project>'
 Copy-Item -LiteralPath (Join-Path $root 'scripts') -Destination $fixture -Recurse
 @{folders=@(@{name='Projeto do workspace'; path=$project})} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $workspacePath -Encoding UTF8
 $config = Get-Content -LiteralPath (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @()
 $config.activeProject = $null
+$config.sonar.serverUrl = 'http://localhost:9000'
 $configPath = Join-Path $fixture 'config.json'
 $config | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $configPath -Encoding UTF8
 $originalConfig = (Get-FileHash $configPath).Hash
@@ -88,14 +89,31 @@ $sonarArguments = @($sonarTask[0].args | ForEach-Object {
 $sonarArguments += @('-ConfigPath', $configPath)
 $output = 'q' | & powershell.exe @sonarArguments 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Token Sonar')) 'Cancelamento Sonar deve preceder pedido de token e envio.'
+$output=@('3','1','q') | & powershell.exe @sonarArguments 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Nenhum scanner sera executado') -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Token Sonar')) ('Menu de download deve chegar a chave sem toolchain ou rede: '+$output)
+$output=@('1','q') | & powershell.exe @sonarArguments -Action Download 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Nenhum scanner sera executado') -and $output.Contains('Selecao cancelada')) ('Action Download deve chegar a chave sem toolchain: '+$output)
 $implementationArguments = @($implementationTask[0].args | ForEach-Object {
     $_.Replace('${workspaceFolder}', $fixture).Replace('${input:harnessWorkspacePath}', $workspacePath).Replace('${execPath}', (Join-Path $fixture 'editor-ausente.exe'))
 })
 $implementationArguments += @('-ConfigPath', $configPath)
 $output = 'q' | & powershell.exe @implementationArguments 2>&1 | Out-String
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Nenhum projeto correspondente') -and -not (Test-Path (Join-Path $fixture '.harness/projetos'))) 'Ausencia de plano deve impedir preparo sem criar registro ou proposta.'
+# Dois planos existentes exigem escolha; cancelar preserva ambos.
+$secondProject=Join-Path $area 'outra aplicacao'
+$null=[IO.Directory]::CreateDirectory($secondProject)
+Set-Content (Join-Path $secondProject 'pom.xml') '<project><artifactId>outro</artifactId></project>'
+@{folders=@(@{name='Projeto do workspace';path=$project},@{name='Outro';path=$secondProject})} | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $workspacePath -Encoding UTF8
+foreach ($name in @('app','outro')) {
+    $folder=Join-Path $fixture ('.harness/projetos/'+$name+'/atual/planejamento')
+    $null=[IO.Directory]::CreateDirectory($folder)
+    Set-Content (Join-Path $folder 'plano.md') ('Proposta humana de '+$name)
+}
+$output = 'q' | & powershell.exe @implementationArguments 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and -not $output.Contains('Prompt preparado:')) 'Cancelamento da task de implementacao deve preceder preparo/editor.'
+Assert (@(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness') -Filter '*.prompt.md' -Recurse -File).Count -eq 0) 'Cancelar implementacao nao pode publicar prompts.'
 Write-Output 'PASS: variaveis de tarefa suportadas, workspace com espacos, entrada real do build e cancelamento sem execucao.'
 $sprintArguments=@($sprints[0].args | ForEach-Object { $_.Replace('${workspaceFolder}',$fixture).Replace('${input:harnessWorkspacePath}',$workspacePath).Replace('${execPath}',(Join-Path $fixture 'editor-ausente.exe')) })
 $output='q' | & powershell.exe @sprintArguments 2>&1 | Out-String
-Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and -not (Test-Path (Join-Path $fixture '.harness/sprints'))) 'Cancelamento da tarefa de sprints criou cenario ou nao chegou ao menu.'
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and @(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness') -Filter 'contexto.json' -Recurse -File).Count -eq 0) 'Cancelamento da tarefa de sprints criou contexto ou nao chegou ao menu.'
 Write-Output 'PASS: entrada real da tarefa de sprints cancela antes de criar contexto.'

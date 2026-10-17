@@ -7,6 +7,12 @@ html:
 
 # ADR-0001: contexto local e acionamento explicito do Copilot
 
+**Atualizacao operacional — 15/10/2026:** a [ADR-0009](0009-estado-corrente-por-projeto.md)
+rege o estado corrente desta versao; integracao e aceite humano sao acompanhados
+no [plano](../../tasks/historico/plan-ate-2026-10-17.md).
+Permanecem contexto local e acionamento explicito. Recibos, snapshots e caminhos
+por execucao abaixo descrevem o desenho historico, nao requisitos do fluxo corrente.
+
 Status: aceita no fluxo aprovado em 2026-09-26.
 
 Atualizacao em 2026-10-04: a [ADR-0005](0005-planejamento-orientado-pelo-registro.md)

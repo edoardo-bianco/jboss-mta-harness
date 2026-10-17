@@ -1,150 +1,105 @@
-# Planejamento por projeto/issue; recibos legados permanecem no leitor original.
-function Get-IssuePlanningHistory {
-    param($Context, [switch]$IncludePrepared)
-    foreach ($file in @(Get-HarnessIssueReceipts $Context.Root)) {
-        $record=Get-Content -LiteralPath $file.FullName -Raw -Encoding UTF8 | ConvertFrom-Json
-        if ((Resolve-HarnessPath $record.Source $Context.Root) -ine $Context.Active.path) { continue }
-        if ($record.RequestId -cnotmatch '^[a-f0-9]{32}$') { throw 'Identidade da solicitacao invalida.' }
-        $paths=Get-HarnessIssuePaths $Context.Root $Context.Active $record.IssueId
-        $folder=Join-Path $paths.Folder ('p_'+$record.RequestId.Substring(0,12))
-        if ($record.LayoutVersion -ne 2 -or $record.RequestId -cnotmatch '^[a-f0-9]{32}$' -or
-            $record.Purpose -ne 'application-remediation' -or (Resolve-HarnessPath $record.Source $Context.Root) -ine $Context.Active.path -or
-            (Split-Path $file.FullName -Parent) -ine $folder) { throw 'Identidade/destino do planejamento por issue divergente.' }
-        foreach ($pair in @(@('ContextPath','contexto-', '.json'),@('PlanPath','plan-','.md'),@('TodoPath','todo-','.md'))) {
-            if ((Resolve-HarnessPath $record.($pair[0]) $Context.Root) -ine (Join-Path $folder ($pair[1]+$paths.Stem+$pair[2]))) { throw 'Destino da issue divergente do recibo.' }
+# Evidencias e fontes do planejamento corrente.
+function Get-CurrentPlanningEvidence {
+    param($Project,$Rows,[string]$EvidenceIndexPath,[hashtable]$ObservedFiles)
+    if ($EvidenceIndexPath) { $index=Resolve-HarnessPath $EvidenceIndexPath $Project.Root }
+    else { $index=Join-Path $Project.EvidencePath 'LEIA-ME.md' }
+    if ($null -ne $ObservedFiles) { $ObservedFiles[$index]=$null }
+    $references=@(); $warnings=@(); $fichas=@()
+    if (Test-Path -LiteralPath $index -PathType Leaf) {
+        $references+=@([pscustomobject]@{Value=$index;Base=$Project.Root;Relation='Indice de evidencias'})
+        $sources=@()
+        $issueTable=$false
+        $indexText=[IO.File]::ReadAllText($index)
+        if ($null -ne $ObservedFiles) { $ObservedFiles[$index]=$indexText }
+        foreach ($line in ($indexText -split '\r?\n')) {
+            if ($line -match '^\s*\|\s*Issue\s*\|') { $issueTable=$true; continue }
+            if ($issueTable -and $line -notmatch '^\s*\|') { $issueTable=$false }
+            $relation='Anexo geral do indice'
+            if ($issueTable) {
+                $cells=$line.Trim().Trim('|').Split('|')
+                if ($cells.Count -lt 3) { throw 'Tabela de evidencias por Issue exige arquivo e relacao.' }
+                $id=$cells[0].Trim()
+                if ($id -match '^:?-+:?$') { continue }
+                if ($id -ne '*' -and $id -cnotin @($Rows | ForEach-Object Id)) { continue }
+                $relation=$id+': '+$cells[2].Trim()
+            }
+            $sources+=@([pscustomobject]@{Text=$line;From=$index;Relation=$relation})
         }
-        if (@($record.SelectedIssues).Count -ne 1 -or $record.SelectedIssues[0].Id -cne $record.IssueId) { throw 'Selecao da issue divergente.' }
-        if ((Resolve-HarnessPath $record.MigrationPath $Context.Root) -ine (Get-HarnessMigrationPaths $Context.Root $Context.Active).MigrationPath) { throw 'Registro de outro projeto no contexto da issue.' }
-        $null=Get-HarnessPlanningBasis $record
-        if (-not $IncludePrepared -and (-not (Test-Path -LiteralPath $record.PlanPath) -or -not (Test-Path -LiteralPath $record.TodoPath))) { continue }
-        $record
+    } else {
+        if ($EvidenceIndexPath) { $references+=@([pscustomobject]@{Value=$index;Base=$Project.Root;Relation='Indice de evidencias'}) }
+        $sources=@()
     }
+    foreach ($row in $Rows) {
+        $sources+=@([pscustomobject]@{Text=$row.Note;From=$Project.MigrationPath;Relation=$row.Id})
+        $relative=Get-PrioritizationFichaRelativePath $row.Category $row.Id
+        $path=Join-Path $Project.Folder $relative
+        $read=Read-HarnessProjectFiles $Project @($relative)
+        if ($null -ne $ObservedFiles) { $ObservedFiles[$path]=$read[$relative] }
+        if ($read[$relative]) {
+            $null=Read-PrioritizationFicha $read[$relative] $Project.Name $row.Category $row.Id
+            $fichas+=@([pscustomobject]@{Id=$row.Id;Category=$row.Category;Path=$path;Status='DISPONIVEL'})
+        } else { $fichas+=@([pscustomobject]@{Id=$row.Id;Category=$row.Category;Path=$path;Status='A ELABORAR'}) }
+    }
+    foreach ($source in $sources) {
+        foreach ($match in [regex]::Matches($source.Text,'\[[^\]]*\]\((?:<([^>\r\n]+)>|([^\s\)]+))\)')) {
+            $value=if ($match.Groups[1].Success) {$match.Groups[1].Value} else {$match.Groups[2].Value}
+            $baseUri=New-Object Uri $source.From
+            $uri=New-Object Uri (([uri]$baseUri.AbsoluteUri),$value)
+            if ($uri.IsUnc -or $uri.Scheme -notin @('file','http','https')) { throw 'Referencia de evidencia com esquema/localizacao nao suportado.' }
+            $references+=@([pscustomobject]@{Value=if ($uri.IsFile) {$uri.LocalPath} else {$uri.AbsoluteUri};Base=$Project.Root;Relation=$source.Relation})
+        }
+    }
+    $inputs=@(); $seen=@{}
+    foreach ($reference in $references) {
+        $path=$reference.Value
+        $status='REFERENCIA EXTERNA'
+        if ($path -notmatch '^https?://') {
+            $path=Resolve-HarnessPath $path $reference.Base
+            # Documentos correntes se referenciam, mas nao viram anexos de si mesmos.
+            if ($path -iin @($Project.PlanPath,$Project.TodoPath,$Project.ContextPath,$Project.MigrationPath,$Project.IndexPath)) { continue }
+            $status=if (Test-Path -LiteralPath $path -PathType Leaf) {'DISPONIVEL'} else {'AUSENTE'}
+        }
+        if ($seen.ContainsKey($path)) { continue }; $seen[$path]=$true
+        if ($status -eq 'AUSENTE') { $warnings+="Evidencia indisponivel: $path" }
+        $inputs+=@([pscustomobject][ordered]@{Path=$path;Relation=$reference.Relation;Status=$status})
+    }
+    [pscustomobject]@{IndexPath=if ($EvidenceIndexPath -or (Test-Path -LiteralPath $index -PathType Leaf)) {$index} else {$null};Inputs=$inputs;Fichas=$fichas;Warnings=$warnings}
 }
 
-function Get-IssueEvidenceIndex {
-    param($Context, $Register, [string]$ExplicitPath)
-    $chosen=@($Register.Rows | Where-Object Decision -eq 'ANALISAR AGORA')
-    if ($ExplicitPath) {
-        $path=Resolve-HarnessPath $ExplicitPath $Context.Root
-        if ($chosen.Count -eq 1 -and (Test-Path -LiteralPath $path -PathType Leaf) -and [IO.File]::ReadAllText($path).Contains('<!-- issue:')) { Assert-HarnessIssueFicha $path $Context.Active.path $chosen[0].Id }
-        return $path
+function Get-CurrentPlanningSources {
+    param($Data,$Project,[string]$From,[string[]]$AvailablePaths=@())
+    $lines=@((Get-HarnessSourceLink $From $Project.Pom 'POM'),(Get-HarnessSourceLink $From $Project.MigrationPath 'Decisoes e recorte atuais'),
+        (Get-HarnessSourceLink $From $Data.PromptPath 'Orientacao do planejamento'),(Get-HarnessSourceLink $From $Data.ContractPath 'Contrato corrente'))
+    foreach ($pair in @(@($Project.PlanPath,'Plano corrente'),@($Project.TodoPath,'Tarefas correntes'),@($Data.ReconciledPath,'Ultima reconciliacao'))) {
+        if ((Test-Path -LiteralPath $pair[0] -PathType Leaf) -or $pair[0] -iin $AvailablePaths) { $lines+=Get-HarnessSourceLink $From $pair[0] $pair[1] }
     }
-    if ($chosen.Count -eq 1) {
-        $paths=Get-HarnessIssuePaths $Context.Root $Context.Active $chosen[0].Id
-        if (Test-Path -LiteralPath $paths.EvidenceIndexPath -PathType Leaf) {
-            if ([IO.File]::ReadAllText($paths.EvidenceIndexPath).Contains('<!-- issue:')) { Assert-HarnessIssueFicha $paths.EvidenceIndexPath $Context.Active.path $chosen[0].Id }
-            return $paths.EvidenceIndexPath
-        }
+    if ($Data.PlanningBasis -eq 'MTA' -and $Data.Mta) {
+        $lines+=Get-HarnessSourceLink $From $Data.Mta.ReportPath 'MTA atual'
+    } elseif ($Data.PlanningBasis -eq 'MTA') { $lines+='Base MTA: origem atualmente indisponivel. Conferir aplicabilidade e pendencias; nao inferir resolucao.' }
+    else { $lines+='Base EVIDENCIAS: nenhum resultado MTA atribuido a esta proposta.' }
+    foreach ($ficha in $Data.FichaPaths) {
+        if ($ficha.Status -eq 'DISPONIVEL') { $lines+=Get-HarnessSourceLink $From $ficha.Path ('Ficha: '+$ficha.Id) }
+        else { $lines+='Ficha ainda a elaborar: '+(ConvertTo-ProjectCell $ficha.Id) }
     }
-    $Register.EvidenceIndexPath
-}
-
-function New-IssuePlanningEvidence {
-    param($Context, $Data, $Selected, $Paths)
-    $folder=Split-Path $Data.ContextPath -Parent
-    $directory=Join-Path $folder 'evidencias'
-    $files=@(); $inputs=@(); $fichas=@()
-    $Data.SourceEvidenceInputs=@($Data.EvidenceInputs)
-    foreach ($input in $Data.SourceEvidenceInputs) {
-        if ([IO.Path]::GetFileName($input.Path) -like 'ficha-*.md') {
-            if ($input.Status -ne 'DISPONIVEL') { throw 'Ficha-base indicada indisponivel. Confira a referencia antes de preparar.' }
-            Assert-HarnessIssueFicha $input.Path $Data.Source $Data.IssueId
-            $fichas += $input.Path
-        }
+    foreach ($input in $Data.EvidenceInputs) {
+        if ($input.Status -eq 'DISPONIVEL') { $lines+=Get-HarnessSourceLink $From $input.Path $input.Relation }
+        elseif ($input.Status -eq 'REFERENCIA EXTERNA') { $lines+='['+(ConvertTo-ProjectCell $input.Relation)+'](<'+$input.Path+'>)' }
+        else { $lines+='Evidencia indisponivel: '+(ConvertTo-ProjectCell $input.Path) }
     }
-    if ($fichas.Count -gt 1) { throw 'Mais de uma ficha vinculada a issue. Escolha a ficha-base, sem usar recencia.' }
-    $issues=@()
-    if ($Selected -and $Data.IssueId -notlike 'DEV-*') {
-        $issues=@(Get-HarnessMtaCatalog $Selected.Run $Context.Root -IncludeIncidents | Where-Object Id -CEQ $Data.IssueId)
-        if ($issues.Count -ne 1) { throw 'Issue escolhida nao encontrada no catalogo MTA; nao consolidar outra regra.' }
-        if ((Get-FileHash -LiteralPath $Data.CatalogPath).Hash -cne $Data.CatalogSha256) { throw 'Catalogo mudou durante a consolidacao.' }
-    }
-    $null=[IO.Directory]::CreateDirectory($directory)
-    Initialize-HarnessIssueProject $Paths $Context.Active
-    foreach ($input in $Data.SourceEvidenceInputs) {
-        if ($input.Status -ne 'DISPONIVEL') { $inputs += $input; continue }
-        $name=(Get-HarnessProjectKey $input.Path).Substring(0,8)+'-'+[IO.Path]::GetFileName($input.Path)
-        $path=Join-Path $directory $name
-        Copy-Item -LiteralPath $input.Path -Destination $path
-        $hash=(Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
-        if ($hash -cne $input.Sha256) { throw 'Evidencia mudou durante a consolidacao.' }
-        $inputs += [pscustomobject]@{Path=$path;OriginPath=$input.Path;Relation=$input.Relation;Status='DISPONIVEL';Sha256=$hash}
-        $files += [pscustomobject]@{RelativePath=('evidencias/'+$name);Sha256=$hash;OriginPath=$input.Path;OriginSha256=$hash}
-    }
-    $fichaPath=Join-Path $folder ('ficha-'+$Paths.Stem+'.md')
-    if ($fichas.Count) { Copy-Item -LiteralPath $fichas[0] -Destination $fichaPath }
-    else {
-        $identity=@{Source=$Data.Source;Id=$Data.IssueId}|ConvertTo-Json -Compress
-        $row=$Data.SelectedIssues[0]
-        $body="# Entrada da issue: $($row.Title)`n`n<!-- issue: $identity -->`n`nCategoria: $($row.Category)`n`nSem ficha de priorizacao vinculada. Diagnostico e aplicabilidade devem ser elaborados no plano a partir das evidencias, sem presumir exame anterior.`n`nObservacao do registro:`n$($row.Observation)`n"
-        [IO.File]::WriteAllText($fichaPath,$body,(New-Object Text.UTF8Encoding($false)))
-    }
-    $files += [pscustomobject]@{RelativePath=[IO.Path]::GetFileName($fichaPath);Sha256=(Get-FileHash -LiteralPath $fichaPath).Hash;OriginPath=if ($fichas.Count) {$fichas[0]} else {$null};OriginSha256=$null}
-    $Data.FichaPath=$fichaPath
-    $Data.IssueInputs=@([ordered]@{Id=$Data.IssueId;Source=$Data.Source;FichaPath=$fichaPath;FichaOrigin=if ($fichas.Count) {$fichas[0]} else {$null};EvidenceIndexOrigin=$Data.EvidenceIndexPath})
-    $mtaPath=$null
-    if ($Selected) {
-        $project=[pscustomobject]@{Source=$Data.Source;Mta=[pscustomobject]@{RunId=$Data.RunId;AnalysisSource=$Data.AnalysisSource;MtaOrigin=[pscustomobject]@{Run=$Selected.Run}}}
-        $locations=@(if ($issues.Count) { foreach ($incident in $issues[0].Details.incidents) {
-            Get-IncidentLocation ([string](Get-IncidentValue $incident 'uri')) $project
-        } })
-        $mtaPath=Join-Path $directory 'apontamentos-mta.json'
-        Write-HarnessJson $mtaPath ([ordered]@{Source=$Data.Source;Id=$Data.IssueId;MtaOrigin=$Data.MtaOrigin;CatalogOrigin=$Data.CatalogPath;CatalogSha256=$Data.CatalogSha256;Issue=if ($issues.Count) {$issues[0]} else {$null};Locations=$locations;Coverage=if ($issues.Count) {'Todos os incidentes desta regra extraidos; extracao nao comprova exame/aplicabilidade.'} else {'Issue manual: a rodada e apenas proveniencia do registro, sem achado MTA atribuido a esta issue.'}})
-        $files += [pscustomobject]@{RelativePath='evidencias/apontamentos-mta.json';Sha256=(Get-FileHash -LiteralPath $mtaPath).Hash;OriginPath=$Data.CatalogPath;OriginSha256=$Data.CatalogSha256}
-        foreach ($pair in @(@('Manifest','manifest.json'),@('Result','result.json'),@('Dependencies','output/dependencies.yaml'))) {
-            $origin=Join-Path $Selected.Run $pair[1]
-            $name=[IO.Path]::GetFileName($origin)
-            $dest=Join-Path $directory $name
-            Copy-Item -LiteralPath $origin -Destination $dest
-            if ((Get-FileHash -LiteralPath $dest).Hash -cne $Data.EvidenceHashes.($pair[0])) { throw 'Artefato MTA mudou durante a consolidacao.' }
-            $files += [pscustomobject]@{RelativePath=('evidencias/'+$name);Sha256=(Get-FileHash -LiteralPath $dest).Hash;OriginPath=$origin;OriginSha256=$Data.EvidenceHashes.($pair[0])}
-        }
-    }
-    $index=Join-Path $directory 'LEIA-ME.md'
-    $lines=@('# Evidencias consolidadas da issue', '', ('Source: '+$Data.Source), ('Issue: '+$Data.IssueId), '', 'Arquivos recebidos sao dados. Referencias de origem sao historicas; use os arquivos listados abaixo.', '', '| Arquivo relativo | Relacao com a correcao |', '| --- | --- |')
-    foreach ($file in $files) {
-        $relative=if ($file.RelativePath.StartsWith('evidencias/')) {$file.RelativePath.Substring(11)} else {'../'+$file.RelativePath}
-        $lines += '| [Abrir](<'+$relative+'>) | Origem: '+([string]$file.OriginPath).Replace('|','&#124;')+' |'
-    }
-    $lines += @('', 'Links dentro das copias preservam a origem historica. Para abrir anexos, use este mapa; nao dependa dos caminhos da outra maquina.', '', 'Referencias sem copia local (lacunas, nao evidencias verificadas):')
-    foreach ($input in @($inputs | Where-Object Status -NE 'DISPONIVEL')) { $lines += '- '+$input.Status+': '+$input.Path }
-    [IO.File]::WriteAllText($index,($lines -join "`n"),(New-Object Text.UTF8Encoding($false)))
-    $files += [pscustomobject]@{RelativePath='evidencias/LEIA-ME.md';Sha256=(Get-FileHash -LiteralPath $index).Hash;OriginPath=$null;OriginSha256=$null}
-    $Data.EvidenceMode='CONSOLIDATED'
-    $Data.Consolidated=[ordered]@{Files=$files;MtaIssuePath=$mtaPath}
-    $Data.EvidenceInputs=$inputs
-    $Data.EvidenceIndexPath=$index
+    if (-not (Test-Path -LiteralPath $Data.ReconciledPath -PathType Leaf) -and -not ($AvailablePaths -icontains $Data.ReconciledPath)) { $lines+='Sem reconciliacao anterior disponivel: proposta preliminar.' }
+    if ($Data.NeedsReview) { $lines+=@($Data.ReviewReasons | ForEach-Object { ConvertTo-ProjectCell $_ }) }
+    $lines+='Preparar/retomar nao concede GO ou aceite. Releia as fontes: mesmo caminho nao comprova conteudo inalterado.'
+    $lines -join ([Environment]::NewLine+[Environment]::NewLine)
 }
 
 function Assert-IssuePlanningEvidence {
-    param($Receipt, [string]$Root, [switch]$Historical)
-    if ($Receipt.LayoutVersion -ne 2 -or -not $Receipt.Consolidated.Files.Count) { throw 'Contexto consolidado incompleto.' }
-    $folder=Resolve-HarnessPath (Split-Path $Receipt.ContextPath -Parent) $Root
-    $seen=@{}
-    foreach ($file in $Receipt.Consolidated.Files) {
-        if ([IO.Path]::IsPathRooted($file.RelativePath)) { throw 'Evidencia consolidada exige caminho relativo.' }
-        $path=Resolve-HarnessPath (Join-Path $folder $file.RelativePath) $Root
-        if (-not $path.StartsWith($folder+'\',[StringComparison]::OrdinalIgnoreCase) -or $seen.ContainsKey($path)) { throw 'Destino de evidencia consolidada invalido/duplicado.' }
-        $seen[$path]=$true
-        if (-not (Test-Path -LiteralPath $path -PathType Leaf) -or (Get-FileHash -LiteralPath $path).Hash -cne $file.Sha256) { throw "Evidencia consolidada ausente/alterada: $path" }
-    }
-    if (-not $seen.ContainsKey((Resolve-HarnessPath $Receipt.FichaPath $Root)) -or -not $seen.ContainsKey((Resolve-HarnessPath $Receipt.EvidenceIndexPath $Root))) { throw 'Ficha/indice ausente do manifesto consolidado.' }
-    Assert-HarnessIssueFicha $Receipt.FichaPath $Receipt.Source $Receipt.IssueId
-    # A copia permite trabalhar sem a origem. Mudancas conhecidas na origem humana
-    # ainda exigem reavaliacao; nunca tratar um anexo novo como ja revisado.
-    foreach ($input in $Receipt.SourceEvidenceInputs) {
+    param($Data,[string]$Root)
+    $project=Get-HarnessProjectStorage $Root $Data.Pom
+    Assert-CurrentPlanningContext $Data $project
+    foreach ($input in $Data.EvidenceInputs) {
         if ($input.Status -eq 'REFERENCIA EXTERNA') { continue }
         $path=Resolve-HarnessPath $input.Path $Root
-        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { continue }
-        if ((Get-FileHash -LiteralPath $path).Hash -cne $input.Sha256) {
-            $message="Evidencia complementar mudou desde o preparo: $path. Reavalie a proposta com a base atual."
-            if ($Historical) { Write-Warning $message } else { throw $message }
-        }
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Evidencia indisponivel: $path. Reavalie a proposta corrente." }
     }
-    if ($Receipt.PlanningBasis -eq 'MTA') {
-        $mtaPath=Resolve-HarnessPath $Receipt.Consolidated.MtaIssuePath $Root
-        if (-not $seen.ContainsKey($mtaPath)) { throw 'Recorte MTA ausente do manifesto consolidado.' }
-        $mta=Get-Content -LiteralPath $mtaPath -Raw -Encoding UTF8 | ConvertFrom-Json
-        if ($mta.Id -cne $Receipt.IssueId -or $mta.Source -ine $Receipt.Source -or $mta.MtaOrigin.RunId -cne $Receipt.RunId) { throw 'Origem/issue MTA consolidada divergente.' }
-    }
+    # Disponibilidade nao atesta equivalencia do conteudo, GO ou aceite.
 }

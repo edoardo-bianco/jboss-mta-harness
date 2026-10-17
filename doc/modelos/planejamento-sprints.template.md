@@ -6,7 +6,7 @@ Projetos selecionados: {{PROJECTS}}.
 
 Descrever o resultado esperado e as categorias confirmadas. Identificar projetos
 sem issues no recorte e seu papel nas entregas compartilhadas. O contexto e o
-JSON identificam esta revisao e suas fontes; nenhum aceite e concedido por este plano.
+JSON identificam o cenario corrente e suas fontes; nenhum aceite e concedido por este plano.
 
 ## Decisoes confirmadas
 
@@ -61,12 +61,13 @@ Calculos pendentes.
 
 {{REASON}}
 
-Registrar o que mudou nas decisoes, estimativas e evidencias em relacao a Previous,
-com motivo e impacto esperado. Na primeira proposta, informar que nao ha anterior.
+Registrar o que mudou nas decisoes, estimativas e evidencias, com motivo e impacto
+esperado. O cenario e atualizado no mesmo diretorio, sem cadeia Previous.
+Na primeira proposta, informar que se trata do preparo inicial.
 
 ## Referencias
 
 - [Dados do planejamento](planejamento-sprints.json).
-- [Contexto e fontes capturadas](contexto.json).
+- [Contexto e referencias correntes](contexto.json).
 
 Acrescentar somente arquivos efetivamente lidos para sustentar a narrativa.

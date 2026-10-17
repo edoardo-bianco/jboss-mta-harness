@@ -10,6 +10,13 @@
 
 ## 1. Objetivo
 
+**Precedência definida em 10/10/2026:** esta evolução começa depois da entrega e
+aceite da [simplificação por projeto](organizacao-simplificada-por-projeto.md),
+incluindo [conversão](conversao-descartavel-dos-registros.md), limpeza e guias/agente
+orientador alinhados. Reavaliar os requisitos de recibos e histórico desta proposta
+sobre o contrato simplificado; não transportá-los para a extensão. A sequência
+vigente está no [plano do harness](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+
 Evoluir o harness existente para um produto instalável e versionado, denominado conceitualmente **Engineering Harness**, que acrescente a um workspace do VS Code as capacidades necessárias para conduzir trabalho de engenharia: configuração, ferramentas, tarefas, guias, instruções, agentes, prompts, contexto e evidências.
 
 A experiência desejada é **instalar a extensão, abrir o workspace, configurar o perfil e utilizar o harness**, sem exigir que o desenvolvedor clone seu repositório como pré-requisito de uso.

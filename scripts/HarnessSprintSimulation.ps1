@@ -35,7 +35,7 @@ function Get-HarnessSprintSimulation {
     $roles=@('Dev','Architect','DevOps');$diagnostics=New-Object 'System.Collections.Generic.List[string]'
     $schema=Get-HarnessSprintValue $Data 'SchemaVersion';$purpose=Get-HarnessSprintValue $Data 'Purpose'
     if ($null -ne $schema -and $schema -ne 1) { throw 'SchemaVersion deve ser 1.' }
-    if ($null -ne $purpose -and $purpose -cne 'sprint-planning') { throw 'Purpose deve ser sprint-planning.' }
+    if ($null -ne $purpose -and $purpose -cnotin @('sprint-planning','current-sprint-planning')) { throw 'Purpose deve identificar planejamento de sprints.' }
     $constraints=Get-HarnessSprintValue $Data 'Constraints';$team=Get-HarnessSprintValue $Data 'Team'
     $aiPercent=ConvertTo-HarnessSprintNumber (Get-HarnessSprintValue (Get-HarnessSprintValue $Data 'Estimation') 'AiDeveloperReductionPercent') 'Estimation.AiDeveloperReductionPercent' -Maximum 100
     $adjustments=@()

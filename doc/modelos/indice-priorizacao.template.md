@@ -1,5 +1,11 @@
 # Índice de priorização de issues
 
+**Modelo histórico, sem uso no fluxo corrente.** O texto abaixo descreve os
+recibos anteriores à ADR-0009 e permanece para interpretar material antigo.
+O índice atual é derivado dos documentos por projeto/categoria/escopo; siga o
+[guia de priorização](../guias/tools/priorizacao-issues.md). Não use este modelo
+para criar novas cadeias ou reintroduzir IDs técnicos.
+
 Recibos preparados até: {{PreparedThroughUtc}} (UTC). Conferência: {{Verification}}.
 Este bloco é derivado dos recibos e resultados; conteúdo manual externo permanece como histórico.
 O índice localiza os arquivos. A continuidade é determinada por Previous/SequenceId, nunca pela data.

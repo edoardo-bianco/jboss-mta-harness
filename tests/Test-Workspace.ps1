@@ -2,32 +2,46 @@
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Import-Module (Join-Path $root 'scripts/Harness.psm1') -Force
+Import-Module (Join-Path $root 'scripts/HarnessProject.psm1') -DisableNameChecking
 $area = Join-Path $root ('.harness/tests/' + [guid]::NewGuid().ToString('N'))
 $fixture = Join-Path $area 'harness'
 $app = Join-Path $area 'app com espaco'
 $other = Join-Path $area 'biblioteca'
 foreach ($dir in @($fixture, $app, $other)) { $null = New-Item -ItemType Directory -Path $dir -Force }
+Set-Content (Join-Path $app 'pom.xml') '<project><artifactId>app</artifactId></project>'
+Set-Content (Join-Path $other 'pom.xml') '<project><artifactId>biblioteca</artifactId></project>'
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $config = Get-Content (Join-Path $root 'config/harness.example.json') -Raw | ConvertFrom-Json
 $config.repositories = @(@{name='api'; path=$app}, @{name='biblioteca'; path=$other})
 $config.activeProject = 'api'
-$config.mta.runsPath = Join-Path $area 'mta externo'
+$externalMta=Join-Path $area 'mta externo'
 $configPath = Join-Path $fixture 'config.json'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
 $context = Read-HarnessConfig $configPath $fixture
 Assert ($context.Active.path -eq $app) 'Alvo inicial incorreto.'
+Assert (-not (Test-Path (Join-Path $fixture '.harness'))) 'Leitura da configuracao nao deve inicializar registros.'
+$project=Initialize-HarnessProjectStorage $fixture (Join-Path $app 'pom.xml')
+$association=Get-Content $project.ConfigPath -Raw | ConvertFrom-Json
+$association.mta.diretorio=$externalMta
+Write-HarnessJson $project.ConfigPath $association
 $path = New-HarnessWorkspace $context
-Assert (Test-Path (Initialize-HarnessMigration $fixture $context.Active).MigrationPath) 'Workspace deve preparar registro por projeto.'
-$registers = @(Get-ChildItem (Join-Path $fixture '.harness/projetos') -Filter migracao-*.md -Recurse)
-Assert ($registers.Count -eq 2) 'Workspace deve preparar todos os projetos importados.'
+Assert (-not (Test-Path (Join-Path $fixture '.harness/projetos/biblioteca'))) 'Gerar workspace nao deve publicar registros; a tarefa de indice inicializa os projetos.'
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
+Assert ($workspace.settings.'files.exclude'.'**/.harness' -eq $false) 'Evidencias devem estar visiveis no Explorer.'
+foreach ($filter in @('**/.harness/tests','**/.harness/backups-temporarios','**/.harness/workspace-backups')) {
+    Assert ($workspace.settings.'files.exclude'.$filter -eq $true) 'Novo workspace deve ocultar somente residuos tecnicos.'
+}
 Assert ($workspace.folders.Count -eq 3) 'Workspace deve conter harness e dois repos.'
 Assert ($workspace.folders[0].name -eq 'harness') 'Raiz de tarefas ausente.'
 Assert ($workspace.folders[1].path -eq $app) 'Path com espacos alterado.'
 $readAccessKey = 'github.copilot.chat.additionalReadAccessPaths'
-Assert ($workspace.settings.PSObject.Properties[$readAccessKey] -and @($workspace.settings.$readAccessKey).Count -eq 1 -and $workspace.settings.$readAccessKey[0] -eq $context.Config.mta.runsPath.Replace('\','/')) 'Workspace deve autorizar leitura da raiz MTA configurada.'
+Assert ($workspace.settings.PSObject.Properties[$readAccessKey] -and @($workspace.settings.$readAccessKey).Count -eq 1 -and $workspace.settings.$readAccessKey[0] -eq $externalMta.Replace('\','/')) 'Workspace deve usar a origem MTA do projeto corrente.'
 $workspace.settings.$readAccessKey = @('D:/evidencias escolhidas')
 $workspace.settings | Add-Member NoteProperty 'editor.fontSize' 17
+$workspace.settings.'files.exclude'.'**/.harness' = $true
+$workspace.settings.'files.exclude' | Add-Member NoteProperty '**/minha-pasta' $true
+$workspace.settings.'files.exclude'.'**/.harness/tests'=$false
+$workspace.settings.'files.exclude'.PSObject.Properties.Remove('**/.harness/backups-temporarios')
 $workspace | ConvertTo-Json -Depth 8 | Set-Content $path -Encoding UTF8
 $config.activeProject = 'biblioteca'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
@@ -38,6 +52,8 @@ Assert (@(Get-ChildItem (Join-Path $fixture '.harness/workspace-backups') -File)
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert (@($workspace.settings.$readAccessKey).Count -eq 1 -and $workspace.settings.$readAccessKey[0] -eq 'D:/evidencias escolhidas') 'Gerador alterou permissao escolhida no workspace.'
 Assert ($workspace.settings.'editor.fontSize' -eq 17) 'Gerador alterou outra configuracao do usuario.'
+Assert ($workspace.settings.'files.exclude'.'**/.harness' -eq $false -and $workspace.settings.'files.exclude'.'**/minha-pasta' -eq $true) 'Regenerar deve expor evidencias antes ocultas e preservar outros filtros.'
+Assert ($workspace.settings.'files.exclude'.'**/.harness/tests' -eq $false -and $workspace.settings.'files.exclude'.'**/.harness/backups-temporarios' -eq $true) 'Regenerar deve preservar filtro tecnico explicito e acrescentar somente o ausente.'
 $workspace.settings.$readAccessKey = @()
 Write-HarnessJson $path $workspace
 $null = New-HarnessWorkspace $context
@@ -78,6 +94,13 @@ Write-HarnessJson $path $workspace
 $null = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.folders.Count -eq 5 -and $workspace.folders[4].path -eq '\\servidor\docs') 'Pasta UNC extra deve ser preservada sem bloquear a regeneracao.'
+$beforeAlias=[IO.File]::ReadAllText($path)
+$config.repositories[0].name='harness'
+Write-HarnessJson $configPath $config
+$rejected=$false
+try { $bad=Read-HarnessConfig $configPath $fixture; New-HarnessWorkspace $bad | Out-Null } catch { $rejected=$_.Exception.Message -match 'reservado' }
+Assert ($rejected -and [IO.File]::ReadAllText($path) -ceq $beforeAlias) 'Alias harness deve ser reservado sem modificar o workspace existente.'
+$config.repositories[0].name='api'
 $config.activeProject = 'inexistente'
 $config | ConvertTo-Json -Depth 8 | Set-Content $configPath -Encoding UTF8
 $rejected = $false
@@ -101,10 +124,10 @@ Assert ($context.Config.tools.mtaExecutable -eq $null) 'Clone nao deve carregar 
 $path = New-HarnessWorkspace $context
 $workspace = Get-Content $path -Raw | ConvertFrom-Json
 Assert ($workspace.folders.Count -eq 1 -and $workspace.folders[0].name -eq 'harness') 'Workspace inicial deve conter somente o harness.'
-Assert (-not $workspace.settings.PSObject.Properties[$readAccessKey]) 'RunsPath null nao deve conceder acesso externo por padrao.'
+Assert (-not $workspace.settings.PSObject.Properties[$readAccessKey]) 'Sem origem externa corrente, nao conceder acesso externo por padrao.'
 $starter = Get-Content (Join-Path $root 'iniciar-harness.code-workspace') -Raw | ConvertFrom-Json
 Assert ($starter.folders.Count -eq 1 -and $starter.folders[0].path -eq '.') 'Workspace versionado deve conter somente o harness.'
-Set-Content (Join-Path $app 'pom.xml') '<project/>'
+Assert ($starter.settings.'files.exclude'.'**/.harness' -eq $false) 'Workspace inicial deve permitir navegar nas evidencias.'
 $workspace.folders += [pscustomobject]@{path=$app}
 Write-HarnessJson $path $workspace
 $context = Read-HarnessConfig $configPath $emptyRoot -WorkspacePath $path
