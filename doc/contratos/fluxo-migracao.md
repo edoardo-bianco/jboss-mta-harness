@@ -409,7 +409,7 @@ transformacao, comandos, testes e criterios. Ambiguidade relevante exige
 direcionamento antes de escrever. O mesmo preparo gera revisar-resultado,
 sem nova Run Task. Esse prompt somente le plano/tarefas e evidencias pertinentes;
 nao trata documentos do preparo como lock de andamento. Solicita logs/exit code do build, testes e
-JaCoCo, Sonar/MTA comparaveis e artefato/recibo/logs de deploy EAP 7.4 quando
+JaCoCo, Sonar/MTA comparaveis e artefato/ultimo deploy/logs EAP 7.4 quando
 possivel. Deriva roteiro funcional com precondicoes, dados, passos concretos,
 resultado esperado/observado, negativos e regressao; lacunas pedem direcionamento.
 Nao executa ferramentas nem escreve ou concede aceite. revisar-lote permanece

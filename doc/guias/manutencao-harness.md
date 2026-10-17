@@ -122,10 +122,10 @@ Para verificar uma corretiva da aplicacao, siga a
 JBoss: `tests/Test-Jboss.ps1`, `tests/Test-JbossRuntime.ps1`,
 `tests/Test-JbossWorkspace.ps1`, `tests/Test-JbossServerContext.ps1`,
 `tests/Test-JbossAllServers.ps1`, `tests/Test-JbossArtifacts.ps1`, `tests/Test-JbossAddUser.ps1` e
-`tests/Test-TaskInputs.ps1` verificam releases/rollback, identidade/estados,
+`tests/Test-TaskInputs.ps1` verificam deploy com substituicao e somente o ultimo, identidade/estados,
 timeouts, preservacao do workspace, tarefas separadas e controle sem aplicacao.
 Todos e validado via menu/CLI, incluindo falhas parciais, configuracao invalida,
-recibos por EAP e cancelamento. Descoberta cobre modulos, ambiguidade, ausencia de
+resultado por EAP e cancelamento. Descoberta cobre modulos, ambiguidade, ausencia de
 build, entrada manual e a entrada real do deploy com adaptadores ficticios.
 O teste de usuario usa assistente ficticio para conferir JDK 8, selecao da
 instalacao, restauracao do ambiente e propagacao de falhas; nao cria usuarios.
@@ -133,7 +133,7 @@ Operacoes de runtime sao simuladas; entradas reais usam cancelamento ou instalac
 ficticias para nao iniciar/parar servidores da maquina. Ensaio opt-in:
 `powershell.exe -NoProfile -File tests/Test-JbossReal.ps1 -RunReal -Eap eap74`
 (ou `eap71`). Usa base isolada em `.harness/tests`, HTTP 8280, gerenciamento 10190
-e debug 8790: start/JDWP, deploy v1/v2 com HTTP, rollback HTTP e stop. Exige as
+e debug 8790: start/JDWP, deploy v1/v2/v1 com substituicao confirmada por HTTP e stop. Exige as
 instalacoes locais configuradas e portas livres. Nao executa breakpoint no VS Code.
 
 Os demais testes PowerShell usam o executor isolado. Ele copia os arquivos

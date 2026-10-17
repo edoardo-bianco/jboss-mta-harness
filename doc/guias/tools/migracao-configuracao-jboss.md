@@ -81,7 +81,7 @@ nao houver evidencia suficiente.
    no contexto da aplicacao e retorne a
    [verificacao e aceite](../harness-migracao-desenvolvedor.md#7-verificar-e-aceitar-o-resultado).
 
-O rollback de deploy do harness restaura artefatos/releases, sem restaurar XML,
+O harness nao tem rollback de deploy: reverter e fazer deploy de um WAR anterior, sem restaurar XML,
 modulos, drivers ou dados do servidor. Migracao de dados persistidos exige
 tratamento proprio. No harness, backups temporarios indispensaveis seguem
 [AGENTS.md](../../../AGENTS.md); evidencias oficiais nao ficam nessa area de limpeza.

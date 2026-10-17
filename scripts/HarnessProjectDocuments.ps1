@@ -98,6 +98,8 @@ function Update-HarnessProjectDocuments {
         @('atual/planejamento/planejar-lotes.prompt.md','Orientacao do planejamento'),
         @('evidencias/LEIA-ME.md','Evidencias e anexos do projeto'),
         @('atual/build/console.log','Log da ultima tentativa de build'),
+        @('atual/jboss/eap71/ultimo-deploy.json','Ultimo deploy JBoss EAP 7.0/7.1'),
+        @('atual/jboss/eap74/ultimo-deploy.json','Ultimo deploy JBoss EAP 7.4'),
         @('atual/diagnosticos/mta-console.log','Log da ultima tentativa MTA'),
         @('atual/diagnosticos/mta-interno.log','Log interno da ultima tentativa MTA'),
         @('atual/diagnosticos/sonar/RESUMO.md','Relatorio Sonar atual'),

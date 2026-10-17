@@ -481,7 +481,7 @@ O estado funcional fica por projeto, com nomes estaveis e links pelos indices.
 | `.harness/backups-temporarios/<atividade>/` | Copias indispensaveis de exercicios; somente a opcao 3 limpa essa area. |
 | `.harness/workspace-backups/` | Backups automaticos do gerador, preservados pela limpeza corrente. |
 | `.harness/tests/` | Fixtures/resultados sinteticos dos testes. |
-| `.harness/jboss/` | Controle operacional dos servidores e releases de deploy; consulte [JBoss](jboss.md). |
+| `.harness/servidores/` | Ultima operacao e logs do ultimo start de cada servidor JBoss; o ultimo deploy fica no projeto. Consulte [JBoss](jboss.md). |
 | `%USERPROFILE%/.m2/repository` | Cache Maven padrao, fora do harness; sem cache duplicado. |
 
 Pastas antigas de execucoes podem permanecer ate uma transicao explicita.
@@ -515,7 +515,6 @@ Referencia de consulta; para escolher a operacao e a ordem, use o
 | [Servidor: consultar estado JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
 | [Servidor: criar usuario JBoss](jboss.md#console-administrativa-e-usuario-de-gerenciamento) | `gerenciar-jboss.ps1 -Action AddUser` (assistente oficial com JDK 8, sem selecao de aplicacao) |
 | [Aplicacao: deploy no JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
-| [Aplicacao: rollback no JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
 | [Aplicacao: preparar implementacao do lote](planejamento-migracao.md#preparar-implementacao-do-lote) | `preparar-implementacao.ps1` |
 | [**MTA: executar analise**](mta.md#uso) | **`executar-mta.ps1`** |
 | [**MTA: acompanhar log da analise**](mta.md#acompanhar-a-analise-mta) | **`acompanhar-log-mta.ps1 -SelectTarget`** |

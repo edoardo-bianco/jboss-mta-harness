@@ -2,8 +2,8 @@
 [CmdletBinding()]
 param([string]$ConfigPath,[string]$WorkspacePath,[string]$Target,[switch]$SelectTarget,
     [ValidateSet('eap71','eap74','all')][string]$Eap,
-    [ValidateSet('Status','Start','StartDebug','Deploy','Rollback','Stop','AddUser')][string]$Action,
-    [string]$ArtifactPath,[string]$DeploymentName,[string]$ReleaseId,[switch]$SelectStartMode)
+    [ValidateSet('Status','Start','StartDebug','Deploy','Stop','AddUser')][string]$Action,
+    [string]$ArtifactPath,[string]$DeploymentName,[switch]$SelectStartMode)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 try {
@@ -19,9 +19,9 @@ try {
         $Action=switch ($choice) {'1' {'Start'} '2' {'StartDebug'} default {throw 'Selecao cancelada.'}}
     }
     if (-not $Action) {
-        Write-Host '1. Estado | 2. Start | 3. Start com debug | 4. Deploy | 5. Rollback | 6. Stop | 7. Criar usuario'
+        Write-Host '1. Estado | 2. Start | 3. Start com debug | 4. Deploy | 5. Stop | 6. Criar usuario'
         $choice=Read-Host 'Acao (Enter/q cancela)'
-        $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Rollback'} '6' {'Stop'} '7' {'AddUser'} default {throw 'Selecao cancelada.'}}
+        $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Stop'} '6' {'AddUser'} default {throw 'Selecao cancelada.'}}
     }
     $serverAction=$Action -in @('Status','Start','StartDebug','Stop')
     if (-not $Eap) {
@@ -31,12 +31,12 @@ try {
         $Eap=switch ($choice) {'1' {'eap71'} '2' {'eap74'} '3' {if ($serverAction) {'all'} else {throw 'Selecao cancelada.'}} default {throw 'Selecao cancelada.'}}
     }
     if ($Eap -eq 'all' -and -not $serverAction) { throw 'Todos so se aplica a iniciar, parar e consultar estado do servidor.' }
-    if ($Action -in @('Deploy','Rollback')) {
+    if ($Action -eq 'Deploy') {
         $context=Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:($SelectTarget -or -not $Target)
         if (-not $context.Active) { throw 'Escolha o projeto com -SelectTarget ou -Target.' }
         Write-Host "Projeto: $($context.Active.label) | Source: $($context.Active.path)"
     } else {
-        if ($ArtifactPath -or $DeploymentName -or $ReleaseId) { throw 'Argumentos de release so se aplicam a deploy/rollback.' }
+        if ($ArtifactPath -or $DeploymentName) { throw 'Artefato e nome do deployment so se aplicam a deploy.' }
         $context=Read-HarnessJbossContext $ConfigPath $root
     }
     if ($serverAction) {
@@ -77,35 +77,20 @@ try {
         Write-Host 'Assistente encerrado. Se confirmou a criacao de Management User, confira o login na console com o servidor ativo.'
         exit 0
     }
-    if ($Action -in @('Deploy','Rollback')) {
-        if ($Action -eq 'Deploy') {
-            if (-not $ArtifactPath) {
-                Import-Module (Join-Path $PSScriptRoot 'HarnessJbossArtifacts.psm1') -DisableNameChecking
-                $ArtifactPath=Select-HarnessJbossArtifact $context.Active.path
-            }
-            if (-not $ArtifactPath) { throw 'Selecao cancelada.' }
-            $ArtifactPath=Resolve-HarnessPath $ArtifactPath $root
-            if (-not $DeploymentName) {
-                $suggested=[IO.Path]::GetFileName($ArtifactPath)
-                $DeploymentName=Read-Host "Nome estavel do deployment (Enter usa $suggested)"
-                if (-not $DeploymentName) { $DeploymentName=$suggested }
-            }
-            Write-Host "Deploy: $ArtifactPath -> $DeploymentName | SHA256: $((Get-FileHash -LiteralPath $ArtifactPath -Algorithm SHA256).Hash)"
-        } else {
-            if (-not $DeploymentName) { $DeploymentName=Read-Host 'Nome do deployment, incluindo .war/.ear (Enter cancela)' }
-            if (-not $DeploymentName) { throw 'Selecao cancelada.' }
-            if (-not $ReleaseId) {
-                $releases=@(Get-HarnessJbossReleases $context $server $DeploymentName | Sort-Object StartedAtUtc -Descending)
-                if (-not $releases.Count) { throw 'Nenhuma release gerenciada disponivel para este projeto/EAP/nome.' }
-                for ($i=0;$i -lt $releases.Count;$i++) { Write-Host ("{0}. {1} | {2} | SHA256 {3}" -f ($i+1),$releases[$i].RunId,$releases[$i].StartedAtUtc,$releases[$i].Sha256) }
-                $choice=Read-Host 'Release a restaurar (Enter/q cancela)'
-                $number=0
-                if (-not [int]::TryParse($choice,[ref]$number) -or $number -lt 1 -or $number -gt $releases.Count) { throw 'Selecao cancelada.' }
-                $ReleaseId=$releases[$number-1].RunId
-            }
-        }
-        $result=Invoke-HarnessJbossRelease $context $server $Action -ArtifactPath $ArtifactPath -DeploymentName $DeploymentName -ReleaseId $ReleaseId
+    if (-not $ArtifactPath) {
+        Import-Module (Join-Path $PSScriptRoot 'HarnessJbossArtifacts.psm1') -DisableNameChecking
+        $ArtifactPath=Select-HarnessJbossArtifact $context.Active.path
     }
+    if (-not $ArtifactPath) { throw 'Selecao cancelada.' }
+    $ArtifactPath=Resolve-HarnessPath $ArtifactPath $root
+    if (-not $DeploymentName) {
+        $suggested=[IO.Path]::GetFileName($ArtifactPath)
+        $DeploymentName=Read-Host "Nome estavel do deployment (Enter usa $suggested)"
+        if (-not $DeploymentName) { $DeploymentName=$suggested }
+    }
+    Write-Host "Deploy: $ArtifactPath -> $DeploymentName | SHA256: $((Get-FileHash -LiteralPath $ArtifactPath -Algorithm SHA256).Hash)"
+    Write-Host 'O deploy substitui o WAR/EAR implantado com este nome, inclusive se implantado fora do harness. Guarda somente o ultimo deploy.'
+    $result=Invoke-HarnessJbossDeploy $context $server -ArtifactPath $ArtifactPath -DeploymentName $DeploymentName
     $result | ConvertTo-Json -Depth 8 | Write-Host
     if ($result.Status -ne 'SUCCEEDED') { exit 1 }
     exit 0
