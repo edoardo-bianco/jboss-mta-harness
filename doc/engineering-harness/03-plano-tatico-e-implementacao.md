@@ -459,7 +459,7 @@ Foram verificados os três arquivos Markdown finais, com os seguintes resultados
 | --- | --- |
 | Definição central | Preservada literalmente, em uma única ocorrência canônica no conjunto. |
 | Links internos | 76 referências locais verificadas, incluindo arquivos de destino e âncoras; nenhuma referência inválida encontrada. |
-| Fontes externas | 32 URLs distintas no catálogo: nove referências ao repositório e 23 fontes oficiais ou primárias. As duas especificações da Biblioteca têm origem e data identificadas, sem URL GitHub inventada. O teste de links internos não é uma certificação de disponibilidade futura dessas páginas. |
+| Fontes externas | 32 URLs distintas no catálogo: nove referências ao repositório e 23 fontes oficiais ou primárias. Na revisão de 16/10, as duas especificações da simplificação foram identificadas por origem e data, sem URL GitHub inventada; desde 17/10, S1 e S2 apontam para o repositório. O teste de links internos não é uma certificação de disponibilidade futura dessas páginas. |
 | Exemplos JSON | Cinco blocos analisados sintaticamente, sem erro. São exemplos de design, não um SDK executável. |
 | Esquema de entrada do build | Sete casos conferidos com validador JSON Schema Draft 2020-12: fases permitidas aceitas; campo ausente, tipo incorreto, fase não permitida, texto de comando e propriedade livre rejeitados. |
 | Markdown | Blocos de código balanceados e nenhuma marca de preenchimento pendente identificada. |
