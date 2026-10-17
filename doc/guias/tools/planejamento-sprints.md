@@ -224,7 +224,7 @@ Nao e necessario interpretar hashes ou IDs de execucao. A operacao automatizada
 usa o contexto preparado e os dados editaveis do cenario escolhido.
 
 Leia o JSON inicial, WorkTemplate/StaffingTemplate e o
-[contrato dos dados](../../especificacoes/planejamento-sprints.md).
+[contrato dos dados](../../contratos/planejamento-sprints.md).
 Work registra macroatividades, estimativas restantes, dependencias, fase,
 prioridade, fontes, confianca, premissas e aceite; Team registra disponibilidade;
 Constraints registra restricoes humanas. Dados ausentes ficam a estimar.

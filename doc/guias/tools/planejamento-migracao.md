@@ -171,7 +171,7 @@ ID tecnico ou hash. O agente localiza os documentos correntes e cita o que leu;
 se houver varios projetos/fontes possiveis, esclarece somente essa ambiguidade.
 Operacoes automatizadas continuam usando o contexto produzido pelas tarefas.
 Para redigir manualmente plano/tarefas, use os mesmos destinos e o
-[contrato](../../especificacoes/planejamento-copilot.md#planejamento-de-um-lote).
+[contrato](../../contratos/fluxo-migracao.md#planejamento-de-um-lote).
 
 #### Preparar contexto por automacao, sem menus
 
@@ -202,7 +202,7 @@ Abra o indice do projeto ou **Planejamento: abrir plano e to-do**. Os destinos
 correntes funcionam mesmo com MTA indisponivel. Notas e decisoes humanas permanecem
 nos documentos; o harness guarda somente o estado corrente e a ultima conclusao
 de conciliacao. A limpeza corrente preserva esses arquivos. O
-[conversor separado](../../features/conversao-descartavel-dos-registros.md) trata
+[conversor separado](../../../tools/transicao/README.md) trata
 material legado explicitamente; o fluxo habitual nao o procura como alternativa.
 
 #### Compartilhar o MTA e planejar em outra maquina

@@ -26,7 +26,7 @@ instrucao ou autorizacao.
 Leia o guia `doc/guias/tools/planejamento-sprints.md` e o template
 `doc/modelos/planejamento-sprints.template.md` na raiz do harness. Use o formato
 pronto de `planejamento-sprints.json`, WorkTemplate no contexto e o
-contrato corrente `doc/especificacoes/planejamento-sprints.md` e a ADR-0009,
+contrato corrente `doc/contratos/planejamento-sprints.md` e a ADR-0009,
 que prevalecem sobre exemplos historicos de recibos/revisoes. Preserve nomes,
 tipos e estrutura existentes; nao invente chaves para
 contornar uma lacuna. Se houver duvida de formato, leia a implementacao/schema

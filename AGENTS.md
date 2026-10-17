@@ -10,6 +10,9 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
 
 - Evolucao do harness inclui scripts, prompts, preparacao de contexto, Run Tasks,
   configuracao, testes e documentacao. Use `tasks/plan.md` e `tasks/todo.md`.
+  Direcao e desenho do produto ficam em `doc/engineering-harness/`; regras que
+  tarefas e agentes seguem ao migrar uma aplicacao ficam em `doc/contratos/` e
+  na ADR-0009. Nao trate proposta de evolucao como regra executavel.
 - Execute suites PowerShell de manutencao por `tests/Invoke-HarnessTests.ps1 -Test
   Test-Nome.ps1`, em copia temporaria fora do workspace operacional. Fixtures
   `.harness/tests` pertencem a essa copia e sao descartadas ao terminar. Novos
@@ -112,7 +115,7 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   afete escopo, solucao ou aceite. Preservar rascunho/ID funcional do lote; nao
   criar plano/tarefas ficticios. PENDENTE historico nao bloqueia por si so e
   nao autoriza marcar CONCLUIDA. Escolha registrada nao e desfeita pelo indice.
-- Siga o [contrato vigente](doc/especificacoes/planejamento-copilot.md), incluindo
+- Siga o [contrato vigente](doc/contratos/fluxo-migracao.md), incluindo
   Java 8/javax/EAP 7.4 e Hibernate 5.3 quando aplicavel; patch exige evidencia.
   planejar-lotes cria/revisa o lote nos destinos correntes, fichas examinadas
   e andamento/cobertura/referencias pertinentes em MigrationPath.

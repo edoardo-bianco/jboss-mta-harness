@@ -154,5 +154,5 @@ resultados e vinculos entre rodadas para nao perder pendencias. Os dois pontos d
 revisao humana por lote impedem tratar sucesso tecnico como aceite automatico.
 
 Esta decisao complementa a [ADR-0001](0001-contexto-copilot.md). O contrato de
-preparacao esta na [especificacao](../especificacoes/planejamento-copilot.md), e
+preparacao esta na [especificacao](../contratos/fluxo-migracao.md), e
 as instrucoes operacionais estao no [prompt](../../.github/prompts/planejar-lotes.prompt.md).

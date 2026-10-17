@@ -7,7 +7,7 @@ EVIDENCIAS. Nao exigem Java, Maven, JBoss ou uma nova execucao MTA.
 
 As tres operacoes sao somente leitura. Nao geram contexto, ranking, ficha, plano
 ou to-do, nao mudam decisoes e nao registram exame, GO ou aceite.
-O [contrato](../../especificacoes/consultas-issues.md) detalha entradas e limites.
+O [contrato](../../contratos/consultas-issues.md) detalha entradas e limites.
 
 ## Escolher o contexto
 

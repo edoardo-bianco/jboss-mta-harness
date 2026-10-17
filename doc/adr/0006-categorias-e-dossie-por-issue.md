@@ -51,6 +51,6 @@ dossies por issue. Novos anexos exigem novo preparo com Previous, sem apagar o
 anterior. Criar/revisar recortes MTA ainda exige a origem registrada; lacunas e
 comparacao MTA posterior permanecem explicitas.
 
-O contrato operacional esta em [planejamento-copilot](../especificacoes/planejamento-copilot.md).
+O contrato operacional esta em [fluxo de migracao](../contratos/fluxo-migracao.md).
 O [guia](../guias/tools/planejamento-migracao.md#dossie-por-issue-e-passagem-entre-colegas)
 explica a passagem entre colegas. Esta decisao complementa as ADRs 0002, 0004 e 0005.

@@ -3,9 +3,16 @@
 Status: proposta para revisão do desenvolvedor; não implementada por esta entrega.
 Data: 2026-10-09.
 
+Refinamento em 17/10/2026: a direcao desta proposta foi consolidada e refinada em
+[Engineering Harness](../engineering-harness/01-estrategia-e-arquitetura.md),
+[system design](../engineering-harness/02-system-design.md) e
+[plano tatico](../engineering-harness/03-plano-tatico-e-implementacao.md). Esta ADR
+permanece como registro historico da decisao proposta; em caso de divergencia,
+prevalece o conjunto consolidado, sem tratar requisito antigo como vigente.
+
 Complemento de prioridade em 10/10/2026: por decisão do desenvolvedor, a
-[simplificação por projeto](../features/organizacao-simplificada-por-projeto.md),
-com [conversão descartável](../features/conversao-descartavel-dos-registros.md),
+[simplificação por projeto](../engineering-harness/02-system-design.md#estado-local),
+com [conversão descartável](../../tools/transicao/README.md),
 limpeza e guias/orientador alinhados, antecede esta modernização e qualquer nova
 funcionalidade. O [plano](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10)
 registra a viabilidade e a retirada de recibos/rastreamentos como requisito.
@@ -18,7 +25,7 @@ O harness JBoss reúne automação, contexto e evidências, mas concentra config
 tecnológica e interação Windows/VS Code. A evolução solicitada precisa atender
 outros objetivos e perfis, manter operação humana e agentes selecionáveis e
 reduzir acoplamento a IDE, cliente de IA e analisador Java. A
-[arquitetura consolidada](../arquitetura/arquitetura-harness.md) registra baseline,
+[arquitetura consolidada](../engineering-harness/01-estrategia-e-arquitetura.md) registra baseline,
 matriz funcional, alternativas, fontes e critérios de verificação.
 
 ## Decisão proposta
@@ -72,7 +79,7 @@ atuais, operação fora de IDE e IA, configuração v1 preservada, segundo perfi
 vazamento tecnológico para o núcleo, indexação Java 8 com limites explícitos e
 ensaios dos clientes. O planejamento de sprints foi integrado na main pela
 [PR #26](https://github.com/edoardo-bianco/jboss-mta-harness/pull/26), em 17f80c2.
-Seu [contrato determinístico](../especificacoes/planejamento-sprints.md) e o
+Seu [contrato determinístico](../contratos/planejamento-sprints.md) e o
 [guia de uso](../guias/tools/planejamento-sprints.md) compõem a base operacional;
 homologação corporativa permanece distinta dessa integração. A proposta de
 núcleo e perfis desta ADR continua sem implementação.

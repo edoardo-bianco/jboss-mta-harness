@@ -2,7 +2,7 @@
 Import-Module (Join-Path $root 'scripts/HarnessSprintPlanning.psm1') -Force -DisableNameChecking
 function New-SprintFixture([string[]]$Names=@('a')) {
     $f=New-PlanningFixture 2 $Names
-    foreach ($relative in @('.github/prompts/planejar-sprints.prompt.md','.github/prompts/revisar-sprints.prompt.md','doc/modelos/planejamento-sprints.template.md','doc/features/planejamento-macro-sprints.md','doc/especificacoes/planejamento-sprints.md','doc/guias/tools/planejamento-sprints.md')) {
+    foreach ($relative in @('.github/prompts/planejar-sprints.prompt.md','.github/prompts/revisar-sprints.prompt.md','doc/modelos/planejamento-sprints.template.md','doc/contratos/planejamento-sprints.md','doc/guias/tools/planejamento-sprints.md')) {
         $destination=Join-Path $f.Root $relative
         $null=[IO.Directory]::CreateDirectory((Split-Path $destination -Parent))
         Copy-Item -LiteralPath (Join-Path $root $relative) -Destination $destination

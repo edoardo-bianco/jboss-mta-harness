@@ -18,7 +18,7 @@ lotes de corretivas que possam ser revisados, implementados e verificados,
 mantendo prioridades, cobertura e pendencias visiveis. O desenvolvedor define
 o escopo, autoriza a implementacao e aceita o resultado.
 
-A base atual atende a migracao de **JBoss EAP 7.1 para EAP 7.4, preservando
+A base atual atende a migracao de **JBoss EAP 7.0 ou 7.1 para EAP 7.4, preservando
 Java 8 e `javax.*`**. O repositorio inclui scripts, tarefas, configuracao,
 prompts e guias. Aplicacoes, incluindo playgrounds de ensaio, ficam em pastas
 externas ao harness. O workspace inicial contem somente o harness; adicione os
@@ -36,17 +36,17 @@ A evolucao proposta e aproveitar essa base em outras tecnologias e etapas do
 ciclo de desenvolvimento, incluindo modernizacao. Um nucleo comum, plugins
 tecnologicos e adaptadores de IA e IDE sao o caminho estudado; Quarkus, IntelliJ
 e engines alternativos dependem de implementacao e pilotos.
-A [estrategia do harness](doc/estrategia/estrategia-harness_.md) distingue
+A [estrategia do harness](doc/engineering-harness/01-estrategia-e-arquitetura.md) distingue
 as capacidades existentes das propostas e seus criterios de avanco.
 
-O [catalogo de dominios e capacidades](doc/features/evolucao-harness-dominios-capacidades-priorizacao.md)
-detalha propostas futuras. A [conciliacao com o backlog](doc/estrategia/conciliacao-evolucao-harness.md)
+O [catalogo de dominios e capacidades](doc/engineering-harness/03-plano-tatico-e-implementacao.md#anexo-a)
+detalha propostas futuras. A [conciliacao com o backlog](doc/engineering-harness/03-plano-tatico-e-implementacao.md)
 identifica sobreposicoes, entregas ja atendidas e pendencias preservadas;
 as prioridades relativas e pilotos posteriores permanecem a definir.
 
 **Prioridade definida em 10/10/2026:** concluir a
-[simplificacao por projeto](doc/features/organizacao-simplificada-por-projeto.md)
-e a [transicao dos registros](doc/features/conversao-descartavel-dos-registros.md)
+[simplificacao por projeto](doc/engineering-harness/02-system-design.md#estado-local)
+e a [transicao dos registros](tools/transicao/README.md)
 antes da modernizacao e de novas funcionalidades. O objetivo e retirar recibos e
 rastreamentos por execucao, usar caminhos fixos e oferecer links diretos das fichas
 para suas fontes. A entrega inclui limpeza e alinhamento dos guias e do orientador.
@@ -56,7 +56,7 @@ regressao integrada e aceite humano sao acompanhados separadamente no
 [checklist](tasks/historico/todo-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
 Nenhum dado real foi convertido ou limpo nesta entrega.
 
-A [arquitetura do Engineering Harness](doc/arquitetura/arquitetura-harness.md)
+A [arquitetura do Engineering Harness](doc/engineering-harness/01-estrategia-e-arquitetura.md)
 consolida a base implementada e propoe a evolucao por nucleo, perfis e capacidades,
 com matriz das Run Tasks, escolha de plataforma e indexacao Java independente de IDE.
 As novas decisoes estao em revisao na [ADR-0008](doc/adr/0008-nucleo-perfis-e-plataforma-do-harness.md).
@@ -117,7 +117,7 @@ resultados correntes, sem IDs de execucao ou hashes. Os guias em `doc/` servem
 como base local para busca/leitura do agente; RAG semantico nao esta implementado.
 
 Para contribuir com a evolucao do harness, consulte [AGENTS.md](AGENTS.md) e as
-[decisoes arquiteturais](doc/adr/). O [contrato de planejamento](doc/especificacoes/planejamento-copilot.md)
+[decisoes arquiteturais](doc/adr/). O [contrato de planejamento](doc/contratos/fluxo-migracao.md)
 define os limites do trabalho assistido e os registros de cada etapa.
 
 ## Licenca

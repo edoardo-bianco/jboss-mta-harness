@@ -48,7 +48,7 @@ relate apenas chamadas reais. Skill aplicada nao comprova delegacao.
    nao proposta concluida. Nao exigir IA para redacao manual nesses destinos.
    Consulte reconciliado/resultado.md quando existir; sua mera presenca nao
    comprova comparacao ou resolucao. Sem conclusao, planejamento e preliminar.
-5. Leia o [contrato vigente](../../../doc/especificacoes/planejamento-copilot.md)
+5. Leia o [contrato vigente](../../../doc/contratos/fluxo-migracao.md)
    e o prompt para explicar o uso; isso nao autoriza executa-lo. Contexto e
    mutavel, sem recibos/cadeias. NeedsReview aponta mudancas conhecidas; releia
    codigo/evidencias mesmo com caminhos iguais. Nao afirmar equivalencia por
