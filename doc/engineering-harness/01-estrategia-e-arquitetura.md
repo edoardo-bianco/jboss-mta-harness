@@ -170,11 +170,15 @@ O domínio da aplicação analisada continua pertencendo ao produto de negócio.
 
 ## 7. Perfis compõem; capacidades são reutilizadas
 
-| Perfil | Origem e destino | Plataforma Java | Situação |
+| Perfil | Objetivo e composição | Plataforma Java | Situação |
 | --- | --- | --- | --- |
-| Migração JBoss | EAP **7.0 ou 7.1** → EAP **7.4** | Java 8 e `javax.*` | Implementado; origem 7.0/7.1 atendida pela mesma instalação configurada. |
-| Quarkus | Versão de origem → versão de destino escolhida | **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus e o JDK homologado | Proposto. |
-| Modernização | Aplicação atual → arquitetura e tecnologia definidas pela análise | Conforme o destino | Proposto; candidato GitHub Copilot app modernization. |
+| Migração JBoss | EAP **7.0 ou 7.1** → EAP **7.4**: MTA ou evidências, Maven, Sonar e continuidade por issue. | Java 8 e `javax.*` | Implementado; origem 7.0/7.1 atendida pela mesma instalação configurada. |
+| Desenvolvimento Quarkus | **SDLC sem migração**: defeitos e melhorias em aplicação Quarkus, com JDK/BOM/extensões, build/testes, modo de desenvolvimento e procedimentos de entrega do projeto. | **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus e o JDK homologado | Proposto; primeiro piloto de SDLC. |
+| Migração Quarkus | Par origem/destino de versões Quarkus, guias e receitas aplicáveis, comparação e revisão das alterações. | Java 17+, incluindo 25 | Proposto. |
+| Cobertura de código | Capacidade **transversal** que compõe com JBoss ou Quarkus: coleta e interpretação de cobertura, separando testes unitários, de integração e recorte medido, sem duplicar os adaptadores Maven/JaCoCo. | Conforme o perfil composto | Proposto; a política JaCoCo do recorte JBoss não vira regra universal. |
+| Modernização | Aplicação atual → arquitetura e tecnologia definidas pela análise. | Conforme o destino | Proposto; candidato GitHub Copilot app modernization. |
+
+Perfis não são novos bounded contexts automaticamente: `quarkus-desenvolvimento` e `quarkus-migracao` reutilizam as mesmas capacidades, mas selecionam procedimentos e critérios diferentes. O SDLC cotidiano também se aplica a aplicações JBoss fora do lote de migração, usando o mesmo núcleo com objetivo próprio.
 
 **Java 8 é restrição do perfil JBoss, não do núcleo.** Uma capacidade de build atende JBoss e Quarkus com instalações Java diferentes; o núcleo recebe o ambiente resolvido e não contém `if JBoss` para impor Java 8 a todos os projetos. Runtimes de ferramentas também são distintos do runtime da aplicação: o JDT Language Server, por exemplo, exige um JDK moderno mesmo ao analisar projetos Java 8.
 

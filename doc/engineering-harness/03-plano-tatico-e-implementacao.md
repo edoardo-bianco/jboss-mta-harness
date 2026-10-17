@@ -192,7 +192,11 @@ São dois pilotos separáveis.
 
 **Piloto de agente:** escolher uma CLI programática realmente aprovada — candidato inicial `claude -p` — e testar autenticação, permissões, efeitos, retorno, interrupção e rede. Uma falha não dispara outro cliente automaticamente. Manter entrega assistida como modo de operação quando a automação não estiver disponível; GitHub Copilot pela IDE continua caminho de referência.
 
-**Piloto de perfil Quarkus:** reutilizar a capacidade de build e o mesmo fluxo em um recorte Quarkus, com **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus. Candidatos de ferramenta: CLI Quarkus para extensões, build e modo de desenvolvimento; testes da aplicação e do artefato (`@QuarkusIntegrationTest`); atualização por OpenRewrite, documentada como experimental e parcial, executada somente na etapa autorizada de alteração. A equivalência precisa ser demonstrada no projeto escolhido. [O23](#fonte-o23) [O33](#fonte-o33)
+**Piloto de SDLC Quarkus (perfil Desenvolvimento Quarkus):** conduzir **um defeito ou uma melhoria fora de qualquer migração**, com **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus. O mesmo núcleo deve relacionar demanda, decisão, alteração e validação, reutilizando a capacidade de build e as ferramentas do projeto: CLI Quarkus para extensões, build e modo de desenvolvimento; testes da aplicação e do artefato (`@QuarkusIntegrationTest`). Aceite: nenhum pré-requisito de MTA, Java 8 ou `javax` no fluxo. [O23](#fonte-o23)
+
+**Piloto de Migração Quarkus:** posterior ao piloto de SDLC; acrescenta par origem/destino de versões, guias e atualização por OpenRewrite, documentada como experimental e parcial e executada somente na etapa autorizada de alteração. A equivalência precisa ser demonstrada no projeto escolhido. [O33](#fonte-o33)
+
+**Cobertura de código:** compor a capacidade transversal com um dos perfis acima (JBoss ou Quarkus), separando testes unitários, de integração e recorte medido; não duplicar os adaptadores Maven/JaCoCo nem tornar a política JaCoCo do recorte JBoss universal.
 
 **Piloto de perfil de modernização:** avaliar o GitHub Copilot app modernization em um recorte delimitado, comparando o plano gerado com o contrato do harness (proposta → GO → execução → verificação → aceite) e registrando o que foi alterado por receita e por agente. [O27](#fonte-o27)
 
@@ -494,6 +498,7 @@ Auditoria feita no repositório, com conferência do código da `main` `5c8d582`
 | A17 — Java 8 tratado como geral | Restrito ao perfil JBoss; Quarkus com Java 17+, incluindo 25. |
 | A18 — Origem EAP divergente | Perfil JBoss atende 7.0 ou 7.1. |
 | A19 — Fundamentos e catálogo fora do conjunto | Origem e fundamentos no documento 1, seção 2; catálogo no anexo A. |
+| A20 — Perfis previstos reduzidos a um "Quarkus" genérico | Restaurados os perfis da arquitetura anterior: Desenvolvimento Quarkus (SDLC sem migração), Migração Quarkus e Cobertura de código transversal (documento 1, seção 7; incremento F). |
 
 Fontes verificadas nesta revisão: O8 (revisão 2026-07-28 do transporte `stdio`), O13, O15 (PowerShell 6+), O24–O27.
 
