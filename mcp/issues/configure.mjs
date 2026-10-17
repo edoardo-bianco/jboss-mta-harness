@@ -19,7 +19,8 @@ export function configureClients(root,nodePath) {
   const config=path.join(root,'config/mcp.local.json');
   const codex=path.join(root,'.codex/config.toml');
   const vscode=path.join(root,'.vscode/mcp.json');
-  for (const file of [config,codex,vscode]) assertNoLinks(file);
+  const claude=path.join(root,'.mcp.json');
+  for (const file of [config,codex,vscode,claude]) assertNoLinks(file);
   const server={type:'stdio',command:nodePath,args:[entry],env:{HARNESS_MCP_CONFIG:config}};
   const section='\n[mcp_servers.harnessIssues]\n'+
     `command = ${JSON.stringify(nodePath)}\nargs = [${JSON.stringify(entry)}]\n`+
@@ -42,18 +43,28 @@ export function configureClients(root,nodePath) {
     throw new Error('harnessIssues ja configurado no VS Code com valores diferentes; revise a entrada existente.');
   }
   json.servers.harnessIssues=server;
+  // Claude Code le servidores do projeto em .mcp.json (chave mcpServers).
+  const claudeJson=existsSync(claude) ? JSON.parse(readFileSync(claude,'utf8').replace(/^\uFEFF/,'')) : {};
+  if (!claudeJson || Array.isArray(claudeJson) || typeof claudeJson!=='object' || (claudeJson.mcpServers && (typeof claudeJson.mcpServers!=='object' || Array.isArray(claudeJson.mcpServers)))) {
+    throw new Error('.mcp.json exige objeto mcpServers. Arquivo preservado.');
+  }
+  claudeJson.mcpServers ??= {};
+  if (claudeJson.mcpServers.harnessIssues && !isDeepStrictEqual(claudeJson.mcpServers.harnessIssues,server)) {
+    throw new Error('harnessIssues ja configurado no Claude Code com valores diferentes; revise a entrada existente.');
+  }
+  claudeJson.mcpServers.harnessIssues=server;
   const settings=existsSync(config) ? JSON.parse(readFileSync(config,'utf8').replace(/^\uFEFF/,'')) : {allowedRoots:['.'],timeoutMs:60000};
   for (const [field,file] of [['workspacePath','jboss-mta-harness.local.code-workspace'],['harnessConfigPath','config/harness.local.json']]) {
     if (settings[field] === undefined && existsSync(path.join(root,file))) settings[field]=file;
   }
   const resolved=resolveSettings(settings,root);
-  const outputs=[[codex,newCodex],[vscode,JSON.stringify(json,null,2)+'\n'],[config,JSON.stringify(settings,null,2)+'\n']];
+  const outputs=[[codex,newCodex],[vscode,JSON.stringify(json,null,2)+'\n'],[claude,JSON.stringify(claudeJson,null,2)+'\n'],[config,JSON.stringify(settings,null,2)+'\n']];
   // Todos os conflitos sao detectados antes da primeira gravacao.
   for (const [file,content] of outputs) {
     mkdirSync(path.dirname(file),{recursive:true});
     if (!existsSync(file) || readFileSync(file,'utf8')!==content) writeFileSync(file,content,'utf8');
   }
-  return {codex,vscode,config,nodePath,workspacePath:resolved.workspacePath ?? null,harnessConfigPath:resolved.harnessConfigPath ?? null};
+  return {codex,vscode,claude,config,nodePath,workspacePath:resolved.workspacePath ?? null,harnessConfigPath:resolved.harnessConfigPath ?? null};
 }
 
 if (process.argv[1] && path.resolve(process.argv[1])===fileURLToPath(import.meta.url)) {

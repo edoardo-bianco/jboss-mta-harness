@@ -5,7 +5,7 @@ html:
   offline: true
 ---
 
-# Orientacao da migracao com Codex ou GitHub Copilot
+# Orientacao da migracao com Claude Code, Codex ou GitHub Copilot
 
 [Voltar ao fluxo do desenvolvedor](harness-migracao-desenvolvedor.md#roteiro-onde-estou-e-o-que-escolho).
 
@@ -43,14 +43,17 @@ Navegacao: [configuracao](#configuracao) · [iniciar](#iniciar-no-codex-ou-no-co
 
 Abra o workspace que inclui a pasta do harness e os projetos desejados. A
 [configuracao da maquina e do workspace](tools/workspace.md#configuracao) fica no
-guia proprio. No Codex, inicie a conversa com a raiz do harness como pasta de
-trabalho: uma aplicacao em repositorio irmao nao herda automaticamente suas skills.
+guia proprio. No Claude Code e no Codex, inicie a conversa com a raiz do harness
+como pasta de trabalho: uma aplicacao em repositorio irmao nao herda
+automaticamente suas skills e helpers.
 
 As instrucoes ficam em `.agents/skills` no repositorio, local reconhecido por
 [Codex](https://learn.chatgpt.com/docs/build-skills) e
 [Copilot no VS Code](https://code.visualstudio.com/docs/agent-customization/agent-skills).
-A descoberta depende do cliente e da pasta aberta. Nao e necessario regenerar
-o workspace para acrescentar a skill.
+No [Claude Code](https://code.claude.com/docs/en/skills), a descoberta usa
+`.claude/skills/orientar-migracao/SKILL.md`, um ponteiro para a mesma skill comum,
+sem regras proprias. A descoberta depende do cliente e da pasta aberta. Nao e
+necessario regenerar o workspace para acrescentar a skill.
 
 O helper tambem orienta a [instalacao do Node em pasta fixa e configuracao MCP](tools/consultas-issues.md#instalar-node-em-pasta-fixa).
 Informe a versao atual, pasta escolhida e etapa ja realizada; veja a
@@ -67,7 +70,9 @@ Ele informa a fonte e a proxima acao, sem instalar certificados ou ferramentas.
 
 Confira os arquivos no clone e se as customizacoes estao habilitadas no cliente.
 No Copilot, consulte **/skills** e a lista de agentes; no Codex, reinicie o cliente
-se a descoberta nao refletir os novos arquivos. Sem descoberta automatica, pode
+se a descoberta nao refletir os novos arquivos. No Claude Code, **/agents** lista os
+helpers e a skill aparece entre as disponiveis; inicie nova sessao depois de
+atualizar os arquivos. Sem descoberta automatica, pode
 referenciar o SKILL.md pelo caminho e pedir que o cliente leia e aplique suas
 instrucoes; isso nao comprova a integracao nativa.
 
@@ -101,15 +106,18 @@ primeiro recurso. Sem apoio compativel, o condutor pode continuar diretamente
 conforme o prompt e suas ferramentas; informe a limitacao. Helpers permanecem
 leitores. Falta de ferramenta essencial deve ser resolvida explicitamente.
 
-### Iniciar no Codex ou no Copilot
+<a id="iniciar-no-codex-ou-no-copilot"></a>
+
+### Iniciar no Claude Code, Codex ou Copilot
 
 | Cliente | Como entrar na orientacao |
 | --- | --- |
 | Codex | Selecione **$orientar-migracao** no chat. Ela assume o papel de orquestrador helper. |
 | GitHub Copilot | Abra a lista de agentes do Chat e selecione **migracao_helper**. A skill tambem pode ser usada por **/orientar-migracao**. |
+| Claude Code | No terminal da raiz do harness, inicie `claude --agent migracao_helper`: a conversa inteira assume o helper. Numa conversa normal, peca "Use o subagente migracao_helper para me orientar" ou use **/orientar-migracao**. |
 
 Depois envie o objetivo. Os exemplos dos guias usam `projeto X`: substitua pelo
-seu projeto. A mesma mensagem serve nos dois clientes, apos selecionar a entrada
+seu projeto. A mesma mensagem serve nos tres clientes, apos selecionar a entrada
 acima; ela e um pedido no chat, nao um comando de terminal.
 
 ```text
@@ -140,6 +148,10 @@ Quando a tarefa preparar um prompt:
   ser retomada depois com o resultado.
 - **Copilot:** abra o prompt preparado e use **Executar Prompt**, com o agente
   indicado e DevSquad nas fases pertinentes, em conversa Local.
+- **Claude Code:** abra uma conversa normal (`claude`, sem `--agent migracao_helper`)
+  na raiz do harness e envie `Leia e execute o prompt deste arquivo:` seguido do
+  caminho fornecido. O campo `agent:` do prompt pertence ao Copilot e nao seleciona
+  perfil no Claude Code; as permissoes sao as da sessao.
 
 A execucao desse prompt e uma etapa distinta da orientacao; helpers continuam
 leitores. Preparar o contexto nao executa o agente. Para o agente salvar o ranking
@@ -231,18 +243,24 @@ consulta somente o helper pertinente; voce tambem pode pedir apoio especializado
 | migracao_implementacao_helper | Orientar pendencias autorizadas, build, debug, testes e aceite. |
 
 No Copilot, os perfis ficam em `.github/agents`; escolha o helper na lista de
-agentes. No Codex, `.codex/agents` fornece perfis para subagentes. Para solicitar
+agentes. No Codex, `.codex/agents` fornece perfis para subagentes. No Claude Code,
+`.claude/agents` fornece os mesmos seis helpers. Para solicitar
 delegacao, diga "Use o subagente migracao_helper para me orientar", quando o perfil
 estiver disponivel. `$` seleciona uma skill, nao comprova chamada de subagente.
 Mencionar/anexar `.agent.md` ou `.toml` fornece um arquivo, sem selecionar o agente.
 O cliente deve mostrar a delegacao real quando ocorrer.
 
-As duas entradas usam a mesma skill e sua referencia de papeis. Formatos:
-[agentes VS Code](https://code.visualstudio.com/docs/agent-customization/custom-agents)
-e [subagentes Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents).
+As tres entradas usam a mesma skill e sua referencia de papeis. Formatos:
+[agentes VS Code](https://code.visualstudio.com/docs/agent-customization/custom-agents),
+[subagentes Codex](https://learn.chatgpt.com/docs/agent-configuration/subagents) e
+[subagentes Claude Code](https://code.claude.com/docs/en/sub-agents).
 Os perfis Copilot oferecem leitura/busca, com delegacao somente no orquestrador.
 Os perfis Codex pedem sandbox read-only e desabilitam subdelegacao dos especialistas;
-permissoes efetivas dependem da sessao. A skill isolada nao configura sandbox.
+permissoes efetivas dependem da sessao. Os perfis Claude Code liberam somente
+Read, Grep, Glob e as tres consultas MCP; o condutor delega pela ferramenta Agent.
+A lista de helpers permitidos e imposta pelo cliente quando iniciado com
+`claude --agent migracao_helper`; como subagente, vale pela instrucao do papel.
+A skill isolada nao configura sandbox.
 Confira as ferramentas/acoes exibidas pelo cliente.
 
 O apoio opcional `devsquad.plan` so e compativel com o helper quando seu perfil

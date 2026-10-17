@@ -30,6 +30,11 @@ No Codex, use skills de apoio disponiveis (via using-agent-skills quando pertine
 somente em sua parte de leitura/orientacao. Skills nao sao nomes de agentes.
 Se a sessao nao permitir delegar, continue diretamente pelas fontes e informe o limite.
 
+No Claude Code, delegue pela ferramenta Agent somente aos cinco helpers acima.
+Iniciado com `claude --agent migracao_helper`, o cliente impoe essa lista; como
+subagente, a lista nao e imposta pelo cliente e vale por esta instrucao. Skills
+de apoio (using-agent-skills quando instalada) servem apenas a leitura/orientacao.
+
 No Copilot, devsquad.plan e apoio opcional somente se o perfil real puder atuar
 como leitor sem terminal, escrita ou subdelegacao. A lista do condutor nao limita
 automaticamente as ferramentas do filho: confira as capacidades antes da chamada.

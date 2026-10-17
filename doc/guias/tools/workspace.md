@@ -63,7 +63,7 @@ Use uma pasta local permitida pela empresa, com Git, VS Code e Windows PowerShel
 5.1 disponiveis. Para build, tenha Maven e JDK 8; para executar MTA, tenha a
 distribuicao Windows completa e seu JDK (JDK 25 no ensaio), conforme a
 [configuracao MTA](mta.md#configuracao). Use as instalacoes existentes.
-Para o planejamento assistido, consulte [Codex ou GitHub Copilot](../orientacao-migracao.md#configuracao)
+Para o planejamento assistido, consulte [Claude Code, Codex ou GitHub Copilot](../orientacao-migracao.md#configuracao)
 em sessao Local. Quem vai somente planejar com uma rodada recebida segue o caminho
 de reutilizacao da etapa 3, sem repetir a analise apenas para preparar a proposta.
 Tambem pode planejar com issues e evidencias fornecidas, sem pacote MTA completo;
@@ -315,7 +315,9 @@ Para o Java de um novo comando Maven, salve as configuracoes e crie um terminal 
 
 ## Uso
 
-### Orientacao com Codex ou GitHub Copilot
+<a id="orientacao-com-codex-ou-github-copilot"></a>
+
+### Orientacao com Claude Code, Codex ou GitHub Copilot
 
 O passo a passo foi reunido no [guia de orientacao da migracao](../orientacao-migracao.md).
 Para preparar o ambiente, use o [pedido ao helper deste guia](#orientacao-com-o-helper).

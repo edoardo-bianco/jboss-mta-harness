@@ -7,7 +7,7 @@ description: Orienta uma etapa da migracao de aplicacoes com o JBoss MTA Harness
 
 O desenvolvedor executa tarefas, escolhe prioridades, concede GO e aceita o
 resultado. O helper le arquivos e indica uma proxima acao. Esta skill e comum ao
-Codex e ao GitHub Copilot; nao instala agentes nem configura permissoes.
+Claude Code, ao Codex e ao GitHub Copilot; nao instala agentes nem configura permissoes.
 Evolucao do harness usa tasks/plan.md e tasks/todo.md e fica fora desta orientacao.
 
 Use leitura, busca e as tres consultas MCP harnessIssues quando disponiveis.
@@ -180,8 +180,8 @@ ExpectedBasisSha256 e transitorio entre paginas, nao recibo. Erro nao e zero iss
 Availability nao substitui decisao e candidato local nao prova aplicabilidade.
 Consulta nao marca exame. Sem MCP, seguir pelos arquivos, sem exigir Node/JSON.
 
-Mantenha o cliente da conversa; pergunte Codex/Copilot apenas se desconhecido e
-necessario. agent: devsquad no prompt nao identifica o cliente atual.
+Mantenha o cliente da conversa; pergunte Claude Code/Codex/Copilot apenas se
+desconhecido e necessario. agent: devsquad no prompt nao identifica o cliente atual.
 
 - Codex: destinatario e o agente principal em nova conversa no mesmo workspace,
   sem migracao_helper/$orientar-migracao, conforme a
@@ -190,6 +190,11 @@ necessario. agent: devsquad no prompt nao identifica o cliente atual.
   O prompt referencia o contexto; nao exija repetir escolhas.
 - Copilot: indicar Executar Prompt no arquivo preparado, com o perfil declarado.
   Para orientar, usar migracao_helper; anexar .agent.md/.toml nao seleciona perfil.
+- Claude Code: destinatario e a conversa principal, sem `--agent migracao_helper`
+  nem subagente helper. Mensagem pronta: "Leia e execute o prompt deste arquivo:
+  <caminho real>". Para orientar, iniciar com `claude --agent migracao_helper` ou
+  pedir o subagente migracao_helper. O campo agent: do prompt e do Copilot e nao
+  seleciona perfil no Claude Code.
 
 Entregue o encaminhamento e aguarde resultado. Nao execute o prompt nem invoque
 condutor executor para responder duvida. Permissoes continuam as do cliente.

@@ -10,7 +10,7 @@ html:
 O **JBoss MTA Harness** e um ambiente de trabalho no VS Code que organiza a
 migracao de aplicacoes JBoss EAP 7.0 ou 7.1 para EAP 7.4, com Java 8 e `javax.*`.
 Seu objetivo e ajudar o desenvolvedor a transformar diagnosticos em corretivas
-delimitadas, implementadas e verificadas, com apoio do Codex ou GitHub Copilot e controle
+delimitadas, implementadas e verificadas, com apoio do Claude Code, Codex ou GitHub Copilot e controle
 humano sobre o escopo e o resultado.
 
 Aqui, **harness** significa o conjunto de mecanismos que prepara, orienta e
@@ -48,7 +48,7 @@ nesse guia especifico. Nao e necessario ler todos os guias antes de comecar.
 O [cheat sheet das Run Tasks](cheat-sheet-run-tasks.md) oferece
 uma consulta compacta das 25 tarefas, incluindo o planejamento por sprints.
 
-**Para receber orientacao, siga o [guia de orientacao da migracao com Codex ou GitHub Copilot](orientacao-migracao.md).**
+**Para receber orientacao, siga o [guia de orientacao da migracao com Claude Code, Codex ou GitHub Copilot](orientacao-migracao.md).**
 Ele explica a skill `orientar-migracao`, o papel `migracao_helper`, como iniciar,
 retomar e passar a execucao autorizada. O helper consulta os arquivos e indica
 uma proxima acao; voce executa e toma as decisoes de prioridade, GO e aceite.
@@ -363,7 +363,7 @@ Cada guia oferece mensagem de exemplo, resultado esperado e retorno ao fluxo pri
 
 | Guia | Quando abrir | Configuracao e operacao |
 | --- | --- | --- |
-| [Orientacao da migracao](orientacao-migracao.md) | Receber ajuda em qualquer etapa, no Codex ou Copilot. | [Iniciar](orientacao-migracao.md#iniciar-no-codex-ou-no-copilot), [retomar](orientacao-migracao.md#retomar-em-outro-chat-ou-cliente), [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa). |
+| [Orientacao da migracao](orientacao-migracao.md) | Receber ajuda em qualquer etapa, no Claude Code, Codex ou Copilot. | [Iniciar](orientacao-migracao.md#iniciar-no-codex-ou-no-copilot), [retomar](orientacao-migracao.md#retomar-em-outro-chat-ou-cliente), [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa). |
 | [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas da categoria escolhida entre projetos; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-com-o-helper), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
 | [Planejamento por sprints](tools/planejamento-sprints.md) | Prever/revisar a migracao de um ou mais projetos no periodo e equipe informados. | [Primeira execucao](tools/planejamento-sprints.md#primeira-execucao), [acoes e retomada](tools/planejamento-sprints.md#escolher-a-acao-da-mesma-tarefa), [dados e preenchimento manual](tools/planejamento-sprints.md#arquivos-e-preenchimento-manual). |
 | [Compartilhamento de contextos](tools/compartilhamento-contextos.md) | Entregar analise ou plano a outro colega; continuar em outra maquina. | [O que copiar](tools/compartilhamento-contextos.md#qual-ponto-compartilhar), [recebimento](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe), [limites](tools/compartilhamento-contextos.md#conflitos-e-limites). |

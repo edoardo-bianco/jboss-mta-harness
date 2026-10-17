@@ -1,5 +1,19 @@
 # To-do do agente: evolucao do harness
 
+## Adaptador Claude Code - 17/10/2026
+
+[Escopo](plan.md#adaptador-claude-code---17102026).
+
+- [x] Seis helpers em `.claude/agents/` com perfil leitor e delegacao restrita ao condutor.
+- [x] Ponteiro `.claude/skills/orientar-migracao/SKILL.md` (descoberta confirmada nesta sessao do Claude Code).
+- [x] Skill comum e papeis com encaminhamento Claude Code.
+- [x] Configurador MCP grava `.mcp.json`; `.gitignore` e copias de teste atualizados.
+- [x] Guias, README e documento 1 atualizados.
+- [x] `Test-ClaudeAdapter`, `Test-CurrentPromptLinks`, `Test-Implementation`, `Test-TestIsolation`: PASS. Node: 10/10 em checkout separado.
+- [ ] `integration.test.mjs` nao executado: caminho do checkout temporario excedeu o limite do harness; repetir em raiz curta.
+- [ ] Ensaio nativo: `claude --agent migracao_helper`, delegacao a um helper, `/orientar-migracao` e consultas MCP aprovadas em `/mcp`.
+- [ ] Revisao humana e aceite.
+
 ## Consolidacao documental do Engineering Harness - 17/10/2026
 
 [Escopo e decisoes](plan.md#consolidacao-documental-do-engineering-harness---17102026).

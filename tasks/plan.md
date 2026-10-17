@@ -1,5 +1,29 @@
 # Plano do agente: evolucao do harness
 
+## Adaptador Claude Code - 17/10/2026
+
+Branch `harness/adaptador-claude-code`, derivada da `main` em `4c27442`.
+
+**Objetivo:** a orientacao da migracao funcionar no Claude Code como no Copilot e
+no Codex, reaproveitando a skill comum e os papeis, sem duplicar regras.
+
+**Entrega:**
+
+- `.claude/agents/`: os seis helpers, com Read, Grep, Glob e as tres consultas MCP;
+  somente `migracao_helper` delega, com `Agent(...)` limitado aos cinco helpers
+  (imposto pelo cliente quando iniciado por `claude --agent migracao_helper`).
+- `.claude/skills/orientar-migracao/SKILL.md`: ponteiro para a skill comum.
+- Skill comum e papeis: encaminhamento e delegacao no Claude Code.
+- `mcp/issues/configure.mjs`: grava `harnessIssues` tambem em `.mcp.json`
+  (ignorado pelo Git, excluido das copias de teste), com as mesmas protecoes.
+- Guias de orientacao, consultas MCP, desenvolvedor, workspace e manutencao; README;
+  documento 1 do Engineering Harness.
+
+**Verificacao:** `Test-ClaudeAdapter.ps1` (paridade, perfil leitor, delegacao,
+ponteiro), suites de prompts/implementacao/isolamento, testes Node de
+configuracao/contrato/ciclo de vida em checkout separado. Ensaio nativo no Claude
+Code permanece com o desenvolvedor.
+
 ## Consolidacao documental do Engineering Harness - 17/10/2026
 
 Branch `harness/consolidar-documentacao`, derivada da `main` em `5c8d582`.

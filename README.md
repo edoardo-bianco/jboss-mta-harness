@@ -10,7 +10,7 @@ html:
 Migrar uma aplicacao exige relacionar diagnosticos com o codigo, escolher o que
 corrigir, verificar o resultado e preservar as decisoes entre uma rodada e outra.
 O **JBoss MTA Harness** organiza esse trabalho em um ambiente no VS Code, com
-apoio do Codex ou GitHub Copilot/DevSquad e controle do desenvolvedor.
+apoio do Claude Code, Codex ou GitHub Copilot/DevSquad e controle do desenvolvedor.
 
 O harness conecta ferramentas de analise e execucao — MTA, Maven, SonarQube e
 JBoss — a contexto, prompts e evidencias. A proposta e transformar achados em
@@ -85,7 +85,7 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 **O agente de orientacao e opcional e permanece leitor.** Ele confere os arquivos
 e indica uma proxima acao. As tarefas de priorizacao e planejamento preparam
 contexto; elaborar ranking/fichas ou plano/to-do e outra etapa, manual ou pela
-execucao do prompt no Codex/Copilot.
+execucao do prompt no Claude Code, Codex ou Copilot.
 Com plano revisado e GO, outro colega pode implementar manualmente ou com agente.
 Testes e revisao humana do resultado continuam necessarios nas duas formas.
 
