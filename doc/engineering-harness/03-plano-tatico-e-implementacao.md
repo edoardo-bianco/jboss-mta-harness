@@ -1,6 +1,6 @@
 # Engineering Harness — plano tático e implementação
 
-**Documento 3 de 3 · Revisão de 17/10/2026 · Decisões tecnológicas, incrementos, verificação e auditoria**
+**Documento 3 de 3 · Revisão de 19/10/2026 · Decisões tecnológicas, incrementos, verificação e auditoria**
 
 **Direção:** [Estratégia e arquitetura](01-estrategia-e-arquitetura.md) · **Contratos:** [System design](02-system-design.md)
 
@@ -10,7 +10,7 @@ Transformar a arquitetura em incrementos executáveis sem reescrever a base inte
 
 A definição do produto pertence ao documento 1. Os contratos e o layout pertencem ao documento 2. Este documento registra escolhas, critérios de implementação e uma revisão crítica final. O estado das entregas continua no acompanhamento canônico do repositório, como `tasks/plan.md` e `tasks/todo.md`; esta proposta não é um segundo backlog de status.
 
-Este conjunto foi incorporado ao repositório em 17/10/2026, substituindo `doc/arquitetura/`, `doc/especificacoes/`, `doc/features/` e `doc/estrategia/` (seção 8). Os incrementos descritos ainda não foram implementados no código; nenhuma ferramenta foi instalada ou integração homologada por esta entrega documental.
+Este conjunto foi incorporado ao repositório em 17/10/2026, substituindo `doc/arquitetura/`, `doc/especificacoes/`, `doc/features/` e `doc/estrategia/` (seção 8). A baseline `6566bb8` já inclui a parte JBoss do incremento A e o adaptador assistido Claude Code; os contratos mínimos, os demais incrementos e a integração programática continuam propostos. Implementação, ensaio e aceite são estados distintos, acompanhados em `tasks/`. Esta revisão documental não instala ferramentas nem homologa integrações.
 
 ## 2. Escolhas tecnológicas e seus compromissos
 
@@ -44,7 +44,7 @@ Validar pedidos e resultados sem coerções silenciosas, resolução remota arbi
 
 **Escolha proposta:** executor Node com `node:child_process`, ambiente por processo e protocolo estruturado. Reutilizar wrappers PowerShell 5.1 onde forem necessários ao launcher Windows ou à transição. Não converter tudo antes de obter valor.
 
-O código de build da `main` (`5c8d582`) já trata fases permitidas, JDK efetivo, logs e código de saída e publica a última tentativa em `atual/build/` com a situação em `operacao.json`, sem `RunId` ou pasta por execução. A implementação nova pode envolvê-lo durante a transição. [R4](#fonte-r4)
+O código de build da baseline `6566bb8` já trata fases permitidas, JDK efetivo, logs e código de saída e publica a última tentativa em `atual/build/` com a situação em `operacao.json`, sem `RunId` ou pasta por execução. Durante uma chamada integral desse fluxo, o PowerShell continua sendo o único responsável pelo lock e pela publicação. O incremento B separa execução e publicação para cumprir o contrato `process-json` do documento 2; uma ponte que apenas chama o fluxo legado não conclui essa prova. [R4](#fonte-r4)
 
 O tratamento de `.cmd`, cancelamento e descendentes precisa de testes Windows específicos. `shell: false` é uma preferência para executáveis compatíveis, não uma solução universal para `mvn.cmd`. [O5](#fonte-o5)
 
@@ -64,9 +64,11 @@ Não criar um servidor MCP por ferramenta, não substituir CLI por MCP e não ex
 
 ### 2.7. Coding agents: entrega assistida antes de automação ampla
 
-**Escolha proposta:** a arquitetura é independente da tecnologia agêntica. **Claude Code e GitHub Copilot** são os clientes de referência; Codex continua suportado pelos artefatos existentes. Começar com contexto preparado e acionamento humano e validar depois uma única integração programática documentada. [O13](#fonte-o13) [O14](#fonte-o14) [O24](#fonte-o24)
+**Decisão do desenvolvedor em 19/10/2026:** **Codex e GitHub Copilot são os agentes principais; Claude Code é secundário**. A prioridade orienta os pilotos, preservando a arquitetura independente de agente e os adaptadores existentes. Começar com contexto preparado e acionamento humano e validar depois uma única integração programática documentada. [O13](#fonte-o13) [O14](#fonte-o14) [O24](#fonte-o24)
 
-**Claude Code** é o candidato natural à primeira integração programática: `claude -p` com saída JSON validável por esquema, ferramentas permitidas explícitas e `--bare` para não carregar configurações da máquina; executa nativamente em PowerShell/CMD, com binário Windows assinado pela Anthropic. [O24](#fonte-o24) [O26](#fonte-o26)
+**Codex** é o candidato inicial à primeira integração programática, por essa prioridade: `codex exec`, eventos JSONL com `--json` e resposta final com `--output-schema`. O adaptador deve distinguir os eventos da resposta final e convertê-la ao envelope do harness, mantendo permissões e escopo explícitos. A documentação confirma a interface; instalação, autenticação e execução Windows continuam condições do piloto. [O13](#fonte-o13)
+
+**Claude Code** permanece alternativa secundária por `claude -p`. Seu modo `--bare` exige contexto, MCP e autenticação fornecidos de forma compatível, pois não carrega automaticamente os artefatos do projeto/usuário. O suporte nativo Windows e a assinatura do binário não alteram a prioridade definida pelo desenvolvedor nem comprovam homologação local. [O24](#fonte-o24) [O26](#fonte-o26)
 
 No ambiente corporativo informado, **não considerar Copilot CLI automaticamente compatível com PowerShell 5.1**: a documentação exige PowerShell 6 ou superior no Windows. Isso não invalida o Copilot na IDE ou a entrega assistida. Manter a restrição explícita e não exigir atualização do shell para viabilizar a arquitetura. [O15](#fonte-o15)
 
@@ -79,6 +81,14 @@ A escolha do primeiro cliente programático depende da instalação realmente au
 | GitHub Copilot app modernization | Modernização e atualização de JDK/frameworks | Avaliação, plano revisável antes das alterações, receitas OpenRewrite e correção iterativa por agente; destinos Java 8, 11, 17, 21 e 25; exige plano Copilot pago e VS Code 1.101+. [O27](#fonte-o27) | Plano gerado tratado como proposta; GO e verificações continuam no harness. |
 | AWS Transform custom | Transformações personalizadas | Workflows com contexto adicional e comandos de validação; Windows/PowerShell com exceções; Node.js 22+, Git e acesso ao serviço. [O31](#fonte-o31) | Os workflows criam commits de checkpoint, em conflito com o Git informativo do contrato; avaliar execução isolada com devolução de diff. O catálogo pronto mira Spring Boot, não EAP 7.4. |
 
+### 2.8. Distribuição e testes
+
+**Escolha proposta:** build reprodutível do pacote, `package-lock.json`, instalação controlada e execução direta do JavaScript compilado. `npm ci` usa o lockfile e rejeita divergências relevantes com `package.json`; não garante, sozinho, cadeia de suprimentos confiável ou instalação sem rede. Dependências devem estar disponíveis pelo canal corporativo aprovado. [O20](#fonte-o20)
+
+O pacote pode declarar `bin` para conveniência, mas não exigir instalação global. Não executar `npx` com resolução/download implícitos em tarefas do harness. [O17](#fonte-o17)
+
+Usar inicialmente o test runner do Node para contratos e módulos extraídos e conservar as suítes PowerShell existentes. O runner nativo fornece mecanismos de teste; a cobertura dos cenários do produto depende das fixtures implementadas. [O21](#fonte-o21)
+
 ### 2.9. Compreensão de código Java: estudo adiado
 
 **Problema registrado:** a integração do Serena não foi concluída no Windows corporativo porque o executável distribuído não tem assinatura de código. Não contornar a política de execução para viabilizá-lo.
@@ -87,8 +97,8 @@ A escolha do primeiro cliente programático depende da instalação realmente au
 
 | Consumo | Como | Limites |
 | --- | --- | --- |
-| Pelo agente, durante o trabalho | Plugin oficial **`jdtls-lsp`** do marketplace da Anthropic no Claude Code: navegação por símbolo (definição, referências, hierarquia) e diagnósticos após cada edição. O plugin só configura o servidor; o `jdtls` é instalado à parte e precisa estar no `PATH`. [O25](#fonte-o25) | Funciona em sessões de terminal, não em sessões na nuvem. Indexação consome memória. |
 | Pelo harness, como capacidade | JDT LS executado fora da IDE pela CLI, com instância e área de dados próprias, expondo consultas por objetivo para qualquer cliente (inclusive via MCP). [O32](#fonte-o32) | Separar **preparar índice** (efeitos de build e cache declarados) de **consultar índice pronto**. |
+| Pelo cliente secundário, em avaliação opcional | Plugin oficial **`jdtls-lsp`** do marketplace da Anthropic no Claude Code: navegação por símbolo (definição, referências, hierarquia) e diagnósticos após cada edição. O plugin só configura o servidor; o `jdtls` é instalado à parte e precisa estar no `PATH`. [O25](#fonte-o25) | Funciona em sessões de terminal, não em sessões na nuvem. Indexação consome memória. Não é pré-requisito dos fluxos Codex/Copilot. |
 
 O JDT LS é uma aplicação Java executada pelo JDK instalado, sem executável nativo próprio a assinar; isso reduz o risco que bloqueou o Serena, mas a política corporativa de execução ainda precisa ser conferida no piloto. Ele exige um JDK moderno (21+) **separado** do Java da aplicação; analisar projetos Java 8 continua possível.
 
@@ -101,15 +111,7 @@ O JDT LS é uma aplicação Java executada pelo JDK instalado, sem executável n
 
 Uma chamada estática não comprova execução: reflexão, CDI/EJB, proxies, geração e configuração externa deixam lacunas. Resultados distinguem cobertura completa no escopo, parcial, desatualizada e falha; resultado vazio só comprova ausência dentro da cobertura declarada.
 
-**Aceite do piloto:** consultar o mesmo projeto pelo plugin do agente e pela CLI; verificar sobrecarga/herança, reactor Maven, Java 8, fontes geradas, dependência ausente e alteração após indexação; medir tempo de preparo/consulta, memória e volume de contexto; demonstrar utilidade para ao menos dois objetivos, como impacto de migração e investigação de defeito.
-
-### 2.8. Distribuição e testes
-
-**Escolha proposta:** build reprodutível do pacote, `package-lock.json`, instalação controlada e execução direta do JavaScript compilado. `npm ci` usa o lockfile e rejeita divergências relevantes com `package.json`; não garante, sozinho, cadeia de suprimentos confiável ou instalação sem rede. Dependências devem estar disponíveis pelo canal corporativo aprovado. [O20](#fonte-o20)
-
-O pacote pode declarar `bin` para conveniência, mas não exigir instalação global. Não executar `npx` com resolução/download implícitos em tarefas do harness. [O17](#fonte-o17)
-
-Usar inicialmente o test runner do Node para contratos e módulos extraídos e conservar as suítes PowerShell existentes. O runner nativo fornece mecanismos de teste; a cobertura dos cenários do produto depende das fixtures implementadas. [O21](#fonte-o21)
+**Aceite do piloto:** consultar o projeto pela CLI e disponibilizar o resultado a um dos agentes principais pelo contrato comum; verificar sobrecarga/herança, reactor Maven, Java 8, fontes geradas, dependência ausente e alteração após indexação; medir tempo de preparo/consulta, memória e volume de contexto; demonstrar utilidade para ao menos dois objetivos, como impacto de migração e investigação de defeito. A comparação com o plugin Claude Code é opcional e não condiciona o aceite do piloto principal.
 
 ## 3. O que não adotar neste ciclo
 
@@ -119,20 +121,21 @@ Não reintroduzir importação/exportação, cópias/extratos MTA, pastas por ex
 
 Também não exigir uma nova instalação JDT para provar a independência básica de IDE. A CLI deve ser neutra; uma capacidade semântica pode continuar dependente de um adaptador específico e aparecer indisponível em outra combinação. O piloto JDT da seção 2.9 é decisão própria, não efeito automático de rodar Node no IntelliJ.
 
-## 4. Situação após a simplificação (`main` `5c8d582`)
+## 4. Situação da baseline (`main` `6566bb8`)
 
-A conciliação com o checkout foi feita em 17/10/2026, depois da integração da PR #31:
+A conciliação documental com o checkout foi atualizada em 19/10/2026. A baseline inclui as PRs #31 a #35; as entregas técnicas abaixo não substituem os ensaios e aceites pendentes em `tasks/todo.md`:
 
 | Requisito | Situação |
 | --- | --- |
 | Identidade por `artifactId`, `atual`, `reconciliado`, `recebido`, `temporarios`, `operacao.json` | Presente. |
 | MTA na origem configurada, seleção por `generatedAt` com fuso ou data de modificação | Presente. |
 | Build sem `RunId` ou pasta por execução | Presente. |
-| Hashes apenas em memória para detectar alteração concorrente | Presente; não são persistidos nem usados em caminhos. |
+| Hashes de concorrência transitórios, sem identidade de execução | Presente; não criam recibos ou caminhos de retomada. Identificadores nativos das ferramentas mantêm suas funções. |
 | Mestre de sprints em projeto participante | Presente. |
-| Origem EAP 7.0 ou 7.1 | Presente pela chave `eap71`; README e guia central precisam dizer "7.0/7.1". |
+| Origem EAP 7.0 ou 7.1 | Presente pela chave `eap71`; README e guia central já descrevem ambas as origens. |
 | Estado JBoss por projeto/servidor, sem GUID ou hash | Presente desde 17/10/2026 (incremento A): `servidores/<servidor>/` e `projetos/<artifactId>/atual/jboss/<servidor>/ultimo-deploy.json`; deploy substitui o WAR, sem rollback. A pasta legada `.harness/jboss/` é removida manualmente. |
 | Backups do workspace com nomes legíveis | **Lacuna menor**: `.harness/workspace-backups/<GUID>.code-workspace`. |
+| Orientação em Codex, GitHub Copilot e Claude Code | Artefatos presentes; a PR #35 acrescentou o adaptador Claude Code. Prioridade atual: Codex/Copilot principais e Claude Code secundário. A integração programática continua proposta. |
 
 Nenhum arquivo da aplicação, diagnóstico externo ou trabalho local deve ser movido, renomeado ou eliminado para corrigir as lacunas sem operação de conversão explícita.
 
@@ -146,17 +149,24 @@ A ordem abaixo é uma proposta por dependências e provas de valor, sem estimati
 
 **Decisões do desenvolvedor (17/10/2026):** guardar somente a última operação e o último deploy; o deploy sempre substitui o WAR implantado no JBoss pelo novo, mesmo quando o atual não foi implantado pelo harness; a Run Task `Aplicacao: rollback no JBoss` é retirada (reverter é fazer deploy de um WAR anterior escolhido pelo desenvolvedor). Parte JBoss implementada em 17/10/2026 (branch `harness/jboss-estado-corrente`); contratos mínimos e backups do workspace permanecem.
 
-**Entrega:** produtores e consumidores JBoss ajustados (`HarnessJboss*`, `gerenciar-jboss.ps1`, Run Tasks e guia), retirada do rollback e fixtures. A pasta legada `.harness/jboss/` não guarda decisões humanas e é removida manualmente, sem conversor.
+**Entrega:**
 
-**Aceite:** nenhuma pasta nomeada por identificador; segunda operação e segundo deploy substituem o resultado corrente; deploy sobre deployment externo ou alterado substitui o WAR e confirma status e conteúdo depois do envio; falha não é declarada sucesso; o caminho principal não depende do conversor ou de operações de importação/exportação.
+- Contratos canônicos de perfil, capacidade, pedido e resultado em JSON Schema 2020-12, com versões, estados, efeitos, limites e bases dos caminhos. Definir a correspondência dos estados legados e a resolução da fonte humana do GO, sem outro registro de autorização.
+- Regras de disponibilidade e fixtures para versão incompatível, provedor ausente, entrada/saída inválida, artefato ausente e divergência de código de saída. São entregas do incremento, não uma biblioteca já disponível nesta revisão.
+- Produtores e consumidores JBoss ajustados (`HarnessJboss*`, `gerenciar-jboss.ps1`, Run Tasks e guia), retirada do rollback e fixtures: parte já implementada. A remoção da pasta legada `.harness/jboss/` exige seleção explícita, sem conversor.
+- Nomes legíveis para novos backups do workspace, preservando os existentes até eventual seleção explícita de conversão/limpeza.
+
+**Aceite dos contratos:** fixtures válidas aceitas e inválidas recusadas sem coerção; versões incompatíveis e capacidades indisponíveis têm motivo explícito; caminhos são resolvidos pela base de cada campo; estados legados têm uma única correspondência; GO é lido do plano aplicável, sem inferência ou nova confirmação de decisão inequívoca. O incremento B usa esses contratos e comprova a publicação única após validar a saída do provedor.
+
+**Aceite de armazenamento:** nenhuma nova pasta/arquivo operacional nomeado por identificador de execução; segunda operação e segundo deploy substituem o resultado corrente; deploy sobre deployment externo ou alterado substitui o WAR e confirma status e conteúdo depois do envio; falha não é declarada sucesso; novos backups têm nomes legíveis; o caminho principal não depende do conversor ou de operações de importação/exportação. Ensaios e aceite humano da parte JBoss permanecem no acompanhamento canônico.
 
 ### Incremento B — Uma capacidade externa real pela CLI
 
-**Escopo:** extrair `maven.build` como prova vertical, usando provedor de processo separado do núcleo. Reutilizar o launcher simplificado existente; acrescentar configuração/diagnóstico estritamente necessários.
+**Escopo:** extrair `maven.build` como prova vertical, usando provedor de processo separado do núcleo. Reutilizar o launcher existente, separando execução de publicação conforme o documento 2, seção 6; acrescentar configuração/diagnóstico estritamente necessários.
 
 **Entrega:** CLI mínima, contrato validado, provedor real e testes. O provedor não pode importar módulos privados do núcleo nem receber comandos arbitrários.
 
-**Aceite:** build permitido, fase inválida, JDK incompatível, falha, timeout e cancelamento têm resultados explícitos. Duas execuções publicam nos mesmos destinos de `atual/build/`. Alterar a localização instalada do provedor pela configuração aprovada não exige mudança no domínio. Semântica de build permanece equivalente; retenção segue a simplificação, não o comportamento histórico da `main`.
+**Aceite:** build permitido, fase inválida, JDK incompatível, falha, timeout e cancelamento têm resultados explícitos. Duas execuções publicam nos mesmos destinos de `atual/build/`. O núcleo publica uma única vez após validar resultado e artefatos transitórios; saída inválida preserva o resultado/log anterior e registra a tentativa inválida na situação da operação, enquanto falha válida de build publica a última tentativa. Alterar a localização instalada do provedor pela configuração aprovada não exige mudança no domínio. Semântica de build permanece equivalente; retenção preserva a baseline simplificada.
 
 **Limite:** não criar todos os perfis e adaptadores durante essa prova. A publicação consistente já é requisito do piloto, não um refinamento a deixar para depois.
 
@@ -188,9 +198,9 @@ A ordem abaixo é uma proposta por dependências e provas de valor, sem estimati
 
 ### Incremento F — Automação de um agente e prova de segundo perfil
 
-São dois pilotos separáveis.
+Os pilotos iniciais de agente e SDLC Quarkus são separáveis. Migração Quarkus, cobertura e modernização são extensões delimitadas após essas provas, conforme a prioridade escolhida.
 
-**Piloto de agente:** escolher uma CLI programática realmente aprovada — candidato inicial `claude -p` — e testar autenticação, permissões, efeitos, retorno, interrupção e rede. Uma falha não dispara outro cliente automaticamente. Manter entrega assistida como modo de operação quando a automação não estiver disponível; GitHub Copilot pela IDE continua caminho de referência.
+**Piloto de agente:** partir de `codex exec`, sujeito à instalação realmente aprovada, e testar autenticação, permissões, efeitos, eventos/resposta final, interrupção e rede. Codex e GitHub Copilot são os agentes principais; Claude Code é secundário. Uma falha não dispara outro cliente automaticamente. Manter entrega assistida como modo de operação quando a automação não estiver disponível; GitHub Copilot pela IDE continua caminho principal.
 
 **Piloto de SDLC Quarkus (perfil Desenvolvimento Quarkus):** conduzir **um defeito ou uma melhoria fora de qualquer migração**, com **Java 17 ou superior, incluindo Java 25**, conforme a versão Quarkus. O mesmo núcleo deve relacionar demanda, decisão, alteração e validação, reutilizando a capacidade de build e as ferramentas do projeto: CLI Quarkus para extensões, build e modo de desenvolvimento; testes da aplicação e do artefato (`@QuarkusIntegrationTest`). Aceite: nenhum pré-requisito de MTA, Java 8 ou `javax` no fluxo. [O23](#fonte-o23)
 
@@ -206,7 +216,7 @@ São dois pilotos separáveis.
 
 Cada incremento deve ter um caso de uso, efeito esperado, entradas/saídas, restrições, amostra de referência e teste que demonstre a lacuna antes da alteração. Implementar a menor mudança que complete a prova vertical.
 
-Preservar PowerShell enquanto ele for o produtor canônico da capacidade. Durante a transição, o adaptador Node chama essa implementação sem copiar a regra. Ao substituí-la, demonstrar equivalência e retirar o caminho redundante de seus consumidores; não manter duas implementações normativas indefinidamente.
+Preservar PowerShell enquanto ele for o produtor canônico da capacidade. Na ponte transitória do build, o adaptador Node chama a operação completa sem copiar a regra, duplicar seu lock ou republicar suas saídas. Para entregar o provedor do incremento B, extrair o launcher e suas verificações de modo que a publicação fique exclusivamente no núcleo após validação. Demonstrar equivalência e ajustar os consumidores para a mesma implementação; não manter dois produtores normativos para o mesmo resultado.
 
 A comparação deve separar **semântica preservada** de **comportamento deliberadamente substituído**. Exemplo: fases Maven e falhas precisam continuar corretas; pastas históricas não precisam ser reproduzidas, pois foram removidas pela decisão de simplificação.
 
@@ -281,12 +291,12 @@ Em 17/10/2026, por decisão do desenvolvedor, este conjunto passou a ficar em **
 
 ## 10. Catálogo único de fontes
 
-As referências abaixo foram consultadas em 16/10/2026 e revisadas em 17/10/2026. Documentação oficial comprova características das ferramentas, não a integração pronta no harness. Arquitetura e decisões do produto são propostas fundamentadas nessas características. R1–R8 apontam para o commit `5dd8fb3`, anterior à consolidação, e servem como registro das versões anteriores.
+As referências externas foram consultadas em 16/10/2026 e revisadas em 17/10/2026; O13 foi reconferida em 19/10/2026 para o piloto Codex. Documentação oficial comprova características das ferramentas, não a integração pronta no harness. Arquitetura e decisões do produto são propostas fundamentadas nessas características. R1, R2, R3, R5, R7 e R8 preservam versões históricas em `5dd8fb3`; R0 identifica a baseline examinada, R4 aponta para o build local e R6 para o acompanhamento corrente.
 
 ### Fontes do repositório e decisões adotadas
 
 <a id="fonte-r0"></a>
-**R0 — Baseline atual.** `main` em `5c8d58265d82134def2ce6cac5c17ca2d80e1899`, merge da PR #31 (simplificação por projeto e transição dos registros), conferida no código em 17/10/2026.
+**R0 — Baseline examinada em 19/10/2026.** `main` em `6566bb81d6f10914ad072f4dfec90cb3809b0cee`, merge da PR #35. Inclui a simplificação da PR #31 (`5c8d582`), a consolidação documental, o estado JBoss corrente da PR #34 e a orientação Claude Code da PR #35. A revisão atual altera documentação nessa base; não declara novos ensaios de runtime ou aceite humano.
 
 <a id="fonte-r1"></a>
 **R1 — Estratégia anterior do produto.** [Visão estratégica e tática](https://github.com/edoardo-bianco/jboss-mta-harness/blob/5dd8fb385240060f3207b9d3958f9238de19f30e/doc/estrategia/estrategia-harness_.md). Direção por núcleo, perfis, engines, IDEs, SDLC e modernização.
@@ -304,7 +314,7 @@ As referências abaixo foram consultadas em 16/10/2026 e revisadas em 17/10/2026
 **R5 — Amostra de implementação MCP.** [Servidor de consultas](https://github.com/edoardo-bianco/jboss-mta-harness/blob/5dd8fb385240060f3207b9d3958f9238de19f30e/mcp/issues/server.mjs). Registro de ferramentas, ponte de consulta, cancelamento e transporte `stdio`.
 
 <a id="fonte-r6"></a>
-**R6 — Acompanhamento de entregas.** [tasks/todo.md](https://github.com/edoardo-bianco/jboss-mta-harness/blob/5dd8fb385240060f3207b9d3958f9238de19f30e/tasks/todo.md). Distingue integração, documentação e pendências de ensaio/homologação. Os testes ali registrados não foram reexecutados nesta revisão.
+**R6 — Acompanhamento corrente de entregas.** [tasks/todo.md](../../tasks/todo.md). Distingue integração, documentação e pendências de ensaio/homologação. Resultados anteriores continuam identificados por entrega; não são convertidos em testes executados nesta revisão.
 
 <a id="fonte-r7"></a>
 **R7 — Catálogo de capacidades.** [Domínios, capacidades e priorização](https://github.com/edoardo-bianco/jboss-mta-harness/blob/5dd8fb385240060f3207b9d3958f9238de19f30e/doc/features/evolucao-harness-dominios-capacidades-priorizacao.md). IDs e recortes HAR/SRC/OBJ/DEP/JBS/CHG; não comprova entrega de todas as capacidades.
@@ -357,7 +367,7 @@ As referências abaixo foram consultadas em 16/10/2026 e revisadas em 17/10/2026
 **O12 — Identidade e escopo Maven.** [Apache Maven — POM Reference](https://maven.apache.org/pom.html). Coordenadas, herança e módulos; a convenção de diretórios do harness é decisão própria.
 
 <a id="fonte-o13"></a>
-**O13 — Codex programático.** [OpenAI — Non-interactive mode](https://learn.chatgpt.com/docs/non-interactive-mode). Uso de `codex exec`; compatibilidade local e políticas dependem de teste.
+**O13 — Codex programático.** [OpenAI — Non-interactive mode](https://learn.chatgpt.com/docs/non-interactive-mode), reconferida em 19/10/2026. `codex exec`, eventos JSONL por `--json` e resposta final estruturada por `--output-schema`; compatibilidade local e políticas dependem de teste.
 
 <a id="fonte-o14"></a>
 **O14 — Copilot programático.** [GitHub — Copilot CLI programmatic reference](https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-programmatic-reference). Interface e parâmetros do modo programático, não equivalência com a extensão da IDE.
@@ -432,13 +442,13 @@ As referências abaixo foram consultadas em 16/10/2026 e revisadas em 17/10/2026
 
 A revisão foi feita em segunda passagem, depois da redação, usando critérios de clareza, consistência entre documentos, viabilidade técnica, segurança e fidelidade à simplificação. Houve também verificações automatizadas dos exemplos e das referências internas.
 
-**Limite de independência:** a revisão foi realizada pelo mesmo assistente, não por outro revisor humano ou modelo independente. Os critérios foram separados da redação, mas isso não constitui independência de autoria. Não foram executados o harness, as aplicações, a branch local de evolução ou os testes corporativos. Este parecer avalia a proposta documental; não certifica implementação, segurança operacional ou homologação.
+**Limite de independência:** a revisão foi realizada pelo mesmo assistente, não por outro revisor humano ou modelo independente. Os critérios foram separados da redação, mas isso não constitui independência de autoria. A conferência de 19/10/2026 leu código/contratos e validou documentos; não executou builds, servidores, fluxos de migração ou testes corporativos. Este parecer avalia a proposta documental; não certifica implementação, segurança operacional ou homologação.
 
 ### 11.2. Achados e tratamento
 
 | Achado | Risco identificado | Tratamento na consolidação | Situação residual |
 | --- | --- | --- | --- |
-| A01 — Baseline local não acessível | Declarar a simplificação como código verificado ou repetir trabalho já realizado. | Resolvido em 17/10/2026: simplificação conferida na `main` `5c8d582` (seção 4). | Lacunas JBoss e backups do workspace no incremento A. |
+| A01 — Baseline local não acessível | Declarar a simplificação como código verificado ou repetir trabalho já realizado. | Simplificação conferida em 17/10; baseline atualizada para `6566bb8` em 19/10 (seção 4). | Contratos mínimos e backups do workspace no incremento A; ensaios/aceites JBoss em `tasks/`. |
 | A02 — Contradição sobre histórico | Reintroduzir snapshots, IDs de execução, importadores ou uma réplica de `atual` com outro nome. | Precedência de S1/S2; destinos correntes reais, último resultado de reconciliação, MTA na origem e conversor descartável. | Testes de segunda publicação e ausência de dependências legadas são necessários. |
 | A03 — Versão do produto confundida com execução | A extensibilidade recriar histórico operacional como requisito de rastreabilidade. | Versões pertencem a contratos, perfis, provedores e ferramentas; metadados das operações permanecem apenas no estado corrente. | Perda de replay histórico é uma escolha explícita, não uma capacidade omitida por acidente. |
 | A04 — Autorização aparente | Tratar `approved: true`, anotações MCP ou edição por agente como decisão humana confiável. | Decisão canônica do perfil, validação do escopo e confirmação pela superfície humana; MCP inicial de leitura. | Não há isolamento contra um agente com os mesmos privilégios que atua fora do harness. |
@@ -447,25 +457,26 @@ A revisão foi feita em segunda passagem, depois da redação, usando critérios
 | A07 — Publicação tratada como transação pronta | Liberar estado parcial ou manter backups permanentes como solução implícita. | Preparação validada, exclusão mútua local e recuperação transitória; nenhuma atomicidade de vários arquivos presumida. | Falhas, arquivos abertos e interrupção abrupta devem ser testados. |
 | A08 — Generalização artificial de build | Esconder fases Maven em uma capacidade apresentada como universal para Java. | Exemplo padronizado como `maven.build`, reutilizável pelos perfis que utilizam Maven. Outro sistema de build exige equivalência demonstrada ou contrato distinto. | O esquema completo de resultado/envelope será implementado no primeiro incremento. |
 | A09 — Fluxo recursivo ou bloqueado | Agente chamar MCP que reinicia o mesmo agente, ou esperar o humano mantendo lock. | Um coordenador por fluxo, tarefas delimitadas e liberação de lock durante espera. | Ensaiar interrupção, retomada e alteração concorrente do plano. |
-| A10 — Documentação concorrente | Manter três definições do produto e duplicar regras, fontes e backlog. | Definição central no documento 1; contrato/layout no 2; decisões, critérios, fontes e auditoria no 3. | A integração no repositório deve atualizar os documentos anteriores conforme a seção 8. |
+| A10 — Documentação concorrente | Manter três definições do produto e duplicar regras, fontes e backlog. | Direção no documento 1; desenho no 2; decisões, critérios, fontes e auditoria no 3. Consolidação executada na seção 8. | Regras vigentes permanecem em ADR-0009/contratos; status das entregas em `tasks/`. |
 
 Os achados marcados como tratados referem-se ao **desenho e à redação**. Nenhum deles é apresentado como defeito de runtime corrigido nesta entrega.
 
 ### 11.3. Resultado das verificações documentais
 
-Foram verificados os três arquivos Markdown finais, com os seguintes resultados:
+As verificações documentais foram atualizadas em 19/10/2026. O resumo datado e os totais ficam em [tasks/todo.md](../../tasks/todo.md#consistencia-documental-e-agentes-principais---19102026); não reutilizar as contagens da revisão de 16/10 como se descrevessem o conjunto atual.
 
 | Verificação | Resultado e limite |
 | --- | --- |
 | Definição central | Preservada literalmente, em uma única ocorrência canônica no conjunto. |
-| Links internos | 76 referências locais verificadas, incluindo arquivos de destino e âncoras; nenhuma referência inválida encontrada. |
-| Fontes externas | 32 URLs distintas no catálogo: nove referências ao repositório e 23 fontes oficiais ou primárias. Na revisão de 16/10, as duas especificações da simplificação foram identificadas por origem e data, sem URL GitHub inventada; desde 17/10, S1 e S2 apontam para o repositório. O teste de links internos não é uma certificação de disponibilidade futura dessas páginas. |
+| Links internos | Arquivos de destino, imagens e âncoras conferidos no conjunto corrente; resumo da coleta em `tasks/todo.md`. |
+| Fontes externas | Catálogo recontado, distinguindo referências históricas GitHub de fontes oficiais/primárias. O13 reconferida para o piloto Codex; as demais consultas preservam as datas declaradas. A verificação local não certifica disponibilidade de todas as páginas externas. |
 | Exemplos JSON | Cinco blocos analisados sintaticamente, sem erro. São exemplos de design, não um SDK executável. |
-| Esquema de entrada do build | Sete casos conferidos com validador JSON Schema Draft 2020-12: fases permitidas aceitas; campo ausente, tipo incorreto, fase não permitida, texto de comando e propriedade livre rejeitados. |
+| Esquema de entrada do build | A revisão original registrou sete casos com JSON Schema Draft 2020-12. Em 19/10 foram conferidas a sintaxe e a preservação dos cinco exemplos em relação à baseline; a validação de esquema não foi repetida. |
 | Markdown | Blocos de código balanceados e nenhuma marca de preenchimento pendente identificada. |
-| Repetição literal | Nenhum parágrafo idêntico com mais de 180 caracteres repetido entre os documentos, desconsiderando código e tabelas. Isso não elimina sobreposição semântica intencional de invariantes. |
+| Diagrama | Fluxo de alteração com IA opcional, GO antes da execução e aceite posterior; a ilustração anterior está identificada como histórica. |
+| Repetição literal | A revisão inicial de 16/10 não encontrou parágrafos idênticos acima de 180 caracteres, desconsiderando código e tabelas. Esse resultado histórico não elimina sobreposição semântica intencional de invariantes. |
 
-A validação do esquema foi feita com a biblioteca Python `jsonschema` no ambiente de elaboração. Ela verifica o exemplo interoperável; **não prova** a futura implementação Ajv/TypeScript, a resistência do launcher a injeção, a autenticidade da autorização ou a execução correta de Maven.
+A validação original do esquema foi feita com a biblioteca Python `jsonschema` no ambiente de elaboração; essa biblioteca não está disponível no ambiente da revisão de 19/10. A prova original verifica o exemplo interoperável; **não prova** a futura implementação Ajv/TypeScript, a resistência do launcher a injeção, a autenticidade da autorização ou a execução correta de Maven.
 
 ### 11.4. Avaliação de clareza e viabilidade
 
@@ -479,13 +490,13 @@ A validação do esquema foi feita com a biblioteca Python `jsonschema` no ambie
 
 ### 11.5. Parecer final
 
-A proposta é **coerente como direção arquitetural e tecnicamente fundamentada para implementação incremental**. O próximo passo não é reescrever o harness: é fixar os contratos mínimos, alinhar o armazenamento JBoss e provar uma capacidade externa pelo mesmo contrato, primeiro na CLI e depois nas interfaces escolhidas, preservando estado corrente e autoridade humana.
+A proposta é **coerente como direção arquitetural e tecnicamente fundamentada para implementação incremental**. Com o armazenamento JBoss implementado, o próximo passo é concluir os contratos mínimos e os nomes legíveis dos backups do incremento A, mantendo seus ensaios/aceites no acompanhamento canônico. Depois, provar `maven.build` como capacidade externa pela CLI e pelas interfaces escolhidas, preservando estado corrente e autoridade humana.
 
 O avanço para automação agêntica de escrita depende de evidência dos controles reais do cliente e do ambiente. Enquanto essa prova não existir, a entrega assistida e as operações determinísticas continuam sendo o caminho válido. A conclusão desta revisão documental não concede GO para alterações de aplicações, implantação ou homologação corporativa.
 
 ### 11.6. Revisão de 17/10/2026
 
-Auditoria feita no repositório, com conferência do código da `main` `5c8d582` e de fontes oficiais. Mesmo limite de independência da seção 11.1.
+Registro histórico da auditoria no repositório, com conferência do código da `main` `5c8d582` e de fontes oficiais. Mesmo limite de independência da seção 11.1. A revisão de 19/10 atualiza a baseline e a prioridade dos agentes sem atribuir essas decisões à revisão anterior.
 
 | Achado | Tratamento |
 | --- | --- |
@@ -501,6 +512,12 @@ Auditoria feita no repositório, com conferência do código da `main` `5c8d582`
 | A20 — Perfis previstos reduzidos a um "Quarkus" genérico | Restaurados os perfis da arquitetura anterior: Desenvolvimento Quarkus (SDLC sem migração), Migração Quarkus e Cobertura de código transversal (documento 1, seção 6; incremento F). |
 
 Fontes verificadas nesta revisão: O8 (revisão 2026-07-28 do transporte `stdio`), O13, O15 (PowerShell 6+), O24–O27.
+
+### 11.7. Revisão de consistência de 19/10/2026
+
+Os seis achados foram tratados no desenho: GO na seção humana do plano; bases explícitas para cada caminho; separação entre publicação do build legado e contrato do provedor; baseline `6566bb8` com entregas e pendências distintas; figura com IA opcional e GO/aceite separados; entregas e aceite dos contratos mínimos no incremento A. As subseções 2.8/2.9 foram ordenadas e a coleta documental foi atualizada.
+
+Por decisão do desenvolvedor, Codex e GitHub Copilot passam a ser principais e Claude Code secundário, substituindo a prioridade registrada em 17/10. O piloto programático parte de Codex, e o plugin JDT LS do Claude Code torna-se uma avaliação opcional. Isso não altera as permissões dos helpers nem comprova homologação dos clientes. A tentativa de consultar `codex exec --help` nesta máquina foi bloqueada pela política de execução de scripts; O13 fundamenta a interface proposta, e o ensaio nativo permanece pendente.
 
 <a id="anexo-a"></a>
 ## Anexo A — Catálogo de capacidades e priorização

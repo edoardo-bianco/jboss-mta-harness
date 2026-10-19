@@ -1,5 +1,27 @@
 # Plano do agente: evolucao do harness
 
+## Consistencia documental e agentes principais - 19/10/2026
+
+Branch `harness/consistencia-engineering-harness`, derivada da `main` em `6566bb8`.
+
+**Objetivo:** resolver os seis achados da revisao de `doc/engineering-harness/`
+e os ajustes editoriais, preservando ADR-0009 e contratos como fontes normativas.
+
+**Decisao do desenvolvedor:** Codex e GitHub Copilot sao os agentes principais;
+Claude Code e secundario. Esta decisao substitui a prioridade registrada em
+17/10/2026, mantendo os tres adaptadores e a independencia do nucleo.
+
+**Entrega:** alinhar fonte do GO, bases dos caminhos, responsabilidade pela
+publicacao do build, baseline e entregas, diagrama com IA opcional e aceite do
+incremento A. Atualizar prioridade dos clientes e piloto programatico, ordenar
+as subsecoes e conferir as referencias da auditoria. O PNG anterior permanece
+identificado como ilustracao historica; o fluxo corrente usa Mermaid editavel.
+
+**Verificacao:** leitura cruzada com contrato/codigo, links e ancoras Markdown,
+sintaxe/preservacao dos exemplos JSON e do esquema de entrada, revisao do
+diagrama e `git diff --check`.
+Alteracao documental; ensaios de runtime e homologacoes anteriores mantem seu estado.
+
 ## Adaptador Claude Code - 17/10/2026
 
 Branch `harness/adaptador-claude-code`, derivada da `main` em `4c27442`.
@@ -65,7 +87,8 @@ e `doc/estrategia/` por dois conjuntos com finalidades distintas:
 
 - Os tres documentos sao a referencia principal; corrigir a situacao descrita
   para a `main` real (`5c8d582`), sem baseline anterior a PR #31.
-- Claude Code passa a ser o cliente principal; Codex e Copilot continuam suportados.
+- Decisao historica, substituida em 19/10/2026: Claude Code seria o cliente principal.
+  A prioridade vigente e Codex e GitHub Copilot como principais, Claude Code secundario.
 - Perfil de modernizacao considera GitHub Copilot app modernization (Azure).
 - Serena nao integrou no Windows (executavel sem assinatura); avaliar o plugin
   oficial `jdtls-lsp` do Claude Code e o JDT LS como alternativa de indexacao.

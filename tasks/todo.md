@@ -1,5 +1,27 @@
 # To-do do agente: evolucao do harness
 
+## Consistencia documental e agentes principais - 19/10/2026
+
+[Escopo e decisao](plan.md#consistencia-documental-e-agentes-principais---19102026).
+
+- [x] Corrigir os seis achados e os ajustes editoriais nos tres documentos.
+- [x] Alinhar Codex e GitHub Copilot como principais; Claude Code secundario.
+- [x] Conferir links/ancoras, sintaxe/preservacao dos exemplos JSON, diagrama e diff.
+- [ ] Revisao humana e integracao na principal.
+
+**Verificacao em 19/10/2026:** 106 referencias locais nos tres documentos e 27
+referencias recebidas de outros Markdown versionados, sem arquivos/ancoras
+ausentes. Links dos dois arquivos tasks tambem conferidos. Cinco blocos JSON
+validos e identicos a baseline `6566bb8`; cercas balanceadas e fluxo Mermaid
+revisado por leitura. Catalogo: 47 URLs externas distintas, sendo sete do
+repositorio e 40 fontes oficiais/primarias. `git diff --check`: PASS.
+
+**Limites:** testes de runtime nao executados nesta alteracao documental.
+Validacao JSON Schema original mantida como historica; nao repetida porque
+`jsonschema` nao esta instalado. Ajuda local `codex exec --help` bloqueada pela
+politica de scripts; interface conferida na fonte oficial O13, sem alterar a
+politica da maquina ou declarar o piloto homologado.
+
 ## Adaptador Claude Code - 17/10/2026
 
 [Escopo](plan.md#adaptador-claude-code---17102026).

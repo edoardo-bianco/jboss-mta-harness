@@ -1,6 +1,6 @@
 # Engineering Harness — system design
 
-**Documento 2 de 3 · Revisão de 17/10/2026 · Contratos e desenho propostos, não APIs já implementadas**
+**Documento 2 de 3 · Revisão de 19/10/2026 · Contratos e desenho propostos, não APIs já implementadas**
 
 **Direção e baseline:** [Estratégia e arquitetura](01-estrategia-e-arquitetura.md) · **Tecnologia, implementação e fontes:** [Plano tático](03-plano-tatico-e-implementacao.md)
 
@@ -97,7 +97,18 @@ Reaproveitar `config/harness.local.json`, a configuração local já usada pelo 
 
 **Precedência proposta:** valores permitidos pelo contrato → defaults do perfil → configuração local validada → parâmetros permitidos da tarefa. Restrições não são sobrescritas por essa precedência. Um alvo incompatível exige correção explícita, não mesclagem silenciosa.
 
-Para os dados e configurações do workspace, preservar a regra da simplificação: caminhos relativos são resolvidos pela raiz do workspace que contém `.harness`, nunca pelo diretório corrente do terminal. Links Markdown são relativos ao documento que os contém. Caminhos de recursos internos de um pacote são relativos à raiz desse pacote e pertencem a outro namespace. Essa distinção precisa de funções e testes explícitos. [S1](03-plano-tatico-e-implementacao.md#fonte-s1)
+Cada campo resolve caminhos relativos pela base definida em seu contrato, nunca pelo diretório corrente do terminal. Preservar as bases da simplificação: [S1](03-plano-tatico-e-implementacao.md#fonte-s1)
+
+| Referência | Base para resolver o caminho relativo |
+| --- | --- |
+| Instalações locais e associações `pom`/`mta.diretorio` em `projeto.json` | Raiz do workspace que contém `.harness`. |
+| Artefatos no resultado público da capacidade | Pasta administrada `.harness/projetos/<artifactId>/`. |
+| `LocalPaths` de uma ficha | `Source` do projeto associado. |
+| `EvidencePaths` de uma ficha | Pasta `evidencias/` do projeto. |
+| Links Markdown | Diretório do documento que contém o link. |
+| Recursos internos de um provedor, como `entrypoint` | Raiz da instalação aprovada do pacote. |
+
+Essas bases não são intercambiáveis. Funções e testes devem cobrir a mesma referência relativa em bases diferentes e a execução a partir de outro diretório.
 
 ### 4.1. Diagnóstico de ambiente
 
@@ -234,7 +245,7 @@ Exemplo de resultado corrente de uma tentativa que falhou:
 }
 ```
 
-Caminhos de artefatos do resultado publicado são relativos à pasta administrada do projeto. O provedor entrega arquivos na área transitória autorizada; o núcleo valida os destinos e publica no caminho final. O provedor não reescreve `migracao.md` nem altera a decisão humana. Schemas completos de envelope e resultado, além do esquema de entrada exemplificado, são entregas do primeiro incremento; estes exemplos não constituem uma biblioteca executável pronta.
+Caminhos de artefatos do resultado publicado são relativos à pasta administrada do projeto. No contrato `process-json`, o provedor entrega arquivos na área transitória autorizada; o núcleo valida os destinos e publica no caminho final. O provedor não reescreve `migracao.md`, o plano ou a decisão humana. A transição do build legado tem a fronteira descrita na seção 6. Schemas completos de envelope e resultado, além do esquema de entrada exemplificado, são entregas do primeiro incremento; estes exemplos não constituem uma biblioteca executável pronta.
 
 O envelope comum distingue sucesso técnico, falha, cancelamento confirmado, resultado parcial, entrada necessária, indisponibilidade, conflito e espera por humano. Saída malformada, ausência de artefato obrigatório ou divergência entre código de saída e resultado tornam a execução inválida. Nenhum estado técnico concede aceite. Os nomes definitivos e sua tradução para contratos legados devem ser fixados no primeiro incremento, sem criar dois estados concorrentes para o mesmo fato.
 
@@ -244,7 +255,9 @@ Para o primeiro contrato `process-json`, uma invocação usa um processo e um pe
 
 O executor controla diretório, argumentos, ambiente permitido, entrada padrão, timeout, tamanho máximo de saída e encerramento. Valores de limite pertencem à configuração validada por capacidade, não a defaults ilimitados. Não montar uma linha de shell com texto produzido pelo modelo. Usar processo e argumentos estruturados quando o executável permitir. No Windows, `.cmd` e `.bat` exigem launcher específico e tratamento cuidadoso; a API Node documenta essa diferença. [O5](03-plano-tatico-e-implementacao.md#fonte-o5)
 
-No piloto Maven, é aceitável conservar o wrapper PowerShell 5.1 aprovado para chamar `mvn.cmd`. Na `main` atual, `HarnessBuild.psm1` já publica a última tentativa em `atual/build/console.log` e a situação em `operacao.json`, sem `RunId` ou pasta por build; o adaptador Node pode chamá-lo durante a transição. [R4](03-plano-tatico-e-implementacao.md#fonte-r4)
+Na baseline `6566bb8`, `HarnessBuild.psm1` executa Maven, controla a exclusividade e publica a última tentativa em `atual/build/console.log`, `resultado.json` e `operacao.json`, sem `RunId` ou pasta por build. Enquanto esse fluxo for chamado integralmente durante a transição, ele permanece o único responsável pela publicação: o adaptador Node não mantém outro lock de escrita durante a chamada nem republica os mesmos arquivos. Essa ponte reaproveita a operação existente, mas ainda não comprova o contrato de provedor da seção 5. [R4](03-plano-tatico-e-implementacao.md#fonte-r4)
+
+Para concluir o incremento B, separar a execução Maven da publicação. Reutilizar o launcher PowerShell 5.1 e suas verificações, fazendo o provedor devolver resultado e artefatos transitórios; o núcleo valida e publica uma única vez. O contrato deve demonstrar que saída inválida não substitui o resultado/log do build anterior e que falha de build válida publica a última tentativa. A situação da operação registra a tentativa inválida e identifica os artefatos preservados como anteriores. A extração é trabalho futuro, sem pressupor uma opção já disponível no módulo atual.
 
 Não alterar `process.env` globalmente para alternar JDKs entre operações concorrentes. Compor o ambiente de cada processo filho e preservar a configuração da máquina. Redigir logs com remoção de segredos e sem publicar todo o ambiente.
 
@@ -348,7 +361,8 @@ Não exigir `RunId`, `RequestId`, GUID ou hash para localizar e retomar o projet
 | Associação local e origem de diagnóstico | `projeto.json`, interpretado pelo perfil. |
 | Detalhamento MTA | Relatório na origem configurada. |
 | Resumo de uma issue | Ficha essencial do perfil. |
-| Decisões da migração | Conteúdo humano de `migracao.md`. |
+| Escolhas de issues, andamento e observações da migração | Conteúdo humano de `migracao.md`. |
+| GO do lote, dispensas e aceite | Seção de decisão humana no plano corrente; tarefas a referenciam, conforme o contrato de migração. |
 | Plano e passos | Arquivos correntes de planejamento. |
 | Reconciliação | Último resultado e pendências em `reconciliado/`. |
 | Navegação | Índices derivados; não autorizam nem substituem os documentos. |
@@ -375,7 +389,7 @@ Compartilhar significa copiar arquivos pelo mecanismo habitual. Se já existe tr
 
 Comparar decisões, escopo, situação e evidências relevantes. Material equivalente não gera duplicação; conflito exige resolução antes de atualizar os documentos afetados. Não escolher a versão do colega apenas pela data. Preservar as associações locais ao POM/MTA; cópia não transfere GO.
 
-Depois da reconciliação, substituir apenas o resultado corrente e a última base reconciliada, regenerar índices e retirar de `recebido/` o material resolvido. Conflitos pendentes permanecem. Uma origem externa não é apagada. Não criar comando de importação, exportação, manifest de transferência ou cadeia `ImportedFrom` com outro nome.
+Depois da comparação, publicar conjuntamente os documentos correntes afetados, suas fontes/índices e a última conclusão em `reconciliado/resultado.md`; não guardar uma cópia da base comparada. Retirar de `recebido/` somente o material interno explicitamente resolvido. Conflitos pendentes permanecem. Uma origem externa não é apagada. Não criar comando de importação, exportação, manifest de transferência ou cadeia `ImportedFrom` com outro nome.
 
 ### 9.6. Escrita consistente e recuperação
 
@@ -392,9 +406,9 @@ Cenários de sprints multiprojeto mantêm um registro mestre em um projeto parti
 
 O controle tem três perguntas independentes: a capacidade está disponível? A operação é permitida nesse contexto? Existe a decisão humana necessária para os efeitos propostos?
 
-O runtime verifica essas condições antes de chamar o provedor. Uma porta de decisão lê o registro canônico definido pelo perfil — `migracao.md` no piloto JBoss — sem criar uma segunda fonte de autorização ou impor esse documento a Quarkus e outros perfis. Selecionar perfil, instalar ferramenta, aprovar um prompt no cliente ou receber `approved=true` não substitui a autorização de uma alteração delimitada.
+O runtime verifica essas condições antes de chamar o provedor. Uma porta de decisão resolve a fonte canônica definida pelo perfil. No piloto JBoss, lê o GO, as dispensas e o aceite na seção de decisão humana do plano corrente (`PlanPath`, normalmente `atual/planejamento/plano.md`); as tarefas referenciam essa seção. `migracao.md` fornece escolhas, andamento e observações das issues, sem substituir o plano como fonte de autorização. Preservar decisões legadas conforme o contrato de migração, sem criar uma segunda fonte ou impor esses documentos a outros perfis. Selecionar perfil, instalar ferramenta, aprovar um prompt no cliente ou receber `approved=true` não substitui a autorização de uma alteração delimitada.
 
-No primeiro fluxo híbrido, a confirmação é solicitada ao desenvolvedor pela interface local. Vincular a decisão ao projeto, perfil, conteúdo relevante do plano, escopo e efeitos apresentados, sem construir uma cadeia histórica de hashes. Comparações de conteúdo podem ocorrer em memória. Se esses elementos mudarem, ou se a continuidade de uma sessão de alteração não puder ser comprovada, solicitar nova decisão.
+No primeiro fluxo híbrido, conferir a decisão humana já registrada e seu alcance antes de solicitar confirmação pela interface local. Vincular a decisão ao projeto, perfil, conteúdo relevante do plano, escopo e efeitos apresentados, sem construir uma cadeia histórica de hashes. Comparações de conteúdo podem ocorrer em memória. GO inequívoco e aplicável não é solicitado novamente por troca de sessão ou cliente. Mudança de escopo, solução ou aceite exige revisão de alcance, preservando o texto anterior; dúvida real pede somente o esclarecimento ausente.
 
 O MCP inicial não expõe uma operação para o agente conceder GO. Uma solicitação de escrita sem autorização verificável retorna necessidade de interação humana; não fica lendo confirmação no `stdin` reservado ao protocolo. A ampliação do MCP para mutação exige uma superfície de confirmação confiável e testes próprios. A recomendação de manter humanos no controle consta da especificação, mas não é automaticamente aplicada pelo protocolo. [O9](03-plano-tatico-e-implementacao.md#fonte-o9)
 
@@ -416,13 +430,13 @@ O adaptador de agente declara modos efetivamente suportados: entrega assistida d
 | CLI programática | Chamar interface documentada, com limites e retorno validado. | Somente após obter e conferir o resultado. |
 | Agente consumidor de MCP | Expor capacidades permitidas; cliente solicita operações. | Cada chamada respeita o contrato e a autoridade do harness. |
 
-**Clientes de referência: Claude Code e GitHub Copilot.** A proposta é independente da tecnologia agêntica; os adaptadores registram o que cada cliente oferece de fato, sem tornar um deles requisito do núcleo. Codex permanece suportado pelos artefatos existentes.
+**Agentes principais: Codex e GitHub Copilot; Claude Code é secundário**, conforme decisão de 19/10/2026. A proposta é independente da tecnologia agêntica; os adaptadores registram o que cada cliente oferece de fato, sem tornar um deles requisito do núcleo. Os três mantêm seus artefatos de orientação existentes.
 
 | Cliente | O que está documentado | Observação para o harness |
 | --- | --- | --- |
-| Claude Code | Modo programático `claude -p`, com `--output-format json`, `--json-schema`, `--allowedTools` e modos de permissão; `--bare` para execução reproduzível sem carregar hooks, plugins e `CLAUDE.md` da máquina. Executa nativamente em PowerShell ou CMD no Windows, com binário assinado pela Anthropic; extensões para VS Code e JetBrains. [O24](03-plano-tatico-e-implementacao.md#fonte-o24) [O26](03-plano-tatico-e-implementacao.md#fonte-o26) | Candidato à primeira integração programática. Plugins oficiais de inteligência de código (LSP) dão navegação por símbolo e diagnósticos após edições. [O25](03-plano-tatico-e-implementacao.md#fonte-o25) |
-| GitHub Copilot | Extensões de IDE com perfis e prompts; Copilot CLI com modo programático. [O14](03-plano-tatico-e-implementacao.md#fonte-o14) | O Copilot CLI exige PowerShell 6 ou superior no Windows; com a baseline corporativa em PowerShell 5.1, não é executor programático homologado. A extensão da IDE e a entrega assistida permanecem caminhos válidos. [O15](03-plano-tatico-e-implementacao.md#fonte-o15) |
-| Codex | `codex exec` para uso não interativo. [O13](03-plano-tatico-e-implementacao.md#fonte-o13) | Mantido nos perfis e skills existentes. |
+| Codex | `codex exec` para uso não interativo; `--json` emite eventos JSONL e `--output-schema` define o formato da resposta final. [O13](03-plano-tatico-e-implementacao.md#fonte-o13) | Principal e candidato inicial ao piloto programático. O adaptador converte o retorno nativo ao envelope do harness; instalação, permissões e cancelamento ainda exigem ensaio. |
+| GitHub Copilot | Extensões de IDE com perfis e prompts; Copilot CLI com modo programático. [O14](03-plano-tatico-e-implementacao.md#fonte-o14) | Principal. O Copilot CLI exige PowerShell 6 ou superior no Windows; com a baseline corporativa em PowerShell 5.1, não é executor programático homologado. A extensão da IDE e a entrega assistida permanecem caminhos válidos. [O15](03-plano-tatico-e-implementacao.md#fonte-o15) |
+| Claude Code | Modo programático `claude -p`, com `--output-format json`, `--json-schema`, `--allowedTools` e modos de permissão; `--bare` desativa descoberta automática de configurações, hooks, plugins, skills e MCP do projeto/usuário. Executa nativamente em PowerShell ou CMD no Windows, com binário assinado pela Anthropic. [O24](03-plano-tatico-e-implementacao.md#fonte-o24) [O26](03-plano-tatico-e-implementacao.md#fonte-o26) | Secundário. Seu piloto precisa fornecer contexto/MCP e autenticação compatíveis com `--bare`, sem presumir o carregamento dos helpers locais. Plugins LSP continuam uma integração específica desse cliente. [O25](03-plano-tatico-e-implementacao.md#fonte-o25) |
 
 Documentação de modo programático estabelece possibilidade técnica, não equivalência operacional entre clientes ou com as extensões das IDEs. O adaptador testa a versão instalada e não escolhe flags permissivas para fazer o cenário passar; não alterar o ambiente para contornar restrições corporativas.
 
