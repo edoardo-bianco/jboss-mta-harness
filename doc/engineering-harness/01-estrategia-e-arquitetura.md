@@ -1,6 +1,6 @@
 # Engineering Harness — estratégia e arquitetura
 
-**Documento 1 de 3 · Revisão de 17/10/2026 · Proposta consolidada para decisão e implementação incremental**
+**Documento 1 de 3 · Revisão de 19/10/2026 · Proposta consolidada para decisão e implementação incremental**
 
 **Leitura complementar:** [System design](02-system-design.md) · [Plano tático, fontes e auditoria](03-plano-tatico-e-implementacao.md)
 
@@ -76,18 +76,18 @@ A estratégia anterior já propunha núcleo comum, perfis, adaptadores e expans�
 
 ### 3.1. Base examinada e limite de verificação
 
-A situação descrita corresponde à `main` em **`5c8d582`**, depois da integração da PR #31, que entregou a simplificação por projeto e a transição dos registros. Foram conferidos no código o layout por projeto, a seleção do MTA na origem, o mestre de sprints, o build com resultado corrente e o servidor MCP. As suítes PowerShell do harness rodam pelo executor isolado; ensaios nativos dos clientes de IA e homologações corporativas continuam pendentes e não são inferidos de testes simulados. [R0](03-plano-tatico-e-implementacao.md#fonte-r0) [S1](03-plano-tatico-e-implementacao.md#fonte-s1) [S2](03-plano-tatico-e-implementacao.md#fonte-s2)
+A situação descrita corresponde à `main` em **`6566bb8`**, conferida em 19/10/2026. Ela inclui a simplificação por projeto da PR #31 (`5c8d582`), a consolidação documental, o estado JBoss corrente da PR #34 e o adaptador Claude Code da PR #35. Foram conferidos no código o layout por projeto, a seleção do MTA na origem, o mestre de sprints, o build com resultado corrente e as integrações JBoss/MCP/clientes. As suítes PowerShell do harness rodam pelo executor isolado; nesta revisão foram realizadas verificações documentais. Ensaios nativos dos clientes de IA e homologações corporativas continuam pendentes e não são inferidos de testes simulados. [R0](03-plano-tatico-e-implementacao.md#fonte-r0) [S1](03-plano-tatico-e-implementacao.md#fonte-s1) [S2](03-plano-tatico-e-implementacao.md#fonte-s2)
 
 ### 3.2. Matriz de situação
 
-| Frente | Situação na `main` (`5c8d582`) | Tratamento nesta proposta |
+| Frente | Situação na `main` (`6566bb8`) | Tratamento nesta proposta |
 | --- | --- | --- |
 | PowerShell 5.1, Run Tasks e configuração local | Presentes; 24 Run Tasks com prefixos por etapa. | Reutilizar durante a transição. |
 | Dados por projeto, `atual` e último `reconciliado` | **Implementados** (ADR-0009): `.harness/projetos/<artifactId>/`, MTA lido na origem, fichas essenciais, cópia com reconciliação, sem recibos, cadeias ou importador. | Baseline do desenho; não reimplementar. |
 | Build Maven | Publica a última tentativa em `atual/build/` e a situação em `operacao.json`, sem `RunId` ou pasta por execução. | Primeira capacidade a extrair. |
 | MTA, Sonar e planejamento | Integrações e contratos correntes; homologação Sonar corporativa pendente. | Extrair capacidades sem declarar homologação concluída. |
 | Operação JBoss | Implementada para EAP 7.0/7.1 (chave `eap71`) e 7.4. Estado em `.harness/servidores/<servidor>/` (última operação e logs do último start) e último deploy em `projetos/<artifactId>/atual/jboss/<servidor>/`; o deploy substitui o WAR implantado, sem rollback gerenciado. | Extrair capacidades preservando o princípio de armazenamento (seção 9). |
-| Clientes de IA | Prompts, skill comum e seis helpers leitores para GitHub Copilot, Codex e Claude Code (`.claude/agents/`, ponteiro em `.claude/skills/` e MCP em `.mcp.json`); ensaio nativo dos três clientes pendente. | Claude Code e GitHub Copilot como clientes de referência; nenhum cliente é requisito do núcleo. |
+| Clientes de IA | Prompts, skill comum e seis helpers leitores para Codex, GitHub Copilot e Claude Code (`.claude/agents/`, ponteiro em `.claude/skills/` e MCP em `.mcp.json`); ensaio nativo dos três clientes pendente. | Codex e GitHub Copilot são principais; Claude Code é secundário. Nenhum cliente é requisito do núcleo. |
 | MCP local de consultas | Servidor `stdio` com SDK 2.3.1, Zod e ponte PowerShell; opcional e de leitura. | Reutilizar conceitos e contratos. |
 | Planejamento macro por sprints | Integrado; homologação pendente. | Preservar regras; contrato em `doc/contratos/`. |
 | Núcleo TypeScript, catálogo de perfis e capacidade externa | Propostos (ADR-0008); não implementados. | Implementar incrementalmente. |
@@ -138,9 +138,24 @@ Desenvolvedor pela CLI/menu/IDE       Coding agent pelo MCP opcional
                   Verificações e revisão humana
 ```
 
-![Arquitetura-alvo por perfis](imagens/05-arquitetura-alvo-perfis.png)
+```mermaid
+flowchart TD
+    Perfil["Perfil: procedimentos e critérios"] --> Contexto["Objetivo, contexto e evidências"]
+    Contexto --> Proposta["Proposta pelo desenvolvedor, com IA opcional"]
+    Proposta --> Revisao["Revisão humana do escopo e critérios"]
+    Revisao --> GO{"GO humano aplicável?"}
+    GO -->|Não| Proposta
+    GO -->|Sim| Execucao["Execução autorizada: manual, determinística ou com IA"]
+    Execucao --> Verificacao["Verificações e evidências"]
+    Perfil --> Verificacao
+    Verificacao --> Aceite{"Aceite humano do resultado?"}
+    Aceite -->|Retrabalho| Alcance{"Mesmo escopo e GO vigente?"}
+    Alcance -->|Sim| Execucao
+    Alcance -->|Não| Proposta
+    Aceite -->|Sim| Continuidade["Atualizar contexto; próximo lote exige pedido de continuidade"]
+```
 
-*Figura 5. O perfil tecnológico fornece elementos do feedforward e as verificações do feedback.*
+*Figura 5. Fluxo de alteração delimitada: o perfil orienta a proposta e as verificações, a IA é opcional e GO e aceite são decisões distintas. A [ilustração anterior](imagens/05-arquitetura-alvo-perfis.png) é histórica e representa somente a concepção inicial do fluxo assistido.*
 
 A CLI é a superfície executável de referência. VS Code e IntelliJ a acionam; extensões próprias podem melhorar a experiência depois. O MCP é outra entrada para os mesmos casos de uso, não o núcleo, a autorização ou o protocolo obrigatório entre todas as capacidades.
 
@@ -192,7 +207,7 @@ O desenvolvedor abre o projeto na IDE preferida, seleciona o perfil e consulta a
 
 No **fluxo conduzido pelo desenvolvedor**, a CLI/menu executa passos conhecidos e pode chamar um agente em uma etapa delimitada. No **fluxo assistido por agente**, o cliente consulta ou solicita capacidades expostas pelo harness, sempre dentro das políticas efetivas. Em ambos os casos, o objetivo e o aceite continuam humanos.
 
-**Independência de agente.** Claude Code e GitHub Copilot são os clientes de referência; Codex continua suportado nos artefatos existentes. A escolha entre eles é do desenvolvedor e da política corporativa: contratos de tarefa, autorização, layout e evidência não mudam com o cliente. Capacidades próprias de um cliente, como plugins de inteligência de código, são aproveitadas por adaptadores e aparecem como indisponíveis quando o cliente não as oferece.
+**Agentes principais: Codex e GitHub Copilot. Claude Code é secundário**, conforme decisão do desenvolvedor em 19/10/2026. Essa prioridade orienta os pilotos e a experiência de uso; os três continuam suportados. A escolha do cliente pertence ao desenvolvedor e à política corporativa: contratos de tarefa, autorização, layout e evidência não mudam com ele. Capacidades próprias de um cliente, como plugins de inteligência de código, são aproveitadas por adaptadores e aparecem como indisponíveis quando o cliente não as oferece.
 
 Há diferença entre preparar um contexto, entregar esse contexto ao cliente e executar o cliente programaticamente. Quando a interface do agente não permitir automação compatível, a entrega assistida continua sendo um resultado válido: o harness prepara e o desenvolvedor aciona o agente. Não simular invocação ou conclusão.
 
@@ -223,7 +238,7 @@ A consequência é explícita: **rastreabilidade do trabalho corrente não equiv
 | Característica | Evidência esperada, não apenas intenção |
 | --- | --- |
 | Independência de IDE | A mesma capacidade e os mesmos parâmetros funcionam no terminal, VS Code e IntelliJ, com diferenças de interface documentadas. |
-| Independência de agente | Trocar entre Claude Code, GitHub Copilot ou outro cliente não altera contratos de tarefa, autorização e resultado; incompatibilidade é exibida. |
+| Independência de agente | Trocar entre Codex, GitHub Copilot, Claude Code ou outro cliente não altera contratos de tarefa, autorização e resultado; incompatibilidade é exibida. |
 | Extensibilidade | Um provedor externo realiza uma capacidade sem importar código interno ou escrever dados fora de seus destinos acordados. |
 | Confiabilidade | Falhas, cancelamento, concorrência e recuperação não deixam sucesso fictício ou conjunto corrente inconsistente. |
 | Segurança | Permissões e limites são aplicados nas fronteiras controladas; restrições do sistema operacional não são contornadas. |
