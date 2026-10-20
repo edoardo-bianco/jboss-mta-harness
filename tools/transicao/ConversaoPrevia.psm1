@@ -42,14 +42,15 @@ function Read-ConversionInputs {
         } elseif ($registers.Count -gt 1) { $session.Pending.Add('Mais de um registro para o Source legado; escolha Registro explicitamente.') }
         else { $session.Pending.Add('Registro legado nao associado ao POM; informe SourceLegado se o checkout foi relocalizado.') }
         $planning=Select-ConversionPlan $session @($records | Where-Object Kind -EQ 'PLANEJAMENTO') $register $Contexto
+        $planning|Add-Member Documents (Get-ConversionPlanDocuments $session $planning.Record)
         $proposed=@([pscustomobject]@{Origin=$project.Pom;Destination=$project.ConfigPath;Action='ASSOCIAR_POM';Exists=(Test-Path -LiteralPath $project.ConfigPath)})
         if ($association) { $proposed+=[pscustomobject]@{Origin=$association;Destination=$project.ConfigPath;Action='CONVERTER_ASSOCIACAO';Exists=(Test-Path -LiteralPath $project.ConfigPath)} }
         if ($register) { $proposed+=[pscustomobject]@{Origin=$register.Path;Destination=$project.MigrationPath;Action='PRESERVAR_DECISOES_E_REESCREVER_LINKS';Exists=(Test-Path -LiteralPath $project.MigrationPath)} }
         if ($planning.Record) {
-            foreach ($pair in @(@('PlanPath',$project.PlanPath),@('TodoPath',$project.TodoPath))) {
-                $origin=Get-LegacyValue $planning.Record.Data $pair[0]
-                if (-not $origin -or $null -eq (Read-ConversionText $session $origin)) { $session.Pending.Add('Documento corrente ausente: '+$pair[0]+' em '+$planning.ContextPath); continue }
-                $proposed+=[pscustomobject]@{Origin=(Resolve-ProjectPath $origin $project.Root);Destination=$pair[1];Action='PRESERVAR_TEXTO_REVISAR_GO';Exists=(Test-Path -LiteralPath $pair[1])}
+            foreach ($document in $planning.Documents.Items) {
+                if ($null -eq $document.Text) { continue }
+                $destination=$project.($document.Field)
+                $proposed+=[pscustomobject]@{Origin=$document.Origin;Destination=$destination;Action='PRESERVAR_TEXTO_REVISAR_GO';Exists=(Test-Path -LiteralPath $destination)}
             }
             $proposed+=[pscustomobject]@{Origin=$planning.ContextPath;Destination=$project.ContextPath;Action='TRANSFORMAR_CONTEXTO_SEM_RECIBO';Exists=(Test-Path -LiteralPath $project.ContextPath)}
         }
@@ -62,7 +63,7 @@ function Read-ConversionInputs {
         Assert-ConversionUnchanged $session $inventory
         $preview=[pscustomobject][ordered]@{Mode='Previa';Project=$project.Name;Pom=$project.Pom;Source=$project.Source;LegacySource=$source;Destination=$project.Folder;
             Register=[pscustomobject]@{Path=$(if ($register) {$register.Path} else {$null});Candidates=@($registers | ForEach-Object Path);Decisions=@(if ($register) {$register.Decisions})};
-            Planning=[pscustomobject]@{ContextPath=$planning.ContextPath;Selection=$planning.Selection;Candidates=@($planning.Candidates)};
+            Planning=[pscustomobject]@{ContextPath=$planning.ContextPath;Selection=$planning.Selection;Candidates=@($planning.Candidates);DocumentsState=$planning.Documents.State};
             Reconciliation=$reconciliation;Related=$related;References=$references;Attachments=$attachments;
             ProposedFiles=@($proposed);Pending=@($session.Pending | Sort-Object -Unique);AuthorizationInherited=$false;DeletionAuthorized=$false;
             DiscardCandidates=@($records | Where-Object { $_.Sources.Count -eq 1 -and -not $_.Path.StartsWith($project.Folder+'\',[StringComparison]::OrdinalIgnoreCase) } | ForEach-Object Path | Sort-Object -Unique);

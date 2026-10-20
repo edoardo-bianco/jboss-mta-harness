@@ -78,6 +78,7 @@ if ($Formato -eq 'Json') { $preview | ConvertTo-Json -Depth 40; return }
 foreach ($path in $preview.Register.Candidates) { "  Registro candidato: $path" }
 foreach ($row in $preview.Register.Decisions) { "  Decisao preservada: $($row.Id) | $($row.Decision) | $($row.Progress) | $($row.Note)" }
 "Plano: $($preview.Planning.Selection) $($preview.Planning.ContextPath)"
+if ($preview.Planning.DocumentsState) { "Documentos do plano: $($preview.Planning.DocumentsState) (disponibilidade de plano/tarefas; nao comprova proposta concluida ou GO)" }
 foreach ($path in $preview.Planning.Candidates) { "  Contexto candidato: $path" }
 "Reconciliacao: $($preview.Reconciliation.State). $($preview.Reconciliation.Reason)"
 foreach ($item in $preview.Reconciliation.Declarations) { "  Declaracao $($item.State): $($item.Path) [$($item.Field)] ($($item.Evidence))" }

@@ -69,6 +69,21 @@ não permite determinar seu Source com segurança; erro de leitura em planning
 também impede declarar `SEM_PLANO`. Priorização, sprints e demais evidências
 mantêm suas próprias escolhas e verificações, mesmo em um projeto sem plano.
 
+Um contexto já preparado pode apontar `PlanPath` e `TodoPath` ainda não escritos.
+A prévia informa `Planning.DocumentsState` (JSON) ou `Documentos do plano`
+(texto): `AUSENTES`, `PRESENTES` ou `INCOMPLETOS`. Isso descreve a disponibilidade
+do par, sem comprovar que a proposta foi concluída. Ambos ausentes permitem
+converter contexto, prompt, fichas e evidências existentes, mantendo os destinos
+futuros no contexto e a revisão pendente. Não são criados plano nem tarefas
+fictícios. O contexto ainda exige vínculo ou escolha por `-Contexto`.
+
+Um único documento existente, diretório no lugar de arquivo ou trabalho diferente
+no destino interrompe a aplicação. Links humanos para documentos ausentes
+continuam sendo lacunas; a ausência do par não comprova que nada se perdeu.
+`Validar` aceita o preparo íntegro sem o par, exige o prompt e continua verificando
+as referências. Índices e fontes gerados só oferecem links para os documentos
+publicados. Os originais são preservados.
+
 Manifestos e resultados MTA copiados para as evidências do plano são tratados
 como cópias diagnósticas quando os anexos declaram sua origem sob o `Run` e o
 Source é único e consistente. Continuam visíveis na prévia como anexos; a
@@ -100,6 +115,127 @@ converta os participantes em ordem decrescente dos nomes Maven: anexos humanos
 compartilhados têm proprietário estável e o mestre só atesta cobertura quando
 as fichas e seus anexos estão disponíveis. Cada chamada escreve somente no
 projeto escolhido. As associações acima existem apenas durante a chamada.
+
+### Acompanhar vários projetos, um por vez
+
+O bloco abaixo executa a prévia de cada projeto e mantém um quadro em memória.
+Informe as pastas e as escolhas conferidas antes de executá-lo. Ele ordena pelos
+artifactIds do POM, em ordem ordinal decrescente. `A` aplica e valida; `V` apenas
+valida o destino; Enter deixa para depois; `S` encerra. Nenhum descarte é chamado.
+Falhas exibem o motivo e preservam o status de aplicação separado da validação.
+As escolhas compartilhadas de sprints precisam ser iguais em todas as chamadas;
+deixá-las vazias não ignora sprints legadas: o conversor exige sua resolução.
+
+```powershell
+# Acompanhamento sequencial da conversao
+$ErrorActionPreference = 'Stop'
+$raizHarness = 'C:\desenvolvimento\repositorio\harness-ambiente\jboss-mta-harness'
+$raizFontes = 'C:\desenvolvimento\repositorio\jboss-7-jdk8'
+$pastas = @(
+    'SIMTR-api', 'SIMTR-Outsourcing-api', 'SIMTR-arquitetura-common',
+    'SIMTR-arquiteturajee7', 'SIMTR-arquitetura-util', 'SIMTR-caixa-permissao',
+    'SIMTR-caixa-verificapdf', 'SIMTR-keycloak', 'SIMTR-parent-all-jee7',
+    'SIMTR-sicli-api', 'SIMTR-siecm-api', 'SIMTR-siiso-api',
+    'SIMTR-sipes-api', 'SIMTR-siric-api'
+)
+$conversor = Join-Path $raizHarness 'tools\transicao\Converter-RegistrosProjeto.ps1'
+Import-Module (Join-Path $raizHarness 'scripts\HarnessProject.psm1') -DisableNameChecking
+$participantes = @{}
+$porProjeto = @{}
+$falhasIdentidade = @()
+foreach ($pasta in $pastas) {
+    try {
+        $source = Join-Path $raizFontes $pasta
+        $projeto = Get-HarnessProjectReference $raizHarness (Join-Path $source 'pom.xml')
+        if ($porProjeto.ContainsKey($projeto.Name)) { throw "artifactId duplicado: $($projeto.Name)" }
+        $participantes[$source] = @{ Pom = $projeto.Pom }
+        $porProjeto[$projeto.Name] = $source
+    } catch {
+        $falhasIdentidade += [pscustomobject]@{ Pasta=$pasta; Motivo=$_.Exception.Message }
+    }
+}
+if ($falhasIdentidade.Count) {
+    $falhasIdentidade | Format-List | Out-Host
+    throw 'Resolva os POMs acima antes de converter o escopo compartilhado. Nada foi aplicado.'
+}
+
+# Contexto de preparo confirmado para a SIMTR-api.
+$sourceApi = Join-Path $raizFontes 'SIMTR-api'
+$participantes[$sourceApi].Contexto = Join-Path $raizHarness '.harness\planning\simtr-parent\issues\hardcode__f6b4c3b3d9fb\p_171d6de849a2\contexto-simtr-parent-hardcoded-ip-add-f6b4c3.json'
+
+# Acrescente escolhas somente depois de conferir os candidatos, por exemplo:
+# $participantes[$sourceApi].BuildResultado = 'caminho conferido do result.json'
+# Outros campos: Registro, MtaDiretorio, PrioritizacaoContexto,
+# SonarResultado e SonarTentativa. Contextos dos demais projetos: Contexto.
+$cenarios = @()
+# Cada entrada de $cenarios exige Contexto, Cenario e MestrePom conferidos.
+
+[string[]]$ordem = @($porProjeto.Keys)
+[Array]::Sort($ordem, [StringComparer]::Ordinal)
+[Array]::Reverse($ordem)
+$status = @{}
+foreach ($nome in $ordem) {
+    $status[$nome] = [pscustomobject]@{
+        Projeto=$nome; Etapa='AGUARDANDO'; Conversao='NAO_APLICADA'
+        Validacao='NAO_EXECUTADA'; Motivo=''
+    }
+}
+$numero = 0
+foreach ($nome in $ordem) {
+    $numero++
+    $linha = $status[$nome]
+    $etapa = 'PREVIA'
+    $parametros = @{ Workspace=$raizHarness; Pom=$participantes[$porProjeto[$nome]].Pom }
+    foreach ($campo in @('Registro','Contexto','MtaDiretorio','PrioritizacaoContexto',
+                        'BuildResultado','SonarResultado','SonarTentativa')) {
+        if ($participantes[$porProjeto[$nome]].ContainsKey($campo)) {
+            $parametros[$campo] = $participantes[$porProjeto[$nome]][$campo]
+        }
+    }
+    Write-Progress -Activity 'Conversao por projeto' -Status "$numero/$($ordem.Count): $nome" -PercentComplete (100 * ($numero-1) / $ordem.Count)
+    try {
+        $previa = $null
+        Write-Host "`n[$numero/$($ordem.Count)] $nome"
+        try {
+            $previa = & $conversor @parametros -Modo Previa -Formato Json | ConvertFrom-Json
+            $linha.Etapa = 'PREVIA'
+            Write-Host "Contexto: $($previa.Planning.Selection); documentos: $($previa.Planning.DocumentsState)"
+            foreach ($pendencia in $previa.Pending) { Write-Host "PENDENTE: $pendencia" }
+        } catch {
+            $linha.Etapa = 'PREVIA FALHOU'
+            $linha.Motivo = $_.Exception.Message
+            Write-Host "Previa indisponivel: $($linha.Motivo)" -ForegroundColor Yellow
+        }
+        $acao = (Read-Host 'A aplicar e validar; V validar; Enter pular; S sair').Trim().ToUpperInvariant()
+        if ($acao -eq 'S') { break }
+        if ($acao -eq 'A') {
+            if (-not $previa) { throw 'Resolva a falha da previa antes de aplicar; V continua disponivel.' }
+            $etapa = 'APLICAR'
+            $resultado = & $conversor @parametros -Participantes $participantes -Sprints $cenarios -Modo Aplicar -Formato Json | ConvertFrom-Json
+            $linha.Conversao = $resultado.Status
+            foreach ($aviso in $resultado.Diagnostics) { Write-Host "CONFERIR: $aviso" }
+        }
+        if ($acao -in @('A','V')) {
+            $etapa = 'VALIDAR'
+            $validacao = & $conversor -Workspace $raizHarness -Pom $parametros.Pom -Modo Validar -Formato Json | ConvertFrom-Json
+            $linha.Validacao = $validacao.Status
+            $linha.Motivo = $validacao.Diagnostics -join '; '
+            $linha.Etapa = 'CONFERIDO'
+            foreach ($aviso in $validacao.Diagnostics) { Write-Host "PENDENTE: $aviso" }
+        }
+    } catch {
+        $linha.Etapa = "$etapa FALHOU"
+        $linha.Motivo = $_.Exception.Message
+        Write-Host "$etapa interrompido: $($linha.Motivo)" -ForegroundColor Yellow
+    }
+    $ordem | ForEach-Object { $status[$_] } | Format-Table Projeto, Etapa, Conversao, Validacao -AutoSize | Out-Host
+    if ((Read-Host 'Enter para o proximo projeto; S para sair') -eq 'S') { break }
+}
+Write-Progress -Activity 'Conversao por projeto' -Completed
+$ordem | ForEach-Object { $status[$_] } | Format-Table Projeto, Etapa, Conversao, Validacao -AutoSize
+# Para rever os motivos completos nesta sessao:
+# $ordem | ForEach-Object { $status[$_] } | Format-List
+```
 
 Sprints preservam as premissas da revisão escolhida e o cálculo comprovado pelo
 ponteiro legado, em arquivos separados. O resultado fica `CONVERTED`, com revisão

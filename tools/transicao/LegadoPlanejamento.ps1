@@ -1,3 +1,17 @@
+function Get-ConversionPlanDocuments($Session,$Record) {
+    if (-not $Record) { return [pscustomobject]@{State=$null;Items=@()} }
+    $items=@(foreach ($field in @('PlanPath','TodoPath')) {
+        $origin=Resolve-ProjectPath (Get-LegacyValue $Record.Data $field) $Session.Workspace
+        if (Test-Path -LiteralPath $origin -PathType Container) { throw ('Diretorio no lugar de documento do plano: '+$origin) }
+        [pscustomobject]@{Field=$field;Origin=$origin;Text=(Read-ConversionText $Session $origin)}
+    })
+    $count=@($items | Where-Object { $null -ne $_.Text }).Count
+    $state=if ($count -eq 2) {'PRESENTES'} elseif ($count -eq 0) {'AUSENTES'} else {'INCOMPLETOS'}
+    if ($state -eq 'INCOMPLETOS') { $Session.Pending.Add('Par plano/tarefas incompleto: '+$Record.Path) }
+    # Disponibilidade informa somente existencia, sem atestar proposta ou GO.
+    [pscustomobject]@{State=$state;Items=$items}
+}
+
 function Get-ConversionIssueIds($Data) {
     $selected=@(Get-LegacyValue $Data 'SelectedIssues' @())
     if (-not $selected.Count) {
