@@ -22,8 +22,13 @@ function Get-ConversionReconciliation($Session,$Records,$Register) {
     [pscustomobject]@{State='PRELIMINAR';Basis=$null;Declarations=$declarations;Reason='Recibo, snapshot e declaracao CONCLUIDA nao comprovam comparacao executada. Conferir conclusoes humanas antes de propor base reconciliada.'}
 }
 
-function Get-ConversionRelated($Session,$Records,$Project) {
-    foreach ($record in $Records | Where-Object { $_.Kind -notin @('REGISTRO','PLANEJAMENTO','RECONCILIACAO') }) {
+function Get-ConversionRelated($Session,$Records,$Project,$Attachments) {
+    foreach ($record in $Records | Where-Object { $_.Kind -notin @('REGISTRO','PLANEJAMENTO','RECONCILIACAO','ASSOCIACAO') }) {
+        # Metadados copiados do MTA ja aparecem nos anexos. Somente a origem
+        # declarada e o Source unico permitem reconhecer esse papel.
+        if ($record.Kind -eq 'PLANNING' -and $record.Sources.Count -eq 1 -and @($Attachments | Where-Object {
+            $_.Valid -and $_.Kind -eq 'COPIA_DIAGNOSTICO_LEGADO' -and $_.Path -ieq $record.Path -and $_.OwnerSource -ieq $record.Sources[0]
+        }).Count) { continue }
         $category=$null
         $destination=switch ($record.Kind) {
             'PRIORIZACAO' {

@@ -12,7 +12,7 @@ function Read-ConversionInputs {
     param([Parameter(Mandatory=$true)][string]$Workspace,[Parameter(Mandatory=$true)][string]$Pom,[string]$SourceLegado,[string]$Registro,[string]$Contexto)
     $project=Get-HarnessProjectReference $Workspace $Pom
     $source=if ($SourceLegado) {Resolve-ProjectPath $SourceLegado $project.Root} else {$project.Source}
-    $session=[pscustomobject]@{Workspace=$project.Root;DataRoot=(Join-Path $project.Root '.harness');Observed=@{};Pending=(New-Object 'Collections.Generic.List[string]')}
+    $session=[pscustomobject]@{Workspace=$project.Root;DataRoot=(Join-Path $project.Root '.harness');Observed=@{};Pending=(New-Object 'Collections.Generic.List[string]');ReadErrors=(New-Object 'Collections.Generic.List[object]')}
     $lease=Enter-HarnessProjectAccess $project -ReadOnly
     try {
         $configuration=Read-ConversionText $session $project.ConfigPath
@@ -27,6 +27,8 @@ function Read-ConversionInputs {
         }
         $inventory=@(Get-ConversionInventory $session | Sort-Object Path)
         $records=@(Read-ConversionRecords $session $inventory $source)
+        $association=Get-ConversionPlanningAssociation $session $inventory $project $source
+        foreach ($record in $records | Where-Object Path -IEQ $association) { $record.Kind='ASSOCIACAO' }
         $registers=@($records | Where-Object Kind -EQ 'REGISTRO')
         if ($Registro) {
             $path=Resolve-ProjectPath $Registro $project.Root
@@ -41,6 +43,7 @@ function Read-ConversionInputs {
         else { $session.Pending.Add('Registro legado nao associado ao POM; informe SourceLegado se o checkout foi relocalizado.') }
         $planning=Select-ConversionPlan $session @($records | Where-Object Kind -EQ 'PLANEJAMENTO') $register $Contexto
         $proposed=@([pscustomobject]@{Origin=$project.Pom;Destination=$project.ConfigPath;Action='ASSOCIAR_POM';Exists=(Test-Path -LiteralPath $project.ConfigPath)})
+        if ($association) { $proposed+=[pscustomobject]@{Origin=$association;Destination=$project.ConfigPath;Action='CONVERTER_ASSOCIACAO';Exists=(Test-Path -LiteralPath $project.ConfigPath)} }
         if ($register) { $proposed+=[pscustomobject]@{Origin=$register.Path;Destination=$project.MigrationPath;Action='PRESERVAR_DECISOES_E_REESCREVER_LINKS';Exists=(Test-Path -LiteralPath $project.MigrationPath)} }
         if ($planning.Record) {
             foreach ($pair in @(@('PlanPath',$project.PlanPath),@('TodoPath',$project.TodoPath))) {
@@ -52,10 +55,10 @@ function Read-ConversionInputs {
         }
         if (@($proposed | Where-Object Exists).Count) { $session.Pending.Add('Destino possui dados; Aplicar devera conferir equivalencia ou conflito, sem sobrescrever trabalho novo.') }
         $reconciliation=Get-ConversionReconciliation $session $records $register
-        $related=@(Get-ConversionRelated $session $records $project)
         $references=@(Get-ConversionReferences $session $proposed $project $source)
         $attachments=@(Get-ConversionAttachments $session $planning.Record)
         foreach ($priority in @($records | Where-Object Kind -EQ 'PRIORIZACAO')) { $attachments+=@(Get-ConversionAttachments $session $priority) }
+        $related=@(Get-ConversionRelated $session $records $project $attachments)
         Assert-ConversionUnchanged $session $inventory
         $preview=[pscustomobject][ordered]@{Mode='Previa';Project=$project.Name;Pom=$project.Pom;Source=$project.Source;LegacySource=$source;Destination=$project.Folder;
             Register=[pscustomobject]@{Path=$(if ($register) {$register.Path} else {$null});Candidates=@($registers | ForEach-Object Path);Decisions=@(if ($register) {$register.Decisions})};

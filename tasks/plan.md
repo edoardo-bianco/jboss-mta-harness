@@ -1,5 +1,36 @@
 # Plano do agente: evolucao do harness
 
+## Conversao de associacao legada sem plano - 20/10/2026
+
+Branch `harness/conversao-associacao-sem-plano`, derivada da `main` em `8193668`.
+
+**Pedido:** corrigir o caso observado na maquina de trabalho, em que
+`planning/arquiteturajee7/issues/project.json` contem apenas ArtifactId, Project
+e Source, sem contexto/plano/tarefas. O inventario o classifica como PLANNING
+desconhecido e exige escolher um contexto inexistente.
+
+**Entrega:** reconhecer somente a associacao legada de formato conhecido,
+conferindo artifactId/POM, Source e caminho; representar ausencia de plano
+sem fabricar documentos; manter recusa de metadados desconhecidos, identidades
+divergentes, planos ambiguos e vinculos quebrados. Originais preservados;
+descarte continua explicito e condicionado a equivalencia.
+
+**Caso adicional informado:** SIMTR-api tem artifactId `simtr-parent`, contexto
+de plano candidato e manifesto MTA copiado em `evidencias/`. Reconhecer essas
+copias pela proveniencia declarada nos anexos e pelo Source unico, sem repetir
+a classificacao de PLANNING desconhecido. O nome do arquivo nao basta.
+Nao escolher automaticamente o plano candidato nem os builds/Sonar/sprints.
+
+**Achado de revisao:** falha de leitura do inventario nao pode comprovar
+ausencia de plano. Manter origem nao interpretada visivel e bloquear publicacao
+parcial, inclusive quando existe outro plano valido vinculado.
+
+**Verificacao:** reproduzir a falha em fixture; testar previa, aplicacao,
+validacao, repeticao e previa de descarte. Conferir outra aplicacao sintetica
+com plano existente, copias MTA com proveniencia e origens corrompidas.
+Executar as suites de conversao pelo runner isolado.
+Nao converter nem limpar os dados reais da maquina de trabalho.
+
 ## Consistencia documental e agentes principais - 19/10/2026
 
 Branch `harness/consistencia-engineering-harness`, derivada da `main` em `6566bb8`.

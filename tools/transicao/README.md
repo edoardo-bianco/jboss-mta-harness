@@ -2,7 +2,7 @@
 
 **Estado:** prévia, aplicação, validação e descarte implementados em Windows
 PowerShell 5.1 e verificados em fixtures. Aceite humano integrado pendente.
-**Revisão:** 14/10/2026. **Destino:** `tools/transicao/README.md`.
+**Revisão:** 20/10/2026. **Destino:** `tools/transicao/README.md`.
 
 **Prioridade:** parte da simplificação que precede modernização e novas
 funcionalidades. Dependências, riscos e
@@ -52,6 +52,28 @@ referências e pendências. Registro e plano são selecionados por Source e vín
 explícitos; `Previous` segue até a ponta única. Datas de arquivos não participam
 da escolha. Um vínculo atual quebrado, ciclo ou documento de outra solicitação
 fica pendente; não é substituído por um plano histórico.
+
+O cadastro legado `planning/<artifactId>/issues/project.json`, contendo somente
+`ArtifactId`, `Project` e `Source` como textos não vazios, é reconhecido como
+associação. O artifactId deve corresponder ao POM e o Source à origem selecionada
+(ou ao `SourceLegado` explícito em uma relocalização). Campos adicionais ou
+identidades divergentes exigem conferência; não são descartados silenciosamente.
+A aplicação preserva o original e associa o POM em `projeto.json` corrente.
+
+Quando não há contexto de planejamento nem referência quebrada a um plano,
+a prévia mostra `Plano: SEM_PLANO`. Nesse caso não se informa `-Contexto` e a
+conversão não cria plano, tarefas ou prompt de planejamento. Planos existentes
+continuam exigindo vínculo ou seleção explícita; referências quebradas permanecem
+pendentes. Uma origem que não pôde ser interpretada bloqueia a aplicação, pois
+não permite determinar seu Source com segurança; erro de leitura em planning
+também impede declarar `SEM_PLANO`. Priorização, sprints e demais evidências
+mantêm suas próprias escolhas e verificações, mesmo em um projeto sem plano.
+
+Manifestos e resultados MTA copiados para as evidências do plano são tratados
+como cópias diagnósticas quando os anexos declaram sua origem sob o `Run` e o
+Source é único e consistente. Continuam visíveis na prévia como anexos; a
+conversão usa a fonte MTA direta e preserva as cópias antigas. O nome
+`manifest.json` ou `result.json`, sozinho, não determina esse papel.
 
 Declarações `CONCLUIDA` no registro e nos snapshots embutidos aparecem como
 `DECLARADA_A_CONFERIR`. O legado não fornece resultado estruturado que comprove

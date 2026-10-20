@@ -1,5 +1,33 @@
 # To-do do agente: evolucao do harness
 
+## Conversao de associacao legada sem plano - 20/10/2026
+
+[Escopo](plan.md#conversao-de-associacao-legada-sem-plano---20102026).
+
+- [x] Reproduzir o caso informado em fixture isolada antes da corretiva.
+- [x] Validar associacao legada e distinguir ausencia de plano de vinculo quebrado.
+- [x] Conferir preservacao, repeticao e descarte explicito, incluindo outro projeto com plano.
+- [x] Reproduzir e corrigir classificacao duplicada das copias MTA declaradas nos anexos.
+- [x] Bloquear publicacao com origem corrompida; nao declarar ausencia de plano por falha de leitura.
+- [x] Executar suites de conversao, revisar diff e documentar o resultado.
+- [ ] Revisao humana e integracao na principal.
+
+**Verificacao em 20/10/2026:** 29 suites `Test-Conversion*.ps1` aprovadas em
+Windows PowerShell 5.1 pelo runner isolado. Na rodada final, 26 passaram e tres
+atingiram o limite de caminho na raiz temporaria padrao; essas tres
+(`EvidenceScopes`, `MultiProject`, `SharedEvidence`) passaram ao repetir com
+TMP e TEMP apontando para `C:\Temp` apenas no processo. Uma primeira rodada
+tambem detectou a mudanca da mensagem de ambiguidade; a mensagem compativel
+foi preservada e `ParticipantMta` passou na rodada final.
+
+As novas fixtures falharam antes das respectivas correcoes. Mutacao que
+desabilitou a validacao de Source foi detectada pelo teste e revertida.
+Revisao independente da associacao, falhas de leitura, publicacao/descarte
+e copias MTA terminou sem achados pendentes; `git diff --check` passou.
+Nenhum dado real de aplicacao foi convertido ou removido. Na maquina de
+trabalho, a origem declarada no contexto SIMTR-api e as escolhas de
+planejamento/diagnosticos/priorizacao/sprints ainda precisam ser conferidas.
+
 ## Consistencia documental e agentes principais - 19/10/2026
 
 [Escopo e decisao](plan.md#consistencia-documental-e-agentes-principais---19102026).
