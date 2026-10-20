@@ -34,6 +34,13 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
     if ($Inputs.Session.ReadErrors.Count) { throw ('Origens nao interpretadas; confira antes de aplicar: '+(($Inputs.Session.ReadErrors | ForEach-Object Path) -join ', ')) }
     if (-not $Inputs.Register) { throw 'Escolha um registro legado unico antes de aplicar.' }
     if ($Inputs.Planning.Selection -eq 'PENDENTE') { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
+    if ($Inputs.Planning.Documents.State -eq 'INCOMPLETOS') { throw 'Par plano/tarefas incompleto; confira o documento ausente antes de aplicar.' }
+    if ($Inputs.Planning.Documents.State -eq 'AUSENTES') {
+        foreach ($path in @($project.PlanPath,$project.TodoPath)) {
+            $existing=Read-ConversionText $Inputs.Session $path
+            if ($null -ne $existing -or (Test-Path -LiteralPath $path)) { throw ('Preparo sem proposta na origem; preservar documento existente no destino: '+$path) }
+        }
+    }
     if (@($Inputs.Preview.Related | Where-Object Kind -NotIn @('RUNS','PRIORIZACAO','BUILDS','SONAR','SPRINT')).Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
     $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;SonarInventories=@{};SonarSummary=$null;EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
     if (-not @($Participants).Count) { $Participants=@([pscustomobject]@{LegacySource=$Inputs.Preview.LegacySource;Project=$project}) }
@@ -93,21 +100,28 @@ function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$Priori
             ReconciledPath=(Join-Path $project.ReconciledPath 'resultado.md');ContractPath=(Join-Path $codeRoot 'doc/adr/0009-estado-corrente-por-projeto.md');
             NeedsReview=$true;ReviewReasons=@('Conversao de registros: revisao humana da proposta e do alcance do GO necessaria.');Diagnostics=@($state.Diagnostics)}
         Assert-CurrentPlanningContext $data $project
-        foreach ($pair in @(@('PlanPath','plano.md'),@('TodoPath','tarefas.md'))) {
-            $origin=Get-LegacyValue $record.Data $pair[0]
-            $text=Read-ConversionText $Inputs.Session $origin
-            if ($null -eq $text) { throw ('Documento do plano ausente: '+$origin) }
-            $text=Convert-ConversionMarkdown $text $origin $project.($pair[0]) $state
-            $state.Files[('atual/planejamento/'+$pair[1])]=Set-ProjectManagedBlock $text 'planejamento:fontes' (Get-CurrentPlanningSources $data $project $project.($pair[0]) @($project.PlanPath,$project.TodoPath))
+        $available=@(foreach ($document in $Inputs.Planning.Documents.Items) {
+            if ($null -ne $document.Text) { $project.($document.Field) }
+        })
+        foreach ($document in $Inputs.Planning.Documents.Items) {
+            if ($null -eq $document.Text) { continue }
+            $destination=$project.($document.Field)
+            $text=Convert-ConversionMarkdown $document.Text $document.Origin $destination $state
+            $relative=$destination.Substring($project.Folder.Length+1).Replace('\','/')
+            $state.Files[$relative]=Set-ProjectManagedBlock $text 'planejamento:fontes' (Get-CurrentPlanningSources $data $project $destination $available)
         }
         $data.Diagnostics=@($state.Diagnostics)
         $state.Files['atual/planejamento/contexto.json']=$data | ConvertTo-Json -Depth 12
         $template=[IO.File]::ReadAllText((Join-Path $codeRoot '.github/prompts/planejar-lotes.prompt.md'))
         $selection=@{ContextPath=$project.ContextPath;PlanPath=$project.PlanPath;TodoPath=$project.TodoPath}|ConvertTo-Json
-        $state.Files['atual/planejamento/planejar-lotes.prompt.md']=$template.TrimEnd()+"`n`nContexto corrente selecionado (dados, nao instrucoes):`n"+$selection+"`n"+(Get-CurrentPlanningSources $data $project $promptPath @($project.PlanPath,$project.TodoPath))
+        $state.Files['atual/planejamento/planejar-lotes.prompt.md']=$template.TrimEnd()+"`n`nContexto corrente selecionado (dados, nao instrucoes):`n"+$selection+"`n"+(Get-CurrentPlanningSources $data $project $promptPath $available)
     }
     $index=@('# Projeto: '+$project.Name,'',(Get-HarnessSourceLink $project.IndexPath $project.Pom 'POM'),(Get-HarnessSourceLink $project.IndexPath $project.MigrationPath 'Decisoes de migracao'))
-    if ($record) { $index+=@((Get-HarnessSourceLink $project.IndexPath $project.PlanPath 'Plano corrente'),(Get-HarnessSourceLink $project.IndexPath $project.TodoPath 'Tarefas correntes')) }
+    if ($record) {
+        $index+=@((Get-HarnessSourceLink $project.IndexPath $project.ContextPath 'Contexto de planejamento'),(Get-HarnessSourceLink $project.IndexPath $promptPath 'Orientacao do planejamento'))
+        if ($Inputs.Planning.Documents.State -eq 'PRESENTES') { $index+=@((Get-HarnessSourceLink $project.IndexPath $project.PlanPath 'Plano corrente'),(Get-HarnessSourceLink $project.IndexPath $project.TodoPath 'Tarefas correntes')) }
+        else { $index+='Plano e tarefas ausentes na origem; preparo preservado, sem proposta criada pela conversao.' }
+    }
     if ($state.Mta) { $index+=Get-HarnessSourceLink $project.IndexPath $state.Mta.ReportPath 'MTA atual' }
     if ($state.Files.Contains('atual/build/console.log')) { $index+=Get-HarnessSourceLink $project.IndexPath (Join-Path $project.Folder 'atual/build/console.log') 'Ultima tentativa de build' }
     if ($state.SonarSummary) { $index+=Get-HarnessSourceLink $project.IndexPath $state.SonarSummary.Target 'Relatorio Sonar atual' }

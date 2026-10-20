@@ -62,7 +62,11 @@ function Assert-CurrentValidationPaths($Project,$Object,[string]$Field='') {
 function Assert-CurrentValidationPlanning($Project,$Data,$Files) {
     Assert-CurrentPlanningContext $Data $Project
     if ($Data.Source -ine $Project.Source -or $Data.Pom -ine $Project.Pom) { throw 'Source/POM do contexto diverge da identidade corrente.' }
-    foreach ($relative in @('atual/planejamento/plano.md','atual/planejamento/tarefas.md','atual/planejamento/planejar-lotes.prompt.md')) { if (-not $Files.ContainsKey($relative)) { throw ('Documento corrente ausente: '+$relative) } }
+    if (-not $Files.ContainsKey('atual/planejamento/planejar-lotes.prompt.md')) { throw 'Prompt de planejamento corrente ausente.' }
+    foreach ($path in @($Project.PlanPath,$Project.TodoPath)) {
+        if (Test-Path -LiteralPath $path -PathType Container) { throw ('Diretorio no lugar de documento corrente: '+$path) }
+    }
+    if ($Files.ContainsKey('atual/planejamento/plano.md') -ne $Files.ContainsKey('atual/planejamento/tarefas.md')) { throw 'Par plano/tarefas corrente incompleto.' }
     foreach ($reference in @($Data.EvidenceInputs)+@($Data.FichaPaths)) {
         if ((Get-CurrentValidationValue $reference 'Status') -in @('AUSENTE','INVALIDA')) { throw ('Evidencia ausente/invalida: '+$reference.Path) }
         Assert-CurrentValidationReference $Project $reference.Path

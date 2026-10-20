@@ -1,5 +1,31 @@
 # To-do do agente: evolucao do harness
 
+## Conversao de preparo sem proposta - 20/10/2026
+
+[Escopo](plan.md#conversao-de-preparo-sem-proposta---20102026).
+
+- [x] Reproduzir preparo sem proposta em fixture isolada.
+- [x] Preservar contexto/prompt/fichas sem criar plano/tarefas; expor disponibilidade.
+- [x] Alinhar indice e validacao; recusar pares incompletos e preservar lacunas.
+- [x] Executar regressao, mutacao e revisao; documentar resultados.
+- [x] Preparar script de acompanhamento individual para entrega no chat e no guia.
+- [ ] Revisao humana e integracao na principal.
+
+**Verificacao em 20/10/2026:** 30 suites `Test-Conversion*.ps1` passaram em
+Windows PowerShell 5.1 via `Invoke-HarnessTests.ps1`, com TMP/TEMP em `C:\Temp`
+somente no processo e copia descartada pelo runner. O novo teste primeiro
+reproduziu a exigencia indevida de plano ausente e depois a incorporacao indevida
+de proposta local anterior a conversao. Ambos foram corrigidos.
+Cobertos preparo EVIDENCIAS/MTA, preservacao de fichas/anexos/decisoes/originais,
+pares incompletos, diretorios indevidos, links ausentes e repeticao equivalente.
+Mutacao da condicao do par foi detectada; arquivo restaurado byte a byte antes
+da regressao completa. Revisao independente sem achados restantes.
+
+O script sequencial no guia teve sintaxe conferida e ensaio com dubles em memoria:
+conversao e validacao com estados separados, falha ao aplicar, validacao mesmo
+com previa indisponivel, pausas e inventario completo de falhas de POM antes
+de qualquer aplicacao. Nenhum projeto real foi convertido ou limpo.
+
 ## Conversao de associacao legada sem plano - 20/10/2026
 
 [Escopo](plan.md#conversao-de-associacao-legada-sem-plano---20102026).
@@ -10,7 +36,7 @@
 - [x] Reproduzir e corrigir classificacao duplicada das copias MTA declaradas nos anexos.
 - [x] Bloquear publicacao com origem corrompida; nao declarar ausencia de plano por falha de leitura.
 - [x] Executar suites de conversao, revisar diff e documentar o resultado.
-- [ ] Revisao humana e integracao na principal.
+- [x] Revisao humana e integracao na principal (PR #38, merge `dd38d6e`, confirmado pelo desenvolvedor).
 
 **Verificacao em 20/10/2026:** 29 suites `Test-Conversion*.ps1` aprovadas em
 Windows PowerShell 5.1 pelo runner isolado. Na rodada final, 26 passaram e tres

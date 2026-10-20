@@ -1,5 +1,36 @@
 # Plano do agente: evolucao do harness
 
+## Conversao de preparo sem proposta - 20/10/2026
+
+Branch `harness/conversao-preparo-sem-proposta`, derivada da `main` em `dd38d6e`.
+
+**Caso confirmado:** SIMTR-api (`simtr-parent`) tem contexto MTA, prompt, fichas
+individuais e indice de evidencias; plano e tarefas foram apenas enderecados,
+nunca escritos. O conversor exige esses documentos e interrompe a aplicacao.
+
+**Entrega:** preservar o preparo e seus documentos existentes sem fabricar
+proposta. Mostrar na previa a disponibilidade do par plano/tarefas; aceitar
+ambos ausentes e manter recusa de par incompleto, origens invalidas e conflitos.
+Indice deve apontar apenas documentos publicados. Referencias humanas a
+documentos ausentes continuam lacunas, sem inferir GO, aceite ou recuperacao.
+Validacao deve reconhecer o preparo corrente sem proposta.
+
+**Verificacao:** reproduzir a falha antes da corretiva, testar preservacao das
+fichas/anexos, repeticao, validacao, previa de descarte e casos negativos pelo
+runner isolado. Revisar diff e testar mutacao de uma condicao. Nenhuma conversao
+ou limpeza de dados reais.
+
+**Orientacao solicitada:** fornecer no chat um script para percorrer projetos
+individualmente, exibir status e pausar entre conversoes; escolhas de contexto,
+diagnosticos, participantes e sprints permanecem explicitas.
+
+**Resultado:** implementacao e 30 suites de conversao aprovadas em copia isolada.
+O preparo conserva contexto/prompt/fichas/evidencias, sem criar a proposta.
+Documentos locais no destino tambem impedem aplicar esse preparo; as ausencias
+sao verificadas novamente na publicacao. Script sequencial documentado e ensaiado
+com dubles em memoria. Revisao independente e mutacao concluidas; integracao
+humana pendente. Detalhes no checklist.
+
 ## Conversao de associacao legada sem plano - 20/10/2026
 
 Branch `harness/conversao-associacao-sem-plano`, derivada da `main` em `8193668`.

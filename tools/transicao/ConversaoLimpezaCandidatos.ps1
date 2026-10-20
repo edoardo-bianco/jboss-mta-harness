@@ -126,6 +126,8 @@ function New-ConversionCleanupSelection($Access,$Options) {
     })
     $candidates=@(); $files=@{}
     foreach ($path in @($state.Map.Keys | Sort-Object)) {
+        # Destinos apenas enderecados no preparo nunca foram arquivos legados.
+        if (-not (Test-Path -LiteralPath $path)) { continue }
         $destination=$state.Map[$path]; $reason='Transformado e exclusivo do Source selecionado.'; $eligible=$true
         try {
             $null=Assert-ConversionDiscardPath $path $Access

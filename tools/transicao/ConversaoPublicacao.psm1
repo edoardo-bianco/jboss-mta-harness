@@ -87,6 +87,11 @@ function Invoke-ConversionApply {
         $inputs=Read-ConversionInputs -Workspace $Workspace -Pom $Pom -SourceLegado $SourceLegado -Registro $Registro -Contexto $Contexto
         $state=New-ConversionCoreFiles $inputs $MtaDiretorio $PrioritizacaoContexto $BuildResultado $SonarResultado $SonarTentativa $participants $Sprints
         $expected=Read-HarnessProjectFiles $project @($state.Files.Keys) -AsBytes
+        if ($inputs.Planning.Documents.State -eq 'AUSENTES') {
+            # Uma proposta criada depois da leitura tambem invalida o preparo.
+            $expected['atual/planejamento/plano.md']=$null
+            $expected['atual/planejamento/tarefas.md']=$null
+        }
         $writes=[ordered]@{}
         foreach ($relative in $state.Files.Keys) {
             [byte[]]$bytes=if ($state.Files[$relative] -is [byte[]]) {$state.Files[$relative]} else {(New-Object Text.UTF8Encoding($false)).GetBytes([string]$state.Files[$relative])}
