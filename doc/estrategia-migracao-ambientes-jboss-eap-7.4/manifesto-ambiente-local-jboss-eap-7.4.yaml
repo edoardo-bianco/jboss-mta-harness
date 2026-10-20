@@ -1,0 +1,103 @@
+# Manifesto do ambiente local - JBoss EAP 7.4
+# Modelo: guia operacional, seção 15; campos obrigatórios: estratégia, seção 3.2.
+# Campos PREENCHER são completados nas próximas seções do guia.
+# Nenhum PREENCHER pode permanecer em um candidato promovido.
+# Conferência automática: verificar-manifesto-eap74.ps1 (requer o módulo powershell-yaml).
+
+baseline:
+  data_verificacao: "2026-10-20"
+  origem_eap71:
+    versao: "PREENCHER (ORG-02)"
+    patch: "PREENCHER (ORG-02)"
+    commit_config: "PREENCHER (ORG-01)"
+  inventario_eap71: "PREENCHER: LINK_INTERNO_DO_INVENTARIO_DA_SECAO_2"
+  eap_distribuicao: "jboss-eap-7.4.0.zip"
+  eap_versao_resultante: "7.4.11.GA"        # .installation: current-version
+  cumulativo_id: "jboss-eap-7.4.11.CP"      # .installation: cumulative-patch-id
+  correcoes_individuais: []                 # .installation: patches. Nenhuma aplicável ao 7.4.11 (guia, seção 7.4).
+  jdk:                                      # Valores do arquivo "release" do JDK. Ver pendência JDK-01.
+    fornecedor: "Eclipse Adoptium"          # IMPLEMENTOR (build Temurin)
+    versao: "1.8.0_504-b01"                 # FULL_VERSION
+    arquitetura: "amd64"                    # OS_ARCH (x64)
+    tipo: "JDK"                             # IMAGE_TYPE
+  oracle_driver:                            # Guia, seção 9 (MOD-02, DS-07).
+    modulo: "PREENCHER (ex.: com.oracle)"
+    slot: "main"
+    arquivo: "PREENCHER (ex.: ojdbc8.jar)"
+    versao: "PREENCHER"
+    sha256: "PREENCHER"
+  sso_adapter:                              # Guia, seção 11 (SSO-01 a SSO-03).
+    produto: "PREENCHER"
+    versao: "PREENCHER"
+    protocolo: "PREENCHER (OIDC/SAML)"
+    variante: "PREENCHER (legado/Elytron)"
+  configuracao_commit: "PREENCHER: SHA_DO_COMMIT_APROVADO (guia, seção 15)"
+  perfil: "standalone-full.xml"
+  artefato_aplicacao:                       # Guia, seção 14.
+    referencia: "PREENCHER"
+    versao: "PREENCHER"
+    sha256: "PREENCHER"
+  parametros_ambiente: "PREENCHER: REFERENCIA_SEM_SEGREDOS"
+  mecanismo_segredos: "PREENCHER: REFERENCIA_SEM_VALORES"
+  des_runtime_ou_imagem:
+    imagem: "PREENCHER (ESTEIRA-01)"
+    tag: "7.4.11-openjdk8"
+    digest: "PREENCHER (ESTEIRA-01)"
+  des_imagem_base: "PREENCHER: OFICIAL_RED_HAT_OPENSHIFT_OU_ZIP + ARQUIVO_DE_CONFIGURACAO_NO_BOOT (ESTEIRA-02)"
+  fontes_imagem: "PREENCHER: PACOTE/FONTES INCLUIDAS (ESTEIRA-07; ref.: 7.1.0-mscore-fonts)"
+  decisao_versao_imagem:
+    decisao: "MANTER_7.4.11"
+    vigente_desde: "2026-10-19"
+    responsavel_aceite: "PREENCHER (ESTEIRA-20)"
+    prazo_atualizacao: "PREENCHER (ESTEIRA-20)"
+  evidencias: "PREENCHER: LINK_INTERNO_AUTORIZADO"
+
+# Hashes calculados localmente em 2026-10-20 (Get-FileHash/sha256sum).
+# Um hash local sem o valor oficial só serve para rastreabilidade (guia, seção 6).
+pacotes:
+  - arquivo: "jboss-eap-7.4.0.zip"
+    local: 'C:\desenvolvimento\instaladores\eap\jboss-eap-7.4.0.zip'
+    tamanho_bytes: 220377044
+    sha256: "5f1f0b7a389dedcd6f91ea3c8c6c9b723e9e8609bdf5720d4088e5469d46ad3a"
+    origem: "Red Hat Customer Portal / Developer"
+    conferido_com_portal: "PREENCHER: sim/nao"
+  - arquivo: "jboss-eap-7.4.11-patch.zip"
+    local: 'C:\desenvolvimento\instaladores\eap\jboss-eap-7.4.11-patch.zip'
+    tamanho_bytes: 174379569
+    sha256: "ad7f67de6b2fbaee357ad50a9832e9f62029a3cae4d1688e214f3cb46143cbe5"
+    origem: "Red Hat Customer Portal > JBoss EAP 7.4 > Patches > Update 11"
+    conferido_com_portal: "PREENCHER: sim/nao"
+
+ambiente_local:
+  jboss_home: 'C:\desenvolvimento\servidores\jboss-eap-7.4'
+  java_home: 'C:\desenvolvimento\java\jdk8u504-b01'
+  bind: "127.0.0.1"
+  port_offset: 100
+  controller: "127.0.0.1:10090"
+  node_name: "eap74-local"
+
+evidencias_patch:
+  backup_pre_patch: 'C:\desenvolvimento\backups\eap74-pre-patch-20261020-080310'
+  antes:
+    product_version: "7.4.0.GA"
+    cumulative_patch_id: "base"
+  depois:
+    product_version: "7.4.11.GA"
+    patch_info: "Version 7.4.11.GA | Cumulative patch ID jboss-eap-7.4.11.CP | One-off patches none"
+    patch_history:
+      - patch_id: "jboss-eap-7.4.11.CP"
+        type: "cumulative"
+        applied_at: "2026-10-20 08:05"
+        aged_out: false
+    boot_log: "WFLYSRV0049: Inicializando JBoss EAP 7.4.11.GA (WildFly Core 15.0.26.Final-redhat-00001)"
+
+pendencias:
+  - id: "JDK-01"
+    descricao: "JDK local é Temurin, não Red Hat build of OpenJDK (guia, seção 4.4). Alinhar com o JDK da imagem de destino."
+    depende_de: "ESTEIRA-04"
+  - id: "IMG-01"
+    descricao: "Confirmar que a imagem 7.4.11-openjdk8 está de fato no Update 11 e registrar o digest."
+    depende_de: "ESTEIRA-01, ESTEIRA-03"
+  - id: "DEC-01"
+    descricao: "Registrar o aceite formal do risco da defasagem 7.4.11, com responsável e prazo de atualização."
+    depende_de: "ESTEIRA-20"
