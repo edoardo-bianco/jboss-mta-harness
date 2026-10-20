@@ -7,8 +7,9 @@ function Add-ConversionParticipantMta($State) {
         $project=$participant.Project
         $options=$participant.Options
         $inputs=Read-ConversionInputs $project.Root $project.Pom -SourceLegado $participant.LegacySource -Registro $options.Registro -Contexto $options.Contexto
+        if ($inputs.Session.ReadErrors.Count) { throw ('Origens nao interpretadas para o participante '+$project.Name+'. Confira a previa.') }
         if (-not $inputs.Register) { throw ('Escolha um registro unico para o participante '+$project.Name+'.') }
-        if (@($inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $inputs.Planning.Record) { throw ('Plano do participante ambiguo; informe Contexto: '+$project.Name) }
+        if ($inputs.Planning.Selection -eq 'PENDENTE') { throw ('Plano do participante ambiguo ou com vinculo pendente; confira Contexto: '+$project.Name) }
         $peer=[pscustomobject]@{Project=$project;Inputs=$inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
         Add-ConversionMta $peer $options.MtaDiretorio -ReferencesOnly
         $sources[$participant.LegacySource]=$peer.Mta

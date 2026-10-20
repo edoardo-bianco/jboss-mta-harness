@@ -10,7 +10,8 @@ function Get-ConversionIssueIds($Data) {
     } | Where-Object { $_ } | Sort-Object -Unique)
 }
 function Select-ConversionPlan($Session,$Plans,$Register,[string]$Contexto) {
-    $byPath=@{}; $byId=@{}; $children=@{}; $parents=@{}; $targets=@{}; $invalid=$false
+    # Uma origem ilegivel nao permite concluir seu Source nem ausencia de plano.
+    $byPath=@{}; $byId=@{}; $children=@{}; $parents=@{}; $targets=@{}; $invalid=@($Session.ReadErrors | Where-Object Family -EQ 'planning').Count -gt 0
     foreach ($plan in $Plans) {
         $id=[string](Get-LegacyValue $plan.Data 'RequestId')
         if ($id -cnotmatch '^[a-f0-9]{32}$' -or $byId.ContainsKey($id)) { $Session.Pending.Add('Identidade de planejamento ausente/duplicada: '+$plan.Path); $invalid=$true; continue }
@@ -72,7 +73,7 @@ function Select-ConversionPlan($Session,$Plans,$Register,[string]$Contexto) {
             if ($broken.Count) { $Session.Pending.Add('Vinculo de planejamento nao resolvido: '+($broken -join ', ')); $invalid=$true }
             if ($seeds.Count -or $broken.Count) { break }
         }
-        if (-not $seeds.Count) { $Session.Pending.Add('Sem vinculo explicito do registro ao plano; escolha Contexto antes de aplicar.') }
+        if (-not $seeds.Count -and $Plans.Count) { $Session.Pending.Add('Sem vinculo explicito do registro ao plano; escolha Contexto antes de aplicar.') }
     }
     $tips=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
     foreach ($seed in $seeds) {
@@ -97,5 +98,5 @@ function Select-ConversionPlan($Session,$Plans,$Register,[string]$Contexto) {
             $Session.Pending.Add('Plano sem registro selecionado ou MigrationPath divergente; confira associacao.'); $chosen=$null
         }
     }
-    [pscustomobject]@{ContextPath=$(if ($chosen) {$chosen.Path} else {$null});Selection=$(if ($chosen) {$selection} else {'PENDENTE'});Candidates=$candidates;Record=$chosen}
+    [pscustomobject]@{ContextPath=$(if ($chosen) {$chosen.Path} else {$null});Selection=$(if ($chosen) {$selection} elseif (-not $Plans.Count -and -not $invalid) {'SEM_PLANO'} else {'PENDENTE'});Candidates=$candidates;Record=$chosen}
 }

@@ -31,14 +31,16 @@ function Convert-ConversionMarkdown {
 
 function New-ConversionCoreFiles($Inputs,[string]$MtaDiretorio,[string[]]$PrioritizacaoContexto=@(),[string]$BuildResultado,[string]$SonarResultado,[string]$SonarTentativa,$Participants=@(),$Sprints=@()) {
     $project=$Inputs.Project
+    if ($Inputs.Session.ReadErrors.Count) { throw ('Origens nao interpretadas; confira antes de aplicar: '+(($Inputs.Session.ReadErrors | ForEach-Object Path) -join ', ')) }
     if (-not $Inputs.Register) { throw 'Escolha um registro legado unico antes de aplicar.' }
-    if (@($Inputs.Records | Where-Object Kind -EQ 'PLANEJAMENTO').Count -and -not $Inputs.Planning.Record) { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
+    if ($Inputs.Planning.Selection -eq 'PENDENTE') { throw ('Plano nao determinado: '+($Inputs.Preview.Pending -join ' ')) }
     if (@($Inputs.Preview.Related | Where-Object Kind -NotIn @('RUNS','PRIORIZACAO','BUILDS','SONAR','SPRINT')).Count) { throw 'Conteudo complementar exige consolidacao antes da aplicacao.' }
     $state=[pscustomobject]@{Project=$project;Inputs=$Inputs;Files=[ordered]@{};Map=@{};Bytes=@{};MtaObserved=@{};Mta=$null;MtaDirectory=$null;MtaOrigin=$null;MtaInventory=$null;SonarInventories=@{};SonarSummary=$null;EvidenceInputs=@();FichaPaths=@();EvidenceIndexPath=$null;Diagnostics=(New-Object 'Collections.Generic.List[string]')}
     if (-not @($Participants).Count) { $Participants=@([pscustomobject]@{LegacySource=$Inputs.Preview.LegacySource;Project=$project}) }
     $state|Add-Member Participants @($Participants)
     $state|Add-Member PartnerObserved @{}
     $state.Map[$Inputs.Register.Path]=$project.MigrationPath
+    foreach ($association in $Inputs.Records | Where-Object Kind -EQ 'ASSOCIACAO') { $state.Map[$association.Path]=$project.ConfigPath }
     $record=$Inputs.Planning.Record
     if ($record) {
         # O registro pode apontar um ancestral. Reescrever a linhagem escolhida,

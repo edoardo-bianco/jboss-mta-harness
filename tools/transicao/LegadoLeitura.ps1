@@ -65,8 +65,32 @@ function Read-ConversionRecords($Session,$Inventory,[string]$Source) {
             $normalized=@($sources | Where-Object { $_ } | ForEach-Object { Resolve-ProjectPath $_ $Session.Workspace } | Sort-Object -Unique)
             if ($Source -notin $normalized) { continue }
             [pscustomobject]@{Path=$file.Path;Kind=$kind;Sources=$normalized;Data=$data;Text=$text}
-        } catch { $Session.Pending.Add(('Origem nao interpretada: '+$file.Path+' - '+$_.Exception.Message)) }
+        } catch {
+            $Session.ReadErrors.Add($file)
+            $Session.Pending.Add(('Origem nao interpretada: '+$file.Path+' - '+$_.Exception.Message))
+        }
     }
+}
+function Get-ConversionPlanningAssociation($Session,$Inventory,$Project,[string]$Source) {
+    # Cadastro do layout por issue, nao um contexto de planejamento.
+    $path=Resolve-ProjectPath (Join-Path $Session.DataRoot ('planning/'+$Project.Name+'/issues/project.json')) $Session.Workspace
+    if ($path -notin @($Inventory | ForEach-Object Path)) { return }
+    $data=ConvertFrom-Json (Read-ConversionText $Session $path)
+    $fields=@('ArtifactId','Project','Source')
+    if ($data -isnot [pscustomobject] -or @($data.PSObject.Properties | Where-Object Name -NotIn $fields).Count) {
+        throw ('Formato de associacao legada desconhecido; preservar e conferir: '+$path)
+    }
+    foreach ($field in $fields) {
+        $property=$data.PSObject.Properties[$field]
+        if (-not $property -or $property.Value -isnot [string] -or [string]::IsNullOrWhiteSpace($property.Value)) {
+            throw ('Campo '+$field+' invalido na associacao legada: '+$path)
+        }
+    }
+    if ($data.ArtifactId -cne $Project.Name) { throw ('ArtifactId da associacao legada diverge do POM: '+$path) }
+    if ((Resolve-ProjectPath $data.Source $Session.Workspace) -ine $Source) {
+        throw ('Source da associacao legada diverge do selecionado; confira SourceLegado: '+$path)
+    }
+    $path
 }
 function Get-ConversionLinks([string]$Text,[string]$Document,$Session) {
     foreach ($match in [regex]::Matches($Text,'\[[^\]\r\n]*\]\((?:<([^>\r\n]*)>|([^\s\)]+))\)')) {
