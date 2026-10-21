@@ -1,5 +1,111 @@
 # To-do do agente: evolucao do harness
 
+## Auditoria independente do checkpoint - 21/10/2026
+
+- [x] Revisar documentacao, orientadores e runtime com tres revisores independentes.
+- [x] Executar 12 suites pelo runner isolado e uma mutacao detectada.
+- [x] Conferir 610 referencias e 415 ancoras locais; registrar destinos antigos ausentes.
+- [x] Consolidar [parecer e reproducoes](auditoria-indice-mta-externo.md).
+- [x] A1/P2: corrigir publicacao parcial de MTA se a associacao falhar.
+- [x] A2/P2: preservar diagnostico interno utilizavel no indice com raiz externa vazia.
+- [x] A3/P3: explicitar excecao MTA no principio de armazenamento do system design.
+
+Auditoria concluida no checkpoint 87a8725. Doze suites passaram, mas os
+dois cenarios P2 nao estavam cobertos e foram reproduzidos separadamente.
+Orientadores alinhados no recorte estatico; consumo real dos modelos por agente
+e descoberta/delegacao nativa permanecem limites. Apenas registros em tasks
+alterados na auditoria inicial. Corretivas concluidas na etapa registrada abaixo; PR nao aberta.
+
+## Tabela resumida e template do indice - 21/10/2026
+
+- [x] Reproduzir ausencia do resumo e implementar tabela Markdown com links.
+- [x] Consumir templates versionados; inventariar produtores e vincular modelos aos prompts.
+- [x] Validar contagens, lacunas, links e preservacao em copia isolada.
+- [x] Concluir revisao da retirada e preparar descricao da PR para main, sem merge.
+
+
+
+**Verificacao em 21/10/2026:** 19 suites distintas aprovadas via runner isolado,
+Windows PowerShell 5.1 e TMP/TEMP em C:\Temp somente no processo:
+ProjectIndexSummary, ProjectIndexExternalMta, ProjectIndex, OutputTemplates,
+ProjectDocuments, PrioritizationIndex, CurrentPromptLinks, Planning,
+EvidenceFolder, Reconciliation, ReconciliationSources, ReconciliationPrioritization,
+ReconciliationConflicts, PlanningPortable, PlanningReassociation, PlanningEvidence,
+ProjectNavigation, PrioritizationProgress e PrioritizationCategories.
+
+O teste do resumo primeiro comprovou a ausencia da tabela. O teste dos modelos
+primeiro comprovou a ausencia de template corrente; depois passou comprovando
+consumo real por alteracao do modelo apenas na copia de teste. Durante a ampliacao,
+um erro de sintaxe na propria suite OutputTemplates foi corrigido e sua execucao
+isolada passou; as outras 12 suites daquela rodada passaram. A mutacao que ocultava
+a ultima tentativa falha foi detectada, com restauracao byte a byte.
+Conferidos 23 scripts por parser e 557 destinos locais e 346 ancoras Markdown; diff --check passou.
+Busca de dependencias ativas do conversor retirado nao encontrou consumidores.
+Nao houve execucao de agente de migracao real, MTA real, conversao ou alteracao
+dos dados operacionais. Inventario em [doc/modelos](../doc/modelos/README.md).
+
+**Entrega:** [descricao da PR](pr-indice-mta-externo.md) preparada para main;
+revisao humana, abertura da PR e integracao permanecem etapas separadas.
+
+**Roteiro na maquina de trabalho:** atualizar esta branch, conferir mta.runsPath
+externo e executar Workspace: atualizar indice dos projetos. Abrir a tabela em
+.harness/indices/projetos.md; para os modelos dos agentes, preparar novamente a
+etapa desejada e abrir os links em Modelos de saida obrigatorios. No resultado de
+priorizacao, seguir Proximo passo para escolher ID/recorte em migracao.md. Nao
+limpar nem converter o estado real para ensaiar esta entrega.
+
+
+## Retirada da conversao legada - 20/10/2026
+
+- [x] Retirar utilitario tools/transicao, fixture e suites exclusivas.
+- [x] Alinhar guias, contratos, skill e papeis de orientacao ao inicio corrente.
+- [x] Verificar dependencias e validar fluxo corrente sem o conversor.
+- [x] Retirada em commit separado 4f67c95; revisao final retomada em 21/10.
+- [ ] Revisao humana e integracao.
+
+**Checkpoint de 20/10/2026, pausa pedida pelo desenvolvedor:** trabalho na branch
+`harness/indice-mta-externo`, worktree `C:\Temp\harness-indice-mta`.
+MTA externo e associacao automatica registrados em `b20af92`; retirada do
+conversor registrada no commit seguinte. Main nao foi alterada nem houve merge.
+Depois da retirada, passaram em copia isolada: Test-ProjectIndexExternalMta,
+Test-Planning, Test-PrioritizationIndex, Test-Cleanup e Test-ClaudeAdapter.
+Busca por dependencias do utilitario fora do historico nao encontrou consumidores;
+git diff --check passou. Nenhum dado real ou relatorio externo foi alterado.
+
+**Retomar em 21/10:** conferir branch/HEAD/estado neste worktree; concluir revisao
+da retirada e dos textos, incluindo links e coerencia do desenho; avaliar apenas
+verificacoes adicionais justificadas; preparar PR para main e entregar o roteiro
+de uso na maquina de trabalho. Nao executar conversao nem restaurar automaticamente
+o ZIP antigo. O checkout original `C:\desenvolvimento\repositorio\jboss-mta-harness`
+permanece na branch `harness/conversao-log-etapas` com alteracoes locais de logging
+anteriores, preservadas e fora desta entrega; nao trocar/resetar esse checkout.
+
+As entregas de conversao abaixo sao historicas; o utilitario deixa de integrar
+o produto por escolha do desenvolvedor. Nenhum dado real foi apagado por esta
+mudanca. Relatorios MTA externos nao recuperam decisoes/fichas humanas antigas.
+
+## Indice com MTA externo configurado - 20/10/2026
+
+- [x] Reproduzir raiz externa ignorada com projetos de nomes distintos do artifactId.
+- [x] Associar pasta Source, selecionar ultimo diagnostico e preservar escolhas.
+- [x] Exigir saida externa nas novas analises e preservar ultimo diagnostico em falha.
+- [x] Cobrir falhas, ambiguidade, leitura externa e concorrencia; alinhar guias/skill/papeis.
+- [x] Executar suites isoladas e revisao independente; preparar entrega.
+- [ ] Revisao humana e integracao.
+
+**Verificacao:** 19 suites passaram em copia isolada com Windows PowerShell 5.1:
+Mta, ProjectIndexExternalMta, ProjectIndex, ProjectMta, ProjectDocuments,
+ProjectNavigation, ProjectPublication, ProjectRecovery, ProjectConcurrency,
+ProjectReadOnly, ProjectStorage, ProjectTemporaryRemoval, MtaActive, MtaLog,
+ExternalMtaDiscovery, SonarConfig, Workspace, McpRoots e PrioritizationIndex.
+Testes novos primeiro reproduziram raiz ignorada, saida interna e perda da
+associacao anterior em falha; depois passaram. Revisao independente apontou a
+associacao antecipada e limpeza incompleta; ambos corrigidos e aprovados na
+revisao final. Teste adicional de nome Source reservado reproduziu acesso a area
+transitoria e passou apos recusa explicita. Nenhum MTA real executado.
+Test-ClaudeAdapter tambem passou apos alinhamento da skill e dos papeis comuns
+dos agentes Codex/Copilot/Claude Code.
+
 ## Conversao de preparo sem proposta - 20/10/2026
 
 [Escopo](plan.md#conversao-de-preparo-sem-proposta---20102026).
@@ -120,3 +226,16 @@ politica da maquina ou declarar o piloto homologado.
 - [ ] Revisao humana e aceite da consolidacao.
 - [ ] Corretiva separada: `Test-IssueQueries.ps1` falha em "Truncamento silencioso ou ausente." (mensagem de incidente esperada com 128 caracteres e um campo truncado).
 - [x] Incremento seguinte: armazenamento JBoss por projeto/servidor (ver secao "Estado JBoss corrente").
+
+
+## Corretivas verificadas da auditoria - 21/10/2026
+
+- [x] Reproduzir A1/A2 antes das correcoes e verificar GREEN.
+- [x] Preservar preparo quando falhar tambem a retirada; provar falha antes e sucesso depois.
+- [x] Ampliar verificacoes estruturais dos adaptadores Codex/Copilot.
+- [x] Corrigir principio documental, exemplo runsPath e referencias locais indisponiveis.
+- [x] Aprovar 13 suites isoladas, mutacao detectada, navegacao e revisao independente.
+
+Resultado e limites em [corretivas do parecer](auditoria-indice-mta-externo.md#corretivas-verificadas---21102026).
+Os ensaios nativos dos agentes permanecem fora desta verificacao; nenhuma
+migracao real, abertura de PR ou integracao foi executada.

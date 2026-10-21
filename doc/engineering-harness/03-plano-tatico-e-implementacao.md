@@ -247,7 +247,7 @@ Os critérios abaixo orientam testes de implementação. Não representam testes
 | MCP | Negociação compatível, `stdout` limpo, ciclo de vida, catálogo limitado e nenhuma anotação de leitura em operação que escreve. |
 | IDEs | Terminal, VS Code e IntelliJ executam o mesmo contrato, sem sobrescrever configuração não gerenciada. |
 | Segundo perfil | Reuso sem Java 8/`javax`/MTA obrigatórios no núcleo e sem mudar a identidade dos resultados. |
-| Conversão | Prévia/aplicação/validação/limpeza separadas; fontes e relatórios externos intactos; runtime funciona com conversor removido. |
+| Início no layout corrente | Índice associa relatórios externos; runtime funciona sem conversor legado, retirado em 20/10/2026; decisões antigas não são reconstruídas do MTA. |
 | Atualização do produto | Versão incompatível não reinterpreta dados; configurações preservadas; dependências efetivas e versões conhecidas. |
 
 **Critério de avanço:** código, contrato, testes, guia e evidências do incremento são coerentes. Homologação corporativa e aceite humano são registros próprios, não inferidos de testes simulados. Um teste que verifica somente o código de saída não comprova comportamento funcional.
@@ -266,7 +266,7 @@ Em 17/10/2026, por decisão do desenvolvedor, este conjunto passou a ficar em **
 | `doc/especificacoes/planejamento-sprints.md` e `doc/features/planejamento-macro-sprints.md` | `doc/contratos/planejamento-sprints.md`, com as regras de cronograma da feature. |
 | `doc/especificacoes/consultas-issues.md` | `doc/contratos/consultas-issues.md`. |
 | `doc/features/organizacao-simplificada-por-projeto.md` | Regra executável na ADR-0009; desenho no documento 2, seção 9. |
-| `doc/features/conversao-descartavel-dos-registros.md` | `tools/transicao/README.md`, junto do utilitário descartável. |
+| `doc/features/conversao-descartavel-dos-registros.md` | Incorporado ao utilitário descartável, retirado em 20/10/2026; decisão histórica registrada em S2. |
 | `doc/features/evolucao-harness-dominios-capacidades-priorizacao.md` | [Anexo A](#anexo-a). |
 | `doc/features/engineering-harness-vscode.md` | Incremento C e seção 2.6: extensão própria é evolução posterior de experiência. |
 | `doc/features/planejamento-copilot.md` | Descartado: já era histórico. |
@@ -326,7 +326,7 @@ As referências externas foram consultadas em 16/10/2026 e revisadas em 17/10/20
 **S1 — Organização simplificada por projeto.** Especificação de 10/10/2026, implementada na `main` e normatizada pela [ADR-0009](../adr/0009-estado-corrente-por-projeto.md). Texto original: [organizacao-simplificada-por-projeto.md em `5c8d582`](https://github.com/edoardo-bianco/jboss-mta-harness/blob/5c8d58265d82134def2ce6cac5c17ca2d80e1899/doc/features/organizacao-simplificada-por-projeto.md). Define identidade por POM, `atual`, último `reconciliado`, MTA na origem, fichas essenciais, compartilhamento por cópia e recuperação transitória.
 
 <a id="fonte-s2"></a>
-**S2 — Conversor descartável.** [tools/transicao/README.md](../../tools/transicao/README.md), especificação de 10/10/2026 mantida junto do utilitário. Define transição separada, sem dependência permanente no núcleo e com aplicação/limpeza distintas.
+**S2 — Conversor descartável (retirado).** A especificação de 10/10/2026 definiu transição separada, sem dependência permanente no núcleo e com aplicação/limpeza distintas. O utilitário e sua documentação foram retirados em 20/10/2026 por escolha do desenvolvedor. O início corrente usa os relatórios MTA externos e o índice dos projetos; esta referência conserva somente a origem histórica da decisão, conforme a [ADR-0009](../adr/0009-estado-corrente-por-projeto.md).
 
 ### Documentação oficial e fontes primárias
 

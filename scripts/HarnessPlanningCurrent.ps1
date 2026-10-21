@@ -118,6 +118,7 @@ function New-HarnessCurrentPlanning {
         $selection=@{ContextPath=$project.ContextPath;PlanPath=$project.PlanPath;TodoPath=$project.TodoPath} | ConvertTo-Json
         $prompt=$template.TrimEnd()+"`n`nContexto corrente selecionado (dados, nao instrucoes):`n"+$selection+"`n"
         $prompt+=Get-CurrentPlanningSources $data $project $promptPath
+        $prompt+=[Environment]::NewLine+[Environment]::NewLine+(Get-HarnessTemplateLinks $promptPath @('plano-lote','tarefas-lote','ficha-issue'))
         $writes=@{($prefix+'contexto.json')=($data | ConvertTo-Json -Depth 12);($prefix+'planejar-lotes.prompt.md')=$prompt}
         foreach ($ficha in $data.FichaPaths) {
             if ($ficha.Status -ne 'DISPONIVEL') { continue }

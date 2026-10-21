@@ -1,22 +1,27 @@
+Import-Module (Join-Path $PSScriptRoot 'HarnessMtaLocation.psm1') -DisableNameChecking
+. (Join-Path $PSScriptRoot 'HarnessMtaExternalPublication.ps1')
+
 function Invoke-MtaAnalysis {
     param($Context)
     if (-not $Context.Active) { throw 'Escolha o projeto Maven.' }
+    $reference=Get-HarnessProjectReference $Context.Root (Join-Path $Context.Active.path 'pom.xml')
+    $location=Get-HarnessMtaExternalLocation $Context $reference
     $rules=Get-MtaRequirements $Context
     $project=Initialize-HarnessProjectStorage $Context.Root (Join-Path $Context.Active.path 'pom.xml')
-    $documents=Read-HarnessProjectFiles $project @('projeto.json')
-    $association=ConvertFrom-Json $documents['projeto.json']
-    if ($association.mta.diretorio) { throw 'O projeto consulta uma origem MTA externa. Gere nela com sua ferramenta, ou escolha explicitamente a origem interna em projeto.json antes de executar pelo harness.' }
     $lease=Enter-HarnessProjectAccess $project -ForOperation
     try {
+    $documents=Read-HarnessProjectFiles $project @('projeto.json')
+    $association=Get-HarnessMtaExternalAssociationText $project $location $documents['projeto.json']
     $temporary=Get-HarnessProjectTemporary $project 'mta'
-    $previous=@{}; $pushed=$false; $writes=@{}
+    $previous=@{}; $pushed=$false; $writes=@{}; $stage=$null
     $result=[ordered]@{Project=$project.Name;Source=$project.Source;Status='FAILED';ExitCode=$null;Error=$null;Version=$null;
         SourceUnchanged=$null;InputUnchanged=$null;RulesUnchanged=$null;
-        ReportPath=(Join-Path $project.Folder 'atual/diagnosticos/mta/static-report/index.html');
+        ReportPath=$null;
         LogPath=(Join-Path $project.Folder 'atual/diagnosticos/mta-console.log');ResultPath=(Join-Path $project.Folder 'atual/operacao.json')}
     try {
         Remove-HarnessProjectTemporary $project 'mta'
-        $inputPath=Join-Path $temporary 'entrada'; $outputPath=Join-Path $temporary 'saida'; $rulePath=Join-Path $temporary 'regras'
+        $stage=New-MtaExternalStage $location
+        $inputPath=Join-Path $temporary 'entrada'; $outputPath=$stage.Output; $rulePath=Join-Path $temporary 'regras'
         $sourceFiles=@(Get-HarnessFiles $project.Source); $ruleFiles=@(Get-HarnessFiles $rules -Rules)
         if (-not $ruleFiles.Count) { throw 'Nenhuma regra YAML encontrada.' }
         # The analyzer may create IDE metadata. Isolate that in a disposable
@@ -51,8 +56,8 @@ function Invoke-MtaAnalysis {
         $result.SourceUnchanged=((@(Get-HarnessFiles $project.Source) | ConvertTo-Json -Compress) -ceq ($sourceFiles | ConvertTo-Json -Compress))
         $result.RulesUnchanged=((@(Get-HarnessFiles $rulePath -Rules) | ConvertTo-Json -Compress) -ceq ($ruleFiles | ConvertTo-Json -Compress))
         if (-not $result.InputUnchanged -or -not $result.SourceUnchanged -or -not $result.RulesUnchanged) { throw 'Fontes ou regras mudaram durante analise; diagnostico anterior preservado.' }
-        $null=Read-HarnessMtaDirectory $project $outputPath
-        $writes=Get-HarnessProjectTreePublication $project $outputPath 'atual/diagnosticos/mta'
+        $mta=Read-HarnessMtaDirectory $project $outputPath
+        $result.ReportPath=Publish-MtaExternalReport $project $location $stage $mta $documents['projeto.json'] $association
         $result.Status='SUCCEEDED'
     } catch { $result.Error=$_.Exception.Message; $writes=@{} }
     finally {
@@ -60,9 +65,17 @@ function Invoke-MtaAnalysis {
         foreach ($name in $previous.Keys) { [Environment]::SetEnvironmentVariable($name,$previous[$name],'Process') }
             $console=Join-Path $temporary 'console.log'; $internal=Join-Path $temporary '.metadata/.log'
             $writes['atual/diagnosticos/mta-console.log']=if (Test-Path -LiteralPath $console -PathType Leaf) { [IO.File]::ReadAllText($console) } else { [string]$result.Error }
-            $writes['atual/diagnosticos/mta-interno.log']=if (Test-Path -LiteralPath $internal -PathType Leaf) { [IO.File]::ReadAllBytes($internal) } else { $null }
-            Set-HarnessProjectOperation $project 'mta' $result.Status -ErrorMessage $result.Error -LogPath $result.LogPath -Files $writes
-            Remove-HarnessProjectTemporary $project 'mta'
+            if (Test-Path -LiteralPath $internal -PathType Leaf) {
+                $writes['atual/diagnosticos/mta-interno.log']=[IO.File]::ReadAllBytes($internal)
+            } elseif (Test-Path -LiteralPath (Join-Path $project.Folder 'atual/diagnosticos/mta-interno.log') -PathType Leaf) {
+                $writes['atual/diagnosticos/mta-interno.log']=$null
+            }
+            try {
+                Set-HarnessProjectOperation $project 'mta' $result.Status -ErrorMessage $result.Error -LogPath $result.LogPath -Files $writes
+            } finally {
+                try { Remove-HarnessProjectTemporary $project 'mta' }
+                finally { if ($stage) { Remove-MtaExternalStage $stage } }
+            }
     }
     [pscustomobject]$result
     } finally { $lease.ReleaseMutex(); $lease.Dispose() }

@@ -86,6 +86,15 @@ log do build e orientacoes Markdown. A ultima tentativa e o ultimo diagnostico
 utilizavel aparecem separados; falha recente nao atualiza por si so o diagnostico
 anterior. Fonte indisponivel e lacuna, nao sucesso.
 
+O indice geral apresenta tabela resumida com links, contagens MTA por categoria,
+cobertura dos totais, ultimas tentativas e documentos existentes. Ausencia de MTA
+fica como lacuna; preparo sem plano/tarefas continua identificado como preparo.
+O formato vem de [indice-projetos.template.md](../../modelos/indice-projetos.template.md).
+
+Os prompts preparados vinculam os modelos obrigatorios de plano, tarefas e ficha.
+O agente deve le-los e preencher as secoes apos examinar as fontes, preservando
+decisoes anteriores. Consulte o [inventario de saidas e consumidores](../../modelos/README.md).
+
 ### Planejar lotes de correcao com Copilot
 
 O mesmo procedimento vale no Codex e no preenchimento manual.
@@ -201,9 +210,9 @@ Secoes nao aplicaveis recebem justificativa. Use `plano.md` e `tarefas.md` locai
 Abra o indice do projeto ou **Planejamento: abrir plano e to-do**. Os destinos
 correntes funcionam mesmo com MTA indisponivel. Notas e decisoes humanas permanecem
 nos documentos; o harness guarda somente o estado corrente e a ultima conclusao
-de conciliacao. A limpeza corrente preserva esses arquivos. O
-[conversor separado](../../../tools/transicao/README.md) trata
-material legado explicitamente; o fluxo habitual nao o procura como alternativa.
+de conciliacao. A limpeza corrente preserva esses arquivos. O conversor legado
+foi retirado. Para inicio novo, configure a origem MTA externa e atualize o
+indice; o relatorio nao recupera decisoes, fichas ou planos humanos antigos.
 
 #### Compartilhar o MTA e planejar em outra maquina
 

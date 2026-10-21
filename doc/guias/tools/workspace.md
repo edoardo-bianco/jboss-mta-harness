@@ -214,7 +214,8 @@ O gerador usa as origens externas `mta.diretorio` de `projeto.json` dos projetos
 correntes para preencher `github.copilot.chat.additionalReadAccessPaths`, quando
 a lista ainda nao foi definida. POM/Source precisam corresponder ao projeto local.
 Caminhos ja cobertos pelo workspace nao exigem permissao extra; uma raiz ancestral
-que ampliaria o acesso e recusada. `mta.runsPath` antigo nao concede acesso.
+que ampliaria o acesso e recusada. `mta.runsPath` sozinho nao concede acesso pelo
+MCP; a associacao por projeto e feita pelo indice antes da consulta.
 
 Confira a associacao MTA, execute **Workspace: gerar workspace** e abra o arquivo
 local. O gerador preserva permissoes existentes, inclusive lista vazia `[]`.
@@ -340,8 +341,8 @@ O projeto e identificado pelo `artifactId` literal do POM e associado ao POM loc
 em `projeto.json`. Renomear a pasta no Explorer nao muda essa identidade. Outro POM
 com o mesmo artifactId exige resolver a colisao; o harness nao cria um hash para
 separa-los. A CLI sem workspace usa os projetos do JSON, mas continua lendo o
-estado corrente. Registros legados exigem conversao explicita; seus originais
-nao sao alterados pelas tarefas correntes.
+estado corrente. O conversor legado foi retirado; tarefas correntes nao alteram
+originais antigos nem os usam como alternativa ao estado atual.
 
 ### Ensaiar e depois usar os projetos corporativos
 
@@ -370,6 +371,9 @@ CLI sem WorkspacePath, mantenha `repositories` coerente com os projetos desejado
 
 1. Execute **Workspace: atualizar indice dos projetos**. A tarefa abre
    `.harness/indices/projetos.md`; escolha o projeto pelo nome.
+   Com `mta.runsPath` configurado, associa automaticamente o MTA existente em
+   raiz/nome-da-pasta-Source quando o projeto ainda nao tem origem explicita.
+   Consulte [origem MTA](mta.md#origem-mta-e-caminhos) para nomes, datas e lacunas.
 2. No indice do projeto, abra registro, plano/tarefas, evidencias/anexos, fichas
    e priorizacoes, cenarios de sprints ou diagnosticos disponiveis.
 3. Para investigar uma falha, abra o log da ultima tentativa de build, MTA ou
@@ -407,6 +411,14 @@ nao produzido nao aparece. Ler arquivos existentes nao exige associar um MTA nem
 executar analises; associacao da origem continua necessaria apenas para os fluxos
 que consomem MTA. Os indices permanecem uma alternativa de navegacao.
 
+A tabela resumida do indice geral usa o
+[template versionado](../../modelos/indice-projetos.template.md), com links para
+projeto/POM, MTA, logs, registro, plano/tarefas, preparo, evidencias e Sonar
+quando existentes. Totais informam quantos projetos possuem MTA utilizavel.
+Nao e gerado arquivo Excel. Atualizar o indice aplica o formato vigente;
+notas duraveis ficam no registro ou nas evidencias.
+O [inventario de modelos](../../modelos/README.md) identifica os geradores e prompts.
+
 O indice e Markdown: use a visualizacao de Markdown do VS Code para clicar
 nos links ou siga-os pelo editor. A arvore de pastas tambem permite copia/cola
 e consulta manual. Os arquivos locais nao acompanham clone/pull; para receber
@@ -423,9 +435,8 @@ links/junctions e destinos fora das areas permitidas.
 
 Dados correntes, fontes, relatorios externos, fichas, planos, anexos e conflitos
 pendentes sao preservados. A tarefa nao apaga `target/` da aplicacao nem
-converte/descarta dados antigos. Descarte legado pertence ao
-[conversor separado](../../../tools/transicao/README.md),
-com previa, validacao e selecao explicitas.
+converte/descarta dados antigos. O utilitario de conversao e descarte legado
+foi retirado; essa tarefa continua restrita a limpeza corrente.
 
 ```powershell
 powershell.exe -NoProfile -File .\scripts\limpar-execucoes.ps1 -All -Preview
@@ -448,9 +459,11 @@ anexos, evidencias, backups e rodadas MTA que estejam dentro dela. A tarefa
 4. Preserve `config/harness.local.json`, o workspace e os fontes das aplicacoes,
    que ficam fora dela. Um MTA externo completo pode ser reutilizado; confirme
    sua aplicabilidade ao codigo atual. MTA que estava dentro da pasta sera perdido.
-5. Execute **Workspace: atualizar indice dos projetos** para reconstruir registros
-   e indice. Confira a origem MTA reconhecida; resolva origem ausente ou ambigua
-   pelo fluxo de MTA existente antes de priorizar.
+5. Confira `mta.runsPath` em `config/harness.local.json`: deve apontar a raiz
+   externa com `<nome-da-pasta-Source>/<rodada>/`. Execute **Workspace: atualizar
+   indice dos projetos** para criar registros e associar o ultimo MTA valido de
+   cada aplicacao. Confira os links; origem ausente ou ambigua fica como lacuna,
+   conforme o [guia MTA](mta.md#origem-mta-e-caminhos).
 6. Execute **Planejamento: priorizar issues**, escolha uma categoria e informe
    **10%**. Execute o novo prompt e confira ranking e fichas por projeto/issue.
 7. Escolha uma issue no registro, vincule sua ficha e acrescente anexos pertinentes.
@@ -486,7 +499,7 @@ O estado funcional fica por projeto, com nomes estaveis e links pelos indices.
 | `.harness/servidores/` | Ultima operacao e logs do ultimo start de cada servidor JBoss; o ultimo deploy fica no projeto. Consulte [JBoss](jboss.md). |
 | `%USERPROFILE%/.m2/repository` | Cache Maven padrao, fora do harness; sem cache duplicado. |
 
-Pastas antigas de execucoes podem permanecer ate uma transicao explicita.
+Pastas antigas de execucoes podem permanecer como material preservado.
 O nucleo corrente nao as usa como alternativa nem exige conservar seus IDs.
 Backups avulsos na raiz de `.harness/` nao fazem parte da organizacao.
 Fontes da aplicacao, configuracao da maquina e workspace permanecem em seus

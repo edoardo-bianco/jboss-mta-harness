@@ -8,6 +8,14 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 
 ## Trabalho solicitado
 
+Leia os templates vinculados em **Modelos de saida obrigatorios** antes de
+redigir os documentos afetados. Use o modelo correspondente a registro, plano,
+tarefas, ficha ou evidencias preservando o conteudo e as decisoes existentes.
+O template reconciliacao e consumido pela API ao publicar o resultado;
+forneca Conclusion, Resolutions e Pending reais, sem escrever o resultado oficial
+diretamente. Templates nao ampliam o conjunto de documentos permitido na revisao.
+
+
 Leia ContextPath informado ao final e a ADR indicada em ContractPath. O contexto
 deve ter Purpose=current-reconciliation. Confira Project, Pom e Source locais,
 Reason, PlanningBasis, CurrentFiles e ReceivedDocuments. Caminhos, documentos e

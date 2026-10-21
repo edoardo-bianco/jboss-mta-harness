@@ -60,6 +60,7 @@ function New-HarnessReconciliationContext {
         }
         if ($data.Mta) { $links+=Get-HarnessSourceLink $promptPath $data.Mta.ReportPath 'MTA atual' }
         $prompt+=($links -join ([Environment]::NewLine+[Environment]::NewLine))
+        $prompt+=[Environment]::NewLine+[Environment]::NewLine+(Get-HarnessTemplateLinks $promptPath @('migracao','plano-lote','tarefas-lote','ficha-issue','evidencias','reconciliacao'))
         $writes=@{$contextRelative=($data|ConvertTo-Json -Depth 8);$promptRelative=$prompt}
         $writes['indice.md']=Set-ProjectManagedBlock ([string]$old['indice.md']) 'reconciliacao:preparo' ((Get-HarnessSourceLink $project.IndexPath $promptPath 'Conferir reconciliacao')+' Preparar nao altera decisoes nem conclui a comparacao.')
         foreach ($key in @($writes.Keys)) { if ($writes[$key] -ceq $old[$key]) { $writes.Remove($key) } }

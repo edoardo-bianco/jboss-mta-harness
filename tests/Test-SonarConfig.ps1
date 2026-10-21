@@ -13,12 +13,12 @@ $config=Get-Content -Raw -LiteralPath $path | ConvertFrom-Json
 Assert ($config.sonar.scannerVersion -eq '5.8.0.7211' -and $config.sonar.ceTimeoutSeconds -eq 300) 'JSON antigo nao recebeu defaults Sonar.'
 Assert ($config.sonar.apiAuthScheme -ceq 'Bearer') 'Padrao de autenticacao local deve continuar Bearer.'
 Assert ($config.sonar.debug -is [bool] -and -not $config.sonar.debug) 'DEBUG deve ser false por padrao.'
-Assert (-not $config.mta.PSObject.Properties['runsPath']) 'Configuracao nao deve recriar a raiz global de rodadas.'
+Assert ($null -eq $config.mta.runsPath) 'Raiz externa deve ser escolhida explicitamente, sem padrao interno.'
 Assert ($config.custom -eq 'preservar' -and $config.tools.applicationMavenSettingsPath -eq $original.tools.applicationMavenSettingsPath) 'Configuracao existente alterada.'
 $config.sonar.serverUrl='https://sonar.empresa'; $config.sonar.scannerVersion='5.7.0.7130'
 $config.sonar.apiAuthScheme='Basic'
 $config.sonar.debug=$true
-$config.mta | Add-Member NoteProperty runsPath 'C:/mta-runs'
+$config.mta.runsPath='C:/mta-runs'
 $config.sonar.PSObject.Properties.Remove('profiles')
 $config | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $path
 & powershell.exe -NoProfile -File (Join-Path $root 'scripts/configurar-caminhos.ps1') -ConfigPath $path

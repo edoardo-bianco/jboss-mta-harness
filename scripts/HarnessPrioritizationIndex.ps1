@@ -10,24 +10,56 @@ function Get-PrioritizationRows {
     $lines -join [Environment]::NewLine
 }
 
-function Get-PrioritizationIndexContent {
-    param($Data,$Result,[string]$Text)
-    if (-not $Text) { $Text='# Indice da priorizacao corrente' }
-    $outside=if ($null -eq $Data.OutsideBaseline) {'nao informado; conferir origem atual'} else {[string]$Data.OutsideBaseline}
-    $lines=@(('Escopo: '+(ConvertTo-ProjectCell $Data.Scope)),('Categoria: '+(ConvertTo-ProjectCell $Data.Category)),
-        "Examinadas acumuladas: $(@($Result.AnalyzedIssues).Count) / $($Data.InitialTotal). Estado da fatia: $($Result.Status).",
-        "Elegiveis fora da base inicial: $outside. Recriar e uma escolha explicita; ausencia no MTA nao comprova resolucao.",
-        (Get-HarnessSourceLink $Data.IndexPath $Data.RankingPath 'Ranking acumulado'),
-        (Get-HarnessSourceLink $Data.IndexPath $Data.PromptPath 'Orientacao da priorizacao'),
-        (Get-HarnessSourceLink $Data.IndexPath $Data.ContractPath 'Contrato'),
-        (Get-PrioritizationRows $Data $Result $Data.IndexPath))
-    foreach ($project in $Data.Projects) {
-        $lines+=Get-HarnessSourceLink $Data.IndexPath $project.MigrationPath ($project.Project+': decisoes')
-        foreach ($diagnostic in $project.Diagnostics) { $lines+=ConvertTo-ProjectCell ($project.Project+': '+$diagnostic) }
-    }
-    Set-ProjectManagedBlock $Text 'priorizacao:indice' ($lines -join ([Environment]::NewLine+[Environment]::NewLine))
+function Get-PrioritizationNextStep {
+    param($Data,[string]$From)
+    $links=@(foreach ($project in $Data.Projects) {
+        if (Test-Path -LiteralPath $project.MigrationPath -PathType Leaf) {
+            '- '+(Get-HarnessSourceLink $From $project.MigrationPath (ConvertTo-ProjectCell ($project.Project+': registro')))
+        } else { '- Registro indisponivel: '+(ConvertTo-ProjectCell $project.Project)+'. Atualize o indice dos projetos.' }
+    })
+    Expand-HarnessDocumentTemplate 'orientacao-priorizacao' @{MigrationLinks=($links -join [Environment]::NewLine)}
 }
 
+function Merge-PrioritizationDocument {
+    param([string]$Name,$Values,[string]$Text,[string[]]$Blocks)
+    $rendered=Expand-HarnessDocumentTemplate $Name $Values
+    if (-not $Text) { return $rendered }
+    foreach ($name in $Blocks) {
+        $block=Find-ProjectManagedBlock $rendered $name
+        if (-not $block) { throw "Template $Name sem bloco $name." }
+        $body=($block.Value -split '\r?\n' | Select-Object -Skip 1 | Select-Object -SkipLast 1) -join [Environment]::NewLine
+        $Text=Set-ProjectManagedBlock $Text $name $body
+    }
+    $Text
+}
+
+function Get-PrioritizationRankingContent {
+    param($Data,$Result,[string]$Text)
+    $values=@{
+        Scope=(ConvertTo-ProjectCell $Data.Scope);Category=(ConvertTo-ProjectCell $Data.Category)
+        Examined=@($Result.AnalyzedIssues).Count;InitialTotal=$Data.InitialTotal;Status=$Result.Status
+        ResultJson=($Result | ConvertTo-Json -Depth 10)
+        Rows=(Get-PrioritizationRows $Data $Result $Data.RankingPath)
+        NextStep=(Get-PrioritizationNextStep $Data $Data.RankingPath)
+    }
+    Merge-PrioritizationDocument 'priorizacao' $values $Text @('priorizacao:resultado','priorizacao:fichas','priorizacao:orientacao')
+}
+
+function Get-PrioritizationIndexContent {
+    param($Data,$Result,[string]$Text)
+    $values=@{
+        Scope=(ConvertTo-ProjectCell $Data.Scope);Category=(ConvertTo-ProjectCell $Data.Category)
+        Examined=@($Result.AnalyzedIssues).Count;InitialTotal=$Data.InitialTotal;Status=$Result.Status
+        OutsideBaseline=if ($null -eq $Data.OutsideBaseline) {'nao informado; conferir origem atual'} else {[string]$Data.OutsideBaseline}
+        RankingLink=(Get-HarnessSourceLink $Data.IndexPath $Data.RankingPath 'Ranking acumulado')
+        PromptLink=(Get-HarnessSourceLink $Data.IndexPath $Data.PromptPath 'Orientacao da priorizacao')
+        ContractLink=(Get-HarnessSourceLink $Data.IndexPath $Data.ContractPath 'Contrato')
+        Rows=(Get-PrioritizationRows $Data $Result $Data.IndexPath)
+        Diagnostics=(@(foreach ($project in $Data.Projects) { foreach ($diagnostic in $project.Diagnostics) { ConvertTo-ProjectCell ($project.Project+': '+$diagnostic) } }) -join [Environment]::NewLine)
+        NextStep=(Get-PrioritizationNextStep $Data $Data.IndexPath)
+    }
+    Merge-PrioritizationDocument 'indice-priorizacao' $values $Text @('priorizacao:indice')
+}
 function Update-HarnessPrioritizationIndex {
     param([string]$Root,[switch]$RefreshSources)
     $base=Join-Path $Root '.harness/projetos'
@@ -94,7 +126,7 @@ function Update-HarnessPrioritizationIndex {
                 $result=Read-PrioritizationResult $data $old[$rankRel] $projects
                 $writes=@{}
                 $writes[$indexRel]=Get-PrioritizationIndexContent $data $result $old[$indexRel]
-                $writes[$rankRel]=Set-ProjectManagedBlock $old[$rankRel] 'priorizacao:fichas' (Get-PrioritizationRows $data $result $paths.RankingPath)
+                $writes[$rankRel]=Get-PrioritizationRankingContent $data $result $old[$rankRel]
                 Publish-HarnessProjectFiles $master $writes $old
                 $lines+='- '+(Get-HarnessSourceLink $globalPath $paths.IndexPath ($data.Scope+' / '+$data.Category))+" - $(@($result.AnalyzedIssues).Count)/$($data.InitialTotal) examinadas; $($result.Status)."
                 foreach ($project in $projects) { $links[$project.Name]+=$paths.IndexPath }
@@ -117,8 +149,11 @@ function Update-HarnessPrioritizationIndex {
         }
     }
     if ($lines.Count -or $globalOld['priorizacao.md']) {
-        $text=$globalOld['priorizacao.md']; if (-not $text) { $text='# Priorizacoes correntes' }
-        $text=Set-ProjectManagedBlock $text 'priorizacao:indice' ($lines -join [Environment]::NewLine)
+        $values=@{
+            Entries=($lines -join [Environment]::NewLine)
+            NextStep=(Expand-HarnessDocumentTemplate 'orientacao-priorizacao' @{MigrationLinks='Abra o escopo/categoria acima para acessar os registros dos projetos e suas fichas.'})
+        }
+        $text=Merge-PrioritizationDocument 'indice-priorizacoes' $values $globalOld['priorizacao.md'] @('priorizacao:indice')
         Publish-HarnessProjectFiles $destination @{'priorizacao.md'=$text} $globalOld
     }
     foreach ($project in $stores.Values) {

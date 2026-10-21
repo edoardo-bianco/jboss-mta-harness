@@ -1,5 +1,70 @@
 # Plano do agente: evolucao do harness
 
+## Auditoria independente do checkpoint - 21/10/2026
+
+Pedido: validar coerencia do todo entre README, doc, guias, templates,
+geradores e agente de orientacao, usando using-agent-skills.
+Auditar 87a8725 contra eb44383 no checkout separado, com revisores independentes,
+regressao isolada e parecer rastreavel. Registrar achados sem misturar corretivas
+com a auditoria. Resultado: [parecer](auditoria-indice-mta-externo.md).
+Dois achados P2 exigem corretiva antes da PR; um P3 documental e lacunas de
+validacao tambem ficaram registrados.
+
+## Tabela resumida e template do indice - 21/10/2026
+
+Retomada na branch harness/indice-mta-externo, no checkout C:\Temp\harness-indice-mta.
+Pedido confirmado: tabela resumida Markdown com links, sem Excel. O indice geral
+corrente tinha apenas uma lista; o resumo antigo consta no historico de 01/10.
+Criar template versionado consumido pelo gerador, com MTA/data, issues/ocorrencias
+por categoria, ultimas tentativas e documentos existentes. Totais informam cobertura;
+ausencia nao vira zero e preparo nao vira proposta. Preservar fontes/decisoes.
+Validar com fixtures pelo runner isolado; concluir revisao da retirada do conversor
+e preparar descricao da PR, sem merge nem alteracao de dados reais.
+
+
+Escopo ampliado pelo desenvolvedor nesta sessao: verificar cada resultado humano
+esperado e assegurar uso do template pelo gerador ou pelo agente via prompt.
+Inventariados indice geral/projeto, registro, indices de priorizacao, ranking,
+orientacao para selecionar a issue, ficha/detalhe, plano/tarefas, evidencias e
+reconciliacao. Sprints ja consumia modelo. O antigo indice-priorizacao era
+historico e sem consumidor; foi substituido pelo modelo corrente.
+A orientacao padronizada deve ligar ao migracao.md, explicar ANALISAR AGORA,
+Observacao/referencia e Planejamento: planejar, sem escolher pelo humano.
+Fichas permanecem unicas por projeto/categoria/issue, sem copias por fatia.
+Validar consumo real alterando templates somente na copia de teste; prompts
+preparados precisam vincular os modelos inclusive apos reconciliacao/realocacao.
+
+## Retirada da conversao legada - 20/10/2026
+
+Pedido explicito: iniciar pelo layout corrente e pelos relatorios MTA externos,
+sem converter o estado antigo. Na branch harness/indice-mta-externo, retirar
+tools/transicao e fixtures/suites exclusivas da conversao em commit separado.
+Alinhar guias, contratos e orientador para iniciar pelo indice; preservar o
+historico das entregas anteriores, indicando que o utilitario foi retirado.
+Verificar ausencia de dependencias no runtime e executar as suites correntes
+pertinentes em copia isolada, sem limpar ou converter dados reais.
+Pausa solicitada em 20/10/2026: salvar os dois commits na branch remota, sem merge.
+A retomada e os resultados estao no topo de tasks/todo.md. Revisao final da
+retirada e preparacao da PR ficam para a proxima sessao.
+
+## Indice com MTA externo configurado - 20/10/2026
+
+Branch `harness/indice-mta-externo`, checkout separado da conversao, a partir de
+`main` em `eb44383`. Pedido: usar `mta.runsPath` informado na configuracao para
+todos os projetos, reconhecendo a ultima analise em raiz/nome-da-pasta-Source.
+Associar a pasta da aplicacao em projeto.json, sem fixar a rodada datada.
+Preservar origens explicitas e diagnosticos internos; informar ausencia,
+ambiguidade e relatorio invalido sem procurar outra aplicacao. Ler fontes
+externas sem copia. Verificar com fixtures isoladas antes/depois da mudanca,
+regressao de indice/MTA/acesso e revisao independente.
+
+Escopo esclarecido: novas analises tambem devem usar sempre a raiz externa
+configurada. Sem mta.runsPath, interromper antes de executar e orientar a
+configuracao. Preparar saida em area externa transitoria; publicar pasta datada
+somente apos sucesso e validacao. Preservar relatorios anteriores, associar
+automaticamente a pasta Source e manter logs operacionais no projeto. Leitura
+de MTA antigo interno continua compativel; novas saidas internas sao retiradas.
+
 ## Conversao de preparo sem proposta - 20/10/2026
 
 Branch `harness/conversao-preparo-sem-proposta`, derivada da `main` em `dd38d6e`.
@@ -173,3 +238,14 @@ sem pedir confirmacao; retirar a Run Task `Aplicacao: rollback no JBoss`.
 
 **Verificacao:** links Markdown internos; nenhuma referencia restante as pastas
 removidas; suites afetadas pelo runner isolado (sprints, consultas, prompts).
+
+## Corretivas da auditoria independente - 21/10/2026
+
+Pedido autorizado: corrigir A1/A2 e a contradicao A3 registrada no parecer.
+Criar primeiro provas de regressao para publicacao externa/associacao e leitura
+do historico com raiz externa configurada; corrigir em incrementos e preservar
+escolhas explicitas, decisoes humanas, concorrencia e diagnosticos anteriores.
+Validar pelo runner isolado, revisar independentemente e atualizar parecer/PR.
+Dados reais e checkout operacional original permanecem fora desta etapa.
+
+Corretivas concluidas e revisadas: A1/A2/A3, cobertura estrutural dos adaptadores e ajustes documentais. Ver resultados em todo.md e no parecer.

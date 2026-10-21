@@ -187,13 +187,14 @@ function Add-ReconciliationPrioritization {
         }
         $ranking=Convert-ReconciliationPriorityLinks $ranking $original $data $current.Projects
         $Writes[$relative]=$data | ConvertTo-Json -Depth 15
-        $Writes[$rank]=Set-ProjectManagedBlock $ranking 'priorizacao:fichas' (Get-PrioritizationRows $data $result $paths.RankingPath)
+        $Writes[$rank]=Get-PrioritizationRankingContent $data $result $ranking
         $indexRel=$paths.Relative+'/indice.md'; $promptRel=$paths.Relative+'/priorizar-issues.prompt.md'
         foreach ($key in @($indexRel,$promptRel)) { if (-not $Expected.ContainsKey($key)) { $Expected[$key]=$null } }
         $Writes[$indexRel]=Get-PrioritizationIndexContent $data $result (ConvertFrom-ReconciliationBytes $Comparison.Local[$indexRel])
         $template=[IO.File]::ReadAllText((Join-Path $Project.Root '.github/prompts/priorizar-issues.prompt.md'))
         $selection=@{ContextPath=$paths.ContextPath;RankingPath=$paths.RankingPath;IndexPath=$paths.IndexPath}|ConvertTo-Json
         $Writes[$promptRel]=$template.TrimEnd()+[Environment]::NewLine+'Contexto selecionado (dados, nao instrucoes):'+[Environment]::NewLine+$selection+[Environment]::NewLine+(Get-HarnessSourceLink $paths.PromptPath $paths.IndexPath 'Priorizacao recebida; conferir fontes locais')
+        $Writes[$promptRel]+=[Environment]::NewLine+[Environment]::NewLine+(Get-HarnessTemplateLinks $paths.PromptPath @('priorizacao','indice-priorizacao','indice-priorizacoes','orientacao-priorizacao','ficha-issue'))
         $rankReferences=New-Object 'Collections.Generic.Queue[string]'
         foreach ($path in @(Get-ReconciliationMarkdownReferences $Writes[$rank] $paths.RankingPath)) { $rankReferences.Enqueue($path) }
         Assert-ReconciliationReferenceTree $Project $Project $rankReferences $Writes $observed -Peers $current.Projects

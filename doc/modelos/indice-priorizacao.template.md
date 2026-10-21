@@ -1,46 +1,19 @@
-# Índice de priorização de issues
+# Indice da priorizacao corrente
 
-**Modelo histórico, sem uso no fluxo corrente.** O texto abaixo descreve os
-recibos anteriores à ADR-0009 e permanece para interpretar material antigo.
-O índice atual é derivado dos documentos por projeto/categoria/escopo; siga o
-[guia de priorização](../guias/tools/priorizacao-issues.md). Não use este modelo
-para criar novas cadeias ou reintroduzir IDs técnicos.
+<!-- priorizacao:indice:inicio -->
+Escopo: {{Scope}}
+Categoria: {{Category}}
 
-Recibos preparados até: {{PreparedThroughUtc}} (UTC). Conferência: {{Verification}}.
-Este bloco é derivado dos recibos e resultados; conteúdo manual externo permanece como histórico.
-O índice localiza os arquivos. A continuidade é determinada por Previous/SequenceId, nunca pela data.
+Examinadas acumuladas: {{Examined}} / {{InitialTotal}}. Estado da fatia: {{Status}}.
+Elegiveis fora da base inicial: {{OutsideBaseline}}. Recriar e uma escolha explicita; ausencia no MTA nao comprova resolucao.
 
-{{Sequences}}
+{{RankingLink}}
+{{PromptLink}}
+{{ContractLink}}
 
-## Substituída (não vigente)
+{{Rows}}
 
-Somente vínculos explícitos de Recreate substituem sequências; uma categoria ou um escopo diferente não substitui os demais.
+{{Diagnostics}}
 
-| Solicitação | Modo | Data (UTC) | Observação | Priorização |
-| --- | --- | --- | --- | --- |
-{{SupersededRows}}
-
-{{SupersededNote}}
-
-## Próximo passo
-
-Concluir as fatias pendentes pelo prompt já preparado. Após a análise, escolher as issues no registro de cada projeto (Decisão `ANALISAR AGORA`) e executar **Planejamento: planejar**.
-O percentual da fatia não é ganho de IA nem percentual de correções. Exame não concede GO ou aceite.
-
-<!-- modelo:sequencia:inicio -->
-## Sequência {{SequenceState}} ({{Category}})
-
-Categoria: {{Category}} | Sequência: `{{SequenceId}}` | Base inicial: {{InitialIssueCount}} issues | Percentual da última fatia: {{SlicePercent}}%
-
-Escopo: {{ScopeLabels}}.
-
-| Ordem | Solicitação | Modo | Data (UTC) | Issues examinadas | Projetos da fatia | Propostas | Priorização | Contexto |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-{{CompletedRows}}
-
-Cobertura acumulada conferida: {{UniqueAnalyzedIssueCount}} de {{InitialIssueCount}} issues examinadas ({{CoveragePercent}}%). Isso não significa corrigidas, validadas ou aceitas.
-
-### Pendências e diagnósticos
-
-{{PendingRows}}
-<!-- modelo:sequencia:fim -->
+{{NextStep}}
+<!-- priorizacao:indice:fim -->

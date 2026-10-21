@@ -68,6 +68,18 @@ ser substituidos. Nao peca IDs de execucao ou hashes para localizar trabalho.
 
 Para primeiro uso/colegas, siga o [roteiro por maquina](../../../doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas).
 Cite a secao usada e indique o resultado a conferir; nao reconstrua um guia paralelo.
+Para MTA existente ou nova analise, siga o [guia MTA](../../../doc/guias/tools/mta.md#origem-mta-e-caminhos).
+Novos relatorios exigem mta.runsPath externo; sem configuracao, orientar
+Workspace: configurar caminhos. Com a raiz informada e projetos no workspace,
+Workspace: atualizar indice dos projetos associa o MTA existente por pasta Source,
+se a origem ainda nao foi escolhida. Dentro dessa pasta, usa o ultimo relatorio
+valido; origem explicita e preservada e falhas ficam visiveis. A pasta Source
+pode diferir do artifactId: este continua nomeando os documentos na .harness.
+Nao orientar copia do relatorio para .harness nem nova analise apenas para indexar.
+O conversor legado foi retirado. Inicio novo parte do indice e dos MTA externos
+configurados; priorizacao, fichas e decisoes anteriores nao sao reconstruidas
+pelo relatorio. Material humano preservado pode ser consultado separadamente,
+sem presumir continuidade, exame ou aceite no estado novo.
 Para configuracao/migracao JBoss, ha [guia EAP 7.4](../../../doc/guias/tools/migracao-configuracao-jboss.md)
 e [operacao JBoss](../../../doc/guias/tools/jboss.md). Start/deploy nao comprovam
 que a configuracao foi migrada; automacoes de backlog nao estao disponiveis.
@@ -88,7 +100,8 @@ sem exigir projeto/MTA/registro para configurar. Orientar uma etapa de cada vez:
 pasta fixa, versao/arquitetura, dependencias, configurador e descoberta no cliente.
 Reaproveitar caminhos fornecidos. Raizes vem do workspace salvo e mta.diretorio
 em projeto.json, conforme workspacePath/harnessConfigPath; allowedRoots guarda
-excecoes explicitas. mta.runsPath antigo nao concede leitura. Nao instalar,
+excecoes explicitas. mta.runsPath sozinho nao concede leitura pelo MCP: a
+associacao por projeto deve existir. Nao instalar,
 configurar, executar CLI ou ampliar permissoes pelo helper. MCP e opcional.
 
 Para prazo/equipe, indique Planejamento: planejar sprints conforme o

@@ -16,7 +16,8 @@ pelo [indice do projeto](workspace.md#navegar-pelas-evidencias-do-projeto).
 O agente pode recuperar ContextPath dali; o desenvolvedor nao precisa memorizar
 IDs ou hashes. Para arquivos de colega, siga a [copia e reconciliacao](compartilhamento-contextos.md)
 antes de consultar: os caminhos devem corresponder ao POM/Source local.
-Contextos legados nao sao aceitos; conversao e uma operacao explicita separada.
+Contextos legados nao sao aceitos e o conversor foi retirado. Prepare um contexto
+corrente pelo fluxo de priorizacao ou planejamento a partir do indice do projeto.
 
 ## Consultar pelo helper
 
@@ -208,9 +209,11 @@ esses arquivos existem. Abra `config/mcp.local.json` e confira as referencias:
 As permissoes cobrem as **raizes e suas subpastas**. A cada consulta, o MCP le
 `folders` do workspace salvo e a associacao `projeto.json` dos projetos Maven
 encontrados. `mta.diretorio` dessa associacao permite ler o MTA externo; com null,
-usa o diagnostico interno em `.harness/projetos/<artifactId>/atual/diagnosticos/mta`,
-ja coberto pela raiz do harness. Adicionar/remover uma pasta e salvar o workspace
-atualiza o acesso na consulta seguinte. `mta.runsPath` legado nao governa o acesso.
+permite leitura de diagnostico interno antigo em `.harness/projetos/<artifactId>/atual/diagnosticos/mta`,
+ja coberto pela raiz do harness. Novos relatorios sao externos. Adicionar/remover
+uma pasta e salvar o workspace atualiza o acesso na consulta seguinte.
+`mta.runsPath` sozinho nao governa o acesso: atualize o indice para materializar
+a associacao por projeto, conforme o [guia MTA](mta.md#origem-mta-e-caminhos).
 Sem workspace configurado, os repositorios da configuracao do harness podem
 fornecer os POMs. Permissao de leitura nao adiciona projetos ao planejamento.
 

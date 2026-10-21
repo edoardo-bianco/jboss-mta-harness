@@ -46,7 +46,6 @@ as prioridades relativas e pilotos posteriores permanecem a definir.
 
 **Prioridade definida em 10/10/2026:** concluir a
 [simplificacao por projeto](doc/engineering-harness/02-system-design.md#estado-local)
-e a [transicao dos registros](tools/transicao/README.md)
 antes da modernizacao e de novas funcionalidades. O objetivo e retirar recibos e
 rastreamentos por execucao, usar caminhos fixos e oferecer links diretos das fichas
 para suas fontes. A entrega inclui limpeza e alinhamento dos guias e do orientador.
@@ -54,6 +53,10 @@ O [plano de viabilidade](tasks/historico/plan-ate-2026-10-17.md#simplificacao-pr
 registra a implementacao tecnica por etapas. O fluxo corrente ja usa esses caminhos;
 regressao integrada e aceite humano sao acompanhados separadamente no
 [checklist](tasks/historico/todo-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10).
+Em 20/10/2026, por escolha do desenvolvedor, o conversor legado foi retirado.
+Para iniciar com relatorios MTA existentes, configure a raiz externa e execute
+**Workspace: atualizar indice dos projetos**, conforme o
+[guia MTA](doc/guias/tools/mta.md#origem-mta-e-caminhos).
 Nenhum dado real foi convertido ou limpo nesta entrega.
 
 A [arquitetura do Engineering Harness](doc/engineering-harness/01-estrategia-e-arquitetura.md)

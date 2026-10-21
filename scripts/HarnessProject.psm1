@@ -1,3 +1,4 @@
+Import-Module (Join-Path $PSScriptRoot 'HarnessDocumentTemplates.psm1') -DisableNameChecking
 #requires -Version 5.1
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
@@ -122,3 +123,5 @@ Export-ModuleMember -Function Set-HarnessProjectOperation,Get-HarnessProjectOper
 Export-ModuleMember -Function Get-HarnessProjectMtaLog
 . (Join-Path $PSScriptRoot 'HarnessProjectReadRoots.ps1')
 Export-ModuleMember -Function Get-HarnessProjectReadRoots
+
+Export-ModuleMember -Function Get-HarnessTemplateLinks

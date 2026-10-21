@@ -19,6 +19,10 @@ Project e o artifactId literal do POM. projeto.json associa POM/Source local e
 mta.diretorio; indices em .harness/indices/projetos.md e no projeto localizam
 trabalho/evidencias. Registro atual concentra escolhas; indice/ranking nao as
 substitui. Use links a HTML/Markdown/log existentes para navegar.
+Novas analises MTA exigem mta.runsPath externo; sem ele, orientar configurar
+caminhos. O indice associa MTA existente por pasta Source quando nao ha origem
+escolhida, preserva mta.diretorio explicito e le o ultimo relatorio valido dessa
+aplicacao. Documentos e fichas continuam na .harness por artifactId.
 Referencias manuais em Markdown/chat podem indicar o diagnostico atual ou ultimo
 build, conferindo origem/conteudo. Ultima tentativa pode diferir do diagnostico
 utilizavel. Nao exigir ID de execucao/hash; prompts gerados podem ser regravados.

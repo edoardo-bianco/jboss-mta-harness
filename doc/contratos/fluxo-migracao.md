@@ -135,7 +135,10 @@ para marcar CONCLUIDA. Escolha ja feita nao volta a pendente por indice antigo.
 
 PlanningBasis=MTA usa Mta.ReportPath/Mta.CatalogPath originais e conferencia local.
 O leitor suporta o catalogo JSON de window["apps"], sem executar JavaScript;
-nao produz extrato de incidentes. Origem externa permanece somente leitura.
+nao produz extrato de incidentes. Consultas/planejamento leem a origem externa
+sem altera-la. A tarefa de analise gera novos relatorios em mta.runsPath, sempre
+fora da .harness, preservando conjuntos anteriores; sem raiz configurada nao
+executa. Indice e documentos do projeto permanecem na .harness.
 Detalhe ausente e lacuna; nao trocar silenciosamente para EVIDENCIAS.
 PlanningBasis=EVIDENCIAS usa entradas humanas reais, inclusive DEV-*, sem inventar
 categoria, regra, snapshot, rodada ou resultado MTA. Evidencias podem sustentar
