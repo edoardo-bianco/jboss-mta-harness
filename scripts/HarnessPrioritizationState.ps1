@@ -26,6 +26,32 @@ function Get-PrioritizationPaths {
         IndexPath=(Join-Path $folder 'indice.md')}
 }
 
+function Resolve-PrioritizationDefaultScope {
+    param($Master,[string]$Category,[string[]]$ProjectNames)
+    $defaultScope='priorizacao'
+    $previousScope=$ProjectNames -join '|'
+    if ($previousScope -ceq $defaultScope) { return $defaultScope }
+    # O nome antigo serve somente para reencontrar conjuntos ja existentes.
+    # Se nem o componente era valido, nenhum preparo anterior podia usa-lo.
+    try { $previousComponent=ConvertTo-HarnessFunctionalPath $previousScope }
+    catch { return $defaultScope }
+    $parent=Join-Path $Master.Folder ('atual/priorizacao/'+(ConvertTo-HarnessFunctionalPath $Category)+'/escopos')
+    $existing=@(foreach ($candidate in @(
+        @{Scope=$defaultScope;Component=$defaultScope},
+        @{Scope=$previousScope;Component=$previousComponent}
+    )) {
+        $folder=Join-Path $parent $candidate.Component
+        foreach ($file in @('contexto.json','priorizacao.md','indice.md','priorizar-issues.prompt.md')) {
+            if (Test-Path -LiteralPath (Join-Path $folder $file)) { $candidate.Scope; break }
+        }
+    })
+    if ($existing.Count -gt 1) {
+        throw "Mais de um escopo existente: informe -Scope priorizacao ou -Scope '$previousScope' para escolher o conjunto."
+    }
+    if ($existing.Count -eq 1) { return $existing[0] }
+    $defaultScope
+}
+
 function Get-PrioritizationSet {
     param($Issues,$Projects)
     $set=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::Ordinal)

@@ -24,7 +24,7 @@ try {
     } else {
         Write-Host "Indice de priorizacao: $($prepared.PrioritizationIndexPath)"
         if ($prepared.Reused) { Write-Host 'Retomando a fatia ainda sem resultado; percentual e quota originais preservados.' }
-        Write-Host "Categoria: $($prepared.Category) | Projetos: $($prepared.Projects.Count) | Percentual: $($prepared.Percentage)% | Base inicial: $($prepared.InitialTotal) | Fatia: $($prepared.SliceSize)"
+        Write-Host "Escopo: $($prepared.Scope) | Categoria: $($prepared.Category) | Projetos: $($prepared.Projects.Count) | Percentual: $($prepared.Percentage)% | Base inicial: $($prepared.InitialTotal) | Fatia: $($prepared.SliceSize)"
         foreach ($project in $prepared.Projects) {
             Write-Host "Projeto: $($project.Label) | ID: $($project.Project) | Source: $($project.Source)"
             foreach ($diagnostic in $project.Diagnostics) { Write-Warning ("$($project.Label): " + $diagnostic) }

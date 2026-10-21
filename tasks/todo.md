@@ -1,5 +1,34 @@
 # To-do do agente: evolucao do harness
 
+## Nome curto para priorizacao - 21/10/2026
+
+- [x] Reproduzir o limite do escopo automatico com 14 projetos sinteticos.
+- [x] Usar priorizacao como padrao, mantendo participantes no contexto.
+- [x] Preservar continuidade antiga, Scope explicito, categorias e contribuicoes humanas.
+- [x] Provar recusa de ambiguidade e de troca silenciosa dos participantes.
+- [x] Atualizar ADR/guia e concluir regressao isolada e revisao.
+
+Validacao: Test-PrioritizationDefaultScope reproduziu antes da correcao o mesmo
+erro de chave funcional acima de 160 caracteres. Depois, passaram pelo runner
+isolado as 8 suites: PrioritizationDefaultScope, Prioritization,
+PrioritizationCategories, PrioritizationProgress, PrioritizationIndex,
+PrioritizationIncidents, ReconciliationPrioritization e OutputTemplates.
+Teste novo escrito por agente independente; revisao separada nao encontrou
+bloqueadores. Mutacao que permitia escolher silenciosamente entre dois escopos
+foi detectada pelo teste de ambiguidade; fonte restaurada byte a byte.
+Nenhum dado real alterado. Desenvolvedor autorizou commit, push e abertura da PR
+para main em 21/10/2026; alinhamento da maquina de trabalho segue apos o merge.
+
+Conferencia complementar solicitada: indice geral, indice de categoria/escopo,
+templates e consumidores das etapas seguintes compativeis. Passaram mais 5
+suites isoladas: IssuePlanning, CurrentPromptLinks, ProjectNavigation,
+IssueQueries e SprintSources (13 suites no total). Planejamento reutiliza a
+ficha por projeto/categoria/issue; consultas/reconciliacao leem Scope do contexto.
+Auditoria independente de orientacoes confirmou skill, helpers Codex/Copilot,
+guias e prompts sem dependencia do antigo nome concatenado. Templates continuam
+obrigatorios e fornecem os indices, ranking, fichas e orientacao para o registro.
+Nenhum ajuste adicional de runtime ou instrucao foi necessario nesta conferencia.
+
 ## Totais do indice por categoria - 21/10/2026
 
 - [x] Reproduzir ausencia de totais por categoria no resumo.

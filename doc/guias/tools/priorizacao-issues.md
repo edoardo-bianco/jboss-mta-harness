@@ -36,6 +36,10 @@ correntes. Categoria e conjunto de participantes delimitam a cobertura.
 separadas. Fonte ausente fica como lacuna; a configuracao nao concede permissao
 de leitura a um caminho que o cliente de IA bloqueia.
 
+Novos conjuntos usam o nome padrao curto `priorizacao`. A lista completa de
+projetos fica no contexto, sem compor o nome da pasta. As categorias conservam
+seus destinos e coberturas separados. A tarefa exibe o escopo e os caminhos usados.
+
 MCP e Node sao opcionais. O executor pode ler registro, contexto, relatorio MTA
 e codigo diretamente. Se usar [consultas de issues](consultas-issues.md), respeite
 paginacao/limites e cite o que examinou. Consultar nao registra exame ou decisao.
@@ -65,8 +69,15 @@ Exemplo de CLI, na raiz do harness:
 ```
 
 Para progredir, use `-Mode Continue -Percentage 10`; para retomar a fatia pendente,
-`-Mode Continue`. `-Scope` informa um nome funcional para o escopo quando
-necessario. Nao e ID de execucao nem autoriza trocar silenciosamente participantes.
+`-Mode Continue`. `-Scope` informa outro nome funcional, por exemplo
+`-Scope frente-api`. Use outro nome ao preparar participantes diferentes quando
+o destino padrao ja estiver ocupado. Nao e ID de execucao nem autoriza trocar
+silenciosamente os participantes de um conjunto existente, mesmo com Recreate.
+
+Ao omitir `-Scope`, um conjunto existente com o antigo nome formado pelos
+artifactIds e reutilizado, preservando notas, caminhos e cobertura. Se ele
+coexistir com `priorizacao`, a tarefa pede a escolha explicita via `-Scope` e
+preserva ambos. Nao e necessario renomear ou mover documentos anteriores.
 Automacao pode usar `-NoOpen -OutputFormat Json`, sem Interactive/EditorPath.
 `EXHAUSTED` significa que nao restam novas elegiveis da base, sem apagar cobertura.
 

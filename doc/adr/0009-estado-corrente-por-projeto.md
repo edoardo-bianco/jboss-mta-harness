@@ -61,10 +61,14 @@ de novas analises. Navegacao/documentos/logs seguem na .harness por artifactId.
 
 ### Priorizacao corrente (S10/S11a)
 
-O escopo padrao usa os artifactIds ordenados ordinalmente, separados por `|`;
-o primeiro participante Maven guarda o conjunto. `Scope` permite um nome funcional
-curto quando o caminho excederia o limite do Windows; o mesmo nome nao pode ser
-reassociado silenciosamente a participantes diferentes no mesmo mestre.
+O escopo padrao de novos conjuntos e `priorizacao`. Os artifactIds ficam no
+contexto, ordenados ordinalmente; o primeiro participante Maven guarda o conjunto.
+`Scope` permite outro nome funcional curto. O mesmo nome nao pode ser reassociado
+silenciosamente a participantes diferentes no mesmo mestre; outro conjunto de
+participantes exige outro `Scope` quando o destino ja estiver ocupado.
+Conjuntos anteriores cujo escopo juntava os artifactIds com `|` sao reencontrados
+ao omitir `Scope`, preservando caminhos, notas e cobertura. Se o conjunto anterior
+e `priorizacao` coexistirem, a escolha explicita de `Scope` resolve a ambiguidade.
 Os caminhos sao `atual/priorizacao/<categoria>/escopos/<escopo>/contexto.json`,
 `priorizacao.md`, `indice.md` e `priorizar-issues.prompt.md`. A ficha de cada
 participante fica em `atual/priorizacao/<categoria>/issues/<issue>/ficha.md`.
