@@ -367,7 +367,7 @@ Não exigir `RunId`, `RequestId`, GUID ou hash para localizar e retomar o projet
 | Reconciliação | Último resultado e pendências em `reconciliado/`. |
 | Navegação | Índices derivados; não autorizam nem substituem os documentos. |
 
-Sem configuração MTA externa, usar `atual/diagnosticos/mta/`. Com origem externa configurada, não misturar fontes ou fazer fallback silencioso para a pasta interna. O harness não copia, move, espelha ou mantém cache persistente do MTA externo.
+Novas análises exigem `mta.runsPath` externo e publicam uma pasta datada por nome da pasta Source, preservando relatórios anteriores. Sem configuração, orientar o preenchimento e não executar. O índice associa a pasta da aplicação em `projeto.json` e consulta seu último relatório válido. Diagnósticos internos antigos continuam legíveis por compatibilidade; novas saídas são externas. Consultas não copiam, movem, espelham ou mantêm cache persistente dos relatórios. Índices, documentos, fichas e logs continuam na `.harness` por artifactId.
 
 ### 9.3. Leitura do MTA e continuidade
 

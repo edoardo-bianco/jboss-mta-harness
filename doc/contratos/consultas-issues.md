@@ -157,7 +157,8 @@ registros nem executar preparadores. As pastas do workspace permitem leitura
 dos projetos; projetos Maven sao associados pelo POM ao projeto.json corrente.
 Sem workspace, usa os repositorios da configuracao. mta.diretorio de cada
 projeto pode acrescentar sua origem externa, sem liberar ancestral amplo.
-mta.runsPath legado nao concede acesso nem seleciona diagnostico.
+mta.runsPath sozinho nao concede acesso pelo MCP; o indice materializa a
+associacao em projeto.json antes da consulta, sem liberar toda a raiz externa.
 Sao no maximo 100 raizes distintas; nao se copiam projetos/relatorios para
 mcp.local.json. Remover uma pasta ou alterar a origem revoga a permissao anterior,
 salvo se tambem declarada em allowedRoots.

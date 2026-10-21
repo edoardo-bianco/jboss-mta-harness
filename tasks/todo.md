@@ -1,5 +1,27 @@
 # To-do do agente: evolucao do harness
 
+## Indice com MTA externo configurado - 20/10/2026
+
+- [x] Reproduzir raiz externa ignorada com projetos de nomes distintos do artifactId.
+- [x] Associar pasta Source, selecionar ultimo diagnostico e preservar escolhas.
+- [x] Exigir saida externa nas novas analises e preservar ultimo diagnostico em falha.
+- [x] Cobrir falhas, ambiguidade, leitura externa e concorrencia; alinhar guias/skill/papeis.
+- [x] Executar suites isoladas e revisao independente; preparar entrega.
+- [ ] Revisao humana e integracao.
+
+**Verificacao:** 19 suites passaram em copia isolada com Windows PowerShell 5.1:
+Mta, ProjectIndexExternalMta, ProjectIndex, ProjectMta, ProjectDocuments,
+ProjectNavigation, ProjectPublication, ProjectRecovery, ProjectConcurrency,
+ProjectReadOnly, ProjectStorage, ProjectTemporaryRemoval, MtaActive, MtaLog,
+ExternalMtaDiscovery, SonarConfig, Workspace, McpRoots e PrioritizationIndex.
+Testes novos primeiro reproduziram raiz ignorada, saida interna e perda da
+associacao anterior em falha; depois passaram. Revisao independente apontou a
+associacao antecipada e limpeza incompleta; ambos corrigidos e aprovados na
+revisao final. Teste adicional de nome Source reservado reproduziu acesso a area
+transitoria e passou apos recusa explicita. Nenhum MTA real executado.
+Test-ClaudeAdapter tambem passou apos alinhamento da skill e dos papeis comuns
+dos agentes Codex/Copilot/Claude Code.
+
 ## Conversao de preparo sem proposta - 20/10/2026
 
 [Escopo](plan.md#conversao-de-preparo-sem-proposta---20102026).

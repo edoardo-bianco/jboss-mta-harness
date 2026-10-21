@@ -43,6 +43,22 @@ links, leitura direta e publicação. O estado corrente não depende de IDs téc
 
 ## Consequências e transição
 
+### Saida MTA externa (ajuste solicitado em 20/10/2026)
+
+Novas analises usam obrigatoriamente `mta.runsPath`, fora do harness e das fontes.
+Sem raiz configurada, orientar a configuracao antes de iniciar. A organizacao e
+`<raiz>/<nome-da-pasta-Source>/<data-com-milissegundos>/`, preservando relatorios
+anteriores. A saida transitoria tambem fica na raiz externa, separada da pasta
+da aplicacao; publicar somente o conjunto validado, sem sobrescrever rodada.
+
+O indice associa automaticamente a pasta Source quando `mta.diretorio` ainda e
+null e existe um conjunto valido. Preserva origens explicitas e acusa nomes de
+pasta ambiguos. A execucao tambem associa a origem, exigindo coerencia com a
+raiz configurada. O leitor existente seleciona o ultimo diagnostico valido nessa
+origem, sem copiar relatorios nem ampliar acesso a toda a raiz global.
+Diagnostico interno antigo permanece legivel por compatibilidade; nao e destino
+de novas analises. Navegacao/documentos/logs seguem na .harness por artifactId.
+
 ### Priorizacao corrente (S10/S11a)
 
 O escopo padrao usa os artifactIds ordenados ordinalmente, separados por `|`;

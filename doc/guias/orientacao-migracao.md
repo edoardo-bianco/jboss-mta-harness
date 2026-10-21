@@ -66,6 +66,12 @@ O helper consulta os mesmos guias vinculados pelo README e pelo guia do desenvol
 inclusive o [preparo do certificado Sonar](tools/sonar.md#certificado-publico-do-sonar-corporativo).
 Ele informa a fonte e a proxima acao, sem instalar certificados ou ferramentas.
 
+Para comecar com MTA ja existente, informe a raiz externa configurada, como
+`C:/mta-runs`, e os projetos do workspace. O helper orienta a
+[associacao pelo indice](tools/mta.md#origem-mta-e-caminhos), sem exigir nova analise
+ou copia dos relatorios. Novas analises tambem usam obrigatoriamente essa raiz
+externa; documentos, fichas e indices permanecem na `.harness` por projeto.
+
 ### Se a skill ou o agente nao aparecer
 
 Confira os arquivos no clone e se as customizacoes estao habilitadas no cliente.

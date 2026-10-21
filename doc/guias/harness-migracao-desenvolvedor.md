@@ -170,6 +170,13 @@ consultar o diagnostico; [Planejamento: MTA existente ou recebido](tools/planeja
 para reutilizar um relatorio. Esse segundo caminho dispensa repetir a analise
 apenas para preparar uma proposta.
 
+Configure `mta.runsPath` com a raiz externa dos relatorios. O indice associa
+automaticamente a pasta da aplicacao pelo nome de Source quando ainda nao ha
+origem escolhida e consulta o ultimo relatorio valido dela. Novas analises tambem
+sao externas e exigem essa configuracao. A `.harness` mantem registro, fichas,
+planos, evidencias e navegacao pelo artifactId do POM, mesmo que ele difira do
+nome da pasta Source. Veja [origem e caminhos](tools/mta.md#origem-mta-e-caminhos).
+
 **Resultado esperado e continuidade:** diagnostico identificado, com divergencias
 e limites conhecidos. A etapa 4 transforma esses achados em prioridades. Se voce
 tem evidencias suficientes de um problema sem pacote MTA completo, pode registra-lo

@@ -63,6 +63,12 @@ Para preparo de migracao, consulte [workspace](../../../../doc/guias/tools/works
 [planejamento](../../../../doc/guias/tools/planejamento-migracao.md#qual-caminho-seguir).
 Recupere projeto e entradas antes de pedir selecao. Distinga preparo de contexto,
 elaboracao da proposta e execucao de corretiva; nao invente identificadores de execucao ou caminhos.
+Para MTA externo existente, confira a raiz configurada e a pasta Source; oriente
+atualizar o indice para associar o ultimo relatorio valido dessa aplicacao quando
+a origem estiver sem escolha. Sem mta.runsPath, oriente configurar caminhos antes
+de uma nova analise. Nao pedir edicao manual de cada projeto.json para o caso
+convencional; preserve origens explicitas e encaminhe divergencias conforme o guia.
+Documentos, fichas e navegacao continuam na .harness por artifactId.
 
 Para migracao da configuracao JBoss, use o [guia de migracao para EAP 7.4](../../../../doc/guias/tools/migracao-configuracao-jboss.md):
 inventario, par de versoes e fontes Red Hat antes do ensaio. A automacao JBS do

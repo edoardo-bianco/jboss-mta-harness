@@ -78,6 +78,7 @@ settings opcionais ficam `null` para usar os padroes Maven da maquina.
 | `tools.mavenHome` | Maven usado pelo MTA, com `bin/mvn.cmd`. |
 | `tools.mavenSettingsPath` | Opcional: `settings.xml` aprovado para o MTA. Nunca coloque credenciais neste JSON. |
 | `mta.rulesPath` | `null` usa `rulesets/java` ao lado da CLI; preencha se as regras Java estiverem em outra pasta. |
+| `mta.runsPath` | Raiz externa obrigatoria para novas analises, por exemplo `C:/mta-runs`. O indice tambem usa essa raiz para associar relatorios existentes por pasta Source. |
 | `mta.profile` | `"eap71-to-eap74-java8"`: origem EAP 7.1, destino EAP 7.4, Java 8 e `javax.*`. |
 | `mta.sources`, `mta.targets`, `mta.mode` | Mantenha `[]`, `["eap7"]` e `"full"`. O harness recusa desvios desse perfil. |
 
@@ -93,10 +94,23 @@ JSONs locais anteriores, sem `profile` e `sources`, recebem esses valores em mem
 
 <a id="pasta-de-rodadas-e-caminhos-longos"></a>
 
-A associacao do projeto fica em
-`.harness/projetos/<artifactId>/projeto.json`. `mta.diretorio: null` usa o
-diagnostico interno em `atual/diagnosticos/mta/`; um caminho explicito consulta
-o MTA externo diretamente, sem copia ou cadastro de rodada.
+A raiz dos relatorios e `mta.runsPath` em `config/harness.local.json`, por exemplo
+`C:/mta-runs`. Novas analises exigem esse caminho fora do harness e das fontes;
+sem ele, a tarefa orienta configurar e nao inicia a ferramenta.
+
+**Workspace: atualizar indice dos projetos** procura em
+`<runsPath>/<nome-da-pasta-Source>/` e, havendo MTA valido, preenche
+`mta.diretorio` em `.harness/projetos/<artifactId>/projeto.json`.
+Por exemplo, Source `.../SIMTR-api` com artifactId `simtr-parent` usa
+`C:/mta-runs/SIMTR-api`; a associacao aponta a pasta da aplicacao, nao a rodada
+datada. Funciona tambem para indices ja criados com `diretorio: null`.
+Nomes de pasta Source repetidos no escopo, pasta ausente e conjunto invalido
+ficam explicitos nos limites da leitura. Nao se pesquisa outra aplicacao.
+
+Uma origem explicita ja preenchida e preservada. Para gerar novas analises,
+ela deve coincidir com `runsPath` mais a pasta Source; divergencia pede conferir
+a associacao. Um relatorio interno antigo continua legivel por compatibilidade
+quando nao ha raiz externa escolhida; novas analises sempre usam a raiz externa.
 
 O leitor reconhece a pasta de relatorio estatico com `index.html` e `output.js`
 contendo uma aplicacao e seus rulesets. Na origem configurada, escolhe o
@@ -105,12 +119,11 @@ diagnostico pela data de geracao valida com fuso ou pela modificacao de
 e lacuna; nao escolhe outra origem silenciosamente. Recencia do diagnostico
 nao altera decisoes, escopo ou GO.
 
-A Run Task de analise publica somente na origem interna. Se configurou origem
-externa, gere nela com sua ferramenta ou escolha explicitamente a origem interna
-em `projeto.json` antes de executar pelo harness. O campo antigo `runsPath`
-nao define novas saidas. Use raiz curta quando ferramentas externas tiverem
-restricoes de comprimento; confira os limites do projeto no ensaio real.
-A limpeza corrente preserva a origem externa.
+A Run Task de analise publica uma nova pasta datada nessa origem e associa
+automaticamente o projeto. Relatorios anteriores permanecem intactos; atualizar
+o indice encontra o ultimo diagnostico valido sem cadastro de rodada. Use raiz
+curta quando ferramentas externas tiverem restricoes de comprimento. A limpeza
+corrente preserva os relatorios externos.
 
 ## Uso
 
@@ -148,15 +161,23 @@ powershell.exe -NoProfile -File .\scripts\executar-mta.ps1 -WorkspacePath .\jbos
 ### Analise e resultados
 
 O resultado utilizavel fica em
-`.harness/projetos/<artifactId>/atual/diagnosticos/mta/`; o relatorio produzido
-pelo harness abre em `static-report/index.html`. A ultima tentativa tem
-`mta-console.log` e, quando disponivel, `mta-interno.log`, separados do
-diagnostico. A situacao da operacao fica legivel no indice do projeto.
+`<runsPath>/<nome-da-pasta-Source>/<yyMMdd-HHmmss-fff>/`; o relatorio produzido
+pelo harness abre em `static-report/index.html`. O sufixo inclui milissegundos;
+colisao nunca sobrescreve um conjunto existente. A saida em preparo fica em
+`<runsPath>/.harness-mta-em-preparo/<temporario>/`, fora da pasta consultada pelo
+indice, e so se torna visivel como rodada apos sucesso e validacao.
+
+A navegacao, registro, fichas, priorizacao, planos/tarefas e evidencias continuam
+em `.harness/projetos/<artifactId>/`. A ultima tentativa tem `mta-console.log` e,
+quando disponivel, `mta-interno.log` em `atual/diagnosticos/`. A situacao da
+operacao e o link para o MTA externo ficam legiveis no indice do projeto.
 
 A analise usa copias temporarias de fontes/regras para isolar alteracoes do
 analisador. Esses arquivos sao retirados ao terminar; nao formam snapshots
 permanentes nem requisitos para planejar. Fonte ou regra alterada durante a
 operacao interrompe a publicacao. Falha preserva o ultimo diagnostico completo.
+A saida externa em preparo e removida ao terminar; se o processo for encerrado
+abruptamente, pode permanecer nessa area, sem entrar na selecao do ultimo MTA.
 `SUCCEEDED` comprova a execucao/verificacoes locais, nao homologacao EAP 7.4.
 
 ### Abrir e compartilhar relatorios

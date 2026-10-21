@@ -53,14 +53,17 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   nao crie uma entrada por projeto, rodada, arquivo, formato ou funcao auxiliar.
   Uma nova tarefa deve representar uma operacao distinta e necessaria ao usuario.
 - Migracao usa Project/artifactId literal do POM e Source local. A associacao fica
-  em .harness/projetos/<artifactId>/projeto.json, com pom e mta.diretorio escolhidos
-  explicitamente. Colisao/nome invalido ou artifactId alterado exigem esclarecimento;
+  em .harness/projetos/<artifactId>/projeto.json, com pom local e mta.diretorio.
+  Sem origem escolhida, o indice associa a pasta Source sob mta.runsPath configurado
+  quando encontra MTA valido, conforme o guia; preserva origem explicita existente.
+  Colisao/nome invalido ou artifactId alterado exigem esclarecimento;
   nao crie alias silencioso. Configuracao da maquina nao acompanha copia de colega.
 - Use .harness/indices/projetos.md e indice.md de cada projeto para localizar
   registro, plano/tarefas, fichas, evidencias e diagnosticos existentes.
   Workspace: atualizar indice dos projetos reconstroi links e preserva escolhas.
   .harness e visivel no Explorer; nao volte a ocultar as evidencias no modelo.
-  Fonte ausente fica como lacuna, sem link inventado ou escolha por data.
+  Fonte ausente fica como lacuna, sem link inventado. A recencia seleciona somente
+  o relatorio MTA dentro da origem da aplicacao; nao escolhe documentos humanos.
 - A entrada habitual e Planejamento: planejar. Usa migracao.md atual e os
   destinos em atual/planejamento/ do projeto. Nao use tasks/ do harness para
   corretivas da aplicacao. Um lote consistente por projeto; detalhes/fichas
@@ -81,7 +84,10 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   com fontes citadas, sem alegar RAG semantico implementado.
 - PlanningBasis=MTA usa relatorio/catalogo original na origem configurada e
   conferencia local, sem executar output.js ou gerar extratos/copias de incidentes.
-  Origem externa e somente leitura. EVIDENCIAS usa entradas humanas reais,
+  Consultas/planejamento nao alteram a origem externa. Nova analise MTA exige
+  mta.runsPath externo, publica pasta datada sem sobrescrever relatorios e
+  associa a pasta Source; indice/documentos/logs permanecem na .harness.
+  EVIDENCIAS usa entradas humanas reais,
   inclusive DEV-*, sem inventar categoria/rodada/resultado MTA. Corrupcao ou
   ausencia nao autoriza fallback silencioso. Igualdade de contagens nao prova
   equivalencia; ausencia em novo MTA nao comprova resolucao.

@@ -1,5 +1,23 @@
 # Plano do agente: evolucao do harness
 
+## Indice com MTA externo configurado - 20/10/2026
+
+Branch `harness/indice-mta-externo`, checkout separado da conversao, a partir de
+`main` em `eb44383`. Pedido: usar `mta.runsPath` informado na configuracao para
+todos os projetos, reconhecendo a ultima analise em raiz/nome-da-pasta-Source.
+Associar a pasta da aplicacao em projeto.json, sem fixar a rodada datada.
+Preservar origens explicitas e diagnosticos internos; informar ausencia,
+ambiguidade e relatorio invalido sem procurar outra aplicacao. Ler fontes
+externas sem copia. Verificar com fixtures isoladas antes/depois da mudanca,
+regressao de indice/MTA/acesso e revisao independente.
+
+Escopo esclarecido: novas analises tambem devem usar sempre a raiz externa
+configurada. Sem mta.runsPath, interromper antes de executar e orientar a
+configuracao. Preparar saida em area externa transitoria; publicar pasta datada
+somente apos sucesso e validacao. Preservar relatorios anteriores, associar
+automaticamente a pasta Source e manter logs operacionais no projeto. Leitura
+de MTA antigo interno continua compativel; novas saidas internas sao retiradas.
+
 ## Conversao de preparo sem proposta - 20/10/2026
 
 Branch `harness/conversao-preparo-sem-proposta`, derivada da `main` em `dd38d6e`.

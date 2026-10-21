@@ -214,7 +214,8 @@ O gerador usa as origens externas `mta.diretorio` de `projeto.json` dos projetos
 correntes para preencher `github.copilot.chat.additionalReadAccessPaths`, quando
 a lista ainda nao foi definida. POM/Source precisam corresponder ao projeto local.
 Caminhos ja cobertos pelo workspace nao exigem permissao extra; uma raiz ancestral
-que ampliaria o acesso e recusada. `mta.runsPath` antigo nao concede acesso.
+que ampliaria o acesso e recusada. `mta.runsPath` sozinho nao concede acesso pelo
+MCP; a associacao por projeto e feita pelo indice antes da consulta.
 
 Confira a associacao MTA, execute **Workspace: gerar workspace** e abra o arquivo
 local. O gerador preserva permissoes existentes, inclusive lista vazia `[]`.
@@ -370,6 +371,9 @@ CLI sem WorkspacePath, mantenha `repositories` coerente com os projetos desejado
 
 1. Execute **Workspace: atualizar indice dos projetos**. A tarefa abre
    `.harness/indices/projetos.md`; escolha o projeto pelo nome.
+   Com `mta.runsPath` configurado, associa automaticamente o MTA existente em
+   raiz/nome-da-pasta-Source quando o projeto ainda nao tem origem explicita.
+   Consulte [origem MTA](mta.md#origem-mta-e-caminhos) para nomes, datas e lacunas.
 2. No indice do projeto, abra registro, plano/tarefas, evidencias/anexos, fichas
    e priorizacoes, cenarios de sprints ou diagnosticos disponiveis.
 3. Para investigar uma falha, abra o log da ultima tentativa de build, MTA ou
