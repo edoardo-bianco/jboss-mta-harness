@@ -58,4 +58,24 @@ $module=Get-Module HarnessProject
 }
 try { Reject { Read-HarnessProjectMta $project } 'Regravacao durante a leitura deve interromper a operacao inteira, sem selecionar outro relatorio.' }
 finally { & $module { Set-Item function:script:Get-ProjectMtaStamp $script:savedStamp } }
+# Rodadas reais guardam fontes em input e o relatorio em output/static-report.
+$round=Add-Report 'rodada/output/static-report' ([datetime]'2026-10-11T12:00:00Z')
+$sourceReport=Add-Report 'rodada/input/assets' ([datetime]'2099-10-11T12:00:00Z')
+$web=Join-Path $external 'rodada/input/src/main/webapp'
+$null=[IO.Directory]::CreateDirectory($web)
+[IO.File]::WriteAllText((Join-Path $web 'index.html'),'<html>Pagina da aplicacao, sem catalogo MTA</html>')
+$readPaths=New-Object 'Collections.Generic.List[string]'
+$actual=Read-HarnessMtaDirectory $project $external -FileReader {
+    param($Path)
+    $readPaths.Add($Path)
+    [IO.File]::ReadAllText($Path)
+}
+Assert ($actual.ReportPath -ceq (Join-Path $round 'index.html')) 'Input da rodada nao pode disputar selecao com o relatorio em output.'
+Assert (-not @($readPaths | Where-Object { $_.Contains('\input\') }).Count -and ($actual.Diagnostics -join ' ') -notmatch '\\input\\') 'HTML e dados da aplicacao em input nao devem ser lidos como relatorios ou gerar avisos MTA.'
+$incompleteRound=Add-Report 'incompleta/output/static-report' ([datetime]'2026-10-12T12:00:00Z')
+[IO.File]::Delete((Join-Path $incompleteRound 'output.js'))
+$withIncomplete=Read-HarnessProjectMta $project
+Assert ($withIncomplete.ReportPath -ceq (Join-Path $round 'index.html') -and ($withIncomplete.Diagnostics -join ' ').Contains($incompleteRound)) 'Relatorio incompleto em output continua sendo lacuna explicita.'
+$explicitInput=Read-HarnessMtaDirectory $project $sourceReport
+Assert ($explicitInput.ReportPath -ceq (Join-Path $sourceReport 'index.html')) 'Origem explicita nao pode ser recusada por conter input no caminho.'
 'PASS: MTA direto, origem unica, recencia, empate, falhas e ausencia de copias.'

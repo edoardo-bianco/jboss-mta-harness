@@ -46,10 +46,10 @@ function Get-HarnessProjectReference {
 }
 
 function Get-HarnessProjectStorage {
-    param([Parameter(Mandatory=$true)][string]$Root,[Parameter(Mandatory=$true)][string]$Pom)
+    param([Parameter(Mandatory=$true)][string]$Root,[Parameter(Mandatory=$true)][string]$Pom,[switch]$ReadCommitted)
     $project=Get-HarnessProjectReference $Root $Pom
     $Root=$project.Root; $Pom=$project.Pom; $folder=$project.Folder; $name=$project.Name
-    $documents=Read-HarnessProjectFiles $project @('projeto.json')
+    $documents=Read-HarnessProjectFiles $project @('projeto.json') -ReadCommitted:$ReadCommitted
     if ($documents['projeto.json']) {
         $config=ConvertFrom-Json $documents['projeto.json']
         if ((Resolve-ProjectPath $config.pom $Root) -ine $Pom) { throw "Colisao de artifactId: $name. Confira a associacao ao POM ou use outra raiz de dados." }

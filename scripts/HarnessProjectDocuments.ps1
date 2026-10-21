@@ -46,10 +46,15 @@ function Get-HarnessProjectDecisions {
 
 function Get-HarnessProjectMigrationText {
     param($Project,$Mta,[string]$Text,[switch]$UpdateIssues)
+    $guide=Join-Path (Split-Path -Parent $PSScriptRoot) 'doc/guias/tools/priorizacao-issues.md'
+    $guideLinks=(Get-HarnessSourceLink $Project.MigrationPath $guide 'Como preencher e usar a ficha')+' | '+
+        (Get-HarnessSourceLink $Project.MigrationPath (Get-HarnessDocumentTemplatePath 'ficha-issue') 'Modelo da ficha')
+    $orientation=(Expand-HarnessDocumentTemplate 'orientacao-registro' @{GuideLinks=$guideLinks}).TrimEnd()
     $migration=$Text
     if (-not $migration) {
-        $migration=Expand-HarnessDocumentTemplate 'migracao' @{Project=(ConvertTo-ProjectCell $Project.Name)}
+        $migration=Expand-HarnessDocumentTemplate 'migracao' @{Project=(ConvertTo-ProjectCell $Project.Name);Orientation=$orientation}
     }
+    $migration=Set-ProjectManagedBlock $migration 'registro:orientacao' $orientation
     if ($UpdateIssues -and $Mta) {
         $rows=New-Object 'Collections.Generic.Dictionary[string,object]' ([StringComparer]::Ordinal)
         foreach ($row in @(Read-ProjectDecisionRows $migration)) {
@@ -87,8 +92,11 @@ function Get-ProjectOperationsText {
 }
 
 function Update-HarnessProjectDocuments {
-    param($Project,$Mta,[switch]$UpdateIssues,[string[]]$Warnings=@())
-    $old=Read-HarnessProjectFiles $Project @('migracao.md','indice.md','atual/operacao.json')
+    param($Project,$Mta,[switch]$UpdateIssues,[string[]]$Warnings=@(),[Collections.IDictionary]$Expected=@{})
+    $old=Read-HarnessProjectFiles $Project @('migracao.md','indice.md','atual/operacao.json','projeto.json')
+    foreach ($key in $Expected.Keys) {
+        if (-not $old.Contains($key) -or $old[$key] -cne $Expected[$key]) { throw 'Associacao editada desde a leitura do MTA; preserve os documentos e atualize novamente o indice.' }
+    }
     $migration=Get-HarnessProjectMigrationText $Project $Mta $old['migracao.md'] -UpdateIssues:$UpdateIssues
     $lines=@()
     foreach ($entry in @(
@@ -115,6 +123,7 @@ function Update-HarnessProjectDocuments {
     $values=@{
         Project=(ConvertTo-ProjectCell $Project.Name)
         Pom=(Get-HarnessSourceLink $Project.IndexPath $Project.Pom 'POM')
+        Source=(Get-HarnessSourceLink $Project.IndexPath $Project.Source 'Codigo local')
         Migration=(Get-HarnessSourceLink $Project.IndexPath $Project.MigrationPath 'Decisoes de migracao')
         Documents=($lines -join [Environment]::NewLine)
         Mta=$mtaText
@@ -128,6 +137,7 @@ function Update-HarnessProjectDocuments {
 
 function Get-HarnessTemplateLinks {
     param([string]$From,[string[]]$Names)
+    if ('migracao' -in $Names -and 'orientacao-registro' -notin $Names) { $Names+='orientacao-registro' }
     $lines=@('## Modelos de saida obrigatorios','','Leia os modelos vinculados antes de escrever. Use suas secoes e blocos; preencha com evidencias reais, sem placeholders restantes. Preserve texto humano existente. Template ausente e lacuna a resolver; nao improvise outro formato.','')
     foreach ($name in $Names) { $lines+='- '+(Get-HarnessSourceLink $From (Get-HarnessDocumentTemplatePath $name) ($name+'.template.md')) }
     $lines -join [Environment]::NewLine

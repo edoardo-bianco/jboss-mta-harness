@@ -14,7 +14,10 @@ Update-HarnessProjectDocuments $project -Mta $mta -UpdateIssues
 $before=Read-HarnessProjectFiles $project @('migracao.md','indice.md')
 Assert ($before['indice.md'] -match '\[POM\]\(' -and $before['indice.md'] -match '\[MTA atual\]\(') 'Indice deve ligar diretamente a POM e MTA.'
 Assert ($before['migracao.md'] -match 'java::regra') 'Primeiro MTA deve oferecer issue para decisao.'
-$human=$before['migracao.md'].Replace('A DEFINIR','ANALISAR AGORA').Replace('NAO ANALISADA','PLANEJADA').Replace('<!-- mta:fim -->',"| ID-manual | Humana | manual | - | MANUAL | ADIAR | NAO ANALISADA | [POM](../pom.xml) &#124; justificativa |`n<!-- mta:fim -->")+"`nTexto humano a preservar.`n"
+Assert ($before['indice.md'] -match '\[Codigo local\]\(') 'Indice do projeto deve localizar Source sem duplicar seu conteudo.'
+Assert ($before['migracao.md'].Contains('## Como usar este registro') -and $before['migracao.md'].Contains('ficha-issue.template.md')) 'Registro deve orientar preenchimento e vincular o modelo comum da ficha.'
+Assert ($before['migracao.md'].Contains('NAO REENCONTRADA') -and $before['migracao.md'].Contains('VERIFICADA')) 'Orientacao deve distinguir presenca, decisao e andamento.'
+$human=$before['migracao.md'].Replace('| A DEFINIR | NAO ANALISADA |','| ANALISAR AGORA | PLANEJADA |').Replace('<!-- mta:fim -->',"| ID-manual | Humana | manual | - | MANUAL | ADIAR | NAO ANALISADA | [POM](../pom.xml) &#124; justificativa |`n<!-- mta:fim -->")+"`nTexto humano a preservar.`n"
 Publish-HarnessProjectFiles $project @{'migracao.md'=$human}
 [IO.File]::Delete($project.IndexPath)
 Update-HarnessProjectDocuments $project -Mta $mta
@@ -34,6 +37,14 @@ $mta.ReportPath=Join-Path $area 'outro relatorio.html'; [IO.File]::WriteAllText(
 Update-HarnessProjectDocuments $project -Mta $mta
 Assert ([IO.File]::ReadAllText($project.MigrationPath).Contains('outro%20relatorio.html')) 'Atualizar indice deve corrigir o link MTA atual no registro.'
 $valid=[IO.File]::ReadAllText($project.MigrationPath)
+# Registros anteriores ao modelo recebem so a orientacao gerada, uma unica vez.
+$withoutOrientation=[regex]::Replace($valid,'(?s)<!-- registro:orientacao:inicio -->.*?<!-- registro:orientacao:fim -->','')
+Publish-HarnessProjectFiles $project @{'migracao.md'=$withoutOrientation}
+Update-HarnessProjectDocuments $project -Mta $mta
+$upgraded=[IO.File]::ReadAllText($project.MigrationPath)
+Update-HarnessProjectDocuments $project -Mta $mta
+Assert ([IO.File]::ReadAllText($project.MigrationPath) -ceq $upgraded) 'Adicionar orientacao a registro existente deve ser idempotente.'
+Assert ((Find-ProjectManagedBlock $upgraded 'mta').Value -ceq (Find-ProjectManagedBlock $valid 'mta').Value -and $upgraded.Contains('Texto humano a preservar.')) 'Acrescentar orientacao preserva tabela e notas existentes.'
 foreach ($invalid in @($valid+"`n<!-- mta:inicio -->",$valid.Replace('<!-- mta:inicio -->',"<!-- mta:inicio -->`n<!-- mta:inicio -->"))) {
     Publish-HarnessProjectFiles $project @{'migracao.md'=$invalid}
     $failed=$false; try { Update-HarnessProjectDocuments $project -Mta $mta -UpdateIssues } catch { $failed=$true }

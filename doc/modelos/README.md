@@ -10,6 +10,7 @@ existir um arquivo de modelo: cada linha abaixo identifica seu consumidor.
 | Indice geral e tabela resumida de projetos | [indice-projetos](indice-projetos.template.md) | New-HarnessProjectIndex |
 | Indice de um projeto | [indice-projeto](indice-projeto.template.md) | Update-HarnessProjectDocuments |
 | Registro migracao.md | [migracao](migracao.template.md) | Get-HarnessProjectMigrationText, somente na criacao |
+| Orientacao do registro | [orientacao-registro](orientacao-registro.template.md) | Get-HarnessProjectMigrationText, bloco gerenciado em registros novos/existentes; prompt de reconciliacao |
 | Indice geral de priorizacoes | [indice-priorizacoes](indice-priorizacoes.template.md) | Update-HarnessPrioritizationIndex |
 | Indice de uma categoria/escopo | [indice-priorizacao](indice-priorizacao.template.md) | Get-PrioritizationIndexContent; prompt priorizar-issues |
 | Priorizacao/ranking acumulado | [priorizacao](priorizacao.template.md) | Get-PrioritizationRankingContent; prompt priorizar-issues |
@@ -26,6 +27,23 @@ mesclar. Isso nao autoriza criar planos, indices ou fichas fora do conjunto
 permitido pela revisao protegida. Relatorios MTA, resultados Maven e dados
 tecnicos JSON conservam os formatos dos seus produtores; nao sao documentos
 para o agente preencher a partir destes modelos.
+
+## Informacao em um so lugar
+
+| Documento | Informacao que orienta o trabalho |
+| --- | --- |
+| Indice geral | Comparacao entre projetos, contagens/cobertura e links. Totais por categoria sao derivados dos MTA utilizaveis. |
+| Indice do projeto | POM/Source, documentos existentes, diagnosticos e situacao das operacoes. Objetivo e decisoes sao consultados no registro vinculado. |
+| migracao.md | Objetivo/limites humanos, escolha, andamento e referencias por issue. O bloco de orientacao explica como preencher; a tabela nao replica a analise da ficha. |
+| Priorizacao | Comparacao, posicao/motivo e cobertura das examinadas, com links para as fichas unicas. |
+| Ficha da issue | Aplicabilidade conferida, risco/alcance, direcao da corretiva, verificacoes e lacunas. O achado MTA original e consultado pelo link ao relatorio. |
+| Plano e tarefas | Escopo do lote, solucao proposta, dependencias, aceite/verificacoes e execucao acompanhada; referenciam as fichas. |
+
+Os detalhes originais continuam no MTA, codigo/POM e anexos; nao copiar catalogos
+ou incidentes para varios documentos. Resumo derivado nao substitui a fonte.
+Fichas sao preenchidas no exame efetivo durante priorizacao ou planejamento,
+inclusive sem recomendacao. Criar indice/preparar prompt apenas localiza fontes
+e destinos: nao fabrica fichas examinadas nem propostas.
 
 ## Regras de preenchimento e preservacao
 
@@ -53,6 +71,9 @@ para o agente preencher a partir destes modelos.
   gerenciados sao reconstruidos pelos produtores; anotacoes externas dos
   documentos de priorizacao permanecem. O indice geral de projetos e derivado:
   notas duraveis pertencem ao registro, fichas ou evidencias.
+- A orientacao do registro usa registro:orientacao:inicio/fim e pode ser
+  atualizada pelo indice sem mudar escolhas, progresso ou notas fora do bloco.
+  Migracao referencia esse modelo tambem no prompt de reconciliacao.
 - Gerar um prompt nao gera plano/tarefas/fichas ficticios nem comprova que um
   agente executou a etapa. O agente deve ler os modelos vinculados, preencher,
   revisar as secoes e conferir os links antes de concluir.

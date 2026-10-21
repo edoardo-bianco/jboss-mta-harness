@@ -23,20 +23,32 @@ function Get-ProjectRecoveryDestination {
 
 function Clear-ProjectPublicationFiles {
     param($Project)
-    $temporary=Resolve-ProjectPath (Join-Path $Project.TemporaryPath 'publicacao') $Project.Folder
-    if (-not $temporary.StartsWith($Project.Folder+'\temporarios\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Area de recuperacao invalida.' }
-    if (Test-Path -LiteralPath $temporary) {
-        $pending=New-Object 'Collections.Generic.Stack[IO.DirectoryInfo]'
-        $pending.Push((Get-Item -LiteralPath $temporary))
-        while ($pending.Count) {
-            foreach ($child in $pending.Pop().EnumerateFileSystemInfos()) {
-                if ($child.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Link/junction na area de recuperacao.' }
-                if ($child -is [IO.DirectoryInfo]) { $pending.Push($child) }
+    # Windows scanners/editors may briefly hold a directory without delete
+    # sharing. Retry cleanup only; never replay the completed publication.
+    for ($attempt=0;$attempt -lt 8;$attempt++) {
+        try {
+            $temporary=Resolve-ProjectPath (Join-Path $Project.TemporaryPath 'publicacao') $Project.Folder
+            if (-not $temporary.StartsWith($Project.Folder+'\temporarios\',[StringComparison]::OrdinalIgnoreCase)) { throw 'Area de recuperacao invalida.' }
+            if (Test-Path -LiteralPath $temporary) {
+                $pending=New-Object 'Collections.Generic.Stack[IO.DirectoryInfo]'
+                $pending.Push((Get-Item -LiteralPath $temporary))
+                while ($pending.Count) {
+                    foreach ($child in $pending.Pop().EnumerateFileSystemInfos()) {
+                        if ($child.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Link/junction na area de recuperacao.' }
+                        if ($child -is [IO.DirectoryInfo]) { $pending.Push($child) }
+                    }
+                }
+                [IO.Directory]::Delete($temporary,$true)
             }
+            if ((Test-Path -LiteralPath $Project.TemporaryPath) -and -not @(Get-ChildItem -LiteralPath $Project.TemporaryPath -Force).Count) { [IO.Directory]::Delete($Project.TemporaryPath) }
+            return
+        } catch {
+            $failure=$_.Exception.GetBaseException()
+            $code=$failure.HResult -band 0xffff
+            if ($failure -isnot [IO.IOException] -or $code -ne 32 -or $attempt -eq 7) { throw }
+            Start-Sleep -Milliseconds 200
         }
-        [IO.Directory]::Delete($temporary,$true)
     }
-    if ((Test-Path -LiteralPath $Project.TemporaryPath) -and -not @(Get-ChildItem -LiteralPath $Project.TemporaryPath -Force).Count) { [IO.Directory]::Delete($Project.TemporaryPath) }
 }
 
 function Remove-ProjectPublication {
@@ -86,8 +98,9 @@ function Restore-ProjectPublication {
 }
 
 function Enter-HarnessProjectAccess {
-    param($Project,[switch]$ForOperation,[switch]$ReadOnly)
+    param($Project,[switch]$ForOperation,[switch]$ReadOnly,[switch]$ReadCommitted)
     if ($ForOperation -and $ReadOnly) { throw 'Operacao e leitura pura sao acessos distintos.' }
+    if ($ReadCommitted -and ($ForOperation -or $ReadOnly)) { throw 'Leitura confirmada exige acesso proprio.' }
     # Only an OS mutex name: this digest is never saved in project data or used
     # for identity, navigation, history or authorization.
     $sha=[Security.Cryptography.SHA256]::Create()
@@ -104,6 +117,12 @@ function Enter-HarnessProjectAccess {
             # inspect the complete current state while the next one is prepared.
             $publication=Enter-HarnessProjectAccess $Project
             try { } finally { $publication.ReleaseMutex(); $publication.Dispose() }
+        } elseif ($ReadCommitted) {
+            # No journal means either preparation never reached publication or
+            # the whole write/rollback finished. Leftover cleanup cannot change
+            # current documents. Keep the mutex and reject an actual journal.
+            $temporary=Resolve-ProjectPath (Join-Path $Project.TemporaryPath 'publicacao') $Project.Folder
+            if (Test-Path -LiteralPath (Join-Path $temporary 'recuperacao.json')) { throw 'Recuperacao de publicacao pendente; leitura confirmada exige recuperar os documentos primeiro.' }
         } elseif ($ReadOnly) {
             if (Test-Path -LiteralPath (Join-Path $Project.TemporaryPath 'publicacao')) { throw 'Recuperacao de publicacao pendente; consulta somente leitura nao altera o projeto. Atualize o indice antes de consultar.' }
         } else { Restore-ProjectPublication $Project }
@@ -216,8 +235,9 @@ function Publish-HarnessProjectFiles {
 }
 
 function Read-HarnessProjectFiles {
-    param($Project,[string[]]$Paths,[switch]$AsBytes)
-    Invoke-WithProjectAccess $Project {
+    param($Project,[string[]]$Paths,[switch]$AsBytes,[switch]$ReadCommitted)
+    $access=Enter-HarnessProjectAccess $Project -ReadCommitted:$ReadCommitted
+    try {
         $result=[ordered]@{}
         foreach ($relative in $Paths) {
             $path=Resolve-ProjectDocument $Project $relative
@@ -228,5 +248,5 @@ function Read-HarnessProjectFiles {
             }
         }
         $result
-    }
+    } finally { $access.ReleaseMutex(); $access.Dispose() }
 }

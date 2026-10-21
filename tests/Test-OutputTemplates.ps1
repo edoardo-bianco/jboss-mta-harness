@@ -1,7 +1,7 @@
 #requires -Version 5.1
 $ErrorActionPreference='Stop'; Set-StrictMode -Version Latest
 . (Join-Path $PSScriptRoot 'PlanningCurrentFixture.ps1')
-$names=@('indice-projetos','indice-projeto','migracao','indice-priorizacoes','indice-priorizacao','priorizacao','orientacao-priorizacao','ficha-issue','plano-lote','tarefas-lote','evidencias','reconciliacao')
+$names=@('indice-projetos','indice-projeto','migracao','orientacao-registro','indice-priorizacoes','indice-priorizacao','priorizacao','orientacao-priorizacao','ficha-issue','plano-lote','tarefas-lote','evidencias','reconciliacao')
 foreach ($name in $names) {
     Assert (Test-Path -LiteralPath (Join-Path $root ('doc/modelos/'+$name+'.template.md'))) ('Template corrente ausente: '+$name)
 }
@@ -19,7 +19,7 @@ foreach ($path in @($prior.RankingPath,$prior.IndexPath,$prior.PrioritizationInd
 Assert ([IO.File]::ReadAllText($project.MigrationPath) -ceq $register) 'Orientacao nao pode escolher a issue pelo humano.'
 $planning=New-HarnessCurrentPlanning $f.Context
 $reconciliation=New-HarnessReconciliationContext $f.Context -LocalOnly
-foreach ($pair in @(@($prior.PromptPath,@('priorizacao','indice-priorizacao','indice-priorizacoes','orientacao-priorizacao','ficha-issue')),@($planning.PromptPath,@('plano-lote','tarefas-lote','ficha-issue')),@($reconciliation.PromptPath,@('migracao','plano-lote','tarefas-lote','ficha-issue','evidencias','reconciliacao')))) {
+foreach ($pair in @(@($prior.PromptPath,@('priorizacao','indice-priorizacao','indice-priorizacoes','orientacao-priorizacao','ficha-issue')),@($planning.PromptPath,@('plano-lote','tarefas-lote','ficha-issue')),@($reconciliation.PromptPath,@('migracao','orientacao-registro','plano-lote','tarefas-lote','ficha-issue','evidencias','reconciliacao')))) {
     $prompt=[IO.File]::ReadAllText($pair[0])
     foreach ($name in $pair[1]) {
         Assert ($prompt.Contains($name+'.template.md')) ('Prompt deve vincular template: '+$name)
@@ -28,18 +28,20 @@ foreach ($pair in @(@($prior.PromptPath,@('priorizacao','indice-priorizacao','in
 }
 Assert (-not (Test-Path -LiteralPath $project.PlanPath) -and -not (Test-Path -LiteralPath $project.TodoPath)) 'Vincular templates nao fabrica proposta.'
 # Alterar o modelo na copia de teste comprova consumo real pelo produtor.
-foreach ($name in @('migracao','indice-projeto','priorizacao','indice-priorizacao','indice-priorizacoes','orientacao-priorizacao')) {
+foreach ($name in @('migracao','orientacao-registro','indice-projeto','priorizacao','indice-priorizacao','indice-priorizacoes','orientacao-priorizacao')) {
     $path=Get-HarnessDocumentTemplatePath $name
     $before=[IO.File]::ReadAllBytes($path)
     try {
         $text=[IO.File]::ReadAllText($path)
         $text=$text -replace '(?m)^# ',('# TEMPLATE-CONSUMIDO-'+$name+' ')
         if ($name -eq 'orientacao-priorizacao') { $text=$text.Replace('## Proximo passo','## TEMPLATE-CONSUMIDO-orientacao-priorizacao') }
+        if ($name -eq 'orientacao-registro') { $text=$text.Replace('## Como usar este registro','## TEMPLATE-CONSUMIDO-orientacao-registro') }
         [IO.File]::WriteAllText($path,$text)
         $fresh=New-Fixture 1
         $prepared=New-HarnessPrioritizationContext $fresh.Context -Percentage 100 -Category mandatory
         $target=switch ($name) {
             'migracao' {$fresh.Projects[0].MigrationPath}
+            'orientacao-registro' {$fresh.Projects[0].MigrationPath}
             'indice-projeto' {$fresh.Projects[0].IndexPath}
             'priorizacao' {$prepared.RankingPath}
             'indice-priorizacao' {$prepared.IndexPath}
