@@ -1,5 +1,32 @@
 # Plano do agente: evolucao do harness
 
+## Nome curto para priorizacao - 21/10/2026
+
+Branch harness/priorizacao-escopo-curto, derivada de main cbe4f8a, no checkout
+isolado C:\Temp\harness-indice-mta. Falha relatada somente na maquina de trabalho:
+Planejamento: priorizar issues rejeita a chave funcional apos escolher mandatory.
+O escopo automatico concatena os 14 artifactIds enviados: 210 caracteres,
+236 depois da codificacao percentual, acima do limite de componente de 160.
+Encurtar a raiz nao corrige esse limite do nome.
+
+Decisao explicita do desenvolvedor: usar priorizacao como nome padrao fixo.
+Participantes completos permanecem no contexto e categorias continuam separadas.
+Preservar Scope explicito e conjuntos antigos existentes, sem renomear fichas,
+perder examinadas/notas ou reassociar o mesmo conjunto a participantes diferentes.
+Havendo conjunto antigo e novo para a mesma selecao, exigir a escolha do escopo.
+
+Reproduzir com fixtures sinteticas pelo runner isolado antes de corrigir.
+Validar 14 participantes, continuidade, categorias, Scope explicito,
+compatibilidade e conflitos; alinhar ADR-0009 e guia. Nenhum dado real sera usado.
+
+Implementacao concluida e validada conforme tasks/todo.md: 8 suites isoladas
+passaram, revisao independente sem bloqueadores e mutacao detectada/restaurada.
+Conferencia complementar dos indices/templates e consumidores concluida: mais
+5 suites passaram (13 no total), com auditoria independente de guias e helpers.
+Publicacao Git autorizada pelo desenvolvedor em 21/10/2026: commit, push da
+branch e PR para main. Integracao e atualizacao da maquina de trabalho seguem
+apos o merge da PR.
+
 ## Totais do indice por categoria - 21/10/2026
 
 Branch `harness/indice-totais-categorias`, derivada de `main` em `57b38d8`,

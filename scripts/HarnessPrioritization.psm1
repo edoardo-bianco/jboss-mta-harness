@@ -47,7 +47,6 @@ function New-HarnessPrioritizationContext {
     }
     $orderedNames=[string[]]@($names.Keys); [Array]::Sort($orderedNames,[StringComparer]::Ordinal)
     $projects=@(foreach ($name in $orderedNames) { $names[$name] })
-    if (-not $Scope) { $Scope=$orderedNames -join '|' }
     $master=$projects[0]; $leases=@()
     try {
         foreach ($project in $projects) { $leases+=Enter-HarnessProjectAccess $project -ForOperation }
@@ -62,6 +61,7 @@ function New-HarnessPrioritizationContext {
             } else { throw 'Informe Category para separar a cobertura por categoria.' }
             if (-not $Category) { throw 'Priorizacao cancelada.' }
         }
+        if (-not $Scope) { $Scope=Resolve-PrioritizationDefaultScope $master $Category $orderedNames }
         $paths=Get-PrioritizationPaths $master $Category $Scope
         $contextRelative=$paths.Relative+'/contexto.json'; $rankingRelative=$paths.Relative+'/priorizacao.md'
         $old=Read-HarnessProjectFiles $master @($contextRelative,$rankingRelative,($paths.Relative+'/indice.md'),($paths.Relative+'/priorizar-issues.prompt.md'))

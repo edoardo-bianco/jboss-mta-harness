@@ -10,7 +10,8 @@ foreach ($category in @('mandatory','optional','potential','personalizada')) {
     Assert ((Read-Prepared $next).ExcludedIssues.Count -eq 1) 'Cobertura nao mistura categorias.'
 }
 $single=[pscustomobject]@{Root=$f.Root;Projects=@($f.Context.Projects[0])}
-$p=New-HarnessPrioritizationContext $single -Percentage 100 -Category mandatory
+Reject { New-HarnessPrioritizationContext $single -Percentage 100 -Category mandatory } 'Escopo padrao existente nao pode mudar participantes.'
+$p=New-HarnessPrioritizationContext $single -Percentage 100 -Category mandatory -Scope individual
 Assert ($p.InitialTotal -eq 2 -and (Read-Prepared $p).ExcludedIssues.Count -eq 0) 'Escopo individual nao herda exame do conjunto.'
 $null=Complete-Slice $f $p
 $all=New-HarnessPrioritizationContext $f.Context -Percentage 100 -Category mandatory -Mode Continue
