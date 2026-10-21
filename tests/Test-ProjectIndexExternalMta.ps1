@@ -86,3 +86,40 @@ $result=New-HarnessProjectIndex $reserved
 $config=Get-Content -LiteralPath $result.Projects[0].ConfigPath -Raw | ConvertFrom-Json
 Assert (($result.Warnings -join ' ') -match 'reservado' -and $null -eq $config.mta.diretorio) 'Nome Source reservado nao pode expor relatorios em preparo.'
 'PASS: associacao externa geral por pasta Source, null existente, ultima rodada e repeticao.'
+
+# Configurar a proxima saida externa nao esconde o diagnostico historico.
+$legacySource=Join-Path $area 'fontes/historico'
+Write-File (Join-Path $legacySource 'pom.xml') '<project><artifactId>historico</artifactId></project>'
+$legacy=Initialize-HarnessProjectStorage $workspace (Join-Path $legacySource 'pom.xml')
+$legacyReport=Add-Report (Join-Path $legacy.Folder 'atual/diagnosticos/mta') 'rodada' 'historico' '2026-09-01T00:00:00Z'
+$legacyContext=[pscustomobject]@{Root=$workspace;Projects=@([pscustomobject]@{name='historico';path=$legacySource})}
+$null=New-HarnessProjectIndex $legacyContext -UpdateMigration
+$legacyRegister=[IO.File]::ReadAllText($legacy.MigrationPath).Replace('| A DEFINIR | NAO ANALISADA |','| ANALISAR AGORA | EM ANDAMENTO |')
+Publish-HarnessProjectFiles $legacy @{
+    'migracao.md'=$legacyRegister
+    'atual/operacao.json'=(@{mta=@{Status='FAILED';DateUtc='2026-10-21T10:00:00Z';Error='Primeira tentativa externa falhou';LogPath=$null}}|ConvertTo-Json)
+}
+$legacyAssociation=[IO.File]::ReadAllText($legacy.ConfigPath)
+$legacyContext | Add-Member NoteProperty Config $context.Config
+foreach ($case in @('ausente','incompleto')) {
+    if ($case -eq 'incompleto') { Write-File (Join-Path $external 'historico/incompleto/index.html') '<html>saida incompleta</html>' }
+    $retained=New-HarnessProjectIndex $legacyContext -UpdateMigration
+    $summary=[IO.File]::ReadAllText($retained.IndexPath)
+    Assert ($summary.Contains('atual/diagnosticos/mta/rodada/index.html') -and $summary.Contains('1 de 1 projetos')) ('MTA externo '+$case+' deve preservar link e cobertura do historico utilizavel.')
+    Assert (($retained.Warnings -join ' ') -match 'externa' -and ($retained.Warnings -join ' ') -match 'historico') 'Avisar lacuna externa e manutencao do historico, sem fallback silencioso.'
+    Assert ($summary.Contains('mta: FAILED')) 'Falha da tentativa externa deve continuar visivel.'
+    Assert ([IO.File]::ReadAllText($legacy.ConfigPath) -ceq $legacyAssociation) 'Origem externa invalida nao deve ser associada.'
+    Assert ([IO.File]::ReadAllText($legacy.MigrationPath) -ceq $legacyRegister) 'Preservar decisoes, andamento e fontes do historico.'
+    Assert ([IO.File]::ReadAllText($legacy.IndexPath).Contains('diagnosticos/mta/rodada/index.html')) 'Indice do projeto tambem deve manter o link historico.'
+}
+$newLegacyReport=Add-Report $external 'historico/sucesso' 'historico' '2026-10-21T11:00:00Z'
+$adopted=New-HarnessProjectIndex $legacyContext -UpdateMigration
+Assert ((Read-HarnessProjectMta $legacy).ReportPath -eq $newLegacyReport) 'Uma origem externa valida deve substituir a leitura historica automaticamente.'
+Assert ([IO.File]::ReadAllText($legacy.MigrationPath).Contains('| ANALISAR AGORA | EM ANDAMENTO |')) 'Adocao externa preserva escolhas e progresso.'
+$explicit=ConvertFrom-Json ([IO.File]::ReadAllText($legacy.ConfigPath))
+$explicit.mta.diretorio=Join-Path $area 'origem-explicita-ausente'
+Publish-HarnessProjectFiles $legacy @{'projeto.json'=($explicit|ConvertTo-Json)}
+$blocked=New-HarnessProjectIndex $legacyContext
+Assert ([IO.File]::ReadAllText($blocked.IndexPath).Contains('| Indisponivel | - |')) 'Origem explicitamente escolhida ausente nao retorna ao historico interno.'
+Assert (($blocked.Warnings -join ' ') -match 'origem-explicita-ausente') 'Origem explicita deve conservar sua lacuna.'
+'PASS: historico legivel com raiz externa ausente/incompleta, progresso preservado e origem explicita respeitada.'

@@ -3,7 +3,7 @@
 **Revisão:** 1.4 — 19/10/2026  
 **Escopo:** preparação do ambiente local Windows e do novo DES  
 **Documento de execução:** [Guia operacional — Windows e DES](guia-operacional-jboss-eap-7.4-windows-des.md)  
-**Matriz de compatibilidade:** [EAP 7.1 → 7.4 com Java 8, Hibernate e cliente SSO](../../25_plano-minimo-migracao-jboss-eap-7-0-para-7-4-java8/matriz-compatibilidade-jboss-eap-7-1-para-7-4-java8-hibernate-cliente-sso.md)
+**Matriz de compatibilidade:** EAP 7.1 → 7.4 com Java 8, Hibernate e cliente SSO. O documento citado originalmente não está disponível neste repositório; esta referência permanece como lacuna.
 
 ## 1. Resumo executivo
 

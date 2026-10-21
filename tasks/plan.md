@@ -1,5 +1,15 @@
 # Plano do agente: evolucao do harness
 
+## Auditoria independente do checkpoint - 21/10/2026
+
+Pedido: validar coerencia do todo entre README, doc, guias, templates,
+geradores e agente de orientacao, usando using-agent-skills.
+Auditar 87a8725 contra eb44383 no checkout separado, com revisores independentes,
+regressao isolada e parecer rastreavel. Registrar achados sem misturar corretivas
+com a auditoria. Resultado: [parecer](auditoria-indice-mta-externo.md).
+Dois achados P2 exigem corretiva antes da PR; um P3 documental e lacunas de
+validacao tambem ficaram registrados.
+
 ## Tabela resumida e template do indice - 21/10/2026
 
 Retomada na branch harness/indice-mta-externo, no checkout C:\Temp\harness-indice-mta.
@@ -228,3 +238,14 @@ sem pedir confirmacao; retirar a Run Task `Aplicacao: rollback no JBoss`.
 
 **Verificacao:** links Markdown internos; nenhuma referencia restante as pastas
 removidas; suites afetadas pelo runner isolado (sprints, consultas, prompts).
+
+## Corretivas da auditoria independente - 21/10/2026
+
+Pedido autorizado: corrigir A1/A2 e a contradicao A3 registrada no parecer.
+Criar primeiro provas de regressao para publicacao externa/associacao e leitura
+do historico com raiz externa configurada; corrigir em incrementos e preservar
+escolhas explicitas, decisoes humanas, concorrencia e diagnosticos anteriores.
+Validar pelo runner isolado, revisar independentemente e atualizar parecer/PR.
+Dados reais e checkout operacional original permanecem fora desta etapa.
+
+Corretivas concluidas e revisadas: A1/A2/A3, cobertura estrutural dos adaptadores e ajustes documentais. Ver resultados em todo.md e no parecer.

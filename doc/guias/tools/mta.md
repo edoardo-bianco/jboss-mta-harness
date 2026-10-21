@@ -64,6 +64,7 @@ settings opcionais ficam `null` para usar os padroes Maven da maquina.
   "mta": {
     "profile": "eap71-to-eap74-java8",
     "rulesPath": null,
+    "runsPath": "C:/mta-runs",
     "sources": [],
     "targets": ["eap7"],
     "mode": "full"
@@ -109,8 +110,14 @@ ficam explicitos nos limites da leitura. Nao se pesquisa outra aplicacao.
 
 Uma origem explicita ja preenchida e preservada. Para gerar novas analises,
 ela deve coincidir com `runsPath` mais a pasta Source; divergencia pede conferir
-a associacao. Um relatorio interno antigo continua legivel por compatibilidade
-quando nao ha raiz externa escolhida; novas analises sempre usam a raiz externa.
+a associacao. Origem explicita indisponivel permanece uma lacuna, sem fallback
+para outro relatorio.
+
+Enquanto `mta.diretorio` estiver null, o indice procura um conjunto externo valido.
+Se essa descoberta falhar, conserva a leitura do diagnostico interno antigo,
+quando disponivel, e registra o motivo como lacuna explicita. Configurar
+`mta.runsPath` sozinho nao descarta esse historico: a associacao so e preenchida
+apos encontrar um conjunto externo valido. Novas analises sempre usam a raiz externa.
 
 O leitor reconhece a pasta de relatorio estatico com `index.html` e `output.js`
 contendo uma aplicacao e seus rulesets. Na origem configurada, escolhe o
@@ -166,6 +173,10 @@ pelo harness abre em `static-report/index.html`. O sufixo inclui milissegundos;
 colisao nunca sobrescreve um conjunto existente. A saida em preparo fica em
 `<runsPath>/.harness-mta-em-preparo/<temporario>/`, fora da pasta consultada pelo
 indice, e so se torna visivel como rodada apos sucesso e validacao.
+Se a associacao falhar na publicacao, a tarefa tenta retirar a rodada para a
+area de preparo. Se o sistema de arquivos tambem impedir essa retirada, informa
+as duas falhas e o caminho preservado; conserva tambem a area de preparo para
+conferencia. Confira esses diretorios antes de atualizar o indice.
 
 A navegacao, registro, fichas, priorizacao, planos/tarefas e evidencias continuam
 em `.harness/projetos/<artifactId>/`. A ultima tentativa tem `mta-console.log` e,

@@ -1,5 +1,21 @@
 # To-do do agente: evolucao do harness
 
+## Auditoria independente do checkpoint - 21/10/2026
+
+- [x] Revisar documentacao, orientadores e runtime com tres revisores independentes.
+- [x] Executar 12 suites pelo runner isolado e uma mutacao detectada.
+- [x] Conferir 610 referencias e 415 ancoras locais; registrar destinos antigos ausentes.
+- [x] Consolidar [parecer e reproducoes](auditoria-indice-mta-externo.md).
+- [x] A1/P2: corrigir publicacao parcial de MTA se a associacao falhar.
+- [x] A2/P2: preservar diagnostico interno utilizavel no indice com raiz externa vazia.
+- [x] A3/P3: explicitar excecao MTA no principio de armazenamento do system design.
+
+Auditoria concluida no checkpoint 87a8725. Doze suites passaram, mas os
+dois cenarios P2 nao estavam cobertos e foram reproduzidos separadamente.
+Orientadores alinhados no recorte estatico; consumo real dos modelos por agente
+e descoberta/delegacao nativa permanecem limites. Apenas registros em tasks
+alterados na auditoria inicial. Corretivas concluidas na etapa registrada abaixo; PR nao aberta.
+
 ## Tabela resumida e template do indice - 21/10/2026
 
 - [x] Reproduzir ausencia do resumo e implementar tabela Markdown com links.
@@ -210,3 +226,16 @@ politica da maquina ou declarar o piloto homologado.
 - [ ] Revisao humana e aceite da consolidacao.
 - [ ] Corretiva separada: `Test-IssueQueries.ps1` falha em "Truncamento silencioso ou ausente." (mensagem de incidente esperada com 128 caracteres e um campo truncado).
 - [x] Incremento seguinte: armazenamento JBoss por projeto/servidor (ver secao "Estado JBoss corrente").
+
+
+## Corretivas verificadas da auditoria - 21/10/2026
+
+- [x] Reproduzir A1/A2 antes das correcoes e verificar GREEN.
+- [x] Preservar preparo quando falhar tambem a retirada; provar falha antes e sucesso depois.
+- [x] Ampliar verificacoes estruturais dos adaptadores Codex/Copilot.
+- [x] Corrigir principio documental, exemplo runsPath e referencias locais indisponiveis.
+- [x] Aprovar 13 suites isoladas, mutacao detectada, navegacao e revisao independente.
+
+Resultado e limites em [corretivas do parecer](auditoria-indice-mta-externo.md#corretivas-verificadas---21102026).
+Os ensaios nativos dos agentes permanecem fora desta verificacao; nenhuma
+migracao real, abertura de PR ou integracao foi executada.

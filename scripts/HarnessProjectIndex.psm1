@@ -18,10 +18,23 @@ function Read-ProjectIndexMta {
     if (-not $configured -and (Test-Path -LiteralPath (Join-Path $Project.Folder 'atual/diagnosticos/mta'))) {
         return Read-HarnessProjectMta $Project
     }
-    $location=Get-HarnessMtaExternalLocation $Context $Project
     $lease=Enter-HarnessProjectAccess $Project -ForOperation
     try {
-        $mta=Read-HarnessMtaDirectory $Project $location.Directory
+        try {
+            $location=Get-HarnessMtaExternalLocation $Context $Project
+            $mta=Read-HarnessMtaDirectory $Project $location.Directory
+        } catch {
+            $externalFailure=$_.Exception.Message
+            if (-not (Test-Path -LiteralPath (Join-Path $Project.Folder 'atual/diagnosticos/mta'))) { throw }
+            $access=Enter-HarnessProjectAccess $Project
+            try {
+                $current=Read-HarnessProjectFiles $Project @('projeto.json')
+                if ($current['projeto.json'] -cne $old['projeto.json']) { throw 'Associacao MTA editada durante a descoberta externa; atualize novamente o indice.' }
+                $mta=Read-HarnessProjectMta $Project
+                $mta.Diagnostics+=('Origem externa ainda nao associada: '+$externalFailure+' Diagnostico interno historico mantido: '+$mta.ReportPath)
+                return $mta
+            } finally { $access.ReleaseMutex(); $access.Dispose() }
+        }
         $association=Get-HarnessMtaExternalAssociationText $Project $location $old['projeto.json']
         Publish-HarnessProjectFiles $Project @{'projeto.json'=$association} @{'projeto.json'=$old['projeto.json']}
         return $mta

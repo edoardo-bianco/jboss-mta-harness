@@ -3,7 +3,7 @@ function New-MtaExternalStage {
     $token=[guid]::NewGuid().ToString('N')
     $path=Resolve-ProjectPath (Join-Path $Location.Root ('.harness-mta-em-preparo/'+$token)) $Location.Root
     $null=[IO.Directory]::CreateDirectory($path)
-    [pscustomobject]@{Root=$Location.Root;Token=$token;Path=$path;Output=(Join-Path $path 'saida')}
+    [pscustomobject]@{Root=$Location.Root;Token=$token;Path=$path;Output=(Join-Path $path 'saida');PreserveForReview=$false}
 }
 
 function Remove-MtaExternalStage {
@@ -11,6 +11,10 @@ function Remove-MtaExternalStage {
     $expected=Join-Path $Stage.Root ('.harness-mta-em-preparo/'+$Stage.Token)
     $path=Resolve-ProjectPath $Stage.Path $Stage.Root
     if ($Stage.Token -notmatch '^[a-f0-9]{32}$' -or $path -ine $expected) { throw 'Identidade da saida temporaria MTA divergiu; preserve os arquivos.' }
+    if ($Stage.PreserveForReview) {
+        Write-Warning ('Saida temporaria MTA preservada para conferencia: '+$path)
+        return
+    }
     if (-not (Test-Path -LiteralPath $path -PathType Container)) { return }
     $pending=New-Object 'Collections.Generic.Stack[IO.DirectoryInfo]'
     $pending.Push((Get-Item -LiteralPath $path))
@@ -36,8 +40,23 @@ function Publish-MtaExternalReport {
         # Move on the same external volume publishes a complete set; never overwrite a run.
         $null=Resolve-ProjectPath $destination $Project.Root
         [IO.Directory]::Move($output,$destination)
-        if ($Association -cne $Previous) {
-            Publish-HarnessProjectFiles $Project @{'projeto.json'=$Association} @{'projeto.json'=$Previous}
+        try {
+            if ($Association -cne $Previous) {
+                Publish-HarnessProjectFiles $Project @{'projeto.json'=$Association} @{'projeto.json'=$Previous}
+            }
+        } catch {
+            $failure=$_
+            # Only withdraw this newly moved run; the local publisher owns association recovery.
+            try {
+                $withdraw=Resolve-ProjectPath $destination $Project.Root
+                $restore=Resolve-ProjectPath $Stage.Output $Project.Root
+                if ((Split-Path $withdraw -Parent) -ine $parent -or $restore -ine (Join-Path $Stage.Path 'saida')) { throw 'Destino de retirada MTA divergiu; preserve os arquivos.' }
+                [IO.Directory]::Move($withdraw,$restore)
+            } catch {
+                $Stage.PreserveForReview=$true
+                throw ('Falha ao associar MTA: '+$failure.Exception.Message+'. Falha ao retirar rodada externa '+$destination+': '+$_.Exception.Message+'. Preserve os arquivos e confira a associacao antes de atualizar o indice.')
+            }
+            throw $failure
         }
         Join-Path $destination $Mta.ReportPath.Substring($output.Length+1)
     } finally { $access.ReleaseMutex(); $access.Dispose() }

@@ -311,7 +311,7 @@ O feedback relaciona quatro elementos: **critério esperado, resultado observado
 
 Esta seção descreve a organização implementada na `main` pela ADR-0009, que continua sendo a regra executável. Não acrescenta um modelo de event sourcing, pastas por execução ou histórico de versões. [S1](03-plano-tatico-e-implementacao.md#fonte-s1)
 
-**Princípio:** cada pasta nomeia o projeto ou o servidor e a função do conteúdo, e uma pessoa entende o que encontra sem abrir arquivos auxiliares. `RunId`, GUID, hash ou carimbo de data não aparecem em caminhos. Uma nova execução substitui o conteúdo corrente da mesma função.
+**Princípio:** cada pasta nomeia o projeto ou o servidor e a função do conteúdo, e uma pessoa entende o que encontra sem abrir arquivos auxiliares. Nos caminhos dos documentos e do estado corrente, não são necessários `RunId`, GUID, hash ou carimbo de data; uma nova operação substitui o conteúdo da mesma função. Relatórios MTA externos são a exceção: novas análises publicam pastas datadas e preservam as anteriores, conforme a seção 9.2.
 
 ### 9.1. Estrutura canônica
 

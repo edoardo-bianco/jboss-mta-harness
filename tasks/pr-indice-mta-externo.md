@@ -1,48 +1,58 @@
 # Manter MTA externo e padronizar os documentos de migracao
 
-Base: main. Branch: harness/indice-mta-externo. Descricao preparada para revisao; sem merge.
+Base: main. Branch: harness/indice-mta-externo. Descricao preparada para revisao.
 
-O indice passa a reconhecer os relatorios sob mta.runsPath pela pasta Source,
-preservando origens explicitamente escolhidas. Novas analises exigem raiz externa
-e publicam somente o diagnostico validado, sem substituir relatorios anteriores.
-O conversor legado e suas suites exclusivas foram retirados; o inicio corrente
-parte do indice e do MTA externo configurado.
+O indice reconhece os relatorios sob mta.runsPath pela pasta Source, preservando
+origens explicitamente escolhidas. Novas analises exigem raiz externa e publicam
+diagnosticos validados em pastas datadas, conservando os anteriores. Quando a
+descoberta externa ainda nao tem resultado utilizavel e nenhuma origem foi
+escolhida, o indice mantem o diagnostico interno historico e mostra a lacuna.
 
-O indice geral recupera a tabela resumida Markdown com links para projeto/POM,
-MTA, ultimas tentativas e documentos existentes. Contagens por categoria e totais
-informam cobertura; MTA indisponivel nao aparece como zero nem como sucesso.
+A publicacao retira a rodada nova se a associacao falhar, preservando edicoes
+concorrentes. Se o filesystem impedir tambem a retirada, informa ambos os erros
+e preserva rodada/preparo para conferencia manual antes de atualizar o indice.
 
-Templates versionados passam a ser consumidos pelos geradores de registro,
-indices, ranking, evidencias e reconciliacao. Prompts de priorizacao,
-planejamento e reconciliacao vinculam os modelos obrigatorios, inclusive ao
-recriar prompts de material recebido. Ficha e detalhe da issue usam um modelo
-comum por projeto/categoria/issue. O ranking e os indices repetem a mesma
-orientacao para o humano marcar ANALISAR AGORA, informar o recorte e seguir
-Planejamento: planejar. Decisoes, GO, aceite e texto humano existente permanecem
-sob as regras correntes.
+O conversor legado e suas suites exclusivas foram retirados. O inicio corrente
+parte do indice e do MTA externo configurado. A tabela resumida Markdown oferece
+links para projeto/POM, MTA, tentativas e documentos. Contagens por categoria e
+totais informam cobertura; ausencia nao aparece como zero nem como sucesso.
+
+Templates versionados sao consumidos pelos geradores de registro, indices,
+ranking, evidencias e reconciliacao. Prompts vinculam os modelos obrigatorios,
+inclusive na reconciliacao de material recebido. Ficha e detalhe da issue usam
+o mesmo modelo por projeto/categoria/issue. Ranking e indices oferecem a mesma
+orientacao para marcar ANALISAR AGORA, informar recorte e seguir Planejamento:
+planejar. Decisoes, andamento, GO, aceite e texto humano sao preservados.
+
+README, contratos, guias, desenho e orientadores foram revisados independentemente.
+O exemplo MTA inclui runsPath, o principio de armazenamento explica a excecao
+das pastas externas datadas e referencias antigas indisponiveis ficam como lacunas.
+A verificacao dos perfis leitores e de delegacao agora cobre os tres clientes.
 
 ## Verificacao
 
-- Checkpoint anterior: 19 suites de MTA/indice/acesso e ClaudeAdapter aprovadas;
-  apos a retirada, ProjectIndexExternalMta, Planning, PrioritizationIndex,
-  Cleanup e ClaudeAdapter aprovadas.
-- Incremento de 21/10: 19 suites distintas aprovadas pelo runner isolado em
-  Windows PowerShell 5.1; detalhadas em [tasks/todo.md](todo.md).
-- Testes alteram templates somente na copia descartavel e comprovam consumo
-  pelo gerador, links dos modelos nos prompts, preservacao de decisoes/fontes,
-  contagens, lacunas e progresso acumulado.
-- Mutacao que ocultava a ultima tentativa falha detectada; arquivo restaurado
-  byte a byte. Sintaxe de 23 scripts e 557 destinos locais e 346 ancoras Markdown conferidos.
-- Sem referencia ativa ao utilitario retirado; git diff --check aprovado.
+- Testes de regressao reproduziram as duas falhas antes das correcoes.
+- Treze suites das corretivas passaram pelo runner isolado em PowerShell 5.1:
+  MtaExternalPublication, ProjectIndexExternalMta, Mta, ProjectIndex,
+  ProjectIndexSummary, ProjectMta, ProjectDocuments, ProjectNavigation,
+  ProjectPublication, ProjectRecovery, ProjectConcurrency, ExternalMtaDiscovery
+  e ClaudeAdapter.
+- Suites anteriores de templates, priorizacao, planejamento, evidencias e
+  reconciliacao tambem aprovadas; detalhes em [tasks/todo.md](todo.md).
+- Mutacao isolada detectada; parser dos cinco PowerShell alterados, JSON de
+  exemplo, 608 referencias locais e 415 ancoras conferidos; diff --check aprovado.
+- [Auditoria e corretivas](auditoria-indice-mta-externo.md) registram reproducoes,
+  revisao independente e limites.
 
 ## Uso e limites
 
 Configurar mta.runsPath e executar Workspace: atualizar indice dos projetos.
-Abrir .harness/indices/projetos.md em preview Markdown. Novos preparos de
-priorizacao/planejamento recebem os links dos templates; revisar as saidas do
-agente conforme os modelos. Nao foi executado um agente de migracao real para
-homologar sua aderencia ao formato.
+Abrir .harness/indices/projetos.md em preview Markdown. Os preparos de
+priorizacao/planejamento vinculam os templates do [inventario](../doc/modelos/README.md).
 
-O [inventario dos modelos](../doc/modelos/README.md) identifica cada produtor.
-Nenhum dado real, relatorio externo ou codigo de aplicacao foi alterado nesta
-validacao. Nenhum merge ou conversao foi executado.
+As verificacoes usam fixtures descartaveis. Nao homologam aderencia de agentes
+reais aos templates nem descoberta/delegacao nas extensoes nativas. Falha dupla
+de associacao/retirada exige conferencia manual; a mensagem indica o material.
+
+Nenhum dado real, relatorio externo de aplicacao ou codigo de aplicacao foi
+alterado. Nenhum merge ou conversao foi executado.
