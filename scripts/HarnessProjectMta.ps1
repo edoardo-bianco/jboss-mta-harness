@@ -85,7 +85,12 @@ function Read-HarnessMtaDirectory {
         $directory=$pending.Pop()
         foreach ($child in $directory.EnumerateFileSystemInfos()) {
             if ($child.Attributes -band [IO.FileAttributes]::ReparsePoint) { throw "Link/junction na origem MTA: $($child.FullName)" }
-            if ($child -is [IO.DirectoryInfo]) { $pending.Push($child); continue }
+            if ($child -is [IO.DirectoryInfo]) {
+                # A CLI round keeps analyzed sources in input and reports in
+                # its sibling output. Application HTML is not a report candidate.
+                if ($child.Name -ieq 'input' -and (Test-Path -LiteralPath (Join-Path $directory.FullName 'output') -PathType Container)) { continue }
+                $pending.Push($child); continue
+            }
             if ($child.Name -ine 'index.html') { continue }
             try { $candidates+=Read-ProjectMtaCandidate $Project $child.FullName -FileReader $FileReader }
             catch {

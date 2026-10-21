@@ -41,6 +41,15 @@ foreach ($mode in @('preparing','forward','rollback')) {
     Publish-HarnessProjectFiles $project $old
     & powershell.exe -NoProfile -File $child (Join-Path $root 'scripts/HarnessProject.psm1') $area $pom $mode
     Assert ($LASTEXITCODE -in @(71,72,73)) ('Processo deve terminar abruptamente em '+$mode)
+    if ($mode -eq 'preparing') {
+        $confirmed=Read-HarnessProjectFiles $project @('atual/planejamento/plano.md','atual/planejamento/tarefas.md') -ReadCommitted
+        Assert ($confirmed['atual/planejamento/plano.md'] -ceq 'plano anterior' -and $confirmed['atual/planejamento/tarefas.md'] -ceq 'tarefas anteriores') 'Sem journal, leitura confirmada enxerga o conjunto anterior intacto.'
+    } else {
+        $failure=$null
+        try { $null=Read-HarnessProjectFiles $project @('atual/planejamento/plano.md') -ReadCommitted } catch { $failure=$_ }
+        Assert ($failure -and $failure.Exception.Message -match 'Recuperacao de publicacao pendente') 'Leitura confirmada nao pode contornar journal de publicacao parcial ou rollback.'
+    }
+    Assert (Test-Path -LiteralPath $project.TemporaryPath) 'Leitura confirmada nunca limpa nem recupera temporarios.'
     $content=Read-HarnessProjectFiles $project @('atual/planejamento/plano.md','atual/planejamento/tarefas.md')
     Assert ($content['atual/planejamento/plano.md'] -ceq 'plano anterior' -and $content['atual/planejamento/tarefas.md'] -ceq 'tarefas anteriores') ('Retomada deve recuperar conjunto depois de '+$mode)
     Assert (-not (Test-Path -LiteralPath $project.TemporaryPath)) 'Recuperacao concluida deve retirar temporarios.'

@@ -36,7 +36,7 @@ function Get-ReconciliationComparable {
     if ($null -eq $Bytes) { return $null }
     if ($Relative -notmatch '\.md$' -or (Get-ReconciliationFileKind $Relative) -eq 'ANEXO') { return [Convert]::ToBase64String($Bytes) }
     $text=ConvertFrom-ReconciliationBytes $Bytes
-    foreach ($name in @('fontes','planejamento:fontes','ficha:fontes','reconciliacao','reconciliacao:fontes','reconciliacao:autorizacao')) {
+    foreach ($name in @('fontes','registro:orientacao','planejamento:fontes','ficha:fontes','reconciliacao','reconciliacao:fontes','reconciliacao:autorizacao')) {
         $block=Find-ProjectManagedBlock $text $name
         if ($block) { $text=$text.Remove($block.Index,$block.Length) }
     }

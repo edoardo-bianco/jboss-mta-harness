@@ -414,7 +414,13 @@ que consomem MTA. Os indices permanecem uma alternativa de navegacao.
 A tabela resumida do indice geral usa o
 [template versionado](../../modelos/indice-projetos.template.md), com links para
 projeto/POM, MTA, logs, registro, plano/tarefas, preparo, evidencias e Sonar
-quando existentes. Totais informam quantos projetos possuem MTA utilizavel.
+quando existentes. Totais informam quantos projetos possuem MTA utilizavel e
+somam issues/ocorrencias por categoria nesse conjunto. A mesma regra em dois
+projetos conta duas issues; projetos sem diagnostico nao entram na soma.
+MTA valido e legivel continua contabilizado se a gravacao de documentos locais
+falhar. Nesse caso, a linha mostra `Atualizacao local pendente` e os limites
+explicam a falha; os documentos podem estar desatualizados. Libere o bloqueio e
+repita a tarefa. Recuperacao incompleta ou conflito humano permanece protegido.
 Nao e gerado arquivo Excel. Atualizar o indice aplica o formato vigente;
 notas duraveis ficam no registro ou nas evidencias.
 O [inventario de modelos](../../modelos/README.md) identifica os geradores e prompts.

@@ -83,3 +83,18 @@ $text=[IO.File]::ReadAllText($p.IndexPath)
 Assert (-not $text.Contains('MTA nao consultado nesta reconciliacao')) 'Trocar base e voltar ao MTA nao pode deixar aviso antigo no indice.'
 Assert ($text.Contains((Get-HarnessSourceLink $p.IndexPath $report 'MTA atual')) -and $text.Contains($historical)) 'Retorno ao MTA deve manter link corrente e nota historica.'
 'PASS: transicoes MTA/EVIDENCIAS/MTA mantem fontes atuais sem aviso obsoleto.'
+
+# Orientacao gerada pode mudar de versao/maquina sem virar conflito humano.
+$f=New-PlanningFixture 1
+$p=$f.Projects[0]
+$register=[IO.File]::ReadAllText($p.MigrationPath)
+$received=Set-ProjectManagedBlock $register 'registro:orientacao' 'Orientacao de outra versao; links locais de outra maquina.'
+Publish-HarnessProjectFiles $p @{'recebido/migracao.md'=$received}
+$comparison=Get-HarnessReconciliationComparison $p (Join-Path $p.Folder 'recebido')
+$document=@($comparison.Documents | Where-Object Path -EQ 'migracao.md')[0]
+Assert ($document.Status -eq 'EQUIVALENTE') 'Legenda gerada nao altera equivalencia das decisoes humanas.'
+Publish-HarnessProjectFiles $p @{'recebido/migracao.md'=($received+"`nNova decisao humana a conciliar.")}
+$comparison=Get-HarnessReconciliationComparison $p (Join-Path $p.Folder 'recebido')
+$document=@($comparison.Documents | Where-Object Path -EQ 'migracao.md')[0]
+Assert ($document.Status -eq 'DIVERGENTE') 'Notas fora da orientacao continuam sendo contribuicao humana.'
+'PASS: orientacao gerada difere sem conflito ficticio, preservando divergencia humana.'

@@ -87,9 +87,25 @@ utilizavel aparecem separados; falha recente nao atualiza por si so o diagnostic
 anterior. Fonte indisponivel e lacuna, nao sucesso.
 
 O indice geral apresenta tabela resumida com links, contagens MTA por categoria,
-cobertura dos totais, ultimas tentativas e documentos existentes. Ausencia de MTA
+cobertura dos totais, ultimas tentativas e documentos existentes. O quadro de
+totais separa issues e ocorrencias por categoria, somando somente os projetos com
+MTA utilizavel. A mesma regra em dois projetos conta duas issues. Ausencia de MTA
 fica como lacuna; preparo sem plano/tarefas continua identificado como preparo.
 O formato vem de [indice-projetos.template.md](../../modelos/indice-projetos.template.md).
+
+Uma falha ao gravar associacao ou documentos locais aparece como `Atualizacao
+local pendente`; ela nao retira dos totais o MTA valido e legivel que foi lido.
+Os links apontam o relatorio efetivamente consultado e os documentos existentes,
+que podem estar desatualizados. A limpeza repete bloqueios transitorios do
+Windows de forma limitada. Se persistir, libere o diretorio em uso e repita a
+tarefa; nao apague material de recuperacao. Publicacao realmente interrompida
+exige recuperacao consistente e preserva conflitos com edicoes humanas.
+
+O indice de cada projeto localiza POM/Source, registro e documentos correntes.
+Objetivo/limites e escolhas ficam em migracao.md; analise e direcao da corretiva
+ficam na ficha. O detalhe original do MTA e aberto pelo link ao relatorio.
+Essa [divisao entre documentos](../../modelos/README.md#informacao-em-um-so-lugar)
+mantem o resumo util sem repetir catalogos, decisoes ou analises em varios lugares.
 
 Os prompts preparados vinculam os modelos obrigatorios de plano, tarefas e ficha.
 O agente deve le-los e preencher as secoes apos examinar as fontes, preservando
@@ -107,6 +123,16 @@ Abra `migracao.md` pelo indice. Marque **ANALISAR AGORA** em **Decisao**, preser
 **Andamento** como retrato do trabalho real e descreva o recorte nas observacoes.
 Conserve as colunas existentes e os links de ficha/evidencias. A mesma regra em
 dois projetos continua sendo dois achados independentes.
+
+O registro traz uma legenda padrao de decisao, andamento, presenca e referencias,
+com links para o guia e o modelo da ficha. Atualizar o indice atualiza esse bloco
+de orientacao, preservando escolhas e texto humano fora dele.
+
+**Quando a ficha e criada:** ao examinar efetivamente uma issue na priorizacao
+ou no planejamento, pelo executor do prompt ou pelo desenvolvedor. Gerar o indice
+ou preparar o prompt nao preenche fichas. Quem planeja diretamente uma issue
+tambem cria/atualiza a mesma ficha, sem exigir priorizacao anterior. A ficha ja
+existente e reutilizada, conforme o [roteiro de preenchimento](priorizacao-issues.md#como-ler-a-ficha).
 
 Problemas sem MTA podem ser registrados como issues manuais `DEV-...`, com titulo,
 evidencias e limites. O identificador funcional permite reconhecer o problema;

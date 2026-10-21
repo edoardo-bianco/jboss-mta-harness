@@ -126,6 +126,11 @@ diagnostico pela data de geracao valida com fuso ou pela modificacao de
 e lacuna; nao escolhe outra origem silenciosamente. Recencia do diagnostico
 nao altera decisoes, escopo ou GO.
 
+Em rodadas com pastas irmas `input/` e `output/`, a descoberta ignora `input/`,
+que contem fontes analisadas. Paginas HTML da aplicacao nao sao candidatos MTA.
+O relatorio em `output/static-report/` continua sujeito a validacao; um conjunto
+incompleto nessa saida permanece uma lacuna explicita.
+
 A Run Task de analise publica uma nova pasta datada nessa origem e associa
 automaticamente o projeto. Relatorios anteriores permanecem intactos; atualizar
 o indice encontra o ultimo diagnostico valido sem cadastro de rodada. Use raiz
