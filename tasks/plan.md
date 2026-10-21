@@ -1,5 +1,18 @@
 # Plano do agente: evolucao do harness
 
+## Retirada da conversao legada - 20/10/2026
+
+Pedido explicito: iniciar pelo layout corrente e pelos relatorios MTA externos,
+sem converter o estado antigo. Na branch harness/indice-mta-externo, retirar
+tools/transicao e fixtures/suites exclusivas da conversao em commit separado.
+Alinhar guias, contratos e orientador para iniciar pelo indice; preservar o
+historico das entregas anteriores, indicando que o utilitario foi retirado.
+Verificar ausencia de dependencias no runtime e executar as suites correntes
+pertinentes em copia isolada, sem limpar ou converter dados reais.
+Pausa solicitada em 20/10/2026: salvar os dois commits na branch remota, sem merge.
+A retomada e os resultados estao no topo de tasks/todo.md. Revisao final da
+retirada e preparacao da PR ficam para a proxima sessao.
+
 ## Indice com MTA externo configurado - 20/10/2026
 
 Branch `harness/indice-mta-externo`, checkout separado da conversao, a partir de

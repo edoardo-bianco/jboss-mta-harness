@@ -145,8 +145,9 @@ revoga escolhas atuais no registro. Para compartilhar, copie a estrutura e as
 referencias conforme o [guia entre colegas](compartilhamento-contextos.md).
 
 <a id="continuar-rodadas-anteriores-a-esta-correcao"></a>
-Dados antigos usam o [conversor separado](../../../tools/transicao/README.md)
-com selecao explicita. O fluxo corrente nao depende deles para continuar.
+O conversor legado foi retirado. Inicio novo usa o MTA externo associado e uma
+nova priorizacao por categoria/escopo. O MTA nao recupera fichas nem a cobertura
+humana anterior; material preservado pode ser consultado separadamente.
 
 ### Planejar e implementar manualmente a partir da priorizacao
 

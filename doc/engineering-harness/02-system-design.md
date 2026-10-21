@@ -481,7 +481,7 @@ Inicialmente, expor consultas de catálogo, estado e evidências, respeitando os
 
 Registrar nas saídas correntes a versão efetiva do perfil/provedor/ferramenta, duração, resultado e limites úteis. Esses metadados apoiam diagnóstico e comparação do ensaio; não produzem um histórico por execução. Custos e tokens ausentes permanecem não disponíveis.
 
-Atualizar o pacote instalado não altera dados, configurações ou decisões da aplicação automaticamente. Esquema incompatível preserva os dados e pede migração explícita. A conversão do layout legado permanece um utilitário separado, com prévia, aplicação, validação e limpeza distintas; o runtime novo não depende dele. [S2](03-plano-tatico-e-implementacao.md#fonte-s2)
+Atualizar o pacote instalado não altera dados, configurações ou decisões da aplicação automaticamente. Esquema incompatível preserva os dados e exige tratamento explícito. O utilitário de conversão do layout legado foi retirado em 20/10/2026; o runtime corrente não depende dele. Início novo associa os relatórios externos pelo índice, sem reconstruir decisões humanas antigas. [S2](03-plano-tatico-e-implementacao.md#fonte-s2)
 
 A prova mínima é uma capacidade externa real, invocada pela CLI e pelas duas IDEs, com configuração inválida, sucesso, falha, cancelamento e segunda publicação nos mesmos destinos. Uma consulta da mesma base deve funcionar por MCP opcional. Uma tarefa híbrida deve preparar contexto, receber decisão humana e produzir feedback sem converter a opinião do agente em validação.
 

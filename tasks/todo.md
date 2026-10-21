@@ -1,5 +1,34 @@
 # To-do do agente: evolucao do harness
 
+## Retirada da conversao legada - 20/10/2026
+
+- [x] Retirar utilitario tools/transicao, fixture e suites exclusivas.
+- [x] Alinhar guias, contratos, skill e papeis de orientacao ao inicio corrente.
+- [x] Verificar dependencias e validar fluxo corrente sem o conversor.
+- [ ] Revisar e preparar entrega em commit separado.
+- [ ] Revisao humana e integracao.
+
+**Checkpoint de 20/10/2026, pausa pedida pelo desenvolvedor:** trabalho na branch
+`harness/indice-mta-externo`, worktree `C:\Temp\harness-indice-mta`.
+MTA externo e associacao automatica registrados em `b20af92`; retirada do
+conversor registrada no commit seguinte. Main nao foi alterada nem houve merge.
+Depois da retirada, passaram em copia isolada: Test-ProjectIndexExternalMta,
+Test-Planning, Test-PrioritizationIndex, Test-Cleanup e Test-ClaudeAdapter.
+Busca por dependencias do utilitario fora do historico nao encontrou consumidores;
+git diff --check passou. Nenhum dado real ou relatorio externo foi alterado.
+
+**Retomar em 21/10:** conferir branch/HEAD/estado neste worktree; concluir revisao
+da retirada e dos textos, incluindo links e coerencia do desenho; avaliar apenas
+verificacoes adicionais justificadas; preparar PR para main e entregar o roteiro
+de uso na maquina de trabalho. Nao executar conversao nem restaurar automaticamente
+o ZIP antigo. O checkout original `C:\desenvolvimento\repositorio\jboss-mta-harness`
+permanece na branch `harness/conversao-log-etapas` com alteracoes locais de logging
+anteriores, preservadas e fora desta entrega; nao trocar/resetar esse checkout.
+
+As entregas de conversao abaixo sao historicas; o utilitario deixa de integrar
+o produto por escolha do desenvolvedor. Nenhum dado real foi apagado por esta
+mudanca. Relatorios MTA externos nao recuperam decisoes/fichas humanas antigas.
+
 ## Indice com MTA externo configurado - 20/10/2026
 
 - [x] Reproduzir raiz externa ignorada com projetos de nomes distintos do artifactId.

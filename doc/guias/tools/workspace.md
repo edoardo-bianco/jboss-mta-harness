@@ -341,8 +341,8 @@ O projeto e identificado pelo `artifactId` literal do POM e associado ao POM loc
 em `projeto.json`. Renomear a pasta no Explorer nao muda essa identidade. Outro POM
 com o mesmo artifactId exige resolver a colisao; o harness nao cria um hash para
 separa-los. A CLI sem workspace usa os projetos do JSON, mas continua lendo o
-estado corrente. Registros legados exigem conversao explicita; seus originais
-nao sao alterados pelas tarefas correntes.
+estado corrente. O conversor legado foi retirado; tarefas correntes nao alteram
+originais antigos nem os usam como alternativa ao estado atual.
 
 ### Ensaiar e depois usar os projetos corporativos
 
@@ -427,9 +427,8 @@ links/junctions e destinos fora das areas permitidas.
 
 Dados correntes, fontes, relatorios externos, fichas, planos, anexos e conflitos
 pendentes sao preservados. A tarefa nao apaga `target/` da aplicacao nem
-converte/descarta dados antigos. Descarte legado pertence ao
-[conversor separado](../../../tools/transicao/README.md),
-com previa, validacao e selecao explicitas.
+converte/descarta dados antigos. O utilitario de conversao e descarte legado
+foi retirado; essa tarefa continua restrita a limpeza corrente.
 
 ```powershell
 powershell.exe -NoProfile -File .\scripts\limpar-execucoes.ps1 -All -Preview
@@ -452,9 +451,11 @@ anexos, evidencias, backups e rodadas MTA que estejam dentro dela. A tarefa
 4. Preserve `config/harness.local.json`, o workspace e os fontes das aplicacoes,
    que ficam fora dela. Um MTA externo completo pode ser reutilizado; confirme
    sua aplicabilidade ao codigo atual. MTA que estava dentro da pasta sera perdido.
-5. Execute **Workspace: atualizar indice dos projetos** para reconstruir registros
-   e indice. Confira a origem MTA reconhecida; resolva origem ausente ou ambigua
-   pelo fluxo de MTA existente antes de priorizar.
+5. Confira `mta.runsPath` em `config/harness.local.json`: deve apontar a raiz
+   externa com `<nome-da-pasta-Source>/<rodada>/`. Execute **Workspace: atualizar
+   indice dos projetos** para criar registros e associar o ultimo MTA valido de
+   cada aplicacao. Confira os links; origem ausente ou ambigua fica como lacuna,
+   conforme o [guia MTA](mta.md#origem-mta-e-caminhos).
 6. Execute **Planejamento: priorizar issues**, escolha uma categoria e informe
    **10%**. Execute o novo prompt e confira ranking e fichas por projeto/issue.
 7. Escolha uma issue no registro, vincule sua ficha e acrescente anexos pertinentes.
@@ -490,7 +491,7 @@ O estado funcional fica por projeto, com nomes estaveis e links pelos indices.
 | `.harness/servidores/` | Ultima operacao e logs do ultimo start de cada servidor JBoss; o ultimo deploy fica no projeto. Consulte [JBoss](jboss.md). |
 | `%USERPROFILE%/.m2/repository` | Cache Maven padrao, fora do harness; sem cache duplicado. |
 
-Pastas antigas de execucoes podem permanecer ate uma transicao explicita.
+Pastas antigas de execucoes podem permanecer como material preservado.
 O nucleo corrente nao as usa como alternativa nem exige conservar seus IDs.
 Backups avulsos na raiz de `.harness/` nao fazem parte da organizacao.
 Fontes da aplicacao, configuracao da maquina e workspace permanecem em seus

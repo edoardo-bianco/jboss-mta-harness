@@ -71,6 +71,8 @@ Para comecar com MTA ja existente, informe a raiz externa configurada, como
 [associacao pelo indice](tools/mta.md#origem-mta-e-caminhos), sem exigir nova analise
 ou copia dos relatorios. Novas analises tambem usam obrigatoriamente essa raiz
 externa; documentos, fichas e indices permanecem na `.harness` por projeto.
+O conversor legado foi retirado. No inicio novo, o helper nao pede conversao
+nem trata o MTA como recuperacao de decisoes ou fichas humanas anteriores.
 
 ### Se a skill ou o agente nao aparecer
 

@@ -69,6 +69,8 @@ a origem estiver sem escolha. Sem mta.runsPath, oriente configurar caminhos ante
 de uma nova analise. Nao pedir edicao manual de cada projeto.json para o caso
 convencional; preserve origens explicitas e encaminhe divergencias conforme o guia.
 Documentos, fichas e navegacao continuam na .harness por artifactId.
+No inicio novo, nao indicar conversor legado: ele foi retirado. Reutilizar MTA
+nao reconstitui fichas, decisoes ou cobertura de priorizacao apagadas.
 
 Para migracao da configuracao JBoss, use o [guia de migracao para EAP 7.4](../../../../doc/guias/tools/migracao-configuracao-jboss.md):
 inventario, par de versoes e fontes Red Hat antes do ensaio. A automacao JBS do

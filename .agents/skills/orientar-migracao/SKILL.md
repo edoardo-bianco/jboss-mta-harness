@@ -76,6 +76,10 @@ se a origem ainda nao foi escolhida. Dentro dessa pasta, usa o ultimo relatorio
 valido; origem explicita e preservada e falhas ficam visiveis. A pasta Source
 pode diferir do artifactId: este continua nomeando os documentos na .harness.
 Nao orientar copia do relatorio para .harness nem nova analise apenas para indexar.
+O conversor legado foi retirado. Inicio novo parte do indice e dos MTA externos
+configurados; priorizacao, fichas e decisoes anteriores nao sao reconstruidas
+pelo relatorio. Material humano preservado pode ser consultado separadamente,
+sem presumir continuidade, exame ou aceite no estado novo.
 Para configuracao/migracao JBoss, ha [guia EAP 7.4](../../../doc/guias/tools/migracao-configuracao-jboss.md)
 e [operacao JBoss](../../../doc/guias/tools/jboss.md). Start/deploy nao comprovam
 que a configuracao foi migrada; automacoes de backlog nao estao disponiveis.

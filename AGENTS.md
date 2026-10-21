@@ -144,8 +144,9 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   comparacao ausente fica pendente, sem declarar resolucao/global concluido.
   Sonar baixado do servidor nao comprova equivalencia com Source local.
 - Limpeza corrente preserva documentos, evidencias, conflitos e MTA externo.
-  Conversao/descarte legado usa o utilitario descartavel e selecao explicita;
-  nao executar em dados reais apenas para demonstrar o fluxo.
+  O conversor legado foi retirado. Inicio novo usa indice e MTA externo configurado;
+  nao orientar comandos de conversao nem recuperar decisoes antigas a partir do MTA.
+  Nao limpar dados reais apenas para demonstrar o fluxo.
 
 Consulte o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md)
 para uso e doc/ para contratos/decisoes. Preserve alteracoes locais e evidencias.

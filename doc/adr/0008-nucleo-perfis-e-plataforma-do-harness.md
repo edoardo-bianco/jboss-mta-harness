@@ -12,7 +12,7 @@ prevalece o conjunto consolidado, sem tratar requisito antigo como vigente.
 
 Complemento de prioridade em 10/10/2026: por decisão do desenvolvedor, a
 [simplificação por projeto](../engineering-harness/02-system-design.md#estado-local),
-com [conversão descartável](../../tools/transicao/README.md),
+com conversão descartável (retirada em 20/10/2026, conforme a [ADR-0009](0009-estado-corrente-por-projeto.md)),
 limpeza e guias/orientador alinhados, antecede esta modernização e qualquer nova
 funcionalidade. O [plano](../../tasks/historico/plan-ate-2026-10-17.md#simplificacao-prioritaria-por-projeto---2026-10-10)
 registra a viabilidade e a retirada de recibos/rastreamentos como requisito.

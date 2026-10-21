@@ -201,9 +201,9 @@ Secoes nao aplicaveis recebem justificativa. Use `plano.md` e `tarefas.md` locai
 Abra o indice do projeto ou **Planejamento: abrir plano e to-do**. Os destinos
 correntes funcionam mesmo com MTA indisponivel. Notas e decisoes humanas permanecem
 nos documentos; o harness guarda somente o estado corrente e a ultima conclusao
-de conciliacao. A limpeza corrente preserva esses arquivos. O
-[conversor separado](../../../tools/transicao/README.md) trata
-material legado explicitamente; o fluxo habitual nao o procura como alternativa.
+de conciliacao. A limpeza corrente preserva esses arquivos. O conversor legado
+foi retirado. Para inicio novo, configure a origem MTA externa e atualize o
+indice; o relatorio nao recupera decisoes, fichas ou planos humanos antigos.
 
 #### Compartilhar o MTA e planejar em outra maquina
 

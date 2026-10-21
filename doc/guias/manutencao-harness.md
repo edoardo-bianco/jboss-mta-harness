@@ -172,14 +172,13 @@ checkout separado e exigem os parametros e a configuracao reais apropriados.
 | Sonar | `Test-Sonar.ps1`, `Test-SonarDownload.ps1`, `Test-SonarCriteria.ps1`, `Test-SonarIssues.ps1` e `Test-SonarReview.ps1`: scan/download simulados, origem, comparacao, criterios e parecer corrente. Launcher/certificado/API possuem suites proprias; API usa HTTP real somente em loopback. |
 | Workspace e entradas | `Test-Workspace.ps1`, `Test-Target.ps1`, `Test-TaskInputs.ps1`, `Test-Editor.ps1` e `Test-EvidenceFolder.ps1`: configuracao, selecao, Explorer, argumentos reais, cancelamento, editor simulado e indice de evidencias. |
 | Consultas | Suites `Test-IssueQuer*.ps1`, `Test-McpRoots.ps1` e testes Node de `mcp/issues`: somente leitura, paginas, limites, origens correntes e permissoes. |
-| Conversao e limpeza | Suites `Test-Conversion*.ps1`, `Test-Cleanup.ps1` e `Test-ProjectTemporaryRemoval.ps1`: previa/aplicacao/validacao/limpeza em fixtures, sem conversao ou limpeza dos registros reais. |
-| Transicao integrada | `Test-TransitionWorkflow.ps1`: converter, descartar o legado selecionado, ler o projeto corrente e reconciliar contribuicao divergente no mesmo projeto; preservar notas, origem externa, GO pendente e links. |
+| Limpeza | `Test-Cleanup.ps1` e `Test-ProjectTemporaryRemoval.ps1`: previa/selecao e remocao de temporarios em fixtures, preservando documentos e fontes. |
 
 Testes simulados nao comprovam que uma aba abriu no VS Code, que o cliente
 descobriu/delegou helpers ou que uma corretiva foi aceita. A qualidade do ranking
 e a orientacao nativa seguem para a [validacao manual](tools/priorizacao-issues.md#validacao-manual).
-A conversao deve permanecer independente do runtime corrente; o fluxo usual nao
-procura recibos antigos nem depende de arquivos do conversor.
+O conversor legado e suas suites exclusivas foram retirados. O fluxo corrente
+nao procura recibos antigos e e validado sem arquivos de conversao.
 
 Para ensaiar cobertura com Maven real, execute em uma linha:
 

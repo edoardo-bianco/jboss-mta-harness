@@ -185,8 +185,9 @@ Atualizar o indice reconstroi a navegacao apos novas saidas ou arquivos copiados
 
 Importador/exportador ZIP e sua tarefa foram retirados; contribuicoes seguem
 copia e reconciliacao por arquivo, inclusive priorizacao cumulativa multiprojeto.
-Limpeza corrente atua em residuos temporarios/backups selecionados; conversao e
-descarte legado ficam no utilitario separado, com validacao e selecao explicita.
+Limpeza corrente atua em residuos temporarios/backups selecionados. O utilitario
+de conversao/descarte legado foi retirado por escolha do desenvolvedor em
+20/10/2026; inicio novo parte dos relatorios MTA externos e dos indices correntes.
 
 Guias, contratos, skill e perfis Codex/Copilot usam documentos correntes.
 Referencias manuais por projeto/objetivo/evidencias sao aceitas; prompts gerados
@@ -212,9 +213,10 @@ recibos/cadeias das [ADR-0004](0004-git-informativo-sem-controle-de-branches.md)
 planejamento pelo registro, categorias, exame de evidências e decisões humanas.
 A separação da [ADR-0002](0002-separacao-harness-e-migracao-progressiva.md) permanece.
 
-A [conversão](../../tools/transicao/README.md) é descartável e
-separada. O runtime não a importa nem procura legado. Originais reais só serão
-limpos após seleção explícita e validação; os testes usam dados sintéticos.
+A conversão foi entregue como utilitário descartável separado e retirada em
+20/10/2026. O runtime não depende dela nem procura legado. Esta retirada não
+apaga originais reais nem transfere decisões antigas para o estado novo;
+relatórios externos são reutilizados pela associação do projeto.
 Modernização e novas capacidades continuam posteriores a esta entrega.
 
 ## Verificação inicial

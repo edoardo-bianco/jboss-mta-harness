@@ -16,7 +16,8 @@ pelo [indice do projeto](workspace.md#navegar-pelas-evidencias-do-projeto).
 O agente pode recuperar ContextPath dali; o desenvolvedor nao precisa memorizar
 IDs ou hashes. Para arquivos de colega, siga a [copia e reconciliacao](compartilhamento-contextos.md)
 antes de consultar: os caminhos devem corresponder ao POM/Source local.
-Contextos legados nao sao aceitos; conversao e uma operacao explicita separada.
+Contextos legados nao sao aceitos e o conversor foi retirado. Prepare um contexto
+corrente pelo fluxo de priorizacao ou planejamento a partir do indice do projeto.
 
 ## Consultar pelo helper
 
