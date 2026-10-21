@@ -1,5 +1,42 @@
 # To-do do agente: evolucao do harness
 
+## Totais do indice por categoria - 21/10/2026
+
+- [x] Reproduzir ausencia de totais por categoria no resumo.
+- [x] Atualizar template, gerador e guias com totais de issues/ocorrencias por categoria.
+- [x] Conferir soma entre projetos, cobertura parcial, categorias livres e casos sem dados.
+- [x] Executar regressao isolada e revisar diff, preservacao e limites.
+- [x] Restaurar orientacao padrao do registro e preenchimento da ficha sem duplicar MTA.
+- [x] Excluir paginas da aplicacao em input/ da descoberta de relatorios da rodada.
+- [x] Tolerar bloqueio transitorio de diretorios na limpeza, preservando erros persistentes.
+- [x] Conferir diferenca com o indice legado: 42 + 2 mandatory do siric = 44; total 92 + 5 = 97 issues, 2981 + 532 = 3513 ocorrencias.
+- [x] Manter MTA valido nos totais quando atualizacao local falhar, com aviso separado e recuperacao protegida.
+
+Validacao: 22 suites passaram por Invoke-HarnessTests.ps1 em copias temporarias
+isoladas (TEMP/TMP=C:\Temp), incluindo bloqueios reais Win32 transitorios e
+persistentes. Cobertura: ProjectMta, ProjectIndex, ProjectNavigation,
+ProjectIndexSummary, ProjectIndexExternalMta, ProjectIndexAvailability,
+ProjectDocuments, OutputTemplates, ProjectRecovery, ProjectPublicationLocks,
+ProjectPublication, ProjectConcurrency, ProjectReadOnly, ProjectStorage,
+ProjectTemporaryRemoval, ReconciliationSources, ReconciliationConflicts,
+Reconciliation, Planning, PlanningReassociation, PrioritizationIndex e
+PrioritizationProgress (prefixo Test-, extensao .ps1).
+
+Duas mutacoes detectadas: excluir MTA apos falha local derruba a verificacao
+de 5 issues/532 ocorrencias; comparar orientacao gerada como conteudo humano
+derruba equivalencia da reconciliacao. Codigo restaurado byte a byte depois
+dos experimentos. Conferidas 111 referencias locais nos documentos alterados;
+git diff --check sem erros. Revisao independente estatica encerrada sem
+Critical/Required pendentes, incluindo journal real e troca concorrente da
+associacao protegida ate a publicacao dos documentos.
+
+Limites: os relatorios reais e o processo que bloqueou a pasta na maquina de
+trabalho nao estao acessiveis nesta sessao. Os totais 97/3513 e mandatory 44/351
+foram conferidos nos dois indices enviados pelo desenvolvedor. Nenhum MTA,
+registro ou codigo de aplicacao real foi alterado. Corretiva na branch
+harness/indice-totais-categorias. O desenvolvedor autorizou commit, push e PR
+para main apos a validacao; merge permanece uma etapa posterior.
+
 ## Auditoria independente do checkpoint - 21/10/2026
 
 - [x] Revisar documentacao, orientadores e runtime com tres revisores independentes.

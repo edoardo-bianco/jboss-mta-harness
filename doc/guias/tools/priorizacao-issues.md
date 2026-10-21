@@ -162,6 +162,11 @@ Para levar ficha e anexos ao plano/to-do padronizados por issue, siga o
 
 #### Como ler a ficha
 
+Para preencher, use o [template comum](../../modelos/ficha-issue.template.md).
+Cada secao explica o conteudo esperado. Registre apenas a analise que orienta
+a resolucao e vincule o achado original no relatorio MTA; nao replique incidentes.
+Decisao e andamento ficam no migracao.md, enquanto o lote proposto fica no plano.
+
 O titulo identifica o **projeto e o problema**, por exemplo, "Aplicacao exemplo -
 Conferir o recurso de email no servidor". A ficha tem quatro blocos:
 

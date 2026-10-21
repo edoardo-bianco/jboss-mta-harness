@@ -1,5 +1,43 @@
 # Plano do agente: evolucao do harness
 
+## Totais do indice por categoria - 21/10/2026
+
+Branch `harness/indice-totais-categorias`, derivada de `main` em `57b38d8`,
+no checkout separado C:\Temp\harness-indice-mta.
+
+Pedido: o indice geral mostra categorias por projeto, mas falta essa separacao
+nos totais. Acrescentar tabela no template consumido pelo gerador, somando issues
+e ocorrencias por categoria nos MTA utilizaveis do escopo. A mesma regra em dois
+projetos conta duas vezes; nomes das categorias e cobertura parcial permanecem
+explicitos. Ausencia de diagnostico nao equivale a zero issues.
+
+Verificar primeiro a falha no teste do resumo, depois soma entre projetos,
+categorias livres, diagnostico vazio, ausencia de MTA, escopo vazio e repeticao.
+Rodar suites pertinentes pelo runner isolado; nao alterar dados reais nem a main.
+
+Escopo esclarecido: manter informacao util em um lugar definido, com templates
+comuns e links. Registro guarda escolhas/progresso; ficha guarda analise/roteiro;
+MTA conserva detalhe original. Restaurar legenda concisa do registro, modelo de
+preenchimento da ficha e link ao Source, preservando texto humano. Fichas surgem
+no exame efetivo, nao na criacao do indice/preparo.
+
+Resultado enviado da maquina de trabalho: 12/14 MTA, 92 issues e 2981 ocorrencias;
+mandatory 42/347, optional 22/2600, potential 28/34. parent-all-jee7 sem conjunto
+utilizavel; siric-api excluido por bloqueio do diretorio temporarios. O indice
+legado enviado depois confirma siric-api com 5/532: mandatory 2/4 e optional
+3/528. Totais esperados para os mesmos relatorios: 97/3513, mandatory 44/351,
+optional 25/3128 e potential 28/34, com cobertura 13/14. A lembranca de 47
+mandatory nao e sustentada pelo legado fornecido.
+Corrigir exclusao de input/ quando a rodada possui output/ e repeticao limitada
+da limpeza sob sharing violation, sem silenciar bloqueio persistente.
+Separar leitura do MTA da atualizacao local: falha ao salvar associacao ou
+documentos fica como Atualizacao local pendente, sem retirar o diagnostico
+valido da contagem. Leitura sob mutex aceita somente estado confirmado, sem
+journal de recuperacao; publicacao realmente incompleta continua protegida.
+
+Apos validacao e revisao independente, o desenvolvedor autorizou commit, push
+e abertura da PR para main. Publicar esta branch sem executar merge.
+
 ## Auditoria independente do checkpoint - 21/10/2026
 
 Pedido: validar coerencia do todo entre README, doc, guias, templates,
