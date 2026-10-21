@@ -7,6 +7,32 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 
 # Priorizar issues por fatias
 
+## Execucao e orquestracao
+
+Ao receber o pedido de executar este prompt, realize o exame da fatia e grave as
+saidas permitidas. Conferir que o preparo existe nao conclui a tarefa. Nao devolva
+este mesmo prompt para execucao novamente. `orientar-migracao` atende pedidos de
+orientacao e perfis helpers; sua leitura automatica nao muda o papel do executor.
+Um helper explicitamente ativo continua leitor e encaminha ao executor.
+
+No GitHub Copilot, `agent: devsquad` seleciona o orquestrador na execucao nativa do
+prompt em sessao Local, quando instalado e reconhecido pelo cliente. Nos demais
+clientes, o agente principal aplica `using-agent-skills` se disponivel (no Codex,
+`$using-agent-skills`). Sem a skill, segue como agente principal. Sem devsquad,
+Agent pode executar o mesmo contrato; o texto nao troca o seletor do editor.
+
+O orquestrador delega aos agentes disponiveis e pertinentes perguntas delimitadas
+por Project/Id, com fontes, recorte e limites de leitura. Distribua identidades
+distintas da fatia, respeitando ExcludedIssues e o parcial corrente. Helpers
+retornam achados, fontes e lacunas; nao escrevem os documentos. O orquestrador
+confere a evidencia de cada exame, escreve as fichas e consolida ranking e indices
+sem escritores concorrentes. Chamadas de agentes nao contam como issues examinadas.
+Se nao houver apoio compativel, realize a analise diretamente com as ferramentas
+autorizadas; relate somente delegacoes reais. Bloqueio de acesso/ferramenta exige
+informar o impedimento concreto e preservar IN_PROGRESS, sem consumir quota.
+
+## Analise e saidas
+
 Antes de escrever, leia os templates vinculados em **Modelos de saida obrigatorios**:
 priorizacao, indice-priorizacao, indice-priorizacoes, orientacao-priorizacao e
 ficha-issue. Use suas secoes e blocos como formato das saidas; substitua os

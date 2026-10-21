@@ -1,5 +1,40 @@
 # Plano do agente: evolucao do harness
 
+## Execucao da priorizacao sem retorno ao preparo - 21/10/2026
+
+Branch `harness/execucao-priorizacao-sem-loop`, derivada de `main` em `2b41664`,
+no checkout isolado C:\Temp\harness-indice-mta. Relato da maquina de trabalho:
+mesmo com devsquad selecionado, o executor carregou orientar-migracao, assumiu
+somente leitura e pediu novamente a execucao do mesmo prompt. Base relatada:
+44 mandatory, fatia de 20% (9 issues), ainda sem exame. Nao reproduzido no cliente.
+
+Corrigir a aplicabilidade da skill antes das regras de leitura, preservando os
+perfis helpers. Execucao explicitamente pedida ao executor deve produzir as
+saidas do prompt; carregar a skill nao o transforma em helper. No Copilot,
+`devsquad` e o orquestrador: delega analises delimitadas e consolida fichas,
+ranking e indices. Nos demais clientes, o agente principal usa
+`using-agent-skills` quando disponivel; sem o recurso, segue no agente padrao.
+Nao instalar/substituir o perfil externo devsquad nem inventar fallback YAML.
+
+Conferir selecao nativa por `agent: devsquad`, limites do cliente e encaminhamento
+para Agent se o perfil nao existir. Alinhar prompt, skill/ponteiro, papeis, guias
+e mensagem de preparo. Preservar quota, contexto, templates, escolhas humanas e
+o papel leitor dos helpers; nao executar a migracao real nesta maquina.
+
+Verificar geracao, metadados, links e limites dos adaptadores em suites isoladas,
+com revisao independente. Separar essas provas do ensaio nativo de selecao e
+delegacao no Copilot, que depende da maquina de trabalho.
+
+Implementacao e revisao local concluidas; cinco suites e navegacao passaram
+conforme todo.md. Confirmado na documentacao e no codigo atual do VS Code:
+`agent` e um nome unico; a execucao procura esse perfil antes de submeter o
+prompt. Nao ha fallback condicional definido no cabecalho. Manter selecao nativa
+de devsquad e alternativa manual Agent, sem criar extensao ou perfil substituto.
+Fontes: [prompt files](https://code.visualstudio.com/docs/agent-customization/prompt-files)
+e [ChatWidget, _applyPromptMetadata/_switchToAgentByName](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/contrib/chat/browser/widget/chatWidget.ts).
+Selecao efetiva, delegacao e producao das nove fichas reais ainda requerem ensaio
+no Copilot da maquina de trabalho; nao foram simuladas como resultado obtido.
+
 ## Nome curto para priorizacao - 21/10/2026
 
 Branch harness/priorizacao-escopo-curto, derivada de main cbe4f8a, no checkout

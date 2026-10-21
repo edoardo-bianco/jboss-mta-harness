@@ -1,6 +1,6 @@
 ---
 name: orientar-migracao
-description: Orienta uma etapa da migracao de aplicacoes com o JBoss MTA Harness, recuperando escolhas e evidencias dos arquivos. Use para preparar o ambiente, iniciar, priorizar, planejar ou retomar o trabalho, inclusive arquivos recebidos; orienta sem executar tarefas ou corretivas.
+description: Orienta o uso do JBoss MTA Harness quando o usuario pede ajuda, consulta de estado ou proximo passo de uma migracao, inclusive material recebido. Aplica-se aos perfis migracao_*_helper. Nao se aplica a pedidos de executar um prompt preparado ou produzir seus artefatos pelo agente executor.
 ---
 
 # Orientar a migracao (ponteiro para a skill comum)

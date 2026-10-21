@@ -1,9 +1,29 @@
 ---
 name: orientar-migracao
-description: Orienta uma etapa da migracao de aplicacoes com o JBoss MTA Harness, recuperando escolhas e evidencias dos arquivos. Use para preparar o ambiente, iniciar, priorizar, planejar ou retomar o trabalho, inclusive arquivos recebidos; orienta sem executar tarefas ou corretivas.
+description: Orienta o uso do JBoss MTA Harness quando o usuario pede ajuda, consulta de estado ou proximo passo de uma migracao, inclusive material recebido. Aplica-se aos perfis migracao_*_helper. Nao se aplica a pedidos de executar um prompt preparado ou produzir seus artefatos pelo agente executor.
 ---
 
 # Orientar a migracao pelo estado efetivo
+
+## Aplicabilidade e papel ativo
+
+Confira o pedido e o perfil ativo antes de aplicar as regras de orientacao:
+
+- Um perfil `migracao_helper` ou especialista `migracao_*_helper` explicitamente
+  ativo continua leitor; encaminha execucao ao agente principal conforme o guia.
+- Quando o usuario pede ao executor/orquestrador para **executar o prompt
+  preparado**, esta skill nao rege essa execucao. O `devsquad` ou agente principal
+  segue o contrato do prompt e produz suas saidas autorizadas. Ler esta skill
+  automaticamente nao o transforma em helper nem restringe seu papel a orientar.
+  Consultar helpers leitores tambem nao transfere esse limite ao orquestrador.
+- Para pedido de orientacao, consulta de estado ou proximo passo, siga as secoes
+  abaixo. Ler um prompt para explica-lo nao e uma solicitacao de execucao.
+
+Esta skill nao seleciona perfis nem concede ferramentas/permissoes. Se o executor
+encontrar bloqueio real, deve identificar a operacao e o acesso/capacidade ausente;
+nao devolver o mesmo prompt como unica proxima acao quando a execucao ja foi pedida.
+
+## Limites da orientacao
 
 O desenvolvedor executa tarefas, escolhe prioridades, concede GO e aceita o
 resultado. O helper le arquivos e indica uma proxima acao. Esta skill e comum ao
@@ -199,13 +219,17 @@ desconhecido e necessario. agent: devsquad no prompt nao identifica o cliente at
 - Codex: destinatario e o agente principal em nova conversa no mesmo workspace,
   sem migracao_helper/$orientar-migracao, conforme a
   [passagem para execucao](../../../doc/guias/orientacao-migracao.md#passar-da-orientacao-para-a-execucao).
-  Mensagem pronta: "Execute o prompt deste arquivo: <caminho real>".
+  Mensagem pronta: "Execute o prompt deste arquivo: <caminho real>. Use
+  $using-agent-skills se disponivel; caso contrario, prossiga no agente principal".
   O prompt referencia o contexto; nao exija repetir escolhas.
-- Copilot: indicar Executar Prompt no arquivo preparado, com o perfil declarado.
+- Copilot: indicar Executar Prompt no arquivo preparado, em sessao Local;
+  `agent: devsquad` solicita o orquestrador instalado. Sem esse perfil, indicar
+  Agent conforme o fallback da [passagem para execucao](../../../doc/guias/orientacao-migracao.md#passar-da-orientacao-para-a-execucao).
   Para orientar, usar migracao_helper; anexar .agent.md/.toml nao seleciona perfil.
 - Claude Code: destinatario e a conversa principal, sem `--agent migracao_helper`
   nem subagente helper. Mensagem pronta: "Leia e execute o prompt deste arquivo:
-  <caminho real>". Para orientar, iniciar com `claude --agent migracao_helper` ou
+  <caminho real>. Use using-agent-skills se disponivel; caso contrario, prossiga
+  no agente principal". Para orientar, iniciar com `claude --agent migracao_helper` ou
   pedir o subagente migracao_helper. O campo agent: do prompt e do Copilot e nao
   seleciona perfil no Claude Code.
 

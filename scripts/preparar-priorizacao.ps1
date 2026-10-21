@@ -37,8 +37,10 @@ try {
         Write-Host "Prompt preparado: $($prepared.PromptPath)"
         Write-Host "Contexto: $($prepared.ContextPath)"
         Write-Host "Ranking a ser escrito pelo agente: $($prepared.RankingPath)"
-        Write-Host ('Codex: Execute o prompt deste arquivo: ' + $prepared.PromptPath)
-        Write-Host 'Copilot: abra o arquivo e use Executar Prompt. Preparo nao executa o agente.'
+        Write-Host ('Codex/Claude Code: Execute o prompt deste arquivo: ' + $prepared.PromptPath)
+        Write-Host 'Nos demais clientes, use using-agent-skills se disponivel (Codex: $using-agent-skills); senao, siga no agente principal.'
+        Write-Host 'Copilot: abra o arquivo e use Executar Prompt em sessao Local; agent: devsquad solicita o orquestrador instalado.'
+        Write-Host 'Sem devsquad: selecione Agent e envie Execute o prompt deste arquivo: seguido do caminho acima. Preparo nao executa o agente.'
         Write-Host 'Depois escolha projeto/IDs/recorte no registro e use Planejamento: planejar. Ranking nao concede GO.'
         if (-not $NoOpen -and $EditorPath) {
             try { Open-HarnessEditor -EditorPath $EditorPath -FilePaths $prepared.PromptPath -Root $root }

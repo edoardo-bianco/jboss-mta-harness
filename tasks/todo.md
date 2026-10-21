@@ -1,5 +1,37 @@
 # To-do do agente: evolucao do harness
 
+## Execucao da priorizacao sem retorno ao preparo - 21/10/2026
+
+- [x] Conferir relato, fontes e papel indevidamente assumido pelo executor.
+- [x] Isolar evolucao em branch derivada de main, preservando checkout operacional.
+- [x] Delimitar skill de orientacao e preservar helpers leitores nos tres clientes.
+- [x] Explicitar devsquad orquestrador, delegacao e consolidacao da fatia.
+- [x] Alinhar execucao por cliente, using-agent-skills e fallback Agent.
+- [x] Validar geracao/links/adaptadores, revisar diff e registrar limites.
+- [ ] Ensaio nativo na maquina de trabalho: selecao, delegacao e 9/44 examinadas.
+
+Verificacao: cinco suites pelo runner isolado em Windows PowerShell 5.1 passaram:
+ClaudeAdapter, Prioritization, CurrentPromptLinks, OutputTemplates e
+PrioritizationProgress. Conferidos 113 links locais nos Markdown alterados, sem
+destinos ausentes; `git diff --check` passou. Revisao independente nao encontrou
+bloqueadores. Nenhum dado real, perfil externo ou checkout operacional alterado.
+
+Limites: essas suites verificam contratos/geracao e preservacao, nao comportamento
+do modelo ou seletor Copilot. `agent: devsquad` ja existia antes deste ajuste.
+O cliente precisa reconhecer o perfil e executar o prompt nativamente em Local;
+o relato "Copilot e com Agent" nao identifica definitivamente o tipo de sessao.
+Sem devsquad, fallback documentado para Agent e manual: nao ha lista condicional
+no campo agent. Nos demais clientes, skill ausente nao impede o agente principal.
+O validador `quick_validate.py` da skill-creator foi tentado, mas nao executou por
+ausencia de PyYAML; frontmatter/ponteiro/perfis foram conferidos por ClaudeAdapter
+e revisao. Nao instalar dependencias globais apenas para essa validacao.
+
+Para adotar o texto na maquina de trabalho apos integrar/atualizar o harness,
+retomar o preparo pendente (`-Mode Continue`, sem percentual) regrava o prompt
+e conserva base/quota. Nao recriar nem progredir para outra fatia por causa do loop.
+Commit, push e abertura de PR para main autorizados pelo desenvolvedor em
+21/10/2026. Ensaio nativo permanece pendente; integracao segue pela revisao da PR.
+
 ## Nome curto para priorizacao - 21/10/2026
 
 - [x] Reproduzir o limite do escopo automatico com 14 projetos sinteticos.
