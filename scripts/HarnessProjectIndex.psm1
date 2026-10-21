@@ -4,6 +4,7 @@ $ErrorActionPreference='Stop'
 Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecking
 Import-Module (Join-Path $PSScriptRoot 'HarnessPrioritization.psm1') -DisableNameChecking
 Import-Module (Join-Path $PSScriptRoot 'HarnessMtaLocation.psm1') -DisableNameChecking
+Import-Module (Join-Path $PSScriptRoot 'HarnessDocumentTemplates.psm1') -DisableNameChecking
 
 function Read-ProjectIndexMta {
     param($Context,$Project)
@@ -27,6 +28,47 @@ function Read-ProjectIndexMta {
     } finally { $lease.ReleaseMutex(); $lease.Dispose() }
 }
 
+function Get-ProjectSummaryRow {
+    param($Project,$Mta,[string]$Index)
+    $report='Indisponivel'; $counts='-'; $categories='-'
+    if ($Mta) {
+        $report=Get-HarnessSourceLink $Index $Mta.ReportPath ($Mta.DateUtc.ToString('yyyy-MM-dd HH:mm:ss'))
+        $occurrences=0; foreach ($issue in $Mta.Issues) { $occurrences+=$issue.Count }
+        $counts=(@($Mta.Issues).Count.ToString()+' / '+$occurrences)
+        $categories=(@($Mta.Issues | Group-Object Category -CaseSensitive | Sort-Object Name | ForEach-Object {
+            $sum=0; foreach ($issue in $_.Group) { $sum+=$issue.Count }
+            (ConvertTo-ProjectCell $_.Name)+': '+$_.Count+' / '+$sum
+        }) -join '<br>')
+        if (-not $categories) { $categories='Sem issues' }
+    }
+    $read=Read-HarnessProjectFiles $Project @('atual/operacao.json')
+    $attempts=@()
+    if ($read['atual/operacao.json']) {
+        $operations=ConvertFrom-Json $read['atual/operacao.json']
+        foreach ($entry in @($operations.PSObject.Properties | Sort-Object Name)) {
+            $state=$entry.Value
+            $label=ConvertTo-ProjectCell ($entry.Name+': '+$state.Status)
+            if ($state.LogPath -and (Test-Path -LiteralPath $state.LogPath -PathType Leaf)) {
+                $label=Get-HarnessSourceLink $Index $state.LogPath $label
+            }
+            $attempts+=($label+' ('+(ConvertTo-ProjectCell $state.DateUtc)+')')
+        }
+    }
+    if (-not $attempts.Count) { $attempts=@('Sem tentativa registrada') }
+    $documents=@()
+    foreach ($entry in @(
+        @('migracao.md','Registro'),@('atual/planejamento/plano.md','Plano'),
+        @('atual/planejamento/tarefas.md','Tarefas'),@('atual/planejamento/planejar-lotes.prompt.md','Preparo'),
+        @('evidencias/LEIA-ME.md','Evidencias'),@('atual/diagnosticos/sonar/RESUMO.md','Sonar'))) {
+        $path=Join-Path $Project.Folder $entry[0]
+        if (Test-Path -LiteralPath $path -PathType Leaf) { $documents+=Get-HarnessSourceLink $Index $path $entry[1] }
+    }
+    if (-not (Test-Path -LiteralPath $Project.PlanPath -PathType Leaf) -and -not (Test-Path -LiteralPath $Project.TodoPath -PathType Leaf)) { $documents+='Proposta ausente' }
+    $projectLink=(Get-HarnessSourceLink $Index $Project.IndexPath (ConvertTo-ProjectCell $Project.Name))+'<br>'+(Get-HarnessSourceLink $Index $Project.Pom 'POM')
+    '| '+(@($projectLink,$report,$counts,$categories,($attempts -join '<br>'),($documents -join '<br>')) -join ' | ')+' |'
+}
+
+
 function New-HarnessProjectIndex {
     param($Context,[switch]$UpdateMigration)
     $index=Join-Path $Context.Root '.harness/indices/projetos.md'
@@ -37,23 +79,30 @@ function New-HarnessProjectIndex {
         if ($names.ContainsKey($project.Name)) { throw "artifactId duplicado no escopo: $($project.Name). Use outra raiz para o projeto distinto." }
         $names[$project.Name]=$true; $projects+=$project
     }
-    $warnings=@(); $lines=@('# Projetos Maven','', 'Escolha o projeto; decisoes, plano e fontes ficam em seus caminhos correntes.','')
+    $warnings=@(); $rows=@(); $available=0; $issueCount=0; $occurrenceCount=0
     foreach ($project in $projects) {
         $project=Initialize-HarnessProjectStorage $Context.Root $project.Pom
         $mta=$null; $limits=@()
         try { $mta=Read-ProjectIndexMta $Context $project } catch { $limits+=('MTA indisponivel: '+$_.Exception.Message) }
         Update-HarnessProjectDocuments $project -Mta $mta -UpdateIssues:$UpdateMigration -Warnings $limits
-        $lines+='- '+(Get-HarnessSourceLink $index $project.IndexPath $project.Name)
+        $rows+=Get-ProjectSummaryRow $project $mta $index
+        if ($mta) { $available++; $issueCount+=@($mta.Issues).Count; foreach ($issue in $mta.Issues) { $occurrenceCount+=$issue.Count } }
         foreach ($limit in $limits) { $warnings+=($project.Name+': '+$limit) }
         if ($mta) { foreach ($limit in $mta.Diagnostics) { $warnings+=($project.Name+': '+$limit) } }
     }
-    if ($warnings.Count) { $lines+=@('','Limites da leitura:')+@($warnings | ForEach-Object { '- '+($_ -replace '[\r\n]+',' ') }) }
     $prioritization=Update-HarnessPrioritizationIndex $Context.Root -RefreshSources
     $warnings+=@($prioritization.Warnings)
-    if (Test-Path -LiteralPath $prioritization.IndexPath -PathType Leaf) { $lines+=@('',(Get-HarnessSourceLink $index $prioritization.IndexPath 'Priorizacoes correntes')) }
     Import-Module (Join-Path $PSScriptRoot 'HarnessSprintPlanning.psm1') -DisableNameChecking
     Update-HarnessSprintIndex $Context.Root
-    $path=Publish-HarnessWorkspaceIndex $Context.Root (($lines -join "`n")+"`n")
+    if (-not $rows.Count) { $rows=@('| Nenhum projeto Maven no escopo. | - | - | - | - | - |') }
+    $values=@{
+        UpdatedAt=[DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm:ss')
+        ProjectRows=($rows -join [Environment]::NewLine)
+        Coverage="MTA utilizavel: $available de $($projects.Count) projetos. Totais conhecidos: $issueCount issues / $occurrenceCount ocorrencias."
+        Warnings=if ($warnings.Count) { (@($warnings | ForEach-Object { '- '+(ConvertTo-ProjectCell $_) }) -join [Environment]::NewLine) } else { 'Nenhuma lacuna identificada nesta leitura.' }
+        Prioritization=if (Test-Path -LiteralPath $prioritization.IndexPath -PathType Leaf) { Get-HarnessSourceLink $index $prioritization.IndexPath 'Priorizacoes correntes' } else { 'Nenhuma priorizacao corrente disponivel.' }
+    }
+    $path=Publish-HarnessWorkspaceIndex $Context.Root (Expand-HarnessDocumentTemplate 'indice-projetos' $values)
     [pscustomobject]@{IndexPath=$path;Warnings=@($warnings);Projects=@($projects)}
 }
 Export-ModuleMember -Function New-HarnessProjectIndex

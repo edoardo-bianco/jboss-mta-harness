@@ -266,3 +266,18 @@ candidata e siga [como levar a escolha ao planejamento](#levar-uma-candidata-ao-
 Se quiser outra fatia, use [continuidade](#fatias-e-continuidade): preservar a base
 ou recriar depende das entradas e da sua escolha. Ranking nao altera decisoes
 no registro, nao cria lote e nao concede GO.
+
+## Modelos dos resultados
+
+Ranking, indice geral, indice de categoria/escopo e ficha da issue seguem os
+[templates correntes](../../modelos/README.md). Os geradores consomem os modelos
+automaticos; o prompt preparado oferece links aos modelos obrigatorios para o
+agente. Ficha e detalhe da issue sao um documento por projeto/categoria/issue,
+reutilizado entre fatias e escopos.
+
+A secao de proximo passo vem de
+[orientacao-priorizacao.template.md](../../modelos/orientacao-priorizacao.template.md).
+Ela orienta abrir o registro pelo link, localizar o ID, marcar
+Decisao=ANALISAR AGORA e informar o recorte em Observacao/referencia, preservando
+Andamento real. Depois, usar Planejamento: planejar. A priorizacao continua sem
+alterar migracao.md ou conceder GO/aceite.

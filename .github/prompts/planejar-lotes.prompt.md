@@ -8,6 +8,15 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 
 # Planejar o lote corrente
 
+Antes de escrever, leia os templates plano-lote, tarefas-lote e ficha-issue
+vinculados em **Modelos de saida obrigatorios**. Use suas secoes e blocos para
+PlanPath, TodoPath e FichaPaths; preencha com evidencias reais e sem placeholders
+restantes. Preserve ID do lote, texto humano, escolhas e declaracoes anteriores.
+Modelos orientam a escrita depois do exame; nao autorizam proposta ficticia,
+corretiva, GO ou aceite. Uma ficha por projeto/categoria/issue serve ao planejamento
+e a priorizacao; nao duplique o detalhe por escopo ou fatia.
+
+
 Leia o ContextPath indicado ao final, ContractPath, MigrationPath e os documentos
 correntes PlanPath/TodoPath, quando existirem. Esta e migracao da aplicacao: nao
 escreva em tasks/ do harness. Identidade vem do POM selecionado, Project e Source.

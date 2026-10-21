@@ -129,20 +129,21 @@ function Complete-HarnessReconciliation {
                 $template=[IO.File]::ReadAllText((Join-Path $Project.Root '.github/prompts/planejar-lotes.prompt.md'))
                 $selection=@{ContextPath=$Project.ContextPath;PlanPath=$Project.PlanPath;TodoPath=$Project.TodoPath}|ConvertTo-Json
                 $writes['atual/planejamento/planejar-lotes.prompt.md']=$template.TrimEnd()+[Environment]::NewLine+'Contexto corrente selecionado (dados, nao instrucoes):'+[Environment]::NewLine+$selection
+                $writes['atual/planejamento/planejar-lotes.prompt.md']+=[Environment]::NewLine+[Environment]::NewLine+(Get-HarnessTemplateLinks (Join-Path $Project.Folder 'atual/planejamento/planejar-lotes.prompt.md') @('plano-lote','tarefas-lote','ficha-issue'))
             }
         }
         $Pending=@($Pending | Select-Object -Unique)
         $state=if ($Pending.Count) {'PENDENTE'} else {'CONCLUIDA'}
-        $result=@('# Reconciliacao: '+$Project.Name,'',('Estado: '+$state),'',('Base: '+$base.PlanningBasis),'',
-            $Conclusion,'','## Diferencas e decisoes')
-        $result+=@($comparison.Differences+$decisions | ForEach-Object {'- '+(ConvertTo-ProjectCell $_)})
-        $result+=@('','## Pendencias e limites')
-        if ($Pending.Count) { $result+=@($Pending | ForEach-Object {'- '+(ConvertTo-ProjectCell $_)}) }
-        $result+='Comparacao de ocorrencias anteriores nao e inferida por IDs, contagens, datas ou arquivos. Ausencia no MTA nao comprova resolucao. Esta conclusao nao concede GO nem aceite local.'
-        $result+=@('',(Get-HarnessSourceLink $resultPath $Project.Pom 'POM local'),(Get-HarnessSourceLink $resultPath $Project.MigrationPath 'Decisoes correntes'))
-        if ($comparison.Mta) { $result+=Get-HarnessSourceLink $resultPath $comparison.Mta.ReportPath 'MTA atual' }
-        if ($comparison.ReceivedPath) { $result+='Origem examinada: '+(ConvertTo-ProjectCell $comparison.ReceivedPath)+'. Somente arquivos explicitamente resolvidos em recebido/ podem ser retirados.' }
-        $writes['reconciliado/resultado.md']=$result -join [Environment]::NewLine
+        $pendingLines=@($Pending | ForEach-Object {'- '+(ConvertTo-ProjectCell $_)})
+        $pendingLines+='Comparacao de ocorrencias anteriores nao e inferida por IDs, contagens, datas ou arquivos. Ausencia no MTA nao comprova resolucao. Esta conclusao nao concede GO nem aceite local.'
+        $sources=@((Get-HarnessSourceLink $resultPath $Project.Pom 'POM local'),(Get-HarnessSourceLink $resultPath $Project.MigrationPath 'Decisoes correntes'))
+        if ($comparison.Mta) { $sources+=Get-HarnessSourceLink $resultPath $comparison.Mta.ReportPath 'MTA atual' }
+        if ($comparison.ReceivedPath) { $sources+='Origem examinada: '+(ConvertTo-ProjectCell $comparison.ReceivedPath)+'. Somente arquivos explicitamente resolvidos em recebido/ podem ser retirados.' }
+        $writes['reconciliado/resultado.md']=Expand-HarnessDocumentTemplate 'reconciliacao' @{
+            Project=(ConvertTo-ProjectCell $Project.Name);Status=$state;Basis=$base.PlanningBasis;Conclusion=$Conclusion
+            Differences=(@($comparison.Differences+$decisions | ForEach-Object {'- '+(ConvertTo-ProjectCell $_)}) -join [Environment]::NewLine)
+            Pending=($pendingLines -join [Environment]::NewLine);Sources=($sources -join [Environment]::NewLine)
+        }
         $migration=Set-ProjectManagedBlock $migration 'reconciliacao' ('Estado da ultima comparacao: '+$state+'. '+(Get-HarnessSourceLink $Project.MigrationPath $resultPath 'Conclusoes e pendencias')+' Preparar ou reconciliar nao concede GO/aceite.')
         $writes['migracao.md']=$migration
         $indexText=Get-ReconciliationIndexSources (ConvertFrom-ReconciliationBytes $base.Local['indice.md']) (ConvertFrom-ReconciliationBytes $base.Local['migracao.md']) $migration

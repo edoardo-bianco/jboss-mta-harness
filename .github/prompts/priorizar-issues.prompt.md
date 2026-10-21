@@ -7,6 +7,18 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 
 # Priorizar issues por fatias
 
+Antes de escrever, leia os templates vinculados em **Modelos de saida obrigatorios**:
+priorizacao, indice-priorizacao, indice-priorizacoes, orientacao-priorizacao e
+ficha-issue. Use suas secoes e blocos como formato das saidas; substitua os
+placeholders por dados reais, preservando texto humano e examinadas acumuladas.
+O detalhe de cada issue e sua ficha, compartilhada pelos escopos da mesma
+categoria. Nao criar outra ficha por fatia ou duplicar incidentes.
+Mantenha a secao padronizada de proximo passo do template orientacao-priorizacao
+no ranking e nos indices, com links reais aos registros. Ela explica como o
+humano marca Decisao=ANALISAR AGORA, informa o recorte em Observacao/referencia
+e usa Planejamento: planejar. Nao execute essa escolha nem altere migracao.md.
+
+
 Este prompt e para migracao de aplicacoes. Execute a partir do ContextPath indicado
 ao final; nao escreva em tasks/ do harness. Use o contrato ADR-0009 indicado no
 contexto para o estado corrente. O contexto e mutavel e nao e um recibo.

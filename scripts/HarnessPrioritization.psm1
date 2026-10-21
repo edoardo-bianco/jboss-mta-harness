@@ -1,3 +1,4 @@
+Import-Module (Join-Path $PSScriptRoot 'HarnessDocumentTemplates.psm1') -DisableNameChecking
 #requires -Version 5.1
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
@@ -121,12 +122,9 @@ function New-HarnessPrioritizationContext {
             ExcludedIssues=@($excluded);AvailableIssues=@($available);FichaPaths=$fichas;
             OutsideBaseline=$outside;ContractPath=(Join-Path $Context.Root 'doc/adr/0009-estado-corrente-por-projeto.md')}
         $result=[pscustomobject]@{Scope=$Scope;Category=$Category;Status=if ($slice -eq 0) {'COMPLETED'} else {'IN_PROGRESS'};AnalyzedIssues=@($examined)}
-        $ranking=$old[$rankingRelative]
-        if (-not $ranking) { $ranking="# Priorizacao corrente\n\nAnotacoes humanas fora dos blocos gerenciados sao preservadas.\n" -replace '\\n',([char]10) }
-        $ranking=Set-PrioritizationResult $ranking $result
+        $ranking=Get-PrioritizationRankingContent $data $result $old[$rankingRelative]
         for ($i=0;$i -lt $projects.Count;$i++) { Update-PrioritizationFichaSources $projects[$i] $reads[$i].Mta $Category }
         $index=Get-PrioritizationIndexContent $data $result $old[($paths.Relative+'/indice.md')]
-        $ranking=Set-ProjectManagedBlock $ranking 'priorizacao:fichas' (Get-PrioritizationRows $data $result $paths.RankingPath)
         $templatePath=Join-Path $Context.Root '.github/prompts/priorizar-issues.prompt.md'
         $template=[IO.File]::ReadAllText($templatePath)
         $selection=@{ContextPath=$paths.ContextPath;RankingPath=$paths.RankingPath;IndexPath=$paths.IndexPath} | ConvertTo-Json
@@ -138,6 +136,7 @@ function New-HarnessPrioritizationContext {
             if ($entry.Mta) { $links+=Get-HarnessSourceLink $paths.PromptPath $entry.Mta.ReportPath ('MTA: '+$entry.Project) }
         }
         $prompt+=[Environment]::NewLine+[Environment]::NewLine+($links -join ([Environment]::NewLine+[Environment]::NewLine))
+        $prompt+=[Environment]::NewLine+[Environment]::NewLine+(Get-HarnessTemplateLinks $paths.PromptPath @('priorizacao','indice-priorizacao','indice-priorizacoes','orientacao-priorizacao','ficha-issue'))
         $writes=@{}
         $writes[$contextRelative]=$data | ConvertTo-Json -Depth 15
         $writes[$rankingRelative]=$ranking

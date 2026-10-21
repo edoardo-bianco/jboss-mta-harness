@@ -1,5 +1,29 @@
 # Plano do agente: evolucao do harness
 
+## Tabela resumida e template do indice - 21/10/2026
+
+Retomada na branch harness/indice-mta-externo, no checkout C:\Temp\harness-indice-mta.
+Pedido confirmado: tabela resumida Markdown com links, sem Excel. O indice geral
+corrente tinha apenas uma lista; o resumo antigo consta no historico de 01/10.
+Criar template versionado consumido pelo gerador, com MTA/data, issues/ocorrencias
+por categoria, ultimas tentativas e documentos existentes. Totais informam cobertura;
+ausencia nao vira zero e preparo nao vira proposta. Preservar fontes/decisoes.
+Validar com fixtures pelo runner isolado; concluir revisao da retirada do conversor
+e preparar descricao da PR, sem merge nem alteracao de dados reais.
+
+
+Escopo ampliado pelo desenvolvedor nesta sessao: verificar cada resultado humano
+esperado e assegurar uso do template pelo gerador ou pelo agente via prompt.
+Inventariados indice geral/projeto, registro, indices de priorizacao, ranking,
+orientacao para selecionar a issue, ficha/detalhe, plano/tarefas, evidencias e
+reconciliacao. Sprints ja consumia modelo. O antigo indice-priorizacao era
+historico e sem consumidor; foi substituido pelo modelo corrente.
+A orientacao padronizada deve ligar ao migracao.md, explicar ANALISAR AGORA,
+Observacao/referencia e Planejamento: planejar, sem escolher pelo humano.
+Fichas permanecem unicas por projeto/categoria/issue, sem copias por fatia.
+Validar consumo real alterando templates somente na copia de teste; prompts
+preparados precisam vincular os modelos inclusive apos reconciliacao/realocacao.
+
 ## Retirada da conversao legada - 20/10/2026
 
 Pedido explicito: iniciar pelo layout corrente e pelos relatorios MTA externos,

@@ -9,6 +9,7 @@ $ErrorActionPreference='Stop'
 try {
     Import-Module (Join-Path $PSScriptRoot 'Harness.psm1') -Force -DisableNameChecking
     Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -Force -DisableNameChecking
+    Import-Module (Join-Path $PSScriptRoot 'HarnessDocumentTemplates.psm1') -DisableNameChecking
     $root=Split-Path -Parent $PSScriptRoot
     if (-not $ConfigPath) { $ConfigPath=Join-Path $root 'config/harness.local.json' }
     $context=Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:$SelectTarget -SkipMigrationInitialization
@@ -20,9 +21,10 @@ try {
     $index=Join-Path $project.Folder $relative
     $old=Read-HarnessProjectFiles $project @($relative)
     if ($null -eq $old[$relative]) {
-        $body="# Evidencias: $($project.Name)`n`nListe links Markdown para os anexos, a issue e a relacao com a corretiva. Use * na coluna Issue para evidencia geral do projeto. Os arquivos permanecem na origem indicada; o planejamento le estas referencias diretamente.`n`n"
-        if ($IssueId) { $body+="Issue de interesse: $(ConvertTo-ProjectCell $IssueId).`n`n" }
-        $body+="| Issue | Arquivo (link relativo a este indice) | Relacao com a corretiva |`n| --- | --- | --- |`n`nUse o formato Markdown de link: rotulo entre colchetes, seguido do caminho entre parenteses.`n"
+        $body=Expand-HarnessDocumentTemplate 'evidencias' @{
+            Project=(ConvertTo-ProjectCell $project.Name)
+            SelectedIssue=if ($IssueId) { 'Issue de interesse: '+(ConvertTo-ProjectCell $IssueId)+'.' } else { '' }
+        }
         Publish-HarnessProjectFiles $project @{$relative=$body} $old
     }
     Write-Host "Registro de migracao: $($project.MigrationPath)"

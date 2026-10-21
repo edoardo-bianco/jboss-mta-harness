@@ -1,11 +1,50 @@
 # To-do do agente: evolucao do harness
 
+## Tabela resumida e template do indice - 21/10/2026
+
+- [x] Reproduzir ausencia do resumo e implementar tabela Markdown com links.
+- [x] Consumir templates versionados; inventariar produtores e vincular modelos aos prompts.
+- [x] Validar contagens, lacunas, links e preservacao em copia isolada.
+- [x] Concluir revisao da retirada e preparar descricao da PR para main, sem merge.
+
+
+
+**Verificacao em 21/10/2026:** 19 suites distintas aprovadas via runner isolado,
+Windows PowerShell 5.1 e TMP/TEMP em C:\Temp somente no processo:
+ProjectIndexSummary, ProjectIndexExternalMta, ProjectIndex, OutputTemplates,
+ProjectDocuments, PrioritizationIndex, CurrentPromptLinks, Planning,
+EvidenceFolder, Reconciliation, ReconciliationSources, ReconciliationPrioritization,
+ReconciliationConflicts, PlanningPortable, PlanningReassociation, PlanningEvidence,
+ProjectNavigation, PrioritizationProgress e PrioritizationCategories.
+
+O teste do resumo primeiro comprovou a ausencia da tabela. O teste dos modelos
+primeiro comprovou a ausencia de template corrente; depois passou comprovando
+consumo real por alteracao do modelo apenas na copia de teste. Durante a ampliacao,
+um erro de sintaxe na propria suite OutputTemplates foi corrigido e sua execucao
+isolada passou; as outras 12 suites daquela rodada passaram. A mutacao que ocultava
+a ultima tentativa falha foi detectada, com restauracao byte a byte.
+Conferidos 23 scripts por parser e 557 destinos locais e 346 ancoras Markdown; diff --check passou.
+Busca de dependencias ativas do conversor retirado nao encontrou consumidores.
+Nao houve execucao de agente de migracao real, MTA real, conversao ou alteracao
+dos dados operacionais. Inventario em [doc/modelos](../doc/modelos/README.md).
+
+**Entrega:** [descricao da PR](pr-indice-mta-externo.md) preparada para main;
+revisao humana, abertura da PR e integracao permanecem etapas separadas.
+
+**Roteiro na maquina de trabalho:** atualizar esta branch, conferir mta.runsPath
+externo e executar Workspace: atualizar indice dos projetos. Abrir a tabela em
+.harness/indices/projetos.md; para os modelos dos agentes, preparar novamente a
+etapa desejada e abrir os links em Modelos de saida obrigatorios. No resultado de
+priorizacao, seguir Proximo passo para escolher ID/recorte em migracao.md. Nao
+limpar nem converter o estado real para ensaiar esta entrega.
+
+
 ## Retirada da conversao legada - 20/10/2026
 
 - [x] Retirar utilitario tools/transicao, fixture e suites exclusivas.
 - [x] Alinhar guias, contratos, skill e papeis de orientacao ao inicio corrente.
 - [x] Verificar dependencias e validar fluxo corrente sem o conversor.
-- [ ] Revisar e preparar entrega em commit separado.
+- [x] Retirada em commit separado 4f67c95; revisao final retomada em 21/10.
 - [ ] Revisao humana e integracao.
 
 **Checkpoint de 20/10/2026, pausa pedida pelo desenvolvedor:** trabalho na branch

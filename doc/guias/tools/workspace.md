@@ -411,6 +411,14 @@ nao produzido nao aparece. Ler arquivos existentes nao exige associar um MTA nem
 executar analises; associacao da origem continua necessaria apenas para os fluxos
 que consomem MTA. Os indices permanecem uma alternativa de navegacao.
 
+A tabela resumida do indice geral usa o
+[template versionado](../../modelos/indice-projetos.template.md), com links para
+projeto/POM, MTA, logs, registro, plano/tarefas, preparo, evidencias e Sonar
+quando existentes. Totais informam quantos projetos possuem MTA utilizavel.
+Nao e gerado arquivo Excel. Atualizar o indice aplica o formato vigente;
+notas duraveis ficam no registro ou nas evidencias.
+O [inventario de modelos](../../modelos/README.md) identifica os geradores e prompts.
+
 O indice e Markdown: use a visualizacao de Markdown do VS Code para clicar
 nos links ou siga-os pelo editor. A arvore de pastas tambem permite copia/cola
 e consulta manual. Os arquivos locais nao acompanham clone/pull; para receber

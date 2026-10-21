@@ -30,6 +30,9 @@ function Install-PlanningCli($Fixture) {
         $Fixture.Projects[$i]=Get-HarnessProjectStorage $Fixture.Root (Join-Path $source 'pom.xml')
         $Fixture.Context.Projects[$i].path=$source
     }
+    $models=Join-Path $Fixture.Root 'doc/modelos'
+    $null=[IO.Directory]::CreateDirectory($models)
+    Get-ChildItem -LiteralPath (Join-Path $root 'doc/modelos') -File | Copy-Item -Destination $models
     $scripts=Join-Path $Fixture.Root 'scripts'
     $null=[IO.Directory]::CreateDirectory($scripts)
     foreach ($file in Get-ChildItem -LiteralPath (Join-Path $root 'scripts') -File) {

@@ -6,10 +6,13 @@ $cli=Install-PlanningCli $f
 $project=$f.Projects[0]
 $register=[IO.File]::ReadAllText($project.MigrationPath)
 $entry='criar-pasta-evidencias.ps1'
+$model=Join-Path $f.Root 'doc/modelos/evidencias.template.md'
+[IO.File]::AppendAllText($model,[Environment]::NewLine+'TEMPLATE-EVIDENCIAS-CONSUMIDO')
 $result=Invoke-PlanningCli $cli $entry @{Target=$project.Source;NoOpen=$true;IssueId='java::mandatory-1'}
 Assert ($result.Code -eq 0) ('Indice corrente nao foi criado: '+$result.Output)
 $index=Join-Path $project.EvidencePath 'LEIA-ME.md'
 Assert ((Test-Path -LiteralPath $index) -and [IO.File]::ReadAllText($index).Contains('| Issue |')) 'Indice deve permitir relacionar anexos por issue.'
+Assert ([IO.File]::ReadAllText($index).Contains('TEMPLATE-EVIDENCIAS-CONSUMIDO')) 'CLI deve consumir o template de evidencias.'
 [IO.File]::AppendAllText($index,"`n| java::mandatory-1 | [Falha](<observacao.md>) | Texto humano |")
 $before=Get-PlanningFixtureState $f
 $result=Invoke-PlanningCli $cli $entry @{Target=$project.Source;NoOpen=$true}

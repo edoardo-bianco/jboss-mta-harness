@@ -86,6 +86,15 @@ log do build e orientacoes Markdown. A ultima tentativa e o ultimo diagnostico
 utilizavel aparecem separados; falha recente nao atualiza por si so o diagnostico
 anterior. Fonte indisponivel e lacuna, nao sucesso.
 
+O indice geral apresenta tabela resumida com links, contagens MTA por categoria,
+cobertura dos totais, ultimas tentativas e documentos existentes. Ausencia de MTA
+fica como lacuna; preparo sem plano/tarefas continua identificado como preparo.
+O formato vem de [indice-projetos.template.md](../../modelos/indice-projetos.template.md).
+
+Os prompts preparados vinculam os modelos obrigatorios de plano, tarefas e ficha.
+O agente deve le-los e preencher as secoes apos examinar as fontes, preservando
+decisoes anteriores. Consulte o [inventario de saidas e consumidores](../../modelos/README.md).
+
 ### Planejar lotes de correcao com Copilot
 
 O mesmo procedimento vale no Codex e no preenchimento manual.

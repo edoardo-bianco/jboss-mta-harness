@@ -48,7 +48,7 @@ function Get-HarnessProjectMigrationText {
     param($Project,$Mta,[string]$Text,[switch]$UpdateIssues)
     $migration=$Text
     if (-not $migration) {
-        $migration="# Migracao: $($Project.Name)`n`nEdite Decisao, Andamento e Observacao. ANALISAR AGORA seleciona uma issue para planejamento; ADIAR e FORA DO ESCOPO exigem justificativa. Categoria e testes nao concedem GO ou aceite. Issues manuais usam ID DEV-... e categoria manual.`n`n## Direcionamento humano`n`nRegistre objetivo, escopo e decisoes aqui.`n`n<!-- mta:inicio -->`n| ID | Issue | Categoria | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |`n| --- | --- | --- | --- | --- | --- | --- | --- |`n<!-- mta:fim -->`n"
+        $migration=Expand-HarnessDocumentTemplate 'migracao' @{Project=(ConvertTo-ProjectCell $Project.Name)}
     }
     if ($UpdateIssues -and $Mta) {
         $rows=New-Object 'Collections.Generic.Dictionary[string,object]' ([StringComparer]::Ordinal)
@@ -90,8 +90,7 @@ function Update-HarnessProjectDocuments {
     param($Project,$Mta,[switch]$UpdateIssues,[string[]]$Warnings=@())
     $old=Read-HarnessProjectFiles $Project @('migracao.md','indice.md','atual/operacao.json')
     $migration=Get-HarnessProjectMigrationText $Project $Mta $old['migracao.md'] -UpdateIssues:$UpdateIssues
-    $lines=@('# Projeto: '+$Project.Name,'', (Get-HarnessSourceLink $Project.IndexPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.IndexPath $Project.MigrationPath 'Decisoes de migracao'))
-    $lines+=@('','## Trabalho e evidencias','', 'Abra o documento correspondente ao problema. Logs mostram a ultima tentativa; relatorios mostram o ultimo diagnostico utilizavel.','')
+    $lines=@()
     foreach ($entry in @(
         @('atual/planejamento/plano.md','Plano corrente'),
         @('atual/planejamento/tarefas.md','Tarefas correntes'),
@@ -108,12 +107,28 @@ function Update-HarnessProjectDocuments {
         $path=Join-Path $Project.Folder $entry[0]
         if (Test-Path -LiteralPath $path -PathType Leaf) { $lines+='- '+(Get-HarnessSourceLink $Project.IndexPath $path $entry[1]) }
     }
-    if ($Mta) { $lines+=@('',(Get-HarnessSourceLink $Project.IndexPath $Mta.ReportPath 'MTA atual'),'Consultar diagnostico nao reconcilia decisoes nem concede GO.'); $Warnings+=@($Mta.Diagnostics) }
-    if ($old['atual/operacao.json']) {
-        $lines+=Set-ProjectManagedBlock '' 'operacoes' (Get-ProjectOperationsText $old['atual/operacao.json'])
+    $mtaText=''
+    if ($Mta) {
+        $mtaText=(Get-HarnessSourceLink $Project.IndexPath $Mta.ReportPath 'MTA atual')+[Environment]::NewLine+'Consultar diagnostico nao reconcilia decisoes nem concede GO.'
+        $Warnings+=@($Mta.Diagnostics)
     }
-    if ($Warnings.Count) { $lines+=@('','Limites da leitura:')+@($Warnings | ForEach-Object { '- '+(ConvertTo-ProjectCell $_) }) }
-    $writes=@{'indice.md'=($lines -join "`n")+"`n"}
+    $values=@{
+        Project=(ConvertTo-ProjectCell $Project.Name)
+        Pom=(Get-HarnessSourceLink $Project.IndexPath $Project.Pom 'POM')
+        Migration=(Get-HarnessSourceLink $Project.IndexPath $Project.MigrationPath 'Decisoes de migracao')
+        Documents=($lines -join [Environment]::NewLine)
+        Mta=$mtaText
+        Operations=if ($old['atual/operacao.json']) { Set-ProjectManagedBlock '' 'operacoes' (Get-ProjectOperationsText $old['atual/operacao.json']) } else { '' }
+        Warnings=if ($Warnings.Count) { 'Limites da leitura:'+[Environment]::NewLine+(@($Warnings | ForEach-Object { '- '+(ConvertTo-ProjectCell $_) }) -join [Environment]::NewLine) } else { '' }
+    }
+    $writes=@{'indice.md'=(Expand-HarnessDocumentTemplate 'indice-projeto' $values)}
     if ($migration -cne $old['migracao.md']) { $writes['migracao.md']=$migration }
     Publish-HarnessProjectFiles $Project $writes $old
+}
+
+function Get-HarnessTemplateLinks {
+    param([string]$From,[string[]]$Names)
+    $lines=@('## Modelos de saida obrigatorios','','Leia os modelos vinculados antes de escrever. Use suas secoes e blocos; preencha com evidencias reais, sem placeholders restantes. Preserve texto humano existente. Template ausente e lacuna a resolver; nao improvise outro formato.','')
+    foreach ($name in $Names) { $lines+='- '+(Get-HarnessSourceLink $From (Get-HarnessDocumentTemplatePath $name) ($name+'.template.md')) }
+    $lines -join [Environment]::NewLine
 }
