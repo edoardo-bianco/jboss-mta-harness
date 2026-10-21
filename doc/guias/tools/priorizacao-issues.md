@@ -56,11 +56,29 @@ paginacao/limites e cite o que examinou. Consultar nao registra exame ou decisao
    O preparo pendente retoma a mesma quota e universo. Enter/q cancela.
 4. Confira projetos, fontes, lacunas e os caminhos exibidos. A tarefa prepara
    contexto/prompt; ainda nao analisa nem escolhe candidatas.
-5. No Codex, envie **Execute o prompt deste arquivo:** seguido do caminho real.
-   No Copilot, abra o prompt e use **Executar Prompt** com perfil compativel.
+5. Execute o prompt no cliente atual conforme a
+   [passagem para execucao](../orientacao-migracao.md#passar-da-orientacao-para-a-execucao):
+   Copilot usa **Executar Prompt** em sessao Local com `devsquad` orquestrador;
+   nos demais clientes, o agente principal usa `using-agent-skills` se disponivel.
+   Sem o recurso especializado, use Agent/agente principal com o mesmo prompt.
    Tambem e possivel realizar o exame e preencher os mesmos documentos manualmente.
 6. Revise ranking/fichas, suas fontes e motivos. O condutor atualiza o indice
    derivado ao concluir; o preparador confere o conjunto na proxima execucao.
+
+O `devsquad` distribui exames por `Project/Id` aos agentes necessarios e disponiveis.
+Helpers retornam evidencias e lacunas em leitura; o orquestrador confere os exames
+e escreve fichas, ranking e ambos os indices, evitando escrita concorrente.
+Delegar nao consome quota: somente issue efetivamente examinada, com ficha e
+motivo, conta. Sem apoio compativel, o executor analisa diretamente. Com base 44
+e fatia 20%, a primeira entrega completa contem **9 fichas e cobertura 9/44**.
+Falha operacional preserva `IN_PROGRESS`; nao conta como exame sem recomendacao.
+
+Se a execucao apenas disser que o preparo esta pronto e pedir o mesmo prompt,
+confira o papel ativo pelo guia acima. `orientar-migracao` carregada pelo executor
+nao o torna helper. Retome a mesma fatia; nao escolha recriar nem progredir para
+resolver o encaminhamento. Apos atualizar o harness, um prompt gerado anteriormente
+so recebe o novo texto quando regravado pelo preparo: use a retomada pendente
+(`-Mode Continue`, sem novo percentual), que conserva universo e quota.
 
 Exemplo de CLI, na raiz do harness:
 

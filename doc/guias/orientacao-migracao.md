@@ -150,16 +150,46 @@ Quando a tarefa preparar um prompt:
 
 - **Codex:** abra uma nova conversa no mesmo workspace, com o agente principal,
   sem selecionar `migracao_helper` nem invocar `$orientar-migracao`. Nessa conversa
-  de execucao, envie `Execute o prompt deste arquivo:` seguido do caminho fornecido.
+  de execucao, envie `Execute o prompt deste arquivo:` seguido do caminho fornecido
+  e `Use $using-agent-skills se disponivel; senao, prossiga no agente principal`.
   O prompt e seu contexto recuperam a etapa, as escolhas e os limites; nao e preciso
   copia-los novamente. A conversa com o helper permanece para orientacao e pode
   ser retomada depois com o resultado.
-- **Copilot:** abra o prompt preparado e use **Executar Prompt**, com o agente
-  indicado e DevSquad nas fases pertinentes, em conversa Local.
+- **Copilot:** abra o arquivo `.prompt.md` preparado e use o botao **Executar
+  Prompt** em sessao **Local**. O cabecalho `agent: devsquad` solicita a selecao
+  automatica do perfil `devsquad` instalado nesse cliente. Ele atua como
+  orquestrador: delega analises pertinentes, confere os retornos e consolida as
+  saidas autorizadas. Colar/anexar o arquivo em uma mensagem nao e a execucao
+  nativa do prompt e nao garante a troca do seletor.
 - **Claude Code:** abra uma conversa normal (`claude`, sem `--agent migracao_helper`)
   na raiz do harness e envie `Leia e execute o prompt deste arquivo:` seguido do
-  caminho fornecido. O campo `agent:` do prompt pertence ao Copilot e nao seleciona
-  perfil no Claude Code; as permissoes sao as da sessao.
+  caminho fornecido e `Use using-agent-skills se disponivel; senao, prossiga no
+  agente principal`. O campo `agent:` do prompt pertence ao Copilot e nao seleciona
+  perfil no Claude Code; as permissoes sao as da sessao. A mesma regra de skill
+  opcional e agente principal vale para os demais clientes.
+
+`using-agent-skills` descobre skills de apoio; nao e nome de agente nem requisito
+de instalacao. Sua ausencia nao impede executar o prompt. Os helpers consultados
+continuam leitores; esse limite nao se transfere ao orquestrador. A skill
+`orientar-migracao` nao deve assumir o controle de um pedido de execucao feito ao
+agente principal, mesmo quando carregada automaticamente.
+
+**Fallback no Copilot:** se `devsquad` nao estiver instalado/reconhecido, selecione
+**Agent** e envie `Execute o prompt deste arquivo:` com o mesmo caminho. Agent
+assume a execucao e usa apoio disponivel; nao e preciso instalar outro perfil.
+O formato nativo documenta um unico `agent`, sem lista condicional de fallback.
+Por isso, o harness nao promete trocar o seletor por uma instrucao no corpo do
+prompt nem substitui o perfil externo do usuario.
+
+**Se o perfil nao mudar ou a resposta pedir o mesmo prompt novamente:** confira
+se o arquivo foi executado pelo botao do editor, se a sessao e Local e se o
+perfil `devsquad` aparece entre os agentes disponiveis. Na interface atual do
+VS Code, a sessao chamada Copilot e distinta da Local; o modo Agent, sozinho,
+nao identifica o tipo de sessao. Com `devsquad` ja selecionado, a resposta deve
+seguir o contrato de execucao e indicar impedimento concreto, caso exista.
+Nao recrie contexto/base/fatia apenas por esse problema. Veja o comportamento
+suportado em [prompt files do VS Code](https://code.visualstudio.com/docs/agent-customization/prompt-files#use-a-prompt-file-in-chat)
+e o [campo agent](https://code.visualstudio.com/docs/agent-customization/prompt-files#prompt-file-format).
 
 A execucao desse prompt e uma etapa distinta da orientacao; helpers continuam
 leitores. Preparar o contexto nao executa o agente. Para o agente salvar o ranking

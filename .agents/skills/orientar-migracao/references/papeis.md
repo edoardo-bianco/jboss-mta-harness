@@ -6,6 +6,11 @@ Guias concentram procedimentos. Todos respondem no chat, sem executar tarefas
 ou gravar documentos. As tres consultas MCP de leitura seguem a skill comum
 e o guia por etapa; modelos e configuracao pessoal permanecem inalterados.
 
+Esses limites pertencem aos helpers. Quando consultados pelo `devsquad` ou pelo
+agente principal durante a execucao de um prompt, devolvem achados/fontes/lacunas;
+o orquestrador preserva seu papel e consolida as saidas autorizadas. Consultar
+um helper nao transforma a execucao em uma nova passagem de orientacao.
+
 ## migracao_helper
 
 Recupere objetivo, escolha e trabalho corrente pelos arquivos. Responda diretamente

@@ -9,6 +9,12 @@ derivada da principal, com checkout conferido, validacao/revisao antes de integr
 Migracao usa os destinos PlanPath/TodoPath correntes do projeto. Nao misture
 evolucao do harness com corretivas da aplicacao.
 
+Ao executar um prompt preparado, devsquad atua como orquestrador: delega analises
+pertinentes e consolida as saidas do contrato. Carregar orientar-migracao nao o
+transforma em helper leitor. Helpers explicitamente ativos continuam leitores.
+Se devsquad nao estiver disponivel, Agent pode executar o mesmo contrato conforme
+o [guia de execucao](../doc/guias/orientacao-migracao.md#passar-da-orientacao-para-a-execucao).
+
 Testes PowerShell do harness usam `tests/Invoke-HarnessTests.ps1 -Test Test-Nome.ps1`:
 copia temporaria fora do workspace operacional, sem configuracao pessoal e com
 descarte das fixtures ao terminar. Nao executar suites diretamente no checkout de

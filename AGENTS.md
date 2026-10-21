@@ -117,6 +117,14 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   somente leitura; nao recupera publicacoes interrompidas nem contorna acesso.
   Helpers continuam leitores/orientadores de uma etapa, com caminho e mensagem
   prontos para o cliente atual; ler prompt nao autoriza executa-lo.
+- Pedido explicito de executar um prompt preparado ao agente principal segue o
+  contrato e os destinos desse prompt. No Copilot, devsquad e o orquestrador:
+  delega analises pertinentes, confere evidencias e consolida as saidas. Nos demais
+  clientes, usar using-agent-skills quando disponivel; sem a skill, seguir no
+  agente principal. Sem devsquad, usar Agent conforme o guia de orientacao.
+  Carregar orientar-migracao ou consultar helpers nao muda o executor para leitor;
+  os helpers explicitamente ativos mantem esse limite. Nao devolver o mesmo
+  prompt como resultado da execucao pedida. Permissoes e GO continuam aplicaveis.
 - Antes da proposta completa, perguntar somente o essencial ainda ausente que
   afete escopo, solucao ou aceite. Preservar rascunho/ID funcional do lote; nao
   criar plano/tarefas ficticios. PENDENTE historico nao bloqueia por si so e
