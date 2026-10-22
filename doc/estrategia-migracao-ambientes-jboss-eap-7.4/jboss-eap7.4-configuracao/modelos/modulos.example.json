@@ -1,0 +1,14 @@
+{
+  "maven": {"executable": "mvn.cmd", "settings": null},
+  "modules": [
+    {
+      "name": "org.example.driver", "slot": "main",
+      "dependencies": ["javax.api", "javax.transaction.api"],
+      "artifacts": [{"source": "file", "path": "jars/driver.jar", "sha256": "PREENCHER_HASH_DO_ARQUIVO_AUTORIZADO"}]
+    },
+    {
+      "name": "org.example.biblioteca", "slot": "main", "dependencies": [],
+      "artifacts": [{"source": "maven", "coordinates": "org.example:biblioteca:1.0", "sha256": "PREENCHER_HASH_DA_FONTE_AUTORIZADA"}]
+    }
+  ]
+}

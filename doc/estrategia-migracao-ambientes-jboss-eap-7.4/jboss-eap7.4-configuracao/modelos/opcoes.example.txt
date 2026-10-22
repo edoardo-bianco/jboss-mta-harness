@@ -1,0 +1,11 @@
+# Uma opcao por linha; ajustar para a maquina e o ambiente.
+-Xms512m
+-Xmx1G
+-XX:MetaspaceSize=96M
+-XX:MaxMetaspaceSize=256m
+-Djava.net.preferIPv4Stack=true
+-Djboss.modules.system.pkgs=org.jboss.byteman
+-Dfile.encoding=UTF-8
+-Djboss.node.name=eap74-local
+# Definir timezone somente apos conferir a necessidade do ambiente:
+# -Duser.timezone=America/Sao_Paulo

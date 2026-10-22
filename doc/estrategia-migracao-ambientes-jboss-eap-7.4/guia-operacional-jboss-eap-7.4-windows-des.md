@@ -1,5 +1,11 @@
 # Guia operacional — JBoss EAP 7.4 no Windows e no novo DES
 
+> Para o preparo repetivel atual com scripts versionados, use
+> [jboss-eap7.4-configuracao](jboss-eap7.4-configuracao/README.md), inclusive sem helper.
+> Este documento preserva o inventario e as decisoes do ambiente DES/CP11.
+> A escolha de outro cumulativo segue o [roteiro de patches](jboss-eap7.4-configuracao/patches.md);
+> referencias antigas a CP11/ELS abaixo nao escolhem o patch de uma nova instalacao.
+
 **Revisão:** 1.4 — 19/10/2026  
 **Estratégia:** [Migração dos ambientes EAP 7.1 → 7.4](estrategia-migracao-ambientes-jboss-eap-7.4.md)  
 **Tecnologia preservada:** Java 8, `standalone-full.xml`, Oracle, WAR/EAR com `javax.*` e cliente Keycloak/RH SSO.  

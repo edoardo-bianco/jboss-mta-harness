@@ -349,3 +349,65 @@ Validar pelo runner isolado, revisar independentemente e atualizar parecer/PR.
 Dados reais e checkout operacional original permanecem fora desta etapa.
 
 Corretivas concluidas e revisadas: A1/A2/A3, cobertura estrutural dos adaptadores e ajustes documentais. Ver resultados em todo.md e no parecer.
+
+## Checkpoint documental do preparo EAP 7.4 local - 21/10/2026
+
+Pedido: salvar a auditoria para retomada em 22/10, sem executar as correcoes.
+Branch `harness/auditoria-preparo-eap74`, criada da main em `d0ba820`.
+Persistir achados, fontes, limites e sequencia no
+[checkpoint EAP 7.4](../doc/estrategia-migracao-ambientes-jboss-eap-7.4/auditoria-preparo-local-eap74-2026-10-21.md).
+Este incremento e documental; configuracoes externas, segredos, instalacao JBoss
+e aplicacoes permanecem fora das alteracoes. A retomada operacional esta no
+checkpoint, sem criar lote de corretivas de aplicacao em tasks/.
+
+## Preparo reutilizavel EAP 7.4 - 22/10/2026
+
+Implementacao autorizada apos auditoria por perguntas. Retomar a branch atual,
+preservando o checkpoint e as alteracoes locais. Scripts, modelos e roteiro manual
+ficam em doc/estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/.
+O guia do desenvolvedor e o helper apontam para esse roteiro, sem duplica-lo.
+
+Entregar preparo configuravel por ambiente: template e valores privados, JVM
+compartilhada pelo launcher/harness, modulos Maven ou JAR local, consolidado e
+publicacao explicita. Exigir servidor parado inclusive somente gerar. Preservar
+modulo identico; recusar divergente/incompleto. LogSql altera apenas XML gerado.
+Nao instalar patch nem aplicar configuracao ao servidor operacional nesta etapa.
+
+Ordem: testes isolados de falha/preservacao; scripts e modelos; guia de patch
+7.4.XX com fontes Red Hat, Java 8/Jakarta EE 8/javax; referencias do helper;
+adaptacao da pasta externa com valores existentes preservados; revisao final.
+As 16 entradas DES, fornecedor JDK, eventual patch novo e testes funcionais
+continuam pendentes, sem bloquear testes sinteticos. CP11 segue base observada.
+Origem do driver DES permanece por confirmar; instalar modulo nao comprova uso.
+Validar com Invoke-HarnessTests.ps1, sem dados reais nas fixtures ou no Git.
+## Entrega do preparo reutilizavel — 22/10/2026
+
+Concluida a implementacao autorizada na branch de auditoria: scripts e modelos
+genericos, roteiro manual, procedimento de patch com fontes Red Hat e referencias
+no guia/helper. Pasta externa adaptada para consumir o codigo versionado; quatro
+entradas privadas preservadas byte a byte. Validacao em memoria dos 96 tokens,
+XML normal/LogSql e JVM, sem expor valores.
+
+Testes isolados PASS: preparo em PowerShell 5.1/7, runtime JBoss, referencias
+e adapter Claude. Revisao conferiu preservacao em falhas, defaults Maven da
+maquina, limites do launcher e ausencia de valores reais nos novos modelos.
+Detalhes e pendencias no [checkpoint](../doc/estrategia-migracao-ambientes-jboss-eap-7.4/auditoria-preparo-local-eap74-2026-10-21.md).
+Nao houve aplicacao ao EAP, boot, deploy, patch, commit ou push.
+
+## Organizacao e transporte do preparo — 22/10/2026
+
+Pedido posterior: pasta OneDrive enxuta, padronizada e guia especifico SIMTR;
+ZIP para extrair em C:\desenvolvimento, chamando scripts diretamente no harness.
+Concluido: entradas relativas ao preparo.json, referencias antigas separadas,
+JARs locais conferidos e alternativa Maven, README/guia na pasta privada e
+pacote inicial com 23 arquivos verificados por SHA256, substituido pela decisao
+abaixo. JBoss/JDK/WAR nao incluidos.
+Validacao em memoria apos mover; valores e JVM preservados. Sem boot, aplicacao
+ao servidor, commit ou push. Detalhes no checkpoint EAP 7.4.
+
+Escolha final: o repositorio alinhado pelo Git e a fonte oficial dos scripts.
+ZIP atualizado com 18 arquivos e somente a raiz jboss-eap7.4-configuracao/;
+conferencia-harness/ guarda seis scripts identicos apenas para comparacao e
+pode ser apagada. Guia e configuracao usam os scripts do repositorio. SHA256
+conferido em todas as entradas; nove entradas privadas preservadas byte a byte.
+Disponibilizar as alteracoes pelo Git continua pendente; nao houve commit/push.

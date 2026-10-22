@@ -1,5 +1,9 @@
 # Replicar na máquina de trabalho: EAP 7.4 + Update 11 + verificação do manifesto
 
+> Registro especifico do CP11. Para configurar modulos, valores, JVM e inicio
+> na maquina de trabalho, siga o [roteiro generico atual](jboss-eap7.4-configuracao/README.md).
+> Para escolher outro patch, consulte [patches](jboss-eap7.4-configuracao/patches.md).
+
 **Origem:** procedimento executado na máquina de casa em 20/10/2026 (guia operacional, seções 5 a 7).
 **Resultado esperado:** EAP `7.4.11.GA`, cumulativo `jboss-eap-7.4.11.CP` e `verificar-manifesto-eap74.ps1` com `FALHA=0`.
 

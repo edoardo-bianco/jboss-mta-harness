@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "eapHome": "C:/desenvolvimento/servidores/jboss-eap-7.4",
+  "jdkHome": "C:/desenvolvimento/java/jdk8",
+  "expectedVersion": "7.4.11.GA",
+  "standaloneConfig": "standalone-local.xml",
+  "template": "templates/standalone.xml",
+  "values": "valores/valores-local.properties",
+  "modules": "modulos/modulos.json",
+  "jvmOptions": "jvm/opcoes.txt",
+  "output": "C:/desenvolvimento/jboss-eap7.4-consolidado/local",
+  "portOffset": 100,
+  "logSql": false
+}
