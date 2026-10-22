@@ -80,6 +80,15 @@ nao reconstitui fichas, decisoes ou cobertura de priorizacao apagadas.
 Para migracao da configuracao JBoss, use o [guia de migracao para EAP 7.4](../../../../doc/guias/tools/migracao-configuracao-jboss.md):
 inventario, par de versoes e fontes Red Hat antes do ensaio. A automacao JBS do
 catalogo continua proposta; controlar start/deploy nao comprova configuracao migrada.
+Para template ja revisado para 7.4, consulte o
+[roteiro manual de preparo](../../../../doc/estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md).
+Oriente uma etapa por vez: pasta privada e preparo.json, modulos Maven ou JAR
+local, preenchimento manual contra DES, JVM, LogSql, consolidacao/aplicacao com
+servidor parado e mesmo XML/JVM no script e harness. Pergunte somente escolhas
+ainda ausentes; nao presuma nomes de aplicacao, endpoints, drivers ou segredos.
+Use patches.md ao escolher outro cumulativo, preservando Java 8/EE 8 javax.
+Nao execute os scripts, mude arquivos nem atribua sucesso operacional a testes
+sinteticos; entregue o comando com caminhos informados e o resultado esperado.
 
 Para arquivos recebidos, siga o [compartilhamento](../../../../doc/guias/tools/compartilhamento-contextos.md):
 copia, associacao explicita ao POM local e reconciliacao. Havendo trabalho local,

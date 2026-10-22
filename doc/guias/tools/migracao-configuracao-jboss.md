@@ -10,12 +10,18 @@ html:
 [Voltar ao guia do desenvolvedor](../harness-migracao-desenvolvedor.md#1-preparar-o-ambiente).
 Para operar uma instalacao pronta, use o [guia JBoss](jboss.md).
 
+Com um **template ja adequado ao EAP 7.4**, siga o
+[preparo reutilizavel do servidor](../../estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md):
+scripts versionados, entradas privadas, modulos Maven/locais, propriedades,
+JVM compartilhada, log Hibernate e patches. O roteiro permite uso manual ou
+orientado pelo helper; esta disponivel para consolidar/aplicar essas entradas.
+
 Este guia prepara a migracao da **configuracao do servidor**: XML ativo, modulos,
 drivers, seguranca, mensageria e recursos externos. As corretivas da aplicacao
 seguem seu proprio plano, com Java 8 e `javax.*`. A atividade de servidor sera
 planejada para a proxima sprint; este roteiro nao executa a migracao.
 
-A automacao de inventario/transformacao ainda e proposta **JBS-01 a JBS-05** no
+A automacao de inventario/transformacao de uma origem legada ainda e proposta **JBS-01 a JBS-05** no
 [catalogo de configuracao JBoss](../../engineering-harness/03-plano-tatico-e-implementacao.md#anexo-a).
 Hoje o desenvolvedor pode usar a ferramenta oficial com orientacao do helper,
 apos conferir o caminho aplicavel. Nao existe uma Run Task de migracao automatica.

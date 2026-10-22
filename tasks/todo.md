@@ -337,3 +337,44 @@ politica da maquina ou declarar o piloto homologado.
 Resultado e limites em [corretivas do parecer](auditoria-indice-mta-externo.md#corretivas-verificadas---21102026).
 Os ensaios nativos dos agentes permanecem fora desta verificacao; nenhuma
 migracao real, abertura de PR ou integracao foi executada.
+
+## Retomada do preparo EAP 7.4 local - 21/10/2026
+
+- [x] Auditar fontes externas 7.1/7.4, mapeamento, documentacao e instalacao local, somente leitura.
+- [x] Salvar [achados e sequencia de retomada](../doc/estrategia-migracao-ambientes-jboss-eap-7.4/auditoria-preparo-local-eap74-2026-10-21.md), sem valores sensiveis.
+- [x] Retomar pelo checkpoint apos autorizacao; scripts/documentacao entregues em 22/10, ensaios operacionais separados abaixo.
+
+Este registro apenas localiza a auditoria; nao concede GO de implementacao,
+deploy ou aceite funcional.
+
+## Preparo reutilizavel EAP 7.4 - 22/10/2026
+
+- [x] Auditar por perguntas e fechar o escopo com o desenvolvedor.
+- [x] Criar testes de preservacao, repeticao, renderizacao e falhas em copia isolada.
+- [x] Implementar scripts genericos, modelos e inicializacao com JVM compartilhada.
+- [x] Publicar roteiro manual e patch parametrizado; apontar guia/helper para ele.
+- [x] Adaptar entradas e instrucoes da pasta externa, preservando valores reais.
+- [x] Validar, revisar e registrar limites; sem aplicar ao JBoss operacional.
+
+Entrega e evidencias no [checkpoint atualizado](../doc/estrategia-migracao-ambientes-jboss-eap-7.4/auditoria-preparo-local-eap74-2026-10-21.md#retomada-autorizada-e-entrega-de-preparo--22102026).
+PASS: preparo (PowerShell 5.1/7), runtime JBoss, referencias de prompts e adapter
+Claude, sempre via executor isolado. Sem commit/push; novos arquivos no indice
+para integrar a copia de teste. Dados privados conferidos em memoria, sem saida
+de valores. Permanecem para uso operacional: os 16 itens de DES, procedencia de
+JARs, aplicacao do consolidado/alinhamento local do harness e validacao funcional.
+
+## Pacote da maquina de trabalho — 22/10/2026
+
+- [x] Padronizar a pasta externa com entradas relativas e scripts diretos do harness.
+- [x] Retirar encaminhadores; preservar referencias antigas fora da pasta de execucao.
+- [x] Incluir guia completo especifico SIMTR e exemplo ficticio separado dos valores ativos.
+- [x] Obter/conferir os dois JARs e deixar modo local por padrao, mantendo alternativa Maven.
+- [x] Atualizar ZIP externo para extrair somente jboss-eap7.4-configuracao/ em C:\desenvolvimento; verificar os 18 arquivos por SHA256.
+- [x] Manter seis scripts em conferencia-harness/ como copia opcional removivel; executar somente a versao do repositorio alinhada pelo Git.
+- [x] Atualizar guia privado e roteiro generico; preservar as nove entradas privadas byte a byte.
+- [x] Validar em memoria caminhos/XML/LogSql/JVM e hashes apos a reorganizacao.
+
+Pendencias operacionais permanecem: disponibilizar esta versao do harness pelo
+Git (alteracoes ainda sem commit/push), conferir os 16 itens com DES, JDK/patch
+instalados no trabalho, aplicar o consolidado parado, alinhar o harness e testar
+a aplicacao. Nenhum dado privado foi levado ao Git.

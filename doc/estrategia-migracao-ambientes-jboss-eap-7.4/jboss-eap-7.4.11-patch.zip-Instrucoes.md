@@ -1,5 +1,9 @@
 # jboss-eap-7.4.11-patch.zip Instruções
 
+> Registro da obtencao/aplicacao do CP11. Para outro cumulativo 7.4.XX, consulte
+> [o procedimento atual e os requisitos ELS/JDK](jboss-eap7.4-configuracao/patches.md).
+> Filtros e escolhas deste registro historico nao sao recomendacao do patch atual.
+
 ## baixar o patch
 
 Pelo navegador, logado com a sua conta Red Hat:

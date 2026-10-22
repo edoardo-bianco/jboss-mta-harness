@@ -102,7 +102,12 @@ pelo relatorio. Material humano preservado pode ser consultado separadamente,
 sem presumir continuidade, exame ou aceite no estado novo.
 Para configuracao/migracao JBoss, ha [guia EAP 7.4](../../../doc/guias/tools/migracao-configuracao-jboss.md)
 e [operacao JBoss](../../../doc/guias/tools/jboss.md). Start/deploy nao comprovam
-que a configuracao foi migrada; automacoes de backlog nao estao disponiveis.
+que a configuracao foi migrada; automacoes de inventario/transformacao do backlog nao estao disponiveis.
+Para preparar um template ja adequado ao EAP 7.4, use o
+[roteiro reutilizavel](../../../doc/estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md).
+Ele concentra scripts versionados, entradas privadas, modulos Maven/locais,
+JVM compartilhada, log Hibernate e patches. Oriente o desenvolvedor a executar;
+nao exija aplicacao/MTA nem exponha valores reais para esse preparo de servidor.
 
 Para Sonar, use o [guia](../../../doc/guias/tools/sonar.md). A tarefa
 Aplicacao: analisar SonarQube permite executar scanner, rever diagnostico e

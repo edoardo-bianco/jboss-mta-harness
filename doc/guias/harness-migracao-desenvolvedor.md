@@ -62,6 +62,11 @@ so prepara os arquivos. As fichas de priorizacao tambem permitem continuar
 manualmente: investigar lacunas, redigir plano/to-do e implementar o lote escolhido.
 Veja [o roteiro manual e o formato das fichas](tools/priorizacao-issues.md#planejar-e-implementar-manualmente-a-partir-da-priorizacao).
 
+Para configurar o JBoss EAP 7.4 manualmente, com template ja revisado, use a
+[referencia completa de preparo e replicacao](../estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md).
+Ela concentra pastas, propriedades, modulos Maven/locais, JVM, log Hibernate,
+patches e inicio pela mesma configuracao no script e no harness.
+
 | Sua situacao | Por onde entrar |
 | --- | --- |
 | Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Importe uma aplicacao externa no workspace. |
