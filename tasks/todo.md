@@ -1,5 +1,41 @@
 # To-do do agente: evolucao do harness
 
+## Links de fichas e registro de issues manuais — 23/10/2026
+
+- [x] Conferir raiz/main/HEAD e criar branch de manutencao preservando o checkout.
+- [x] Localizar a codificacao de pastas, a interpretacao dos links e os contratos de preservacao/retomada.
+- [x] Reproduzir a navegacao quebrada em teste isolado antes de corrigir o gerador.
+- [x] Corrigir geracao/leitura de URI sem mudar IDs, nomes de pastas ou limites de acesso.
+- [x] Orientar Copilot/executor e helpers sobre registro manual, evidencias e conferência dos links.
+- [x] Documentar prompt de reparo e instrucao de retomada da fatia parcial na maquina de trabalho.
+- [x] Validar regressao pertinente, navegacao documental e revisao final; registrar limites.
+- [x] Registrar autorizacao de 23/10 para commit, push da branch e PR para main.
+
+RED confirmado antes da corretiva: cinco casos de navegacao falharam no PS7,
+incluindo a pasta literal `%44...` interpretada como `D...`. A correcao constroi
+URI file explicita a partir dos segmentos literais; preserva o escape ao gerar
+links relativos e ao resolver/remapear referencias no planejamento/reconciliacao.
+
+GREEN pelo runner isolado: FunctionalLinks, ProjectStorage, ProjectDocuments,
+ProjectNavigation, MigrationRegister, PrioritizationProgress, PlanningEvidence,
+PlanningPortable, ReconciliationSources e ReconciliationPrioritization.
+FunctionalLinks cobre sete casos de URI em PS5.1 e PS7, mais tres consumidores
+em PS5.1. Uma primeira execucao GREEN falhou pelo import de HarnessPlanning no
+filho PS7; o teste foi ajustado ao runtime suportado e repetido com PASS, sem
+relaxar o guard de producao. As demais nove suites passaram na mesma rodada.
+
+Revisao independente sem achados impeditivos. Conferidos dez Markdown alterados,
+113 links locais, 40 ancoras e tres blocos PowerShell (parser, sem executar os
+exemplos), sem falhas. Diff e diff staged sem erros de whitespace. Frontmatter
+da skill preservado; somente a orientacao do corpo foi ampliada.
+
+Limites: a ficha e o log informados estao na outra maquina e nao foram alterados
+nem validados aqui. Atualizar o harness naquela maquina e executar o prompt de
+reparo sao passos posteriores; indice preserva observacoes humanas e nao repara
+seus links automaticamente. Nenhum registro real, MTA, servidor ou configuracao
+privada foi alterado. Commit, push da branch e PR desta corretiva autorizados
+em 23/10; o merge e a atualizacao/reparo na maquina de trabalho ficam posteriores.
+
 ## Fork do harness na conta da empresa — 23/10/2026
 
 - [x] Conferir main/estado local e criar branch propria para a documentacao.

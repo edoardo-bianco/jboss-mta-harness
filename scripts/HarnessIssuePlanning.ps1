@@ -43,8 +43,8 @@ function Get-CurrentPlanningEvidence {
     foreach ($source in $sources) {
         foreach ($match in [regex]::Matches($source.Text,'\[[^\]]*\]\((?:<([^>\r\n]+)>|([^\s\)]+))\)')) {
             $value=if ($match.Groups[1].Success) {$match.Groups[1].Value} else {$match.Groups[2].Value}
-            $baseUri=New-Object Uri $source.From
-            $uri=New-Object Uri (([uri]$baseUri.AbsoluteUri),$value)
+            $baseUri=ConvertTo-HarnessFileUri $source.From
+            $uri=New-Object Uri ($baseUri,$value)
             if ($uri.IsUnc -or $uri.Scheme -notin @('file','http','https')) { throw 'Referencia de evidencia com esquema/localizacao nao suportado.' }
             $references+=@([pscustomobject]@{Value=if ($uri.IsFile) {$uri.LocalPath} else {$uri.AbsoluteUri};Base=$Project.Root;Relation=$source.Relation})
         }

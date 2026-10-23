@@ -89,16 +89,31 @@ function ConvertTo-HarnessFunctionalPath {
     $encoded
 }
 
+function ConvertTo-HarnessFileUri {
+    param([Parameter(Mandatory=$true)][string]$Path)
+    # O argumento e um caminho LITERAL, nao uma URL. O construtor Uri em modo
+    # DOS interpreta percentuais diferentemente no .NET do PS5.1 e do PS7.
+    # Construir file:// explicitamente preserva %44 como nome, nao como D.
+    $full=[IO.Path]::GetFullPath($Path).Replace('\','/')
+    $segments=@($full.Split('/') | ForEach-Object { [Uri]::EscapeDataString($_) })
+    if ($full -match '^[A-Za-z]:/') {
+        $segments[0]=$full.Substring(0,2)
+        return [Uri]('file:///'+($segments -join '/'))
+    }
+    if ($full.StartsWith('//')) { return [Uri]('file:'+($segments -join '/')) }
+    throw 'URI de arquivo exige caminho absoluto Windows.'
+}
+
 function Get-HarnessSourceLink {
     param([string]$From,[string]$Path,[string]$Label='Abrir')
-    $fromUri=New-Object Uri ([IO.Path]::GetFullPath($From))
-    $targetUri=New-Object Uri ([IO.Path]::GetFullPath($Path))
-    $relative=$fromUri.MakeRelativeUri($targetUri).ToString()
-    if ($fromUri.LocalPath.Substring(0,2) -ine $targetUri.LocalPath.Substring(0,2)) { $relative=$targetUri.AbsoluteUri }
+    $fromUri=ConvertTo-HarnessFileUri $From
+    $targetUri=ConvertTo-HarnessFileUri $Path
+    $relative=$fromUri.MakeRelativeUri($targetUri).OriginalString
+    if ([IO.Path]::GetPathRoot($fromUri.LocalPath) -ine [IO.Path]::GetPathRoot($targetUri.LocalPath)) { $relative=$targetUri.AbsoluteUri }
     '['+($Label -replace '[\[\]\r\n]',' ')+'](<'+$relative+'>)'
 }
 
-Export-ModuleMember -Function Get-HarnessProjectStorage,Initialize-HarnessProjectStorage,ConvertTo-HarnessFunctionalPath,Get-HarnessSourceLink
+Export-ModuleMember -Function Get-HarnessProjectStorage,Initialize-HarnessProjectStorage,ConvertTo-HarnessFunctionalPath,ConvertTo-HarnessFileUri,Get-HarnessSourceLink
 Export-ModuleMember -Function Get-HarnessProjectReference
 . (Join-Path $PSScriptRoot 'HarnessProjectPublication.ps1')
 Export-ModuleMember -Function Publish-HarnessProjectFiles,Read-HarnessProjectFiles,Enter-HarnessProjectAccess

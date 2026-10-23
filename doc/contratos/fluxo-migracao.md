@@ -108,6 +108,10 @@ referencias/lacunas. Bloco ficha:identidade:inicio/fim contem JSON sem cercas:
 Project, Category, Id, LocalPaths e EvidencePaths. Os dois arrays sao relativos
 a Source e evidencias/ respectivamente e representam caminhos conferidos.
 Bloco ficha:fontes:inicio/fim usa links diretos; preservar texto humano externo.
+Nomes fisicos codificados nao sao URLs: %44 na pasta exige %2544 no link.
+Gerar links por Get-HarnessSourceLink com caminhos literais e conferir o destino
+resolvido existente; nao alterar ID/pasta para reparar navegacao. LocalPaths e
+EvidencePaths continuam caminhos literais, sem escape de URL adicional.
 Nao copiar incidentes/anexos nem inventar ancora de relatorio ou linha de codigo.
 
 RankingPath conserva um bloco priorizacao:resultado:inicio/fim, JSON sem cercas:

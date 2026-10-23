@@ -23,6 +23,9 @@ links, leitura direta e publicação. O estado corrente não depende de IDs téc
   para pastas. Maiúsculas são codificadas para impedir colisões no Windows. Não
   truncar nem substituir por hash. Categoria e escopo funcional separam cobertura;
   fichas pertencem ao projeto e à categoria, sem repetir a mesma ficha por escopo.
+  O nome fisico codificado e literal: `%44` na pasta vira `%2544` na URI do link.
+  Gerar links pela API comum e conferir o destino resolvido, sem mudar IDs ou
+  renomear pastas. Arrays de caminhos da ficha permanecem literais.
 - Cada escopo de priorização conserva somente total inicial, issues examinadas e
   proposta corrente. A chave de uma issue é o projeto associado ao POM mais seu ID
   funcional. Mencionar uma issue não a marca examinada. Recriar é escolha explícita.

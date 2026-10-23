@@ -188,6 +188,10 @@ Conferir conteudo relevante. Novo MTA/Sonar DEPOIS e checklist nao bloqueante,
 com comparacao ausente declarada, sem resolucao global. Falhas tecnicas continuam
 falhas; um registro antigo RUNNING nao prova servidor ativo agora.
 Pedido manual pode partir de ficha SEM POSICAO; nao condicionar a recomendacao IA.
+Para criar/reparar issue DEV-..., use o [roteiro de issue manual](../../../doc/guias/tools/planejamento-migracao.md#registrar-uma-issue-manual).
+Explique a diferenca entre pasta literal e link escapado; nao recomende renomear
+o ID. Helpers orientam o executor, sem escrever ou executar o reparo. DEV-* fica
+fora da fatia percentual MTA; interrompida, ela retoma a mesma quota e cobertura.
 
 ## Retomada local e recebida
 

@@ -36,6 +36,10 @@ correntes. Categoria e conjunto de participantes delimitam a cobertura.
 separadas. Fonte ausente fica como lacuna; a configuracao nao concede permissao
 de leitura a um caminho que o cliente de IA bloqueia.
 
+Issues manuais `DEV-*` ficam fora da fatia percentual MTA, inclusive ao recriar.
+Permanecem no registro, com ficha/evidencias, e seguem por escolha humana ao
+[planejamento por evidencias](planejamento-migracao.md#registrar-uma-issue-manual).
+
 Novos conjuntos usam o nome padrao curto `priorizacao`. A lista completa de
 projetos fica no contexto, sem compor o nome da pasta. As categorias conservam
 seus destinos e coberturas separados. A tarefa exibe o escopo e os caminhos usados.
