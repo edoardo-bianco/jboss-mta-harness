@@ -76,7 +76,7 @@ function Convert-ReconciliationPriorityLinks {
         param($match)
         $group=if ($match.Groups[1].Success) {$match.Groups[1]} else {$match.Groups[2]}
         if (-not $group.Value -or $group.Value -match '^#|^[a-zA-Z][\w+.-]*:' -and $group.Value -notmatch '^file:|^[a-zA-Z]:[/\\]') { return $match.Value }
-        $baseUri=New-Object Uri ((New-Object Uri ([IO.Path]::GetFullPath($OriginalFrom))).AbsoluteUri)
+        $baseUri=ConvertTo-HarnessFileUri $OriginalFrom
         $uri=New-Object Uri ($baseUri,$group.Value)
         if (-not $uri.IsFile) { return $match.Value }
         $path=$uri.LocalPath; $mapped=$null
@@ -85,7 +85,11 @@ function Convert-ReconciliationPriorityLinks {
             if ($path.StartsWith($old+'\',[StringComparison]::OrdinalIgnoreCase)) { $mapped=Join-Path $map[$old] $path.Substring($old.Length+1); break }
         }
         if (-not $mapped) { return $match.Value }
-        $relative=(New-Object Uri $CurrentFrom).MakeRelativeUri((New-Object Uri $mapped)).ToString()+$uri.Fragment
+        $currentUri=ConvertTo-HarnessFileUri $CurrentFrom
+        $mappedUri=ConvertTo-HarnessFileUri $mapped
+        $relative=$currentUri.MakeRelativeUri($mappedUri).OriginalString
+        if ([IO.Path]::GetPathRoot($currentUri.LocalPath) -ine [IO.Path]::GetPathRoot($mappedUri.LocalPath)) { $relative=$mappedUri.AbsoluteUri }
+        $relative+=$uri.Fragment
         $offset=$group.Index-$match.Index
         $match.Value.Substring(0,$offset)+$relative+$match.Value.Substring($offset+$group.Length)
     })
@@ -95,9 +99,8 @@ function Get-ReconciliationMarkdownReferences {
     foreach ($match in [regex]::Matches($Text,'\[[^\]]*\]\(\s*(?:<([^>]*)>|([^\s)]+))[^)]*\)')) {
         $url=if ($match.Groups[1].Success) {$match.Groups[1].Value} else {$match.Groups[2].Value}
         if (-not $url -or $url -match '^#|^[a-zA-Z][\w+.-]*:' -and $url -notmatch '^file:|^[a-zA-Z]:[/\\]') { continue }
-        # Recriar a base file:// evita o modo DOS de Uri, que reescapa %25
-        # em referencias relativas e perde a pasta funcional com %3A etc.
-        $baseUri=New-Object Uri ((New-Object Uri $From).AbsoluteUri)
+        # Usar a mesma conversao literal do gerador, inclusive na pasta de origem.
+        $baseUri=ConvertTo-HarnessFileUri $From
         $uri=New-Object Uri ($baseUri,$url)
         if ($uri.IsFile) { $uri.LocalPath }
     }

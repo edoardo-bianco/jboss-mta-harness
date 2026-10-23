@@ -1,5 +1,38 @@
 # Plano do agente: evolucao do harness
 
+## Links de fichas e registro de issues manuais — 23/10/2026
+
+Branch `harness/links-issues-manuais`, derivada da main `a29137d`, inicialmente
+limpa. Pedido: corrigir definitivamente os links de pastas funcionais com `%`
+e orientar o Copilot a registrar/reparar issues manuais coerentemente.
+O caso informado pertence a outra maquina; nenhum registro real sera alterado aqui.
+
+Preservar a codificacao canonica de pastas e os IDs DEV-... da ADR-0009.
+Reproduzir a falha de navegacao antes da correcao; gerar URI de arquivo a partir
+do caminho literal e reutilizar a conversao nos leitores/realinhadores pertinentes.
+Conferir destino real, caracteres especiais, fontes e continuidade em testes
+isolados, incluindo Windows PowerShell 5.1 e PowerShell 7 quando disponivel.
+
+Documentar criacao de ficha manual, log e indice de evidencias, linha do registro,
+links escapados, limites de ANALISADA e preservacao na atualizacao do indice.
+Explicitar que DEV-* nao integra a fatia percentual MTA e que IN_PROGRESS retoma
+a mesma quota sem recriar. Fornecer prompt para reparar a maquina de trabalho
+depois de receber a correcao, sem renomear IDs nem reiniciar a analise.
+
+Implementacao e documentacao concluidas. Dez suites pertinentes passaram em
+copia temporaria pelo runner; links testados em PS5.1/PS7, consumidores de
+planejamento/reconciliacao em PS5.1. Revisao independente e navegacao documental
+sem impedimentos. Detalhes de RED/GREEN e limites em tasks/todo.md.
+O reparo dos documentos reais na maquina de trabalho depende de receber esta
+corretiva e seguir o prompt publicado no guia; nao foi executado neste checkout.
+
+Em 23/10, o desenvolvedor autorizou commit, push desta branch e abertura de PR
+para main. A publicacao inclui a corretiva, testes e orientacoes; o reparo dos
+documentos reais na maquina de trabalho permanece posterior a atualizacao.
+
+Frente anterior: PR #46 integrado em `a29137d`; main alinhada e branch do guia
+de fork removida local/remotamente.
+
 ## Fork do harness na conta da empresa — 23/10/2026
 
 Branch `harness/guia-fork-empresa`, derivada da main `bb9ebe8`, com arvore limpa.

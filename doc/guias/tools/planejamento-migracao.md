@@ -145,6 +145,87 @@ Use **Planejamento: criar pasta de evidencias** para abrir
 evidencia geral. O contexto inclui linhas das issues escolhidas e referencias
 gerais, preservando lacunas de arquivos ainda indisponiveis.
 
+#### Registrar uma issue manual
+
+Um problema encontrado em log, teste ou conferencia local pode ter ficha sem
+regra MTA. No Copilot, use Agent ou o executor disponivel para produzir os
+documentos; o helper apenas orienta. Para criar ou reparar a ficha:
+
+1. Confira `projeto.json`, POM/Source e `migracao.md`. Reutilize a issue existente
+   para o mesmo problema. Preserve o ID funcional `DEV-...`, categoria `manual`,
+   ocorrencias `-` e presenca `MANUAL`.
+2. Guarde o log/anexo original em `evidencias/`, com nome descritivo. Uma pasta
+   como `evidencias/deploy-eap-7.4.11/` e valida. No `LEIA-ME.md`, relacione
+   Issue, Arquivo e Relacao. Identifique origem, estado ANTES/DEPOIS e limites;
+   horario do evento nao comprova horario de coleta. Identifique texto fornecido
+   pelo desenvolvedor como tal, sem alegar coleta automatica.
+3. Use o [modelo da ficha](../../modelos/ficha-issue.template.md) em
+   `atual/priorizacao/manual/issues/<ID codificado>/ficha.md`. No JSON, mantenha
+   o ID original; `LocalPaths` parte do Source e `EvidencePaths` parte de
+   `evidencias/`, sem repetir esse prefixo.
+4. Gere os links conforme abaixo e confira cada destino literal, inclusive
+   referencias de volta ao registro e aos anexos. Fonte ausente fica como lacuna.
+5. Se o pedido inclui registrar a issue, inclua/revise somente sua linha no
+   `migracao.md`. Preserve escolhas anteriores; para issue nova sem escolha,
+   use `A DEFINIR`. `ANALISADA` exige exame sustentado pelas fontes e limites,
+   nao apenas um arquivo criado. Nao significa corrigida ou aceita.
+6. Atualize o indice do projeto para incluir as evidencias. Confira a preservacao
+   da linha manual, ficha e anexos. Observacoes humanas sao preservadas: atualizar
+   o indice nao corrige automaticamente links errados escritos nessa coluna.
+
+**Nome da pasta e endereco do link sao representacoes diferentes.** A codificacao
+UTF-8 de `ConvertTo-HarnessFunctionalPath` e reversivel e distingue maiusculas
+no Windows. O ID `DEV-01` usa a pasta literal `%44%45%56-01`; no link Markdown,
+ela aparece como `%2544%2545%2556-01`. `%25` representa o `%` do nome fisico.
+Nao renomeie a pasta nem converta o ID para minusculas para reparar o link;
+nao escape novamente um link ja gerado.
+
+Na raiz do harness, o executor pode obter caminho e link sem escrever arquivos:
+
+```powershell
+Import-Module .\scripts\HarnessProject.psm1 -Force -DisableNameChecking
+$projeto = Get-HarnessProjectStorage -Root (Get-Location).Path -Pom 'C:\repositorios\minha-aplicacao\pom.xml'
+$id = 'DEV-EXEMPLO-01'
+$pastaIssue = ConvertTo-HarnessFunctionalPath $id
+$ficha = Join-Path $projeto.Folder ("atual/priorizacao/manual/issues/$pastaIssue/ficha.md")
+Get-HarnessSourceLink -From $projeto.MigrationPath -Path $ficha -Label 'Ficha'
+```
+
+Substitua POM e ID pelos ja escolhidos. Passe caminhos de filesystem a
+`Get-HarnessSourceLink`, nunca URLs previamente escapadas. O helper nao executa
+esse bloco. O gerador nao comprova existencia: confira o arquivo por caminho
+literal e o destino resolvido pelo leitor Markdown.
+
+**Preservacao e continuidade.** Atualizar o indice conserva issues manuais.
+A priorizacao percentual atual considera issues MTA elegiveis e exclui `DEV-*`;
+recriar nao inclui automaticamente a manual. Recriar redefine base/cobertura,
+preservando fichas e notas fora dos blocos gerenciados; nao reconcilia decisoes.
+A manual pode seguir para planejamento apos a escolha `ANALISAR AGORA`, com
+base EVIDENCIAS quando somente issues manuais forem selecionadas.
+
+Para retomar uma fatia MTA interrompida, use o mesmo escopo/categoria e prompt.
+Se precisar regravar o preparo pendente, use `-Mode Continue` sem novo percentual:
+`IN_PROGRESS` conserva universo, quota e examinadas registradas. Confira ranking
+e fichas antes de continuar. Ficha ainda fora de `AnalyzedIssues` exige conferencia,
+nao descarte nem contagem automatica. Veja [fatias e continuidade](priorizacao-issues.md#fatias-e-continuidade).
+
+Pedido de reparo para o executor, apos receber a correcao do harness:
+
+```text
+Repare somente a navegacao da issue [ID] do projeto [artifactId] neste workspace.
+Leia Registrar uma issue manual em doc/guias/tools/planejamento-migracao.md,
+projeto.json, migracao.md, ficha existente e evidencias/LEIA-ME.md.
+Preserve ID, categoria, pasta fisica, analise, log original e escolhas humanas.
+Gere links com Get-HarnessSourceLink a partir dos caminhos literais e confira
+que cada destino resolvido e o arquivo correto. Corrija referencias pertinentes
+na ficha, registro e indice de evidencias, sem criar outra ficha ou renomear o ID.
+Atualize o indice do projeto e confira a preservacao da linha manual e priorizacao.
+Relate arquivos/links corrigidos e lacunas. Nao execute corretivas, deploy, MTA
+nem nova priorizacao. Para a fatia interrompida, apenas informe escopo, categoria,
+quota, examinadas registradas, estado e prompt para retomar a mesma fatia.
+Nao recrie a base nem declare exame/GO/aceite por existencia de arquivos.
+```
+
 #### Manter o registro e adotar outra origem
 
 <a id="reconstruir-a-pasta-usando-um-mta-existente"></a>

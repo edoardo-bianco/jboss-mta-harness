@@ -33,6 +33,11 @@ Referencias manuais em Markdown/chat podem indicar o diagnostico atual ou ultimo
 build, conferindo origem/conteudo. Ultima tentativa pode diferir do diagnostico
 utilizavel. Nao exigir ID de execucao/hash; prompts gerados podem ser regravados.
 
+Para registrar/reparar issue manual, siga o [roteiro](../doc/guias/tools/planejamento-migracao.md#registrar-uma-issue-manual).
+Mantenha ID DEV-... e pasta canonica; gere links com Get-HarnessSourceLink usando
+caminhos literais, nao URLs ja escapadas. %44 na pasta exige %2544 no link.
+Confira o arquivo resolvido; nao renomeie o ID para reparar navegacao.
+
 Planejamento: planejar cria, retoma ou revisa um lote consistente por projeto
 nos mesmos destinos atuais, com fichas proprias por issue. Contexto mutavel nao
 e recibo; nao ha Previous, snapshots ou copia consolidada obrigatorios.
