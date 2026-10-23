@@ -5,4 +5,5 @@
 /config/mcp.local.json
 /.codex/config.toml
 /.vscode/mcp.json
+/.vscode/settings.json
 /.mcp.json
