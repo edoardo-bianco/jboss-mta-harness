@@ -70,6 +70,7 @@ patches e inicio pela mesma configuracao no script e no harness.
 | Sua situacao | Por onde entrar |
 | --- | --- |
 | Primeiro uso, ensaio ou configuracao de outra maquina | [1. Preparar o ambiente](#1-preparar-o-ambiente). Importe uma aplicacao externa no workspace. |
+| Quero manter um fork do harness na minha conta GitHub da empresa | [GitHub na empresa](tools/github-empresa.md): criar o fork e receber atualizacoes; aplicacoes continuam no Azure Repos. |
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
 | Arquivos de analise ou plano recebidos de um colega | [Compartilhar por copia](tools/compartilhamento-contextos.md): preservar a estrutura do projeto, conferir Source local e continuar da etapa recebida. |
@@ -129,6 +130,10 @@ ou trabalhar com repositorios corporativos.
 **Guia da etapa:** [Workspace: configuracao e uso](tools/workspace.md).
 Ele cobre primeira configuracao, projetos, ajustes da IDE e dados locais, e
 encaminha a configuracao propria de cada ferramenta.
+
+Para usar sua conta GitHub da empresa como origem do harness, siga o
+[guia de fork e atualizacao](tools/github-empresa.md). Ele inclui gh/Git ou navegador e Git,
+clone existente e preservacao das aplicacoes e pipelines no Azure DevOps.
 
 Para instalar em outra maquina, siga o [roteiro por maquina](tools/workspace.md#preparar-as-maquinas-dos-colegas).
 Ele encaminha aos procedimentos mantidos de certificado Sonar e Node/MCP.
@@ -376,6 +381,7 @@ Cada guia oferece mensagem de exemplo, resultado esperado e retorno ao fluxo pri
 | Guia | Quando abrir | Configuracao e operacao |
 | --- | --- | --- |
 | [Orientacao da migracao](orientacao-migracao.md) | Receber ajuda em qualquer etapa, no Claude Code, Codex ou Copilot. | [Iniciar](orientacao-migracao.md#iniciar-no-codex-ou-no-copilot), [retomar](orientacao-migracao.md#retomar-em-outro-chat-ou-cliente), [pedidos por etapa](orientacao-migracao.md#pedidos-por-etapa). |
+| [GitHub na empresa](tools/github-empresa.md) | Manter o harness na sua conta da empresa e as aplicacoes no Azure Repos. | [Com gh](tools/github-empresa.md#criar-o-fork-pelo-terminal), [sem gh](tools/github-empresa.md#criar-o-fork-sem-gh), [clone existente](tools/github-empresa.md#aproveitar-o-clone-existente), [atualizar](tools/github-empresa.md#receber-atualizacoes-do-original). |
 | [Priorizacao de issues](tools/priorizacao-issues.md) | Comparar candidatas da categoria escolhida entre projetos; etapa 4 opcional. | [Run Task e prompt](tools/priorizacao-issues.md#uso-manual-pela-run-task), [helpers](tools/priorizacao-issues.md#orientacao-com-o-helper), [levar a escolha ao planejamento](tools/priorizacao-issues.md#levar-uma-candidata-ao-planejamento). |
 | [Planejamento por sprints](tools/planejamento-sprints.md) | Prever/revisar a migracao de um ou mais projetos no periodo e equipe informados. | [Primeira execucao](tools/planejamento-sprints.md#primeira-execucao), [acoes e retomada](tools/planejamento-sprints.md#escolher-a-acao-da-mesma-tarefa), [dados e preenchimento manual](tools/planejamento-sprints.md#arquivos-e-preenchimento-manual). |
 | [Compartilhamento de contextos](tools/compartilhamento-contextos.md) | Entregar analise ou plano a outro colega; continuar em outra maquina. | [O que copiar](tools/compartilhamento-contextos.md#qual-ponto-compartilhar), [recebimento](tools/compartilhamento-contextos.md#na-maquina-de-quem-recebe), [limites](tools/compartilhamento-contextos.md#conflitos-e-limites). |

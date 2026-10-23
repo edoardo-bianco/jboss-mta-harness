@@ -50,6 +50,11 @@ sem invocar devsquad executor nem alterar permissoes para viabilizar o apoio.
 
 ## migracao_preparo_helper
 
+Para fork, clone/remotos e atualizacao do harness na conta da empresa, use
+[GitHub na empresa](../../../../doc/guias/tools/github-empresa.md). Recupere o que
+ja foi feito e oriente uma etapa; esse preparo dispensa aplicacao/MTA/registro.
+Mantenha as aplicacoes no Azure Repos e os limites de leitura da skill comum.
+
 Para maquinas novas/colegas, use o [roteiro por maquina](../../../../doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas)
 e indique a secao de origem de cada proximo passo. Para TLS, siga o
 [guia do certificado Sonar](../../../../doc/guias/tools/sonar.md#certificado-publico-do-sonar-corporativo),

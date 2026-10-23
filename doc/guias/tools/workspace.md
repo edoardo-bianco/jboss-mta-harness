@@ -17,6 +17,7 @@ e quando precisar ajustar o ambiente durante o trabalho.
 | Necessidade | Secao |
 | --- | --- |
 | Comecar em uma maquina | [Primeira configuracao](#comecar-na-maquina-de-trabalho) |
+| Usar um fork na conta GitHub da empresa | [Fork, clone existente e atualizacao](github-empresa.md); aplicacoes permanecem no Azure Repos |
 | Preparar tambem as maquinas dos colegas | [Roteiro por maquina e usuario](#preparar-as-maquinas-dos-colegas) |
 | Alterar caminhos ou escolhas da IDE | [JSON local](#configuracao-da-maquina) e [workspace gerado/manual](#duas-opcoes-para-configurar-o-workspace) |
 | Permitir leitura dos relatorios MTA pelo Copilot | [Acesso a pasta MTA](#acesso-do-copilot-a-pasta-mta) |
@@ -86,6 +87,10 @@ Em uma pasta de repositorios permitida, execute:
 git clone https://github.com/edoardo-bianco/jboss-mta-harness.git
 ```
 
+Se usara um fork na sua conta GitHub da empresa, siga o [guia de fork](github-empresa.md)
+e clone a URL dele. O mesmo guia mostra como reaproveitar o clone ja configurado,
+preservando caminhos, dados locais e remotos das aplicacoes no Azure Repos.
+
 Os passos abaixo usam a **opcao A: configuracao pelo harness**. Para configurar a IDE diretamente, veja a [opcao B: configuracao manual do workspace](#opcao-b-configurar-o-workspace-manualmente).
 
 1. Na primeira configuracao, use **File > Open Workspace from File** e abra `iniciar-harness.code-workspace`, na raiz do clone. Ele mostra somente `harness`. Use-o para configurar os caminhos e gerar seu workspace local nos passos seguintes.
@@ -124,6 +129,7 @@ o usuario que executara as tarefas; arquivos locais nao acompanham o clone.
 
 | Preparo necessario | Procedimento e evidencia a conferir |
 | --- | --- |
+| Fork do harness na conta da empresa | [GitHub na empresa](github-empresa.md): usuario, fork e remotos corretos; atualizacao do harness separada das aplicacoes no Azure Repos. |
 | Workspace e ferramentas | [Primeira configuracao](#comecar-na-maquina-de-trabalho): workspace salvo, projetos externos e JSON com caminhos locais. Maven usa settings normais da maquina ou override corporativo explicito. |
 | Build/testes | [Maven Java 8](maven.md#build-maven-da-aplicacao-com-java-8): versao Java, resultado dos testes e cobertura da aplicacao. |
 | Sonar corporativo | [Configuracao Sonar](sonar.md#exemplo-corporativo-no-sonarqube-99) e [certificado publico](sonar.md#certificado-publico-do-sonar-corporativo): JDK do scanner, endpoint, impressao confirmada e truststore do usuario. A propria tarefa oferece o preparo. |
