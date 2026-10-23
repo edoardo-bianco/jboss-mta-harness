@@ -2,8 +2,8 @@
 [CmdletBinding()]
 param([string]$ConfigPath,[string]$WorkspacePath,[string]$Target,[switch]$SelectTarget,
     [ValidateSet('eap71','eap74','all')][string]$Eap,
-    [ValidateSet('Status','Start','StartDebug','Deploy','Stop','AddUser')][string]$Action,
-    [string]$ArtifactPath,[string]$DeploymentName,[switch]$SelectStartMode)
+    [ValidateSet('Status','Start','StartDebug','Deploy','Stop','AddUser','Restart','RestartDebug')][string]$Action,
+    [string]$ArtifactPath,[string]$DeploymentName,[switch]$SelectStartMode,[switch]$SelectRestartMode)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 try {
@@ -12,25 +12,26 @@ try {
     Import-Module (Join-Path $PSScriptRoot 'HarnessJboss.psm1') -DisableNameChecking
     $root=Split-Path -Parent $PSScriptRoot
     if (-not $ConfigPath) { $ConfigPath=Join-Path $root 'config/harness.local.json' }
-    if ($SelectStartMode) {
-        if ($Action) { throw 'Use SelectStartMode ou Action, nao ambos.' }
-        Write-Host '1. Start normal | 2. Start com debug'
+    if ($SelectStartMode -or $SelectRestartMode) {
+        if ($Action -or ($SelectStartMode -and $SelectRestartMode)) { throw 'Use apenas Action, SelectStartMode ou SelectRestartMode.' }
+        $operation=if ($SelectRestartMode) {'Restart'} else {'Start'}
+        Write-Host "1. $operation normal | 2. $operation com debug"
         $choice=Read-Host 'Modo (Enter/q cancela)'
-        $Action=switch ($choice) {'1' {'Start'} '2' {'StartDebug'} default {throw 'Selecao cancelada.'}}
+        $Action=switch ($choice) {'1' {$operation} '2' {$operation+'Debug'} default {throw 'Selecao cancelada.'}}
     }
     if (-not $Action) {
-        Write-Host '1. Estado | 2. Start | 3. Start com debug | 4. Deploy | 5. Stop | 6. Criar usuario'
+        Write-Host '1. Estado | 2. Start | 3. Start com debug | 4. Deploy | 5. Stop | 6. Criar usuario | 7. Restart | 8. Restart com debug'
         $choice=Read-Host 'Acao (Enter/q cancela)'
-        $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Stop'} '6' {'AddUser'} default {throw 'Selecao cancelada.'}}
+        $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Stop'} '6' {'AddUser'} '7' {'Restart'} '8' {'RestartDebug'} default {throw 'Selecao cancelada.'}}
     }
-    $serverAction=$Action -in @('Status','Start','StartDebug','Stop')
+    $serverAction=$Action -in @('Status','Start','StartDebug','Stop','Restart','RestartDebug')
     if (-not $Eap) {
         $allOption=if ($serverAction) {' | 3. Todos (legado e EAP 7.4)'} else {''}
         Write-Host "Servidor: 1. EAP 7.0/7.1 (eap71) | 2. EAP 7.4$allOption | Enter/q cancela"
         $choice=Read-Host 'EAP'
         $Eap=switch ($choice) {'1' {'eap71'} '2' {'eap74'} '3' {if ($serverAction) {'all'} else {throw 'Selecao cancelada.'}} default {throw 'Selecao cancelada.'}}
     }
-    if ($Eap -eq 'all' -and -not $serverAction) { throw 'Todos so se aplica a iniciar, parar e consultar estado do servidor.' }
+    if ($Eap -eq 'all' -and -not $serverAction) { throw 'Todos so se aplica a iniciar, reiniciar, parar e consultar estado do servidor.' }
     if ($Action -eq 'Deploy') {
         $context=Read-HarnessConfig $ConfigPath $root -WorkspacePath $WorkspacePath -Target $Target -SelectTarget:($SelectTarget -or -not $Target)
         if (-not $context.Active) { throw 'Escolha o projeto com -SelectTarget ou -Target.' }
@@ -48,6 +49,7 @@ try {
                 Write-Host "Servidor: $serverId | EAP detectado: $($server.Version) | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
                 Write-Host "HTTP: $($server.HttpPort) | Gerenciamento: $($server.ManagementPort) | Debug: 127.0.0.1:$($server.Settings.debugPort)"
                 if ($Action -eq 'Stop') { Write-Host 'Stop encerra este servidor e todas as aplicacoes nele implantadas.' }
+                if ($Action -in @('Restart','RestartDebug')) { Write-Host 'Restart para este servidor e suas aplicacoes; so inicia novamente depois da parada confirmada.' }
                 $result=Invoke-HarnessJbossOperation $context $server $Action
             } catch {
                 # Falhas anteriores ao recibo (configuracao/lock) tambem entram no resumo.
@@ -56,7 +58,7 @@ try {
             $result | ConvertTo-Json -Depth 8 | Write-Host
             $state=if ($result.Observed) {$result.Observed.State} else {'UNVERIFIED'}
             $summary+=[pscustomobject]@{Eap=$serverId;Status=$result.Status;State=$state}
-            if ($Action -eq 'StartDebug' -and $result.Status -eq 'SUCCEEDED') {
+            if ($Action -in @('StartDebug','RestartDebug') -and $result.Status -eq 'SUCCEEDED') {
                 Write-Host "No VS Code: Run and Debug > JBoss $serverId - attach Java > F5. Desconectar nao para o servidor."
             }
         }

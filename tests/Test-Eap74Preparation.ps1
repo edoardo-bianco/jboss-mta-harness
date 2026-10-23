@@ -224,6 +224,7 @@ Assert (Test-Path -LiteralPath $installedJar -PathType Leaf) 'JAR local nao foi 
 Assert ((Get-FileHash -LiteralPath $installedJar -Algorithm SHA256).Hash -ceq (Get-FileHash -LiteralPath $f.Jar -Algorithm SHA256).Hash) 'Instalacao alterou o JAR local.'
 [xml]$moduleXml = [IO.File]::ReadAllText($installedModule)
 Assert ($moduleXml.DocumentElement.GetAttribute('name') -ceq 'org.example.driver') 'module.xml perdeu o nome configurado.'
+Assert (-not $moduleXml.DocumentElement.HasAttribute('slot')) 'Schema module:1.9 rejeita atributo slot; descritor gerado nao pode usa-lo.'
 Assert ($null -ne $moduleXml.SelectSingleNode('//*[local-name()="resource-root" and @path="driver.jar"]')) 'module.xml nao referencia o JAR instalado.'
 Assert ($null -ne $moduleXml.SelectSingleNode('//*[local-name()="dependencies"]/*[local-name()="module" and @name="javax.api"]')) 'module.xml perdeu dependencia configurada.'
 [IO.File]::SetLastWriteTimeUtc($installedJar, [datetime]'2020-01-02T03:04:05Z')
@@ -231,6 +232,15 @@ Assert ($null -ne $moduleXml.SelectSingleNode('//*[local-name()="dependencies"]/
 $beforeModule = Get-TreeState $f.TargetModule -IncludeTimes
 $null = Invoke-EapPreparation -ConfigPath $f.ConfigPath -Apply
 Assert ((Get-TreeState $f.TargetModule -IncludeTimes) -ceq $beforeModule) 'Retomada reescreveu modulo ja instalado e identico.'
+
+$f = New-PreparationFixture 'modulo-slot-personalizado'
+$f.Modules.modules[0].slot = 'legado'
+Write-TestJson $f.ModulesPath $f.Modules
+$null = Invoke-EapPreparation -ConfigPath $f.ConfigPath -Apply
+$customDescriptor = Join-Path $f.Eap 'modules/org/example/driver/legado/module.xml'
+[xml]$customXml = [IO.File]::ReadAllText($customDescriptor)
+Assert ($customXml.DocumentElement.GetAttribute('name') -ceq 'org.example.driver:legado') 'Slot personalizado deve integrar a identidade do modulo no schema 1.9.'
+Assert (-not $customXml.DocumentElement.HasAttribute('slot')) 'Slot personalizado gerou atributo incompativel com schema 1.9.'
 
 foreach ($problem in @('jar-diferente', 'xml-diferente', 'modulo-incompleto')) {
     $f = New-PreparationFixture $problem
@@ -293,6 +303,42 @@ $beforeOutput = Get-TreeState $f.Output -IncludeTimes
 Assert-Rejected { Invoke-EapPreparation -ConfigPath $f.ConfigPath -Apply } 'Versao diferente do patch configurado foi aceita.'
 Assert ((Get-TreeState $f.Eap -IncludeTimes) -ceq $beforeTarget) 'Versao divergente alterou o servidor.'
 Assert ((Get-TreeState $f.Output -IncludeTimes) -ceq $beforeOutput) 'Versao divergente alterou o consolidado anterior.'
+
+# Arquivos externos sao opt-in, copiados sem transformar bytes e nunca
+# substituem um arquivo existente diferente no servidor.
+$f = New-PreparationFixture 'arquivos-externos'
+$secretFile = Join-Path $f.Base 'arquivos/aplicacao.jceks'
+Write-TestFile $secretFile 'chave sintetica; nao e um keystore real'
+$f.Config.files = @(@{source='arquivos/aplicacao.jceks';target='seguranca/aplicacao.jceks'})
+Write-TestJson $f.ConfigPath $f.Config
+$beforeTarget = Get-TreeState $f.Eap -IncludeTimes
+$null = Invoke-EapPreparation -ConfigPath $f.ConfigPath
+$relativeFile = 'standalone/configuration/seguranca/aplicacao.jceks'
+Assert ([IO.File]::Exists((Join-Path $f.Output $relativeFile))) 'Arquivo externo nao entrou no consolidado.'
+Assert ((Get-TreeState $f.Eap -IncludeTimes) -ceq $beforeTarget) 'Gerar arquivos externos alterou servidor.'
+$null = Invoke-EapPreparation -ConfigPath $f.ConfigPath -Apply
+$installed = Join-Path $f.Eap $relativeFile
+Assert ((Get-FileHash $installed).Hash -eq (Get-FileHash $secretFile).Hash) 'Arquivo externo perdeu bytes.'
+$beforeTarget = Get-TreeState $f.Eap -IncludeTimes
+$beforeOutput = Get-TreeState $f.Output -IncludeTimes
+$null = Invoke-EapPreparation -ConfigPath $f.ConfigPath -Apply
+Assert ((Get-TreeState $f.Eap -IncludeTimes) -ceq $beforeTarget) 'Arquivo identico foi regravado.'
+$beforeOutput = Get-TreeState $f.Output -IncludeTimes
+Write-TestFile $secretFile 'outra chave sintetica'
+Assert-Rejected { Invoke-EapPreparation -ConfigPath $f.ConfigPath -Apply } 'Arquivo externo divergente foi sobrescrito.' 'externo.*divergente'
+Assert ((Get-TreeState $f.Eap -IncludeTimes) -ceq $beforeTarget) 'Divergencia alterou servidor.'
+Assert ((Get-TreeState $f.Output -IncludeTimes) -ceq $beforeOutput) 'Divergencia alterou consolidado.'
+foreach ($destination in @('../fora.jceks','C:/fora.jceks','seguranca/../fora.jceks','arquivo:stream','CON','pasta./arquivo','standalone-local.xml')) {
+    $f.Config.files[0].target=$destination
+    Write-TestJson $f.ConfigPath $f.Config
+    Assert-Rejected { Invoke-EapPreparation -ConfigPath $f.ConfigPath } ('Destino externo inseguro aceito: '+$destination) 'Destino.*externo'
+}
+$f.Config.files=@(@{source='arquivos/ausente.jceks';target='ausente.jceks'})
+Write-TestJson $f.ConfigPath $f.Config
+Assert-Rejected { Invoke-EapPreparation -ConfigPath $f.ConfigPath } 'Arquivo ausente aceito.' 'externo.*ausente'
+$f.Config.files=@(@{source='arquivos/aplicacao.jceks';target='igual.jceks'},@{source='arquivos/aplicacao.jceks';target='IGUAL.jceks'})
+Write-TestJson $f.ConfigPath $f.Config
+Assert-Rejected { Invoke-EapPreparation -ConfigPath $f.ConfigPath } 'Destino externo duplicado aceito.' 'externo.*duplicado'
 
 # Recarregar elimina o mock do guard. Daqui em diante o guard real decide a
 # partir apenas das fronteiras Windows simuladas, sem consultar a maquina.
@@ -473,7 +519,30 @@ try {
     & $module { Set-Item -Path Function:script:Write-EapAtomicFile -Value $script:testOriginalAtomicWrite }
 }
 
-Write-Output ('PASS PS' + $PSVersionTable.PSVersion.Major + ': preparo EAP 7.4 isolado, guard/recheck, XML/LogSql/JVM, modulos locais/Maven, retomada, preservacao/rollback, patch e launcher batch com restauracao de ambiente.')
+# Falha apos publicar um arquivo externo deve retirar apenas os bytes desta
+# tentativa e restaurar XML/JVM e consolidado anteriores.
+$f = New-PreparationFixture 'rollback-arquivos-externos'
+Write-TestFile (Join-Path $f.Base 'arquivos/primeiro.jceks') 'segredo sintetico 1'
+Write-TestFile (Join-Path $f.Base 'arquivos/segundo.jceks') 'segredo sintetico 2'
+$f.Config.files=@(@{source='arquivos/primeiro.jceks';target='externos/primeiro.jceks'},@{source='arquivos/segundo.jceks';target='externos/segundo.jceks'})
+Write-TestJson $f.ConfigPath $f.Config
+$null=Invoke-EapPreparation -ConfigPath $f.ConfigPath
+$beforeTarget=Get-TreeState $f.Eap -IncludeTimes
+$beforeOutput=Get-TreeState $f.Output -IncludeTimes
+& $module {
+    $script:testOriginalAtomicWrite=(Get-Item Function:Write-EapAtomicFile).ScriptBlock
+    function script:Write-EapAtomicFile { param([string]$Path,[byte[]]$Bytes,[switch]$CreateOnly)
+        if ($Path.EndsWith('segundo.jceks')) { throw 'Falha sintetica no segundo arquivo externo.' }
+        & $script:testOriginalAtomicWrite $Path $Bytes -CreateOnly:$CreateOnly
+    }
+}
+try {
+    Assert-Rejected { Invoke-EapPreparation -ConfigPath $f.ConfigPath -Apply } 'Falha de arquivo externo ocultada.' 'segundo arquivo externo'
+    Assert ((Get-TreeState $f.Eap -IncludeTimes) -ceq $beforeTarget) 'Rollback externo alterou servidor.'
+    Assert ((Get-TreeState $f.Output -IncludeTimes) -ceq $beforeOutput) 'Rollback externo alterou consolidado.'
+} finally { & $module { Set-Item Function:script:Write-EapAtomicFile $script:testOriginalAtomicWrite } }
+
+Write-Output ('PASS PS' + $PSVersionTable.PSVersion.Major + ': preparo EAP 7.4 isolado, guard/recheck, XML/LogSql/JVM, modulos locais/Maven, arquivos externos, retomada, preservacao/rollback, patch e launcher batch com restauracao de ambiente.')
 
 # O executor principal usa PS5.1. Quando disponivel, executar a mesma suite em
 # PS7 dentro desta copia temporaria detecta diferencas reais de JSON/runtime.

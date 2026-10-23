@@ -1,5 +1,49 @@
 # To-do do agente: evolucao do harness
 
+Encerramento de 22/10/2026 a pedido do desenvolvedor: ver
+[checkpoint e sequencia de retomada](../doc/estrategia-migracao-ambientes-jboss-eap-7.4/checkpoint-correcoes-preparo-des-2026-10-22.md).
+
+- [x] Preservar correcoes, evidencias e pendencias em checkpoint, sem publicar.
+- [x] Em 23/10, concluir conferencia documental/diff depois do checkpoint:
+  67 links locais e 26 ancoras conferidos nos oito Markdown alterados/novos;
+  diff --check sem erros. Suites anteriores preservadas, sem repeticao.
+
+## Correcoes autorizadas e validacao DES — estado atual, 23/10/2026
+
+- [x] Retomar branch de evolucao e preservar os documentos pendentes; nenhum dado real copiado para o Git.
+- [x] Corrigir descritores module:1.9 e comprovar carregamento real de main/slot personalizado, com Java 8/JBoss Modules locais e classe sintetica, sem boot do EAP.
+- [x] Implementar files opcional no preparo: origens privadas, destinos em standalone/configuration, hashes no consolidado, identicos preservados, divergencias recusadas.
+- [x] Implementar Restart/RestartDebug no gerenciador e tarefa unica, lock continuo, stop confirmado antes do start, modo e selecao Todos.
+- [x] Implementar script/tarefa de logs: EAP ou Todos, tail, UTF-8 incremental, arquivo ausente/rotacao/truncamento e leitura sem bloquear escrita.
+- [x] Documentar operacao e roteiro explicito de atualizacao da maquina de trabalho, preservando configuracao privada e Git como origem dos scripts.
+- [x] Consolidar pendencias DES em pasta explicita; imagem/pipeline/OKD classificados como responsabilidade externa, sem bloquear nossas correcoes.
+- [x] Concluir regressao final, navegacao e revisao do diff; resultados abaixo.
+- [x] Registrar autorizacao de 23/10 para commit, push e PR das quatro entregas; analise de DES permanece para etapa posterior.
+- [ ] Revisar e integrar na main o PR das correcoes do harness.
+- [ ] Na maquina de trabalho, atualizar via Git apos integracao, conferir modulos/arquivos privados e ensaiar restart/logs; validacao da aplicacao ainda depende do desenvolvedor.
+- [ ] Retomar posteriormente a analise de desenvolvimento/DES e resolver os itens no registro especifico, indicando por item a atualizacao local necessaria. Template privado permanece inalterado; esta pendencia nao condiciona a publicacao das quatro entregas.
+
+Os registros historicos abaixo descrevem as etapas anteriores a esta autorizacao.
+Demandas antes adiadas de arquivos externos/restart/logs agora estao implementadas
+nesta branch; o estado de entrega/validacao corrente e o deste bloco.
+
+Verificacao final PASS pelo runner isolado: Eap74Preparation, JbossRestart,
+JbossLogs, JbossRuntime, JbossAllServers, Jboss e TaskInputs. Preparo e leitor de
+logs tambem exercitados em PS7 pela respectiva suite. Rollback de falha no
+segundo arquivo externo restaurou servidor/consolidado sinteticos. Restart
+preservou o lock, interrompeu antes do start em falha de stop e registrou fase
+de falha; entradas reais das tasks cancelaram antes de operar servidores.
+
+Teste adicional Eap74ModuleLoading passou com JDK 8 e JBoss Modules da instalacao
+local: main e slot legado carregaram classe sintetica. O erro antigo foi
+reproduzido antes da correcao. Ferramentas reais somente lidas/executadas no
+checkout temporario; nenhum JBoss iniciado, parado, reiniciado ou alterado.
+Sintaxe de 15 arquivos PowerShell, JSONs alterados, 53 links locais e diff --check
+passaram. Revisao final do diff sem bloqueadores identificados. Testes de
+processo/rede sao simulados; uso real de restart/logs e da aplicacao na maquina
+de trabalho continua no ensaio do desenvolvedor. Ctrl+C durante acompanhamento
+real nao foi ensaiado pelo agente. Sem commit/push, sem atualizacao da pasta privada.
+
 ## Execucao da priorizacao sem retorno ao preparo - 21/10/2026
 
 - [x] Conferir relato, fontes e papel indevidamente assumido pelo executor.
@@ -378,3 +422,107 @@ Pendencias operacionais permanecem: disponibilizar esta versao do harness pelo
 Git (alteracoes ainda sem commit/push), conferir os 16 itens com DES, JDK/patch
 instalados no trabalho, aplicar o consolidado parado, alinhar o harness e testar
 a aplicacao. Nenhum dado privado foi levado ao Git.
+
+## Roteiro DES e impacto no local — 22/10/2026
+
+O PR #44 ja foi integrado; pendencia de publicacao Git do preparo anterior resolvida.
+
+- [x] Identificar as fontes distintas: template DES no inventario, XML local e candidato 7.4.
+- [x] Comparar propriedades/tokens e recursos; registrar alteracoes sem necessidade comprovada.
+- [x] Confirmar com o desenvolvedor Azure DevOps/OKD, template unico e preservacao do comportamento 7.1.
+- [x] Gravar roteiro generico e pasta privada DES com auditoria e passos da primeira aplicacao.
+- [x] Conferir links e preservacao das entradas existentes.
+- [ ] Confirmar revisao implantada, contrato da imagem/esteira e decisoes que afetam o template compartilhado.
+- [ ] Auditar a segunda aplicacao quando seu material for fornecido.
+
+Esta frente prepara documentacao; nao concede aceite operacional nem executa
+alteracoes na configuracao da aplicacao, no JBoss local ou em DES.
+
+Entregues: [roteiro generico DES](../doc/estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/des.md)
+e pasta privada jboss-eap7.4-configuracao-des/ com README e auditoria/roteiro
+da primeira aplicacao. Dez achados e matriz complementar de defaults; driver,
+keepalive/timeout EJB, caches, seguranca e contrato da imagem exigem revisao
+antes de aplicar o template compartilhado. Nenhum XML ou valor foi alterado.
+PASS: cinco documentos, 31 links locais, fences/tabela e separacao de dados
+privados; 24 arquivos preexistentes preservados por comparacao SHA256 na
+criacao da pasta; git diff --check. Suites nao executadas: alteracoes documentais.
+Alteracoes desta frente locais, sem commit/push.
+
+### Acompanhamento da maquina de trabalho — 22/10/2026
+
+- [x] Registrar a escolha de prosseguir com o ensaio local da versao entregue, antes da resolucao individual dos achados DES.
+- [x] Registrar confirmacao do desenvolvedor: maquina de trabalho alinhada com a main remota.
+- [ ] Receber ajustes privados realizados e resultados do ensaio; hash exato ainda nao informado, sem bloquear o ensaio.
+- [ ] Para cada achado resolvido, registrar no roteiro privado necessidade (ou dispensa) de atualizacao local, arquivos, origem, passos e testes.
+- [ ] Acompanhar aplicacao/verificacao de cada atualizacao necessaria na maquina de trabalho, somente com evidencia ou relato do desenvolvedor.
+
+Nenhuma nova versao dos scripts foi publicada nesta frente; preservar os
+preenchimentos feitos na outra maquina e acompanhar o ajuste manual dos
+descritores registrado abaixo.
+
+- [x] Diagnosticar e reproduzir isoladamente a falha da linha 100 com dados sinteticos: chave de propriedade sem igual; nenhum defeito de parser demonstrado.
+- [x] Identificar fuso escrito com acentos; orientar America/Sao_Paulo literal.
+- [x] Conferir as saidas enviadas da maquina de trabalho: propriedade antes sem igual agora renderizada e fuso America/Sao_Paulo sem acentos no BAT.
+- [x] Receber resultado do primeiro boot: EAP 7.4.11/CP11, XML/JVM/portas esperados; inicializacao com erros no modulo Oracle, sem aceite funcional.
+- [x] Confirmar segundo boot sem ERROR no log recebido (17:16): WFLYSRV0025, driver Oracle 19.22/ojdbc8 iniciado e datasource vinculado; HTTP 8180/gerenciamento 10090.
+- [x] Receber resultado de simtrPU:test-connection-in-pool: outcome=success e result=[true], executado pelo desenvolvedor no EAP 7.4/gerenciamento 10090; conexao confirmada, sem comprovar consultas da aplicacao.
+- [x] Documentar teste de conexao apos start no guia JBoss e referenciar no roteiro de preparo EAP 7.4: comando, ajustes por ambiente, resultado esperado e limites antes do deploy.
+- [x] Explicar os avisos da CLI e ajustar comando do guia para informar bin/jboss-cli.xml por jboss.cli.config; aviso de cliente nao modular pode permanecer sem invalidar o teste.
+- [ ] Conferir versao/base de fusos do JDK informado como 8u112 antes do aceite dos testes de datas; nao e a causa da falha de propriedades.
+
+Os ajustes de propriedade/fuso sao nas entradas privadas da maquina de trabalho
+e dispensam nova versao dos scripts. O defeito posterior no descritor exige
+correcao do gerador. Segundo boot comprovado pelo log; verificacao funcional
+permanece pendente.
+
+- [x] Revisar XML/BAT/manifesto enviados: referencias Oracle/Jasper, logSql e JVM coerentes com as entradas informadas; sem salvar valores reais.
+- [x] Comparar SHA256 dos dois JARs do pacote de origem com os hashes informados no manifesto: coincidentes. Bytes remotos e module.xml remoto nao examinados diretamente.
+- [ ] Validar funcoes que dependem dos tres valores ainda ficticios e do keystore (segredo MTR preenchido, validade pendente); conferir relatorios/fontes apos deploy.
+
+### Arquivos externos no preparo — discutir junto com os outros ajustes
+
+- [x] Registrar localizacao do keystore no servidor legado e escolha de copia manual neste ensaio; arquivo nao recebido nem copiado pelo agente.
+- [ ] Confirmar copia manual no alvo 7.4.11 e verificacao das entradas; nao presumir sucesso apenas pela localizacao.
+- [ ] Revisar proposta generica de pasta privada arquivos/ e mapeamento opcional de uma ou mais origens para destinos relativos a eapHome.
+- [ ] Apos fechar a proposta, implementar consolidacao/aplicacao com preservacao de arquivos identicos, interrupcao em divergencias e verificacoes isoladas de falha/publicacao.
+- [ ] Atualizar guia/helper e registrar exatamente o que atualizar via Git e na pasta privada da maquina de trabalho.
+
+Estado: demanda futura, sem implementacao autorizada nesta etapa. O script
+atual nao copia arquivos externos adicionais; manter a copia manual fora do
+consolidado, preservando seu manifesto.
+
+### Acompanhar logs JBoss — junto com os proximos ajustes
+
+- [x] Registrar pedido de PS1 no harness e tarefa unica `Servidor: acompanhar logs`, com EAP 7.1, EAP 7.4 ou Todos; implementacao adiada pelo desenvolvedor.
+- [ ] Implementar script reutilizando configuracao e selecao de servidores; exibir ultimas linhas, novas mensagens e origem quando acompanhar ambos.
+- [ ] Tratar log ausente/rotacao e Ctrl+C, encerrando apenas os leitores e preservando servidores e arquivos.
+- [ ] Integrar a tarefa ao gerador de workspace e ao guia JBoss; verificar em copia isolada e indicar como atualizar o harness/workspace na maquina de trabalho.
+
+Estado: somente demanda registrada; o acompanhamento atual continua pelo
+comando PowerShell informado no chat. Retomar junto com arquivos externos e
+demais ajustes pendentes do preparo/operacao JBoss.
+
+### Defeito no descritor dos modulos — primeiro boot da maquina de trabalho
+
+- [x] Identificar geracao invalida de schema module:1.9 com slot="main"; module.xml remoto enviado confirma o defeito.
+- [x] Reproduzir falha de parsing com slot e aceitacao do descritor sem slot no JBoss Modules local, em TEMP isolado, sem iniciar/alterar servidor.
+- [x] Confirmar carregamento Oracle e boot normal no segundo log da maquina de trabalho; erro de modulo do primeiro boot ausente.
+- [ ] Confirmar descritor Jasper corrigido e uso das fontes apos deploy; conexao Oracle ja confirmada no acompanhamento acima.
+- [ ] Corrigir gerador e acrescentar verificacao com carregador real, cobrindo main e slot personalizado; testes anteriores nao detectaram incompatibilidade de schema.
+- [ ] Definir atualizacao via Git e tratamento explicito dos modulos/consolidado existentes, preservando a interrupcao em divergencias inesperadas.
+- [ ] Conferir DNS SMTP separadamente e manter pendente a validacao do keystore da aplicacao; aviso de application.keystore nao se refere ao JCEKS.
+
+Estado: segundo boot normal comprovado pelo log recebido; correcao dos scripts
+e verificacoes da aplicacao pendentes; teste de conexao confirmado com success/true.
+Nao reexecutar o preparo atual apos ajuste manual dos descritores: geracao antiga
+permanece invalida e a comparacao com o servidor pode interromper por divergencia.
+
+### Reiniciar JBoss — junto com os proximos ajustes
+
+- [x] Registrar necessidade de Restart e conferir comportamento atual: Start mantem instancia RUNNING; reinicio manual exige Parar e depois Iniciar.
+- [x] Documentar reinicio manual, efeito sobre aplicacoes e comportamento normal/debug no guia JBoss.
+- [ ] Implementar tarefa unica `Servidor: reiniciar JBoss` e acao no gerenciador existente, com selecao de servidor/Todos e modo normal/debug.
+- [ ] Manter lock por servidor durante stop/start, aguardar encerramento e impedir novo start se stop falhar; preservar verificacoes de identidade/portas e informar a fase do resultado.
+- [ ] Verificar em copia isolada: instancia ativa/parada, stop com falha/timeout, concorrencia, portas ocupadas, debug e Todos; atualizar guia e instrucoes para maquina de trabalho.
+
+Estado: evolucao futura; nenhuma acao Restart implementada ou executada agora.

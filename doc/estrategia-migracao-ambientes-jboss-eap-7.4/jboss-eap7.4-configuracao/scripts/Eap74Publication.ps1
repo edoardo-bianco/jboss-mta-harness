@@ -47,18 +47,19 @@ function Assert-EapOwnedOutput {
     }
 }
 function Write-EapAtomicFile {
-    param([string]$Path,[byte[]]$Bytes)
+    param([string]$Path,[byte[]]$Bytes,[switch]$CreateOnly)
     Assert-EapPlainPath $Path
     $temporary=$Path+'.eap-'+[guid]::NewGuid().ToString('N')
     try {
         [IO.File]::WriteAllBytes($temporary,$Bytes)
-        if ([IO.File]::Exists($Path)) { [IO.File]::Replace($temporary,$Path,[NullString]::Value) }
+        if (-not $CreateOnly -and [IO.File]::Exists($Path)) { [IO.File]::Replace($temporary,$Path,[NullString]::Value) }
         else { [IO.File]::Move($temporary,$Path) }
     } finally { if ([IO.File]::Exists($temporary)) { [IO.File]::Delete($temporary) } }
 }
 function Publish-EapTarget {
-    param($Config,[string]$Source,[string[]]$Modules)
+    param($Config,[string]$Source,[string[]]$Modules,[string[]]$ExternalFiles=@())
     $files=@(('standalone\configuration\'+$Config.standaloneConfig),'bin\standalone.conf.bat')
+    $files+=@($ExternalFiles)
     foreach ($module in $Modules) {
         if (Test-Path -LiteralPath (Join-Path $Config.eapHome $module)) { continue } # Compatibilidade ja conferida; preservar datas.
         foreach ($file in (Get-EapTreeFiles (Join-Path $Source $module)).Keys) { $files+=Join-Path $module $file }
@@ -71,13 +72,15 @@ function Publish-EapTarget {
             $target=Join-Path $Config.eapHome $relative; $origin=Join-Path $Source $relative
             $hash=(Get-FileHash -LiteralPath $origin -Algorithm SHA256).Hash
             if ([IO.File]::Exists($target) -and (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -ceq $hash) { continue }
+            if ($relative -in $ExternalFiles -and (Test-Path -LiteralPath $target)) { throw "Arquivo externo existente divergente: $relative. Arquivos preservados." }
             $parent=Split-Path -Parent $target; $missing=@(); $cursor=$parent
             while (-not (Test-Path -LiteralPath $cursor)) { $missing+=$cursor; $cursor=Split-Path -Parent $cursor }
             foreach ($directory in $missing) { $directories.Add($directory) }
             $null=[IO.Directory]::CreateDirectory($parent)
             $before=$null; $time=$null
             if ([IO.File]::Exists($target)) { $before=[IO.File]::ReadAllBytes($target); $time=[IO.File]::GetLastWriteTimeUtc($target) }
-            Write-EapAtomicFile $target ([IO.File]::ReadAllBytes($origin))
+            if ($relative -in $ExternalFiles) { Write-EapAtomicFile $target ([IO.File]::ReadAllBytes($origin)) -CreateOnly }
+            else { Write-EapAtomicFile $target ([IO.File]::ReadAllBytes($origin)) }
             $changed.Add([pscustomobject]@{Path=$target;Before=$before;Time=$time;Hash=$hash})
         }
     } catch {

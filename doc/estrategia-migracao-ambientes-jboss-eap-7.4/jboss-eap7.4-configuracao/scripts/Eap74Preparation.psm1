@@ -4,6 +4,7 @@ $ErrorActionPreference='Stop'
 . $PSScriptRoot/Eap74Inputs.ps1
 . $PSScriptRoot/Eap74Modules.ps1
 . $PSScriptRoot/Eap74Publication.ps1
+. $PSScriptRoot/Eap74Files.ps1
 
 function Invoke-EapPreparation {
     [CmdletBinding()]
@@ -23,7 +24,9 @@ function Invoke-EapPreparation {
         [IO.File]::WriteAllText((Join-Path $stage ('standalone/configuration/'+$config.standaloneConfig)),$xml,(New-Object Text.UTF8Encoding $false))
         [IO.File]::WriteAllText((Join-Path $stage 'bin/standalone.conf.bat'),$jvm,(New-Object Text.UTF8Encoding $false))
         $modules=@(New-EapModules $config $stage)
+        $files=@(New-EapFiles $config $stage)
         Assert-EapModulesCompatible $config $stage $modules
+        Assert-EapFilesCompatible $config $stage $files
         Assert-EapOwnedOutput $config.output
         $receipt=[ordered]@{schemaVersion=1;files=(Get-EapTreeFiles $stage)}
         [IO.File]::WriteAllText((Join-Path $stage '.eap-preparo.json'),($receipt | ConvertTo-Json -Depth 5),(New-Object Text.UTF8Encoding $false))
@@ -33,7 +36,8 @@ function Invoke-EapPreparation {
         if ($Apply) {
             Assert-EapStopped $config
             Assert-EapModulesCompatible $config $config.output $modules
-            Publish-EapTarget $config $config.output $modules
+            Assert-EapFilesCompatible $config $config.output $files
+            Publish-EapTarget $config $config.output $modules $files
         }
     } catch {
         if ($published) { [IO.Directory]::Move($config.output,$stage) }
@@ -43,7 +47,7 @@ function Invoke-EapPreparation {
         Remove-EapStage $stage $parent
         if ($saved) { Remove-EapStage $previous $parent }
     }
-    [pscustomobject]@{Output=$config.output;Applied=$Apply.IsPresent;StandaloneConfig=$config.standaloneConfig;Modules=$modules.Count;LogSql=($LogSql.IsPresent -or $config.logSql)}
+    [pscustomobject]@{Output=$config.output;Applied=$Apply.IsPresent;StandaloneConfig=$config.standaloneConfig;Modules=$modules.Count;Files=$files.Count;LogSql=($LogSql.IsPresent -or $config.logSql)}
 }
 
 function Start-EapPrepared {

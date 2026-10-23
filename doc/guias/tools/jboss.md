@@ -21,7 +21,10 @@ Depois do ensaio, volte a etapa correspondente e registre o resultado como
 evidencia. Start, stop, console e debug tambem podem ser usados separadamente.
 
 Navegacao: [orientacao com o helper](#orientacao-com-o-helper) ·
-[configuracao](#configuracao) · [uso](#uso) · [resultado e proximo passo](#resultado-e-proximo-passo).
+[configuracao](#configuracao) · [uso](#uso) ·
+[reiniciar](#reiniciar-o-jboss) · [acompanhar logs](#acompanhar-logs-de-boot-e-deploy) ·
+[teste de conexao com o banco](#testar-conexao-com-o-banco-apos-o-start) ·
+[resultado e proximo passo](#resultado-e-proximo-passo).
 
 ## Orientacao com o helper
 
@@ -214,6 +217,8 @@ Elas substituem a antiga tarefa **Aplicacao: gerenciar JBoss**:
 | Tarefa | Selecao |
 | --- | --- |
 | Servidor: iniciar JBoss | Modo normal ou debug, depois EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
+| Servidor: reiniciar JBoss | Modo normal/debug, EAP ou Todos; parada confirmada antes de iniciar. |
+| Servidor: acompanhar logs | EAP ou Todos; acompanha boot/deploy no server.log, Ctrl+C encerra a leitura. |
 | Servidor: parar JBoss | EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
 | Servidor: consultar estado JBoss | EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
 | Servidor: criar usuario JBoss | EAP 7.0/7.1/7.4; assistente oficial solicita tipo, nome e senha. Nao exige servidor ativo. |
@@ -255,6 +260,136 @@ Esse roteiro nao exige selecionar aplicacao nem construir um WAR. Start pode car
 aplicacoes ja implantadas no servidor; stop encerra todas elas. Repita no outro EAP
 quando quiser validar as duas instalacoes. Falha ou timeout exige conferir os logs
 e o resultado antes de continuar; nao equivale a sucesso parcial confirmado.
+
+### Reiniciar o JBoss
+
+Execute **Servidor: reiniciar JBoss**, escolha modo normal/debug e o EAP ou
+Todos. O harness mantem o mesmo lock por servidor, para e aguarda `STOPPED`,
+depois inicia no modo escolhido. Se ja estiver parado, apenas inicia. Confira
+`SUCCEEDED`, `RUNNING`, identidade e o log do novo boot. O reinicio interrompe
+todas as aplicacoes daquela instancia. Em Todos, cada EAP tem resultado proprio.
+
+Na raiz do harness, a alternativa pela linha de comando e:
+
+```powershell
+.\scripts\gerenciar-jboss.ps1 -Eap eap74 -Action Restart
+# Ou RestartDebug; -Eap all seleciona os dois servidores.
+```
+
+Executar Start quando a instancia correta ja esta RUNNING apenas retorna seu
+estado, mantendo o processo. Nao recarrega XML nem aplica alteracoes de JVM.
+Start com debug em instancia ativa sem debug pede stop/start explicitos; Start
+normal tambem nao retira o debug de uma instancia que ja esta ativa com ele.
+
+Se o stop falhar ou nao confirmar o encerramento, confira estado/log antes de
+iniciar novamente. O start exige STOPPED e confere as portas de gerenciamento,
+HTTP e debug quando solicitado. Processo existente sem gerenciamento acessivel,
+identidade divergente ou porta ocupada interrompem a operacao. Essas verificacoes
+evitam iniciar outra instancia sobre a existente; nao dispare os comandos em
+paralelo. Reiniciar usa os arquivos instalados e nao executa o preparo.
+Uma falha registra `Phase=Stop` ou `Phase=Start` em `ultima-operacao.json`;
+nao ha kill forcado nem segundo start depois de uma parada malsucedida.
+
+### Acompanhar logs de boot e deploy
+
+Abra **Servidor: acompanhar logs**, escolha EAP legado, EAP 7.4 ou Todos, e
+deixe esse terminal aberto enquanto executa o deploy em outra tarefa. A leitura
+mostra as ultimas 100 linhas de `standalone/log/server.log` e acompanha mensagens
+novas com prefixo do servidor. Nao exige aplicacao selecionada nem servidor ativo.
+
+```powershell
+.\scripts\acompanhar-log-jboss.ps1 -Eap eap74
+.\scripts\acompanhar-log-jboss.ps1 -Eap all -Tail 50
+```
+
+O script le os caminhos de `config/harness.local.json` (ou `-ConfigPath`),
+aguarda a criacao do log e retoma apos rotacao/truncamento. Usa UTF-8 e exibe
+linhas quando terminam. **Ctrl+C encerra somente o acompanhamento**. Os arquivos
+continuam no JBoss; nao sao copiados para o repositorio.
+
+Em versoes anteriores do harness, abra outro PowerShell na raiz e use:
+
+```powershell
+$config = Get-Content '.\config\harness.local.json' -Raw | ConvertFrom-Json
+$log = Join-Path $config.tools.eap74Home 'standalone\log\server.log'
+Get-Content -LiteralPath $log -Tail 100 -Wait -Encoding UTF8
+```
+
+O resultado do deploy aparece na tarefa de deploy; o `server.log` permite
+acompanhar mensagens da aplicacao e a causa detalhada de falhas.
+
+### Testar conexao com o banco apos o start
+
+Este teste usa o datasource configurado no JBoss e pode ser executado **antes
+de implantar a aplicacao**. Inicie o EAP em modo normal pela tarefa
+**Servidor: iniciar JBoss** e confira o estado/identidade em
+**Servidor: consultar estado JBoss**. Confira tambem `server.log`: estado
+RUNNING sozinho nao comprova boot sem erros. O driver deve estar carregado e o
+datasource vinculado, sem falhas de modulo ou dependencias ausentes.
+
+Para uma instalacao preparada pelo [roteiro EAP 7.4](../../estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md),
+abra outro terminal PowerShell e execute o comando abaixo. Ele usa o Java e a
+CLI da instalacao indicada em `preparo.json`; `jdkHome` e `eapHome` devem
+corresponder a instalacao iniciada pelo harness.
+
+O exemplo usa gerenciamento em `127.0.0.1:10090` (porta padrao 9990 mais offset
+100) e datasource `simtrPU`. Ajuste o caminho do JSON, a porta mostrada no start
+e o nome conforme seu ambiente. Use o **pool-name** do datasource no XML; por
+exemplo, `<datasource pool-name="simtrPU" jndi-name="java:jboss/datasources/simtr-ds" ...>`
+e enderecado por `data-source=simtrPU`. O procedimento serve para outros
+datasources e aplicacoes, substituindo esse nome.
+
+```powershell
+$preparo = Get-Content 'C:\desenvolvimento\jboss-eap7.4-configuracao\preparo.json' -Raw | ConvertFrom-Json
+
+& (Join-Path $preparo.jdkHome 'bin\java.exe') `
+  ('-Djboss.cli.config=' + (Join-Path $preparo.eapHome 'bin\jboss-cli.xml')) `
+  -jar (Join-Path $preparo.eapHome 'bin\client\jboss-cli-client.jar') `
+  --connect `
+  --controller=127.0.0.1:10090 `
+  '--command=/subsystem=datasources/data-source=simtrPU:test-connection-in-pool'
+```
+
+`-Djboss.cli.config` indica o arquivo de configuracao da CLI na instalacao EAP.
+Sem esse argumento, a execucao direta do JAR pode mostrar
+`WARN: can't find jboss-cli.xml. Using default configuration values.` e usar
+padroes da CLI; isso nao significa que o standalone do servidor esta ausente.
+
+Ao executar `jboss-cli-client.jar` diretamente, pode aparecer
+`The CLI is running in a non-modular environment and cannot load commands from management extensions.`
+Esse aviso descreve o carregamento de classes do cliente CLI e a indisponibilidade
+de comandos adicionais de extensoes nesse cliente. Nao indica falha dos modulos
+do servidor e nao impede a operacao de datasource acima. O resultado da operacao
+continua sendo o criterio para avaliar o teste. Veja a
+[configuracao e os modos da CLI na documentacao Red Hat](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html-single/management_cli_guide/index).
+
+O teste usa a URL e as credenciais ja configuradas no datasource. Na configuracao
+padrao, a CLI usa autenticacao local para acessar o gerenciamento; nao e preciso
+colocar a senha do banco no comando. Se o gerenciamento tiver seguranca
+personalizada, siga o mecanismo de autenticacao definido para esse ambiente.
+
+Resultado esperado:
+
+```text
+{
+    "outcome" => "success",
+    "result" => [true]
+}
+```
+
+`success` com `true` confirma que o datasource consegue obter uma conexao com o
+banco naquele momento. Ainda faltam consultas, permissoes nas tabelas,
+transacoes e fluxos da aplicacao depois do deploy.
+
+Se a CLI nao conectar, confira servidor ativo e porta de gerenciamento. Se o
+datasource nao existir ou faltar o driver, confira o XML selecionado e os
+modulos instalados. Se a operacao falhar, leia a descricao e as mensagens do
+datasource em `standalone/log/server.log` para identificar rede/DNS, URL,
+autenticacao ou outra causa. Registre o resultado e o erro pertinente sem
+incluir credenciais. Iniciar o servidor ou vincular o datasource nao substitui
+esse teste.
+
+Referencia: [Red Hat EAP 7.4 — Datasource Management, Test a Datasource Connection](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html/configuration_guide/datasource_management).
 
 ### Deploy
 
