@@ -1,5 +1,25 @@
 # To-do do agente: evolucao do harness
 
+## Fork do harness na conta da empresa — 23/10/2026
+
+- [x] Conferir main/estado local e criar branch propria para a documentacao.
+- [x] Escrever guia generico de fork, remotos e atualizacao por gh/Git, com rota sem gh: navegador para criar o fork e Git para as etapas locais.
+- [x] Ligar README, guia do desenvolvedor, workspace, orientacao e fontes comuns dos helpers.
+- [x] Conferir navegacao, exemplos, limites do orientador e diff; registrar evidencias e limites.
+- [x] Registrar autorizacao de 23/10 para commit, push da branch e PR para main desta entrega documental.
+
+Validacao documental em 23/10: nove arquivos revisados, 358 links locais e
+248 ancoras conferidos, 12 blocos PowerShell analisados pelo parser sem executar
+os comandos, nenhuma falha. Frontmatter da skill preservado; adaptadores de
+Codex, Copilot e Claude ja consultam a skill comum e o papel de preparo.
+Exemplos confrontados com documentacao oficial Git/GitHub/gh; diff sem erros
+de whitespace. O quick_validate.py da skill-creator nao iniciou a validacao
+por ausencia de PyYAML (ModuleNotFoundError: yaml); nenhuma dependencia instalada.
+Suites funcionais nao executadas nesta entrega exclusivamente documental.
+O procedimento documentado nao foi executado: nenhum fork criado e nenhuma
+autenticacao ou URL de remoto alterada. A publicacao autorizada se limita a
+esta branch do harness; analise DES e ensaio operacional permanecem pendentes.
+
 Encerramento de 22/10/2026 a pedido do desenvolvedor: ver
 [checkpoint e sequencia de retomada](../doc/estrategia-migracao-ambientes-jboss-eap-7.4/checkpoint-correcoes-preparo-des-2026-10-22.md).
 
@@ -19,7 +39,7 @@ Encerramento de 22/10/2026 a pedido do desenvolvedor: ver
 - [x] Consolidar pendencias DES em pasta explicita; imagem/pipeline/OKD classificados como responsabilidade externa, sem bloquear nossas correcoes.
 - [x] Concluir regressao final, navegacao e revisao do diff; resultados abaixo.
 - [x] Registrar autorizacao de 23/10 para commit, push e PR das quatro entregas; analise de DES permanece para etapa posterior.
-- [ ] Revisar e integrar na main o PR das correcoes do harness.
+- [x] PR #45 integrado pelo desenvolvedor em `bb9ebe8`; main alinhada e branch local/remota removida em 23/10.
 - [ ] Na maquina de trabalho, atualizar via Git apos integracao, conferir modulos/arquivos privados e ensaiar restart/logs; validacao da aplicacao ainda depende do desenvolvedor.
 - [ ] Retomar posteriormente a analise de desenvolvimento/DES e resolver os itens no registro especifico, indicando por item a atualizacao local necessaria. Template privado permanece inalterado; esta pendencia nao condiciona a publicacao das quatro entregas.
 

@@ -73,6 +73,7 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 | Sua situacao | Primeiro passo |
 | --- | --- |
 | Primeiro uso | Abra `iniciar-harness.code-workspace` e siga a [configuracao do workspace](doc/guias/tools/workspace.md#configuracao). Gere/salve o workspace local e adicione os projetos externos. |
+| Quero o harness na minha conta GitHub da empresa | Siga o [guia de fork e atualizacao](doc/guias/tools/github-empresa.md): terminal com gh/Git ou navegador e Git, preservando as aplicacoes no Azure Repos. |
 | Preparar minha maquina ou as dos colegas | Siga o [roteiro por maquina](doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas), que encaminha ao certificado Sonar e ao Node/MCP opcional; o helper usa essas mesmas fontes. |
 | Quero escolher o que corrigir | Confira o registro e use a [priorizacao opcional por categoria](doc/guias/tools/priorizacao-issues.md). |
 | Ja escolhi uma issue | Use **Planejamento: planejar**, a partir da escolha e das evidencias no registro. |

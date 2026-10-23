@@ -1,5 +1,30 @@
 # Plano do agente: evolucao do harness
 
+## Fork do harness na conta da empresa — 23/10/2026
+
+Branch `harness/guia-fork-empresa`, derivada da main `bb9ebe8`, com arvore limpa.
+Pedido: documentar o fork na conta GitHub usada na empresa, mantendo aplicacoes
+e pipelines no Azure DevOps; usar somente a denominacao generica empresa.
+Incluir caminho por terminal com GitHub CLI (`gh`) para criar o fork e Git para
+clonar, ajustar remotos e sincronizar; manter rota explicita sem gh, com criacao
+do fork pelo navegador e operacoes locais somente por Git.
+
+Criar guia em doc/guias/tools/, acessivel pelo README, guia do desenvolvedor,
+workspace e guia de orientacao. Skill comum e papel de preparo encaminham ao
+mesmo guia, sem duplicar comandos nem executar operacoes pelo helper.
+Cobrir clone novo/existente, origin/upstream, preservacao dos dados locais,
+atualizacao sem force e divergencias/permissoes. Validar links, exemplos e diff;
+nenhum fork, autenticacao ou remoto real sera alterado por esta entrega.
+
+Entrega documental concluida, incluindo abertura direta do original publico
+com a conta da empresa e rota sem gh. Evidencias e limite do validador de skill
+registrados em tasks/todo.md. Em 23/10, o desenvolvedor autorizou commit,
+push da branch e abertura de PR para main desta entrega documental.
+
+Frente anterior: PR #45 integrado em `bb9ebe8`, main alinhada e branch de origem
+removida local/remotamente em 23/10. Analise DES e ensaio operacional permanecem
+pendentes. O texto de retomada abaixo registra o estado anterior a publicacao.
+
 Retomada em 23/10/2026 apos a pausa solicitada pelo desenvolvedor em 22/10. Ver
 [checkpoint de preparo/operacao e DES](../doc/estrategia-migracao-ambientes-jboss-eap-7.4/checkpoint-correcoes-preparo-des-2026-10-22.md).
 Alteracoes locais preservadas; commit/push/PR autorizados em 23/10, sem operacao de servidor.

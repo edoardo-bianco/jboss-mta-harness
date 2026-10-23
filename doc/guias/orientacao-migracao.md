@@ -315,6 +315,7 @@ da etapa. Voce pode entrar diretamente onde parou.
 | Etapa do processo | Guia com pedido de exemplo |
 | --- | --- |
 | 1. Preparar o ambiente | [Workspace](tools/workspace.md#orientacao-com-o-helper). |
+| Criar ou atualizar o fork do harness na conta da empresa | [GitHub na empresa](tools/github-empresa.md#orientacao-com-o-helper); nao exige projeto/MTA/registro. |
 | 2. Escolher projeto e fazer o build | [Maven](tools/maven.md#orientacao-com-o-helper); [Sonar](tools/sonar.md#orientacao-com-o-helper) e [JBoss](tools/jboss.md#orientacao-com-o-helper) para a referencia ANTES. |
 | 3. Obter ou reutilizar diagnostico | [MTA](tools/mta.md#orientacao-com-o-helper). |
 | 4. Conferir registro e escolher prioridades | [Registro](tools/planejamento-migracao.md#orientar-registro-e-escolha); [priorizacao opcional](tools/priorizacao-issues.md#orientacao-com-o-helper). |

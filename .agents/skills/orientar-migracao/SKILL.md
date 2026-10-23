@@ -88,6 +88,14 @@ ser substituidos. Nao peca IDs de execucao ou hashes para localizar trabalho.
 
 Para primeiro uso/colegas, siga o [roteiro por maquina](../../../doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas).
 Cite a secao usada e indique o resultado a conferir; nao reconstrua um guia paralelo.
+Para criar/atualizar fork do harness na conta GitHub da empresa, consulte
+[GitHub na empresa](../../../doc/guias/tools/github-empresa.md). Preserve a escolha
+de manter as aplicacoes no Azure Repos. Oriente a etapa faltante (conta/fork,
+clone/remotos ou sincronizacao), sem exigir projeto/MTA/registro nem executar
+criacao, autenticacao, troca de remotos ou sincronizacao. Respeite a preferencia
+por gh/Git ou navegador/Git; gh nao e requisito do harness.
+Um pedido de documentar/evoluir esse procedimento
+pertence ao agente executor de manutencao, nao ao helper leitor.
 Para MTA existente ou nova analise, siga o [guia MTA](../../../doc/guias/tools/mta.md#origem-mta-e-caminhos).
 Novos relatorios exigem mta.runsPath externo; sem configuracao, orientar
 Workspace: configurar caminhos. Com a raiz informada e projetos no workspace,
