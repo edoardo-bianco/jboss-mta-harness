@@ -96,9 +96,7 @@ function Get-HarnessReconciliationComparison {
         $documents=@(foreach ($relative in @($received.Keys | Sort-Object)) {
             $kind=Get-ReconciliationFileKind $relative
             if ($kind -eq 'FICHA') {
-                $parts=$relative.Split('/')
-                if ((Get-PrioritizationFichaRelativePath ([Uri]::UnescapeDataString($parts[2])) ([Uri]::UnescapeDataString($parts[4]))) -cne $relative) { throw 'Caminho da ficha nao corresponde a chave funcional canonica.' }
-                $null=Read-PrioritizationFicha (ConvertFrom-ReconciliationBytes $received[$relative]) $Project.Name ([Uri]::UnescapeDataString($parts[2])) ([Uri]::UnescapeDataString($parts[4]))
+                $null=Read-HarnessFichaAtPath (ConvertFrom-ReconciliationBytes $received[$relative]) $Project.Name $relative
             }
             if ($kind -eq 'REGISTRO') { $null=@(Read-ProjectDecisionRows (ConvertFrom-ReconciliationBytes $received[$relative])) }
             $status=if ($kind -eq 'REFERENCIA') {'REFERENCIA'} elseif ($null -eq $local[$relative]) {'NOVO'}

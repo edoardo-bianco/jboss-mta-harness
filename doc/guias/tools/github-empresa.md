@@ -283,6 +283,11 @@ clone do harness. Apos sincronizar, confira estado/commits e continue abrindo o
 mesmo workspace local. O fork nao compartilha automaticamente as evidencias
 da `.harness/`; para isso, siga o [guia de copia](compartilhamento-contextos.md).
 
+Se o fork corporativo nao estiver disponivel e a necessidade for compartilhar
+os documentos da migracao, revise o [procedimento documental por Git](compartilhamento-documental-git.md).
+Ele usa uma pasta do repositorio existente da equipe, inclusive no Azure Repos,
+e mantem a ferramenta na origem atual, com copia seletiva e reconciliacao.
+
 Atualizar o harness nao aplica configuracoes no JBoss nem valida a migracao.
 Para primeira instalacao, volte ao [preparo da maquina](workspace.md#comecar-na-maquina-de-trabalho);
 para uso corrente, retome a [etapa da aplicacao](../harness-migracao-desenvolvedor.md#como-usar-este-guia).

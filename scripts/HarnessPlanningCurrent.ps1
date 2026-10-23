@@ -122,7 +122,7 @@ function New-HarnessCurrentPlanning {
         $writes=@{($prefix+'contexto.json')=($data | ConvertTo-Json -Depth 12);($prefix+'planejar-lotes.prompt.md')=$prompt}
         foreach ($ficha in $data.FichaPaths) {
             if ($ficha.Status -ne 'DISPONIVEL') { continue }
-            $relative=Get-PrioritizationFichaRelativePath $ficha.Category $ficha.Id
+            $relative=Get-PrioritizationFichaRelativePath $ficha.Category $ficha.Id -Project $project
             $read=Read-HarnessProjectFiles $project @($relative)
             $old[$relative]=$read[$relative]
             $writes[$relative]=Get-IssueSourcesText $project $mta $ficha.Id $ficha.Category $read[$relative] $ficha.Path -EvidenceOnly:($PlanningBasis -eq 'EVIDENCIAS')

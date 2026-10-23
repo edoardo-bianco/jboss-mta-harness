@@ -74,6 +74,7 @@ patches e inicio pela mesma configuracao no script e no harness.
 | Workspace pronto e projeto a analisar | [2. Escolher o projeto e fazer o build](#2-escolher-o-projeto-e-fazer-o-build). |
 | MTA ja executado ou pasta completa recebida de um colega | [3. Obter ou reutilizar o diagnostico MTA](#3-obter-ou-reutilizar-o-diagnostico-mta); nao repetir a analise apenas para planejar. |
 | Arquivos de analise ou plano recebidos de um colega | [Compartilhar por copia](tools/compartilhamento-contextos.md): preservar a estrutura do projeto, conferir Source local e continuar da etapa recebida. |
+| Quero versionar apenas o consolidado documental em simtr-doc ou outro repo existente | [Proposta de procedimento por Git](tools/compartilhamento-documental-git.md): conteudo compartilhavel, .gitignore e reconciliacao entre coordenador/devs, sem mover a .harness local. |
 | Preparo a priorizacao para a equipe e cada desenvolvedor vai planejar suas issues | [Priorizacao compartilhada e planejamento por desenvolvedor](#priorizacao-compartilhada-e-planejamento-por-desenvolvedor). |
 | Tenho evidencia de um problema, mas nao um pacote MTA completo | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); registre a issue/evidencias e siga para Planejar. |
 | Retomada de um projeto ou consulta das pendencias | [4. Conferir o registro e escolher prioridades](#4-conferir-o-registro-e-escolher-prioridades); localizar o plano existente antes de gerar outro. |

@@ -81,6 +81,7 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 | Quero conferir uma base ou consultar uma issue preparada | Peca ao helper a [consulta da base ou da issue](doc/guias/tools/consultas-issues.md#consultar-pelo-helper), indicando o contexto se ainda nao estiver identificado. |
 | Quero adotar um novo MTA, local ou recebido | Use **Planejamento: atualizar registro de migracao**, conforme o [guia de adocao e comparacao](doc/guias/tools/planejamento-migracao.md#reconstruir-a-pasta-usando-um-mta-existente). |
 | Recebi arquivos de analise ou plano de um colega | Siga o [guia de copia](doc/guias/tools/compartilhamento-contextos.md): associar o POM local, preservar contribuicoes e reconciliar. |
+| Quero compartilhar somente os documentos da migracao em um repo da equipe | Revise o [procedimento documental por Git](doc/guias/tools/compartilhamento-documental-git.md): selecao de arquivos, modelo de .gitignore e reconciliacao; a .harness operacional permanece local. |
 | Quero navegar nas evidencias | Abra `.harness/indices/projetos.md` e o indice do projeto; [roteiro de navegacao](doc/guias/tools/workspace.md#navegar-pelas-evidencias-do-projeto). |
 | Quero baixar o Sonar da pipeline | Use **Aplicacao: analisar SonarQube > 3 Baixar ultima analise concluida**; [origem e limites](doc/guias/tools/sonar.md#baixar-a-ultima-analise-concluida). |
 | Quero migrar/configurar o JBoss EAP 7.4 | Consulte o [guia de migracao da configuracao](doc/guias/tools/migracao-configuracao-jboss.md) e o [guia de operacao](doc/guias/tools/jboss.md). |

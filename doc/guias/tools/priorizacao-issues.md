@@ -36,9 +36,15 @@ correntes. Categoria e conjunto de participantes delimitam a cobertura.
 separadas. Fonte ausente fica como lacuna; a configuracao nao concede permissao
 de leitura a um caminho que o cliente de IA bloqueia.
 
-Issues manuais `DEV-*` ficam fora da fatia percentual MTA, inclusive ao recriar.
-Permanecem no registro, com ficha/evidencias, e seguem por escolha humana ao
-[planejamento por evidencias](planejamento-migracao.md#registrar-uma-issue-manual).
+Issues manuais `DEV-*` participam quando a categoria escolhida e `manual`.
+Essa categoria usa registro, fichas, codigo e evidencias, sem exigir relatorio
+MTA; as categorias MTA mantem conjuntos separados. Cadastro atualiza a contagem
+no indice do projeto, sem mudar InitialTotal/quota da fatia iniciada. Novas
+issues entram na base mediante Recreate explicito. Elas tambem podem seguir
+diretamente, por escolha humana, ao [planejamento por evidencias](planejamento-migracao.md#registrar-uma-issue-manual).
+Fichas novas usam pastas legiveis e mantem o ID completo na identidade. Fichas
+antigas permanecem reconhecidas; recriar preserva seu conteudo, sem contabilizar
+exame automaticamente. O reparo da manual esta no mesmo roteiro.
 
 Novos conjuntos usam o nome padrao curto `priorizacao`. A lista completa de
 projetos fica no contexto, sem compor o nome da pasta. As categorias conservam
@@ -169,8 +175,8 @@ atual/priorizacao/<categoria>/escopos/<escopo>/
 Cada participante guarda suas fichas em
 `atual/priorizacao/<categoria>/issues/<issue>/ficha.md`. Os indices geral e dos
 participantes apontam ao mesmo conjunto mestre, sem duplicar a cobertura.
-Navegue pelos links; os nomes funcionais sao codificados quando necessario
-para o Windows. O mestre padrao e o primeiro artifactId na ordenacao ordinal.
+Navegue pelos links; as fichas novas usam nomes legiveis, com o ID completo
+preservado na identidade. O mestre padrao e o primeiro artifactId na ordenacao ordinal.
 
 O indice e derivado, preserva notas fora dos blocos gerenciados e pode ser
 reconstruido. Ele nao decide a proxima issue, nao comprova exame ou aceite e nao

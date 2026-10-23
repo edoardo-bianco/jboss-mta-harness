@@ -103,13 +103,17 @@ function Update-HarnessPrioritizationIndex {
                 Assert-PrioritizationContext $data $paths $projects $data.Category $data.Scope
                 if ($RefreshSources) {
                     foreach ($project in $projects) {
-                        if (-not $mtas.ContainsKey($project.Name)) {
-                            try { $mtas[$project.Name]=Read-HarnessProjectMta $project }
-                            catch { $mtas[$project.Name]=$null; $warnings+=($project.Name+': '+$_.Exception.Message) }
+                        $sourceMta=$null
+                        if ($data.Category -cne 'manual') {
+                            if (-not $mtas.ContainsKey($project.Name)) {
+                                try { $mtas[$project.Name]=Read-HarnessProjectMta $project }
+                                catch { $mtas[$project.Name]=$null; $warnings+=($project.Name+': '+$_.Exception.Message) }
+                            }
+                            $sourceMta=$mtas[$project.Name]
                         }
                         $key=$project.Name+'|'+$data.Category
                         if (-not $refreshed.ContainsKey($key)) {
-                            Update-PrioritizationFichaSources $project $mtas[$project.Name] $data.Category
+                            Update-PrioritizationFichaSources $project $sourceMta $data.Category
                             $refreshed[$key]=$true
                         }
                     }
@@ -117,9 +121,15 @@ function Update-HarnessPrioritizationIndex {
                 # Nao confiar em destinos editados dentro de FichaPaths.
                 $expectedFichas=@(foreach ($issue in $data.BaselineIssues) {
                     $store=$stores[$issue.Project]
-                    [pscustomobject]@{Project=$issue.Project;Id=$issue.Id;Path=(Join-Path $store.Folder (Get-PrioritizationFichaRelativePath $data.Category $issue.Id))}
+                    [pscustomobject]@{Project=$issue.Project;Id=$issue.Id;Path=(Join-Path $store.Folder (Get-PrioritizationFichaRelativePath $data.Category $issue.Id -Project $store))}
                 })
-                if ((ConvertTo-Json -InputObject @($data.FichaPaths) -Compress) -cne (ConvertTo-Json -InputObject $expectedFichas -Compress)) { throw 'Destinos de fichas divergentes.' }
+                if (@($data.FichaPaths).Count -ne $expectedFichas.Count) { throw 'Destinos de fichas divergentes.' }
+                foreach ($expected in $expectedFichas) {
+                    $actual=@($data.FichaPaths | Where-Object { $_.Project -ceq $expected.Project -and $_.Id -ceq $expected.Id })
+                    $legacy=Join-Path $stores[$expected.Project].Folder (Get-PrioritizationFichaRelativePath $data.Category $expected.Id -Legacy)
+                    if ($actual.Count -ne 1 -or ($actual[0].Path -cne $expected.Path -and
+                        ($actual[0].Path -cne $legacy -or (Test-Path -LiteralPath $expected.Path -PathType Leaf)))) { throw 'Destinos de fichas divergentes; confira/converta as pastas sem recriar a priorizacao.' }
+                }
                 $rankRel=$paths.Relative+'/priorizacao.md'; $indexRel=$paths.Relative+'/indice.md'
                 $old=Read-HarnessProjectFiles $master @($relative,$rankRel,$indexRel)
                 if ($old[$relative] -cne $read[$relative]) { throw 'Contexto mudou durante a leitura.' }

@@ -100,9 +100,13 @@ function Read-PrioritizationResult {
         if ([string]::IsNullOrWhiteSpace($issue.Reason)) { throw 'Cada examinada exige motivo, inclusive sem recomendacao.' }
         if ($null -ne $issue.Position -and ($issue.Position -isnot [int] -or $issue.Position -lt 1 -or -not $positions.Add($issue.Position))) { throw 'Posicao deve ser inteiro positivo unico ou null para sem proposta.' }
         $project=@($Projects | Where-Object Name -CEQ $issue.Project)[0]
-        $relative=Get-PrioritizationFichaRelativePath $Data.Category $issue.Id
+        $relative=Get-PrioritizationFichaRelativePath $Data.Category $issue.Id -Project $project
         $ficha=if ($FichaReader) { & $FichaReader $project $relative } else { Read-HarnessProjectFiles $project @($relative) }
-        if (-not $ficha[$relative]) { throw "Falta ficha da issue examinada: $($issue.Project) / $($issue.Id)" }
+        if ($FichaReader -and (-not $ficha.Contains($relative) -or -not $ficha[$relative])) {
+            $relative=Get-PrioritizationFichaRelativePath $Data.Category $issue.Id -Legacy
+            $ficha=& $FichaReader $project $relative
+        }
+        if (-not $ficha.Contains($relative) -or -not $ficha[$relative]) { throw "Falta ficha da issue examinada: $($issue.Project) / $($issue.Id)" }
         $null=Read-PrioritizationFicha $ficha[$relative] $project.Name $Data.Category $issue.Id
     }
     $result

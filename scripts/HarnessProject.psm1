@@ -120,7 +120,7 @@ Export-ModuleMember -Function Publish-HarnessProjectFiles,Read-HarnessProjectFil
 . (Join-Path $PSScriptRoot 'HarnessProjectMta.ps1')
 Export-ModuleMember -Function Read-HarnessProjectMta,Read-HarnessMtaDirectory
 . (Join-Path $PSScriptRoot 'HarnessProjectDocuments.ps1')
-Export-ModuleMember -Function Update-HarnessProjectDocuments,Get-HarnessProjectDecisions
+Export-ModuleMember -Function Update-HarnessProjectDocuments,Get-HarnessProjectDecisions,Get-HarnessMigrationCounts,Get-HarnessMigrationCountText
 Export-ModuleMember -Function Get-HarnessProjectMigrationText,Read-ProjectDecisionRows,Resolve-ProjectPath
 Export-ModuleMember -Function Find-ProjectManagedBlock,Set-ProjectManagedBlock,ConvertTo-ProjectCell,Get-ProjectOperationsText
 

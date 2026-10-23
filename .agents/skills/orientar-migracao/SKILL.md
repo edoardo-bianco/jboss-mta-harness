@@ -189,9 +189,13 @@ com comparacao ausente declarada, sem resolucao global. Falhas tecnicas continua
 falhas; um registro antigo RUNNING nao prova servidor ativo agora.
 Pedido manual pode partir de ficha SEM POSICAO; nao condicionar a recomendacao IA.
 Para criar/reparar issue DEV-..., use o [roteiro de issue manual](../../../doc/guias/tools/planejamento-migracao.md#registrar-uma-issue-manual).
-Explique a diferenca entre pasta literal e link escapado; nao recomende renomear
-o ID. Helpers orientam o executor, sem escrever ou executar o reparo. DEV-* fica
-fora da fatia percentual MTA; interrompida, ela retoma a mesma quota e cobertura.
+Oriente cadastro generico por Register-HarnessManualIssue e reparo explicito por
+Repair-HarnessManualIssue. Pastas de fichas sao legiveis; o ID original permanece
+na identidade. Helpers nao escrevem nem executam o reparo. Categoria manual
+pode ser priorizada por evidencias, separada das categorias MTA. Cadastro atualiza
+contagem, sem mudar base/quota iniciada; Recreate exige escolha explicita.
+ANALISAR AGORA e EVIDENCIAS permitem planejar a propria issue manual e suas
+corretivas; implementacao/aceite continuam sujeitos ao fluxo humano.
 
 ## Retomada local e recebida
 

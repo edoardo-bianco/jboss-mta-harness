@@ -1,0 +1,31 @@
+# Instalar como simtr-doc/.harness-jbosseap7.4/.gitignore.
+# Proposta para revisao; escopo: somente esta subpasta, nao o repositorio todo.
+# Copiar apenas os documentos escolhidos. Este filtro nao exporta arquivos,
+# nao remove arquivos ja rastreados e pode ser contornado por git add -f.
+
+# Ignorar arquivos por padrao, permitindo percorrer diretorios para as excecoes.
+*
+!*/
+!/.gitignore
+!/README.md
+
+# Registro, fichas e par inseparavel de continuidade da priorizacao.
+!/projetos/*/migracao.md
+!/projetos/*/atual/priorizacao/*/issues/*/ficha.md
+!/projetos/*/atual/priorizacao/*/escopos/*/contexto.json
+!/projetos/*/atual/priorizacao/*/escopos/*/priorizacao.md
+
+# Lote corrente, quando existente; prompts e indices gerados ficam locais.
+!/projetos/*/atual/planejamento/contexto.json
+!/projetos/*/atual/planejamento/plano.md
+!/projetos/*/atual/planejamento/tarefas.md
+!/projetos/*/reconciliado/resultado.md
+
+# Indice de evidencias e anexos liberados individualmente apos conferencia.
+!/projetos/*/evidencias/LEIA-ME.md
+# Exemplo: descomentar somente depois de conferir o arquivo e o destinatario.
+# !/projetos/simtr-parent/evidencias/deploy-eap-7.4.11/simtr-api-deploy-falha.log
+
+# Tudo que nao estiver liberado permanece ignorado, inclusive projeto.json,
+# operacao, builds, diagnosticos, sprints, temporarios, recebidos, servidores,
+# backups e binarios. Nao adicionar excecoes genericas para *.json ou *.log.
