@@ -1,5 +1,16 @@
 # To-do do agente: evolucao do harness
 
+## Settings locais do VS Code — 23/10/2026
+
+- [x] Conferir main, estado local e ausencia de rastreamento de settings.json.
+- [x] Criar branch de manutencao e adicionar regra restrita ao arquivo local.
+- [x] Conferir regra de ignore, preservacao de tasks/launch e diff final.
+
+git check-ignore confirmou a regra especifica para settings.json; tasks.json,
+launch.json e extensions.json permanecem fora dela. Diff sem erros. Nenhum
+arquivo local de configuracao foi alterado ou removido. Commit e push
+autorizados pelo usuario em 23/10/2026.
+
 ## Consolidacao para publicacao — 23/10/2026
 
 - [x] Registrar autorizacao de commit/push e manter compartilhamento como proposta.

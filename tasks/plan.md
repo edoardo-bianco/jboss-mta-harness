@@ -1,5 +1,13 @@
 # Plano do agente: evolucao do harness
 
+## Settings locais do VS Code — 23/10/2026
+
+Evolucao do harness na branch harness/ignorar-settings-vscode, a partir da main
+ce643ce limpa. Ignorar somente /.vscode/settings.json, mantendo as tarefas e
+demais arquivos compartilhados da IDE versionados. O arquivo nao esta rastreado
+neste checkout; preservar seu conteudo caso exista na maquina do desenvolvedor.
+Conferir a regra com git check-ignore e revisar o diff, sem suites de runtime.
+
 ## Consolidacao para publicacao — 23/10/2026
 
 A pedido do usuario, reunir fichas legiveis/issues manuais e proposta documental
