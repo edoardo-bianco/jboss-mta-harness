@@ -4,13 +4,15 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 24 -and @($labels | Sort-Object -Unique).Count -eq 24) 'Manter 24 tarefas distintas (rollback retirado), incluindo planejamento macro de sprints e conciliacao pela entrada habitual.'
-$serverLabels=@('Servidor: iniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
+Assert ($labels.Count -eq 26 -and @($labels | Sort-Object -Unique).Count -eq 26) 'Manter 26 tarefas distintas, incluindo restart e acompanhamento de logs JBoss.'
+$serverLabels=@('Servidor: iniciar JBoss','Servidor: reiniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
     Assert ($task.Count -eq 1 -and $task[0].args -contains '${workspaceFolder}/scripts/gerenciar-jboss.ps1') 'Falta tarefa de servidor JBoss.'
     Assert ($task[0].args -notcontains '-SelectTarget' -and $task[0].args -notcontains '-WorkspacePath' -and -not ($task[0].args | Where-Object { $_ -like '${input:*}' })) 'Servidor nao deve solicitar workspace/projeto.'
 }
+$logTask=@($tasks.tasks | Where-Object label -eq 'Servidor: acompanhar logs')
+Assert ($logTask.Count -eq 1 -and $logTask[0].args -contains '${workspaceFolder}/scripts/acompanhar-log-jboss.ps1' -and -not ($logTask[0].args | Where-Object { $_ -like '${input:*}' })) 'Logs devem selecionar servidor sem exigir projeto/workspace.'
 $deployTask=@($tasks.tasks | Where-Object label -eq 'Aplicacao: deploy no JBoss')
 Assert ($deployTask.Count -eq 1 -and $deployTask[0].args -contains 'Deploy') 'Deploy deve ter tarefa com acao explicita.'
 Assert (@($tasks.tasks | Where-Object label -eq 'Aplicacao: rollback no JBoss').Count -eq 0) 'Rollback gerenciado foi retirado; reverter e fazer deploy de outro WAR.'
@@ -116,3 +118,11 @@ $sprintArguments=@($sprints[0].args | ForEach-Object { $_.Replace('${workspaceFo
 $output='q' | & powershell.exe @sprintArguments 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and @(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness') -Filter 'contexto.json' -Recurse -File).Count -eq 0) 'Cancelamento da tarefa de sprints criou contexto ou nao chegou ao menu.'
 Write-Output 'PASS: entrada real da tarefa de sprints cancela antes de criar contexto.'
+foreach ($serverTask in @($logTask[0],@($tasks.tasks | Where-Object label -eq 'Servidor: reiniciar JBoss')[0])) {
+    $serverArguments=@($serverTask.args | ForEach-Object { $_.Replace('${workspaceFolder}',$fixture) })
+    $serverArguments+=@('-ConfigPath',$configPath)
+    $output='q' | & powershell.exe @serverArguments 2>&1 | Out-String
+    Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada')) 'Cancelar tarefa de logs/restart nao encerrou no menu.'
+    Assert (-not (Test-Path (Join-Path $fixture '.harness/servidores'))) 'Cancelar logs/restart nao pode operar servidor.'
+}
+Write-Output 'PASS: tarefas reais de logs/restart cancelam antes de qualquer operacao de servidor.'

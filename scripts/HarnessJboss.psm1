@@ -95,13 +95,14 @@ function Invoke-HarnessJbossDeploy {
 }
 
 function Invoke-HarnessJbossOperation {
-    param($Context,$Server,[ValidateSet('Status','Start','StartDebug','Stop')][string]$Action)
+    param($Context,$Server,[ValidateSet('Status','Start','StartDebug','Stop','Restart','RestartDebug')][string]$Action)
     $null=[IO.Directory]::CreateDirectory($Server.State)
     try { $lock=[IO.File]::Open((Join-Path $Server.State 'operation.lock'),'OpenOrCreate','ReadWrite','None') } catch { throw 'Outra operacao JBoss esta em andamento.' }
     # Somente a ultima operacao: cada execucao substitui o resultado anterior.
     # Logs do servidor ficam em ultimo-start/, renovados apenas por um novo start.
     $result=[ordered]@{Action=$Action;Scope='Server';Eap=$Server.Eap;Home=$Server.Home;Base=$Server.Base;StandaloneConfig=$Server.Settings.standaloneConfig;Source=$null;Project=$null;Status='FAILED';Observed=$null;Error=$null;StartedAtUtc=[DateTime]::UtcNow.ToString('o');FinishedAtUtc=$null;ResultPath=(Join-Path $Server.State 'ultima-operacao.json')}
     try {
+        $result.Phase=$Action
         Write-HarnessJson $result.ResultPath $result
         $start=Join-Path $Server.State 'ultimo-start'
         $result.Observed=switch ($Action) {
@@ -109,8 +110,16 @@ function Invoke-HarnessJbossOperation {
             Start { Start-HarnessJboss $Server $start }
             StartDebug { Start-HarnessJboss $Server $start -DebugMode }
             Stop { Stop-HarnessJboss $Server }
+            { $_ -in @('Restart','RestartDebug') } {
+                $result.Phase='Stop'
+                $stopped=Stop-HarnessJboss $Server
+                if ($stopped.State -ne 'STOPPED') { throw 'Parada nao confirmada; restart interrompido antes do start.' }
+                $result.Phase='Start'
+                Start-HarnessJboss $Server $start -DebugMode:($Action -eq 'RestartDebug')
+            }
         }
         $result.Status='SUCCEEDED'
+        $result.Phase='Completed'
     } catch { $result.Error=$_.Exception.Message }
     finally {
         $result.FinishedAtUtc=[DateTime]::UtcNow.ToString('o')

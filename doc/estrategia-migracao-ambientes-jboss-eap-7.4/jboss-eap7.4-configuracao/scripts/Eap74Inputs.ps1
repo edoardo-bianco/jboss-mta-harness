@@ -27,6 +27,7 @@ function Read-EapPreparationConfig {
     if (($config.portOffset -isnot [int] -and $config.portOffset -isnot [long]) -or $config.portOffset -lt 0 -or $config.portOffset -gt 55000) { throw 'portOffset deve ser inteiro entre 0 e 55000.' }
     if ($config.logSql -isnot [bool]) { throw 'logSql deve ser booleano.' }
     $base=Split-Path -Parent $Path
+    $config | Add-Member -NotePropertyName PreparationBase -NotePropertyValue $base -Force
     foreach ($key in @('eapHome','jdkHome','template','values','modules','jvmOptions','output')) { $config.$key=Resolve-EapPath $config.$key $base }
     foreach ($pathValue in @($config.eapHome,$config.jdkHome,$config.output)) {
         if ($pathValue -match '["%!^&|<>\r\n]') { throw 'Caminho contem caracteres nao suportados pelo launcher Windows.' }

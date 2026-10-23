@@ -12,6 +12,26 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
+      "label": "Servidor: reiniciar JBoss",
+      "detail": "Escolha modo normal/debug e EAP ou Todos; confirma parada antes de iniciar, sob o mesmo bloqueio por servidor.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-SelectRestartMode"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
+      "label": "Servidor: acompanhar logs",
+      "detail": "Acompanhe server.log do EAP escolhido ou de ambos. Ctrl+C encerra somente a leitura.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/acompanhar-log-jboss.ps1"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Servidor: parar JBoss",
       "detail": "Escolha EAP 7.1/7.4 ou Todos; encerra os servidores escolhidos e suas aplicacoes.",
       "type": "process",

@@ -26,7 +26,7 @@ foreach ($eap in @('eap71','eap74')) {
 $config | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $configPath -Encoding UTF8
 $runner=Join-Path $area 'runner.ps1'
 @'
-param([string]$Eap,[string]$Action,[switch]$SelectStartMode,[string]$FailEap)
+param([string]$Eap,[string]$Action,[switch]$SelectStartMode,[switch]$SelectRestartMode,[string]$FailEap)
 $ErrorActionPreference='Stop'
 Import-Module (Join-Path $PSScriptRoot 'scripts/HarnessJboss.psm1') -DisableNameChecking
 $module=Get-Module HarnessJboss
@@ -55,6 +55,7 @@ $arguments=@{ConfigPath=(Join-Path $PSScriptRoot 'config.json')}
 if ($Eap) { $arguments.Eap=$Eap }
 if ($Action) { $arguments.Action=$Action }
 if ($SelectStartMode) { $arguments.SelectStartMode=$true }
+if ($SelectRestartMode) { $arguments.SelectRestartMode=$true }
 try { & (Join-Path $PSScriptRoot 'scripts/gerenciar-jboss.ps1') @arguments }
 catch { Write-Output $_.Exception.Message; exit 1 }
 exit $LASTEXITCODE
@@ -71,13 +72,13 @@ function Invoke-Entry {
     $exitCode=$LASTEXITCODE
     [pscustomobject]@{ExitCode=$exitCode;Output=$output;Receipts=@(Get-Receipts)}
 }
-foreach ($action in @('Status','Start','StartDebug','Stop')) {
+foreach ($action in @('Status','Start','StartDebug','Stop','Restart','RestartDebug')) {
     $result=Invoke-Entry -Arguments @('-Eap','all','-Action',$action)
     Assert ($result.ExitCode -eq 0 -and $result.Receipts.Count -eq 2) "Todos deve executar ambos: $action. $($result.Output)"
     Assert (($result.Receipts.Eap | Sort-Object) -join ',' -eq 'eap71,eap74') 'Recibos devem identificar cada EAP.'
     foreach ($receipt in $result.Receipts) {
         Assert ($receipt.Status -eq 'SUCCEEDED' -and $receipt.Action -eq $action -and $receipt.Scope -eq 'Server' -and $null -eq $receipt.Source) 'Resultado/escopo incorreto.'
-        if ($action -eq 'StartDebug') { Assert $receipt.Observed.Debug 'Todos perdeu modo debug.' }
+        if ($action -in @('StartDebug','RestartDebug')) { Assert $receipt.Observed.Debug 'Todos perdeu modo debug.' }
         if ($action -eq 'Stop') { Assert ($receipt.Observed.State -eq 'STOPPED') 'Todos nao parou o servidor.' }
     }
     Assert ($result.Output.Contains('Resumo por servidor') -and $result.Output.Contains('eap71') -and $result.Output.Contains('eap74')) 'Falta resumo dos resultados.'
@@ -91,6 +92,9 @@ foreach ($mode in @('1','2')) {
     $result=Invoke-Entry -Arguments @('-SelectStartMode') -Answers @($mode,'3')
     $expected=if ($mode -eq '1') {'Start'} else {'StartDebug'}
     Assert ($result.ExitCode -eq 0 -and $result.Receipts.Count -eq 2 -and @($result.Receipts | Where-Object Action -ne $expected).Count -eq 0) 'Menu de start perdeu modo ou selecao Todos.'
+    $result=Invoke-Entry -Arguments @('-SelectRestartMode') -Answers @($mode,'3')
+    $expected=if ($mode -eq '1') {'Restart'} else {'RestartDebug'}
+    Assert ($result.ExitCode -eq 0 -and $result.Receipts.Count -eq 2 -and @($result.Receipts | Where-Object Action -ne $expected).Count -eq 0) 'Menu de restart perdeu modo ou selecao Todos.'
 }
 foreach ($failedEap in @('eap71','eap74')) {
     $result=Invoke-Entry -Arguments @('-Eap','all','-Action','Stop','-FailEap',$failedEap)

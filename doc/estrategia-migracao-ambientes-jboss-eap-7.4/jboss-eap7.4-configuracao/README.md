@@ -6,9 +6,13 @@ EAP 7.4 standalone e JDK 8. Os scripts recebem um **template ja adequado ao EAP
 aplicam patch ou fazem deployment. Para transformar a origem, consulte o
 [roteiro de migracao da configuracao](../../guias/tools/migracao-configuracao-jboss.md).
 
-O preparo consolida XML, configuracao JVM e modulos; `-Aplicar` publica esse
+O preparo consolida XML, configuracao JVM, modulos e arquivos externos declarados; `-Aplicar` publica esse
 conjunto no EAP escolhido. O inicio usa os arquivos ja instalados. Script e
 harness chamam o `standalone.bat` oficial e o mesmo `bin/standalone.conf.bat`.
+
+Para DES com imagem construida pelo Azure DevOps e executada no OKD, use o
+[roteiro de DES](des.md). Local e DES devem consumir a mesma revisao do template
+7.4 por aplicacao; valores, provisionamento e inicializacao seguem cada ambiente.
 
 ## 1. Separar codigo e dados de cada ambiente
 
@@ -27,6 +31,7 @@ C:\desenvolvimento\jboss-eap7.4-configuracao\
   modulos\modulos.json
   modulos\jars\driver.jar
   jvm\opcoes.txt
+  arquivos\aplicacao.jceks                           # opcional, privado
 C:\desenvolvimento\jboss-eap7.4-consolidado\local\       # output, exclusivo do gerador
 C:\desenvolvimento\servidores\jboss-eap-7.4\           # eapHome, produto instalado
 C:\desenvolvimento\java\jdk8\                         # jdkHome
@@ -55,6 +60,7 @@ Nao copie configuracao pessoal de outra maquina sem revisar caminhos e JDK.
 | `standaloneConfig` | Nome simples, ex. `standalone-local.xml`, usado tambem no harness |
 | `template`, `values` | XML 7.4 com tokens e arquivo de valores |
 | `modules` | Manifesto dos modulos adicionais; `modules: []` se nao houver |
+| `files` | Lista opcional de arquivos externos, descrita na secao 3.1; omitir ou usar `[]` se nao houver |
 | `jvmOptions` | Arquivo UTF-8, uma opcao JVM completa por linha |
 | `output` | Pasta exclusiva do consolidado, separada das entradas/EAP/JDK |
 | `portOffset` | Inteiro, ex. `100`: HTTP padrao 8180, management padrao 10090 |
@@ -104,6 +110,9 @@ Edite [modulos.example.json](modelos/modulos.example.json). Cada modulo declara
 `name`, `slot`, `dependencies` (nomes de modulos JBoss) e `artifacts`.
 O caminho de destino e `modules/<nome dividido por pontos>/<slot>`.
 O gerador produz `module.xml` com `resource-root` para cada JAR.
+Com schema `module:1.9`, nao escreve atributo `slot`: o slot padrao usa o nome
+simples, e um slot personalizado usa `name="nome:slot"`. A pasta continua sendo
+`modules/<nome>/<slot>`. Veja a [orientacao Red Hat sobre slots](https://access.redhat.com/solutions/185243).
 Declare todas as dependencias necessarias: a copia Maven **nao resolve/transfere
 dependencias transitivas** para o modulo.
 
@@ -129,6 +138,40 @@ driver efetivamente usado pela aplicacao. Confira nome, versao, origem, hash e
 associacao no XML/servidor. O mecanismo Maven usa o
 [goal oficial dependency:copy](https://maven.apache.org/plugins/maven-dependency-plugin/copy-mojo.html),
 fixado em `3.8.1` nos scripts.
+
+### 3.1. Incluir keystores e outros arquivos privados
+
+Crie `arquivos/` na pasta privada somente se precisar desses arquivos. Coloque
+ali os arquivos obtidos da origem autorizada, sem alterar seu formato. Declare
+em `preparo.json`, por exemplo:
+
+```json
+"files": [
+  {"source": "arquivos/aplicacao.jceks", "target": "aplicacao.jceks"},
+  {"source": "arquivos/integracao.properties", "target": "integracoes/integracao.properties"}
+]
+```
+
+`source` parte da pasta do JSON (ou e um caminho absoluto externo ao EAP e ao
+consolidado). `target` e **relativo a `standalone/configuration`**, no consolidado
+e no servidor. Para o arquivo `simtr-keystore.jceks` do ensaio, use esse nome
+nos dois campos e mantenha a propriedade XML apontando a
+`${jboss.server.config.dir}/simtr-keystore.jceks`. Nao e o `cacerts` do JDK nem
+o `application.keystore` de TLS do servidor.
+
+O script copia bytes, inclui o hash no manifesto e nao extrai senhas nem valida
+aliases internos. Confira separadamente os aliases e o uso pela aplicacao.
+Arquivo ausente, destino duplicado/invalido, link, ou arquivo instalado com
+bytes diferentes interrompe o preparo. Arquivo identico conserva suas datas.
+Nao ha substituicao forcada: para trocar um keystore existente, concilie as
+copias e planeje sua substituicao com o servidor parado. Retirar uma entrada da
+lista nao apaga o arquivo ja instalado no EAP.
+
+Destinos aceitam subpastas simples; nao aceitam caminhos absolutos, `..`, nomes
+reservados Windows, o XML gerado, `standalone*.xml`, historico XML nem
+`logging.properties`. Arquivos entram somente em `standalone/configuration`;
+JARs continuam no manifesto de modulos, e opcoes JVM em `jvmOptions`.
+Configuracoes existentes sem `files` continuam funcionando.
 
 ## 4. Definir a JVM compartilhada
 
@@ -223,6 +266,15 @@ standalone dessa instalacao; para JVMs independentes, use instalacoes separadas.
 
 ## 7. Verificar e repetir na maquina de trabalho
 
+Para atualizar uma instalacao ja ensaiada, siga o
+[roteiro de atualizacao da maquina de trabalho](atualizacao-maquina-trabalho.md).
+Ele distingue atualizar o harness via Git de aplicar novamente as entradas privadas.
+
+Depois do start normal, execute o [teste de conexao com o banco pela CLI](../../guias/tools/jboss.md#testar-conexao-com-o-banco-apos-o-start)
+antes do deploy. O roteiro usa `preparo.json`, permite ajustar a porta e o
+pool-name do datasource e mostra o resultado esperado (`success` e `true`).
+Nao exige aplicacao implantada; a validacao funcional continua apos o deploy.
+
 Registre versao/patch/JDK, arquivos escolhidos e resultados sem valores secretos.
 Confira boot sem erros, XML realmente selecionado, carregamento dos modulos,
 datasources/conexoes e integracoes exigidas. Admin-only e XML bem formado nao
@@ -241,7 +293,7 @@ as pendencias que dependem da equipe; nao preencha com suposicoes.
 Quero configurar um JBoss EAP 7.4 usando um template 7.4 ja revisado.
 Leia doc/estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md.
 Meu preparo.json esta em [caminho privado]. Ja conclui [etapas].
-Oriente uma etapa por vez: entradas, modulos Maven ou locais, valores, JVM,
+Oriente uma etapa por vez: entradas, modulos Maven ou locais, arquivos externos, valores, JVM,
 LogSql, consolidacao, aplicacao e inicio pelo script/harness.
 Nao exiba valores secretos; indique comando, resultado esperado e pendencias.
 ```

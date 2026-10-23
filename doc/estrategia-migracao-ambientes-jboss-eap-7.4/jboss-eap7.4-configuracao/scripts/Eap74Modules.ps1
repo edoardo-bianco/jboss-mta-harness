@@ -34,7 +34,10 @@ function New-EapModules {
         if (-not $names.Add($relative)) { throw "Modulo/slot duplicado: $name/$slot" }
         $destination=Join-Path $Stage $relative
         $null=[IO.Directory]::CreateDirectory($destination)
-        $lines=@('<?xml version="1.0" encoding="UTF-8"?>',('<module xmlns="urn:jboss:module:1.9" name="'+$name+'" slot="'+$slot+'">'),'  <resources>')
+        # Desde module:1.6 o slot integra a identidade; nao existe atributo slot.
+        $identity=$name
+        if ($slot -ne 'main') { $identity+=':'+$slot }
+        $lines=@('<?xml version="1.0" encoding="UTF-8"?>',('<module xmlns="urn:jboss:module:1.9" name="'+$identity+'">'),'  <resources>')
         $jars=New-Object 'Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
         if (-not @($module.artifacts).Count) { throw "Modulo sem artefatos: $name" }
         foreach ($artifact in @($module.artifacts)) {
