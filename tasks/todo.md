@@ -1,5 +1,39 @@
 # To-do do agente: evolucao do harness
 
+## Compartilhamento documental por Git — 23/10/2026
+
+- [x] Conferir main limpa e criar branch de documentacao; identificar pedido como evolucao do harness.
+- [x] Conferir contrato de copia/reconciliacao e distinguir contexto de continuidade de dados operacionais.
+- [x] Escrever lista de inclusao/exclusao e procedimento do coordenador/devs, com continuidade do trabalho atual.
+- [x] Preparar modelo de .gitignore limitado a .harness-jbosseap7.4, sem alterar o Git operacional.
+- [x] Ligar a proposta pelo README, guia do desenvolvedor e compartilhamento existente.
+- [x] Validar selecao com Git em pasta sintetica, exemplos PowerShell, links e diff; registrar limites.
+
+Entregues doc/guias/tools/compartilhamento-documental-git.md e
+doc/modelos/compartilhamento-documental.gitignore. Proposta para revisao, sem
+alterar o contrato/runtime: caminhos compartilhados, exclusoes, anexos explicitos,
+base inicial, contribuicoes separadas, reconciliacao no harness habitual e
+publicacao do consolidado. Inclui pedido de inventario somente leitura para
+conferir os arquivos reais na maquina de trabalho antes da copia.
+
+Validacao em repositorios Git sinteticos no TEMP: 50 verificacoes PASS, com
+13 arquivos documentais staged apos liberar um anexo; WAR, configuracao local,
+operacoes, temporarios e prompts/indices derivados excluidos. Regras restritas
+a subpasta, preservando outras areas do repositorio; sparse-checkout de pasta
+nova e existente conferido. Fixtures removidas com alvo absoluto verificado.
+Nao houve acesso a remoto nem ensaio de clone parcial via servidor.
+
+Sete Markdown conferidos: 197 links locais, 116 ancoras e 15 blocos PowerShell
+analisados pelo parser, sem executar os exemplos. Revisao confrontou o recorte
+com o leitor de contribuicoes, os contratos correntes e a documentacao Git.
+Suites do runtime nao repetidas: alteracao exclusivamente documental/modelo.
+
+Limites: nenhum dado real exportado, nenhuma configuracao local modificada e
+nenhum acesso ao simtr-doc da empresa. A lista real de arquivos, permissao de
+publicacao e ensaio entre dois devs dependem da revisao na maquina de trabalho.
+Versoes antigas ja sobrescritas nao sao recuperadas por este procedimento.
+Commit e push autorizados em 23/10 para consolidar a documentacao com as fichas. A adocao do compartilhamento e o envio de dados ao simtr-doc continuam pendentes de revisao.
+
 ## Links de fichas e registro de issues manuais — 23/10/2026
 
 - [x] Conferir raiz/main/HEAD e criar branch de manutencao preservando o checkout.

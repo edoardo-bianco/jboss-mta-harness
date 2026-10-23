@@ -1,5 +1,35 @@
 # Plano do agente: evolucao do harness
 
+## Compartilhamento documental por Git — 23/10/2026
+
+Branch `harness/compartilhamento-documental-git`, derivada da main limpa
+`9165c3e`. Pedido: preparar para revisao o conteudo compartilhavel e o processo
+do coordenador/devs no repositorio existente simtr-doc, em
+`.harness-jbosseap7.4/`. A `.harness` operacional permanece no harness de cada
+maquina; MTA permanece externo em `C:\mta-runs`.
+
+Entregar proposta de procedimento manual usando copia seletiva, Git e a
+reconciliacao existente, com modelo de .gitignore restrito a pasta compartilhada.
+Preservar base/quota/examinadas, fichas, escolhas, propostas e evidencias nomeadas;
+excluir configuracao de maquina, builds/deploys e residuos operacionais.
+Documentar primeira base, contribuicoes em copia separada, integracao revisada,
+recebimento pelos devs e possibilidade de continuar o trabalho local antes de
+publicar. Conferir navegacao, comandos e selecao do modelo com dados sinteticos.
+
+Sem exportador novo, alteracao de runtime/perfil/raiz de dados, copia de dados
+reais, acesso ao simtr-doc, commit, push ou PR. Publicacao real depende da revisao
+do procedimento e do diff na maquina de trabalho; esta entrega nao a executa.
+
+Proposta e modelo concluidos, com navegacao pelos guias existentes. Conferidos
+50 casos de selecao/sparse-checkout em Git sintetico e a navegacao/sintaxe da
+documentacao. Resultado e limites registrados em tasks/todo.md. A revisao e o
+ensaio com os arquivos reais da equipe permanecem posteriores a esta preparacao.
+
+Em 23/10, o usuario autorizou consolidar a proposta com a entrega de fichas e fazer commit/push no repositorio do harness. O compartilhamento permanece proposta para revisao; nao ha autorizacao de exportacao ou publicacao de dados no simtr-doc.
+
+Frente anterior: PR #47 integrado em `9165c3e`, main alinhada e branch
+`harness/links-issues-manuais` removida local/remotamente.
+
 ## Links de fichas e registro de issues manuais — 23/10/2026
 
 Branch `harness/links-issues-manuais`, derivada da main `a29137d`, inicialmente

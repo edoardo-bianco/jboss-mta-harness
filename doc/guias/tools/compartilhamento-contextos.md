@@ -15,6 +15,12 @@ pelos mesmos nomes e links. Nao existe tarefa de exportacao/importacao, cadastro
 de transferencia ou identificador de pacote. Um ZIP pode servir como transporte:
 extraia-o numa pasta de recebimento e confira o conteudo antes de usar.
 
+Para versionar somente os documentos em um repositorio existente, consulte a
+[proposta de compartilhamento documental por Git](compartilhamento-documental-git.md).
+Ela detalha a selecao para `.harness-jbosseap7.4/` no `simtr-doc`, o modelo de
+`.gitignore` e o trabalho do coordenador/devs, mantendo a `.harness` local e o
+MTA externo. Usa a reconciliacao abaixo; nao implementa sincronizacao automatica.
+
 ## Orientacao com o helper
 
 ```text
