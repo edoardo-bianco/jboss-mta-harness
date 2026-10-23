@@ -1,5 +1,28 @@
 # Plano do agente: evolucao do harness
 
+## Fichas legiveis e issues manuais — 23/10/2026
+
+Evolucao do harness em checkout separado C:/temp/harness-fichas-legiveis,
+branch harness/fichas-legiveis, base main 9165c3e. A proposta documental
+permanece intacta em harness/compartilhamento-documental-git.
+
+Pedido: pastas legiveis para TODAS as fichas; ID original preservado na
+identidade. Cadastro manual generico, registro e contagem coerentes,
+priorizacao da categoria manual e continuidade para planejamento/implementacao.
+Usuario permite recriar a priorizacao desde o inicio; preservar a ficha manual,
+o log, indice de evidencias e decisoes. Sem converter todo o historico.
+Reparo pontual da manual com previa, publicacao protegida e recusa de conflito.
+Caminho Windows inclui a area de publicacao temporaria; nao truncar nem usar
+hash para ocultar colisao. Pastas antigas continuam legiveis pelos consumidores.
+Cadastro nao equivale a analise ou GO. InitialTotal permanece fixo por escopo/
+categoria; novos achados entram na base quando Recreate for escolhido.
+
+Validar cadastro/repeticao, reparo/preservacao, colisao/comprimento, MTA/manual,
+recriacao/continuidade, planejamento, indice e reconciliacao em copia isolada.
+Em 23/10, o usuario autorizou consolidar esta entrega com a proposta documental e fazer commit/push. Nenhuma alteracao de dados reais ou publicacao no simtr-doc faz parte dessa autorizacao.
+
+Implementacao concluida e revisada; 14 suites passaram em copia isolada. Cadastro, contagem, priorizacao manual, planejamento e reconciliacao verificados. Resultados, limites e verificacao pendente no editor corporativo registrados em tasks/todo.md.
+
 ## Links de fichas e registro de issues manuais — 23/10/2026
 
 Branch `harness/links-issues-manuais`, derivada da main `a29137d`, inicialmente

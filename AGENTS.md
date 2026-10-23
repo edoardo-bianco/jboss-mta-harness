@@ -65,10 +65,12 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   Fonte ausente fica como lacuna, sem link inventado. A recencia seleciona somente
   o relatorio MTA dentro da origem da aplicacao; nao escolhe documentos humanos.
 - Para registrar/reparar issue manual, siga o [roteiro](doc/guias/tools/planejamento-migracao.md#registrar-uma-issue-manual).
-  Preserve ID DEV-... e pasta canonica; gere links com Get-HarnessSourceLink a
-  partir de caminhos literais. Percentuais no nome fisico exigem escape na URI
-  (%44 na pasta vira %2544 no link). Confira o destino existente, sem renomear
-  a issue para consertar navegacao nem contar ficha criada como exame automatico.
+  Use Register-HarnessManualIssue para cadastro generico e Repair-HarnessManualIssue
+  para reparo explicito de pasta antiga. Todas as fichas usam nomes legiveis;
+  preserve o ID completo na identidade, recusando colisoes e caminhos longos.
+  Gere links com Get-HarnessSourceLink a partir de caminhos literais.
+  Categoria manual pode ser priorizada por evidencias; a base/quota e fixa ate
+  Recreate explicito. Cadastro nao comprova exame, GO ou aceite.
 - A entrada habitual e Planejamento: planejar. Usa migracao.md atual e os
   destinos em atual/planejamento/ do projeto. Nao use tasks/ do harness para
   corretivas da aplicacao. Um lote consistente por projeto; detalhes/fichas

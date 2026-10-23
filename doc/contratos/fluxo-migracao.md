@@ -85,8 +85,10 @@ sem duplicar exame; esgotamento nao inventa trabalho.
 
 Conferir escolhas atuais no registro. Elegibilidade considera categoria,
 presenca, decisao A DEFINIR/ANALISAR AGORA e andamento NAO ANALISADA/ANALISADA.
-ADIAR, FORA DO ESCOPO, DEV-* e corretivas em andamento exigem direcionamento
-humano explicito. Mudanca de elegibilidade exige novo preparo, sem alterar
+ADIAR, FORA DO ESCOPO e corretivas em andamento exigem direcionamento humano
+explicito. Issues MANUAL na categoria manual sao elegiveis pelos mesmos estados,
+com registro/fichas/evidencias e sem exigir relatorio MTA. Nao entram nas
+categorias MTA. Cadastro atualiza a contagem, nao a base de uma fatia iniciada. Mudanca de elegibilidade exige novo preparo, sem alterar
 o contexto pelo prompt para fabricar cumprimento de quota. Git nao e consultado.
 
 Examinar SliceSize novas issues alem de ExcludedIssues, considerando trabalho
@@ -108,10 +110,12 @@ referencias/lacunas. Bloco ficha:identidade:inicio/fim contem JSON sem cercas:
 Project, Category, Id, LocalPaths e EvidencePaths. Os dois arrays sao relativos
 a Source e evidencias/ respectivamente e representam caminhos conferidos.
 Bloco ficha:fontes:inicio/fim usa links diretos; preservar texto humano externo.
-Nomes fisicos codificados nao sao URLs: %44 na pasta exige %2544 no link.
-Gerar links por Get-HarnessSourceLink com caminhos literais e conferir o destino
-resolvido existente; nao alterar ID/pasta para reparar navegacao. LocalPaths e
-EvidencePaths continuam caminhos literais, sem escape de URL adicional.
+Pastas das fichas sao legiveis, com ID completo na identidade. Obter destinos
+pela API comum/FichaPaths; nao deduzir IDs pelos nomes simplificados. Recusar
+colisoes e caminhos longos, considerando a publicacao temporaria. Pastas antigas
+sao reconhecidas; reparar manual explicitamente, preservando analise e escolhas.
+Gerar links por Get-HarnessSourceLink com caminhos literais; conferir destino
+e clique separadamente. LocalPaths/EvidencePaths nao sao URLs.
 Nao copiar incidentes/anexos nem inventar ancora de relatorio ou linha de codigo.
 
 RankingPath conserva um bloco priorizacao:resultado:inicio/fim, JSON sem cercas:

@@ -1,5 +1,43 @@
 # To-do do agente: evolucao do harness
 
+## Fichas legiveis e issues manuais — 23/10/2026
+
+- [x] Preservar proposta documental em outra branch e criar checkout separado.
+- [x] Registrar mudanca de escopo: todas as fichas, reinicio da priorizacao permitido.
+- [x] Escrever teste inicial; RED por ausencia do cadastro integrado.
+- [x] Implementar nomes legiveis, limites de caminho e recusa de colisoes.
+- [x] Cadastrar manual e atualizar registro/total sem inventar analise.
+- [x] Permitir priorizacao manual com base fixa e evidencia explicita.
+- [x] Reparar somente ficha manual antiga, com previa e preservacao.
+- [x] Atualizar contratos, guias e orientacao ao Copilot; fornecer prompt de reparo.
+- [x] Validar regressao e revisar diff; registrar resultados e limites.
+
+Validacao final: 14 suites passaram pelo runner isolado: ReadableIssueFolders,
+ManualPrioritization, FunctionalLinks, ProjectStorage, ProjectDocuments,
+ProjectNavigation, MigrationRegister, PrioritizationProgress, IssuePlanning,
+PlanningEvidence, PlanningPortable, ReconciliationSources,
+ReconciliationPrioritization e ReconciliationLegacyFolders.
+
+Testes reproduziram antes da corretiva a ausencia do cadastro integrado, a
+aceitacao de identidade divergente no reparo, a mistura de fontes MTA/manual
+e a reconciliacao de ficha legada recebida sem equivalente local. Os casos
+passaram depois dos ajustes. Cobertura inclui repeticao do cadastro, preservacao
+de escolhas/analise/log, destino divergente ou vazio, colisoes, tamanho do caminho,
+base fixa no Continue e inclusao de novos achados no Recreate.
+
+Revisao independente concluida sem novos achados impeditivos. Conferidos 11
+Markdowns, 112 links locais, 40 ancoras e quatro exemplos PowerShell; parser dos
+16 arquivos PowerShell alterados e diff --check HEAD sem erros.
+
+Limites: nomes legiveis sao usados nas novas fichas; fichas antigas continuam
+aceitas pelos leitores. Reparo pontual manual tem previa e aplicacao explicita;
+nao houve conversao geral nem alteracao de dados da maquina da empresa. Recriar
+a priorizacao preserva fichas e notas existentes. O clique na previa Markdown
+do editor corporativo precisa ser validado naquela maquina; testes de caminhos
+nao substituem essa verificacao. Prompt de reparo consta no guia de planejamento.
+Commit e push autorizados em 23/10 para consolidacao. Proposta documental segue preservada
+em harness/compartilhamento-documental-git, no checkout original.
+
 ## Links de fichas e registro de issues manuais — 23/10/2026
 
 - [x] Conferir raiz/main/HEAD e criar branch de manutencao preservando o checkout.

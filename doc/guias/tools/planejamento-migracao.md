@@ -147,83 +147,128 @@ gerais, preservando lacunas de arquivos ainda indisponiveis.
 
 #### Registrar uma issue manual
 
-Um problema encontrado em log, teste ou conferencia local pode ter ficha sem
-regra MTA. No Copilot, use Agent ou o executor disponivel para produzir os
-documentos; o helper apenas orienta. Para criar ou reparar a ficha:
+Uma issue manual e um achado real de log, teste ou conferencia local, sem regra
+MTA. Ela participa do registro, da contagem, da priorizacao da categoria
+`manual` e do planejamento/implementacao. O ID `DEV-...` e generico: nao ha
+tratamento especial para uma aplicacao ou um problema especifico.
 
-1. Confira `projeto.json`, POM/Source e `migracao.md`. Reutilize a issue existente
-   para o mesmo problema. Preserve o ID funcional `DEV-...`, categoria `manual`,
-   ocorrencias `-` e presenca `MANUAL`.
-2. Guarde o log/anexo original em `evidencias/`, com nome descritivo. Uma pasta
-   como `evidencias/deploy-eap-7.4.11/` e valida. No `LEIA-ME.md`, relacione
-   Issue, Arquivo e Relacao. Identifique origem, estado ANTES/DEPOIS e limites;
-   horario do evento nao comprova horario de coleta. Identifique texto fornecido
-   pelo desenvolvedor como tal, sem alegar coleta automatica.
-3. Use o [modelo da ficha](../../modelos/ficha-issue.template.md) em
-   `atual/priorizacao/manual/issues/<ID codificado>/ficha.md`. No JSON, mantenha
-   o ID original; `LocalPaths` parte do Source e `EvidencePaths` parte de
-   `evidencias/`, sem repetir esse prefixo.
-4. Gere os links conforme abaixo e confira cada destino literal, inclusive
-   referencias de volta ao registro e aos anexos. Fonte ausente fica como lacuna.
-5. Se o pedido inclui registrar a issue, inclua/revise somente sua linha no
-   `migracao.md`. Preserve escolhas anteriores; para issue nova sem escolha,
-   use `A DEFINIR`. `ANALISADA` exige exame sustentado pelas fontes e limites,
-   nao apenas um arquivo criado. Nao significa corrigida ou aceita.
-6. Atualize o indice do projeto para incluir as evidencias. Confira a preservacao
-   da linha manual, ficha e anexos. Observacoes humanas sao preservadas: atualizar
-   o indice nao corrige automaticamente links errados escritos nessa coluna.
+O executor deve reutilizar uma issue existente para o mesmo problema e conferir
+`projeto.json`, POM/Source, `migracao.md` e evidencias. O helper apenas orienta.
 
-**Nome da pasta e endereco do link sao representacoes diferentes.** A codificacao
-UTF-8 de `ConvertTo-HarnessFunctionalPath` e reversivel e distingue maiusculas
-no Windows. O ID `DEV-01` usa a pasta literal `%44%45%56-01`; no link Markdown,
-ela aparece como `%2544%2545%2556-01`. `%25` representa o `%` do nome fisico.
-Nao renomeie a pasta nem converta o ID para minusculas para reparar o link;
-nao escape novamente um link ja gerado.
-
-Na raiz do harness, o executor pode obter caminho e link sem escrever arquivos:
+**Cadastro integrado.** Na raiz do harness, use a API em vez de montar a pasta
+e a linha da tabela manualmente:
 
 ```powershell
 Import-Module .\scripts\HarnessProject.psm1 -Force -DisableNameChecking
+Import-Module .\scripts\HarnessIssues.psm1 -Force -DisableNameChecking
 $projeto = Get-HarnessProjectStorage -Root (Get-Location).Path -Pom 'C:\repositorios\minha-aplicacao\pom.xml'
-$id = 'DEV-EXEMPLO-01'
-$pastaIssue = ConvertTo-HarnessFunctionalPath $id
-$ficha = Join-Path $projeto.Folder ("atual/priorizacao/manual/issues/$pastaIssue/ficha.md")
-Get-HarnessSourceLink -From $projeto.MigrationPath -Path $ficha -Label 'Ficha'
+Register-HarnessManualIssue -Project $projeto -Id 'DEV-EXEMPLO-01' -Title 'Falha observada no deploy'
 ```
 
-Substitua POM e ID pelos ja escolhidos. Passe caminhos de filesystem a
-`Get-HarnessSourceLink`, nunca URLs previamente escapadas. O helper nao executa
-esse bloco. O gerador nao comprova existencia: confira o arquivo por caminho
-literal e o destino resolvido pelo leitor Markdown.
+O cadastro publica a ficha inicial e a linha do registro juntos. Usa categoria
+`manual`, ocorrencias `-`, presenca `MANUAL`, decisao `A DEFINIR` e andamento
+`NAO ANALISADA`. Repetir preserva analise, titulo e escolhas existentes.
+A ficha inicial exige exame e preenchimento pelo executor; criar arquivo nao e
+analisar. O indice do projeto mostra as contagens de cadastro, separadas entre
+manuais, MTA presentes e nao reencontradas. Essas contagens nao comprovam resolucao.
 
-**Preservacao e continuidade.** Atualizar o indice conserva issues manuais.
-A priorizacao percentual atual considera issues MTA elegiveis e exclui `DEV-*`;
-recriar nao inclui automaticamente a manual. Recriar redefine base/cobertura,
-preservando fichas e notas fora dos blocos gerenciados; nao reconcilia decisoes.
-A manual pode seguir para planejamento apos a escolha `ANALISAR AGORA`, com
-base EVIDENCIAS quando somente issues manuais forem selecionadas.
+Use `-LocalPaths` e `-EvidencePaths` para os caminhos relativos pertinentes.
+`LocalPaths` parte do Source; `EvidencePaths` parte de `evidencias/`, sem
+repetir esse prefixo. A API nao coleta nem inventa logs. Guarde o original em
+`evidencias/` e relacione Issue, Arquivo e Relacao no `LEIA-ME.md`.
+Identifique origem, estado ANTES/DEPOIS e limites. Horario do evento nao comprova
+horario da coleta; texto fornecido pelo desenvolvedor deve ser identificado assim.
 
-Para retomar uma fatia MTA interrompida, use o mesmo escopo/categoria e prompt.
-Se precisar regravar o preparo pendente, use `-Mode Continue` sem novo percentual:
-`IN_PROGRESS` conserva universo, quota e examinadas registradas. Confira ranking
-e fichas antes de continuar. Ficha ainda fora de `AnalyzedIssues` exige conferencia,
-nao descarte nem contagem automatica. Veja [fatias e continuidade](priorizacao-issues.md#fatias-e-continuidade).
+**Pastas legiveis para todas as fichas.** O ID completo permanece no bloco
+`ficha:identidade`; o nome da pasta serve para navegacao. Exemplos:
 
-Pedido de reparo para o executor, apos receber a correcao do harness:
+- `DEV-SWAGGER-JACKSON-01` usa `manual/issues/DEV-SWAGGER-JACKSON-01/ficha.md`.
+- `eap7/weblogic/tests/data::hibernate4-00039` usa
+  `mandatory/issues/eap7-weblogic-tests-data--hibernate4-00039/ficha.md`.
+
+O gerador transforma separadores/caracteres inadequados em nomes legiveis;
+nao trunca nem acrescenta hashes. Confere colisoes sem diferenciar caixa no
+Windows e considera o caminho completo, inclusive a area de publicacao
+temporaria. Caminho longo ou colisao interrompe a operacao com os destinos/IDs
+a conferir; use raiz mais curta quando necessario. Nao invente sufixo ou alias.
+A identidade e lida da ficha, nunca reconstruida a partir do nome simplificado.
+
+Obtenha o caminho por `Get-HarnessIssuePath -Project $projeto -Category manual
+-Id 'DEV-EXEMPLO-01'` e gere links por `Get-HarnessSourceLink`, passando caminhos
+literais. Pastas antigas codificadas continuam sendo reconhecidas; nao crie
+uma segunda ficha para substituir uma analise existente.
+
+**Reparo de uma manual antiga.** Depois de atualizar o harness, use o mesmo POM
+e ID. A primeira chamada so informa os arquivos que mudariam:
+
+```powershell
+Repair-HarnessManualIssue -Project $projeto -Id 'DEV-EXEMPLO-01'
+Repair-HarnessManualIssue -Project $projeto -Id 'DEV-EXEMPLO-01' -Apply
+```
+
+O reparo transfere a ficha e seus arquivos da pasta antiga para a legivel,
+corrige os links nos documentos correntes do projeto e os caminhos do contexto
+de planejamento. Preserva o ID, analise, escolhas, pendencias e bytes dos logs.
+Nao altera material recebido, codigo, MTA, build ou deploy. Destino divergente,
+inclusive um `ficha.md` vazio criado no lugar errado, e recusado antes da escrita.
+Compare os arquivos; se o destino contiver apenas um rascunho descartavel,
+preserve-o em `.harness/backups-temporarios/<atividade>/` com seu caminho
+relativo antes de repetir. Nunca sobrescreva outra analise para resolver um link.
+Referencias em outros projetos ou repositorios precisam de conferencia propria.
+
+Confira separadamente o destino no filesystem e o clique no preview usado pelo
+desenvolvedor. Sem acesso ao editor, declare o clique pendente. Nao alegue que
+`Test-Path` comprova o comportamento do preview nem atribua falha a cache sem evidencia.
+
+**Priorizacao e planejamento.** Selecione categoria `manual` para comparar os
+achados manuais com base no registro, fichas, codigo e evidencias, sem exigir MTA.
+As categorias MTA conservam seus proprios conjuntos; uma manual nao vira
+`mandatory`. A contagem atual cresce no cadastro, mas `InitialTotal` e a quota
+de uma fatia iniciada permanecem fixos. Novas issues entram nessa base mediante
+`Recreate` explicito. `Continue` conserva base, quota e examinadas registradas.
+
+Para planejar a propria issue manual, marque `ANALISAR AGORA` no registro e use
+**Planejamento: planejar**, com base **EVIDENCIAS** quando apenas manuais forem
+selecionadas. O plano considera ID, achado, ficha, evidencias e escolhas; define
+corretiva, verificacoes e aceite. Implementacao exige GO; verificacoes e aceite
+continuam separados.
+
+**Reiniciar a priorizacao.** Quando o humano escolher comecar novamente, use
+`Recreate` com o percentual/categoria/escopo escolhidos. Reinicia base e cobertura,
+mas preserva fichas/notas e registro. Nao apague toda a `.harness`.
+Fichas antigas podem ser reaproveitadas apos releitura; sua existencia nao conta
+como exame na nova fatia. Para retomar sem reiniciar, use `Continue` sem novo
+percentual em `IN_PROGRESS`. Veja [fatias e continuidade](priorizacao-issues.md#fatias-e-continuidade).
+
+Prompt de reparo para o executor (substitua os campos):
 
 ```text
-Repare somente a navegacao da issue [ID] do projeto [artifactId] neste workspace.
-Leia Registrar uma issue manual em doc/guias/tools/planejamento-migracao.md,
-projeto.json, migracao.md, ficha existente e evidencias/LEIA-ME.md.
-Preserve ID, categoria, pasta fisica, analise, log original e escolhas humanas.
-Gere links com Get-HarnessSourceLink a partir dos caminhos literais e confira
-que cada destino resolvido e o arquivo correto. Corrija referencias pertinentes
-na ficha, registro e indice de evidencias, sem criar outra ficha ou renomear o ID.
-Atualize o indice do projeto e confira a preservacao da linha manual e priorizacao.
-Relate arquivos/links corrigidos e lacunas. Nao execute corretivas, deploy, MTA
-nem nova priorizacao. Para a fatia interrompida, apenas informe escopo, categoria,
-quota, examinadas registradas, estado e prompt para retomar a mesma fatia.
-Nao recrie a base nem declare exame/GO/aceite por existencia de arquivos.
+Repare a issue manual [ID] do projeto [artifactId], usando o harness atualizado.
+Leia AGENTS.md, Registrar uma issue manual no guia, projeto.json, migracao.md,
+a ficha completa e evidencias/LEIA-ME.md. Nao criar outra analise nem mudar o ID.
+
+Confirme que HarnessIssues.psm1 oferece Repair-HarnessManualIssue. Se nao
+oferecer, informe a versao ausente; nao improvise renomeacao em versao antiga.
+
+Localize a ficha pela identidade. Compare a pasta antiga e a legivel.
+Se a legivel contiver exclusivamente ficha.md vazio ou somente "# ficha",
+sem identidade nem conteudo util, autorizo mover esse rascunho para
+.harness/backups-temporarios/reparo-ficha-manual/, preservando o caminho
+relativo. Confira os caminhos absolutos; nao sobrescreva backup existente.
+Se houver outro conteudo, preserve ambas e relate o conflito.
+
+Use Repair-HarnessManualIssue primeiro sem Apply e confira a previa;
+depois aplique o reparo autorizado. Preserve analise, registro/escolhas,
+log original e indice de evidencias. Confira EvidencePaths relativos a evidencias/.
+Atualize o indice e verifique que o registro aponta para a ficha completa
+na pasta legivel. Confira o clique no preview; se nao tiver acesso, declare pendente.
+Nao use testes de filesystem como prova de clique no editor.
+
+A recriacao da priorizacao foi permitida, mas exige identificar a categoria,
+escopo e percentual escolhidos. Informe os preparos existentes e os parametros
+para Recreate; nao execute o exame nem invente escolhas ausentes.
+Nao execute corretivas, deploy ou MTA, nem atribua GO/aceite.
+Relate arquivos alterados, preservacao verificada e pendencias.
 ```
 
 #### Manter o registro e adotar outra origem

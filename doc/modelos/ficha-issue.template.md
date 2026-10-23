@@ -4,7 +4,7 @@
 {{IdentityJson}}
 <!-- ficha:identidade:fim -->
 
-<!-- Navegacao: preserve ID e pasta canonica. Gere links com Get-HarnessSourceLink a partir dos caminhos literais; %44 na pasta vira %2544 no link. Confira que o destino resolvido e o arquivo existente. LocalPaths/EvidencePaths guardam caminhos relativos literais, nao URLs. Para issue manual, siga doc/guias/tools/planejamento-migracao.md#registrar-uma-issue-manual. -->
+<!-- Navegacao: preserve ID completo na identidade e use o caminho legivel fornecido pela API/FichaPaths. Nao reconstrua ID pelo nome da pasta. Gere links com Get-HarnessSourceLink usando caminhos literais e confira destino/clique separadamente. LocalPaths/EvidencePaths sao relativos, nao URLs. Para cadastro/reparo manual, siga doc/guias/tools/planejamento-migracao.md#registrar-uma-issue-manual. -->
 
 ## 1. Achado e aplicabilidade
 

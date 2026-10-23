@@ -8,13 +8,13 @@ Import-Module (Join-Path $PSScriptRoot 'HarnessProject.psm1') -DisableNameChecki
 . (Join-Path $PSScriptRoot 'HarnessPrioritizationIndex.ps1')
 
 function Read-PrioritizationProject {
-    param($Project)
+    param($Project,[switch]$EvidenceOnly)
     $entry=[ordered]@{Project=$Project.Name;Label=$Project.Name;Source=$Project.Source;Pom=$Project.Pom;
         MigrationPath=$Project.MigrationPath;EvidencePath=$Project.EvidencePath;Mta=$null;Diagnostics=@();Categories=@();EligibleIssues=@()}
     $rows=@()
     try { $rows=@(Get-HarnessProjectDecisions $Project) } catch { $entry.Diagnostics+=$_.Exception.Message }
     $mta=$null
-    try { $mta=Read-HarnessProjectMta $Project } catch { $entry.Diagnostics+=$_.Exception.Message }
+    if (-not $EvidenceOnly) { try { $mta=Read-HarnessProjectMta $Project } catch { $entry.Diagnostics+=$_.Exception.Message } }
     if ($mta) {
         $entry.Mta=@{ReportPath=$mta.ReportPath;CatalogPath=$mta.CatalogPath}
         $entry.Diagnostics+=@($mta.Diagnostics)
@@ -30,6 +30,13 @@ function Read-PrioritizationProject {
         $unknown=@($mta.Issues | Where-Object Id -CNotIn @($rows | ForEach-Object Id))
         if ($unknown.Count) { $entry.Diagnostics+=("$($unknown.Count) issues ainda sem decisao no registro; atualize o indice dos projetos para inclui-las.") }
     }
+    $manual=@($rows | Where-Object { $_.Presence -ceq 'MANUAL' -and $_.Category -ceq 'manual' })
+    if ($manual.Count) { $entry.Categories=@($entry.Categories)+@('manual') }
+    $entry.EligibleIssues+=@(foreach ($row in $manual) {
+        if ($row.Decision -in @('A DEFINIR','ANALISAR AGORA') -and $row.Progress -in @('NAO ANALISADA','ANALISADA')) {
+            [pscustomobject]@{Project=$Project.Name;Id=$row.Id;Category='manual'}
+        }
+    })
     [pscustomobject]@{Entry=[pscustomobject]$entry;Mta=$mta}
 }
 
@@ -50,7 +57,7 @@ function New-HarnessPrioritizationContext {
     $master=$projects[0]; $leases=@()
     try {
         foreach ($project in $projects) { $leases+=Enter-HarnessProjectAccess $project -ForOperation }
-        $reads=@(foreach ($project in $projects) { Read-PrioritizationProject $project })
+        $reads=@(foreach ($project in $projects) { Read-PrioritizationProject $project -EvidenceOnly:($Category -ceq 'manual') })
         $entries=@($reads | ForEach-Object Entry)
         if (-not $Category) {
             $categories=@($entries | ForEach-Object Categories | Sort-Object -Unique)
@@ -86,6 +93,7 @@ function New-HarnessPrioritizationContext {
             $baseline=@($data.BaselineIssues); $examined=@($result.AnalyzedIssues)
             $excluded=if ($reused) { @($data.ExcludedIssues) } else { @($examined | Select-Object Project,Id) }
         }
+        Assert-HarnessIssueFolderSet @($baseline | ForEach-Object { [pscustomobject]@{Project=$_.Project;Id=$_.Id;Category=$Category} })
         $baseSet=Get-PrioritizationSet $baseline $projects
         $excludedSet=Get-PrioritizationSet $excluded $projects
         $available=@($eligible | Where-Object { $baseSet.Contains((Get-PrioritizationIssueKey $_)) -and -not $excludedSet.Contains((Get-PrioritizationIssueKey $_)) })
@@ -110,7 +118,7 @@ function New-HarnessPrioritizationContext {
         }
         $fichas=@(foreach ($issue in $baseline) {
             $project=$names[$issue.Project]
-            $relative=Get-PrioritizationFichaRelativePath $Category $issue.Id
+            $relative=Get-PrioritizationFichaRelativePath $Category $issue.Id -Project $names[$issue.Project]
             if ((Join-Path $project.TemporaryPath ('publicacao/depois/'+$relative)).Length -ge 248) { throw 'Caminho da ficha longo; use raiz de dados curta ou confira a chave funcional.' }
             [pscustomobject]@{Project=$issue.Project;Id=$issue.Id;Path=(Join-Path $project.Folder $relative)}
         })

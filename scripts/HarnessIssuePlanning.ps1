@@ -29,9 +29,10 @@ function Get-CurrentPlanningEvidence {
         if ($EvidenceIndexPath) { $references+=@([pscustomobject]@{Value=$index;Base=$Project.Root;Relation='Indice de evidencias'}) }
         $sources=@()
     }
+    Assert-HarnessIssueFolderSet @($Rows | ForEach-Object { [pscustomobject]@{Project=$Project.Name;Category=$_.Category;Id=$_.Id} })
     foreach ($row in $Rows) {
         $sources+=@([pscustomobject]@{Text=$row.Note;From=$Project.MigrationPath;Relation=$row.Id})
-        $relative=Get-PrioritizationFichaRelativePath $row.Category $row.Id
+        $relative=Get-PrioritizationFichaRelativePath $row.Category $row.Id -Project $Project
         $path=Join-Path $Project.Folder $relative
         $read=Read-HarnessProjectFiles $Project @($relative)
         if ($null -ne $ObservedFiles) { $ObservedFiles[$path]=$read[$relative] }
