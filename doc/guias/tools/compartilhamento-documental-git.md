@@ -43,7 +43,11 @@ C:\mta-runs\                           # MTA externo, organizacao atual
 
 Copie o conteudo selecionado de `.harness/projetos/` para
 `.harness-jbosseap7.4/projetos/`, sem adicionar outra `.harness` dentro dela.
-Preserve artifactId, categorias, escopos e nomes codificados das pastas de issue.
+Preserve artifactId, categorias, escopos e nomes existentes das pastas de issue.
+Novas fichas usam nomes legiveis; pastas legadas continuam aceitas pelos leitores.
+Nao renomeie pastas durante a copia. Para reparar uma ficha manual antiga, siga
+antes o [guia de cadastro e reparo](planejamento-migracao.md#registrar-uma-issue-manual)
+no harness local e confira suas referencias.
 `simtr-doc` e o repositorio documental, nao um projeto Maven a cadastrar no harness.
 
 O coordenador prepara a base, confere contribuicoes e publica o consolidado
@@ -206,7 +210,10 @@ e a lista/diff do commit publicado e os arquivos da branch remota correspondente
 4. Confira o indice e os documentos locais resultantes. Para uma fatia interrompida,
    preserve escopo, categoria e quota: retome o prompt existente, ou `Continue`
    sem novo percentual quando precisar regravar o preparo. Nao use `Recreate`
-   apenas por ter recebido arquivos. Issues DEV-* permanecem fora da quota MTA.
+   apenas por ter recebido arquivos. Issues DEV-* integram a categoria `manual`,
+   baseada em evidencias, e permanecem fora das quotas das categorias MTA.
+   Novos cadastros atualizam o total do registro; uma base de priorizacao ja
+   iniciada permanece fixa ate uma escolha explicita de `Recreate`.
 5. Continue a analise/planejamento local. Escolhas, GO e aceite mantem seus limites;
    trabalho concluido pelo colega nao comprova que a corretiva esta no seu Source.
 6. Para entregar, crie uma branch documental a partir da base compartilhada usada,

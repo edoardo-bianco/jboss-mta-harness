@@ -37,6 +37,19 @@ function Read-ProjectDecisionRows {
     }
 }
 
+function Get-HarnessMigrationCounts {
+    param([string]$Text)
+    $rows=@(Read-ProjectDecisionRows $Text)
+    [pscustomobject]@{Registered=$rows.Count;Manual=@($rows | Where-Object Presence -CEQ 'MANUAL').Count;
+        MtaPresent=@($rows | Where-Object Presence -CEQ 'PRESENTE').Count;
+        MtaNotFound=@($rows | Where-Object Presence -CEQ 'NAO REENCONTRADA').Count}
+}
+function Get-HarnessMigrationCountText {
+    param([string]$Text)
+    $counts=Get-HarnessMigrationCounts $Text
+    'Issues registradas: '+$counts.Registered+'. Manuais: '+$counts.Manual+'. MTA presentes: '+$counts.MtaPresent+'. MTA nao reencontradas: '+$counts.MtaNotFound+'. Contagem de cadastro; nao comprova exame, resolucao ou aceite. A base/quota de uma fatia ja iniciada permanece fixa.'
+}
+
 function Get-HarnessProjectDecisions {
     param($Project)
     $documents=Read-HarnessProjectFiles $Project @('migracao.md')
@@ -98,7 +111,7 @@ function Update-HarnessProjectDocuments {
         if (-not $old.Contains($key) -or $old[$key] -cne $Expected[$key]) { throw 'Associacao editada desde a leitura do MTA; preserve os documentos e atualize novamente o indice.' }
     }
     $migration=Get-HarnessProjectMigrationText $Project $Mta $old['migracao.md'] -UpdateIssues:$UpdateIssues
-    $lines=@()
+    $lines=@((Set-ProjectManagedBlock '' 'issues:totais' (Get-HarnessMigrationCountText $migration)).Trim())
     foreach ($entry in @(
         @('atual/planejamento/plano.md','Plano corrente'),
         @('atual/planejamento/tarefas.md','Tarefas correntes'),

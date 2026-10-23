@@ -1,5 +1,40 @@
 # Plano do agente: evolucao do harness
 
+## Consolidacao para publicacao — 23/10/2026
+
+A pedido do usuario, reunir fichas legiveis/issues manuais e proposta documental
+na branch harness/fichas-e-compartilhamento, no checkout habitual. Preservar os
+dois commits de origem e os resultados de verificacao. Ajustar referencias da
+proposta para os nomes legiveis e a categoria manual.
+
+Commit e push no repositorio do harness autorizados. Compartilhamento no
+simtr-doc permanece somente proposta para revisao: nenhuma exportacao, pasta
+remota, sincronizacao ou configuracao da equipe sera criada nesta publicacao.
+Navegacao conjunta e diff conferidos; codigo identico a entrega ja testada. Resultados da consolidacao registrados em tasks/todo.md.
+
+## Fichas legiveis e issues manuais — 23/10/2026
+
+Evolucao do harness em checkout separado C:/temp/harness-fichas-legiveis,
+branch harness/fichas-legiveis, base main 9165c3e. A proposta documental
+permanece intacta em harness/compartilhamento-documental-git.
+
+Pedido: pastas legiveis para TODAS as fichas; ID original preservado na
+identidade. Cadastro manual generico, registro e contagem coerentes,
+priorizacao da categoria manual e continuidade para planejamento/implementacao.
+Usuario permite recriar a priorizacao desde o inicio; preservar a ficha manual,
+o log, indice de evidencias e decisoes. Sem converter todo o historico.
+Reparo pontual da manual com previa, publicacao protegida e recusa de conflito.
+Caminho Windows inclui a area de publicacao temporaria; nao truncar nem usar
+hash para ocultar colisao. Pastas antigas continuam legiveis pelos consumidores.
+Cadastro nao equivale a analise ou GO. InitialTotal permanece fixo por escopo/
+categoria; novos achados entram na base quando Recreate for escolhido.
+
+Validar cadastro/repeticao, reparo/preservacao, colisao/comprimento, MTA/manual,
+recriacao/continuidade, planejamento, indice e reconciliacao em copia isolada.
+Em 23/10, o usuario autorizou consolidar esta entrega com a proposta documental e fazer commit/push. Nenhuma alteracao de dados reais ou publicacao no simtr-doc faz parte dessa autorizacao.
+
+Implementacao concluida e revisada; 14 suites passaram em copia isolada. Cadastro, contagem, priorizacao manual, planejamento e reconciliacao verificados. Resultados, limites e verificacao pendente no editor corporativo registrados em tasks/todo.md.
+
 ## Compartilhamento documental por Git — 23/10/2026
 
 Branch `harness/compartilhamento-documental-git`, derivada da main limpa
@@ -17,7 +52,7 @@ recebimento pelos devs e possibilidade de continuar o trabalho local antes de
 publicar. Conferir navegacao, comandos e selecao do modelo com dados sinteticos.
 
 Sem exportador novo, alteracao de runtime/perfil/raiz de dados, copia de dados
-reais, acesso ao simtr-doc, commit, push ou PR. Publicacao real depende da revisao
+reais ou acesso ao simtr-doc. Publicacao real da base documental depende da revisao
 do procedimento e do diff na maquina de trabalho; esta entrega nao a executa.
 
 Proposta e modelo concluidos, com navegacao pelos guias existentes. Conferidos

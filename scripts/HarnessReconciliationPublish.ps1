@@ -102,9 +102,8 @@ function Complete-HarnessReconciliation {
             if ($relative -notmatch '^atual/priorizacao/[^/]+/issues/[^/]+/ficha\.md$') { continue }
             $bytes=if ($writes.ContainsKey($relative)) {$writes[$relative]} else {$base.Local[$relative]}
             if ($null -eq $bytes) { continue }
-            $parts=$relative.Split('/')
-            if ((Get-PrioritizationFichaRelativePath ([Uri]::UnescapeDataString($parts[2])) ([Uri]::UnescapeDataString($parts[4]))) -cne $relative) { throw 'Caminho da ficha nao corresponde a chave funcional canonica.' }
-            $writes[$relative]=Get-IssueSourcesText $Project $comparison.Mta ([Uri]::UnescapeDataString($parts[4])) ([Uri]::UnescapeDataString($parts[2])) (ConvertFrom-ReconciliationBytes $bytes) (Join-Path $Project.Folder $relative) -EvidenceOnly:($base.PlanningBasis -eq 'EVIDENCIAS') -AvailablePaths $available
+            $identity=Read-HarnessFichaAtPath (ConvertFrom-ReconciliationBytes $bytes) $Project.Name $relative
+            $writes[$relative]=Get-IssueSourcesText $Project $comparison.Mta $identity.Id $identity.Category (ConvertFrom-ReconciliationBytes $bytes) (Join-Path $Project.Folder $relative) -EvidenceOnly:($base.PlanningBasis -eq 'EVIDENCIAS') -AvailablePaths $available
         }
         foreach ($relative in @('atual/planejamento/plano.md','atual/planejamento/tarefas.md')) {
             $bytes=if ($writes.ContainsKey($relative)) {$writes[$relative]} else {$base.Local[$relative]}

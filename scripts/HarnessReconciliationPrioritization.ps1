@@ -42,7 +42,7 @@ function Get-ReconciliationPriorityData {
     $data.FichaPaths=@(foreach ($issue in $data.BaselineIssues) {
         $peer=@($participants | Where-Object Name -CEQ $issue.Project)
         if ($peer.Count -ne 1) { throw 'Base inicial inclui projeto fora do escopo.' }
-        [pscustomobject]@{Project=$issue.Project;Id=$issue.Id;Path=(Join-Path $peer[0].Folder (Get-PrioritizationFichaRelativePath $category $issue.Id))}
+        [pscustomobject]@{Project=$issue.Project;Id=$issue.Id;Path=(Join-Path $peer[0].Folder (Get-PrioritizationFichaRelativePath $category $issue.Id -Project $peer[0]))}
     })
     $data | Add-Member NoteProperty NeedsReview $true -Force
     Assert-PrioritizationContext $data $paths $participants $category $scope
@@ -57,6 +57,23 @@ function Get-ReconciliationCandidateText {
     }
     (Read-HarnessProjectFiles $Peer @($Relative))[$Relative]
 }
+function Get-ReconciliationFichaCandidatePath {
+    param($Project,$Peer,[string]$Category,[string]$Id,$Writes,$Local)
+    $new=Get-PrioritizationFichaRelativePath $Category $Id
+    $legacy=Get-PrioritizationFichaRelativePath $Category $Id -Legacy
+    $found=@()
+    foreach ($relative in @(@($new,$legacy) | Select-Object -Unique)) {
+        $text=Get-ReconciliationCandidateText $Project $Peer $relative $Writes $Local
+        if ($text) {
+            $null=Read-PrioritizationFicha $text $Peer.Name $Category $Id
+            $found+=$relative
+        }
+    }
+    if ($found.Count -gt 1) { throw 'Duas fichas candidatas para a mesma identidade; concilie os caminhos antes de adotar a priorizacao.' }
+    if ($found.Count) { return $found[0] }
+    $new
+}
+
 function Convert-ReconciliationPriorityLinks {
     param([string]$Text,$Original,$Current,$Projects,[string]$OriginalFrom,[string]$CurrentFrom)
     if (-not $OriginalFrom) { $OriginalFrom=$Original.RankingPath }
@@ -115,10 +132,11 @@ function Test-ReconciliationReferenceDocument {
     $false
 }
 function Assert-ReconciliationPriorityReferences {
-    param($Project,$Peer,[string]$Text,[string]$Category,[string]$Id,$Writes,$Observed,$Peers=@($Peer))
+    param($Project,$Peer,[string]$Text,[string]$Category,[string]$Id,$Writes,$Observed,$Peers=@($Peer),[string]$FichaRelative)
     $identity=Read-PrioritizationFicha $Text $Peer.Name $Category $Id
     $queue=New-Object 'Collections.Generic.Queue[string]'; $visited=@{}
-    $fichaPath=Join-Path $Peer.Folder (Get-PrioritizationFichaRelativePath $Category $Id)
+    if (-not $FichaRelative) { $FichaRelative=Get-PrioritizationFichaRelativePath $Category $Id -Project $Peer }
+    $fichaPath=Join-Path $Peer.Folder $FichaRelative
     $visited[$fichaPath]=$true
     foreach ($path in @(Get-ReconciliationMarkdownReferences $Text $fichaPath)) { $queue.Enqueue($path) }
     foreach ($pair in @(@($Peer.Source,$identity.LocalPaths),@($Peer.EvidencePath,$identity.EvidencePaths))) {
@@ -157,6 +175,11 @@ function Add-ReconciliationPrioritization {
         $original=ConvertFrom-Json (ConvertFrom-ReconciliationBytes $contextBytes)
         $current=Get-ReconciliationPriorityData $Project $relative $contextBytes $Projects
         $data=$current.Data; $paths=$current.Paths
+        $data.FichaPaths=@(foreach ($issue in $data.BaselineIssues) {
+            $peer=@($current.Projects | Where-Object Name -CEQ $issue.Project)[0]
+            $candidate=Get-ReconciliationFichaCandidatePath $Project $peer $data.Category $issue.Id $Writes $Comparison.Local
+            [pscustomobject]@{Project=$peer.Name;Id=$issue.Id;Path=(Join-Path $peer.Folder $candidate)}
+        })
         $ranking=Get-ReconciliationCandidateText $Project $Project $rank $Writes $Comparison.Local
         # O leitor e chamado dentro de Read-PrioritizationResult, que possui sua
         # propria variavel $project. Usar nomes exclusivos evita sombra dinamica PS.
@@ -175,7 +198,7 @@ function Add-ReconciliationPrioritization {
         }
         foreach ($issue in $result.AnalyzedIssues) {
             $peer=@($current.Projects | Where-Object Name -CEQ $issue.Project)[0]
-            $ficha=Get-PrioritizationFichaRelativePath $data.Category $issue.Id
+            $ficha=Get-ReconciliationFichaCandidatePath $Project $peer $data.Category $issue.Id $Writes $Comparison.Local
             $text=Get-ReconciliationCandidateText $Project $peer $ficha $Writes $Comparison.Local
             if ($peer.Name -ceq $Project.Name -and $Writes.ContainsKey($ficha)) {
                 $oldPeer=@($original.Projects | Where-Object Project -CEQ $peer.Name)[0]
@@ -186,7 +209,7 @@ function Add-ReconciliationPrioritization {
                 $text=Get-IssueSourcesText $peer $Comparison.Mta $issue.Id $data.Category $text $localPath -EvidenceOnly:($Comparison.PlanningBasis -eq 'EVIDENCIAS') -AvailablePaths $available
                 $Writes[$ficha]=(New-Object Text.UTF8Encoding($false)).GetBytes($text)
             }
-            Assert-ReconciliationPriorityReferences $Project $peer $text $data.Category $issue.Id $Writes $observed $current.Projects
+            Assert-ReconciliationPriorityReferences $Project $peer $text $data.Category $issue.Id $Writes $observed $current.Projects -FichaRelative $ficha
         }
         $ranking=Convert-ReconciliationPriorityLinks $ranking $original $data $current.Projects
         $Writes[$relative]=$data | ConvertTo-Json -Depth 15

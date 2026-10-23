@@ -80,7 +80,9 @@ function Get-ReconciliationPartnerFiles {
             }
             foreach ($issue in $data.BaselineIssues) {
                 if ($issue.Project -ceq $Project.Name) { continue }
-                $ficha=Get-PrioritizationFichaRelativePath $data.Category $issue.Id
+                $store=@($Projects | Where-Object Name -CEQ $issue.Project)
+                if ($store.Count -ne 1) { throw 'Participante nao associado.' }
+                $ficha=Get-PrioritizationFichaRelativePath $data.Category $issue.Id -Project $store[0]
                 $requests[$issue.Project+'|'+$ficha]=[pscustomobject]@{Project=$issue.Project;Relative=$ficha;Category=$data.Category;Id=$issue.Id}
             }
         }

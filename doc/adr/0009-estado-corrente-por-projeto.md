@@ -19,13 +19,16 @@ links, leitura direta e publicação. O estado corrente não depende de IDs téc
   Não executar JavaScript. Usar `generatedAt` válido com fuso quando disponível;
   senão, mtime UTC de `index.html`. Desempatar por caminho ordinal. Regravação
   detectada interrompe a operação. Outros formatos exigem suporte e testes próprios.
-- Chaves funcionais como `ruleset::regra` usam codificação percentual UTF-8 reversível
-  para pastas. Maiúsculas são codificadas para impedir colisões no Windows. Não
-  truncar nem substituir por hash. Categoria e escopo funcional separam cobertura;
-  fichas pertencem ao projeto e à categoria, sem repetir a mesma ficha por escopo.
-  O nome fisico codificado e literal: `%44` na pasta vira `%2544` na URI do link.
-  Gerar links pela API comum e conferir o destino resolvido, sem mudar IDs ou
-  renomear pastas. Arrays de caminhos da ficha permanecem literais.
+- Ajuste solicitado em 23/10/2026: todas as fichas usam pastas legiveis derivadas
+  do ID, sem escapes percentuais, truncamento ou hash. O ID completo fica na
+  identidade da ficha; nao e reconstruido a partir do nome simplificado.
+  Colisoes no Windows e caminhos longos (incluindo publicacao temporaria) sao
+  recusados antes da escrita. Categoria/escopo continuam separando cobertura.
+  Pastas percentuais antigas permanecem reconhecidas para leitura. Reparo
+  explicito da manual preserva analise/evidencias/escolhas; nova priorizacao
+  pode ser recriada por escolha humana, sem apagar fichas ou a .harness.
+  Gerar links pela API comum e conferir destino e preview separadamente.
+  Arrays de caminhos da ficha permanecem literais.
 - Cada escopo de priorização conserva somente total inicial, issues examinadas e
   proposta corrente. A chave de uma issue é o projeto associado ao POM mais seu ID
   funcional. Mencionar uma issue não a marca examinada. Recriar é escolha explícita.
