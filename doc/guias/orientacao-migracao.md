@@ -35,6 +35,20 @@ arquivos, mas nao ha importacao/exportacao de pacote pelo harness.
 Analise recebida segue para escolha/planejamento; proposta recebida exige
 conferencia de escopo/GO e codigo local antes da execucao.
 
+Para compartilhar somente os documentos no `simtr-doc` ou outro repositorio da
+equipe, o helper consulta o
+[passo a passo com prompts e verificacoes](tools/compartilhamento-documental-passo-a-passo.md).
+Ele identifica a etapa atual e preserva o escopo escolhido, inclusive todos os
+projetos Java locais. O inventario pode ser conferido em leitura; copia,
+publicacao Git e reconciliacao sao encaminhadas ao executor do cliente atual.
+Exemplo de pedido:
+
+```text
+Quero compartilhar somente os documentos da .harness de todos os projetos
+Java locais adicionados ao harness no simtr-doc. Oriente a proxima etapa
+usando o passo a passo documental, com o prompt e as verificacoes pertinentes.
+```
+
 Navegacao: [configuracao](#configuracao) · [iniciar](#iniciar-no-codex-ou-no-copilot) ·
 [retomar](#retomar-em-outro-chat-ou-cliente) · [pedidos por etapa](#pedidos-por-etapa) ·
 [resultado e proximo passo](#resultado-e-proximo-passo).

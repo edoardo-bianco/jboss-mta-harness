@@ -20,6 +20,8 @@ Para versionar somente os documentos em um repositorio existente, consulte a
 Ela detalha a selecao para `.harness-jbosseap7.4/` no `simtr-doc`, o modelo de
 `.gitignore` e o trabalho do coordenador/devs, mantendo a `.harness` local e o
 MTA externo. Usa a reconciliacao abaixo; nao implementa sincronizacao automatica.
+O [passo a passo com prompts e verificacoes](compartilhamento-documental-passo-a-passo.md)
+conduz do inventario de todos os projetos locais ao recebimento e ao consolidado.
 
 ## Orientacao com o helper
 

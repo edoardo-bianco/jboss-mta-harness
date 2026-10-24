@@ -95,6 +95,13 @@ Use patches.md ao escolher outro cumulativo, preservando Java 8/EE 8 javax.
 Nao execute os scripts, mude arquivos nem atribua sucesso operacional a testes
 sinteticos; entregue o comando com caminhos informados e o resultado esperado.
 
+Para inventariar e preparar compartilhamento documental no simtr-doc, siga as
+etapas de inventario, copia e conferencia do
+[passo a passo](../../../../doc/guias/tools/compartilhamento-documental-passo-a-passo.md).
+Confira o escopo ja escolhido pelo desenvolvedor e a selecao documental;
+codigo, POM e MTA sao referencias, nao arquivos a publicar. Oriente uma etapa
+com seu prompt e verificacoes, sem copiar, alterar o Git ou publicar pelo helper.
+
 Para arquivos recebidos, siga o [compartilhamento](../../../../doc/guias/tools/compartilhamento-contextos.md):
 copia, associacao explicita ao POM local e reconciliacao. Havendo trabalho local,
 usar recebido/ ou pasta externa, sem copiar por cima. Contextos copiados tambem
@@ -119,6 +126,13 @@ PENDENTE historico, indice antigo ou nota nova nao impedem planejamento por si s
 Reconciliacao nao planeja nem implementa; seu executor publica registro,
 documentos afetados, indice e ultima conclusao conjuntamente. Catalogo carregado nao comprova reconciliacao realizada.
 Contexto recebido em conflito nao autoriza apagar ou sobrescrever estado local.
+
+Para receber contribuicoes do simtr-doc e orientar o consolidado, consulte o
+[recebimento](../../../../doc/guias/tools/compartilhamento-documental-passo-a-passo.md#6-receber-a-base-em-outra-maquina)
+e a [consolidacao](../../../../doc/guias/tools/compartilhamento-documental-passo-a-passo.md#9-reconciliar-contribuicoes-e-publicar-o-consolidado).
+Oriente a comparacao com pasta externa por projeto, preservando trabalho local
+e o par contexto/ranking. Git sem conflito textual nao comprova coerencia da
+cobertura ou das decisoes. Encaminhe a execucao ao agente principal; nao publique.
 
 ## migracao_planejamento_helper
 
