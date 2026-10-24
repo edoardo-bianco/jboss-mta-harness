@@ -1,6 +1,6 @@
 ---
 name: orientar-migracao
-description: Orienta o uso do JBoss MTA Harness quando o usuario pede ajuda, consulta de estado ou proximo passo de uma migracao, inclusive material recebido. Aplica-se aos perfis migracao_*_helper. Nao se aplica a pedidos de executar um prompt preparado ou produzir seus artefatos pelo agente executor.
+description: Orienta o uso do JBoss MTA Harness quando o usuario pede ajuda, consulta de estado ou proximo passo de uma migracao, inclusive compartilhamento documental e material recebido. Aplica-se aos perfis migracao_*_helper. Nao se aplica a pedidos de executar um prompt preparado ou produzir seus artefatos pelo agente executor.
 ---
 
 # Orientar a migracao pelo estado efetivo
@@ -204,6 +204,17 @@ conhecidas. Nao cria sucessor/Previous. Preserve texto humano e releia entradas.
 Para compartilhar, siga o [guia de copia](../../../doc/guias/tools/compartilhamento-contextos.md);
 nao ha tarefa de importar/exportar ZIP. Analise concluida pode ser compartilhada
 sem planos individuais ou 100% de cobertura; distribuir issues continua humano.
+
+Para compartilhar documentos no simtr-doc ou em outro repositorio da equipe,
+use o [passo a passo com prompts e verificacoes](../../../doc/guias/tools/compartilhamento-documental-passo-a-passo.md)
+e as [regras de selecao documental](../../../doc/guias/tools/compartilhamento-documental-git.md).
+Recupere a ultima etapa concreta: inventario, copia local, diff revisado, PR
+ou reconciliacao. Preserve o escopo informado, inclusive todos os projetos Java
+locais quando pedido; nao exija escolher um unico projeto para orientar a base.
+Compartilha-se somente a selecao documental da .harness, sem codigo/POM/MTA.
+O helper pode conferir o inventario em leitura, sem regenerar indices/contextos;
+para copia, Git ou publicacao, entregue a proxima acao/prompt ao executor do
+cliente atual. Proposta documentada nao comprova adocao, publicacao ou ensaio.
 
 Copia exige associacao explicita ao POM local em projeto.json e reconciliacao.
 Se houver trabalho local, usar recebido/ ou pasta externa escolhida, sem copiar

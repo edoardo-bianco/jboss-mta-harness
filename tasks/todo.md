@@ -1,5 +1,50 @@
 # To-do do agente: evolucao do harness
 
+## Passo a passo do compartilhamento documental — 24/10/2026
+
+- [x] Conferir raiz, main, HEAD, worktrees e estado limpo; criar branch de documentacao.
+- [x] Criar roteiro completo com prompts e verificacoes para todos os projetos locais.
+- [x] Explicitar selecao documental e continuidade, sem copiar codigo/POM/MTA.
+- [x] Ligar README, guia do desenvolvedor e guias de compartilhamento ao roteiro.
+- [x] Conferir links/ancoras, estrutura, exemplos PowerShell e diff; registrar resultados.
+
+Verificacao documental: sete Markdown conferidos, 203 links locais e 116 ancoras
+validos; quatro blocos PowerShell analisados pelo parser sem executar comandos.
+Cercas balanceadas, 19 linhas de tabelas do novo roteiro com colunas coerentes,
+whitespace/newline do arquivo novo e git diff --check sem erros. Revisao do
+conteudo contra os guias de selecao/copia/reconciliacao, preservando escopo,
+GO/aceite, cobertura e limites do ensaio. Suites de runtime nao executadas:
+alteracao exclusivamente documental. Sem commit/push nesta entrega.
+
+Confirmacoes humanas desta conversa: priorizacao funcionando e fichas conferidas
+na maquina corporativa. Considerar esses relatos na retomada, sem inferir
+ensaio de compartilhamento, contagem examinada ou validacao de outros clientes.
+O roteiro permanece para adocao/ensaio pela equipe; nenhum dado real copiado
+ou publicado no simtr-doc por esta entrega documental.
+
+Complemento de orientacao pelos helpers:
+
+- [x] Conferir que Codex, Copilot e Claude usam skill/papeis comuns.
+- [x] Vincular explicitamente compartilhamento documental na skill e nos papeis de preparo/reconciliacao; alinhar descricao do ponteiro Claude.
+- [x] Acrescentar exemplo de pedido no guia de orientacao, preservando o papel leitor.
+- [x] Conferir frontmatter/referencias da skill, navegacao e adaptadores em copia isolada; registrar resultados e limites.
+
+PASS: Test-ClaudeAdapter.ps1 pelo runner oficial em copia temporaria descartada,
+conferindo os adaptadores Codex/Copilot/Claude, ponteiros comuns, identidade e
+perfil leitor. Navegacao ampliada: 11 Markdown, 297 links locais, 175 ancoras,
+quatro exemplos PowerShell analisados e nenhuma falha. Revisao das instrucoes
+preserva escopo, cliente e passagem ao executor, sem duplicar o procedimento.
+quick_validate.py nao iniciou por falta de PyYAML (ModuleNotFoundError: yaml);
+nenhuma dependencia instalada. O frontmatter foi conferido pela suite existente.
+Sem ensaio nativo nesta entrega; disponibilidade na maquina corporativa depende
+de receber a versao atualizada. Novo guia adicionado ao Git para integrar a copia
+de teste, sem commit/push.
+
+Em 24/10/2026, o desenvolvedor autorizou commit, push e PR desta entrega para
+main. Os registros de ausencia de publicacao acima descrevem a preparacao e
+validacao anteriores a essa autorizacao. Nenhum dado real do simtr-doc integra
+esta entrega.
+
 ## Settings locais do VS Code — 23/10/2026
 
 - [x] Conferir main, estado local e ausencia de rastreamento de settings.json.

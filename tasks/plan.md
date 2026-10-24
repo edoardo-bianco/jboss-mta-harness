@@ -1,5 +1,43 @@
 # Plano do agente: evolucao do harness
 
+## Passo a passo do compartilhamento documental — 24/10/2026
+
+Evolucao documental a pedido do desenvolvedor: transformar o roteiro do chat em
+Markdown reutilizavel, com prompts completos, verificacoes e acesso pelo README
+e guia do desenvolvedor. Branch `harness/guia-compartilhamento-passo-a-passo`,
+derivada da main limpa `a76c699` no checkout habitual.
+
+Criar `doc/guias/tools/compartilhamento-documental-passo-a-passo.md` ao lado da
+proposta existente, preservada como referencia das regras de selecao. Abranger
+todos os projetos Java locais adicionados ao harness, somente documentos
+selecionados da .harness, com codigo/POM/MTA fora da copia. Incluir inventario,
+copia revisavel, diff/publicacao, recebimento, ensaio isolado, contribuicao e
+consolidacao. Vincular tambem pelos guias de compartilhamento existentes.
+
+Conferir links/ancoras, estrutura Markdown, sintaxe dos exemplos PowerShell e
+coerencia com copia/reconciliacao; revisar o diff. Sem alteracao de runtime,
+dados reais, configuracao de equipe ou publicacao no simtr-doc. O pedido atual
+e a documentacao; nao executa os prompts nela contidos.
+
+Contexto confirmado pelo desenvolvedor nesta conversa: priorizacao funcionando
+e fichas conferidas na maquina corporativa. Isso nao comprova o ensaio de
+compartilhamento entre dois devs nem resultados numericos/delegacao adicionais.
+
+Roteiro e navegacao entregues; verificacao documental concluida e registrada
+em tasks/todo.md. Prompts de publicacao permanecem exemplos para uso explicito
+na maquina de trabalho; nenhum deles foi executado nesta entrega.
+
+Complemento solicitado na mesma conversa: conferir o encaminhamento pelos
+helpers/skills. A skill comum chegava ao roteiro indiretamente pelo guia de
+copia. Acrescentar referencia explicita na descoberta/retomada da skill e nos
+papeis de preparo/reconciliacao, com exemplo no guia de orientacao. Preservar
+o perfil leitor e o cliente atual; os adaptadores Codex/Copilot/Claude continuam
+usando a mesma fonte, sem duplicar o procedimento nem ampliar ferramentas.
+
+Publicacao autorizada pelo desenvolvedor em 24/10/2026: commit, push da branch
+e PR para main, incluindo roteiro, navegacao e encaminhamento dos helpers.
+A autorizacao se limita ao repositorio do harness; nao publica dados no simtr-doc.
+
 ## Settings locais do VS Code — 23/10/2026
 
 Evolucao do harness na branch harness/ignorar-settings-vscode, a partir da main

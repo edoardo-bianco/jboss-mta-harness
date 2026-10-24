@@ -7,6 +7,12 @@ Nao cria exportador, tarefa de sincronizacao ou selecao automatica de perfis.
 [Voltar ao guia do desenvolvedor](../harness-migracao-desenvolvedor.md) |
 [Contrato de copia e reconciliacao](compartilhamento-contextos.md).
 
+Para executar o fluxo por etapas, use o
+[passo a passo com prompts e verificacoes](compartilhamento-documental-passo-a-passo.md).
+Ele cobre o inventario de todos os projetos Java locais adicionados ao harness,
+a copia documental, o PR, o recebimento, o ensaio entre dois devs e o consolidado.
+Este documento concentra as regras da proposta e a selecao de arquivos.
+
 ## 1. Continuar trabalhando antes de compartilhar
 
 Voce pode continuar priorizando, analisando, planejando e corrigindo issues no
