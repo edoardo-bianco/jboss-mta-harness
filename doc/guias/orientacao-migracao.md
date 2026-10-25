@@ -211,6 +211,17 @@ ou plano, execute o prompt correspondente; aplicar corretivas exige GO para o es
 Verificacoes tecnicas e aceite do resultado continuam separados.
 Veja o [procedimento de planejamento e execucao](tools/planejamento-migracao.md#preparar-e-executar-o-prompt).
 
+### Criar ou revisar uma issue com evidencias
+
+Para problema novo de deploy/execucao, achado da conversa, revisao manual ou
+revisao de issue MTA, use os
+[exemplos por situacao e cliente](tools/issues-e-evidencias.md#pedir-ajuda-ao-orientador-exemplos-por-situacao).
+O roteiro mostra a entrada no Copilot, Codex e Claude Code, a tarefa
+**Planejamento: criar ou revisar issue**, a passagem para o executor e como
+levar trechos/logs quando a execucao ocorrer em outra conversa.
+O helper entrega orientacao e mensagem pronta; o executor investiga e publica
+a ficha. Projeto/ID e evidencias ja acessiveis devem ser reaproveitados.
+
 ### Continuar manualmente a partir de uma ficha
 
 Pode ser outro colega quem implementa. O orientador recupera a ficha e os anexos

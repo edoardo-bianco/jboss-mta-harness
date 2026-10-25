@@ -262,6 +262,16 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
+      "label": "Planejamento: criar ou revisar issue",
+      "detail": "Seleciona projeto e abre o prompt; no chat, aproveite evidencias da sessao ou informe problema, ID e log. Mantem a origem MTA/manual.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/preparar-issue.ps1", "-WorkspacePath", "${input:harnessWorkspacePath}", "-SelectTarget", "-EditorPath", "${execPath}"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Planejamento: priorizar issues",
       "detail": "Escolhe a categoria e prepara uma fatia percentual; permite recriar ou progredir sem repetir issues examinadas nessa sequencia.",
       "type": "process",

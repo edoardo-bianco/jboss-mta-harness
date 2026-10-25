@@ -147,13 +147,24 @@ gerais, preservando lacunas de arquivos ainda indisponiveis.
 
 #### Registrar uma issue manual
 
+Para investigar e cadastrar em um unico pedido, ou revisar uma ficha existente,
+use o [roteiro com prompt e verificacoes](issues-e-evidencias.md). Ele explica fontes
+oficiais, acesso web, contagens nos indices e continuidade para priorizar/planejar.
+
 Uma issue manual e um achado real de log, teste ou conferencia local, sem regra
 MTA. Ela participa do registro, da contagem, da priorizacao da categoria
 `manual` e do planejamento/implementacao. O ID `DEV-...` e generico: nao ha
 tratamento especial para uma aplicacao ou um problema especifico.
 
-O executor deve reutilizar uma issue existente para o mesmo problema e conferir
-`projeto.json`, POM/Source, `migracao.md` e evidencias. O helper apenas orienta.
+Antes de chamar a API, o executor busca issues iguais/parecidas no registro,
+fichas e MTA disponivel; diante de candidata, mostra a comparacao e pede ao
+humano confirmar revisao da existente ou criacao distinta. Sem resposta, nao
+cadastra. Pedido ja explicito de revisar um ID nao exige repetir essa escolha.
+Confira projeto.json, POM/Source, migracao.md e evidencias. Use os modelos vigentes,
+prepare a proposta e pergunte se deseja auditoria independente ANTES de publica-la,
+conforme o [roteiro de qualidade](issues-e-evidencias.md#perguntar-antes-da-auditoria-independente).
+A API confere identidade/colisao, mas nao detecta similaridade semantica nem decide
+sobre auditoria. O helper apenas orienta; fontes ausentes exigem lacuna/pesquisa.
 
 **Cadastro integrado.** Na raiz do harness, use a API em vez de montar a pasta
 e a linha da tabela manualmente:

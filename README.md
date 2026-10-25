@@ -76,6 +76,7 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 | Quero o harness na minha conta GitHub da empresa | Siga o [guia de fork e atualizacao](doc/guias/tools/github-empresa.md): terminal com gh/Git ou navegador e Git, preservando as aplicacoes no Azure Repos. |
 | Preparar minha maquina ou as dos colegas | Siga o [roteiro por maquina](doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas), que encaminha ao certificado Sonar e ao Node/MCP opcional; o helper usa essas mesmas fontes. |
 | Quero escolher o que corrigir | Confira o registro e use a [priorizacao opcional por categoria](doc/guias/tools/priorizacao-issues.md). |
+| Descobri uma falha ou quero revisar uma issue | Execute **Planejamento: criar ou revisar issue** e siga o [roteiro de issues e evidencias](doc/guias/tools/issues-e-evidencias.md) e o prompt de investigacao/cadastro; depois escolha priorizar ou planejar. |
 | Ja escolhi uma issue | Use **Planejamento: planejar**, a partir da escolha e das evidencias no registro. |
 | Quero prever a migracao por sprints, equipe e prazo | Use **Planejamento: planejar sprints**, conforme o [guia de planejamento macro](doc/guias/tools/planejamento-sprints.md); inclui todos os projetos ou um subconjunto. |
 | Quero conferir uma base ou consultar uma issue preparada | Peca ao helper a [consulta da base ou da issue](doc/guias/tools/consultas-issues.md#consultar-pelo-helper), indicando o contexto se ainda nao estiver identificado. |

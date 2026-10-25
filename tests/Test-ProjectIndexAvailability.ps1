@@ -46,7 +46,7 @@ function Assert-Available($Fixture,$Result,[bool]$Pending) {
     $text=[IO.File]::ReadAllText($Result.IndexPath)
     $row=@($text -split '\r?\n' | Where-Object { $_ -match '^\| \[siric-api\]' })
     Assert ($row.Count -eq 1) 'Projeto com MTA legivel deve continuar no resumo.'
-    Assert ($row[0].Contains('| 5 / 532 |') -and $row[0].Contains('mandatory: 2 / 4') -and $row[0].Contains('optional: 3 / 528')) 'Falha local nao pode suprimir issues ou ocorrencias do MTA lido.'
+    Assert ($row[0].Contains('| MTA: 5 / 532<br>Manuais: 0 / - |') -and $row[0].Contains('mandatory: 2 / 4') -and $row[0].Contains('optional: 3 / 528')) 'Falha local nao pode suprimir issues ou ocorrencias do MTA lido.'
     Assert ($row[0].Contains('siric-api/rodada/index.html') -and -not $row[0].Contains('Indisponivel')) 'Resumo deve manter o link ao relatorio original utilizavel.'
     Assert ($text.Contains('1 de 2 projetos') -and $text.Contains('5 issues / 532 ocorrencias')) 'Totais devem incluir o MTA valido e excluir somente o realmente ausente.'
     Assert ($text.Contains('| mandatory | 2 | 4 |') -and $text.Contains('| optional | 3 | 528 |')) 'Totais por categoria devem preservar o projeto com pendencia local.'
@@ -167,7 +167,7 @@ foreach ($case in @('ausente','corrompido')) {
     $result=New-HarnessProjectIndex $fixture.Context -UpdateMigration
     $text=[IO.File]::ReadAllText($result.IndexPath)
     $row=@($text -split '\r?\n' | Where-Object { $_ -match '^\| \[siric-api\]' })
-    Assert ($row.Count -eq 1 -and $row[0].Contains('| Indisponivel | - |')) 'MTA realmente ausente ou corrompido deve ficar indisponivel.'
+    Assert ($row.Count -eq 1 -and $row[0].Contains('| Indisponivel | MTA: -<br>Manuais: 0 / - |')) 'MTA realmente ausente ou corrompido deve ficar indisponivel.'
     Assert ($text.Contains('0 de 2 projetos') -and $text.Contains('Totais conhecidos: indisponiveis.')) 'Nao contar MTA alternativo quando a origem escolhida falhou.'
     Assert (($result.Warnings -join ' ') -match 'siric-api: MTA indisponivel' -and ($result.Warnings -join ' ') -notmatch 'Atualizacao local pendente') 'Distinguir falha real da fonte de falha da atualizacao local.'
     Assert ([IO.File]::ReadAllText($fixture.Project.ConfigPath) -ceq $associationBefore) 'Indice nao pode substituir a origem explicita invalida.'
@@ -270,7 +270,7 @@ Assert (-not [IO.File]::ReadAllText($fixture.Project.MigrationPath).Contains('ja
 Assert (($result.Warnings -join ' ') -match 'siric-api: Atualizacao local pendente') 'Concorrencia da associacao deve ficar visivel como pendencia local.'
 $summary=[IO.File]::ReadAllText($result.IndexPath)
 $row=@($summary -split '\r?\n' | Where-Object { $_ -match '^\| \[siric-api\]' })
-Assert ($row.Count -eq 1 -and $row[0].Contains('| 6 / 533 |') -and $row[0].Contains('siric-api/rodada/index.html') -and $row[0].Contains('Atualizacao local pendente')) 'Resumo deve identificar a leitura efetivamente realizada e sua pendencia de sincronizacao local.'
+Assert ($row.Count -eq 1 -and $row[0].Contains('| MTA: 6 / 533<br>Manuais: 0 / - |') -and $row[0].Contains('siric-api/rodada/index.html') -and $row[0].Contains('Atualizacao local pendente')) 'Resumo deve identificar a leitura efetivamente realizada e sua pendencia de sincronizacao local.'
 Assert (($result.Warnings -join ' ') -notmatch 'siric-api: MTA indisponivel') 'Troca concorrente nao torna invalido o diagnostico ja lido.'
 Assert ([IO.File]::ReadAllText($fixture.Catalog) -ceq $changedCatalog) 'Protecao da associacao nao altera a origem externa antiga.'
 $result=New-HarnessProjectIndex $fixture.Context -UpdateMigration

@@ -1,5 +1,125 @@
 # Plano do agente: evolucao do harness
 
+## Publicacao das issues e evidencias — 24/10/2026
+
+O desenvolvedor autorizou commit, push e PR para main desta entrega completa:
+indice com contagens manuais, tarefa/prompt criar-revisar-issue, orientacao e
+verificacoes. Publicar a branch harness/indice-e-investigacao-manual do worktree
+separado; a integracao do PR permanece uma etapa posterior. Os registros de
+ausencia de commit/push/PR nas secoes abaixo descrevem a preparacao anterior.
+
+## Criar ou revisar qualquer issue com evidencias — complemento de 24/10/2026
+
+Pedido ampliado pelo desenvolvedor antes da publicacao: substituir o prompt ainda
+inedito registrar-issue-manual por criar-revisar-issue, para MTA ou manual.
+Uma tarefa Planejamento: criar ou revisar issue seleciona o projeto e abre um
+prompt preparado. Problema/ID/evidencias sao recuperados ou pedidos no chat,
+conforme escolha humana. Executar no chat atual permite aproveitar evidencias
+ja disponiveis; outra sessao exige trecho/arquivo acessivel, sem acesso presumido.
+
+Preservar origem MTA/ID/categoria; novo achado humano usa cadastro manual existente.
+Revisar a mesma ficha, documentar mudanca de conclusao, anexar evidencia pertinente
+de conversa/saida de ferramenta/log de servidor com origem e limites. Preservar
+ANTES com nome proprio quando a fonte for mutavel; nao copiar logs inteiros por
+padrao nem persistir segredos. Evidencia opcional, sem inventar anexos ou reproducao.
+
+Preparador usa contexto real do projeto, referencia o contrato unico do prompt,
+preserva notas e publica somente o prompt de preparo com Expected. Nao cria
+issue, registro, plano, quota ou GO. Requer registro existente; cancelar nao grava.
+Cabecalho devsquad com web/fetch e vscode/askQuestions; ferramentas disponiveis
+podem ser selecionadas pelo prompt, sem conceder rede/permissoes nem instalar busca.
+
+Complemento humano: todos os novos/revisados prompts devem atender Copilot,
+Codex e Claude Code. Registrar regra em AGENTS, corpo comum e instrucoes de
+execucao por cliente; metadados Copilot nao concedem ferramentas nos demais.
+
+Aceite adicional: selecionar projeto correto, links validos, repeticao preserva
+notas e cadastro, ausencia de registro/cancelamento nao grava; tarefa usa selecao
+existente e abre arquivo. Validar CLI e tarefas via runner isolado, parser e
+navegacao. Execucao nativa no chat/rede corporativa permanece ensaio naquela maquina.
+
+Complemento implementado e revisado; preparo, tarefas, navegacao e adaptadores
+validados em copia isolada. Resultados e limites registrados em tasks/todo.md.
+
+Complemento documental solicitado: exemplos de pedido ao orientador por tipo de
+situacao (novo problema com log, achado da conversa, revisao manual e revisao MTA)
+e entrada/passagem por Copilot, Codex e Claude Code. Manter guia unico e link no
+guia de orientacao; explicitar resultados esperados e transferencia de evidencias
+quando houver outra conversa. Conferir navegacao, exemplos e diff, sem mudar runtime.
+
+Complemento de qualidade solicitado: antes de criar, buscar issues iguais ou
+parecidas no registro/fichas e MTA disponivel; apresentar comparacao e pedir
+confirmacao quando houver correspondencia possivel. Pedido de revisar ID ja
+explicito e suficiente, sem repetir escolha. Sem correspondencia apos busca,
+seguir o cadastro autorizado, declarando escopo e limites da conferencia.
+
+Usar modelos existentes de ficha/evidencias e API, sem inventar esquemas. Vincular
+fatos a evidencia local/relato identificado e regras tecnicas a fontes oficiais
+aplicaveis; lacuna essencial vira pergunta, nao fato. Sem web, entregar pesquisa
+orientada (questao, versao, fonte oficial, termos publicos, trecho esperado),
+permitindo cadastro sustentado com pesquisa pendente conforme decisao anterior.
+
+Auditoria independente e opcional e exige pergunta explicita ao humano antes de
+acionar outro agente/revisor. Preparar proposta antes da pergunta; nenhuma resposta
+significa aguardar, nao consentimento. Sim: segundo contexto sem participacao na
+autoria confere proposta/modelos/fontes/duplicidade; autor corrige e submete pontos
+alterados quando necessario. Nao: seguir pedido inicial, registrar nao realizada.
+Revisor indisponivel: entregar mensagem/material para outra sessao e aguardar a
+escolha do humano, sem simular independencia. Decisao/resultados ficam na secao
+Referencias e lacunas da ficha, sem confundir auditoria com GO/aceite de corretiva.
+
+Validar instrucoes e exemplos contra os modelos e fluxo existente; links/parser
+e diff. Esta etapa altera contratos/prompts/guias, nao API/runtime. Comportamento
+de agentes requer ensaio nativo e nao sera alegado a partir de verificacao textual.
+
+Complemento de qualidade concluido conforme as escolhas humanas finais;
+validacao estrutural/documental e limites registrados em tasks/todo.md.
+
+## Issues manuais: indice e investigacao — 24/10/2026
+
+Evolucao do harness na branch harness/indice-e-investigacao-manual, base main
+2467171, worktree separado C:/temp/harness-issues-manuais. O checkout operacional
+permanece na main. Escopo fechado com o desenvolvedor: investigar e cadastrar
+no mesmo pedido; pesquisa oficial indisponivel fica pendente explicita; resumo
+na mesma celula com MTA: X / Y e Manuais: N / -, categoria manual e totais
+separados, inclusive sem MTA.
+
+Entregar o ciclo de cadastro/analise e navegacao das issues manuais. Reutilizar
+Register-HarnessManualIssue e a ficha existente, preservar identidade, evidencias,
+decisoes e notas. Fato observado, hipotese e causa sustentada devem ficar distintos.
+Consultar codigo/configuracao e documentacao oficial das versoes aplicaveis,
+citando URL/secao e limites. Ausencia de web nao impede registrar fato comprovado.
+Nenhuma corretiva ou escolha humana e executada pelo cadastro.
+
+1. Indice: ler contagem do registro uma vez por projeto; usar a mesma leitura
+   nas celulas e totais. Fonte ilegivel fica como lacuna, nunca zero. Preservar
+   totais MTA e informar cobertura da contagem manual. Atualizar os dois modelos
+   para navegacao indice -> registro -> ficha/evidencias.
+2. Prompt criar-revisar-issue (ampliado conforme complemento acima): receber relato/evidencia ou ID existente;
+   conferir duplicidade e Source/POM, investigar, cadastrar/atualizar pelo fluxo
+   existente e conferir links. Acesso web depende de ferramentas/permissoes reais.
+   Nao modificar ranking, quota, GO/aceite ou codigo da aplicacao.
+3. Orientacao: explicar cadastro versus revisao da ficha versus priorizacao.
+   Fatia elegivel rele a ficha; Continue exclui examinadas e mantem base fixa;
+   Recreate explicito inclui novas manuais. Escolha direta segue para planejar.
+   Vincular prompt/roteiro no README, guia e skill comum.
+
+Aceite: MTA com manual e projeto apenas manual aparecem corretamente apos
+regeneracao; repeticao nao duplica contagens/fichas nem perde texto humano;
+registro ilegivel nao suprime MTA nem aparenta zero manual. Ficha existente
+continua sendo usada por priorizacao e planejamento. Documentacao orienta pesquisa
+oficial, cadastro com lacuna e verificacao real de ferramentas na maquina de trabalho.
+
+Validacao: reproduzir a falha antes da corretiva e rodar suites pertinentes por
+tests/Invoke-HarnessTests.ps1 -Test Test-ProjectIndexManual.ps1,Test-ProjectIndexSummary.ps1,Test-ProjectIndexAvailability.ps1,Test-ManualPrioritization.ps1,Test-IssuePlanning.ps1
+em copia temporaria do runner. Conferir demais indices/fontes afetados, parser,
+links, frontmatter e diff. Ensaio nativo do Copilot/rede corporativa permanece
+verificacao naquela maquina; testes locais nao demonstram essa capacidade.
+
+Implementacao e revisao concluidas. Onze suites passaram pelo runner isolado;
+navegacao, sintaxe e limites registrados em tasks/todo.md. Prompt e roteiro
+entregues; execucao nativa/rede corporativa exige conferencia naquela maquina.
+
 ## Passo a passo do compartilhamento documental — 24/10/2026
 
 Evolucao documental a pedido do desenvolvedor: transformar o roteiro do chat em

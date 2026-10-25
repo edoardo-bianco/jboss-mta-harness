@@ -1,5 +1,110 @@
 # To-do do agente: evolucao do harness
 
+## Publicacao das issues e evidencias — 24/10/2026
+
+- [x] Receber autorizacao explicita para commit, push e PR para main.
+- [x] Revisar o conjunto final e confirmar a base igual a origin/main (2467171).
+- [x] Conferir 14 Markdown: 281 links locais, 154 ancoras, quatro exemplos PowerShell e 21 linhas de tabelas; parser de sete arquivos PowerShell, frontmatter e diff sem erros.
+
+As 13 suites isoladas descritas abaixo passaram. A publicacao inclui somente
+harness, testes e documentacao; o checkout operacional e os dados reais foram
+preservados. Ensaio nativo dos prompts e da rede corporativa continua pendente.
+Os registros anteriores de ausencia de commit/push/PR sao historicos.
+
+## Criar ou revisar qualquer issue com evidencias — complemento de 24/10/2026
+
+- [x] Confirmar projeto na tarefa e problema/ID/evidencias no chat.
+- [x] Incluir evidencias ja presentes na sessao e logs de execucao do servidor.
+- [x] Generalizar prompt/guia para MTA e manual preservando identidade e decisoes.
+- [x] Preparar tarefa unica e prompt por projeto, preservando notas e contexto.
+- [x] Validar CLI/cancelamento/preservacao e documentacao em copia isolada.
+- [x] Registrar em AGENTS a regra para Copilot, Codex e Claude Code; orientar execucao do mesmo contrato e limites por cliente.
+
+- [x] Acrescentar exemplos ao orientador por situacao e entrada/passagem por cliente no roteiro de issues; referenciar pelo guia de orientacao.
+- [x] Conferir links/ancoras, exemplos e diff deste complemento documental.
+Complemento documental PASS: quatro Markdown, 70 links locais, 48 ancoras,
+um exemplo PowerShell e 21 linhas de tabelas conferidos; diff --check sem erros.
+Exemplos revisados contra a skill comum e a passagem de cliente existente.
+Sem mudanca de runtime ou nova execucao de suites; nenhum prompt de migracao
+foi executado. Alteracoes permanecem na mesma branch, sem commit/push/PR.
+
+- [x] Tornar explicita a busca previa e a confirmacao humana de issues possivelmente correspondentes.
+- [x] Reforcar modelos, sustentacao dos fatos e roteiro de pesquisa oficial sem acesso web.
+- [x] Perguntar antes de acionar auditor independente, preservando decisao e limites por cliente.
+- [x] Conferir contrato, exemplos, navegacao e diff deste complemento.
+
+Complemento de qualidade PASS: oito Markdown, 89 links locais, 30 ancoras,
+quatro exemplos PowerShell e 21 linhas de tabelas; frontmatter, parser e
+diff --check sem erros. Revisao de coerencia contra modelos de ficha/evidencias,
+API de cadastro e fluxo de publicacao: busca previa com confirmacao de candidatas,
+proposta revisavel, pergunta sobre auditoria, resultado/recusa explicitos e
+reconferencia de correspondencias se o registro mudar antes de publicar.
+
+Confirmacao humana final: perguntar se deseja auditoria independente; ela nao e
+automatica. Nao houve delegacao/auditoria independente nesta manutencao nem
+cadastro real. Alteracoes desta etapa sao instrucionais/documentais, sem mudanca
+de runtime; suites anteriores nao demonstram obediencia do modelo. Ensaio nativo
+permanece na maquina de trabalho. Sem commit/push/PR.
+
+RED: Test-IssuePrompt falhou pela ausencia da entrada preparar-issue. Apos a
+implementacao, PASS para projeto selecionado, links/contexto reais, heranca do
+cabecalho, preservacao das notas/registro/Source, repeticao sem mudanca e falha
+sem escrita para registro ausente/invalido. Test-TaskInputs passou com 27 tarefas
+e cancelamento da nova entrada preservando os arquivos da fixture.
+
+Apos ampliar para os tres clientes: Test-IssuePrompt, Test-CurrentPromptLinks e
+Test-ClaudeAdapter PASS pelo runner isolado. Somados aos resultados da primeira
+etapa, 13 suites distintas aprovadas. Revisao final: 13 Markdown, 234 links locais,
+115 ancoras, quatro exemplos PowerShell e 21 linhas de tabelas; parser de sete
+arquivos PowerShell, frontmatter e diff --check sem erros.
+
+Guia unico issues-e-evidencias e prompt criar-revisar-issue substituem os nomes
+manuais propostos antes da publicacao. Tarefa prepara/abre o arquivo; usuario
+executa no chat atual para reaproveitar evidencias acessiveis. Regra e exemplos
+explicitam origem, recorte preservado de log mutavel, hipoteses e pesquisa oficial
+pendente, sem inferir historico compartilhado, ferramentas, GO ou acesso de rede.
+
+Limite: nao houve execucao nativa desses prompts no Copilot/Codex/Claude Code nem
+ensaio de rede corporativa. Suites provam preparo/contratos/adaptadores, nao
+comportamento de modelos. Checkout operacional continua main limpa; somente o
+worktree harness/indice-e-investigacao-manual foi alterado. Sem commit/push/PR.
+
+## Issues manuais: indice e investigacao — 24/10/2026
+
+- [x] Fechar investigacao/cadastro, pesquisa pendente e formato do indice com o desenvolvedor.
+- [x] Conferir main limpa e criar branch em worktree separado.
+- [x] Reproduzir ausencia das manuais no indice geral com teste isolado.
+- [x] Incluir resumo/categoria/totais manuais e cobertura de registros, preservando MTA.
+- [x] Criar prompt de investigacao/cadastro/revisao com fontes oficiais e lacunas.
+- [x] Orientar navegacao, pesquisa web e continuidade para priorizar/planejar.
+- [x] Validar suites, navegacao, parser e diff; registrar resultados e limites.
+
+Validacao concluida em copia temporaria pelo runner oficial: 11 suites PASS:
+ProjectIndexManual, ProjectIndexSummary, ProjectIndexAvailability, ProjectIndex,
+ProjectDocuments, ProjectNavigation, ManualPrioritization, IssuePlanning,
+PlanningEvidence, CurrentPromptLinks e ClaudeAdapter.
+
+RED inicial reproduziu a ausencia das manuais no resumo. Novo caso tambem
+reproduziu a ambiguidade de uma categoria MTA chamada manual; exibicao agora
+distingue manual (MTA), mantendo as identidades e contagens de origem.
+Teste de preservacao considera a normalizacao de quebras de linha que ja ocorre
+ao atualizar as linhas MTA; texto humano, identidade, ficha e vinculos preservados.
+Mutacao temporaria da condicao de cobertura parcial foi rejeitada pelo teste;
+gerador restaurado e teste novamente PASS, sem backup ou dados operacionais.
+
+Conferencia documental: 12 Markdown, 226 links locais, 113 ancoras, tres exemplos
+PowerShell e 16 linhas de tabelas do novo roteiro, sem erros. Parser dos quatro
+arquivos PowerShell, frontmatter do prompt e git diff --check aprovados.
+Revisao de contagens/origens, cobertura parcial, publicacao protegida e permissao
+web concluida. Sem novas dependencias ou mudanca das ferramentas dos helpers.
+
+Limites: nao houve execucao nativa do prompt no Copilot nem validacao de acesso
+web na rede corporativa. O roteiro inclui o teste de ferramenta/URL para aquela
+maquina. As oito manuais mencionadas pelo desenvolvedor sao relato da maquina
+corporativa, nao uma contagem verificada neste checkout. Trabalho permanece
+no worktree separado; checkout operacional e seus dados nao foram regenerados.
+Sem commit, push ou PR desta entrega.
+
 ## Passo a passo do compartilhamento documental — 24/10/2026
 
 - [x] Conferir raiz, main, HEAD, worktrees e estado limpo; criar branch de documentacao.
