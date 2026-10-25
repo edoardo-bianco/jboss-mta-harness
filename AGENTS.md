@@ -68,6 +68,11 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   Use Register-HarnessManualIssue para cadastro generico e Repair-HarnessManualIssue
   para reparo explicito de pasta antiga. Todas as fichas usam nomes legiveis;
   preserve o ID completo na identidade, recusando colisoes e caminhos longos.
+  Antes de criar, buscar issues iguais/parecidas e pedir confirmacao humana de
+  revisao/criacao distinta quando houver candidata. Seguir modelos vigentes e
+  sustentar fatos em evidencias/fontes; pesquisa oficial inacessivel fica orientada
+  e pendente. Com proposta pronta, perguntar se deseja auditoria independente;
+  somente resposta afirmativa autoriza segundo agente/contexto nao autor.
   Gere links com Get-HarnessSourceLink a partir de caminhos literais.
   Categoria manual pode ser priorizada por evidencias; a base/quota e fixa ate
   Recreate explicito. Cadastro nao comprova exame, GO ou aceite.
@@ -124,6 +129,11 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   somente leitura; nao recupera publicacoes interrompidas nem contorna acesso.
   Helpers continuam leitores/orientadores de uma etapa, com caminho e mensagem
   prontos para o cliente atual; ler prompt nao autoriza executa-lo.
+- Ao criar/revisar prompts, atender GitHub Copilot, Codex e Claude Code com um
+  procedimento comum. Separar metadados/ferramentas especificos de cada cliente;
+  devsquad e executor do Copilot, nao precondicao nos demais. Orientar execucao
+  explicita do arquivo pelo agente principal e uso das evidencias acessiveis na
+  conversa atual; nao presumir historico entre sessoes, ferramentas ou rede.
 - Pedido explicito de executar um prompt preparado ao agente principal segue o
   contrato e os destinos desse prompt. No Copilot, devsquad e o orquestrador:
   delega analises pertinentes, confere evidencias e consolida as saidas. Nos demais

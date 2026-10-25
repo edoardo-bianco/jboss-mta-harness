@@ -88,7 +88,19 @@ presenca, decisao A DEFINIR/ANALISAR AGORA e andamento NAO ANALISADA/ANALISADA.
 ADIAR, FORA DO ESCOPO e corretivas em andamento exigem direcionamento humano
 explicito. Issues MANUAL na categoria manual sao elegiveis pelos mesmos estados,
 com registro/fichas/evidencias e sem exigir relatorio MTA. Nao entram nas
-categorias MTA. Cadastro atualiza a contagem, nao a base de uma fatia iniciada. Mudanca de elegibilidade exige novo preparo, sem alterar
+categorias MTA. Cadastro atualiza a contagem, nao a base de uma fatia iniciada.
+O indice geral apresenta manuais separadas do MTA, obtidas do registro, inclusive
+sem MTA; registro ilegivel e lacuna, nunca zero. Investigacao/cadastro/revisao seguem
+[o roteiro de issues e evidencias](../guias/tools/issues-e-evidencias.md), consultando Source,
+evidencias e documentacao oficial aplicavel. Pesquisa inacessivel fica pendente.
+Antes de criar, conferir issues iguais/parecidas e pedir confirmacao humana
+quando houver candidata, preservando identidade/escolhas. Fichas/anexos seguem
+os modelos vigentes e distinguem fatos sustentados, relatos, hipoteses e fontes
+oficiais consultadas. Sem acesso, orientar a pesquisa e registrar a pendencia.
+A proposta pronta e apresentada com pergunta sobre auditoria independente; somente
+resposta afirmativa aciona outro agente/contexto sem participacao na autoria.
+Sem auditoria, registrar a escolha/limite, sem alegar independencia.
+Revisar uma ficha nao atualiza ranking/quota nem concede GO ou aceite. Mudanca de elegibilidade exige novo preparo, sem alterar
 o contexto pelo prompt para fabricar cumprimento de quota. Git nao e consultado.
 
 Examinar SliceSize novas issues alem de ExcludedIssues, considerando trabalho

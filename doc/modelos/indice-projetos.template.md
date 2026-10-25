@@ -18,9 +18,10 @@ Indice reconstruido em {{UpdatedAt}} (UTC). Abra o projeto para consultar fontes
 
 ## Como interpretar
 
-- Issues sao regras distintas por projeto; ocorrencias sao os incidentes do MTA lido. Categorias mantem os nomes da origem.
-- Totais por categoria somam os projetos com MTA utilizavel no escopo. A mesma regra em dois projetos conta duas issues; o quadro nao mede progresso da migracao.
-- Indisponivel e "-" indicam lacuna; "0 / 0" exige diagnostico valido sem issues. Totais incluem somente os projetos com MTA utilizavel.
+- A celula Issues / ocorrencias separa MTA e Manuais. No MTA, issues sao regras distintas por projeto; ocorrencias sao incidentes. Categorias MTA mantem os nomes da origem; manual (MTA) distingue uma categoria homonima do cadastro humano.
+- Totais das categorias MTA somam os projetos com MTA utilizavel no escopo. A mesma regra em dois projetos conta duas issues; o quadro nao mede progresso da migracao.
+- A categoria manual vem das linhas MANUAL do registro, inclusive sem MTA. Ocorrencias "-" nao se aplicam a manuais; cadastro nao comprova exame, resolucao ou aceite. O total manual informa quantos registros foram lidos; lacuna nao e zero. Abra Registro e siga Ficha para a analise e suas evidencias.
+- No MTA, Indisponivel e "-" indicam lacuna; "0 / 0" exige diagnostico valido sem issues. Seus totais incluem somente os projetos com MTA utilizavel.
 - MTA utilizavel mostra o relatorio selecionado e sua data: generatedAt valido, senao modificacao do index.html. Uma tentativa posterior pode ter falhado.
 - Atualizacao local pendente indica falha ao atualizar associacao/documentos; o MTA valido e legivel continua nos totais. Confira Limites da leitura e repita a tarefa apos resolver o bloqueio. Os documentos locais podem estar desatualizados.
 - Ultimas tentativas mostram estado/data registrados e abrem o log quando existe. MTA externo nao comprova execucao local.

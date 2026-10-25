@@ -55,14 +55,14 @@ $result=New-HarnessProjectIndex $context
 $text=[IO.File]::ReadAllText($result.IndexPath)
 Assert ($text.Contains('| Projeto | MTA utilizavel (UTC) | Issues / ocorrencias | Categorias (issues / ocorrencias) | Ultimas tentativas (UTC) | Documentos |')) 'Indice deve apresentar tabela resumida com links.'
 $line=($text -split '\r?\n' | Where-Object { $_ -match '^\| \[com-mta\]' })
-Assert ($line.Contains('| 3 / 3 |') -and $line.Contains('mandatory: 1 / 2') -and $line.Contains('optional: 1 / 1')) 'Contagens devem vir do MTA por categoria.'
+Assert ($line.Contains('| MTA: 3 / 3<br>Manuais: 0 / - |') -and $line.Contains('mandatory: 1 / 2') -and $line.Contains('optional: 1 / 1')) 'Contagens devem vir do MTA por categoria.'
 Assert ($line.Contains('custom&#124;&#91;x&#93;&lt;tag&gt;: 1 / 0')) 'Categoria externa deve ser texto seguro na tabela.'
 Assert ($line.Contains('2026-10-20 11:00:00') -and $line.Contains('mta: FAILED') -and $line.Contains('2026-10-21T12:00:00Z')) 'Diagnostico anterior e ultima tentativa falha devem aparecer separados.'
 Assert ($line.Contains('[build: FAILED]') -and $line.Contains('console.log')) 'Tentativa deve abrir seu log existente.'
 Assert ($line.Contains('[Registro]') -and $line.Contains('[Sonar]') -and $line.Contains('[Preparo]') -and $line.Contains('Proposta ausente')) 'Preparo e diagnostico devem ter links sem aparentar plano existente.'
 $missing=($text -split '\r?\n' | Where-Object { $_ -match '^\| \[sem-mta\]' })
 $empty=($text -split '\r?\n' | Where-Object { $_ -match '^\| \[vazio\]' })
-Assert ($missing.Contains('| Indisponivel | - |') -and $empty.Contains('| 0 / 0 |')) 'Ausencia de MTA nao equivale a diagnostico vazio.'
+Assert ($missing.Contains('| Indisponivel | MTA: -<br>Manuais: 0 / - |') -and $empty.Contains('| MTA: 0 / 0<br>Manuais: 0 / - |')) 'Ausencia de MTA nao equivale a diagnostico vazio.'
 Assert ($text.Contains('3 de 4 projetos') -and $text.Contains('6 issues / 7 ocorrencias')) 'Totais devem explicitar cobertura parcial e excluir ausencia.'
 Assert ($text.Contains('## Totais conhecidos') -and $text.Contains('| Categoria | Issues | Ocorrencias |')) 'Totais devem ter tabela por categoria no indice geral.'
 Assert ($text.Contains('| mandatory | 2 | 5 |')) 'Mesma regra em dois projetos conta duas issues; ocorrencias devem ser somadas.'

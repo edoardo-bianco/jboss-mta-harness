@@ -4,7 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 26 -and @($labels | Sort-Object -Unique).Count -eq 26) 'Manter 26 tarefas distintas, incluindo restart e acompanhamento de logs JBoss.'
+Assert ($labels.Count -eq 27 -and @($labels | Sort-Object -Unique).Count -eq 27) 'Manter 27 tarefas distintas, incluindo criar ou revisar issue.'
 $serverLabels=@('Servidor: iniciar JBoss','Servidor: reiniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
@@ -126,3 +126,13 @@ foreach ($serverTask in @($logTask[0],@($tasks.tasks | Where-Object label -eq 'S
     Assert (-not (Test-Path (Join-Path $fixture '.harness/servidores'))) 'Cancelar logs/restart nao pode operar servidor.'
 }
 Write-Output 'PASS: tarefas reais de logs/restart cancelam antes de qualquer operacao de servidor.'
+
+$issueTask=@($tasks.tasks | Where-Object label -eq 'Planejamento: criar ou revisar issue')
+Assert ($issueTask.Count -eq 1 -and $issueTask[0].args -contains '${workspaceFolder}/scripts/preparar-issue.ps1' -and $issueTask[0].args -contains '${execPath}') 'Falta tarefa unica de criar/revisar issue.'
+$issueArguments=@($issueTask[0].args | ForEach-Object { $_.Replace('${workspaceFolder}',$fixture).Replace('${input:harnessWorkspacePath}',$workspacePath).Replace('${execPath}',(Join-Path $fixture 'editor-ausente.exe')) })
+$issueArguments+=@('-ConfigPath',$configPath)
+$beforeIssue=@(Get-ChildItem -LiteralPath $fixture -Recurse -File | Sort-Object FullName | ForEach-Object { $_.FullName+':'+(Get-FileHash -LiteralPath $_.FullName).Hash }) -join "`n"
+$output='q' | & powershell.exe @issueArguments 2>&1 | Out-String
+$afterIssue=@(Get-ChildItem -LiteralPath $fixture -Recurse -File | Sort-Object FullName | ForEach-Object { $_.FullName+':'+(Get-FileHash -LiteralPath $_.FullName).Hash }) -join "`n"
+Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and $beforeIssue -ceq $afterIssue) 'Cancelar nova tarefa deve preservar todos os arquivos, sem prompt ou cadastro.'
+Write-Output 'PASS: tarefa de criar/revisar issue seleciona projeto e cancela sem escrever.'

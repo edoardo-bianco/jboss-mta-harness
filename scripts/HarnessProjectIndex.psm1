@@ -40,7 +40,7 @@ function Read-ProjectIndexMta {
 }
 
 function Get-ProjectSummaryRow {
-    param($Project,$Mta,[string]$Index,[Collections.Generic.List[string]]$LocalWarnings)
+    param($Project,$Mta,[string]$Index,[Collections.Generic.List[string]]$LocalWarnings,$MigrationCounts)
     $report='Indisponivel'; $counts='-'; $categories='-'
     if ($Mta) {
         $report=Get-HarnessSourceLink $Index $Mta.ReportPath ($Mta.DateUtc.ToString('yyyy-MM-dd HH:mm:ss'))
@@ -48,10 +48,15 @@ function Get-ProjectSummaryRow {
         $counts=(@($Mta.Issues).Count.ToString()+' / '+$occurrences)
         $categories=(@($Mta.Issues | Group-Object Category -CaseSensitive | Sort-Object Name | ForEach-Object {
             $sum=0; foreach ($issue in $_.Group) { $sum+=$issue.Count }
-            (ConvertTo-ProjectCell $_.Name)+': '+$_.Count+' / '+$sum
+            $label=ConvertTo-ProjectCell $_.Name
+            if ($_.Name -ceq 'manual') { $label+=' (MTA)' }
+            $label+': '+$_.Count+' / '+$sum
         }) -join '<br>')
-        if (-not $categories) { $categories='Sem issues' }
+        if (-not $categories) { $categories='Sem issues MTA' }
     }
+    $manual=if ($null -ne $MigrationCounts) { [string]$MigrationCounts.Manual } else { '-' }
+    $counts='MTA: '+$counts+'<br>Manuais: '+$manual+' / -'
+    $categories+='<br>manual: '+$manual+' / -'
     $attempts=@()
     try {
         $read=Read-HarnessProjectFiles $Project @('atual/operacao.json') -ReadCommitted
@@ -102,6 +107,7 @@ function New-HarnessProjectIndex {
         $names[$project.Name]=$true; $projects+=$project
     }
     $warnings=@(); $rows=@(); $available=0; $issueCount=0; $occurrenceCount=0
+    $manualCount=0; $manualAvailable=0
     $categoryTotals=New-Object 'Collections.Generic.Dictionary[string,object]' ([StringComparer]::Ordinal)
     foreach ($project in $projects) {
         $mta=$null; $reading=$null; $limits=@()
@@ -124,7 +130,14 @@ function New-HarnessProjectIndex {
             }
             Update-HarnessProjectDocuments $project -Mta $mta -UpdateIssues:$UpdateMigration -Warnings $limits -Expected $expected
         } catch { $localWarnings.Add($_.Exception.Message) }
-        $rows+=Get-ProjectSummaryRow $project $mta $index $localWarnings
+        $migrationCounts=$null
+        try {
+            $read=Read-HarnessProjectFiles $project @('migracao.md') -ReadCommitted
+            if (-not $read['migracao.md']) { throw 'Registro ausente.' }
+            $migrationCounts=Get-HarnessMigrationCounts $read['migracao.md']
+            $manualCount+=$migrationCounts.Manual; $manualAvailable++
+        } catch { $localWarnings.Add('Contagem manual indisponivel: '+$_.Exception.Message) }
+        $rows+=Get-ProjectSummaryRow $project $mta $index $localWarnings $migrationCounts
         if ($mta) {
             $available++; $issueCount+=@($mta.Issues).Count
             foreach ($issue in $mta.Issues) {
@@ -152,16 +165,21 @@ function New-HarnessProjectIndex {
     if (-not $rows.Count) { $rows=@('| Nenhum projeto Maven no escopo. | - | - | - | - | - |') }
     $categoryRows=@($categoryTotals.Keys | Sort-Object -CaseSensitive | ForEach-Object {
         $label=if ([string]::IsNullOrWhiteSpace($_)) { 'Sem categoria informada' } else { ConvertTo-ProjectCell $_ }
+        if ($_ -ceq 'manual') { $label+=' (MTA)' }
         '| '+$label+' | '+$categoryTotals[$_].Issues+' | '+$categoryTotals[$_].Occurrences+' |'
     })
     if (-not $categoryRows.Count) {
         $categoryRows=@(if ($available) { '| Sem issues no MTA utilizavel | 0 | 0 |' } else { '| Indisponivel: nenhum MTA utilizavel | - | - |' })
     }
+    $manualTotal=if ($manualAvailable) { [string]$manualCount } else { '-' }
+    $categoryRows+=('| manual | '+$manualTotal+' | - |')
+    $manualCoverage="Issues manuais registradas: $manualTotal, fora dos totais MTA. Registros legiveis: $manualAvailable de $($projects.Count) projetos."
+    if ($manualAvailable -lt $projects.Count) { $manualCoverage+=' Total manual parcial.' }
     $knownTotals=if ($available) { "$issueCount issues / $occurrenceCount ocorrencias" } else { 'indisponiveis' }
     $values=@{
         UpdatedAt=[DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm:ss')
         ProjectRows=($rows -join [Environment]::NewLine)
-        Coverage="MTA utilizavel: $available de $($projects.Count) projetos. Totais conhecidos: $knownTotals."
+        Coverage="MTA utilizavel: $available de $($projects.Count) projetos. Totais conhecidos: $knownTotals."+[Environment]::NewLine+[Environment]::NewLine+$manualCoverage
         CategoryRows=($categoryRows -join [Environment]::NewLine)
         Warnings=if ($warnings.Count) { (@($warnings | ForEach-Object { '- '+(ConvertTo-ProjectCell $_) }) -join [Environment]::NewLine) } else { 'Nenhuma lacuna identificada nesta leitura.' }
         Prioritization=if (Test-Path -LiteralPath $prioritizationPath -PathType Leaf) { Get-HarnessSourceLink $index $prioritizationPath 'Priorizacoes correntes' } else { 'Nenhuma priorizacao corrente disponivel.' }

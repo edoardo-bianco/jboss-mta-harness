@@ -248,6 +248,12 @@ codigo da aplicacao. Uma ficha nao substitui o plano. Se a proposta ja existe,
 compartilhe plano/tarefas e suas referencias para evitar refaze-la.
 100% examinadas significa cobertura da analise, nao issues resolvidas.
 
+Para falhas descobertas no deploy, em execucao ou na conferencia do codigo,
+use o [roteiro de issues e evidencias](tools/issues-e-evidencias.md): investigar/cadastrar,
+revisar a mesma ficha, navegar pelos indices e escolher priorizacao ou planejamento.
+Inclui evidencias da conversa/log, execucao no Copilot, Codex e Claude Code e
+verificacao de ferramentas web na maquina de trabalho.
+
 ### 5. Planejar e revisar um lote
 
 O **planejamento do lote** relaciona diagnostico, codigo, prioridades

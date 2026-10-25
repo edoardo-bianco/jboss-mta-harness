@@ -188,6 +188,23 @@ Conferir conteudo relevante. Novo MTA/Sonar DEPOIS e checklist nao bloqueante,
 com comparacao ausente declarada, sem resolucao global. Falhas tecnicas continuam
 falhas; um registro antigo RUNNING nao prova servidor ativo agora.
 Pedido manual pode partir de ficha SEM POSICAO; nao condicionar a recomendacao IA.
+Para investigar e criar/revisar uma issue MTA ou manual, encaminhe ao executor pelo
+[roteiro com prompt e verificacoes](../../../doc/guias/tools/issues-e-evidencias.md).
+Use Planejamento: criar ou revisar issue para selecionar projeto e abrir o prompt.
+No Copilot, encaminhe a devsquad/Agent; no Codex e Claude Code, ao agente principal
+com pedido explicito de executar o mesmo arquivo. Ferramentas dependem do cliente.
+Recupere projeto, ID e evidencias ja conhecidos no chat ou log acessivel; nao exija repeticao.
+O prompt preserva origem MTA/manual e evidencia nomeada, investiga Source
+mais documentacao oficial e cadastra no mesmo pedido; sem web, registra a lacuna.
+Oriente a busca previa de issues iguais/parecidas e a pergunta de confirmacao
+quando houver candidata, antes de criar. O executor segue modelos, vincula fatos
+a fontes e, sem web, entrega pesquisa oficial orientada. Com a proposta pronta,
+pergunta se o humano quer auditoria independente; somente Sim autoriza acionar
+outro agente/contexto nao autor. Recusa/indisponibilidade ficam explicitas; helper
+nao aciona essa auditoria por conta propria. Veja as etapas no mesmo roteiro.
+Helpers nao executam o prompt. Revisar ficha nao atualiza ranking/quota; priorizacao
+rele a mesma ficha quando elegivel/selecionada. Novas manuais exigem Recreate
+explicito para entrar numa base iniciada; escolha direta pode seguir para planejar.
 Para criar/reparar issue DEV-..., use o [roteiro de issue manual](../../../doc/guias/tools/planejamento-migracao.md#registrar-uma-issue-manual).
 Oriente cadastro generico por Register-HarnessManualIssue e reparo explicito por
 Repair-HarnessManualIssue. Pastas de fichas sao legiveis; o ID original permanece
