@@ -320,9 +320,11 @@ Modelo fixo de PlanPath:
 4. **Alteracoes previstas**: tabela com arquivo relativo/simbolo, alteracao,
    justificativa e comportamento a preservar; incluir POM/configuracao se aplicavel.
 5. **Dependencias e ordem**: dependencias internas/entre issues/projetos, restricoes,
-   impacto em consumidores e o que precisa estar pronto antes de cada passo.
+   impacto em consumidores, organizacao das issues/fases, regra de execucao e o
+   que precisa estar pronto antes de cada passo.
 6. **Sequencia de execucao**: passos E1, E2... em ordem, cada qual com entrada,
-   acao concreta, saida e verificacao; rota manual e apoio de ferramenta quando houver.
+   issue/fase, responsavel pela acao, saida, verificacao e parada manual;
+   rota manual e apoio de ferramenta quando houver.
 7. **Verificacoes e criterios de aceite**: testes/comandos/cenarios pertinentes,
    resultado esperado, evidencia a guardar e limites do ambiente.
 8. **Riscos e reversao**: riscos e confianca separados; gatilho, passos e verificacao
@@ -333,8 +335,10 @@ Modelo fixo de PlanPath:
 Modelo fixo de TodoPath, com link ao plano:
 
 1. **Identificacao e escopo**: projeto, lote, issues e cobertura.
-2. **Revisao e GO humano**: referencia a decisao no plano e precondicoes vigentes.
-3. **Tarefas por E1, E2...**: dependencia, entrada/acao/saida e resultado verificavel.
+2. **Revisao e GO humano**: referencia a decisao na secao 9 do plano, precondicoes
+   vigentes e regra de execucao da secao 5.
+3. **Tarefas por E1, E2...**: mesma organizacao de issues/fases do plano, responsavel,
+   dependencia, entrada/acao/saida, parada manual e resultado verificavel.
 4. **Verificacoes**: criterios, comandos realmente executados e evidencias dos
    resultados; preservar limites e pendencias.
 5. **Revisao e aceite do resultado**: referencia ao aceite no plano; proximo lote
@@ -342,6 +346,16 @@ Modelo fixo de TodoPath, com link ao plano:
 
 Use checkboxes [ ] ate comprovacao e associe evidencia de conclusao a cada tarefa.
 GO fica no plano; o to-do o referencia, sem conceder autorizacao por checkbox.
+Com varias issues e sem organizacao ja decidida, o condutor pergunta antes de
+concluir a proposta: todas juntas, uma fase por issue ou fases agrupando issues?
+Apresenta dependencias e sugestao fundamentada de grupos/ordem para escolha humana.
+Uma issue dispensa essa pergunta; escolhas registradas ou dadas no chat nao sao
+pedidas novamente. Enquanto aguarda, preservar rascunho e explicitar a pendencia.
+Registrar a escolha na secao 5 do plano e espelhar na secao 3 do to-do, cobrindo
+todas as issues selecionadas com passos, verificacoes e condicao de passagem.
+Issue distribuida em fases tem entregas identificadas, sem duplicar sua conclusao.
+Fases mantem ID do lote, passos existentes e o mesmo par de documentos; nao criam
+branches nem novos lotes. GO que cobre a sequencia/escopo dispensa novo GO por fase.
 Planos legados preservam sua estrutura e nomes, sem conversao forcada.
 ID estavel usa letras/numeros/ponto/hifen/sublinhado. Nova proposta: PROPOSTA - NAO APROVADA.
 
@@ -392,16 +406,38 @@ ou aceite. Verificacao ausente continua PENDENTE/UNVERIFIED, nao [x].
 GO inequivoco nao deve ser pedido novamente. Plano e to-do recebem reconciliacao
 da decisao ja dada, preservando origem/criterios; isso nao exige novo GO/preparo.
 
+Build, release/publicacao quando prevista, deploy, verificacoes e testes sao
+manuais por padrao, inclusive testes locais e contra servidor (HTTP, tokens,
+endpoints e banco). Escrever essa regra na secao 5 do plano e na secao 2 do to-do.
+Antes de cada operacao, o executor para e informa issue/fase/E, Run Task existente
+ou comando, diretorio, ambiente/destino, entradas sem segredos, resultado esperado
+e evidencia a devolver. Aguarda o desenvolvedor, analisa e registra o retorno
+antes de seguir; falha ou evidencia insuficiente mantem a etapa pendente.
+Leituras locais de artefatos/logs/evidencias ja gerados e escrita autorizada de
+codigo/testes continuam com o executor. Criar teste nao autoriza executa-lo.
+Excecao humana explicita pode atribuir a operacao ao agente, limitada ao alcance,
+destino/finalidade autorizados. Preservar escolhas anteriores e resultados ja
+comprovados para o codigo/ambiente pertinente. GO generico nao revoga a regra
+manual nem autoriza publicacao. Release fora do escopo recebe Nao se aplica;
+patch EAP, tokens e precondicoes de outro lote nao se tornam requisitos genericos.
+
+Na implementacao, recuperar a organizacao escolhida; se faltar para varias issues,
+perguntar sem inventar sequencia. Retomar a fase corrente e avancar somente apos
+analisar/registrar resultados que atendam sua condicao de passagem. Fase concluida
+nao concede aceite do lote; mudanca de escopo/solucao/aceite exige rever o GO.
+
 No Copilot, delegar a devsquad.implement via agent quando disponivel e compativel,
 com [CONDUCTOR], [LANG: pt-BR], contrato, caminhos, identidade funcional, lote, GO/dispensas,
-precondicoes vigentes, escopo e comandos. Sem apoio compativel, informar o limite
+precondicoes vigentes, escopo, fase, regra manual/excecoes, paradas e comandos.
+Sem apoio compativel, informar o limite
 e executar diretamente dentro do GO e das ferramentas disponiveis, sem simular apoio.
 No Codex, usar o agente principal e, quando permitido pelas instrucoes do cliente,
 subagentes de execucao compativeis disponiveis,
 sem converter perfis helper em executores. Especialista le documentos antes de escrita.
 No DevSquad, pode usar validate/execute/verify/review,
 repassando limites; revisores leem, um escritor por arquivo. Nao usar finalize,
-refine, sprint, board, cadastro Git ou outra fase. Se agente ausente, informar.
+refine, sprint, board ou cadastro Git; fases internas seguem a sequencia aprovada
+do lote. Se agente ausente, informar.
 Executor altera somente Source conforme GO; condutor atualiza PlanPath/TodoPath
 e andamento/evidencia das issues do lote em MigrationPath quando explicito.
 Nao alterar harness, ADRs, memoria, regras MTA ou evidencias ANTES preservadas.
@@ -409,7 +445,8 @@ Nao executar Git mutante, commit/push/merge/PR ou mensagens externas. Lacuna de
 escopo/API/criterio retorna ASK e decisao humana; nao emendar plano sozinho.
 
 Executar incrementalmente tarefas pendentes; na retomada conferir diff/evidencias,
-sem repetir corretiva. Testes pertinentes, JDK/perfis/settings previstos; usar
+sem repetir corretiva. Preparar testes pertinentes e orientar sua execucao manual,
+salvo excecao humana explicita. JDK/perfis/settings previstos; usar
 padroes da maquina, sem mirrors/settings/caches alternativos por conveniencia.
 Terminal so para verificacao de leitura e comandos tecnicos autorizados. MTA/Sonar,
 rede, deploy/EAP ou operacoes externas exigem autorizacao explicita de destino/fim,
