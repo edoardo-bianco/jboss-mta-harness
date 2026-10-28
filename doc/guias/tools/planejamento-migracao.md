@@ -366,6 +366,24 @@ evidencias dos resultados e revisao/aceite, vinculadas aos passos do plano.
 Secoes nao aplicaveis recebem justificativa. Use `plano.md` e `tarefas.md` locais;
 `tasks/` pertence exclusivamente a evolucao do harness.
 
+Se o lote tiver varias issues e a organizacao ainda nao estiver decidida, o
+agente pergunta: aplicar juntas, uma fase por issue ou fases agrupando issues?
+Ele apresenta dependencias e uma sugestao de ordem/grupos para sua escolha.
+A resposta fica na secao 5 do plano e nas tarefas por E1/E2, com issues,
+verificacoes e condicao de passagem de cada fase ate cobrir todo o recorte.
+As fases pertencem ao mesmo lote/plano/to-do; preservam ID, passos e GO aplicavel,
+sem criar branch ou lote por fase. Escolha ja registrada nao precisa ser repetida.
+
+Build, release/publicacao quando prevista, deploy, verificacoes e testes sao
+**manuais por padrao**, incluindo testes locais e contra servidor. A secao 5 do
+plano e a secao 2 das tarefas devem dizer: o agente para, orienta Run Task/comando,
+diretorio/ambiente, entradas, resultado esperado e evidencia a devolver; aguarda
+seu retorno, analisa, registra e so entao segue. Leituras locais de arquivos ja
+gerados e escrita autorizada de codigo/testes continuam com o executor.
+Uma atribuicao humana explicita pode permitir ao agente uma operacao especifica,
+com alcance/destino/finalidade definidos. GO de corretiva nao muda essa regra.
+Decisao e alcance do GO ficam somente na secao 9 do plano; tarefas a referenciam.
+
 #### Localizar documentos e identificar o historico
 
 <a id="recuperar-um-preparo-apos-limpeza"></a>
@@ -418,9 +436,18 @@ sem push; essa escolha nao concede GO. Gestao Git continua com o desenvolvedor.
 
 Execute o prompt de implementacao no cliente escolhido com autorizacao para o
 escopo. O orientador continua leitor. O executor registra mudancas, cobertura,
-testes e lacunas nos documentos correntes. Para revisar resultado, consulte os
-guias de [build](maven.md), [Sonar](sonar.md), [MTA](mta.md) e [JBoss](jboss.md)
+testes e lacunas nos documentos correntes. Ele respeita as paradas manuais e
+a sequencia de fases decidida: nao executa essas operacoes por conta propria nem
+avanca sem analisar o retorno exigido. Falha ou evidencia insuficiente fica
+pendente; concluir uma fase nao equivale a aceitar o lote. Para revisar resultado,
+consulte os guias de [build](maven.md), [Sonar](sonar.md), [MTA](mta.md) e [JBoss](jboss.md)
 conforme os criterios do lote, preservando as evidencias e a decisao humana.
+
+Atualizar templates nao reescreve planos/tarefas existentes. Para adotar a regra
+em um lote ja preparado, use **Planejamento: planejar**, execute o prompt para
+revisar os documentos preservando decisoes anteriores e depois use
+**Aplicacao: preparar implementacao do lote** para atualizar o prompt de execucao.
+O preparo sozinho nao conclui essa revisao nem concede novo GO.
 
 ## Resultado e proximo passo
 

@@ -1,5 +1,47 @@
 # To-do do agente: evolucao do harness
 
+## Execucao manual e fases do lote — 28/10/2026
+
+- [x] Conferir base/estado local e criar branch em worktree separado.
+- [x] Confirmar execucao manual por padrao com o desenvolvedor.
+- [x] Alinhar prompts de planejamento/implementacao, modelos, contrato e guia.
+- [x] Conferir parada/retomada, cobertura por fases, escolhas existentes e GO unico.
+- [x] Validar preparadores/modelos/links em copia isolada e revisar diff.
+- [x] Registrar resultados e limites da entrega.
+
+PASS na versao final pelo tests/Invoke-HarnessTests.ps1, em copia temporaria
+descartada: Test-OutputTemplates, Test-Implementation, Test-CurrentPromptLinks e
+Test-IssuePlanning. Conferem consumo/vinculos dos modelos, preparo, preservacao
+de notas/decisoes, repeticao e links; nao comprovam obediencia do modelo.
+
+Revisao documental: nove secoes do plano e cinco do to-do, placeholders e blocos
+de fontes preservados. Conferidos os casos de uma issue, varias sem escolha,
+escolha existente, fases com verificacao pendente, excecao humana e GO vigente.
+Removida a proibicao ambigua de outra fase, mantendo a restricao a outros lotes
+e fluxos de publicacao. Corpo comum explicito para Copilot/Codex/Claude Code.
+git diff --check sem erros; nao foram alterados scripts nem criados testes textuais.
+
+Ao concluir o preparo, o checkout habitual permaneceu em main limpo e as
+alteracoes ficaram locais no worktree
+C:/Users/edoar/AppData/Local/Temp/harness-modo-execucao-e-fases, branch
+harness/modo-execucao-e-fases, sem commit/push/integracao. Prompts e documentos
+reais de migracao nao foram regravados. Adocao em lote existente exige revisao
+do plano/to-do e novo preparo do prompt de implementacao, conforme o guia.
+Ensaio nativo no cliente permanece nao realizado; nenhum build/deploy/teste
+de aplicacao, release ou operacao de servidor foi executado nesta entrega.
+
+Retomada de publicacao — 28/10/2026:
+
+- [x] Receber autorizacao para commit/push e pedido de parar antes do PR.
+- [x] Conferir branch, HEAD, origem, oito arquivos do escopo e diff sem erros.
+- [ ] Retomar em 29/10/2026 a abertura/revisao do PR para main com o desenvolvedor.
+- [ ] Ao final, conferir integracao e trabalho pendente antes de limpar o worktree.
+
+Commit/push desta retomada usam a branch acima. Preservar o worktree e parar
+apos o push; PR, integracao e limpeza nao pertencem a esta etapa. As quatro
+suites ja passaram na versao final dos prompts; nesta retomada foram alteradas
+somente estas notas de acompanhamento, sem necessidade de repetir as suites.
+
 ## Publicacao das issues e evidencias — 24/10/2026
 
 - [x] Receber autorizacao explicita para commit, push e PR para main.

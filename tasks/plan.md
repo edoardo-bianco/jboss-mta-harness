@@ -1,5 +1,41 @@
 # Plano do agente: evolucao do harness
 
+## Execucao manual e fases do lote — 28/10/2026
+
+Pedido: tornar explicito nos prompts e modelos como o executor deve agir nos
+pontos de build, release, deploy e testes, e perguntar como organizar varias
+issues no mesmo lote. O desenvolvedor confirmou execucao manual por padrao:
+agente orienta, aguarda retorno, analisa, registra e so entao avanca.
+
+Alterar planejar-lotes, implementar-lote, modelos de plano/tarefas, contrato e
+guia corrente. Decisoes existentes prevalecem; perguntar somente a organizacao
+ainda ausente: juntas, uma fase por issue ou fases agrupando issues. Preservar
+ID, passos E1/E2, GO aplicavel e cobertura completa do recorte no mesmo par de
+documentos. Fases nao criam novos lotes, branches ou aceite automatico.
+
+Operacoes manuais incluem testes locais e contra servidor; leituras locais e
+escrita de codigo/testes autorizadas continuam com o executor. Cada parada
+informa Run Task/comando, diretorio, ambiente, entradas, resultado esperado e
+evidencia a devolver. Excecao explicita vale apenas no alcance autorizado;
+release/publicacao continua sujeita a destino/finalidade, sem permissao implicita.
+P2, tokens, patch EAP e datas do exemplo nao viram precondicoes genericas.
+
+Base conferida: main e origin/main em e900828, checkout limpo. Desenvolvimento
+em harness/modo-execucao-e-fases, worktree separado no TEMP. Validar com suites
+existentes de preparo/modelos/links via runner isolado e revisao documental;
+nao criar testes que apenas procurem frases nem alegar obediencia do agente
+por teste textual. Sem alterar documentos reais de migracao ou executar servidor.
+
+Entrega local concluida e revisada. Quatro suites passaram na versao final;
+resultados, caminho do worktree e limites em tasks/todo.md. Ensaio nativo de
+agentes permanece nao realizado.
+
+Retomada autorizada em 28/10/2026: preparar commit e fazer push da branch
+harness/modo-execucao-e-fases, parando antes do PR. O desenvolvedor decidiu
+retomar o PR amanha (29/10/2026); manter o worktree ate essa revisao e realizar
+sua limpeza ao final do fluxo, apos conferir integracao e ausencia de trabalho
+pendente. Esta publicacao nao autoriza abrir/integrar o PR nem limpar agora.
+
 ## Publicacao das issues e evidencias — 24/10/2026
 
 O desenvolvedor autorizou commit, push e PR para main desta entrega completa:

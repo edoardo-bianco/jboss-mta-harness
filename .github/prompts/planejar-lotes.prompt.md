@@ -8,6 +8,10 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 
 # Planejar o lote corrente
 
+Procedimento comum a Copilot, Codex e Claude Code; agent/tools no cabecalho sao
+metadados do Copilot. Execute explicitamente este arquivo no agente principal
+do cliente, usando ferramentas equivalentes e evidencias acessiveis nesta conversa.
+
 Antes de escrever, leia os templates plano-lote, tarefas-lote e ficha-issue
 vinculados em **Modelos de saida obrigatorios**. Use suas secoes e blocos para
 PlanPath, TodoPath e FichaPaths; preencha com evidencias reais e sem placeholders
@@ -58,6 +62,33 @@ do lote; nao crie plano/tarefas ficticios. Nao repetir escolhas ou respostas.
 Se o recorte misturar causas/solucoes independentes, esclarecer um lote consistente
 com o humano antes de propor; nao fragmentar silenciosamente em planos futuros.
 
+Para um lote com mais de uma issue, recupere a organizacao ja decidida no plano
+ou na conversa. Sem decisao, pergunte antes de concluir plano/to-do: aplicar
+todas juntas, uma fase por issue ou fases agrupando issues? Apresente dependencias
+e uma sugestao de grupos/ordem fundamentada no codigo, para escolha humana.
+Nao escolher silenciosamente nem repetir pergunta respondida. Enquanto aguarda,
+preserve o rascunho e explicite essa pendencia. Com uma issue, nao exigir a pergunta.
+Registre a escolha na secao 5 do plano; fases do mesmo lote cobrem todas as issues
+selecionadas, com IDs, passos E1/E2, dependencias, verificacoes e condicao de
+passagem por fase. Espelhe essa organizacao na secao 3 do to-do. Uma issue pode
+atravessar fases, com suas entregas identificadas, sem contabiliza-la duas vezes.
+Preserve ID do lote e numeracao existente; fases mantem o mesmo plano/to-do e
+branch. Nao pedir GO separado quando o vigente ja cobre sua sequencia e escopo.
+
+Escreva explicitamente na secao 5 do plano e na secao 2 do to-do a regra de
+execucao manual por padrao: build, release/publicacao, deploy, verificacoes e
+testes (locais ou contra servidor, incluindo HTTP, tokens e consultas ao banco)
+sao executados pelo desenvolvedor. O agente de codificacao para, indica Run Task
+existente ou comando, diretorio/ambiente e entradas sem segredos, o que observar
+e qual evidencia devolver; aguarda o resultado, analisa, registra e so entao
+segue para o proximo passo. Falha ou retorno insuficiente mantem a etapa pendente.
+Leitura local de artefatos, logs e evidencias ja gerados e escrita autorizada de
+codigo/testes continuam com o executor. Excecao humana explicita pode atribuir
+operacoes ao agente; registre seu alcance, preservando escolhas ja feitas.
+GO de corretiva nao transfere operacoes manuais ao agente nem autoriza release
+ou destino externo por implicacao. Release fora do escopo recebe Nao se aplica.
+Nao transportar patch EAP, tokens ou precondicoes de outro lote para este.
+
 Para cada issue efetivamente examinada, crie/atualize a ficha em FichaPaths.Path:
 identificacao, resumo do problema, localizacao relevante, impacto, encaminhamento
 manual e lacunas. Preserve texto humano. Links diretos junto das referencias a
@@ -85,14 +116,16 @@ Com informacao suficiente, escreva PlanPath com estas nove secoes:
 2. Contexto, fontes e diagnostico local por issue, incluindo fichas e limites.
 3. Objetivo, escopo, cobertura parcial e fora do escopo.
 4. Solucao por arquivo/classe/metodo e justificativa.
-5. Dependencias e ordem, incluindo POM/configuracao.
-6. Passos manuais E1, E2... com resultado esperado.
+5. Dependencias e ordem, incluindo POM/configuracao, fases escolhidas e regra de execucao.
+6. Passos E1, E2... com issue/fase, responsavel pela acao, parada e resultado esperado.
 7. Verificacoes e criterios de aceite.
 8. Riscos e reversao.
 9. Revisao/GO, execucao, verificacoes e aceite humano, separados.
 
 TodoPath usa cinco secoes: identificacao/escopo; revisao e GO humano;
 tarefas por E1/E2...; verificacoes; revisao e aceite do resultado.
+GO e alcance ficam somente na secao 9 do plano; a secao 2 do to-do referencia
+essa decisao, as precondicoes e a regra de execucao da secao 5, sem GO por checkbox.
 Tarefas devem ser verificaveis e preservar as ja comprovadas. O plano deve servir
 a outro desenvolvedor sem este chat. Java 8/javax/EAP 7.4 e Hibernate 5.3 quando
 aplicaveis; versao de patch exige evidencia. Preveja testes focais/regressao,
