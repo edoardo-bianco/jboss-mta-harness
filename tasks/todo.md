@@ -1,5 +1,143 @@
 # To-do do agente: evolucao do harness
 
+## Resumo do andamento das issues — 30/10/2026
+
+- [x] Conferir modelos, contadores, registro e permissoes de escrita dos prompts.
+- [x] Confirmar estados novos, criterio de fechamento, denominador e registro das verificacoes.
+- [x] Criar proposta em doc/engineering-harness/ numa branch/worktree isolados.
+- [x] Conferir coerencia, dez links locais e formato do diff da proposta.
+- [x] Receber aprovacao da organizacao e cobertura parcial, com coerencia documental/orientacao como requisito.
+- [x] Detalhar dependencias, matriz documental, criterios de aceite e verificacoes.
+- [x] Conferir dez links da especificacao, treze suites existentes citadas e diff do planejamento.
+- [x] Registrar pausa solicitada, escopo consolidado e ponto de retomada.
+- [ ] Revisar o plano tecnico detalhado antes da implementacao.
+
+Documento: [resumo do andamento](../doc/engineering-harness/proposta-resumo-andamento-issues.md).
+Branch: harness/resumo-andamento-issues, base main 58b117f.
+Worktree: C:/Users/edoar/AppData/Local/Temp/harness-resumo-andamento-20261030.
+Escopo desta entrega: especificacao aprovada e planejamento detalhado; sem
+alterar o runtime ou documentos reais da migracao. Dez links locais existentes;
+git diff --check e verificacao do arquivo novo sem erros. Main operacional segue
+limpa. Suites nao executadas: esta entrega contem somente documentacao de engenharia.
+
+Pausa pedida pelo desenvolvedor em 30/10/2026. Consolidacao em commit local na
+branch acima; manter o worktree. Na retomada, seguir o checkpoint em tasks/plan.md.
+As tarefas A1..A14 permanecem pendentes; pausa/consolidacao nao iniciam implementacao.
+
+As tarefas abaixo aguardam a revisao do plano. Nao sao tarefas de corretiva da
+aplicacao. Arquivos sao os pontos previstos; ajustes tecnicos devem preservar
+escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacional.
+
+- [ ] A1 — Calculo e legenda comuns (sem dependencia adicional).
+  Aceite: oito estados, origem/categoria preservadas, percentuais sobre total
+  corrente, lacunas/zero distintos e definicoes comuns para os renderizadores.
+  Arquivos: novo scripts/HarnessIssueProgress.ps1, scripts/HarnessProject.psm1,
+  novo doc/modelos/legenda-andamento.template.md e tests/Test-IssueProgress.ps1.
+  Verificar: runner -Test Test-IssueProgress.ps1, com grupos, arredondamento,
+  desconhecidos, manual homonima MTA, duplicatas e denominador zero.
+
+- [ ] A2 — Registro e indice do projeto (depende de A1).
+  Aceite: mesmo calculo/legenda nos dois destinos; notas/decisoes preservadas,
+  repeticao idempotente e links permitem identificar membros dos grupos.
+  Arquivos: HarnessProjectDocuments.ps1, migracao.template.md,
+  indice-projeto.template.md, orientacao-registro.template.md e Test-ProjectIndex.ps1.
+  Verificar: runner -Test Test-ProjectIndex.ps1,Test-ProjectNavigation.ps1.
+
+- [ ] A3 — Dashboard geral (depende de A1, A2).
+  Aceite: resumo compacto por projeto/categoria, consolidado por somas e legenda;
+  MTA diagnostico separado do registro, com leitura parcial explicita.
+  Arquivos: HarnessProjectIndex.psm1, indice-projetos.template.md,
+  Test-ProjectIndexSummary.ps1 e Test-ProjectIndexAvailability.ps1.
+  Verificar: runner -Test Test-ProjectIndexSummary.ps1,Test-ProjectIndexAvailability.ps1;
+  conferencia do Markdown sintetico nos tres destinos (checkpoint apos A3).
+
+- [ ] A4 — Recalculo apos publicacao documental/cadastro (depende de A2, A3).
+  Aceite: API comum atualiza resumos sem selecionar MTA novo; cadastro conserva
+  andamento existente; falha do dashboard e concorrencia ficam explicitas.
+  Arquivos: HarnessIssueProgress.ps1, HarnessProject.psm1,
+  HarnessProjectIndex.psm1, HarnessIssues.psm1 e Test-ProjectIndexManual.ps1.
+  Verificar: runner -Test Test-IssueProgress.ps1,Test-ProjectIndexManual.ps1,
+  com alteracao de estado, repeticao, falha parcial e MTA externo preservado.
+
+- [ ] A5 — Reconciliacao e publicacao protegida (depende de A4).
+  Aceite: resumo corresponde ao registro realmente publicado; conflitos nao
+  apagam contribuicoes, nao promovem estado e nao deixam sucesso falso.
+  Arquivos: HarnessReconciliationPublish.ps1, manter-migracao.prompt.md,
+  Test-MigrationRegister.ps1 e Test-ReconciliationSources.ps1.
+  Verificar: runner -Test Test-MigrationRegister.ps1,Test-ReconciliationSources.ps1.
+
+- [ ] A6 — Consumidores dos estados novos (depende de A1).
+  Aceite: EM ANALISE pode retomar o exame no fluxo pertinente; IMPLEMENTADA,
+  VERIFICADA e CONCLUIDA nao sao reabertas pelo filtro; quota/examinadas preservadas.
+  Arquivos: HarnessPrioritization.psm1, HarnessIssueQueryView.ps1 se necessario,
+  Test-PrioritizationProgress.ps1 e Test-IssueQueryPlanning.ps1.
+  Verificar: runner -Test Test-PrioritizationProgress.ps1,Test-IssueQueryPlanning.ps1;
+  conferir cadastro/planejamento/reconciliacao juntos (checkpoint apos A6).
+
+- [ ] A7 — Exame, proposta e acompanhamento na ficha (depende de A2, A6).
+  Aceite: ficha conserva achado/ANTES e registra acompanhamento com evidencias;
+  planejamento atualiza somente estados sustentados e preserva escolhas humanas.
+  Arquivos: ficha-issue.template.md, planejar-lotes.prompt.md,
+  criar-revisar-issue.prompt.md, Test-IssuePlanning.ps1 e Test-OutputTemplates.ps1.
+  Verificar: runner -Test Test-IssuePlanning.ps1,Test-OutputTemplates.ps1;
+  revisar caso de ficha apenas cadastrada, analisada e recorte parcial.
+
+- [ ] A8 — Implementacao e revisao documental do resultado (depende de A4, A7).
+  Aceite: principal registra evidencias/ficha/tarefas/registro e recalcula;
+  VERIFICADA nao e aceite; CONCLUIDA exige declaracao e alcance completo aplicavel.
+  Arquivos: implementar-lote.prompt.md, revisar-resultado.prompt.md,
+  plano-lote.template.md, tarefas-lote.template.md e Test-Implementation.ps1.
+  Verificar: runner -Test Test-Implementation.ps1,Test-OutputTemplates.ps1;
+  revisar testes pendentes/falhos, aguardando integracao, aceite parcial e aceite vigente.
+
+- [ ] A9 — Contrato e instrucoes executaveis (depende de A5, A8).
+  Aceite: remover contradicao da revisao somente leitura para o principal;
+  manter helpers/consultas/revisao de sprints leitores e operacoes externas separadas.
+  Arquivos: fluxo-migracao.md, ADR-0009, AGENTS.md e .github/copilot-instructions.md.
+  Verificar: leitura cruzada com prompts, fontes dos estados e destinos reais;
+  runner -Test Test-CurrentPromptLinks.ps1 para referencias geradas pertinentes.
+
+- [ ] A10 — README e guia do desenvolvedor (depende de A9).
+  Aceite: tabela explicativa dos oito estados, formula e exemplo conferivel,
+  atualizacao ficha/registro/resumos e passos de verificacao/aceite.
+  Arquivos: README.md, harness-migracao-desenvolvedor.md e cheat-sheet-run-tasks.md.
+  Verificar: leitura ponta a ponta e links; nao descrever funcionalidade sem
+  a implementacao correspondente e nao criar uma Run Task adicional.
+
+- [ ] A11 — Guias operacionais e catalogo de modelos (depende de A9, A10).
+  Aceite: procedimentos remetem a legenda central, preservam priorizacao sem
+  escrita do registro e explicam atualizacao manual, lacunas e cobertura parcial.
+  Arquivos: planejamento-migracao.md, issues-e-evidencias.md,
+  priorizacao-issues.md, workspace.md e doc/modelos/README.md.
+  Verificar: busca/leitura delimitada das regras de estados, escrita e
+  acompanhamento; conferir links e preservar contexto de historicos.
+
+- [ ] A12 — Skill e papeis do orientador (depende de A9, A10).
+  Aceite: explicar os indicadores com fonte, distinguir resumo antigo, evidencia
+  ainda nao registrada e conflito; encaminhar o passo do estado sem executar.
+  Arquivos: .agents/skills/orientar-migracao/SKILL.md,
+  references/papeis.md e doc/guias/orientacao-migracao.md.
+  Verificar: cenarios de IMPLEMENTADA, VERIFICADA, CONCLUIDA, status desconhecido,
+  falha de teste, cobertura parcial e indice antigo; habilidades/permissoes preservadas.
+
+- [ ] A13 — Adaptadores dos clientes (depende de A12).
+  Aceite: Codex, Copilot e Claude Code consomem a mesma orientacao; nenhuma
+  instrucao propria contradiz o acompanhamento ou amplia permissoes.
+  Arquivos previstos se houver lacuna: .codex/agents/migracao_helper.toml,
+  .github/agents/migracao_helper.agent.md e .claude/agents/migracao_helper.md.
+  Conferir tambem especialistas e ponteiro .claude/skills/orientar-migracao/SKILL.md;
+  o ponteiro atual ja encaminha a skill comum, sem precisar copiar seu conteudo.
+  Verificar: leitura dos adaptadores e mensagens prontas por cliente;
+  registrar limite do ensaio nativo e conferencia documental (checkpoint apos A13).
+
+- [ ] A14 — Verificacao integrada e entrega (depende de A1..A13).
+  Aceite: tres resumos/legendas consistentes, rastreabilidade, dados reais
+  preservados, documentacao coerente e limites de testes/ensaio declarados.
+  Verificar: suites afetadas pelo runner, git diff --check, links locais,
+  preview Markdown dos exemplos sinteticos e revisao completa do diff.
+  Registrar resultados em tasks/ e atualizar estado da especificacao;
+  integracao/publicacao permanece uma etapa explicita posterior.
+
 ## Execucao manual e fases do lote — 28/10/2026
 
 - [x] Conferir base/estado local e criar branch em worktree separado.
