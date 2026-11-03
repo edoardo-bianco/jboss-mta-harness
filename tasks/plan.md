@@ -27,8 +27,12 @@ percentual ponderado 1/4=25%, escopo reduzido, registro invalido e editor concor
 
 Preview sintetico Markdown/HTML gerado no TEMP. Host de navegador indisponivel;
 tentativa nativa interrompida pela ferramenta por nao determinar a URL atual com
-seguranca. Nenhuma inspecao visual concluida; conferir no preview do editor do
-desenvolvedor permanece pendente. Ensaio nativo de agentes tambem nao realizado.
+seguranca. Inspecao visual pelo agente nao concluida. Posteriormente, o desenvolvedor
+informou "visualmente me parece ok"; conferencia visual humana registrada no to-do.
+Conferencia adicional dos exemplos passou: tres resumos, quantidades/percentuais,
+membros, lacuna, 59 links locais e tres legendas. Ensaio nativo de agentes permanece
+pendente, com casos e resultados esperados documentados; CLIs localizadas, sem
+disparar sessoes adicionais. Nenhuma alteracao de codigo nesta conferencia.
 
 ## Resumo do andamento das issues — 30/10/2026
 

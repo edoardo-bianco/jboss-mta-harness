@@ -144,10 +144,10 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
 
 ### Verificacao final da retomada — 03/11/2026
 
-Implementacao e revisao tecnica concluidas. A14 permanece parcialmente pendente
-somente para conferencia visual no editor e ensaio nativo dos agentes; esses
-resultados nao sao inferidos de testes textuais. Publicacao/PR/integracao e aceite
-humano da funcionalidade sao etapas posteriores.
+Implementacao e revisao tecnica concluidas. O desenvolvedor informou nesta conversa
+que a apresentacao visual parece adequada. A14 permanece parcialmente pendente
+para ensaio nativo dos agentes; esse resultado nao e inferido de testes textuais.
+Publicacao/PR/integracao e aceite humano da funcionalidade sao etapas posteriores.
 
 PASS em Windows PowerShell 5.1 pelo runner isolado, 19 suites na versao final:
 Test-IssueProgress, Test-IssueProgressRefresh, Test-IssueProgressLifecycle,
@@ -175,10 +175,32 @@ e os limites de leitor, sem alterar ferramentas/permissoes dos helpers.
 
 Preview sintetico gerado em
 C:/Users/edoar/AppData/Local/Temp/harness-progress-preview-20261103/preview.html.
-Inspecao visual nao concluida: host do navegador indisponivel e Computer Use
+Inspecao visual pelo agente nao concluida: host do navegador indisponivel e Computer Use
 interrompido por nao determinar a URL atual com seguranca. Nao houve novas acoes
-de UI apos a interrupcao. Conferir tabelas/details e cliques no preview Markdown
-do editor do desenvolvedor; ensaio dos prompts nos clientes continua pendente.
+de UI apos a interrupcao. Depois, o desenvolvedor relatou: "visualmente me parece ok".
+Registrar essa observacao como conferencia visual humana; ela nao declara teste
+de cada clique, comportamento dos agentes ou aceite funcional integral.
+
+Conferencia adicional da previa existente: PASS nos tres documentos, 24 linhas
+dos oito estados da categoria manual (6/18=33,33%, 9/18=50,00%, 3/18=16,67%),
+tres linhas da lacuna MTA, membros correspondentes as quantidades, 59 links locais
+resolvendo a arquivos existentes, tres secoes HTML e tres legendas. Essa previa
+e sintetica e valida apresentacao/conteudo; os fluxos completos de cadastro,
+publicacao e navegacao foram cobertos pelas suites isoladas acima. Nao repetidas
+as 19 suites nesta conferencia, pois nao houve mudanca de codigo.
+
+Ensaio nativo pendente: executar os mesmos casos em copia isolada por cliente,
+preservando entrada, resposta e diff para comparar com o contrato. CLIs Codex,
+Copilot e Claude localizadas; nenhuma sessao adicional de agente disparada.
+Casos minimos para verificar a orientacao/execucao no papel correspondente:
+
+- IMPLEMENTADA com teste falho: explicitar falha/pendencia; nao promover a VERIFICADA.
+- VERIFICADA sem aceite: orientar aceite humano, sem concluir automaticamente.
+- Aceite de recorte com trabalho restante: registrar alcance, sem concluir a issue inteira.
+- Resumo antigo com registro valido: orientar recalculo, sem exigir novo MTA ou reconciliacao integral.
+- CONCLUIDA sem pedido de continuidade: nao iniciar automaticamente outro lote.
+- Helper orientador: informar fontes/proxima acao e manter arquivos inalterados.
+
 Main operacional e documentos reais da migracao preservados. Entrega em commits
 locais na branch harness/resumo-andamento-issues; sem push/PR/integracao nesta retomada.
 
