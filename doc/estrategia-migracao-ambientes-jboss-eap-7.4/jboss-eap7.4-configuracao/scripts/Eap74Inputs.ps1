@@ -15,13 +15,13 @@ function Read-EapJson {
     catch { throw "JSON ausente ou invalido: $Path" }
 }
 function Read-EapPreparationConfig {
-    param([string]$Path)
+    param([string]$Path,[string]$Profile)
     $Path=Resolve-EapPath $Path (Get-Location).Path
-    $config=Read-EapJson $Path
+    $config=Resolve-EapProfile (Read-EapJson $Path) $Path $Profile
     foreach ($key in @('schemaVersion','eapHome','jdkHome','expectedVersion','standaloneConfig','template','values','modules','jvmOptions','output','portOffset','logSql')) {
         if (-not $config.PSObject.Properties[$key]) { throw "Campo obrigatorio ausente: $key" }
     }
-    if ($config.schemaVersion -ne 1) { throw 'schemaVersion deve ser 1.' }
+    if ($config.schemaVersion -notin @(1,2)) { throw 'schemaVersion deve ser 1 ou 2.' }
     if ($config.expectedVersion -cnotmatch '^7\.4\.\d+\.GA$') { throw 'expectedVersion deve identificar um patch EAP 7.4, por exemplo 7.4.11.GA.' }
     if ($config.standaloneConfig -cnotmatch '^[A-Za-z0-9][A-Za-z0-9_.-]*\.xml$') { throw 'standaloneConfig deve ser um nome XML simples.' }
     if (($config.portOffset -isnot [int] -and $config.portOffset -isnot [long]) -or $config.portOffset -lt 0 -or $config.portOffset -gt 55000) { throw 'portOffset deve ser inteiro entre 0 e 55000.' }

@@ -2,14 +2,15 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 . $PSScriptRoot/Eap74Inputs.ps1
+. $PSScriptRoot/Eap74Profiles.ps1
 . $PSScriptRoot/Eap74Modules.ps1
 . $PSScriptRoot/Eap74Publication.ps1
 . $PSScriptRoot/Eap74Files.ps1
 
 function Invoke-EapPreparation {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$ConfigPath,[switch]$Apply,[switch]$LogSql)
-    $config=Read-EapPreparationConfig $ConfigPath
+    param([Parameter(Mandatory)][string]$ConfigPath,[switch]$Apply,[switch]$LogSql,[string]$Profile)
+    $config=Read-EapPreparationConfig $ConfigPath $Profile
     Assert-EapStopped $config
     Assert-EapPlainPath $config.output
     $xml=New-EapXml $config ($LogSql.IsPresent -or $config.logSql)
@@ -47,13 +48,13 @@ function Invoke-EapPreparation {
         Remove-EapStage $stage $parent
         if ($saved) { Remove-EapStage $previous $parent }
     }
-    [pscustomobject]@{Output=$config.output;Applied=$Apply.IsPresent;StandaloneConfig=$config.standaloneConfig;Modules=$modules.Count;Files=$files.Count;LogSql=($LogSql.IsPresent -or $config.logSql)}
+    [pscustomobject]@{Profile=$config.Profile;Output=$config.output;Applied=$Apply.IsPresent;StandaloneConfig=$config.standaloneConfig;Modules=$modules.Count;Files=$files.Count;LogSql=($LogSql.IsPresent -or $config.logSql)}
 }
 
 function Start-EapPrepared {
     [CmdletBinding()]
-    param([Parameter(Mandatory)][string]$ConfigPath,[switch]$AdminOnly)
-    $config=Read-EapPreparationConfig $ConfigPath
+    param([Parameter(Mandatory)][string]$ConfigPath,[switch]$AdminOnly,[string]$Profile)
+    $config=Read-EapPreparationConfig $ConfigPath $Profile
     Assert-EapStopped $config
     $xml=Join-Path $config.eapHome ('standalone/configuration/'+$config.standaloneConfig)
     if (-not [IO.File]::Exists($xml)) { throw 'XML preparado ausente no servidor. Execute o preparo com -Aplicar primeiro.' }

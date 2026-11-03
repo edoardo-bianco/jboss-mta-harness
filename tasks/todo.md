@@ -1,5 +1,26 @@
 # To-do do agente: evolucao do harness
 
+## Perfis de preparo EAP 7.4 — 03/11/2026
+
+- [x] Separar a evolucao em branch/worktree derivados da principal atualizada no remoto.
+- [x] Conferir fontes privadas e preparo/inicio/deploy sem divulgar valores.
+- [x] Confirmar alternancia, drivers/modulos atuais e deployments separados.
+- [x] Incorporar preservacao dos ajustes e do SIMTR ja usado na maquina de trabalho.
+- [x] Registrar [especificacao](../doc/engineering-harness/proposta-perfis-preparo-eap74.md), origens e criterios de verificacao.
+- [x] Revisao humana do desenho e pedido explicito de implementacao.
+- [x] P1 — Selecao de perfis: parser/wrappers e teste isolado; v1 preservado e erros sem escrita. RED por parametro ausente; GREEN Profiles e Preparation (inclui PS5.1/7).
+- [ ] P2 — JVM por XML e publicacao protegida: teste de aplicacao/alternancia sem alterar JVM global ou perder deployments.
+- [ ] P3 — Inicio normal/debug: usar JVM associada e verificar argumentos/ambiente em launcher sintetico.
+- [ ] P4 — Entradas outsourcing privadas: comparar recursos, criar arquivos, conferir tokens/valores e preservar modulos.
+- [ ] P5 — Preparo e guias: documentar atualizacao incremental na maquina de trabalho e exemplos genericos.
+- [ ] P6 — Revisao/regressao: suites pertinentes, mutacao detectada, preservacao privada e limites registrados.
+
+Somente documentos de engenharia. Sem alteracao de entradas privadas/runtime
+ou servidor. As 49 propriedades outsourcing possuem fontes identificadas:
+38 comuns iguais, oito do 7.4 atual e tres especificas do XML local 7.1.
+Isso nao comprova validade operacional nem equivalencia com ajustes posteriores
+da maquina de trabalho, que devem ser preservados na atualizacao incremental.
+
 ## Resumo do andamento das issues — 30/10/2026
 
 Retomada em 03/11/2026: implementacao A1..A13 concluida na branch original.
