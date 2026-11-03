@@ -34,6 +34,14 @@ membros, lacuna, 59 links locais e tres legendas. Ensaio nativo de agentes perma
 pendente, com casos e resultados esperados documentados; CLIs localizadas, sem
 disparar sessoes adicionais. Nenhuma alteracao de codigo nesta conferencia.
 
+Publicacao autorizada pelo desenvolvedor em 03/11: branch enviada ao origin e
+[PR #53](https://github.com/edoardo-bianco/jboss-mta-harness/pull/53) aberto para main,
+com as verificacoes e os limites declarados. Integracao nao executada. Continuidade
+na maquina de trabalho usa o lote e registros reais existentes; validacao nativa
+pode acompanhar o uso real e nao exige recriar a migracao. Testes de manutencao e
+cenarios artificiais continuam isolados. Nenhuma alteracao de runtime apos as
+19 suites aprovadas; a publicacao acrescenta somente o registro desta decisao.
+
 ## Resumo do andamento das issues — 30/10/2026
 
 Pedido: apresentar quantidades e percentuais por categoria/andamento no dashboard

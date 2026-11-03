@@ -3,8 +3,8 @@
 ## Resumo do andamento das issues — 30/10/2026
 
 Retomada em 03/11/2026: implementacao A1..A13 concluida na branch original.
-Revisao tecnica e verificacao integrada em A14; publicacao/integracao continuam
-etapas posteriores. Checkpoint de 30/10 abaixo e historico.
+Revisao tecnica e verificacao integrada em A14; PR #53 aberto para main em 03/11.
+Integracao permanece posterior. Checkpoint de 30/10 abaixo e historico.
 
 - [x] Conferir modelos, contadores, registro e permissoes de escrita dos prompts.
 - [x] Confirmar estados novos, criterio de fechamento, denominador e registro das verificacoes.
@@ -147,7 +147,9 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
 Implementacao e revisao tecnica concluidas. O desenvolvedor informou nesta conversa
 que a apresentacao visual parece adequada. A14 permanece parcialmente pendente
 para ensaio nativo dos agentes; esse resultado nao e inferido de testes textuais.
-Publicacao/PR/integracao e aceite humano da funcionalidade sao etapas posteriores.
+Publicacao da branch e PR #53 autorizados e realizados em 03/11; integracao e
+aceite humano da funcionalidade permanecem separados. A cobertura nativa pendente
+nao bloqueia continuar a migracao real sobre o trabalho e o GO vigentes.
 
 PASS em Windows PowerShell 5.1 pelo runner isolado, 19 suites na versao final:
 Test-IssueProgress, Test-IssueProgressRefresh, Test-IssueProgressLifecycle,
@@ -201,8 +203,17 @@ Casos minimos para verificar a orientacao/execucao no papel correspondente:
 - CONCLUIDA sem pedido de continuidade: nao iniciar automaticamente outro lote.
 - Helper orientador: informar fontes/proxima acao e manter arquivos inalterados.
 
-Main operacional e documentos reais da migracao preservados. Entrega em commits
-locais na branch harness/resumo-andamento-issues; sem push/PR/integracao nesta retomada.
+Main operacional e documentos reais da migracao preservados. Publicacao autorizada
+em 03/11: commits enviados para origin/harness/resumo-andamento-issues e
+[PR #53](https://github.com/edoardo-bianco/jboss-mta-harness/pull/53) aberto para main.
+Base remota conferida em 58b117f; diff sem erros. Nenhum merge executado.
+
+O desenvolvedor escolheu avancar na migracao verdadeira com os registros existentes.
+Apos atualizar o harness na maquina de trabalho, preservar .harness, configuracao
+local, lote, evidencias e decisoes; observar o acompanhamento durante as etapas
+reais autorizadas. Isso valida somente os casos/clientes efetivamente utilizados.
+Cenarios artificiais e suites de manutencao continuam em copias isoladas, sem
+transformar o ensaio completo dos tres clientes em precondicao da migracao.
 
 ## Execucao manual e fases do lote — 28/10/2026
 
