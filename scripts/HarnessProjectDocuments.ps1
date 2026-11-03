@@ -90,7 +90,8 @@ function Get-HarnessProjectMigrationText {
     $refs=@((Get-HarnessSourceLink $Project.MigrationPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.MigrationPath $Project.Source 'Codigo local'))
     if ($Mta) { $refs+=Get-HarnessSourceLink $Project.MigrationPath $Mta.ReportPath 'MTA atual' }
     $migration=Set-ProjectManagedBlock $migration 'fontes' ($refs -join ' | ')
-    $migration
+    $progress=Get-HarnessIssueProgress -Rows @(Read-ProjectDecisionRows $migration)
+    Set-HarnessIssueProgressBlock $migration (Get-HarnessIssueProgressText $progress $Project.MigrationPath $Project.MigrationPath)
 }
 
 function Get-ProjectOperationsText {
@@ -138,6 +139,7 @@ function Update-HarnessProjectDocuments {
         Pom=(Get-HarnessSourceLink $Project.IndexPath $Project.Pom 'POM')
         Source=(Get-HarnessSourceLink $Project.IndexPath $Project.Source 'Codigo local')
         Migration=(Get-HarnessSourceLink $Project.IndexPath $Project.MigrationPath 'Decisoes de migracao')
+        Progress=(Set-HarnessIssueProgressBlock '' (Get-HarnessIssueProgressText (Get-HarnessIssueProgress -Rows @(Read-ProjectDecisionRows $migration)) $Project.IndexPath $Project.MigrationPath))
         Documents=($lines -join [Environment]::NewLine)
         Mta=$mtaText
         Operations=if ($old['atual/operacao.json']) { Set-ProjectManagedBlock '' 'operacoes' (Get-ProjectOperationsText $old['atual/operacao.json']) } else { '' }

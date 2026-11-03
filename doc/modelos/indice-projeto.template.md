@@ -8,6 +8,8 @@ vem do MTA ou das evidencias locais de deploy, execucao, teste ou conferencia.
 A ficha reune a analise, fontes e lacunas; cadastro nao comprova exame ou resolucao.
 Este indice localiza os documentos correntes.
 
+{{Progress}}
+
 ## Trabalho e evidencias
 
 Abra o documento correspondente ao problema. Logs mostram a ultima tentativa; relatorios mostram o ultimo diagnostico utilizavel.

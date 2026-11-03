@@ -10,7 +10,7 @@
 - [x] Detalhar dependencias, matriz documental, criterios de aceite e verificacoes.
 - [x] Conferir dez links da especificacao, treze suites existentes citadas e diff do planejamento.
 - [x] Registrar pausa solicitada, escopo consolidado e ponto de retomada.
-- [ ] Revisar o plano tecnico detalhado antes da implementacao.
+- [x] Revisar o plano tecnico detalhado antes da implementacao (retomada solicitada em 03/11/2026).
 
 Documento: [resumo do andamento](../doc/engineering-harness/proposta-resumo-andamento-issues.md).
 Branch: harness/resumo-andamento-issues, base main 58b117f.
@@ -28,7 +28,7 @@ As tarefas abaixo aguardam a revisao do plano. Nao sao tarefas de corretiva da
 aplicacao. Arquivos sao os pontos previstos; ajustes tecnicos devem preservar
 escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacional.
 
-- [ ] A1 — Calculo e legenda comuns (sem dependencia adicional).
+- [x] A1 — Calculo e legenda comuns (sem dependencia adicional).
   Aceite: oito estados, origem/categoria preservadas, percentuais sobre total
   corrente, lacunas/zero distintos e definicoes comuns para os renderizadores.
   Arquivos: novo scripts/HarnessIssueProgress.ps1, scripts/HarnessProject.psm1,
@@ -36,14 +36,14 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   Verificar: runner -Test Test-IssueProgress.ps1, com grupos, arredondamento,
   desconhecidos, manual homonima MTA, duplicatas e denominador zero.
 
-- [ ] A2 — Registro e indice do projeto (depende de A1).
+- [x] A2 — Registro e indice do projeto (depende de A1).
   Aceite: mesmo calculo/legenda nos dois destinos; notas/decisoes preservadas,
   repeticao idempotente e links permitem identificar membros dos grupos.
   Arquivos: HarnessProjectDocuments.ps1, migracao.template.md,
   indice-projeto.template.md, orientacao-registro.template.md e Test-ProjectIndex.ps1.
   Verificar: runner -Test Test-ProjectIndex.ps1,Test-ProjectNavigation.ps1.
 
-- [ ] A3 — Dashboard geral (depende de A1, A2).
+- [x] A3 — Dashboard geral (depende de A1, A2).
   Aceite: resumo compacto por projeto/categoria, consolidado por somas e legenda;
   MTA diagnostico separado do registro, com leitura parcial explicita.
   Arquivos: HarnessProjectIndex.psm1, indice-projetos.template.md,

@@ -1,5 +1,16 @@
 # Plano do agente: evolucao do harness
 
+## Retomada da implementacao — 03/11/2026
+
+Pedido de continuidade aplicado ao checkpoint da branch harness/resumo-andamento-issues,
+HEAD c800a44, derivada da main 58b117f e sem alteracoes pendentes. Plano tecnico
+revisado: manter calculo/legenda comuns e separar recalculo documental da descoberta
+MTA. Implementacao sequencial no worktree existente; nenhuma migracao real alterada.
+A1..A3 implementadas. RED confirmado para calculo, resumo do projeto e dashboard;
+GREEN pelo runner isolado: IssueProgress, ProjectIndex, ProjectNavigation,
+ProjectIndexSummary, ProjectIndexAvailability e OutputTemplates. Numeros, lacunas,
+IDs e preservacao conferidos no Markdown sintetico; preview visual fica para A14.
+
 ## Resumo do andamento das issues — 30/10/2026
 
 Pedido: apresentar quantidades e percentuais por categoria/andamento no dashboard

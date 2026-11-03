@@ -40,7 +40,7 @@ function Read-ProjectIndexMta {
 }
 
 function Get-ProjectSummaryRow {
-    param($Project,$Mta,[string]$Index,[Collections.Generic.List[string]]$LocalWarnings,$MigrationCounts)
+    param($Project,$Mta,[string]$Index,[Collections.Generic.List[string]]$LocalWarnings,$MigrationCounts,$Progress)
     $report='Indisponivel'; $counts='-'; $categories='-'
     if ($Mta) {
         $report=Get-HarnessSourceLink $Index $Mta.ReportPath ($Mta.DateUtc.ToString('yyyy-MM-dd HH:mm:ss'))
@@ -86,7 +86,7 @@ function Get-ProjectSummaryRow {
     $projectLabel=ConvertTo-ProjectCell $Project.Name
     $projectLink=if (Test-Path -LiteralPath $Project.IndexPath -PathType Leaf) { Get-HarnessSourceLink $Index $Project.IndexPath $projectLabel } else { $projectLabel }
     $projectLink+='<br>'+(Get-HarnessSourceLink $Index $Project.Pom 'POM')
-    '| '+(@($projectLink,$report,$counts,$categories,($attempts -join '<br>'),($documents -join '<br>')) -join ' | ')+' |'
+    '| '+(@($projectLink,$report,$counts,$categories,(Get-HarnessIssueProgressCompact $Progress $Index $Project.MigrationPath),($attempts -join '<br>'),($documents -join '<br>')) -join ' | ')+' |'
 }
 
 
@@ -108,6 +108,7 @@ function New-HarnessProjectIndex {
     }
     $warnings=@(); $rows=@(); $available=0; $issueCount=0; $occurrenceCount=0
     $manualCount=0; $manualAvailable=0
+    $progressRows=@(); $readProjects=@(); $missingProjects=@()
     $categoryTotals=New-Object 'Collections.Generic.Dictionary[string,object]' ([StringComparer]::Ordinal)
     foreach ($project in $projects) {
         $mta=$null; $reading=$null; $limits=@()
@@ -130,14 +131,21 @@ function New-HarnessProjectIndex {
             }
             Update-HarnessProjectDocuments $project -Mta $mta -UpdateIssues:$UpdateMigration -Warnings $limits -Expected $expected
         } catch { $localWarnings.Add($_.Exception.Message) }
-        $migrationCounts=$null
+        $migrationCounts=$null; $progress=$null
         try {
             $read=Read-HarnessProjectFiles $project @('migracao.md') -ReadCommitted
             if (-not $read['migracao.md']) { throw 'Registro ausente.' }
             $migrationCounts=Get-HarnessMigrationCounts $read['migracao.md']
+            $issueRows=@(Read-ProjectDecisionRows $read['migracao.md'])
+            $progress=Get-HarnessIssueProgress -Rows $issueRows
+            foreach ($row in $issueRows) {
+                $row | Add-Member NoteProperty Project $project.Name
+                $row | Add-Member NoteProperty MigrationPath $project.MigrationPath
+            }
+            $progressRows+=$issueRows; $readProjects+=$project.Name
             $manualCount+=$migrationCounts.Manual; $manualAvailable++
-        } catch { $localWarnings.Add('Contagem manual indisponivel: '+$_.Exception.Message) }
-        $rows+=Get-ProjectSummaryRow $project $mta $index $localWarnings $migrationCounts
+        } catch { $missingProjects+=$project.Name; $localWarnings.Add('Contagem manual/andamento indisponivel: '+$_.Exception.Message) }
+        $rows+=Get-ProjectSummaryRow $project $mta $index $localWarnings $migrationCounts $progress
         if ($mta) {
             $available++; $issueCount+=@($mta.Issues).Count
             foreach ($issue in $mta.Issues) {
@@ -162,7 +170,7 @@ function New-HarnessProjectIndex {
     } catch { $warnings+=('Atualizacao local pendente nas priorizacoes: '+$_.Exception.Message) }
     Import-Module (Join-Path $PSScriptRoot 'HarnessSprintPlanning.psm1') -DisableNameChecking
     try { Update-HarnessSprintIndex $Context.Root } catch { $warnings+=('Atualizacao local pendente nos sprints: '+$_.Exception.Message) }
-    if (-not $rows.Count) { $rows=@('| Nenhum projeto Maven no escopo. | - | - | - | - | - |') }
+    if (-not $rows.Count) { $rows=@('| Nenhum projeto Maven no escopo. | - | - | - | - | - | - |') }
     $categoryRows=@($categoryTotals.Keys | Sort-Object -CaseSensitive | ForEach-Object {
         $label=if ([string]::IsNullOrWhiteSpace($_)) { 'Sem categoria informada' } else { ConvertTo-ProjectCell $_ }
         if ($_ -ceq 'manual') { $label+=' (MTA)' }
@@ -181,6 +189,7 @@ function New-HarnessProjectIndex {
         ProjectRows=($rows -join [Environment]::NewLine)
         Coverage="MTA utilizavel: $available de $($projects.Count) projetos. Totais conhecidos: $knownTotals."+[Environment]::NewLine+[Environment]::NewLine+$manualCoverage
         CategoryRows=($categoryRows -join [Environment]::NewLine)
+        Progress=(Set-HarnessIssueProgressBlock '' (Get-HarnessWorkspaceProgressText $progressRows $readProjects $missingProjects $index))
         Warnings=if ($warnings.Count) { (@($warnings | ForEach-Object { '- '+(ConvertTo-ProjectCell $_) }) -join [Environment]::NewLine) } else { 'Nenhuma lacuna identificada nesta leitura.' }
         Prioritization=if (Test-Path -LiteralPath $prioritizationPath -PathType Leaf) { Get-HarnessSourceLink $index $prioritizationPath 'Priorizacoes correntes' } else { 'Nenhuma priorizacao corrente disponivel.' }
     }
