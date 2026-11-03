@@ -87,7 +87,13 @@ concedem GO. Dispensa de precondicao nao dispensa entrega ou verificacao.
 Aplicacao: preparar implementacao do lote prepara implementar-lote/revisar-resultado.
 Executor confere GO e limita-se ao lote; nao infere commit/push/PR, escrita no
 harness, operacao externa ou proximo lote. Usar apoio real compativel disponivel,
-sem simular delegacao ou trocar cliente. Revisao de resultado e somente leitura.
+sem simular delegacao ou trocar cliente. Na revisao do resultado, o principal pode
+registrar evidencias/pendencias e aceite humano declarado na ficha, plano/tarefas
+e registro explicitos; helpers/revisores auxiliares continuam leitores. Siga
+[acompanhamento](../doc/guias/tools/acompanhamento-issues.md) e a legenda comum:
+CONCLUIDA exige verificacoes e aceite de todo o escopo aplicavel, sem promover por
+recorte parcial. Recalcule resumos com workspace explicito, sem selecionar outro
+MTA; informe falha parcial. A escrita documental nao autoriza operacoes externas.
 
 Git e informativo conforme a [ADR-0004](../doc/adr/0004-git-informativo-sem-controle-de-branches.md).
 Branch/HEAD diferentes nao exigem novo contexto por si so; conferir codigo.

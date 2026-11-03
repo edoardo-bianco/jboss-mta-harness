@@ -4,8 +4,8 @@ Indice reconstruido em {{UpdatedAt}} (UTC). Abra o projeto para consultar fontes
 
 ## Resumo por projeto
 
-| Projeto | MTA utilizavel (UTC) | Issues / ocorrencias | Categorias (issues / ocorrencias) | Ultimas tentativas (UTC) | Documentos |
-| --- | --- | --- | --- | --- | --- |
+| Projeto | MTA utilizavel (UTC) | Issues / ocorrencias | Categorias (issues / ocorrencias) | Andamento registrado | Ultimas tentativas (UTC) | Documentos |
+| --- | --- | --- | --- | --- | --- | --- |
 {{ProjectRows}}
 
 ## Totais conhecidos
@@ -15,6 +15,8 @@ Indice reconstruido em {{UpdatedAt}} (UTC). Abra o projeto para consultar fontes
 | Categoria | Issues | Ocorrencias |
 | --- | --- | --- |
 {{CategoryRows}}
+
+{{Progress}}
 
 ## Como interpretar
 

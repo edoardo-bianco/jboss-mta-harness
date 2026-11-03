@@ -161,6 +161,24 @@ Revisao final de S13 concluida em 12/10/2026; provas em
 [plano](../../tasks/historico/plan-ate-2026-10-17.md#retomada-de-12102026). Fixtures sinteticas nao substituem
 ensaio humano integrado nem o aceite da simplificacao completa.
 
+### Acompanhamento das issues (03/11/2026)
+
+O Andamento no registro e a fonte dos resumos por origem/categoria publicados no
+fim de migracao.md, no indice do projeto e no dashboard. Os oito estados usam a
+[legenda comum](../modelos/legenda-andamento.template.md); percentuais dividem
+quantidade no estado pelo total corrente registrado, inclusive decisoes adiadas,
+fora do escopo, presencas nao reencontradas e lacunas de estado. Consolidado soma
+quantidades e denominadores, sem misturar diagnostico MTA com registro/manual.
+
+O principal registra evidencias e aceite humano declarado durante a revisao do
+resultado nos destinos existentes. Helpers continuam leitores. CONCLUIDA exige
+verificacoes, aceite explicito e todo o escopo aplicavel; recorte parcial nao fecha
+a issue. A ficha sustenta acompanhamento/ANTES sem virar outra fonte de estado.
+Recalculo documental usa Update-HarnessIssueProgress com workspace explicito,
+sem selecionar MTA. Registro/indice local publicam juntos; dashboard separado
+informa falha parcial. Derivados recebidos nao criam conflito humano; os dados
+e decisoes continuam protegidos. Consulte o [procedimento](../guias/tools/acompanhamento-issues.md).
+
 ### Sprints correntes (S16)
 
 Cenario funcional tem unico mestre Maven participante, com contexto, premissas,

@@ -13,7 +13,7 @@ function Get-HarnessIssuePath {
 function Register-HarnessManualIssue {
     [CmdletBinding()]
     param($Project,[Parameter(Mandatory=$true)][string]$Id,[Parameter(Mandatory=$true)][string]$Title,
-        [string[]]$LocalPaths=@(),[string[]]$EvidencePaths=@())
+        [string[]]$LocalPaths=@(),[string[]]$EvidencePaths=@(),$Context)
     if ($Id -cnotmatch '^DEV-[A-Za-z0-9][A-Za-z0-9._-]*$' -or $Id.EndsWith('.')) { throw 'Issue manual exige ID DEV-... legivel, sem separadores de pasta.' }
     if ([string]::IsNullOrWhiteSpace($Title)) { throw 'Informe o titulo do achado.' }
     $lease=Enter-HarnessProjectAccess $Project -ForOperation
@@ -58,13 +58,16 @@ function Register-HarnessManualIssue {
             $writes['migracao.md']=$old['migracao.md'].Substring(0,$block.Index)+($lines -join '')+$old['migracao.md'].Substring($block.Index+$block.Length)
         }
         $migration=if ($writes.ContainsKey('migracao.md')) {$writes['migracao.md']} else {$old['migracao.md']}
-        if ($old['indice.md']) {
-            $index=Set-ProjectManagedBlock $old['indice.md'] 'issues:totais' (Get-HarnessMigrationCountText $migration)
-            if ($index -cne $old['indice.md']) { $writes['indice.md']=$index }
-        }
+        $summaries=Get-HarnessIssueProgressFiles $Project $migration $old['indice.md']
+        foreach ($key in $summaries.Keys) { if ($summaries[$key] -cne $old[$key]) { $writes[$key]=$summaries[$key] } }
         if ($writes.Count) { Publish-HarnessProjectFiles $Project $writes $old }
-        [pscustomobject]@{Counts=(Get-HarnessMigrationCounts $migration);Id=$Id;FichaPath=$path;MigrationPath=$Project.MigrationPath;Reused=($writes.Count -eq 0);ChangedFiles=@($writes.Keys)}
+        $result=[pscustomobject]@{Counts=(Get-HarnessMigrationCounts $migration);Id=$Id;FichaPath=$path;MigrationPath=$Project.MigrationPath;Reused=($writes.Count -eq 0);ChangedFiles=@($writes.Keys);DashboardPending=$true;Warnings=@('Dashboard pendente: recalcular com Context do workspace explicito.')}
     } finally { $lease.ReleaseMutex(); $lease.Dispose() }
+    if ($Context) {
+        try { $refresh=Update-HarnessIssueProgress -Context $Context -RequiredProject $Project; $result.DashboardPending=-not $refresh.Synchronized; $result.Warnings=$refresh.Warnings }
+        catch { $result.Warnings=@('Cadastro publicado; dashboard pendente: '+$_.Exception.Message) }
+    }
+    $result
 }
 
 function Get-IssueRepairFiles {

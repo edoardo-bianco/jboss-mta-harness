@@ -26,6 +26,15 @@
 <!-- Vincule MTA, codigo/POM, documentacao pertinente e anexos; diferencie fontes consultadas de sugeridas. Declare limites. Decisao/andamento ficam em migracao.md; escopo aprovado e tarefas ficam no plano. -->
 {{ReferencesAndLimits}}
 
+## 5. Acompanhamento da corretiva
+
+<!-- Preencher somente com trabalho/evidencias reais: etapa e recorte/fase,
+resultado observado, origem/data/ambiente, evidencia, pendencia e referencia ao
+aceite quando existir. Preservar achado original e ANTES. Nao duplicar plano ou
+criar outro campo autoritativo de Andamento; ele permanece em migracao.md.
+Verificacao falha/pendente nao e VERIFICADA. Aceite parcial nao conclui a issue
+inteira; para CONCLUIDA conferir todo o escopo aplicavel e a declaracao humana. -->
+
 <!-- ficha:fontes:inicio -->
 {{Sources}}
 <!-- ficha:fontes:fim -->

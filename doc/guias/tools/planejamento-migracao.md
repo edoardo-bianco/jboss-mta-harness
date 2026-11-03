@@ -80,6 +80,13 @@ permanecem null; valem os padroes da maquina.
 
 ### Indice da situacao dos projetos
 
+Os tres resumos de andamento (dashboard, indice do projeto e fim do registro)
+seguem a [legenda central](../harness-migracao-desenvolvedor.md#ler-os-indicadores-de-andamento).
+Planejamento registra EM ANALISE/ANALISADA conforme exame e PLANEJADA quando
+proposta/tarefas estiverem prontas; cadastro/ficha por si so nao promove estado.
+Veja [acompanhamento e recalculo](acompanhamento-issues.md) para preservar recorte,
+evidencias e decisoes, e tratar indice antigo sem exigir reconciliacao integral.
+
 O indice e navegacao derivada; o registro guarda a decisao humana. Atualizar o
 indice preserva escolhas e notas. Links preferem HTML do MTA, resumo Sonar,
 log do build e orientacoes Markdown. A ultima tentativa e o ultimo diagnostico
@@ -414,6 +421,13 @@ Links devem abrir fontes reais; lacunas permanecem explicitas. Nova evidencia
 entra por referencia, seguida de revisao do impacto no lote atual.
 
 #### Da proposta revisada a execucao e ao aceite
+
+O principal pode registrar resultados comprovados durante revisar-resultado em
+ficha, tarefas/plano e registro explicitos. IMPLEMENTADA pede verificacoes;
+VERIFICADA pede aceite humano; CONCLUIDA exige todo o escopo aplicavel da issue.
+Aceite de fase/recorte nao fecha trabalho restante. Publique com Expected e use
+o [recalculo documental](acompanhamento-issues.md#recalcular-sem-selecionar-outro-mta)
+com workspace explicito; falha do dashboard fica pendente. Helpers continuam leitores.
 
 <a id="orientar-verificacoes-e-aceite"></a>
 

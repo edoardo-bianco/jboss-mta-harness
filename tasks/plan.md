@@ -1,5 +1,191 @@
 # Plano do agente: evolucao do harness
 
+## Retomada da implementacao — 03/11/2026
+
+Pedido de continuidade aplicado ao checkpoint da branch harness/resumo-andamento-issues,
+HEAD c800a44, derivada da main 58b117f e sem alteracoes pendentes. Plano tecnico
+revisado: manter calculo/legenda comuns e separar recalculo documental da descoberta
+MTA. Implementacao sequencial no worktree existente; nenhuma migracao real alterada.
+A1..A3 implementadas. RED confirmado para calculo, resumo do projeto e dashboard;
+GREEN pelo runner isolado: IssueProgress, ProjectIndex, ProjectNavigation,
+ProjectIndexSummary, ProjectIndexAvailability e OutputTemplates. Numeros, lacunas,
+IDs e preservacao conferidos no Markdown sintetico; preview visual fica para A14.
+
+A4..A13 implementadas: recalculo em HarnessIssueProgressPublication.ps1 separado
+da descoberta MTA, cadastro/reconciliacao com Context opcional e DashboardPending,
+resumos locais protegidos e filtro de EM ANALISE. Consumidor de consultas aceita
+estados livres e nao exigiu mudanca. Guia de acompanhamento centraliza o procedimento;
+prompts/modelos, contrato, README/guia central e orientador alinhados. Os 18
+adaptadores e o ponteiro Claude consomem a skill comum; nao precisaram de alteracao.
+Helpers permanecem leitores; nenhum subagente foi acionado.
+
+Revisao de testes: mutacao de origem manual/MTA inicialmente sobreviveu, revelando
+assercoes insuficientes; acrescentada conferencia dos membros/origem. Nova execucao
+detectou a mutacao; arquivo restaurado byte a byte. Cobertura adicional de
+percentual ponderado 1/4=25%, escopo reduzido, registro invalido e editor concorrente.
+19 suites da regressao integrada passaram; resultados e limites registrados no to-do.
+
+Preview sintetico Markdown/HTML gerado no TEMP. Host de navegador indisponivel;
+tentativa nativa interrompida pela ferramenta por nao determinar a URL atual com
+seguranca. Inspecao visual pelo agente nao concluida. Posteriormente, o desenvolvedor
+informou "visualmente me parece ok"; conferencia visual humana registrada no to-do.
+Conferencia adicional dos exemplos passou: tres resumos, quantidades/percentuais,
+membros, lacuna, 59 links locais e tres legendas. Ensaio nativo de agentes permanece
+pendente, com casos e resultados esperados documentados; CLIs localizadas, sem
+disparar sessoes adicionais. Nenhuma alteracao de codigo nesta conferencia.
+
+Publicacao autorizada pelo desenvolvedor em 03/11: branch enviada ao origin e
+[PR #53](https://github.com/edoardo-bianco/jboss-mta-harness/pull/53) aberto para main,
+com as verificacoes e os limites declarados. Integracao nao executada. Continuidade
+na maquina de trabalho usa o lote e registros reais existentes; validacao nativa
+pode acompanhar o uso real e nao exige recriar a migracao. Testes de manutencao e
+cenarios artificiais continuam isolados. Nenhuma alteracao de runtime apos as
+19 suites aprovadas; a publicacao acrescenta somente o registro desta decisao.
+
+## Resumo do andamento das issues — 30/10/2026
+
+Pedido: apresentar quantidades e percentuais por categoria/andamento no dashboard
+dos projetos, no indice do projeto e ao final de migracao.md, sustentados no
+registro e nas evidencias. Organizacao aprovada pelo desenvolvedor para detalhar
+a implementacao. Plano tecnico abaixo; runtime ainda nao alterado.
+
+[Especificacao aprovada e complemento documental](../doc/engineering-harness/proposta-resumo-andamento-issues.md).
+Confirmados pelo desenvolvedor: acrescentar EM ANALISE, EM IMPLEMENTACAO e
+CONCLUIDA; fechamento exige verificacoes/aceite humano; denominador inclui todas
+as issues registradas da categoria; principal pode registrar resultados
+comprovados na ficha/tarefas/registro e atualizar resumos ao revisar evidencias.
+
+Leitura identificou cinco estados na legenda atual, ausencia de agrupamento por
+andamento no gerador e revisao de resultado somente leitura. A proposta explicita
+o ajuste desse contrato, preserva helpers leitores e diferencia estado da issue,
+decisao, presenca, cobertura parcial, GO e aceite. O desenvolvedor aprovou o
+layout e a cobertura parcial e exigiu coerencia de README, guia do desenvolvedor,
+legenda em todos os indicadores e orientacao dos agentes de migracao. A
+especificacao de engenharia nao substitui o contrato executavel ainda vigente.
+
+Base local main em 58b117f, checkout limpo. Proposta em branch
+harness/resumo-andamento-issues, worktree separado no TEMP. Preservado o checkout
+operacional; nenhum registro real, prompt, modelo ou script alterado.
+
+### Plano tecnico revisto na retomada de 03/11/2026
+
+Uma capacidade: acompanhamento por issue, com calculo comum, publicacao em tres
+destinos e procedimento documental coerente. PowerShell 5.1 e Markdown; sem
+dependencia, servico, watcher ou Run Task novos. Reutilizar as APIs de identidade,
+blocos gerenciados, links e publicacao protegida existentes.
+
+O calculo recebe as linhas validadas de migracao.md e produz grupos por origem
+manual/MTA, categoria e estado. Identidade Project/Id; quantidade e percentual
+por grupo; total corrente como denominador. Estado desconhecido tem grupo de
+lacuna, preservando seu texto. O gerador nao interpreta prosa nem promove estado.
+A tabela de oito estados/definicoes alimenta a legenda comum renderizada em todos
+os documentos com indicadores. Fonte de Andamento continua sendo o registro.
+
+Separar recalculo dos derivados e descoberta/atualizacao de catalogo MTA. A
+atualizacao documental do principal usa uma API comum de resumos sobre os
+registros correntes, com escopo de workspace explicito e sem executar analises.
+Nao selecionar novo MTA como efeito colateral. A Run Task existente continua
+reconstruindo os indices pelo seu fluxo normal e utiliza o mesmo calculo/legenda.
+Falha no dashboard informa resumo pendente; nao prometer transacao atomica entre
+todos os projetos e o indice global. Proteger escritas por projeto e preservar
+edicoes concorrentes em vez de recalcular sobre documento parcialmente escrito.
+
+Sequencia de entregas, detalhada em tasks/todo.md:
+
+| Etapa | Resultado verificavel | Depende de |
+| --- | --- | --- |
+| A1 | Calculo por categoria/estado e legenda comum, com testes de numeros e lacunas | Especificacao |
+| A2 | Registro e indice do projeto mostram o mesmo resumo, com legenda | A1 |
+| A3 | Dashboard compacto e consolidado usam o mesmo calculo/legenda | A1, A2 |
+| A4 | Atualizacao documental/cadastro recalcula derivados sem trocar MTA | A2, A3 |
+| A5 | Reconciliacao e conflitos preservam coerencia dos resumos publicados | A4 |
+| A6 | Consumidores reconhecem estados novos sem perda de retomada ou reabertura | A1 |
+| A7 | Analise/planejamento e ficha explicam quando registrar o estado | A2, A6 |
+| A8 | Implementacao/revisao registra evidencias e aceite nos destinos autorizados | A4, A7 |
+| A9 | Contrato, ADR operacional e instrucoes gerais concordam com o fluxo | A5, A8 |
+| A10 | README e guia central ensinam a leitura e o acompanhamento completo | A9 |
+| A11 | Guias de operacao/modelos eliminam contradicoes e usam a mesma legenda | A9, A10 |
+| A12 | Orientador comum explica contadores, lacunas e proximo passo por estado | A9, A10 |
+| A13 | Adaptadores dos tres clientes mantem encaminhamento e limites coerentes | A12 |
+| A14 | Regressao integrada, preview/links e revisao final da coerencia documental | A1..A13 |
+
+As etapas sao sequenciais neste trabalho; nao foi solicitado apoio de subagentes.
+Pontos de conferencia apos A3, A6 e A13 evitam acumular divergencias ate a entrega.
+
+### Matriz de cobertura documental
+
+| Grupo | Arquivos correntes e responsabilidade |
+| --- | --- |
+| Indicadores | doc/modelos/indice-projetos.template.md, indice-projeto.template.md, migracao.template.md, orientacao-registro.template.md e legenda compartilhada: tabela de estados, base, formula, limites e rastreabilidade em todos os destinos. |
+| Entrada e ciclo | README.md, doc/guias/harness-migracao-desenvolvedor.md, doc/guias/cheat-sheet-run-tasks.md: como acompanhar e atualizar, com exemplos absolutos/percentuais e ligacoes para as fontes. |
+| Procedimentos | doc/guias/tools/planejamento-migracao.md, issues-e-evidencias.md, priorizacao-issues.md, workspace.md e doc/modelos/README.md: papel da ficha, transicoes, verificacoes, aceite, cadastro e reconstrucao. |
+| Contrato e agentes principais | doc/contratos/fluxo-migracao.md, doc/adr/0009-estado-corrente-por-projeto.md, AGENTS.md e .github/copilot-instructions.md: principal pode registrar resultado; helpers continuam leitores; GO/aceite continuam humanos. |
+| Prompts/modelos do lote | planejar-lotes, implementar-lote, revisar-resultado, manter-migracao e criar-revisar-issue; ficha-issue, plano-lote e tarefas-lote: atualizar conforme o momento real sem promover estado por existencia de arquivo. |
+| Orientador | .agents/skills/orientar-migracao/SKILL.md, references/papeis.md e doc/guias/orientacao-migracao.md: explicar legenda, conferir fonte, distinguir indice antigo de conflito e encaminhar uma acao ao executor do cliente atual. |
+| Adaptadores | .codex/agents, .github/agents, .claude/agents e .claude/skills/orientar-migracao/SKILL.md: conferir consumo da skill comum e contradicoes; editar somente onde necessario, sem duplicar procedimento ou ampliar permissoes. |
+
+O README e o guia central devem incluir tabela explicativa, nao apenas lista dos
+nomes. Os tres documentos com contadores incluem a legenda completa gerada da
+mesma fonte, podendo usar details para manter o dashboard compacto. Guias
+complementares apontam a secao central e esclarecem a acao da propria etapa.
+Nao atualizar historicos como se fossem instrucao vigente; preservar outros
+usos de CONCLUIDA e de somente leitura (consultas, helpers, revisao de sprints).
+
+### Criterios de aceite e verificacao
+
+- Os tres resumos concordam com o registro por Project/Id/categoria, incluindo
+  estados desconhecidos e leitura parcial. Cada quantidade tem caminho para
+  identificar as issues que a compoem; percentual nao mede esforco/ocorrencias.
+- Estado muda por trabalho/evidencia registrado no fluxo autorizado. Ficha
+  examinada nao promove estado automaticamente. CONCLUIDA exige aceite/alcance;
+  aceitar recorte parcial nao conclui a issue inteira nem a migracao global.
+- Toda publicacao dos indicadores traz tabela/legenda, denominador, limites e
+  referencia ao registro. Fonte ausente nao vira zero; nao reencontrada nao
+  vira resolvida; uma falha de atualizacao nao aparenta sincronizacao completa.
+- README, guias, contrato, prompts e helpers ensinam o mesmo processo. O helper
+  explica o numero com fonte, distingue recalculo de reconciliacao e encaminha
+  verificacao/registro/aceite sem escrever, executar operacoes ou conceder GO.
+
+Testes pelo tests/Invoke-HarnessTests.ps1 em copia temporaria, com novos arquivos
+adicionados ao Git antes do runner. A1 acrescenta teste de comportamento focado;
+A2..A9 ampliam suites existentes pertinentes. A14 executa o conjunto afetado,
+confere links e preview Markdown com dados sinteticos, sem atualizar a .harness
+real. Nao criar testes apenas de presenca de frases. Revisao documental por busca
+e leitura delimitada confere os significados e as referencias. Ensaio nativo de
+orientacao nos tres clientes deve ser registrado como realizado ou pendente,
+sem inferir obediencia dos agentes a partir de testes textuais.
+
+### Riscos e limites
+
+Resumo reconstruivel pode ficar antigo apos edicao manual: mostrar data/limite
+e orientar a Run Task existente. Registro e indice global podem ser publicados
+em momentos diferentes: informar falha parcial e permitir repetir o recalculo.
+Filtros existentes aceitam apenas NAO ANALISADA/ANALISADA: A6 confere a retomada
+de EM ANALISE, sem mexer em quota/examinadas ou tornar IMPLEMENTADA elegivel.
+Estados livres antigos nao recebem traducao silenciosa. Evidencia insuficiente
+ou conflito de aceite requer direcionamento humano, preservando o texto anterior.
+
+Etapa atual concluida: especificacao complementada e plano tecnico detalhado.
+A revisao deste plano antecede a implementacao; nao repetir as escolhas
+funcionais ja aprovadas. A consolidacao local desta etapa esta registrada abaixo;
+publicacao, integracao e uso em dados reais permanecem fora desta entrega.
+
+### Checkpoint da pausa — 30/10/2026
+
+O desenvolvedor pediu parar por agora e consolidar. Esta etapa e consolidada em
+commit local na branch harness/resumo-andamento-issues, preservando o worktree
+C:/Users/edoar/AppData/Local/Temp/harness-resumo-andamento-20261030 para retomada.
+Especificacao funcional aprovada, complemento documental incorporado e plano
+tecnico A1..A14 detalhado. Implementacao ainda nao iniciada; a revisao do plano
+tecnico continua pendente, sem reabrir as escolhas funcionais ja confirmadas.
+
+Na retomada: conferir esta branch/worktree e o estado local; ler a especificacao
+e as tarefas deste assunto; concluir a revisao do plano tecnico e iniciar A1
+quando solicitado. O checkout operacional permanece em main. Alteracoes desta
+etapa sao somente os tres documentos de engenharia; registros reais da migracao
+e runtime preservados. Validacao documental: links locais, referencias as
+suites existentes e diff. Suites funcionais nao se aplicam a este checkpoint.
+
 ## Execucao manual e fases do lote — 28/10/2026
 
 Pedido: tornar explicito nos prompts e modelos como o executor deve agir nos

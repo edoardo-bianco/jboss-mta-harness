@@ -45,6 +45,11 @@ da operacao ao agente, com alcance/destino/finalidade; preservar decisoes existe
 
 ## 9. Revisao, GO, execucao e aceite
 
+<!-- Referenciar evidencias por issue/recorte e registrar declaracao humana e
+alcance do aceite. VERIFICADA ainda aguarda aceite; CONCLUIDA exige atender todo
+o escopo aplicavel da issue. Fase/recorte aceito nao fecha trabalho restante.
+Reabertura preserva aceite anterior e registra motivo e alcance da revisao. -->
+
 <!-- GO, alcance e dispensas ficam aqui; o to-do referencia esta secao. Registrar decisao humana sem inventar autorizacao. GO vigente pode cobrir todas as fases; mudanca de alcance exige revisao, preservando o texto anterior. Aceite do lote permanece separado das verificacoes por fase. -->
 {{HumanDecisions}}
 

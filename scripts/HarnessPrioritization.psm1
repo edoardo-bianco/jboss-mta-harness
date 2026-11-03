@@ -23,7 +23,7 @@ function Read-PrioritizationProject {
         foreach ($issue in $mta.Issues) { $present.Add($issue.Id,$issue) }
         $entry.EligibleIssues=@(foreach ($row in $rows) {
             if ($row.Id -notlike 'DEV-*' -and $present.ContainsKey($row.Id) -and
-                $row.Decision -in @('A DEFINIR','ANALISAR AGORA') -and $row.Progress -in @('NAO ANALISADA','ANALISADA')) {
+                $row.Decision -in @('A DEFINIR','ANALISAR AGORA') -and $row.Progress -in @('NAO ANALISADA','EM ANALISE','ANALISADA')) {
                 [pscustomobject]@{Project=$Project.Name;Id=$row.Id;Category=$present[$row.Id].Category}
             }
         })
@@ -33,7 +33,7 @@ function Read-PrioritizationProject {
     $manual=@($rows | Where-Object { $_.Presence -ceq 'MANUAL' -and $_.Category -ceq 'manual' })
     if ($manual.Count) { $entry.Categories=@($entry.Categories)+@('manual') }
     $entry.EligibleIssues+=@(foreach ($row in $manual) {
-        if ($row.Decision -in @('A DEFINIR','ANALISAR AGORA') -and $row.Progress -in @('NAO ANALISADA','ANALISADA')) {
+        if ($row.Decision -in @('A DEFINIR','ANALISAR AGORA') -and $row.Progress -in @('NAO ANALISADA','EM ANALISE','ANALISADA')) {
             [pscustomobject]@{Project=$Project.Name;Id=$row.Id;Category='manual'}
         }
     })

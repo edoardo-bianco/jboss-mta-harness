@@ -375,6 +375,14 @@ CLI sem WorkspacePath, mantenha `repositories` coerente com os projetos desejado
 
 ### Navegar pelas evidencias do projeto
 
+Dashboard, indice do projeto e fim do registro mostram o Andamento registrado,
+com mesma legenda, quantidades, percentuais e IDs. Consulte a
+[leitura dos indicadores](../harness-migracao-desenvolvedor.md#ler-os-indicadores-de-andamento).
+Apos edicao manual, atualize o indice pela tarefa existente. O principal pode
+[recalcular derivados](acompanhamento-issues.md#recalcular-sem-selecionar-outro-mta)
+depois da escrita documental sem selecionar MTA novo; informe falha parcial.
+Indice antigo nao exige novo diagnostico, reconciliacao integral ou novo lote.
+
 1. Execute **Workspace: atualizar indice dos projetos**. A tarefa abre
    `.harness/indices/projetos.md`; escolha o projeto pelo nome.
    Com `mta.runsPath` configurado, associa automaticamente o MTA existente em

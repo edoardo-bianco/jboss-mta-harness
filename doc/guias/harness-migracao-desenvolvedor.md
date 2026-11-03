@@ -114,6 +114,36 @@ com projeto, objetivo e referencias aos arquivos correntes. Guias e contratos
 formam a base local de consulta do agente, recuperada conforme a etapa e citada
 por links; busca semantica/RAG automatizado permanece uma evolucao futura.
 
+## Ler os indicadores de andamento
+
+Dashboard, indice do projeto e fim de migracao.md usam o mesmo calculo e legenda.
+Abra os IDs do grupo no registro e siga Ficha/evidencias para conferir o recorte.
+
+| Andamento | Trabalho registrado e proxima acao |
+| --- | --- |
+| NAO ANALISADA | Sem analise; escolher/examinar conforme a prioridade humana. |
+| EM ANALISE | Achados/lacunas iniciais; completar o exame. |
+| ANALISADA | Aplicabilidade, alcance e limites documentados; elaborar proposta. |
+| PLANEJADA | Proposta/tarefas prontas; revisar GO ou retomar o vigente. |
+| EM IMPLEMENTACAO | Corretiva autorizada iniciada; completar pendencias do lote. |
+| IMPLEMENTADA | Aplicada no Source local no recorte declarado; verificar criterios. |
+| VERIFICADA | Criterios tecnicos atendidos; submeter ao aceite humano. |
+| CONCLUIDA | Verificacoes e aceite de todo o escopo aplicavel; conferir continuidade pedida. |
+
+Percentual = quantidade no estado / total corrente da origem/categoria * 100.
+Exemplo: 6 EM ANALISE, 9 IMPLEMENTADA e 3 CONCLUIDA em 18 manuais correspondem a
+33,33%, 50,00% e 16,67%. Fechamento e 3/18; nao se somam etapas como progresso.
+Adiadas, fora do escopo e nao reencontradas permanecem na base. Lacunas de estado
+tambem contam; leitura indisponivel nao vale zero. Consolidado soma quantidades e
+denominadores, separando manual/MTA e registro/diagnostico. InitialTotal nao muda.
+
+O principal registra resultados comprovados na ficha/tarefas/registro e recalcula
+resumos; helpers orientam. Para aceite, vincule a declaracao e seu alcance na
+secao 9 do plano. Cobertura parcial nao fecha a issue inteira e falha de teste
+impede VERIFICADA. Apos edicao manual, atualize o indice pela tarefa existente;
+para escrita do principal, siga o [recalculo documental](tools/acompanhamento-issues.md#recalcular-sem-selecionar-outro-mta),
+que preserva o MTA e informa falha parcial. Veja o [ciclo de acompanhamento](tools/acompanhamento-issues.md).
+
 ## Roteiro: onde estou e o que escolho
 
 O ciclo principal e **preparar ambiente e diagnostico → escolher prioridades →

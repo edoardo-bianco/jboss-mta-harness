@@ -152,6 +152,14 @@ informativo conforme a [ADR-0004](doc/adr/0004-git-informativo-sem-controle-de-b
   e andamento/cobertura/referencias pertinentes em MigrationPath.
   Pode limpar apenas NeedsReview/ReviewReasons apos revisao tecnica.
   Nao altera escolhas humanas, codigo da aplicacao ou harness.
+- Andamento por issue segue a [legenda](doc/modelos/legenda-andamento.template.md)
+  e o [procedimento](doc/guias/tools/acompanhamento-issues.md). O principal pode
+  registrar resultados comprovados em ficha/tarefas/registro durante revisao,
+  com Expected e recalculo por Update-HarnessIssueProgress no workspace explicito.
+  Helpers permanecem leitores. CONCLUIDA exige verificacoes, aceite humano e todo
+  o escopo aplicavel; aceite parcial nao fecha a issue. Preservar achado/ANTES e
+  aceite anterior na reabertura. Resumos sao derivados; falha parcial fica pendente,
+  sem selecionar MTA novo no recalculo nem promover estado por arquivo existente.
 - Separe proposta, revisao/GO humano, execucao autorizada, verificacoes e
   revisao/aceite humano. GO inequivoco aplicavel nao deve ser pedido novamente.
   Alteracao de escopo/solucao/aceite exige revisar seu alcance, preservando texto

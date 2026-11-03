@@ -31,7 +31,7 @@ Confira as escolhas ANALISAR AGORA atuais por ID, o recorte e as respostas human
 SelectedIssues e o escopo no preparo; divergencia atual exige esclarecer o efeito
 antes da proposta, sem eleger issue pelo ranking. ADIAR/FORA DO ESCOPO permanecem
 fora; dependencias exigem escolha humana. PLANEJADA retoma este lote sem regredir
-andamento. IMPLEMENTADA/VERIFICADA exige direcionamento humano para reabrir.
+andamento. EM IMPLEMENTACAO retoma o lote autorizado; IMPLEMENTADA/VERIFICADA/CONCLUIDA exige direcionamento humano para reabrir.
 Nao criar lote seguinte automaticamente; um unico lote consistente por projeto.
 
 PlanningBasis e explicito:
@@ -142,6 +142,13 @@ ContextPath; isso encerra o aviso de preparo, nao a revisao/GO/aceite humanos.
 Saidas: PlanPath, TodoPath, fichas efetivamente examinadas e os dois campos de
 revisao mencionados do ContextPath. Em MigrationPath, atualize somente andamento,
 cobertura e links das issues trabalhadas; preserve escolhas, observacoes e catalogo.
+Use a legenda de andamento e o procedimento em doc/guias/tools/acompanhamento-issues.md
+na raiz do harness: EM ANALISE durante exame registrado, ANALISADA quando completo
+e PLANEJADA quando proposta/tarefas estiverem prontas. Ficha apenas criada nao
+promove estado. Registre recorte/fase e pendencias; preserve achado/ANTES na ficha.
+Depois da publicacao protegida, recalcule por Update-HarnessIssueProgress com o
+Context do workspace completo conhecido; informe Synchronized/Warnings. Sem
+esse escopo, declare dashboard pendente, sem selecionar outro MTA para recalcular.
 Preserve blocos planejamento:fontes:inicio/fim existentes, atualizando seus links
 ao referenciar fontes. Nao edite a aplicacao, rode build/MTA/Sonar/Git ou aplique
 corretivas. Helpers so leem/orientam; o condutor escreve. Use especialistas reais

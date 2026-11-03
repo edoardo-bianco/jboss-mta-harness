@@ -53,7 +53,9 @@ Publish-HarnessProjectFiles $p @{
 $externalBefore=@(Get-ChildItem -LiteralPath $external -File -Recurse | Get-FileHash | ForEach-Object Hash) -join ','
 $result=New-HarnessProjectIndex $context
 $text=[IO.File]::ReadAllText($result.IndexPath)
-Assert ($text.Contains('| Projeto | MTA utilizavel (UTC) | Issues / ocorrencias | Categorias (issues / ocorrencias) | Ultimas tentativas (UTC) | Documentos |')) 'Indice deve apresentar tabela resumida com links.'
+Assert ($text.Contains('| Projeto | MTA utilizavel (UTC) | Issues / ocorrencias | Categorias (issues / ocorrencias) | Andamento registrado | Ultimas tentativas (UTC) | Documentos |')) 'Indice deve apresentar tabela resumida com links.'
+Assert ($text.Contains('Lacuna: EM ANDAMENTO') -and $text.Contains('Registros de andamento lidos: 4 de 4')) 'Dashboard deve explicitar lacunas sem descartar o denominador.'
+Assert ($text.Contains('| MTA / mandatory | NAO ANALISADA | 1 | 50,00% | 2 |')) 'Consolidado soma quantidades e denominadores dos projetos.'
 $line=($text -split '\r?\n' | Where-Object { $_ -match '^\| \[com-mta\]' })
 Assert ($line.Contains('| MTA: 3 / 3<br>Manuais: 0 / - |') -and $line.Contains('mandatory: 1 / 2') -and $line.Contains('optional: 1 / 1')) 'Contagens devem vir do MTA por categoria.'
 Assert ($line.Contains('custom&#124;&#91;x&#93;&lt;tag&gt;: 1 / 0')) 'Categoria externa deve ser texto seguro na tabela.'
@@ -69,7 +71,7 @@ Assert ($text.Contains('| mandatory | 2 | 5 |')) 'Mesma regra em dois projetos c
 Assert ($text.Contains('| optional | 1 | 1 |') -and $text.Contains('| potential | 1 | 1 |') -and $text.Contains('| information | 1 | 0 |')) 'Categorias distintas devem manter seus totais de issues e ocorrencias.'
 Assert ($text.Contains('| custom&#124;&#91;x&#93;&lt;tag&gt; | 1 | 0 |')) 'Totais devem preservar e escapar categorias livres.'
 Assert ($text.Contains('Sem tentativa registrada')) 'Nao inferir execucao local a partir de MTA externo.'
-Assert ([IO.File]::ReadAllText($p.MigrationPath) -ceq $registry) 'Resumo nao muda decisoes humanas.'
+Assert ((Find-ProjectManagedBlock ([IO.File]::ReadAllText($p.MigrationPath)) 'mta').Value -ceq (Find-ProjectManagedBlock $registry 'mta').Value) 'Resumo nao muda decisoes humanas.'
 Assert ((@(Get-ChildItem -LiteralPath $external -File -Recurse | Get-FileHash | ForEach-Object Hash) -join ',') -ceq $externalBefore) 'Resumo nao escreve no MTA externo.'
 Assert ($text -notmatch '\{\{[A-Za-z]+\}\}' -and $text.Contains('## Como interpretar')) 'Template deve ser preenchido e manter legenda.'
 foreach ($match in [regex]::Matches($text,'\]\(<([^>]+)>\)')) {

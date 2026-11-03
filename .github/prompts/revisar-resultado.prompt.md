@@ -1,9 +1,9 @@
 ---
 name: revisar-resultado
-description: Analisa evidencias da corretiva e orienta verificacoes e aceite humano.
+description: Confere e registra evidencias da corretiva, pendencias e aceite humano declarado.
 argument-hint: Use o prompt preparado junto da implementacao e informe as evidencias.
 agent: devsquad
-tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
+tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', 'search/textSearch', 'edit/createFile', 'edit/editFiles', 'execute/runInTerminal', "harnessissues/auditar_base", "harnessissues/listar_issues", "harnessissues/obter_issue"]
 ---
 
 ## Direcionamento do desenvolvedor
@@ -11,6 +11,11 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 Leia evidencias e observacoes fora dos blocos gerenciados e nos documentos correntes.
 
 ## Trabalho solicitado
+
+Procedimento comum a Copilot, Codex e Claude Code. Metadados agent/tools sao do
+Copilot; o principal executa explicitamente este prompt com ferramentas do cliente
+atual. Helpers e revisores auxiliares continuam leitores. A permissao abaixo e
+documental; nao autoriza corretivas nem operacoes externas.
 
 MCP e opcional. Se indisponivel, execute esta etapa pelo fluxo existente, lendo
 diretamente contexto, evidencias e codigo com as ferramentas habituais autorizadas.
@@ -69,7 +74,24 @@ esperado, casos negativos/regressao, resultado observado e evidencia a guardar.
 Se faltar contrato funcional ou acesso ao ambiente, solicite direcionamento especifico.
 Oriente uso do LEIA-ME das evidencias com origem/data/ambiente e relacao por issue.
 Nao execute build, Sonar, MTA ou deploy; esta etapa analisa e orienta o desenvolvedor.
-Nao altere arquivos, integre, publique, escolha outro lote ou declare conclusao global.
+O principal registra resultados comprovados, origem/data/ambiente, cobertura e
+pendencias em PlanPath/TodoPath, nas fichas de FichaPaths e em MigrationPath
+explicito. Preserve achado e ANTES. Use a secao de acompanhamento da ficha, sem
+duplicar o plano ou criar outra fonte de Andamento. Confira destinos existentes
+antes da escrita; lacuna essencial pede direcionamento, sem inventar documentos.
+Registre VERIFICADA somente com criterios tecnicos aplicaveis atendidos; falha ou
+teste pendente mantem pendencia. CONCLUIDA exige declaracao humana de aceite,
+referenciada na secao 9 do plano e nas tarefas/registro, e cobertura de todo o
+escopo aplicavel da issue. Aceite parcial nao fecha a issue inteira. Preserve
+aceite anterior em reabertura, registrando motivo/alcance. Nao conceda aceite.
+Publique documentos pelo Publish-HarnessProjectFiles com Expected do texto/bytes
+lidos; conflito exige releitura e preservacao. Depois use Update-HarnessIssueProgress
+com Context do workspace completo conhecido, conforme
+doc/guias/tools/acompanhamento-issues.md na raiz do harness. Esse e o unico uso
+mutante de terminal nesta revisao: publicacao/recalculo documental autorizado,
+sem selecionar MTA novo ou executar testes/build. Informe Synchronized/Warnings;
+sem escopo, informe dashboard pendente. Nao altere codigo, integre, publique
+externamente, escolha outro lote ou declare conclusao global.
 Informe criterios atendidos, falhas, pendencias e o que fornecer antes do aceite humano.
 Use PENDENTE apenas para acao concreta ainda necessaria ao criterio escolhido;
 nao solicite repetir aceite vigente, escolhas ou evidencias ja comprovadas.

@@ -90,7 +90,8 @@ function Get-HarnessProjectMigrationText {
     $refs=@((Get-HarnessSourceLink $Project.MigrationPath $Project.Pom 'POM'),(Get-HarnessSourceLink $Project.MigrationPath $Project.Source 'Codigo local'))
     if ($Mta) { $refs+=Get-HarnessSourceLink $Project.MigrationPath $Mta.ReportPath 'MTA atual' }
     $migration=Set-ProjectManagedBlock $migration 'fontes' ($refs -join ' | ')
-    $migration
+    $progress=Get-HarnessIssueProgress -Rows @(Read-ProjectDecisionRows $migration)
+    Set-HarnessIssueProgressBlock $migration (Get-HarnessIssueProgressText $progress $Project.MigrationPath $Project.MigrationPath)
 }
 
 function Get-ProjectOperationsText {
@@ -138,6 +139,7 @@ function Update-HarnessProjectDocuments {
         Pom=(Get-HarnessSourceLink $Project.IndexPath $Project.Pom 'POM')
         Source=(Get-HarnessSourceLink $Project.IndexPath $Project.Source 'Codigo local')
         Migration=(Get-HarnessSourceLink $Project.IndexPath $Project.MigrationPath 'Decisoes de migracao')
+        Progress=(Find-ProjectManagedBlock (Set-HarnessIssueProgressBlock $old['indice.md'] (Get-HarnessIssueProgressText (Get-HarnessIssueProgress -Rows @(Read-ProjectDecisionRows $migration)) $Project.IndexPath $Project.MigrationPath)) 'issues:andamento').Value
         Documents=($lines -join [Environment]::NewLine)
         Mta=$mtaText
         Operations=if ($old['atual/operacao.json']) { Set-ProjectManagedBlock '' 'operacoes' (Get-ProjectOperationsText $old['atual/operacao.json']) } else { '' }
@@ -153,5 +155,9 @@ function Get-HarnessTemplateLinks {
     if ('migracao' -in $Names -and 'orientacao-registro' -notin $Names) { $Names+='orientacao-registro' }
     $lines=@('## Modelos de saida obrigatorios','','Leia os modelos vinculados antes de escrever. Use suas secoes e blocos; preencha com evidencias reais, sem placeholders restantes. Preserve texto humano existente. Template ausente e lacuna a resolver; nao improvise outro formato.','')
     foreach ($name in $Names) { $lines+='- '+(Get-HarnessSourceLink $From (Get-HarnessDocumentTemplatePath $name) ($name+'.template.md')) }
+    if (@($Names | Where-Object { $_ -in @('migracao','ficha-issue','plano-lote','tarefas-lote') }).Count) {
+        $guide=Join-Path (Split-Path -Parent $PSScriptRoot) 'doc/guias/tools/acompanhamento-issues.md'
+        $lines+='- '+(Get-HarnessSourceLink $From $guide 'Acompanhamento das issues: estados, evidencias e recalculo')
+    }
     $lines -join [Environment]::NewLine
 }

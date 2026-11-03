@@ -111,6 +111,15 @@ Automacao pode usar `-NoOpen -OutputFormat Json`, sem Interactive/EditorPath.
 
 ### Fatias e continuidade
 
+Andamento do registro e cobertura da priorizacao sao distintos. A
+[legenda central](../harness-migracao-desenvolvedor.md#ler-os-indicadores-de-andamento)
+explica o resumo corrente: seu denominador pode crescer, enquanto InitialTotal
+fica fixo ate Recreate. EM ANALISE pode retomar o exame se a decisao for elegivel;
+EM IMPLEMENTACAO/IMPLEMENTADA/VERIFICADA/CONCLUIDA nao reabrem pelo filtro.
+Priorizacao preenche a mesma ficha, preserva achado/ANTES e nao altera o registro.
+Planejamento/reconciliacao conferem evidencias antes de registrar o estado;
+veja [acompanhamento](acompanhamento-issues.md).
+
 O total inicial conta issues distintas por projeto + identificador funcional,
 nao ocorrencias. A quota arredonda para cima e se limita ao disponivel.
 Com 200 issues, cada 10% corresponde a 20; nao e 10% do restante.

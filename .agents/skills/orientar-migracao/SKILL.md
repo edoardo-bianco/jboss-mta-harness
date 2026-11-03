@@ -161,6 +161,22 @@ nao preenche dados, calcula ou valida. Cenario nao concede GO de lote.
 
 ## Decidir o proximo passo
 
+Para explicar contadores/percentuais, consulte a [legenda central](../../../doc/guias/harness-migracao-desenvolvedor.md#ler-os-indicadores-de-andamento)
+e o [acompanhamento](../../../doc/guias/tools/acompanhamento-issues.md). Releia as
+linhas/IDs do registro e evidencias pertinentes; indice e derivado, nao prova de
+resolucao. Diferencie total corrente de InitialTotal, origem manual de MTA e
+registro de diagnostico. Lacuna/estado desconhecido nao e zero nem conclusao.
+
+IMPLEMENTADA pede verificacoes concretas; VERIFICADA pede aceite humano;
+CONCLUIDA pede conferir todo o alcance aplicavel e continuidade solicitada.
+Falha de teste impede recomendar VERIFICADA; recorte aceito nao fecha a issue
+inteira. Resumo antigo pede reconstruir derivados; evidencia nova sem registro
+pede ao principal analisar/registrar; conflito entre estado/evidencia/decisao
+pede reconciliacao. Nao pedir novo MTA ou lote somente por indice antigo.
+O principal pode escrever resultados documentais no prompt revisar-resultado;
+isso nao muda o helper leitor. Nao execute a API de recalculo, altere status ou
+conceda GO/aceite. Entregue uma proxima acao com fonte no cliente atual.
+
 Use a linha pertinente; aprofunde apenas essa etapa.
 
 | Situacao observada | Orientacao |

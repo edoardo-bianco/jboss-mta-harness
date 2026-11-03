@@ -5,7 +5,7 @@ Mantenha as oito colunas e os marcadores. Edite Decisao, Andamento e Observacao/
 | Campo | Como preencher ou interpretar |
 | --- | --- |
 | Decisao | A DEFINIR, ANALISAR AGORA, ADIAR ou FORA DO ESCOPO. Justifique adiamento/exclusao. ANALISAR AGORA pede planejamento; nao comprova trabalho feito. |
-| Andamento | Registre o trabalho comprovado: NAO ANALISADA, ANALISADA, PLANEJADA, IMPLEMENTADA ou VERIFICADA. Nenhum valor concede GO ou aceite. |
+| Andamento | Registre o trabalho comprovado: NAO ANALISADA, EM ANALISE, ANALISADA, PLANEJADA, EM IMPLEMENTACAO, IMPLEMENTADA, VERIFICADA ou CONCLUIDA. Consulte a legenda completa no resumo ao final. CONCLUIDA exige verificacoes e aceite humano do escopo aplicavel; nenhum valor concede GO ou aceite. |
 | Observacao/referencia | Recorte, justificativa, cobertura parcial e links para ficha/anexos. Trabalho de colega ainda fora do codigo local fica AGUARDANDO INTEGRACAO na observacao, sem marcar IMPLEMENTADA. |
 | Presenca | PRESENTE = encontrada no MTA lido; NAO REENCONTRADA = ausente nele, sem comprovar resolucao; MANUAL = entrada humana. |
 | Categoria / Ocorrencias | Valores do MTA; nao definem prioridade humana nem comprovam aplicabilidade. O detalhe original e consultado pelo link MTA atual. |

@@ -64,6 +64,36 @@ consolida a base implementada e propoe a evolucao por nucleo, perfis e capacidad
 com matriz das Run Tasks, escolha de plataforma e indexacao Java independente de IDE.
 As novas decisoes estao em revisao na [ADR-0008](doc/adr/0008-nucleo-perfis-e-plataforma-do-harness.md).
 
+## Acompanhar o andamento
+
+O dashboard `.harness/indices/projetos.md`, o indice de cada projeto e o fim de
+`migracao.md` mostram quantidades/percentuais por origem, categoria e estado.
+Cada grupo identifica suas issues e traz a legenda completa; o registro e a fonte,
+enquanto a ficha sustenta analise, recorte e evidencias.
+
+| Andamento | Significado |
+| --- | --- |
+| NAO ANALISADA | Sem analise registrada. |
+| EM ANALISE | Exame iniciado, ainda incompleto, com achados/lacunas registrados. |
+| ANALISADA | Aplicabilidade, alcance e limites documentados; proposta por concluir. |
+| PLANEJADA | Proposta e tarefas prontas; GO separado. |
+| EM IMPLEMENTACAO | Corretiva autorizada iniciada, ainda por concluir. |
+| IMPLEMENTADA | Aplicada no Source local no recorte declarado; verificacoes pendentes. |
+| VERIFICADA | Criterios tecnicos atendidos com evidencias; aceite pendente. |
+| CONCLUIDA | Verificacoes e aceite humano de todo o escopo aplicavel da issue. |
+
+Percentual = quantidade no estado / total corrente da origem/categoria * 100.
+Em 18 issues manuais, 9 IMPLEMENTADA representam 50,00%; 3 CONCLUIDA, 16,67%.
+Adiadas, fora do escopo e nao reencontradas continuam no denominador; fonte
+indisponivel nao e zero. O consolidado soma quantidades/denominadores, sem media
+de percentuais. Isso nao mede esforco ou ocorrencias nem muda InitialTotal.
+
+Depois de evidencias novas, o principal confere e registra ficha/tarefas/registro
+e recalcula os derivados. Apos edicao manual, use **Workspace: atualizar indice
+dos projetos**. Aceite de recorte nao conclui a issue inteira; reabertura preserva
+aceite anterior. Consulte o [passo a passo de acompanhamento](doc/guias/tools/acompanhamento-issues.md)
+para verificacoes, aceite, recalculo sem trocar MTA e tratamento de falha parcial.
+
 ## Como usar
 
 **Siga o [guia do desenvolvedor](doc/guias/harness-migracao-desenvolvedor.md).**
