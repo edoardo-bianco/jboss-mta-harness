@@ -30,8 +30,20 @@ function Resolve-EapProfile {
         foreach ($field in @('template','values','jvmOptions')) { $inputs+=Resolve-EapPath $entry.Value.$field $base }
     }
     if ($Config.PSObject.Properties['files']) {
-        foreach ($file in $Config.files) { $inputs+=Resolve-EapPath ([string](Get-EapField $file 'source' '')) $base }
+        foreach ($file in $Config.files) {
+            if ($xmlNames.Contains([string](Get-EapField $file 'target' ''))) { throw 'Arquivo externo nao pode substituir XML de perfil.' }
+            $inputs+=Resolve-EapPath ([string](Get-EapField $file 'source' '')) $base
+        }
     }
+    $manifestPath=Resolve-EapPath $Config.modules $base
+    $manifest=Read-EapJson $manifestPath
+    foreach ($module in @(Get-EapField $manifest 'modules' @())) {
+        foreach ($artifact in @(Get-EapField $module 'artifacts' @())) {
+            if ((Get-EapField $artifact 'source') -eq 'file') { $inputs+=Resolve-EapPath ([string](Get-EapField $artifact 'path' '')) (Split-Path -Parent $manifestPath) }
+        }
+    }
+    $mavenSettings=Get-EapField (Get-EapField $manifest 'maven') 'settings'
+    if ($mavenSettings) { $inputs+=Resolve-EapPath $mavenSettings (Split-Path -Parent $manifestPath) }
     for ($i=0; $i -lt $outputs.Count; $i++) {
         foreach ($inputPath in $inputs) { if (Test-EapWithin $inputPath $outputs[$i]) { throw 'output de perfil nao pode conter entradas de outro perfil ou entradas comuns.' } }
         foreach ($homePath in @($Config.eapHome,$Config.jdkHome)) {

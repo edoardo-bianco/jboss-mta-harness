@@ -24,6 +24,9 @@ function Read-EapPreparationConfig {
     if ($config.schemaVersion -notin @(1,2)) { throw 'schemaVersion deve ser 1 ou 2.' }
     if ($config.expectedVersion -cnotmatch '^7\.4\.\d+\.GA$') { throw 'expectedVersion deve identificar um patch EAP 7.4, por exemplo 7.4.11.GA.' }
     if ($config.standaloneConfig -cnotmatch '^[A-Za-z0-9][A-Za-z0-9_.-]*\.xml$') { throw 'standaloneConfig deve ser um nome XML simples.' }
+    $jvmRelative='bin\standalone.conf.bat'
+    if ($config.schemaVersion -eq 2) { $jvmRelative='bin\'+(Get-HarnessJbossJvmFileName $config.standaloneConfig) }
+    $config | Add-Member -NotePropertyName JvmRelativePath -NotePropertyValue $jvmRelative -Force
     if (($config.portOffset -isnot [int] -and $config.portOffset -isnot [long]) -or $config.portOffset -lt 0 -or $config.portOffset -gt 55000) { throw 'portOffset deve ser inteiro entre 0 e 55000.' }
     if ($config.logSql -isnot [bool]) { throw 'logSql deve ser booleano.' }
     $base=Split-Path -Parent $Path
@@ -105,10 +108,14 @@ function New-EapJvmConfig {
         $options+='"'+$option+'"'
     }
     if (-not $options.Count) { throw 'Arquivo JVM sem opcoes.' }
-    $original=[IO.File]::ReadAllText((Join-Path $Config.eapHome 'bin/standalone.conf.bat'))
+    $originalPath=Join-Path $Config.eapHome 'bin/standalone.conf.bat'
+    if ($Config.schemaVersion -eq 2) { $originalPath=Resolve-HarnessJbossJvmConfig $Config.eapHome $Config.standaloneConfig }
+    $original=[IO.File]::ReadAllText($originalPath)
     $original=[regex]::Replace($original,'(?ms)^rem BEGIN EAP74 PREPARO (?:ENV|JVM)\r?\n.*?^rem END EAP74 PREPARO\r?\n?','')
     # Limpar heranca antes do arquivo do produto; aplicar escolhas ao final.
-    $prefix=@('rem BEGIN EAP74 PREPARO ENV','@echo off','set "JAVA_OPTS="','set "JAVA_TOOL_OPTIONS="','set "_JAVA_OPTIONS="','set "JDK_JAVA_OPTIONS="','rem END EAP74 PREPARO') -join "`r`n"
+    $prefix=@('rem BEGIN EAP74 PREPARO ENV')
+    if ($Config.schemaVersion -eq 2) { $prefix+=('rem EAP74 PREPARO CONFIG='+$Config.standaloneConfig) }
+    $prefix=($prefix+@('@echo off','set "JAVA_OPTS="','set "JAVA_TOOL_OPTIONS="','set "_JAVA_OPTIONS="','set "JDK_JAVA_OPTIONS="','rem END EAP74 PREPARO')) -join "`r`n"
     $suffix=@('rem BEGIN EAP74 PREPARO JVM',('set "JAVA_HOME='+$Config.jdkHome+'"'),('set "JAVA='+$Config.jdkHome+'\bin\java.exe"'),('set JAVA_OPTS='+($options -join ' ')),'rem END EAP74 PREPARO') -join "`r`n"
     $prefix+"`r`n"+$original.TrimEnd()+"`r`n"+$suffix+"`r`n"
 }

@@ -5,6 +5,24 @@ obter pelo Git a revisao corrigida do harness**. A existencia deste documento
 na branch de trabalho nao significa que a main remota ja contenha as mudancas.
 Nao copie `conferencia-harness/` por cima do repositorio.
 
+## Acrescentar outro perfil sem refazer o ambiente existente
+
+Para perfis v2, siga a [secao 1.1 do preparo](README.md#11-alternar-perfis-na-mesma-instalacao)
+e o [modelo generico](modelos/preparo-perfis.example.json). Atualize os scripts
+pelo Git, acrescente as novas entradas privadas e adapte o JSON preservando os
+caminhos/valores da maquina de trabalho. Nao extraia um pacote inteiro sobre
+a pasta que ja recebeu ajustes. Instalacao/patch do EAP e modulos atuais ficam.
+
+Gere/aplique somente o perfil acrescentado, com o servidor parado. A JVM v2 fica
+em arquivo por XML; a global existente permanece. Modulos divergentes continuam
+recusados, inclusive descritores ajustados manualmente: compare antes de qualquer
+reconciliacao. Nenhum WAR e movido nem outro perfil reaplicado automaticamente.
+
+Ao alternar perfis instalados, pare/inicie com o XML correto; nao regenere XML.
+Conserve os registros de deployment da CLI. No harness, alinhe
+`eap.eap74.standaloneConfig` e as portas ao perfil ativo antes do start/deploy.
+Os comandos das secoes historicas abaixo usam v1; em v2 inclua `-Perfil <nome>`.
+
 ## 1. Atualizar somente o codigo
 
 Na raiz do harness, confira a branch e alteracoes locais antes de atualizar

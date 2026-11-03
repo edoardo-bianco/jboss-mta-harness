@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 2,
+  "eapHome": "C:/desenvolvimento/servidores/jboss-eap-7.4",
+  "jdkHome": "C:/desenvolvimento/java/jdk8",
+  "expectedVersion": "7.4.11.GA",
+  "modules": "modulos/modulos.json",
+  "files": [],
+  "portOffset": 100,
+  "logSql": false,
+  "profiles": {
+    "azul": {
+      "standaloneConfig": "standalone-azul.xml",
+      "template": "templates/standalone-azul.xml",
+      "values": "valores/azul.properties",
+      "jvmOptions": "jvm/azul.txt",
+      "output": "C:/desenvolvimento/jboss-eap7.4-consolidado/aplicacao-azul/local"
+    },
+    "verde": {
+      "standaloneConfig": "standalone-verde.xml",
+      "template": "templates/standalone-verde.xml",
+      "values": "valores/verde.properties",
+      "jvmOptions": "jvm/verde.txt",
+      "output": "C:/desenvolvimento/jboss-eap7.4-consolidado/aplicacao-verde/local"
+    }
+  }
+}

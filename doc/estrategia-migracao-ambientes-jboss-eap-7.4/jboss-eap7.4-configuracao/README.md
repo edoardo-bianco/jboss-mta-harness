@@ -8,7 +8,9 @@ aplicam patch ou fazem deployment. Para transformar a origem, consulte o
 
 O preparo consolida XML, configuracao JVM, modulos e arquivos externos declarados; `-Aplicar` publica esse
 conjunto no EAP escolhido. O inicio usa os arquivos ja instalados. Script e
-harness chamam o `standalone.bat` oficial e o mesmo `bin/standalone.conf.bat`.
+harness chamam o `standalone.bat` oficial. Schema v1 conserva a JVM global;
+schema v2 associa uma JVM a cada XML, permitindo alternar perfis na mesma
+instalacao, um ativo por vez. Drivers e modulos continuam compartilhados.
 
 Para DES com imagem construida pelo Azure DevOps e executada no OKD, use o
 [roteiro de DES](des.md). Local e DES devem consumir a mesma revisao do template
@@ -54,7 +56,7 @@ Nao copie configuracao pessoal de outra maquina sem revisar caminhos e JDK.
 
 | Campo de preparo.json | Preenchimento |
 | --- | --- |
-| `schemaVersion` | `1` |
+| `schemaVersion` | `1` para entrada unica; `2` para os perfis da secao 1.1 |
 | `eapHome`, `jdkHome` | Diretorios da instalacao EAP e do JDK 8 |
 | `expectedVersion` | Versao escolhida e verificada, ex. `7.4.11.GA`; nao significa patch recomendado |
 | `standaloneConfig` | Nome simples, ex. `standalone-local.xml`, usado tambem no harness |
@@ -69,6 +71,48 @@ Nao copie configuracao pessoal de outra maquina sem revisar caminhos e JDK.
 Antes do preparo, instale EAP/JDK e confira a versao pelo [roteiro de patches](patches.md).
 O script confere `version.txt` e `release` do JDK; isso nao substitui `patch info`,
 a matriz de suporte, a conferencia dos pacotes ou o teste de boot.
+
+### 1.1. Alternar perfis na mesma instalacao
+
+Use [preparo-perfis.example.json](modelos/preparo-perfis.example.json). Em v2,
+`eapHome`, `jdkHome`, `expectedVersion`, `modules`, `files`, `portOffset` e
+`logSql` ficam na raiz. Cada entrada de `profiles` declara somente
+`standaloneConfig`, `template`, `values`, `jvmOptions` e `output`. Nao ha
+sobrescrita dos campos comuns. Nomes de perfis sao dados, com ate 64 caracteres
+alfanumericos, `_` ou `-`, iniciados por letra/numero; use a grafia declarada.
+
+Passe `-Perfil azul` ou `-Perfil verde` tanto ao preparar quanto ao iniciar.
+A selecao e obrigatoria em v2; uma chamada gera/aplica somente um perfil.
+XMLs precisam ter nomes distintos, e saidas nao podem coincidir, conter outra
+saida ou conter entradas de qualquer perfil. V1 continua aceito sem `-Perfil`.
+
+Para adicionar um perfil a uma maquina ja em uso, preserve seus caminhos,
+valores e ajustes. Mova os cinco campos especificos existentes para o primeiro
+perfil e acrescente o segundo. Nao copie um JSON completo de outra maquina por
+cima do local. Nao reaplique o primeiro perfil para instalar o segundo.
+
+Separe scanners no proprio template, por exemplo `deployments` e
+`deployments-verde`, ambos relativos a `jboss.server.base.dir`. Use pastas irmas;
+nao coloque uma dentro da outra. O preparo nao move/apaga/implanta WARs. A tarefa
+de deploy do harness usa CLI; a separacao de pastas afeta os arquivos copiados
+manualmente. Logs e dados internos permanecem compartilhados.
+
+```powershell
+$scripts = Join-Path (Get-Location) 'doc/estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/scripts'
+$configuracao = 'C:\desenvolvimento\jboss-eap7.4-configuracao\preparo.json'
+# EAP parado, inclusive para gerar:
+& "$scripts/preparar-eap74.ps1" -Configuracao $configuracao -Perfil verde
+# Apos conferir a saida:
+& "$scripts/preparar-eap74.ps1" -Configuracao $configuracao -Perfil verde -Aplicar
+& "$scripts/iniciar-eap74-local.ps1" -Configuracao $configuracao -Perfil verde
+```
+
+Para trocar, pare o servidor e inicie o outro perfil ja instalado. Inicio nao
+regenera XML e conserva deployments registrados pela CLI. V2 recusa aplicar
+um XML existente diferente do candidato. Preserve e confira as diferencas;
+somente se decidir substituir o XML inteiro, use `-Aplicar -SubstituirXml`.
+Essa escolha pode remover registros de deployment/ajustes; nao e necessaria
+para alternar. O parametro nao libera divergencias de modulos ou outros arquivos.
 
 ## 2. Preparar o XML e preencher propriedades
 
@@ -173,7 +217,7 @@ reservados Windows, o XML gerado, `standalone*.xml`, historico XML nem
 JARs continuam no manifesto de modulos, e opcoes JVM em `jvmOptions`.
 Configuracoes existentes sem `files` continuam funcionando.
 
-## 4. Definir a JVM compartilhada
+## 4. Definir a JVM
 
 Copie [opcoes.example.txt](modelos/opcoes.example.txt) e ajuste heap, metaspace,
 timezone e propriedades necessarias. Uma opcao inteira por linha, sem aspas;
@@ -181,6 +225,18 @@ timezone e propriedades necessarias. Uma opcao inteira por linha, sem aspas;
 O preparo preserva o texto original de `standalone.conf.bat`, limpa heranca de
 JAVA_OPTS/variaveis de injecao Java e aplica o JDK e a lista escolhida ao final.
 Em nova geracao, substitui somente os blocos gerenciados anteriores.
+
+Em v2, o destino e `bin/eap74-preparo-<nome-do-XML-sem-extensao>.conf.bat`.
+Na primeira geracao usa o texto nao gerenciado da JVM global como base;
+nas seguintes preserva o texto nao gerenciado do arquivo daquele XML.
+`bin/standalone.conf.bat` nao e substituido ao aplicar um perfil v2.
+O iniciador e o harness (normal/debug) selecionam o arquivo associado via
+`STANDALONE_CONF`. A associacao tem marcacao conferida; nao renomeie esse BAT.
+Sem arquivo por XML, conserva-se o fallback global da instalacao existente.
+O iniciador do preparo confere opcoes/JDK antes de iniciar e recusa divergencia.
+Se o XML ja recebeu JVM por perfil, aplicar um JSON v1 para esse mesmo XML e
+recusado: continue usando v2. Um XML legado sem arquivo JVM por perfil pode ser
+adotado por v2 sem reaplicacao, desde que as opcoes/JDK instalados correspondam.
 
 Nao transponha `standalone.conf` Linux literalmente: caminhos, agentes APM,
 truststores, bootclasspath e bibliotecas dos overlays dependem da maquina e do
@@ -206,6 +262,9 @@ $configuracao = 'C:\desenvolvimento\jboss-eap7.4-configuracao\preparo.json'
 # Conferir o consolidado em privado. Para publicar no servidor parado:
 & "$scripts/preparar-eap74.ps1" -Configuracao $configuracao -Aplicar
 ```
+
+Os exemplos desta secao usam v1. Em v2 acrescente `-Perfil <nome>` nas duas
+chamadas; observe a protecao contra XML divergente descrita na secao 1.1.
 
 O primeiro comando deixa o EAP inalterado. O segundo refaz as validacoes e
 publica os arquivos completos. Nao copie a pasta inteira sobre o EAP por conta
@@ -240,8 +299,9 @@ para desligar, regenere com template sem DEBUG/TRACE e aplique parado.
 ```
 
 O inicio nao gera XML nem instala modulos. Usa bind local `127.0.0.1`, o offset
-configurado e a JVM compartilhada; bloqueia se o alvo/portas ja estiverem ativos.
+configurado e a JVM associada ao XML (ou global legada); bloqueia se o alvo/portas ja estiverem ativos.
 Alterar entradas requer novo preparo com o servidor parado.
+Em v2 acrescente `-Perfil <nome>` tambem nas chamadas de inicio/admin-only.
 
 Para a outra forma de inicio, apos aplicar, ajuste **somente estes campos** do
 seu `config/harness.local.json`, preservando as demais escolhas:
@@ -261,8 +321,12 @@ seu `config/harness.local.json`, preservando as demais escolhas:
 Use os mesmos `jdkHome`, `eapHome`, `standaloneConfig` e `portOffset` do preparo.
 Execute `Servidor: iniciar JBoss` escolhendo EAP 7.4, conforme o [guia JBoss](../../guias/tools/jboss.md).
 O modo debug e uma escolha adicional do harness. Nao inicie as duas formas ao
-mesmo tempo. O arquivo nativo compartilhado tambem afeta outras inicializacoes
-standalone dessa instalacao; para JVMs independentes, use instalacoes separadas.
+mesmo tempo. As tarefas do harness leem o XML escolhido em `harness.local.json`,
+nao o perfil de `preparo.json`: alinhe `standaloneConfig` ao alternar e depois
+consulte o estado antes de implantar. A JVM por XML e reconhecida automaticamente.
+Chamar `standalone.bat -c ...` diretamente seleciona somente o XML; para usar
+a JVM associada, prefira os iniciadores acima. O suporte de perfis e para
+alternancia, nao para duas instancias simultaneas.
 
 ## 7. Verificar e repetir na maquina de trabalho
 

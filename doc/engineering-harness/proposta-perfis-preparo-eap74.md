@@ -1,7 +1,7 @@
 # Proposta: perfis de preparo EAP 7.4
 
-Data: 03/11/2026. Estado: especificacao aprovada, implementacao solicitada pelo
-desenvolvedor. Evolucao do harness conforme a
+Data: 03/11/2026. Estado: implementacao local concluida e verificada; publicacao
+Git e verificacao operacional posteriores. Evolucao do harness conforme a
 [ADR-0002](../adr/0002-separacao-harness-e-migracao-progressiva.md).
 Checkpoint em [plan.md](../../tasks/plan.md) e [todo.md](../../tasks/todo.md).
 
@@ -17,27 +17,29 @@ Confirmado pelo desenvolvedor:
 - Manter os drivers, modulos e JARs ja migrados do simtr-api.
 - Separar as pastas de deployments dos perfis.
 - Separar template, valores reais/ficticios, JVM e consolidado do outsourcing.
+- Manter HTTP local como no SIMTR migrado, sem acrescentar listener HTTPS.
 - Usar o inventario fornecido e os valores locais, sem inventar configuracao.
 - A maquina de trabalho ja executa o SIMTR e recebeu ajustes conforme suas
   instalacoes. Esses caminhos, valores e ajustes sao a referencia da atualizacao.
 
-A atualizacao sera incremental: preservar o SIMTR instalado e acrescentar o
+A atualizacao e incremental: preservar o SIMTR instalado e acrescentar o
 outsourcing. Proposta ajustada apos esse esclarecimento: conservar o scanner do
 SIMTR em standalone/deployments e usar standalone/deployments-outsourcing para
 o outsourcing. Sao pastas irmas, sem mover os WARs do SIMTR ou colocar um perfil
 dentro da pasta escaneada pelo outro.
 
-## Fontes e comportamento atual
+## Fontes e comportamento anterior (base e845707)
 
-O [modelo atual](../estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/modelos/preparo.example.json)
+O [modelo legado](../estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/modelos/preparo.example.json)
 usa schemaVersion=1 e uma combinacao de entradas/saida. O
 [parser](../estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/scripts/Eap74Inputs.ps1)
 resolve caminhos relativos ao JSON e exige cobertura exata dos tokens.
 O [preparo/iniciador](../estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/scripts/Eap74Preparation.psm1)
-gera XML e bin/standalone.conf.bat compartilhado, exige servidor parado e aplica
-somente com -Aplicar. O iniciador ja seleciona standaloneConfig pelo argumento -c;
-sua conferencia atual de JVM verifica marcacao/JDK, insuficiente para distinguir
-opcoes de perfis diferentes.
+gerava XML e bin/standalone.conf.bat compartilhado, exigia servidor parado e aplicava
+somente com -Aplicar. O iniciador ja selecionava standaloneConfig pelo argumento -c;
+sua conferencia de JVM verificava marcacao/JDK, insuficiente para distinguir
+opcoes de perfis diferentes. A implementacao abaixo acrescenta JVM por XML no v2
+e conferencia das opcoes instaladas, preservando o comportamento legado v1.
 
 O [runtime do harness](../../scripts/HarnessJbossRuntime.psm1) usa
 eap.eap74.standaloneConfig da configuracao local do workspace. O
@@ -68,13 +70,15 @@ url.simtr.outsourcing.api, simtr.outsourcing.resource.sso.filter e
 url.gestao.documento. Valores reais nao sao publicados neste documento.
 
 Essa comparacao identifica origem; nao comprova credenciais, servicos ou
-equivalencia funcional. Conferir outros recursos antes de fechar o novo template.
+equivalencia funcional. Outros recursos tambem foram conferidos: conservar a
+base 7.4, alterar duas categorias de log/scanner e retirar max-header-size que
+nao consta no inventario outsourcing. FILE local e HTTP foram mantidos.
 Conservar o JNDI java:jboss/datasources/simtr-ds, pool simtrPU, driver ojdbc8,
 modulo com.oracle.ojdbc8/ojdbc8-19.22.0.0.jar e modulo
 net.sf.jasperreports.fonts/jasperreports-fonts-6.16.0.jar da configuracao migrada.
 Nao restaurar registros Oracle legados apenas por constarem no inventario.
 
-## Interface proposta
+## Interface implementada
 
 Preservar schemaVersion=1 e os comandos atuais. Acrescentar schemaVersion=2 com
 profiles e parametro -Perfil nos scripts de preparo/inicio. Com profiles,
@@ -85,7 +89,7 @@ portOffset e logSql. Cada perfil declara standaloneConfig, template, values,
 jvmOptions e output. Sem sobrescrita dos campos comuns nesta primeira versao.
 Resolver caminhos relativos ao preparo.json e gerar um perfil por chamada.
 
-Fragmento proposto para integrar ao preparo.json existente (nao substitui o
+Fragmento para integrar ao preparo.json existente (nao substitui o
 arquivo completo nem seus caminhos/valores locais):
 
 ```json
@@ -169,7 +173,7 @@ instalacao, portas adicionais ou gerenciamento de instancias simultaneas.
    gerar somente seu consolidado. Isso nao reaplica o SIMTR.
 5. Na aplicacao autorizada, parar o EAP, conferir diferencas e instalar o novo
    XML. Modulos identicos sao reutilizados; divergencias nao sao sobrescritas
-   a forca. JVM compartilhada exige conferencia antes de qualquer substituicao.
+   a forca. JVM outsourcing fica associada ao seu XML, preservando a JVM global.
 6. Iniciar com o XML escolhido, alinhar a configuracao local do harness e
    verificar boot/driver/datasource antes do deploy e dos testes funcionais.
 
@@ -179,7 +183,7 @@ copia de entradas nao significam aplicacao no servidor nem aceite operacional.
 
 ## Comandos, estrutura e estilo
 
-Interface proposta: -Perfil ainda nao existe. Exemplo na raiz do harness, usando
+Interface implementada: -Perfil seleciona uma entrada v2. Exemplo na raiz do harness, usando
 o caminho privado efetivo da maquina de trabalho:
 
 ```powershell
@@ -201,10 +205,10 @@ em ingles e validacoes antes da escrita. Padrao existente a estender:
 
 ```powershell
 [CmdletBinding()]
-param([Parameter(Mandatory)][string]$Configuracao,[switch]$Aplicar,[switch]$LogSql)
+param([Parameter(Mandatory)][string]$Configuracao,[string]$Perfil,[switch]$Aplicar,[switch]$LogSql,[switch]$SubstituirXml)
 $ErrorActionPreference='Stop'
 Import-Module "$PSScriptRoot/Eap74Preparation.psm1" -Force -DisableNameChecking
-Invoke-EapPreparation -ConfigPath $Configuracao -Apply:$Aplicar -LogSql:$LogSql
+Invoke-EapPreparation -ConfigPath $Configuracao -Profile $Perfil -Apply:$Aplicar -LogSql:$LogSql -ReplaceXml:$SubstituirXml
 ```
 
 ## Verificacao e conclusao
@@ -219,7 +223,7 @@ Conferir cobertura exata dos tokens e XML privado sem imprimir valores.
 Suites de manutencao pelo runner isolado, com novos arquivos adicionados ao Git:
 
 ```powershell
-& ./tests/Invoke-HarnessTests.ps1 -Test Test-Eap74Preparation.ps1,Test-Eap74ModuleLoading.ps1,Test-JbossRuntime.ps1,Test-JbossLegacyLauncher.ps1
+& ./tests/Invoke-HarnessTests.ps1 -Test Test-Eap74Profiles.ps1,Test-Eap74Preparation.ps1,Test-Eap74ProfileRuntime.ps1,Test-JbossRuntime.ps1,Test-JbossLegacyLauncher.ps1
 git diff --check
 ```
 
@@ -233,11 +237,18 @@ Concluir quando os dois conjuntos estiverem coerentes com suas fontes, a
 selecao generica estiver verificada, a alternancia preservar deployments e o
 roteiro de atualizacao estiver pronto. XML valido nao comprova boot, conexao,
 SSO, keystore ou funcoes da aplicacao; registrar evidencias e limites reais.
-Nesta etapa documental nenhum servidor ou arquivo privado e alterado.
+Foram entregues as quatro entradas privadas, preparo.json v2 e os dois guias.
+Os sete arquivos publicados foram conferidos; os 15 originais restantes foram
+preservados por SHA256. Quinze suites passaram, incluindo preparacao PS5.1/7,
+launcher BAT sintetico normal/debug e carregador real de modulos em fixture.
+Mutacao de XML duplicado detectada e fonte restaurada; detalhes em tasks/.
+Nenhum servidor foi iniciado/alterado, nenhum consolidado real foi publicado
+e nenhum dado privado foi versionado. Verificacao funcional permanece posterior.
 
 ## Aprovacao e continuidade
 
 As escolhas de uso foram respondidas e o desenho foi aprovado com pedido de
-implementacao e atualizacao da pasta privada/README/guia. O plano tecnico consta
-em tasks/plan.md. A conferencia detalhada dos recursos pode revelar lacunas;
-elas serao apresentadas com sua origem, sem preencher valores por suposicao.
+implementacao e atualizacao da pasta privada/README/guia, atendido nesta branch.
+O plano e as verificacoes constam em tasks/plan.md e tasks/todo.md. Os guias
+orientam a atualizacao incremental no trabalho, depois da publicacao Git,
+preservando seus caminhos, credenciais, JVM, modulos e XML SIMTR instalados.

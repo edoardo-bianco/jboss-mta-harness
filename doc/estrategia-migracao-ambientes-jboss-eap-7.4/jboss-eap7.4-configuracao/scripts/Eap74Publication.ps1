@@ -57,8 +57,9 @@ function Write-EapAtomicFile {
     } finally { if ([IO.File]::Exists($temporary)) { [IO.File]::Delete($temporary) } }
 }
 function Publish-EapTarget {
-    param($Config,[string]$Source,[string[]]$Modules,[string[]]$ExternalFiles=@())
-    $files=@(('standalone\configuration\'+$Config.standaloneConfig),'bin\standalone.conf.bat')
+    param($Config,[string]$Source,[string[]]$Modules,[string[]]$ExternalFiles=@(),[switch]$ReplaceXml)
+    $xmlRelative='standalone\configuration\'+$Config.standaloneConfig
+    $files=@($xmlRelative,$Config.JvmRelativePath)
     $files+=@($ExternalFiles)
     foreach ($module in $Modules) {
         if (Test-Path -LiteralPath (Join-Path $Config.eapHome $module)) { continue } # Compatibilidade ja conferida; preservar datas.
@@ -72,6 +73,7 @@ function Publish-EapTarget {
             $target=Join-Path $Config.eapHome $relative; $origin=Join-Path $Source $relative
             $hash=(Get-FileHash -LiteralPath $origin -Algorithm SHA256).Hash
             if ([IO.File]::Exists($target) -and (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash -ceq $hash) { continue }
+            if ($Config.schemaVersion -eq 2 -and $relative -eq $xmlRelative -and (Test-Path -LiteralPath $target) -and -not $ReplaceXml) { throw 'XML instalado divergente: preserve os deployments/ajustes e revise antes de usar -Aplicar -SubstituirXml.' }
             if ($relative -in $ExternalFiles -and (Test-Path -LiteralPath $target)) { throw "Arquivo externo existente divergente: $relative. Arquivos preservados." }
             $parent=Split-Path -Parent $target; $missing=@(); $cursor=$parent
             while (-not (Test-Path -LiteralPath $cursor)) { $missing+=$cursor; $cursor=Split-Path -Parent $cursor }
@@ -79,7 +81,7 @@ function Publish-EapTarget {
             $null=[IO.Directory]::CreateDirectory($parent)
             $before=$null; $time=$null
             if ([IO.File]::Exists($target)) { $before=[IO.File]::ReadAllBytes($target); $time=[IO.File]::GetLastWriteTimeUtc($target) }
-            if ($relative -in $ExternalFiles) { Write-EapAtomicFile $target ([IO.File]::ReadAllBytes($origin)) -CreateOnly }
+            if ($relative -in $ExternalFiles -or ($Config.schemaVersion -eq 2 -and $relative -eq $xmlRelative -and -not $ReplaceXml)) { Write-EapAtomicFile $target ([IO.File]::ReadAllBytes($origin)) -CreateOnly }
             else { Write-EapAtomicFile $target ([IO.File]::ReadAllBytes($origin)) }
             $changed.Add([pscustomobject]@{Path=$target;Before=$before;Time=$time;Hash=$hash})
         }
