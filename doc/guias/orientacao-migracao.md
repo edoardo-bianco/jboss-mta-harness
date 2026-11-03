@@ -333,6 +333,14 @@ essa compatibilidade; nao e necessario altera-lo para receber orientacao.
 
 ## Pedidos por etapa
 
+Para indicadores, use a [legenda central](harness-migracao-desenvolvedor.md#ler-os-indicadores-de-andamento)
+e o [acompanhamento](tools/acompanhamento-issues.md). Exemplo: "Explique as issues
+IMPLEMENTADA deste projeto e a verificacao pendente, citando registro e ficha".
+O helper confere fonte/recorte e orienta uma acao: verificar, pedir aceite ou
+conferir alcance/continuidade. Distingue indice antigo de evidencia nao registrada
+e conflito real. O principal executa revisar-resultado para registrar evidencias
+e recalcular; helpers dos tres clientes continuam leitores, sem promover estado.
+
 Cada guia abaixo tem uma secao **Orientacao com o helper**, com mensagem de exemplo
 e resultado esperado. A configuracao, os comandos e as verificacoes ficam no guia
 da etapa. Voce pode entrar diretamente onde parou.

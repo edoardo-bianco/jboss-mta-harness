@@ -14,3 +14,7 @@ Registre objetivo/destino, escopo, limites e restricoes que afetam a migracao. D
 | ID | Issue | Categoria | Ocorrencias | Presenca | Decisao | Andamento | Observacao/referencia |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 <!-- mta:fim -->
+
+<!-- O gerador acrescenta issues:andamento ao final, com legenda compartilhada,
+quantidades, percentuais e IDs. Preserve esse bloco derivado e as notas humanas
+fora dele; atualize as oito colunas acima conforme o trabalho/evidencia real. -->

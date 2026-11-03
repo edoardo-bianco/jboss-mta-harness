@@ -30,6 +30,14 @@ para o agente preencher a partir destes modelos.
 
 ## Informacao em um so lugar
 
+[legenda-andamento.template.md](legenda-andamento.template.md) fornece a ordem e
+as definicoes comuns aos tres resumos gerados. Registro e fonte do Andamento;
+ficha conserva achado/ANTES e acompanhamento por recorte, evidencia e pendencia.
+Plano registra GO/aceite e alcance; tarefas referenciam essas decisoes. Nao criar
+outro status autoritativo na ficha. Veja a [legenda explicada](../guias/harness-migracao-desenvolvedor.md#ler-os-indicadores-de-andamento)
+e o [procedimento](../guias/tools/acompanhamento-issues.md). CONCLUIDA exige todo
+o escopo aplicavel da issue, verificacoes e aceite; recorte aceito nao basta.
+
 | Documento | Informacao que orienta o trabalho |
 | --- | --- |
 | Indice geral | Comparacao entre projetos, contagens/cobertura e links. Totais por categoria sao derivados dos MTA utilizaveis. |

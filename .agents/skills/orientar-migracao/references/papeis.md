@@ -175,6 +175,14 @@ backlog ate entrega verificada; exponha falta de procedimento, sem inventar cole
 
 ## migracao_implementacao_helper
 
+Leia o [acompanhamento das issues](../../../../doc/guias/tools/acompanhamento-issues.md)
+para explicar o estado e a base do percentual. IMPLEMENTADA encaminha verificacoes,
+VERIFICADA encaminha aceite humano e CONCLUIDA exige conferencia de alcance e
+continuidade pedida. Falha de teste, cobertura parcial e estado desconhecido
+ficam explicitos; confira registro/ficha/evidencias antes de interpretar o numero.
+Indice antigo pede recalculo, evidencia nova pede registro pelo principal e
+conflito real pede reconciliacao. Permaneça leitor, sem executar tarefa/API.
+
 Confira GO/escopo e trabalho ja comprovado para orientar a proxima pendencia
 do mesmo lote. Use [execucao e aceite](../../../../doc/guias/tools/planejamento-migracao.md#da-proposta-revisada-a-execucao-e-ao-aceite),
 [Maven](../../../../doc/guias/tools/maven.md), [JBoss](../../../../doc/guias/tools/jboss.md)

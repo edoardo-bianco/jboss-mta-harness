@@ -1,10 +1,10 @@
 # Proposta: resumo do andamento das issues
 
-Data: 30/10/2026. Estado: organizacao aprovada pelo desenvolvedor, com complemento
-de coerencia documental e orientacao; plano tecnico detalhado. Trabalho pausado
-a pedido do desenvolvedor, com consolidacao documental e implementacao nao iniciada.
-Este documento descreve uma evolucao do harness; nao altera o contrato vigente
-nem o andamento de qualquer aplicacao. Plano e acompanhamento em
+Data inicial: 30/10/2026. Retomada solicitada em 03/11/2026: implementacao A1..A13
+concluida na branch harness/resumo-andamento-issues, com verificacao final A14 e
+limites registrados nas tarefas. O contrato executavel foi alinhado nesta branch;
+publicacao, integracao e aceite da funcionalidade permanecem separados.
+Nenhum andamento de aplicacao real foi alterado. Plano e acompanhamento em
 [tasks/plan.md](../../tasks/plan.md) e [tasks/todo.md](../../tasks/todo.md).
 
 ## Objetivo e decisoes confirmadas
@@ -29,7 +29,7 @@ agentes de orientacao coerentes com o processo de acompanhamento. Essa coerencia
 integra o aceite da funcionalidade. O plano tecnico esta em tasks/plan.md;
 nenhum registro real deve ser modificado como parte da implementacao do harness.
 
-## Fontes e comportamento existente
+## Fontes e comportamento anterior (30/10/2026)
 
 O [modelo do registro](../modelos/migracao.template.md) tem oito colunas.
 Decisao, Andamento e Presenca sao campos distintos. A
@@ -255,14 +255,15 @@ Aceite da funcionalidade: os tres resumos concordam com o mesmo registro, cada
 total e rastreavel, lacunas ficam visiveis e o fluxo documental mantem andamento
 e evidencias coerentes. README, guias, modelos, prompts e orientadores devem
 ensinar o mesmo ciclo, e todo documento que publica indicadores inclui sua legenda.
-Nesta etapa foram feitas apenas leitura, especificacao e planejamento;
-nenhum script, modelo executavel ou registro de aplicacao foi alterado.
+Na etapa inicial de 30/10 foram feitas apenas leitura, especificacao e planejamento.
+Na retomada de 03/11, scripts/modelos/instrucoes foram implementados e testados em
+copias isoladas; registros reais continuam preservados. Veja os resultados nas tarefas.
 
 ## Aprovacao e proxima etapa
 
 Organizacao, cobertura parcial e atualizacao aprovadas em 30/10/2026, com o
-complemento documental acima. O plano tecnico detalhado aguarda revisao para
-iniciar a implementacao, sem repetir as escolhas funcionais ja aprovadas.
+complemento documental acima. O plano tecnico foi revisto na retomada de 03/11
+antes de implementar, sem repetir as escolhas funcionais ja aprovadas.
 
 Pausa solicitada em 30/10/2026: consolidar esta especificacao e o plano/tarefas
 na branch harness/resumo-andamento-issues. Na retomada, partir do checkpoint em

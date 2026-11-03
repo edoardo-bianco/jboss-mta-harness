@@ -11,6 +11,25 @@ GREEN pelo runner isolado: IssueProgress, ProjectIndex, ProjectNavigation,
 ProjectIndexSummary, ProjectIndexAvailability e OutputTemplates. Numeros, lacunas,
 IDs e preservacao conferidos no Markdown sintetico; preview visual fica para A14.
 
+A4..A13 implementadas: recalculo em HarnessIssueProgressPublication.ps1 separado
+da descoberta MTA, cadastro/reconciliacao com Context opcional e DashboardPending,
+resumos locais protegidos e filtro de EM ANALISE. Consumidor de consultas aceita
+estados livres e nao exigiu mudanca. Guia de acompanhamento centraliza o procedimento;
+prompts/modelos, contrato, README/guia central e orientador alinhados. Os 18
+adaptadores e o ponteiro Claude consomem a skill comum; nao precisaram de alteracao.
+Helpers permanecem leitores; nenhum subagente foi acionado.
+
+Revisao de testes: mutacao de origem manual/MTA inicialmente sobreviveu, revelando
+assercoes insuficientes; acrescentada conferencia dos membros/origem. Nova execucao
+detectou a mutacao; arquivo restaurado byte a byte. Cobertura adicional de
+percentual ponderado 1/4=25%, escopo reduzido, registro invalido e editor concorrente.
+19 suites da regressao integrada passaram; resultados e limites registrados no to-do.
+
+Preview sintetico Markdown/HTML gerado no TEMP. Host de navegador indisponivel;
+tentativa nativa interrompida pela ferramenta por nao determinar a URL atual com
+seguranca. Nenhuma inspecao visual concluida; conferir no preview do editor do
+desenvolvedor permanece pendente. Ensaio nativo de agentes tambem nao realizado.
+
 ## Resumo do andamento das issues — 30/10/2026
 
 Pedido: apresentar quantidades e percentuais por categoria/andamento no dashboard
@@ -36,7 +55,7 @@ Base local main em 58b117f, checkout limpo. Proposta em branch
 harness/resumo-andamento-issues, worktree separado no TEMP. Preservado o checkout
 operacional; nenhum registro real, prompt, modelo ou script alterado.
 
-### Plano tecnico para revisao
+### Plano tecnico revisto na retomada de 03/11/2026
 
 Uma capacidade: acompanhamento por issue, com calculo comum, publicacao em tres
 destinos e procedimento documental coerente. PowerShell 5.1 e Markdown; sem

@@ -144,7 +144,7 @@ function New-HarnessProjectIndex {
             }
             $progressRows+=$issueRows; $readProjects+=$project.Name
             $manualCount+=$migrationCounts.Manual; $manualAvailable++
-        } catch { $missingProjects+=$project.Name; $localWarnings.Add('Contagem manual/andamento indisponivel: '+$_.Exception.Message) }
+        } catch { $missingProjects+=$project.Name; $localWarnings.Add('Contagem manual indisponivel; andamento indisponivel: '+$_.Exception.Message) }
         $rows+=Get-ProjectSummaryRow $project $mta $index $localWarnings $migrationCounts $progress
         if ($mta) {
             $available++; $issueCount+=@($mta.Issues).Count

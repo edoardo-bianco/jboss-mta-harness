@@ -84,7 +84,7 @@ fichas/anotacoes; Continue conserva o conjunto cumulativo. Fatia parcial retoma
 sem duplicar exame; esgotamento nao inventa trabalho.
 
 Conferir escolhas atuais no registro. Elegibilidade considera categoria,
-presenca, decisao A DEFINIR/ANALISAR AGORA e andamento NAO ANALISADA/ANALISADA.
+presenca, decisao A DEFINIR/ANALISAR AGORA e andamento NAO ANALISADA/EM ANALISE/ANALISADA.
 ADIAR, FORA DO ESCOPO e corretivas em andamento exigem direcionamento humano
 explicito. Issues MANUAL na categoria manual sao elegiveis pelos mesmos estados,
 com registro/fichas/evidencias e sem exigir relatorio MTA. Nao entram nas
@@ -270,8 +270,10 @@ O catalogo pode conter todo MTA; a analise detalha apenas o recorte selecionado.
 
 Exigir ao menos uma issue ANALISAR AGORA escolhida pelo desenvolvedor no registro
 atual. Sem selecao, pedir IDs/decisao no registro; objetivo generico nao autoriza
-triagem global. Planejar NAO ANALISADA/ANALISADA; PLANEJADA direciona a revisao do
-plano, IMPLEMENTADA/VERIFICADA a verificacao do resultado. Reabrir etapa ou outro
+triagem global. Planejar NAO ANALISADA/EM ANALISE/ANALISADA; PLANEJADA direciona a
+revisao do plano, EM IMPLEMENTACAO a pendencia autorizada e IMPLEMENTADA/VERIFICADA
+a verificacao/aceite do resultado. CONCLUIDA exige conferir alcance e continuidade.
+Reabrir etapa ou outro
 estado exige direcionamento humano explicito por ID. Issues DEV-... exigem origem,
 objetivo e evidencias. ProjectIndexPath e referencia informativa quando existente,
 sem substituir MigrationPath ou escolher projeto/issue pela recencia. Dependencia fora
@@ -438,8 +440,9 @@ No DevSquad, pode usar validate/execute/verify/review,
 repassando limites; revisores leem, um escritor por arquivo. Nao usar finalize,
 refine, sprint, board ou cadastro Git; fases internas seguem a sequencia aprovada
 do lote. Se agente ausente, informar.
-Executor altera somente Source conforme GO; condutor atualiza PlanPath/TodoPath
-e andamento/evidencia das issues do lote em MigrationPath quando explicito.
+Executor altera somente Source conforme GO; condutor atualiza PlanPath/TodoPath,
+acompanhamento nas fichas de FichaPaths e andamento/evidencia das issues do lote
+em MigrationPath quando explicito, com publicacao protegida.
 Nao alterar harness, ADRs, memoria, regras MTA ou evidencias ANTES preservadas.
 Nao executar Git mutante, commit/push/merge/PR ou mensagens externas. Lacuna de
 escopo/API/criterio retorna ASK e decisao humana; nao emendar plano sozinho.
@@ -467,13 +470,45 @@ O preparo de implementacao referencia plano, tarefas e fontes correntes, sem
 copias ou hashes persistidos. Executor explicita tarefas, arquivos, GO/dispensas,
 transformacao, comandos, testes e criterios. Ambiguidade relevante exige
 direcionamento antes de escrever. O mesmo preparo gera revisar-resultado,
-sem nova Run Task. Esse prompt somente le plano/tarefas e evidencias pertinentes;
+sem nova Run Task. O principal le plano/tarefas e evidencias pertinentes e registra
+resultados comprovados nos destinos documentais existentes do lote;
 nao trata documentos do preparo como lock de andamento. Solicita logs/exit code do build, testes e
 JaCoCo, Sonar/MTA comparaveis e artefato/ultimo deploy/logs EAP 7.4 quando
 possivel. Deriva roteiro funcional com precondicoes, dados, passos concretos,
 resultado esperado/observado, negativos e regressao; lacunas pedem direcionamento.
-Nao executa ferramentas nem escreve ou concede aceite. revisar-lote permanece
+Nao executa build/testes/analises/deploy nem concede aceite. Publicacao e recalculo
+documentais seguem o procedimento abaixo; helpers/revisores auxiliares continuam
+somente leitores. revisar-lote permanece
 compatibilidade de revisao de proposta, sem trocar seu significado historico.
+
+### Andamento por issue e resumos
+
+Fonte autoritativa: Andamento de migracao.md, por Project/Id. Use os oito estados
+da [legenda comum](../modelos/legenda-andamento.template.md) e o
+[procedimento de acompanhamento](../guias/tools/acompanhamento-issues.md).
+Exame registrado permite EM ANALISE/ANALISADA em etapas com escrita autorizada;
+proposta pronta permite PLANEJADA. Corretiva autorizada inicia EM IMPLEMENTACAO;
+aplicacao no Source local permite IMPLEMENTADA. VERIFICADA exige criterios tecnicos
+aplicaveis atendidos; CONCLUIDA exige tambem aceite humano referenciado e cobertura
+de todo o escopo aplicavel da issue. Recorte parcial, cadastro/ficha existente,
+build verde ou ausencia no MTA nao concluem uma issue. Reabertura preserva aceite
+anterior e registra motivo/alcance. Priorizacao e revisao isolada de ficha nao
+alteram o registro; escolhas humanas e GO permanecem separados do estado.
+
+Ficha conserva achado/ANTES e acompanhamento com resultado, origem/ambiente,
+recorte, evidencia e pendencia; nao duplica status autoritativo. O principal pode
+registrar resultados comprovados e aceite humano ja declarado nos documentos
+do lote durante a revisao. Escrever nao autoriza operacoes externas ou outro lote.
+
+Resumos no registro, indice do projeto e dashboard usam a mesma legenda/calculo,
+incluindo todas as issues registradas da origem/categoria no denominador corrente.
+Quantidade, percentual com duas casas, IDs e lacunas ficam visiveis. Consolidado
+soma quantidades/denominadores; MTA/manual e diagnostico/registro sao separados.
+Estado desconhecido conta como lacuna; fonte invalida nao e zero. Apos escrita
+protegida com Expected, Update-HarnessIssueProgress recebe escopo explicito do
+workspace e recalcula sem selecionar MTA. Publicacao por projeto e dashboard
+sao separadas: falha parcial exige informar resumos pendentes. A Run Task existente
+reconstroi indices apos edicao manual. Helpers nao escrevem nem executam a API.
 
 Build Maven Java 8 com POM alinhado, testes/consumidores e validacao funcional do
 artefato identificado no EAP 7.4 quando possivel e pertinente; ambiente indisponivel

@@ -23,9 +23,16 @@ as excecoes humanas explicitas e seu alcance.
 
 ## 4. Verificacoes
 
+<!-- Relacionar issue/fase, criterio, resultado observado, origem/ambiente,
+evidencia e pendencia. Vincular acompanhamento na ficha; nao manter status
+autoritativo paralelo ao registro. Falha/pendencia impede VERIFICADA. -->
+
 {{Verification}}
 
 ## 5. Revisao e aceite do resultado
+
+<!-- Referenciar a declaracao/alcance na secao 9 do plano. Aceite de recorte nao
+conclui toda a issue; registrar cobertura restante antes de atualizar o registro. -->
 
 {{HumanAcceptance}}
 

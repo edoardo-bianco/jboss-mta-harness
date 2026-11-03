@@ -241,14 +241,19 @@ o texto/bytes lidos de TODOS os destinos alterados (null para ausente). Conflito
 exige releitura/conciliacao; nao sobrescreva edicao concorrente. Nao altere Decisao,
 Andamento, GO ou aceite; declare exame e limites na ficha. Sem acesso a API,
 informe bloqueio e caminhos, sem alegar cadastro nem editar de forma improvisada.
+Use a secao Acompanhamento da corretiva para evidencias novas, recorte e pendencias,
+preservando achado/ANTES. Nesta etapa isolada, o exame da ficha alimenta o
+planejamento/reconciliacao; nao promove o estado do registro automaticamente.
 
 ## 7. Conferir e encaminhar
 
 Confira unicidade, identidade, registro -> ficha -> evidencias e contagem do
-indice do projeto. Atualize o indice geral pelo fluxo Workspace: atualizar indice
-dos projetos, usando escopo/configuracao ja conhecidos; nao reduza o workspace
-artificialmente. Se o escopo nao estiver disponivel, indique a atualizacao derivada
-pendente e a tarefa ao desenvolvedor.
+indice do projeto. Apos a escrita autorizada, use Update-HarnessIssueProgress
+com Context do workspace completo conhecido, conforme
+doc/guias/tools/acompanhamento-issues.md na raiz do harness. Confira
+Synchronized/Warnings, sem selecionar novo MTA ou reduzir o workspace. Cadastro
+aceita esse Context; sem escopo disponivel, informe DashboardPending e indique
+Workspace: atualizar indice dos projetos ao desenvolvedor.
 
 Nao escreva rankings/contextos de priorizacao, base/quota, plano/tarefas de lote,
 codigo da aplicacao ou configuracao da maquina. Cadastro/revisao nao consome quota

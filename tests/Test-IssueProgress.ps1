@@ -15,6 +15,10 @@ $rows+=@(
 )
 $progress=Get-HarnessIssueProgress -Rows $rows
 Assert ($progress.Total -eq 12 -and $progress.Groups.Count -eq 3) 'Origem manual deve permanecer distinta da categoria MTA homonima.'
+$manual=@($progress.Groups | Where-Object { $_.Origin -ceq 'manual' -and $_.Category -ceq 'manual' })[0]
+$mtaManual=@($progress.Groups | Where-Object { $_.Origin -ceq 'MTA' -and $_.Category -ceq 'manual' })[0]
+Assert (@($manual.States | Where-Object State -CEQ IMPLEMENTADA)[0].Ids[0] -ceq 'DEV-1') 'Presenca MANUAL pertence a origem manual, com os membros corretos.'
+Assert (@($mtaManual.States | Where-Object State -CEQ CONCLUIDA)[0].Ids[0] -ceq 'manual-mta') 'Categoria homonima com presenca PRESENTE permanece MTA.'
 $group=@($progress.Groups | Where-Object Category -CEQ mandatory)[0]
 Assert ($group.Total -eq 10 -and $group.States.Count -eq 10) 'Denominador inclui adiadas, fora do escopo, nao reencontradas e estados livres.'
 foreach ($state in $states) {
@@ -25,6 +29,14 @@ Assert ($progress.Deferred -eq 1 -and $progress.OutOfScope -eq 1 -and $progress.
 Assert (@($group.States | Where-Object { -not $_.Known }).Count -eq 2) 'Vazio/desconhecido permanecem lacunas distintas.'
 $three=Get-HarnessIssueProgress -Rows $rows[0..2]
 Assert ($three.Groups[0].States[0].Percent -eq 33.33) 'Percentual arredondado com duas casas.'
+$weighted=@(
+    [pscustomobject]@{Project='a';Id='mesma-regra';Category='mandatory';Presence='PRESENTE';Decision='A DEFINIR';Progress='CONCLUIDA'},
+    [pscustomobject]@{Project='b';Id='mesma-regra';Category='mandatory';Presence='PRESENTE';Decision='A DEFINIR';Progress='NAO ANALISADA'},
+    [pscustomobject]@{Project='b';Id='regra-2';Category='mandatory';Presence='PRESENTE';Decision='A DEFINIR';Progress='NAO ANALISADA'},
+    [pscustomobject]@{Project='b';Id='regra-3';Category='mandatory';Presence='PRESENTE';Decision='A DEFINIR';Progress='NAO ANALISADA'}
+)
+$combined=Get-HarnessIssueProgress -Rows $weighted
+Assert ($combined.Total -eq 4 -and @($combined.Groups[0].States | Where-Object State -CEQ CONCLUIDA)[0].Percent -eq 25) 'Consolidado usa 1/4, nao media de percentuais; mesma regra em projetos distintos conta duas issues.'
 $zero=Get-HarnessIssueProgress -Rows @() -Categories @([pscustomobject]@{Origin='MTA';Category='optional'})
 Assert ($zero.Total -eq 0 -and $null -eq $zero.Groups[0].States[0].Percent) 'Categoria vazia tem zero issues e percentual sem base.'
 $failed=$false; try { Get-HarnessIssueProgress -Rows @($rows[0],$rows[0]) | Out-Null } catch { $failed=$true }

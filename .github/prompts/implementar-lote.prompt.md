@@ -108,9 +108,20 @@ MTA/Sonar/rede/EAP/deploy exigem autorizacao explicita de destino/finalidade.
 Nao sobrescrever baseline ANTES nem executar commit, push, merge, PR ou mensagens.
 
 Executor altera somente Source conforme GO. Condutor registra resultados em
-PlanPath/TodoPath e, se explicito no contexto, andamento/cobertura/evidencias das issues
-do lote em MigrationPath; preserve catalogo e decisoes humanas. Nao editar harness,
+PlanPath/TodoPath, nas fichas identificadas em FichaPaths e, se explicito no contexto,
+andamento/cobertura/evidencias das issues do lote em MigrationPath; preserve catalogo e decisoes humanas. Nao editar harness,
 contexto tecnico, regras, memoria ou documentos paralelos.
+Siga doc/guias/tools/acompanhamento-issues.md na raiz do harness. Registre
+EM IMPLEMENTACAO ao iniciar corretiva autorizada, IMPLEMENTADA apos aplicacao
+local e VERIFICADA somente com criterios tecnicos atendidos. Falha/teste pendente
+impede VERIFICADA. CONCLUIDA exige declaracao humana e todo o escopo aplicavel da
+issue atendido; aceite de fase/recorte nao fecha trabalho restante. Referencie
+aceite da secao 9 do plano nas tarefas/registro. Preserve achado/ANTES e registre
+resultado, origem/ambiente, cobertura e pendencias no acompanhamento da ficha.
+Reabertura preserva aceite anterior e motivo/alcance. Apos escrita protegida com
+Expected, use Update-HarnessIssueProgress com Context do workspace completo
+conhecido; este recalculo documental integra a escrita autorizada e nao executa
+analises. Informe Synchronized/Warnings ou dashboard pendente se faltar escopo.
 Registre comandos reais, resultados e limitacoes, sem marcar pendencias como sucesso.
 Releia os documentos, confira diff contra GO, informe links e indique revisao/aceite
 humano quando ainda nao realizado; preserve aceite valido do mesmo resultado.

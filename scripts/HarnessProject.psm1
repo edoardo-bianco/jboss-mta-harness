@@ -121,6 +121,8 @@ Export-ModuleMember -Function Publish-HarnessProjectFiles,Read-HarnessProjectFil
 Export-ModuleMember -Function Read-HarnessProjectMta,Read-HarnessMtaDirectory
 . (Join-Path $PSScriptRoot 'HarnessProjectDocuments.ps1')
 . (Join-Path $PSScriptRoot 'HarnessIssueProgress.ps1')
+. (Join-Path $PSScriptRoot 'HarnessIssueProgressPublication.ps1')
+Export-ModuleMember -Function Get-HarnessIssueProgressFiles,Update-HarnessIssueProgress
 Export-ModuleMember -Function Get-HarnessIssueProgress,Get-HarnessIssueProgressStates
 Export-ModuleMember -Function Get-HarnessIssueProgressText,Set-HarnessIssueProgressBlock,Format-HarnessIssuePercent
 Export-ModuleMember -Function Get-HarnessIssueProgressCompact,Get-HarnessWorkspaceProgressText

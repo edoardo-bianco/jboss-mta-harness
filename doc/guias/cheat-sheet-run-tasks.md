@@ -45,6 +45,14 @@ Os menus dessas tarefas concentram suas variantes; não há uma tarefa por proje
 
 No workspace, abra `.harness/indices/projetos.md` e siga o link do projeto para `indice.md`. Ele reúne registro, plano, tarefas, fichas, evidências, diagnósticos e logs existentes. Após copiar arquivos ou gerar novas saídas, use **Workspace: atualizar indice dos projetos** para reconstruir os links. Para compartilhar, copie as pastas conforme o [guia](tools/compartilhamento-contextos.md); não há tarefa de importar/exportar ZIP.
 
+## Acompanhamento das issues
+
+Para acompanhar estados/percentuais, abra os indices e o resumo ao final do
+registro. Apos edicao manual use `Workspace: atualizar indice dos projetos`.
+O principal registra evidencias/aceite declarado e recalcula conforme o
+[procedimento de acompanhamento](tools/acompanhamento-issues.md); nao ha tarefa
+adicional. `VERIFICADA` aguarda aceite; `CONCLUIDA` exige todo o escopo aplicavel.
+
 ## Planejamento por sprints
 
 A [MACRO-01](../contratos/planejamento-sprints.md#regras-do-cronograma) amplia a visão por issue para escopo, calendário e capacidade de trabalho. A tarefa seleciona os projetos; o prompt reúne as datas, o prazo, a equipe e as estimativas ainda ausentes. Depois do preenchimento, **Validar e gerar cronograma**, na mesma tarefa, produz JSON e Markdown com tabelas, matriz e Gantt. O [guia](tools/planejamento-sprints.md) concentra o procedimento completo; o [template](../modelos/planejamento-sprints.template.md) orienta a narrativa.

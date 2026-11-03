@@ -330,7 +330,12 @@ a ficha/registro/evidencias; cadastro e auditoria nao aprovam a corretiva.
 
 ## 3. Atualizar e navegar pelos indices
 
-Execute **Workspace: atualizar indice dos projetos** no workspace habitual.
+Apos edicao manual, execute **Workspace: atualizar indice dos projetos** no workspace habitual.
+Apos publicacao documental do principal, use o [recalculo sem selecionar MTA](acompanhamento-issues.md#recalcular-sem-selecionar-outro-mta)
+com Context explicito. Cadastro/reconciliacao aceitam esse contexto para atualizar
+tambem o dashboard; sem ele, DashboardPending informa a pendencia. Os resumos
+locais sao publicados junto do registro. A [legenda central](../harness-migracao-desenvolvedor.md#ler-os-indicadores-de-andamento)
+explica os oito estados; revisar somente a ficha nao altera o Andamento.
 O indice geral .harness/indices/projetos.md mostra:
 
 | Local | Leitura |
@@ -338,6 +343,7 @@ O indice geral .harness/indices/projetos.md mostra:
 | Issues / ocorrencias | MTA: X / Y e Manuais: N / -, na mesma celula. |
 | Categorias | Categorias MTA e manual: N / -. |
 | Totais conhecidos | Totais MTA preservados; manual separado, com ocorrencias -. |
+| Andamento registrado | Quantidades/percentuais por origem/categoria; detalhamento com IDs, cobertura da leitura e legenda. |
 | Projeto sem MTA | MTA indisponivel e contagem manual obtida do registro. |
 | Registro ilegivel | Contagem manual indisponivel e total parcial com cobertura de leitura. |
 
@@ -370,7 +376,7 @@ reavaliar o ranking com a base atual, escolha-a explicitamente.
 Uma ficha existente nao prova exame na nova fatia: o executor precisa reler
 as fontes e registrar o exame efetivamente realizado.
 
-A elegibilidade usa Decisao A DEFINIR/ANALISAR AGORA e Andamento NAO ANALISADA/ANALISADA.
+A elegibilidade usa Decisao A DEFINIR/ANALISAR AGORA e Andamento NAO ANALISADA/EM ANALISE/ANALISADA.
 ADIAR, FORA DO ESCOPO e corretiva ja em andamento nao sao reabertos pelo cadastro.
 Veja [priorizacao por fatias](priorizacao-issues.md).
 

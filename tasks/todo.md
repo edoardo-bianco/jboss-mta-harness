@@ -2,6 +2,10 @@
 
 ## Resumo do andamento das issues — 30/10/2026
 
+Retomada em 03/11/2026: implementacao A1..A13 concluida na branch original.
+Revisao tecnica e verificacao integrada em A14; publicacao/integracao continuam
+etapas posteriores. Checkpoint de 30/10 abaixo e historico.
+
 - [x] Conferir modelos, contadores, registro e permissoes de escrita dos prompts.
 - [x] Confirmar estados novos, criterio de fechamento, denominador e registro das verificacoes.
 - [x] Criar proposta em doc/engineering-harness/ numa branch/worktree isolados.
@@ -15,16 +19,16 @@
 Documento: [resumo do andamento](../doc/engineering-harness/proposta-resumo-andamento-issues.md).
 Branch: harness/resumo-andamento-issues, base main 58b117f.
 Worktree: C:/Users/edoar/AppData/Local/Temp/harness-resumo-andamento-20261030.
-Escopo desta entrega: especificacao aprovada e planejamento detalhado; sem
-alterar o runtime ou documentos reais da migracao. Dez links locais existentes;
+Escopo do checkpoint de 30/10: especificacao aprovada e planejamento detalhado; sem
+alterar o runtime ou documentos reais da migracao naquela etapa. Dez links locais existentes;
 git diff --check e verificacao do arquivo novo sem erros. Main operacional segue
 limpa. Suites nao executadas: esta entrega contem somente documentacao de engenharia.
 
 Pausa pedida pelo desenvolvedor em 30/10/2026. Consolidacao em commit local na
 branch acima; manter o worktree. Na retomada, seguir o checkpoint em tasks/plan.md.
-As tarefas A1..A14 permanecem pendentes; pausa/consolidacao nao iniciam implementacao.
+Naquela pausa, A1..A14 permaneceram pendentes; a implementacao foi retomada em 03/11.
 
-As tarefas abaixo aguardam a revisao do plano. Nao sao tarefas de corretiva da
+As tarefas abaixo seguem o plano revisado em 03/11. Nao sao tarefas de corretiva da
 aplicacao. Arquivos sao os pontos previstos; ajustes tecnicos devem preservar
 escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacional.
 
@@ -51,7 +55,7 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   Verificar: runner -Test Test-ProjectIndexSummary.ps1,Test-ProjectIndexAvailability.ps1;
   conferencia do Markdown sintetico nos tres destinos (checkpoint apos A3).
 
-- [ ] A4 — Recalculo apos publicacao documental/cadastro (depende de A2, A3).
+- [x] A4 — Recalculo apos publicacao documental/cadastro (depende de A2, A3).
   Aceite: API comum atualiza resumos sem selecionar MTA novo; cadastro conserva
   andamento existente; falha do dashboard e concorrencia ficam explicitas.
   Arquivos: HarnessIssueProgress.ps1, HarnessProject.psm1,
@@ -59,14 +63,14 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   Verificar: runner -Test Test-IssueProgress.ps1,Test-ProjectIndexManual.ps1,
   com alteracao de estado, repeticao, falha parcial e MTA externo preservado.
 
-- [ ] A5 — Reconciliacao e publicacao protegida (depende de A4).
+- [x] A5 — Reconciliacao e publicacao protegida (depende de A4).
   Aceite: resumo corresponde ao registro realmente publicado; conflitos nao
   apagam contribuicoes, nao promovem estado e nao deixam sucesso falso.
   Arquivos: HarnessReconciliationPublish.ps1, manter-migracao.prompt.md,
   Test-MigrationRegister.ps1 e Test-ReconciliationSources.ps1.
   Verificar: runner -Test Test-MigrationRegister.ps1,Test-ReconciliationSources.ps1.
 
-- [ ] A6 — Consumidores dos estados novos (depende de A1).
+- [x] A6 — Consumidores dos estados novos (depende de A1).
   Aceite: EM ANALISE pode retomar o exame no fluxo pertinente; IMPLEMENTADA,
   VERIFICADA e CONCLUIDA nao sao reabertas pelo filtro; quota/examinadas preservadas.
   Arquivos: HarnessPrioritization.psm1, HarnessIssueQueryView.ps1 se necessario,
@@ -74,7 +78,7 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   Verificar: runner -Test Test-PrioritizationProgress.ps1,Test-IssueQueryPlanning.ps1;
   conferir cadastro/planejamento/reconciliacao juntos (checkpoint apos A6).
 
-- [ ] A7 — Exame, proposta e acompanhamento na ficha (depende de A2, A6).
+- [x] A7 — Exame, proposta e acompanhamento na ficha (depende de A2, A6).
   Aceite: ficha conserva achado/ANTES e registra acompanhamento com evidencias;
   planejamento atualiza somente estados sustentados e preserva escolhas humanas.
   Arquivos: ficha-issue.template.md, planejar-lotes.prompt.md,
@@ -82,7 +86,7 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   Verificar: runner -Test Test-IssuePlanning.ps1,Test-OutputTemplates.ps1;
   revisar caso de ficha apenas cadastrada, analisada e recorte parcial.
 
-- [ ] A8 — Implementacao e revisao documental do resultado (depende de A4, A7).
+- [x] A8 — Implementacao e revisao documental do resultado (depende de A4, A7).
   Aceite: principal registra evidencias/ficha/tarefas/registro e recalcula;
   VERIFICADA nao e aceite; CONCLUIDA exige declaracao e alcance completo aplicavel.
   Arquivos: implementar-lote.prompt.md, revisar-resultado.prompt.md,
@@ -90,21 +94,21 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   Verificar: runner -Test Test-Implementation.ps1,Test-OutputTemplates.ps1;
   revisar testes pendentes/falhos, aguardando integracao, aceite parcial e aceite vigente.
 
-- [ ] A9 — Contrato e instrucoes executaveis (depende de A5, A8).
+- [x] A9 — Contrato e instrucoes executaveis (depende de A5, A8).
   Aceite: remover contradicao da revisao somente leitura para o principal;
   manter helpers/consultas/revisao de sprints leitores e operacoes externas separadas.
   Arquivos: fluxo-migracao.md, ADR-0009, AGENTS.md e .github/copilot-instructions.md.
   Verificar: leitura cruzada com prompts, fontes dos estados e destinos reais;
   runner -Test Test-CurrentPromptLinks.ps1 para referencias geradas pertinentes.
 
-- [ ] A10 — README e guia do desenvolvedor (depende de A9).
+- [x] A10 — README e guia do desenvolvedor (depende de A9).
   Aceite: tabela explicativa dos oito estados, formula e exemplo conferivel,
   atualizacao ficha/registro/resumos e passos de verificacao/aceite.
   Arquivos: README.md, harness-migracao-desenvolvedor.md e cheat-sheet-run-tasks.md.
   Verificar: leitura ponta a ponta e links; nao descrever funcionalidade sem
   a implementacao correspondente e nao criar uma Run Task adicional.
 
-- [ ] A11 — Guias operacionais e catalogo de modelos (depende de A9, A10).
+- [x] A11 — Guias operacionais e catalogo de modelos (depende de A9, A10).
   Aceite: procedimentos remetem a legenda central, preservam priorizacao sem
   escrita do registro e explicam atualizacao manual, lacunas e cobertura parcial.
   Arquivos: planejamento-migracao.md, issues-e-evidencias.md,
@@ -112,7 +116,7 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   Verificar: busca/leitura delimitada das regras de estados, escrita e
   acompanhamento; conferir links e preservar contexto de historicos.
 
-- [ ] A12 — Skill e papeis do orientador (depende de A9, A10).
+- [x] A12 — Skill e papeis do orientador (depende de A9, A10).
   Aceite: explicar os indicadores com fonte, distinguir resumo antigo, evidencia
   ainda nao registrada e conflito; encaminhar o passo do estado sem executar.
   Arquivos: .agents/skills/orientar-migracao/SKILL.md,
@@ -120,7 +124,7 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   Verificar: cenarios de IMPLEMENTADA, VERIFICADA, CONCLUIDA, status desconhecido,
   falha de teste, cobertura parcial e indice antigo; habilidades/permissoes preservadas.
 
-- [ ] A13 — Adaptadores dos clientes (depende de A12).
+- [x] A13 — Adaptadores dos clientes (depende de A12).
   Aceite: Codex, Copilot e Claude Code consomem a mesma orientacao; nenhuma
   instrucao propria contradiz o acompanhamento ou amplia permissoes.
   Arquivos previstos se houver lacuna: .codex/agents/migracao_helper.toml,
@@ -137,6 +141,46 @@ escopo aprovado. Testes sempre pelo runner isolado, nunca no workspace operacion
   preview Markdown dos exemplos sinteticos e revisao completa do diff.
   Registrar resultados em tasks/ e atualizar estado da especificacao;
   integracao/publicacao permanece uma etapa explicita posterior.
+
+### Verificacao final da retomada — 03/11/2026
+
+Implementacao e revisao tecnica concluidas. A14 permanece parcialmente pendente
+somente para conferencia visual no editor e ensaio nativo dos agentes; esses
+resultados nao sao inferidos de testes textuais. Publicacao/PR/integracao e aceite
+humano da funcionalidade sao etapas posteriores.
+
+PASS em Windows PowerShell 5.1 pelo runner isolado, 19 suites na versao final:
+Test-IssueProgress, Test-IssueProgressRefresh, Test-IssueProgressLifecycle,
+Test-ProjectIndex, Test-ProjectNavigation, Test-ProjectIndexSummary,
+Test-ProjectIndexAvailability, Test-ProjectIndexManual, Test-MigrationRegister,
+Test-ReconciliationSources, Test-PrioritizationProgress, Test-ManualPrioritization,
+Test-IssuePlanning, Test-OutputTemplates, Test-Implementation, Test-CurrentPromptLinks,
+Test-ProjectPublication, Test-ProjectRecovery e Test-ClaudeAdapter.
+
+Cobertura: oito estados, origem manual/MTA homonima, 1/4=25% no consolidado,
+lacunas/zero/duplicatas, IDs, preservacao de notas/decisoes, repeticao, cadastro,
+reconciliacao, quota, escopo global, falha parcial e editor concorrente. Mutacao
+de origem inicialmente sobreviveu; teste reforcado, mutacao detectada e codigo
+restaurado byte a byte antes da regressao. Nenhum teste foi desabilitado.
+
+Test-IssueQueryPlanning falhou em "Truncamento silencioso ou ausente" na entrega
+e tambem em copia isolada da main limpa 58b117f. Falha antecede esta mudanca,
+ja registrada no historico; nao foi corrigida neste escopo. Consultas nao receberam
+alteracao de runtime; seu filtro de Progress ja aceita texto livre.
+
+Revisao documental: links locais/ancoras, parser PowerShell, diff e cenarios de
+cadastro, exame parcial, implementacao, teste falho/pendente, aceite parcial,
+reabertura e indice antigo. Adaptadores Codex/Copilot/Claude mantem a fonte comum
+e os limites de leitor, sem alterar ferramentas/permissoes dos helpers.
+
+Preview sintetico gerado em
+C:/Users/edoar/AppData/Local/Temp/harness-progress-preview-20261103/preview.html.
+Inspecao visual nao concluida: host do navegador indisponivel e Computer Use
+interrompido por nao determinar a URL atual com seguranca. Nao houve novas acoes
+de UI apos a interrupcao. Conferir tabelas/details e cliques no preview Markdown
+do editor do desenvolvedor; ensaio dos prompts nos clientes continua pendente.
+Main operacional e documentos reais da migracao preservados. Entrega em commits
+locais na branch harness/resumo-andamento-issues; sem push/PR/integracao nesta retomada.
 
 ## Execucao manual e fases do lote — 28/10/2026
 

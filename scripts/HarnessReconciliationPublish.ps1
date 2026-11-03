@@ -1,6 +1,6 @@
 function Complete-HarnessReconciliation {
     param($Project,[Parameter(Mandatory=$true)][string]$Conclusion,
-        [Collections.IDictionary]$Resolutions=@{},[string[]]$Pending=@())
+        [Collections.IDictionary]$Resolutions=@{},[string[]]$Pending=@(),$Context)
     if ([string]::IsNullOrWhiteSpace($Conclusion)) { throw 'Informe a conclusao baseada no exame das fontes.' }
     $folder=Get-ReconciliationReviewFolder $Project
     $preflight=Import-Clixml -LiteralPath (Join-Path $folder 'base.clixml')
@@ -156,6 +156,8 @@ function Complete-HarnessReconciliation {
             })
             $writes['indice.md']=Set-ProjectManagedBlock $writes['indice.md'] 'priorizacao' ($scopeLinks -join [Environment]::NewLine)
         }
+        $summaries=Get-HarnessIssueProgressFiles $Project $writes['migracao.md'] $writes['indice.md']
+        foreach ($key in $summaries.Keys) { $writes[$key]=$summaries[$key] }
         foreach ($key in @($writes.Keys)) {
             $value=$writes[$key]
             if ($null -ne $value -and $value -isnot [byte[]]) { $value=(New-Object Text.UTF8Encoding($false)).GetBytes([string]$value); $writes[$key]=$value }
@@ -170,6 +172,11 @@ function Complete-HarnessReconciliation {
         $removed=Remove-ReconciliationReview $Project -Expected $draft
         $diagnostics=@()
         if (-not $removed) { $diagnostics+='Resultado publicado, mas a revisao foi editada durante a publicacao. Rascunho preservado; confira as diferencas antes de reiniciar.' }
-        [pscustomobject]@{Project=$Project.Name;State=$state;ReconciledPath=$resultPath;NeedsReview=$reviewNeeded;ChangedFiles=@($writes.Keys);Pending=$Pending;Diagnostics=$diagnostics}
+        $result=[pscustomobject]@{Project=$Project.Name;State=$state;ReconciledPath=$resultPath;NeedsReview=$reviewNeeded;ChangedFiles=@($writes.Keys);Pending=$Pending;Diagnostics=$diagnostics;DashboardPending=$true}
     } finally { Exit-ReconciliationAccess $access }
+    if ($Context) {
+        try { $refresh=Update-HarnessIssueProgress -Context $Context -RequiredProject $Project; $result.DashboardPending=-not $refresh.Synchronized; $result.Diagnostics+=@($refresh.Warnings) }
+        catch { $result.Diagnostics+=('Reconciliacao publicada; dashboard pendente: '+$_.Exception.Message) }
+    } else { $result.Diagnostics+='Dashboard pendente: recalcular com Context do workspace explicito.' }
+    $result
 }

@@ -8,6 +8,14 @@ tools: ['agent', 'read/readFile', 'search/listDirectory', 'search/fileSearch', '
 
 ## Trabalho solicitado
 
+Ao reconciliar andamento, siga doc/guias/tools/acompanhamento-issues.md na raiz
+do harness. Compare evidencias, recorte e aceite; CONCLUIDA da reconciliacao nao
+conclui issues. Estado desconhecido exige esclarecimento; preserve decisoes e
+aceites anteriores. A API recalcula os resumos locais sobre o registro publicado.
+Passe Context do workspace completo conhecido a Complete-HarnessReconciliation
+ou use Update-HarnessIssueProgress depois; confira DashboardPending/Diagnostics.
+Sem escopo global, declare resumo pendente. Esse recalculo nao seleciona outro MTA.
+
 Leia os templates vinculados em **Modelos de saida obrigatorios** antes de
 redigir os documentos afetados. Use o modelo correspondente a registro, plano,
 tarefas, ficha ou evidencias preservando o conteudo e as decisoes existentes.
