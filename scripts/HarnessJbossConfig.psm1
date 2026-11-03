@@ -30,4 +30,28 @@ function Get-HarnessJbossDebugConfigurations {
         [pscustomobject][ordered]@{name="JBoss $id - attach Java"; type='java'; request='attach'; hostName='127.0.0.1'; port=$settings.debugPort}
     }
 }
-Export-ModuleMember -Function Get-HarnessJbossSettings, Get-HarnessJbossDebugConfigurations
+function Get-HarnessJbossJvmFileName {
+    param([string]$StandaloneConfig)
+    if ($StandaloneConfig -cnotmatch '^[A-Za-z0-9][A-Za-z0-9_.-]*\.xml$') { throw 'Nome XML invalido para associacao JVM.' }
+    'eap74-preparo-'+[IO.Path]::GetFileNameWithoutExtension($StandaloneConfig)+'.conf.bat'
+}
+
+function Resolve-HarnessJbossJvmConfig {
+    param([string]$EapHome,[string]$StandaloneConfig,[string]$ExpectedJdk)
+    $profilePath=Join-Path $EapHome ('bin/'+(Get-HarnessJbossJvmFileName $StandaloneConfig))
+    if (Test-Path -LiteralPath $profilePath) {
+        if (-not [IO.File]::Exists($profilePath)) { throw 'Arquivo JVM do XML indisponivel.' }
+        $content=[IO.File]::ReadAllText($profilePath)
+        $markers=[regex]::Matches($content,'(?m)^rem EAP74 PREPARO CONFIG=([^\r\n]+)\r?$')
+        if ($markers.Count -ne 1 -or $markers[0].Groups[1].Value -ine $StandaloneConfig) { throw 'Associacao JVM/XML invalida. Confira o preparo instalado.' }
+        if ($ExpectedJdk) {
+            $blocks=[regex]::Matches($content,'(?ms)^rem BEGIN EAP74 PREPARO JVM\r?\n.*?^rem END EAP74 PREPARO')
+            if ($blocks.Count -ne 1) { throw 'Bloco JVM associado ao XML ausente ou repetido.' }
+            $jdk=[regex]::Matches($blocks[0].Value,'(?m)^set "JAVA_HOME=([^"\r\n]+)"\r?$')
+            if ($jdk.Count -ne 1 -or [IO.Path]::GetFullPath($jdk[0].Groups[1].Value) -ine [IO.Path]::GetFullPath($ExpectedJdk)) { throw 'JDK da JVM por XML difere da configuracao do servidor.' }
+        }
+        return $profilePath
+    }
+    Join-Path $EapHome 'bin/standalone.conf.bat'
+}
+Export-ModuleMember -Function Get-HarnessJbossSettings, Get-HarnessJbossDebugConfigurations, Get-HarnessJbossJvmFileName, Resolve-HarnessJbossJvmConfig

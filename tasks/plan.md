@@ -1,5 +1,81 @@
 # Plano do agente: evolucao do harness
 
+## Perfis de preparo EAP 7.4 — 03/11/2026
+
+Nova evolucao em harness/preparo-perfis, derivada de origin/main e845707 (PR #53),
+no worktree C:/Users/edoar/AppData/Local/Temp/harness-preparo-perfis-20261103.
+[Especificacao implementada](../doc/engineering-harness/proposta-perfis-preparo-eap74.md).
+Confirmados: um perfil ativo por vez, drivers/modulos atuais compartilhados e
+deployments separados. Proposta preserva o scanner/pasta SIMTR existentes e
+acrescenta deployments-outsourcing, alem de template/valores/JVM separados.
+
+O desenvolvedor confirmou SIMTR em uso e caminhos/configuracoes ajustados no
+trabalho: atualizacao incremental, sem copiar a pasta inteira por cima, sem
+reaplicar SIMTR ou descartar ajustes locais. Alternancia precisa preservar
+deployments registrados pela CLI; selecao XML por -c e JVM coerente.
+Especificacao aprovada pelo desenvolvedor, com pedido explicito de implementar
+scripts, entradas privadas e instrucoes em README.md/GUIA-SIMTR-LOCAL.md.
+
+### Plano tecnico autorizado
+
+Sequencia P1 -> P2 -> P3; P4 usa o contrato de P1/P2; P5/P6 consolidam a entrega.
+Implementacao sequencial no worktree; testes pelo runner isolado.
+
+- P1: resolver profiles v2 para a configuracao efetiva existente, com validacao
+  de selecao, campos, XMLs e saidas nao sobrepostas. Preservar v1. Teste RED/GREEN
+  de dois perfis neutros e rejeicoes antes de publicacao.
+- P2: gerar JVM por XML em bin/eap74-preparo-<nome-sem-xml>.conf.bat para v2;
+  nao modificar a JVM global v1. Associacao generica/validada em
+  HarnessJbossConfig.psm1. Inicio compara opcoes JVM instaladas e usa
+  STANDALONE_CONF; nenhum XML e regenerado ao alternar. Apply v2 recusa XML
+  existente divergente, salvo -SubstituirXml explicito apos revisao humana.
+- P3: inicio normal/debug do harness resolve a mesma associacao por XML, com
+  fallback global para instalacoes existentes e sem novas tarefas por projeto.
+  Verificar launcher real sintetico, argumentos, ambiente e preservacao.
+- P4: conferir recursos das fontes privadas, criar template outsourcing 7.4,
+  valores reais/ficticios e JVM separados, reutilizando manifesto/JARs. Validar
+  renderizacao/procedencia sem exibir segredos. Nenhum servidor real alterado.
+- P5: atualizar preparo.json privado e guias com transicao incremental no
+  trabalho, preservando seus caminhos/ajustes; modelos e guia publico genericos.
+- P6: regressao apropriada, revisao de diff/segredos, mutacao de verificacao,
+  conferencia de preservacao dos arquivos privados e checkpoint final.
+
+Riscos centrais: global JVM sobrescrita (evitada com arquivo por XML), perda de
+deployments CLI (inicio somente leitura; substituicao de XML opt-in), confusao de
+perfis (validacoes/identidade), valores de outra maquina (roteiro incremental).
+Geracao/aplicacao no servidor real e testes funcionais permanecem separados.
+
+### Entrega e verificacoes — 03/11/2026
+
+P1..P6 implementadas e revisadas. HTTP local confirmado pelo desenvolvedor,
+mantendo a base SIMTR; nenhum listener HTTPS acrescentado. Profiles sao dados
+do preparo v2, sem nomes de projetos nos scripts; v1 continua compativel.
+Inicio normal/debug seleciona JVM por XML e preserva ambiente do processo pai.
+Adocao do SIMTR existente usa o XML/JVM instalados sem reaplicar o template.
+
+Pasta privada atualizada com quatro entradas outsourcing novas, preparo.json v2,
+README.md e GUIA-SIMTR-LOCAL.md. Conferidos os sete arquivos entregues e os 15
+originais restantes por SHA256; templates/valores/JVM SIMTR, manifesto e JARs
+preservados. As 49 propriedades e 67 tokens possuem origem conferida em memoria;
+recursos compartilhados e hashes dos dois JARs validados. Nenhum valor privado
+foi levado ao Git. Consolidado anterior, instalacao EAP e checkout operacional
+permanecem sem alteracoes desta evolucao.
+
+Quinze suites pertinentes passaram pelo runner isolado; detalhes no to-do.
+Profiles e Preparation incluem PowerShell 5.1/7; runtime usa launcher BAT
+sintetico, e ModuleLoading usa JBoss Modules/JDK reais em fixture temporaria,
+sem iniciar servidor. RED/GREEN demonstrados para selecao, JVM/alternancia e
+runtime; mutacao que retirou a recusa de XML duplicado foi detectada, com fonte
+restaurada byte a byte. Revisao de seis documentos: 37 links locais e 21 blocos
+PowerShell conferidos; JSON, cercas Markdown e git diff --check sem erros.
+
+Entrega local na branch harness/preparo-perfis. Publicacao/integracao Git e
+aplicacao no trabalho sao posteriores. Roteiro orienta copiar somente novos
+arquivos, preservar caminhos/valores/JVM locais, gerar/aplicar outsourcing com
+servidor parado, alinhar standaloneConfig e alternar sem regenerar XML.
+Boot real, datasource, SSO, keystore e testes funcionais outsourcing nao foram
+executados; arquivos validos e testes sinteticos nao constituem aceite funcional.
+
 ## Retomada da implementacao — 03/11/2026
 
 Pedido de continuidade aplicado ao checkpoint da branch harness/resumo-andamento-issues,

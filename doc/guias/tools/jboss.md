@@ -100,7 +100,12 @@ JSON e execute **Servidor: iniciar JBoss**, que passa o nome ao launcher com
 `-c`. Essa troca de XML nao exige regenerar o workspace.
 
 O perfil espera os sockets padrao HTTP 8080 e gerenciamento 9990 mais offset.
-Preserva e executa o `standalone.conf.bat` instalado. Datasources, drivers e demais
+Preserva e executa o `standalone.conf.bat` instalado ou a JVM por XML criada pelo
+preparo v2 (`bin/eap74-preparo-<nome-do-XML-sem-extensao>.conf.bat`), tanto no
+inicio normal quanto no debug. A associacao e validada, sem alterar o arquivo
+global. As tarefas leem `standaloneConfig` do workspace; nao escolhem profiles
+do preparo.json. Veja [perfis de preparo](../../estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md#11-alternar-perfis-na-mesma-instalacao).
+Datasources, drivers e demais
 requisitos da aplicacao continuam sendo configurados pelo desenvolvedor no JBoss.
 Overrides locais do launcher que mudem Java, portas ou debug devem corresponder
 ao perfil; falha de identidade nao sera tratada como sucesso.

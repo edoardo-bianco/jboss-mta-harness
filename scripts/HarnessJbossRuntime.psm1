@@ -135,6 +135,7 @@ function Start-JbossProcess {
             [Environment]::SetEnvironmentVariable($name,$null,'Process')
         }
         $env:JAVA_HOME=$Server.Jdk; $env:JBOSS_HOME=$Server.Home; $env:JBOSS_BASE_DIR=$Server.Base; $env:NOPAUSE='true'
+        $env:STANDALONE_CONF=Resolve-HarnessJbossJvmConfig $Server.Home $Server.Settings.standaloneConfig $Server.Jdk
         $arguments='""'+(Join-Path $Server.Home 'bin/standalone.bat')+'" "-Djboss.server.base.dir='+$Server.Base+'" -c '+$Server.Settings.standaloneConfig+' -b 127.0.0.1 -bmanagement 127.0.0.1 -Djboss.socket.binding.port-offset='+$Server.Settings.portOffset
         if ($DebugMode) {
             # O parser Java aceita somente a porta numerica apos --debug.
@@ -144,7 +145,8 @@ function Start-JbossProcess {
                 # O launcher antigo redefine DEBUG_PORT ao interpretar --debug.
                 # Aplicar o bind depois desse parser, preservando a conf instalada.
                 $debugConf=Join-Path $Run 'standalone-debug.conf.bat'
-                $lines=@('@echo off', 'if exist "%JBOSS_HOME%\bin\standalone.conf.bat" call "%JBOSS_HOME%\bin\standalone.conf.bat" %*',
+                $confLeaf=Split-Path -Leaf $env:STANDALONE_CONF
+                $lines=@('@echo off', ('if exist "%JBOSS_HOME%\bin\'+$confLeaf+'" call "%JBOSS_HOME%\bin\'+$confLeaf+'" %*'),
                     ('set "DEBUG_PORT=127.0.0.1:'+$Server.Settings.debugPort+'"'))
                 [IO.File]::WriteAllText($debugConf,($lines -join "`r`n"),[Text.Encoding]::ASCII)
                 $env:STANDALONE_CONF=$debugConf

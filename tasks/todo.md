@@ -1,5 +1,47 @@
 # To-do do agente: evolucao do harness
 
+## Perfis de preparo EAP 7.4 — 03/11/2026
+
+- [x] Separar a evolucao em branch/worktree derivados da principal atualizada no remoto.
+- [x] Conferir fontes privadas e preparo/inicio/deploy sem divulgar valores.
+- [x] Confirmar alternancia, drivers/modulos atuais e deployments separados.
+- [x] Incorporar preservacao dos ajustes e do SIMTR ja usado na maquina de trabalho.
+- [x] Registrar [especificacao](../doc/engineering-harness/proposta-perfis-preparo-eap74.md), origens e criterios de verificacao.
+- [x] Revisao humana do desenho e pedido explicito de implementacao.
+- [x] P1 — Selecao de perfis: parser/wrappers e teste isolado; v1 preservado e erros sem escrita. RED por parametro ausente; GREEN Profiles e Preparation (inclui PS5.1/7).
+- [x] P2 — JVM por XML e publicacao protegida: aplicacao/alternancia preserva JVM global e deployments; XML divergente exige -Aplicar -SubstituirXml deliberado.
+- [x] P3 — Inicio normal/debug: JVM associada, XML, JDWP local e ambiente verificados com launcher BAT sintetico.
+- [x] P4 — Entradas outsourcing privadas: quatro arquivos novos, 49 propriedades/67 tokens conferidos, recursos comuns e modulos preservados; HTTP local confirmado.
+- [x] P5 — Preparo e guias: preparo.json privado v2, README/GUIA privados, modelo e guias publicos com atualizacao incremental no trabalho.
+- [x] P6 — Revisao/regressao: 15 suites passaram, mutacao detectada, sete arquivos privados entregues e 15 originais restantes preservados por SHA256.
+
+Suites PASS via tests/Invoke-HarnessTests.ps1, em copia temporaria:
+Test-Eap74Profiles, Test-Eap74Preparation, Test-Eap74ProfileRuntime,
+Test-Eap74ModuleLoading, Test-JbossRuntime, Test-JbossLegacyLauncher,
+Test-JbossRestart, Test-JbossServerContext, Test-JbossVersions, Test-Jboss,
+Test-JbossAllServers, Test-JbossWorkspace, Test-JbossArtifacts, Test-JbossAddUser
+e Test-JbossLogs (nomes com sufixo .ps1). As duas primeiras incluem PS5.1/7.
+ModuleLoading passou com HARNESS_TEST_EAP74_HOME e HARNESS_TEST_JDK8_HOME
+apontando para ferramentas locais, usadas somente em fixture isolada.
+
+RED/GREEN: parametro de perfil ausente, sobrescrita da JVM global, selecao da JVM
+no runtime e conflito de reaplicacao v1. A mutacao que desabilitou a recusa de
+XML duplicado foi detectada pela suite Profiles; fonte restaurada byte a byte.
+Regressao posterior aprovada. Seis documentos conferidos: 37 links locais,
+21 blocos PowerShell, exemplos JSON, cercas Markdown e git diff --check.
+Revisao confirmou ausencia de dependencias SIMTR/outsourcing nos scripts.
+
+As 49 propriedades outsourcing possuem fontes identificadas: 38 comuns iguais,
+oito do 7.4 atual e tres especificas do XML local 7.1. O template conserva os
+recursos 7.4 migrados, ajusta categorias de log/scanner e retira o max-header-size
+especifico do SIMTR, ausente no inventario outsourcing; FILE local e HTTP mantidos.
+Entradas atuais SIMTR, manifesto e JARs nao foram alterados. Nenhum segredo no Git.
+
+Entrega local em harness/preparo-perfis; sem push/integracao ou operacao no EAP.
+Boot, conexao, SSO, keystore e comportamento funcional outsourcing permanecem
+para verificacao na maquina de trabalho. Preservar seus ajustes ao seguir o guia;
+os testes nao comprovam equivalencia com valores posteriores daquela maquina.
+
 ## Resumo do andamento das issues — 30/10/2026
 
 Retomada em 03/11/2026: implementacao A1..A13 concluida na branch original.
