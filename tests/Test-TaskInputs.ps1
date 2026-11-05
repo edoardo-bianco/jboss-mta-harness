@@ -4,8 +4,8 @@ $root = Split-Path -Parent $PSScriptRoot
 function Assert($condition, $message) { if (-not $condition) { throw $message } }
 $tasks = Get-Content -LiteralPath (Join-Path $root '.vscode/tasks.json') -Raw | ConvertFrom-Json
 $labels = @($tasks.tasks | ForEach-Object { $_.label })
-Assert ($labels.Count -eq 27 -and @($labels | Sort-Object -Unique).Count -eq 27) 'Manter 27 tarefas distintas, incluindo criar ou revisar issue.'
-$serverLabels=@('Servidor: iniciar JBoss','Servidor: reiniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss')
+Assert ($labels.Count -eq 28 -and @($labels | Sort-Object -Unique).Count -eq 28) 'Manter 28 tarefas distintas, incluindo administrar deployments.'
+$serverLabels=@('Servidor: iniciar JBoss','Servidor: reiniciar JBoss','Servidor: parar JBoss','Servidor: consultar estado JBoss','Servidor: criar usuario JBoss','Servidor: administrar deployments JBoss')
 foreach ($label in $serverLabels) {
     $task=@($tasks.tasks | Where-Object label -eq $label)
     Assert ($task.Count -eq 1 -and $task[0].args -contains '${workspaceFolder}/scripts/gerenciar-jboss.ps1') 'Falta tarefa de servidor JBoss.'
@@ -118,14 +118,14 @@ $sprintArguments=@($sprints[0].args | ForEach-Object { $_.Replace('${workspaceFo
 $output='q' | & powershell.exe @sprintArguments 2>&1 | Out-String
 Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada') -and @(Get-ChildItem -LiteralPath (Join-Path $fixture '.harness') -Filter 'contexto.json' -Recurse -File).Count -eq 0) 'Cancelamento da tarefa de sprints criou contexto ou nao chegou ao menu.'
 Write-Output 'PASS: entrada real da tarefa de sprints cancela antes de criar contexto.'
-foreach ($serverTask in @($logTask[0],@($tasks.tasks | Where-Object label -eq 'Servidor: reiniciar JBoss')[0])) {
+foreach ($serverTask in @($logTask[0],@($tasks.tasks | Where-Object label -eq 'Servidor: reiniciar JBoss')[0],@($tasks.tasks | Where-Object label -eq 'Servidor: administrar deployments JBoss')[0])) {
     $serverArguments=@($serverTask.args | ForEach-Object { $_.Replace('${workspaceFolder}',$fixture) })
     $serverArguments+=@('-ConfigPath',$configPath)
     $output='q' | & powershell.exe @serverArguments 2>&1 | Out-String
     Assert ($LASTEXITCODE -eq 1 -and $output.Contains('Selecao cancelada')) 'Cancelar tarefa de logs/restart nao encerrou no menu.'
     Assert (-not (Test-Path (Join-Path $fixture '.harness/servidores'))) 'Cancelar logs/restart nao pode operar servidor.'
 }
-Write-Output 'PASS: tarefas reais de logs/restart cancelam antes de qualquer operacao de servidor.'
+Write-Output 'PASS: tarefas reais de logs/restart/deployments cancelam antes de qualquer operacao de servidor.'
 
 $issueTask=@($tasks.tasks | Where-Object label -eq 'Planejamento: criar ou revisar issue')
 Assert ($issueTask.Count -eq 1 -and $issueTask[0].args -contains '${workspaceFolder}/scripts/preparar-issue.ps1' -and $issueTask[0].args -contains '${execPath}') 'Falta tarefa unica de criar/revisar issue.'

@@ -226,6 +226,7 @@ Elas substituem a antiga tarefa **Aplicacao: gerenciar JBoss**:
 | Servidor: acompanhar logs | EAP ou Todos; acompanha boot/deploy no server.log, Ctrl+C encerra a leitura. |
 | Servidor: parar JBoss | EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
 | Servidor: consultar estado JBoss | EAP 7.0/7.1 (eap71), EAP 7.4 ou Todos. |
+| Servidor: administrar deployments JBoss | EAP individual; consulta, undeploy de todos/um ou sair. Se parado, oferece inicio admin-only. |
 | Servidor: criar usuario JBoss | EAP 7.0/7.1/7.4; assistente oficial solicita tipo, nome e senha. Nao exige servidor ativo. |
 | Aplicacao: deploy no JBoss | Workspace, EAP 7.0/7.1/7.4, aplicacao e WAR/EAR descoberto ou caminho manual. |
 
@@ -245,7 +246,49 @@ resultado e um resumo final; falha de configuracao ou operacao de um servidor
 nao impede tentar o outro. Se qualquer um falhar, a tarefa termina com codigo 1,
 sem desfazer os sucessos. EAP nao configurado aparece como falha, sem ser omitido.
 Enter/q continua cancelando a selecao; Todos exige escolher a opcao 3.
-Criar usuario e deploy continuam exigindo um EAP individual.
+Criar usuario, deploy e administrar deployments exigem um EAP individual.
+
+### Administrar deployments sem iniciar as aplicacoes
+
+Execute **Terminal > Run Task > Servidor: administrar deployments JBoss**.
+
+1. Escolha o JBoss legado (7.0/7.1) ou o EAP 7.4 configurado.
+2. Se estiver parado, escolha **1. Iniciar somente administracao (sem aplicacoes)**
+   ou **0. Sair**. O inicio usa o XML/JVM configurados e confirma `ADMIN_ONLY`.
+   Se ja estiver ativo, a tarefa utiliza o modo atual, sem parar/reiniciar aplicacoes.
+3. Confira o modo, a URL da console administrativa e a saida de `deployment-info`.
+4. Escolha **1. Undeploy de todas as aplicacoes listadas**, **2. Escolher uma
+   aplicacao** (selecao numerica), ou **0. Sair**. Enter/q tambem sai. Lista vazia
+   encerra sem solicitar remocao. A escolha de undeploy executa a remocao.
+
+Tambem pode abrir a URL exibida (`http://127.0.0.1:<porta>/console`) e administrar
+pelo navegador com o usuario de gerenciamento existente. Admin-only disponibiliza
+as interfaces administrativas sem iniciar servicos de runtime/aplicacoes.
+As funcoes da console que dependem desses servicos nao ficam disponiveis nesse modo.
+Referencias oficiais: [EAP 7.4](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.4/html/configuration_guide/starting_and_stopping_jboss_eap)
+e [EAP 7.1](https://docs.redhat.com/en/documentation/red_hat_jboss_enterprise_application_platform/7.1/html/configuration_guide/starting_and_stopping_jboss_eap).
+O launcher usa `--start-mode=admin-only` em 7.1/7.4 e `--admin-only` em 7.0.
+
+**Sair encerra apenas a tarefa:** o JBoss continua no modo atual, inclusive
+admin-only, permitindo continuar pela console. Para iniciar as aplicacoes
+restantes depois, use **Servidor: reiniciar JBoss > normal/debug**; para encerrar
+o gerenciamento, use **Servidor: parar JBoss**. Start normal sobre admin-only
+informa a diferenca de modo; deploy pelo harness exige modo `NORMAL`.
+
+O undeploy remove o registro/conteudo gerenciado pelo servidor; nao apaga o
+WAR/EAR de origem. Arquivos na pasta do deployment scanner devem ser administrados
+tambem nessa origem, pois podem ser implantados novamente pelo scanner ao iniciar
+normalmente. A tarefa consulta os deployments do XML selecionado, inclusive os
+implantados fora do harness; nao depende de projeto Maven/workspace.
+Remove somente os nomes listados/escolhidos, revalida identidade/lista e confirma
+cada remocao. Falha interrompe a sequencia e informa os nomes ja removidos em
+`.harness/servidores/<eap>/ultima-operacao.json`; nao ha rollback automatico.
+Nomes com caracteres fora de letras ASCII, numeros, espacos, ponto, hifen e
+sublinhado continuam visiveis, mas devem ser administrados pela console.
+
+Entrada equivalente: `scripts/gerenciar-jboss.ps1 -Action Deployments -Eap eap74`.
+Nao e necessario regenerar o workspace para a tarefa aparecer; atualize os
+arquivos do harness e, se preciso, recarregue a janela do VS Code.
 
 ### Testar o controle do servidor sem deploy
 

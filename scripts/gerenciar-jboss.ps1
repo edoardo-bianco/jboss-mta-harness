@@ -2,7 +2,7 @@
 [CmdletBinding()]
 param([string]$ConfigPath,[string]$WorkspacePath,[string]$Target,[switch]$SelectTarget,
     [ValidateSet('eap71','eap74','all')][string]$Eap,
-    [ValidateSet('Status','Start','StartDebug','Deploy','Stop','AddUser','Restart','RestartDebug')][string]$Action,
+    [ValidateSet('Status','Start','StartDebug','Deploy','Deployments','Stop','AddUser','Restart','RestartDebug')][string]$Action,
     [string]$ArtifactPath,[string]$DeploymentName,[switch]$SelectStartMode,[switch]$SelectRestartMode)
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
@@ -20,9 +20,9 @@ try {
         $Action=switch ($choice) {'1' {$operation} '2' {$operation+'Debug'} default {throw 'Selecao cancelada.'}}
     }
     if (-not $Action) {
-        Write-Host '1. Estado | 2. Start | 3. Start com debug | 4. Deploy | 5. Stop | 6. Criar usuario | 7. Restart | 8. Restart com debug'
+        Write-Host '1. Estado | 2. Start | 3. Start com debug | 4. Deploy | 5. Stop | 6. Criar usuario | 7. Restart | 8. Restart com debug | 9. Administrar deployments'
         $choice=Read-Host 'Acao (Enter/q cancela)'
-        $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Stop'} '6' {'AddUser'} '7' {'Restart'} '8' {'RestartDebug'} default {throw 'Selecao cancelada.'}}
+        $Action=switch ($choice) {'1' {'Status'} '2' {'Start'} '3' {'StartDebug'} '4' {'Deploy'} '5' {'Stop'} '6' {'AddUser'} '7' {'Restart'} '8' {'RestartDebug'} '9' {'Deployments'} default {throw 'Selecao cancelada.'}}
     }
     $serverAction=$Action -in @('Status','Start','StartDebug','Stop','Restart','RestartDebug')
     if (-not $Eap) {
@@ -72,6 +72,11 @@ try {
     $server=Get-HarnessJbossServer $context $Eap
     Write-Host "Servidor: $Eap | EAP detectado: $($server.Version) | Home: $($server.Home) | Config: $($server.Settings.standaloneConfig)"
     Write-Host "HTTP: $($server.HttpPort) | Gerenciamento: $($server.ManagementPort) | Debug: 127.0.0.1:$($server.Settings.debugPort)"
+    if ($Action -eq 'Deployments') {
+        $result=Invoke-HarnessJbossDeploymentMenu $context $server
+        if ($result.Status -eq 'FAILED') { exit 1 }
+        exit 0
+    }
     if ($Action -eq 'AddUser') {
         Write-Host 'Assistente oficial: a = Management User (gerenciamento/console); b = Application User.'
         Write-Host 'Informe nome e senha no assistente. O servidor pode estar parado.'

@@ -1,5 +1,22 @@
 # To-do do agente: evolucao do harness
 
+## Administrar deployments do JBoss — 05/11/2026
+
+- [x] Identificar evolucao, conferir estado limpo e criar branch derivada da main.
+- [x] Incorporar administracao sem iniciar aplicacoes na mesma Run Task.
+- [x] Teste RED: consulta ainda ausente e launcher sem flag admin-only.
+- [x] Implementar consulta/undeploy e inicio administrativo com recursos existentes.
+- [x] Expor tarefa unica e documentar uso/retorno ao modo normal e console.
+- [x] Validar 14 suites em copia temporaria, revisar diff e detectar mutacao na confirmacao de remocao.
+
+PASS: Test-JbossDeployments, Test-JbossAdminOnly, Test-JbossRuntime, Test-Jboss,
+Test-TaskInputs, Test-JbossAllServers, Test-JbossRestart, Test-JbossLegacyLauncher,
+Test-Eap74ProfileRuntime, Test-JbossServerContext, Test-JbossWorkspace,
+Test-JbossVersions, Test-JbossAddUser e Test-JbossLogs.
+Runner: tests/Invoke-HarnessTests.ps1; fixtures temporarias removidas. CLI/JBoss
+simulados; nenhum servidor real iniciado e nenhuma aplicacao real removida.
+
+
 ## Perfis de preparo EAP 7.4 — 03/11/2026
 
 - [x] Separar a evolucao em branch/worktree derivados da principal atualizada no remoto.

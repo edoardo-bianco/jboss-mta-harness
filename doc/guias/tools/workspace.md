@@ -548,6 +548,7 @@ Referencia de consulta; para escolher a operacao e a ordem, use o
 | [Servidor: iniciar JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
 | [Servidor: parar JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
 | [Servidor: consultar estado JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (sem selecao de aplicacao) |
+| [Servidor: administrar deployments JBoss](jboss.md#administrar-deployments-sem-iniciar-as-aplicacoes) | `gerenciar-jboss.ps1 -Action Deployments` (consulta/undeploy; inicio admin-only opcional) |
 | [Servidor: criar usuario JBoss](jboss.md#console-administrativa-e-usuario-de-gerenciamento) | `gerenciar-jboss.ps1 -Action AddUser` (assistente oficial com JDK 8, sem selecao de aplicacao) |
 | [Aplicacao: deploy no JBoss](jboss.md#uso) | `gerenciar-jboss.ps1` (com selecao de aplicacao) |
 | [Aplicacao: preparar implementacao do lote](planejamento-migracao.md#preparar-implementacao-do-lote) | `preparar-implementacao.ps1` |
