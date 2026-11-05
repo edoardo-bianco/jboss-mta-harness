@@ -52,6 +52,16 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "clear": false }
     },
     {
+      "label": "Servidor: administrar deployments JBoss",
+      "detail": "Consulte deployment-info, remova todas/uma aplicacao ou saia; se parado, permite iniciar somente administracao, sem carregar aplicacoes.",
+      "type": "process",
+      "command": "${env:SystemRoot}/System32/WindowsPowerShell/v1.0/powershell.exe",
+      "args": ["-NoProfile", "-File", "${workspaceFolder}/scripts/gerenciar-jboss.ps1", "-Action", "Deployments"],
+      "problemMatcher": [],
+      "runOptions": { "instanceLimit": 1 },
+      "presentation": { "reveal": "always", "focus": true, "panel": "dedicated", "clear": false }
+    },
+    {
       "label": "Servidor: criar usuario JBoss",
       "detail": "Escolha EAP 7.1/7.4; assistente oficial solicita tipo Management/Application, nome e senha usando o JDK 8 configurado.",
       "type": "process",

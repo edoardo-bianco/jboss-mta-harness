@@ -1,5 +1,31 @@
 # To-do do agente: evolucao do harness
 
+## Administrar deployments do JBoss — 05/11/2026
+
+- [x] Identificar evolucao, conferir estado limpo e criar branch derivada da main.
+- [x] Incorporar administracao sem iniciar aplicacoes na mesma Run Task.
+- [x] Teste RED: consulta ainda ausente e launcher sem flag admin-only.
+- [x] Implementar consulta/undeploy e inicio administrativo com recursos existentes.
+- [x] Expor tarefa unica e documentar uso/retorno ao modo normal e console.
+- [x] Validar 14 suites em copia temporaria, revisar diff e detectar mutacao na confirmacao de remocao.
+
+PASS: Test-JbossDeployments, Test-JbossAdminOnly, Test-JbossRuntime, Test-Jboss,
+Test-TaskInputs, Test-JbossAllServers, Test-JbossRestart, Test-JbossLegacyLauncher,
+Test-Eap74ProfileRuntime, Test-JbossServerContext, Test-JbossWorkspace,
+Test-JbossVersions, Test-JbossAddUser e Test-JbossLogs.
+Runner: tests/Invoke-HarnessTests.ps1; fixtures temporarias removidas. CLI/JBoss
+simulados; nenhum servidor real iniciado e nenhuma aplicacao real removida.
+
+- [x] Auditar skill/helpers e catalogo: nova tarefa ja listada; faltavam restart, logs e criar/revisar issue.
+- [x] Alinhar orientacao comum, papeis de preparo/implementacao e entrada no README.
+- [x] Completar Markdown/HTML com as 28 tarefas e conferir links/adaptadores.
+
+Conferencia PASS: catalogos com os mesmos 28 nomes de tasks.json, sem faltas,
+extras ou duplicacoes; cinco colunas por linha HTML; 147 destinos de links locais;
+Test-ClaudeAdapter pelo runner isolado; git diff --check. Nenhum runtime alterado
+neste complemento documental.
+
+
 ## Perfis de preparo EAP 7.4 — 03/11/2026
 
 - [x] Separar a evolucao em branch/worktree derivados da principal atualizada no remoto.

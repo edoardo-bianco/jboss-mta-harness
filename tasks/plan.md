@@ -1,5 +1,50 @@
 # Plano do agente: evolucao do harness
 
+## Administrar deployments do JBoss — 05/11/2026
+
+Pedido autorizado: uma Run Task de servidor que consulta deployment-info no EAP
+escolhido e oferece undeploy de todos os deployments listados, de um escolhido,
+ou sair. Complemento: permitir iniciar somente o gerenciamento (admin-only),
+sem iniciar as aplicacoes, na mesma tarefa. Branch harness/gerenciar-deployments-jboss,
+derivada da main limpa em 4ba3c877.
+
+Reutilizar gerenciar-jboss.ps1, configuracao/identidade/CLI/lock do servidor e
+ultima-operacao.json. Nao exigir projeto/workspace. Se parado, oferecer start
+admin-only; se ativo, preservar modo/processo. Informar URL da console e modo.
+Sair deixa o servidor como esta. Para voltar ao normal, usar o restart existente.
+Undeploy usa os nomes consultados, sem wildcard que inclua novos deployments;
+revalidar identidade e nomes, conferir remocao e registrar falha parcial.
+
+Verificar menus, vazio/cancelamento, escolha individual/todos, falhas/concorrencia,
+modo administrativo, argumentos por versao e regressao de start/deploy/restart
+com fixtures e runner isolado. Nenhuma aplicacao real sera removida no ensaio.
+Atualizar catalogo de Run Tasks e guia de uso, incluindo limites do admin-only.
+
+Implementado: `Servidor: administrar deployments JBoss`, acao `Deployments`,
+com inicio `StartAdminOnly` opcional no menu e modo/URL da console visiveis.
+Start normal e deploy reconhecem o modo administrativo para nao declarar
+aplicacoes em execucao. A tarefa preserva servidor ativo, XML/JVM selecionados
+e arquivos de origem; nomes nao suportados pela CLI orientados para a console.
+Guia explica scanner e retorno por restart normal/debug.
+
+Verificacao: 14 suites PASS pelo runner isolado (lista no to-do), entrada real
+do script com CLI simulada, launcher BAT ficticio para flags 7.0/7.1/7.4,
+cancelamentos, lock, identidade, lista alterada, remocao parcial e confirmacao.
+Mutacao da condicao de confirmacao foi detectada em copia temporaria separada.
+Diff conferido; nenhum servidor instalado foi acionado. Validacao funcional na
+instalacao do desenvolvedor ainda nao realizada, sem alegar teste real de boot.
+
+Complemento solicitado: alinhar a skill orientar-migracao e os papeis comuns
+dos helpers com a administracao JBoss, preservando orientacao sem execucao.
+Conferir catalogos Markdown/HTML contra tasks.json. A auditoria encontrou tres
+entradas faltantes (restart, logs e criar/revisar issue), alem da contagem antiga.
+Completar as 28 tarefas, atualizar data/README e validar links/adaptadores dos
+tres clientes. Perfis continuam apontando para a mesma skill, sem regras duplicadas.
+Concluido: catalogos com exatamente os 28 nomes de tasks.json e cinco colunas
+por linha HTML; 147 destinos locais validos; Test-ClaudeAdapter PASS em copia
+temporaria; diff sem erros. Complemento somente documental, sem mudanca de runtime.
+
+
 ## Perfis de preparo EAP 7.4 — 03/11/2026
 
 Nova evolucao em harness/preparo-perfis, derivada de origin/main e845707 (PR #53),

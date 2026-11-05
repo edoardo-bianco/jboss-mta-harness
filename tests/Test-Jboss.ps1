@@ -13,7 +13,8 @@ $context=[pscustomobject]@{Root=$area; Active=[pscustomobject]@{name='app';label
 $module=Get-Module HarnessJboss
 & $module {
     $script:deployed=@{}; $script:unmanaged=@{}; $script:failDeploy=$false; $script:writeBlocked=$null; $script:commands=@()
-    function script:Get-HarnessJbossStatus { param($Server) [pscustomobject]@{State='RUNNING';Identity='MATCHED'} }
+    $script:runningMode='NORMAL'
+    function script:Get-HarnessJbossStatus { param($Server) [pscustomobject]@{State='RUNNING';Identity='MATCHED';RunningMode=$script:runningMode} }
     function script:Get-JbossDeployment { param($Server,$Name)
         if ($script:unmanaged.ContainsKey($Name)) { throw 'Deployment existente nao e um unico arquivo gerenciado.' }
         if ($script:deployed.ContainsKey($Name)) { return $script:deployed[$Name] }
@@ -53,6 +54,11 @@ $first=Invoke-HarnessJbossDeploy $context $server $v1 'app.war'
 Assert ($first.Status -eq 'SUCCEEDED' -and -not $first.Replaced) ('Primeiro deploy falhou: '+$first.Error)
 Assert ((& $module { $script:writeBlocked }) -eq $true) 'Artefato deve ficar protegido contra escrita durante o envio.'
 Assert ((Read-LastDeploy).Sha256 -eq (Get-FileHash $v1).Hash) 'Resultado corrente nao registrou o primeiro deploy.'
+
+& $module { $script:runningMode='ADMIN_ONLY'; $script:commands=@() }
+$admin=Invoke-HarnessJbossDeploy $context $server $v2 'app.war'
+Assert ($admin.Status -eq 'FAILED' -and @(& $module {$script:commands}).Count -eq 0) 'Deploy em admin-only nao deve enviar artefato e depois alegar falha de runtime.'
+& $module { $script:runningMode='NORMAL' }
 
 $second=Invoke-HarnessJbossDeploy $context $server $v2 'app.war'
 Assert ($second.Status -eq 'SUCCEEDED' -and $second.Replaced -and $second.ReplacedSha1 -eq $v1Sha1) 'Segundo deploy deve substituir o WAR implantado.'

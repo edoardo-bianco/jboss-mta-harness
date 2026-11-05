@@ -5,6 +5,9 @@ A skill define leitura, escolha da proxima etapa e limites de retomada.
 Guias concentram procedimentos. Todos respondem no chat, sem executar tarefas
 ou gravar documentos. As tres consultas MCP de leitura seguem a skill comum
 e o guia por etapa; modelos e configuracao pessoal permanecem inalterados.
+Para perguntas sobre funcionalidades, consulte o
+[catalogo de Run Tasks](../../../../doc/guias/cheat-sheet-run-tasks.md) e o guia
+da operacao; nao apresente backlog como ferramenta entregue.
 
 Esses limites pertencem aos helpers. Quando consultados pelo `devsquad` ou pelo
 agente principal durante a execucao de um prompt, devolvem achados/fontes/lacunas;
@@ -85,6 +88,12 @@ nao reconstitui fichas, decisoes ou cobertura de priorizacao apagadas.
 Para migracao da configuracao JBoss, use o [guia de migracao para EAP 7.4](../../../../doc/guias/tools/migracao-configuracao-jboss.md):
 inventario, par de versoes e fontes Red Hat antes do ensaio. A automacao JBS do
 catalogo continua proposta; controlar start/deploy nao comprova configuracao migrada.
+Para administrar deployments sem iniciar as aplicacoes, oriente
+**Servidor: administrar deployments JBoss** pelo
+[procedimento administrativo](../../../../doc/guias/tools/jboss.md#administrar-deployments-sem-iniciar-as-aplicacoes).
+Se parado, a tarefa oferece admin-only; se ativo, usa o modo atual. URL da console,
+consulta, undeploy de todos/um e sair estao na mesma tarefa, sem projeto/MTA.
+Sair mantem o servidor; para iniciar as aplicacoes depois, oriente restart normal/debug.
 Para template ja revisado para 7.4, consulte o
 [roteiro manual de preparo](../../../../doc/estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md).
 Oriente uma etapa por vez: pasta privada e preparo.json, modulos Maven ou JAR
@@ -188,6 +197,13 @@ do mesmo lote. Use [execucao e aceite](../../../../doc/guias/tools/planejamento-
 [Maven](../../../../doc/guias/tools/maven.md), [JBoss](../../../../doc/guias/tools/jboss.md)
 e [Sonar](../../../../doc/guias/tools/sonar.md). Falta de GO impede recomendar
 corretivas, mas permite explicar o procedimento; GO nao muda seu papel de leitor.
+
+Para consulta/undeploy e administracao sem runtime, use a tarefa
+**Servidor: administrar deployments JBoss** e o
+[guia](../../../../doc/guias/tools/jboss.md#administrar-deployments-sem-iniciar-as-aplicacoes).
+Distinga NORMAL de ADMIN_ONLY: gerenciamento ativo nao comprova deploy funcional.
+Confira o resultado informado pelo desenvolvedor; falha parcial preserva a lista
+de remocoes confirmadas. O helper nao inicia servidor nem executa undeploy.
 
 Para erro Sonar, use o [diagnostico por etapa](../../../../doc/guias/tools/sonar.md#envio-concluido-e-falha-na-coleta-local).
 Uma falha TLS antecede a resposta HTTP; scanner com exit 0 pode ter enviado o

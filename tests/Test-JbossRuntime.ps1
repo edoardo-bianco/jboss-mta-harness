@@ -47,6 +47,7 @@ Assert $rejected 'Outcome failed aceito.'
             'name=product-version' {$script:productVersion;break}
             'java.version' {'1.8.0_504';break}
             'name=server-state' {'running';break}
+            'name=running-mode' {'NORMAL';break}
             default {throw "Consulta inesperada: $Command"}
         }
     }

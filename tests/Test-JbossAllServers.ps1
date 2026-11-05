@@ -33,10 +33,17 @@ $module=Get-Module HarnessJboss
 & $module {
     param($FailEap)
     $script:failEap=$FailEap
+    $script:deployments=@('app.war')
+    function script:Invoke-JbossCli($Server,$Command) {
+        if ($Command -eq 'deployment-info') { return 'NAME RUNTIME-NAME ENABLED STATUS' }
+        if ($Command -eq ':read-children-names(child-type=deployment)') { return ('{"outcome" => "success", "result" => '+(ConvertTo-Json -InputObject @($script:deployments) -Compress)+'}') }
+        if ($Command -eq 'undeploy "app.war"') { $script:deployments=@(); return '' }
+        throw "Comando inesperado: $Command"
+    }
     function script:Get-HarnessJbossStatus {
         param($Server)
         if ($Server.Eap -eq $script:failEap) { throw "Falha simulada em $($Server.Eap)" }
-        [pscustomobject]@{State='RUNNING';Identity='MATCHED';Debug=$false}
+        [pscustomobject]@{State='RUNNING';Identity='MATCHED';Debug=$false;RunningMode='NORMAL'}
     }
     function script:Start-HarnessJboss {
         param($Server,$Run,[switch]$DebugMode)
@@ -114,11 +121,15 @@ foreach ($action in @('Status','Start','StartDebug','Stop')) {
     $result=Invoke-Entry -Arguments @('-Action',$action) -Answers @('q')
     Assert ($result.ExitCode -eq 1 -and $result.Receipts.Count -eq 0 -and $result.Output.Contains('Selecao cancelada')) 'Cancelar deve encerrar sem operacao.'
 }
-foreach ($action in @('AddUser','Deploy')) {
+foreach ($action in @('AddUser','Deploy','Deployments')) {
     $result=Invoke-Entry -Arguments @('-Eap','all','-Action',$action)
     Assert ($result.ExitCode -eq 1 -and $result.Receipts.Count -eq 0 -and $result.Output.Contains('Todos so se aplica')) 'Todos deve recusar usuario/deploy antes de qualquer interacao.'
     $result=Invoke-Entry -Arguments @('-Action',$action) -Answers @('3')
     Assert ($result.ExitCode -eq 1 -and -not $result.Output.Contains('3. Todos')) 'Menu nao deve oferecer Todos para usuario/deploy.'
 }
+$result=Invoke-Entry -Arguments @('-Action','Deployments','-Eap','eap74') -Answers @('0')
+Assert ($result.ExitCode -eq 0 -and $result.Receipts.Count -eq 0 -and $result.Output.Contains('deployment-info:') -and $result.Output.Contains('/console')) 'Entrada real de administracao deve consultar e sair sem alterar servidor.'
+$result=Invoke-Entry -Arguments @() -Answers @('9','2','2','1')
+Assert ($result.ExitCode -eq 0 -and $result.Receipts.Count -eq 1 -and $result.Receipts[0].Action -eq 'Undeploy' -and $result.Receipts[0].Removed[0] -eq 'app.war') 'Menu geral deve chegar ao undeploy individual sem pedir projeto.'
 Assert (-not (Test-Path (Join-Path $area '.harness/projetos'))) 'Operacoes de servidor criaram registro de aplicacao.'
 Write-Output 'PASS: Todos via CLI/menu, modos, recibos individuais, falha parcial, configuracao invalida, cancelamento e selecao individual; runtime simulado.'

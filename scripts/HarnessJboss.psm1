@@ -55,7 +55,7 @@ function Invoke-HarnessJbossDeploy {
         $result.ResultPath=Join-Path $project.Folder $relative
         Set-HarnessProjectOperation $project $operation 'RUNNING'
         $current=Get-HarnessJbossStatus $Server
-        if ($current.State -ne 'RUNNING' -or $current.Identity -ne 'MATCHED') { throw 'Deploy exige servidor running com identidade confirmada. Use start explicitamente.' }
+        if ($current.State -ne 'RUNNING' -or $current.Identity -ne 'MATCHED' -or $current.RunningMode -ne 'NORMAL') { throw 'Deploy exige servidor running em modo NORMAL com identidade confirmada. Use start/restart explicitamente.' }
         $ArtifactPath=Resolve-HarnessPath $ArtifactPath $Context.Root
         $result.ArtifactSource=$ArtifactPath
         $result.Git=Get-HarnessGitState $Context
@@ -72,7 +72,7 @@ function Invoke-HarnessJbossDeploy {
             $result.Replaced=$true
         }
         $current=Get-HarnessJbossStatus $Server
-        if ($current.State -ne 'RUNNING' -or $current.Identity -ne 'MATCHED') { throw 'Servidor mudou antes do deploy.' }
+        if ($current.State -ne 'RUNNING' -or $current.Identity -ne 'MATCHED' -or $current.RunningMode -ne 'NORMAL') { throw 'Servidor mudou antes do deploy.' }
         # A CLI Windows antiga reconhece C:\ como raiz, mas trata C:/ como relativo.
         $command='deploy "'+$ArtifactPath+'" --name='+$DeploymentName+' --runtime-name='+$DeploymentName
         if ($result.Replaced) { $command+=' --force' }
@@ -94,8 +94,104 @@ function Invoke-HarnessJbossDeploy {
     return [pscustomobject]$result
 }
 
+function Get-JbossDeploymentNames {
+    param($Server)
+    $reply=Invoke-JbossCli $Server ':read-children-names(child-type=deployment)'
+    $match=[regex]::Match($reply,'"result"\s*=>\s*(\[(?:\s|"(?:\\.|[^"\\])*"|,)*\])')
+    if ($reply -notmatch '"outcome"\s*=>\s*"success"' -or -not $match.Success) { throw 'Resposta CLI invalida ao listar deployments.' }
+    # Apenas o array DMR de strings e JSON compativel; nao interpretar a tabela.
+    $parsed=$match.Groups[1].Value | ConvertFrom-Json
+    $names=@()
+    if ($null -ne $parsed) { $names=@($parsed) }
+    foreach ($name in $names) { if ($name -isnot [string] -or -not $name) { throw 'Nome de deployment invalido na resposta CLI.' } }
+    $names
+}
+
+function Get-HarnessJbossDeployments {
+    param($Server)
+    $current=Get-HarnessJbossStatus $Server
+    if ($current.State -ne 'RUNNING' -or $current.Identity -ne 'MATCHED') { throw 'Consulta exige gerenciamento ativo com identidade confirmada.' }
+    $info=Invoke-JbossCli $Server 'deployment-info'
+    [pscustomobject]@{Info=$info;Names=@(Get-JbossDeploymentNames $Server)}
+}
+
+function Invoke-HarnessJbossUndeploy {
+    param($Server,[string[]]$Names)
+    $result=[ordered]@{Action='Undeploy';Scope='Server';Eap=$Server.Eap;Home=$Server.Home;Base=$Server.Base;
+        StandaloneConfig=$Server.Settings.standaloneConfig;Status='FAILED';Requested=@($Names);Removed=@();Error=$null;
+        StartedAtUtc=[DateTime]::UtcNow.ToString('o');FinishedAtUtc=$null;ResultPath=(Join-Path $Server.State 'ultima-operacao.json')}
+    $lock=$null
+    try {
+        if (-not $Names.Count) { throw 'Escolha ao menos um deployment listado.' }
+        foreach ($name in $Names) {
+            # Nome literal: impedir opcoes, expressoes CLI, caminhos e wildcard.
+            if ($name -cnotmatch '^[A-Za-z0-9][A-Za-z0-9_. -]*$' -or $name.Contains(' --')) { throw "Nome de deployment nao suportado para undeploy: $name" }
+        }
+        $null=[IO.Directory]::CreateDirectory($Server.State)
+        try { $lock=[IO.File]::Open((Join-Path $Server.State 'operation.lock'),'OpenOrCreate','ReadWrite','None') } catch { throw 'Outra operacao JBoss esta em andamento.' }
+        $view=Get-HarnessJbossDeployments $Server
+        foreach ($name in $Names) { if ($view.Names -cnotcontains $name) { throw 'A lista de deployments mudou. Consulte novamente antes de remover.' } }
+        foreach ($name in $Names) {
+            $current=Get-HarnessJbossStatus $Server
+            if ($current.State -ne 'RUNNING' -or $current.Identity -ne 'MATCHED') { throw 'Servidor mudou antes do undeploy.' }
+            $null=Invoke-JbossCli $Server ('undeploy "'+$name+'"')
+            if (@(Get-JbossDeploymentNames $Server) -ccontains $name) { throw "Undeploy enviado, mas remocao nao confirmada: $name" }
+            $result.Removed+=@($name)
+        }
+        $result.Status='SUCCEEDED'
+    } catch { $result.Error=$_.Exception.Message }
+    finally {
+        $result.FinishedAtUtc=[DateTime]::UtcNow.ToString('o')
+        if ($lock) { try { Write-HarnessJson $result.ResultPath $result } finally { $lock.Dispose() } }
+    }
+    [pscustomobject]$result
+}
+
+function Invoke-HarnessJbossDeploymentMenu {
+    param($Context,$Server)
+    $cancelled=[pscustomobject]@{Status='CANCELLED'}
+    $current=Get-HarnessJbossStatus $Server
+    if ($current.State -eq 'STOPPED') {
+        Write-Host 'Servidor parado. 1. Iniciar somente administracao (sem aplicacoes) | 0. Sair'
+        do {
+            $choice=Read-Host 'Acao (Enter/q sai)'
+            if ($choice -in @('','q','0')) { return $cancelled }
+        } while ($choice -ne '1')
+        $started=Invoke-HarnessJbossOperation $Context $Server 'StartAdminOnly'
+        if ($started.Status -ne 'SUCCEEDED') { throw $started.Error }
+        $current=$started.Observed
+    }
+    if ($current.State -ne 'RUNNING' -or $current.Identity -ne 'MATCHED') { throw 'Gerenciamento indisponivel; confira estado e identidade do servidor.' }
+    Write-Host "Modo: $($current.RunningMode) | Console: http://127.0.0.1:$($Server.ManagementPort)/console"
+    Write-Host 'Sair encerra somente a tarefa. O servidor permanece no modo atual.'
+    $view=Get-HarnessJbossDeployments $Server
+    Write-Host 'deployment-info:'
+    Write-Host $view.Info
+    if (-not $view.Names.Count) { Write-Host 'Nenhuma aplicacao registrada neste servidor.'; return $cancelled }
+    Write-Host "1. Undeploy de todas as $($view.Names.Count) aplicacoes listadas | 2. Escolher uma aplicacao | 0. Sair"
+    do {
+        $choice=Read-Host 'Acao (Enter/q sai)'
+        if ($choice -in @('','q','0')) { return $cancelled }
+    } while ($choice -notin @('1','2'))
+    $selected=@($view.Names)
+    if ($choice -eq '2') {
+        for ($i=0;$i -lt $view.Names.Count;$i++) { Write-Host ('{0}. {1}' -f ($i+1),$view.Names[$i]) }
+        do {
+            $choice=Read-Host 'Aplicacao (0/Enter/q sai)'
+            if ($choice -in @('','q','0')) { return $cancelled }
+            $number=0
+            $valid=[int]::TryParse($choice,[ref]$number) -and $number -ge 1 -and $number -le $view.Names.Count
+        } while (-not $valid)
+        $selected=@($view.Names[$number-1])
+    }
+    Write-Host ('Undeploy: '+($selected -join ', '))
+    $result=Invoke-HarnessJbossUndeploy $Server $selected
+    $result | ConvertTo-Json -Depth 6 | Write-Host
+    return $result
+}
+
 function Invoke-HarnessJbossOperation {
-    param($Context,$Server,[ValidateSet('Status','Start','StartDebug','Stop','Restart','RestartDebug')][string]$Action)
+    param($Context,$Server,[ValidateSet('Status','Start','StartDebug','StartAdminOnly','Stop','Restart','RestartDebug')][string]$Action)
     $null=[IO.Directory]::CreateDirectory($Server.State)
     try { $lock=[IO.File]::Open((Join-Path $Server.State 'operation.lock'),'OpenOrCreate','ReadWrite','None') } catch { throw 'Outra operacao JBoss esta em andamento.' }
     # Somente a ultima operacao: cada execucao substitui o resultado anterior.
@@ -109,6 +205,7 @@ function Invoke-HarnessJbossOperation {
             Status { Get-HarnessJbossStatus $Server }
             Start { Start-HarnessJboss $Server $start }
             StartDebug { Start-HarnessJboss $Server $start -DebugMode }
+            StartAdminOnly { Start-HarnessJboss $Server $start -AdminOnly }
             Stop { Stop-HarnessJboss $Server }
             { $_ -in @('Restart','RestartDebug') } {
                 $result.Phase='Stop'
@@ -127,4 +224,4 @@ function Invoke-HarnessJbossOperation {
     }
     [pscustomobject]$result
 }
-Export-ModuleMember -Function Invoke-HarnessJbossDeploy, Invoke-HarnessJbossOperation
+Export-ModuleMember -Function Invoke-HarnessJbossDeploy, Invoke-HarnessJbossOperation, Get-HarnessJbossDeployments, Invoke-HarnessJbossUndeploy, Invoke-HarnessJbossDeploymentMenu

@@ -107,7 +107,7 @@ function Get-HarnessJbossStatus {
     if (-not $listeners.Count) {
         $processes=@(Get-JbossLocalProcesses $Server)
         $state=if ($processes.Count) {'UNREACHABLE'} else {'STOPPED'}
-        return [pscustomobject]@{State=$state; ProcessId=$null; ProcessStartUtc=$null; Identity='UNVERIFIED'; Debug=$false}
+        return [pscustomobject]@{State=$state; ProcessId=$null; ProcessStartUtc=$null; Identity='UNVERIFIED'; Debug=$false; RunningMode=$null}
     }
     $ids=@($listeners.OwningProcess | Select-Object -Unique)
     if ($ids.Count -ne 1) { throw 'Porta de gerenciamento tem identidade ambigua.' }
@@ -122,12 +122,13 @@ function Get-HarnessJbossStatus {
     $javaVersion=Read-JbossValue $Server ':resolve-expression(expression="${java.version}")'
     if ($javaVersion -notmatch '^1\.8\.') { throw 'O servidor selecionado nao esta executando Java 8.' }
     $state=Read-JbossValue $Server ':read-attribute(name=server-state)'
+    $runningMode=Read-JbossValue $Server ':read-attribute(name=running-mode)'
     $debug=@(Get-JbossListener $Server.Settings.debugPort | Where-Object { $_.OwningProcess -eq $ids[0] -and $_.LocalAddress -eq '127.0.0.1' }).Count -gt 0
-    [pscustomobject]@{State=$state.ToUpperInvariant(); ProcessId=[int]$ids[0]; ProcessStartUtc=$processStart; Identity='MATCHED'; Debug=$debug}
+    [pscustomobject]@{State=$state.ToUpperInvariant(); ProcessId=[int]$ids[0]; ProcessStartUtc=$processStart; Identity='MATCHED'; Debug=$debug; RunningMode=$runningMode}
 }
 
 function Start-JbossProcess {
-    param($Server, [string]$Run, [switch]$DebugMode)
+    param($Server, [string]$Run, [switch]$DebugMode, [switch]$AdminOnly)
     $previous=@{}
     try {
         foreach ($name in @('JAVA_HOME','JBOSS_HOME','JBOSS_BASE_DIR','JBOSS_CONFIG_DIR','JBOSS_LOG_DIR','STANDALONE_CONF','DEBUG','DEBUG_PORT','NOPAUSE')) {
@@ -137,6 +138,7 @@ function Start-JbossProcess {
         $env:JAVA_HOME=$Server.Jdk; $env:JBOSS_HOME=$Server.Home; $env:JBOSS_BASE_DIR=$Server.Base; $env:NOPAUSE='true'
         $env:STANDALONE_CONF=Resolve-HarnessJbossJvmConfig $Server.Home $Server.Settings.standaloneConfig $Server.Jdk
         $arguments='""'+(Join-Path $Server.Home 'bin/standalone.bat')+'" "-Djboss.server.base.dir='+$Server.Base+'" -c '+$Server.Settings.standaloneConfig+' -b 127.0.0.1 -bmanagement 127.0.0.1 -Djboss.socket.binding.port-offset='+$Server.Settings.portOffset
+        if ($AdminOnly) { $arguments+=if ($Server.Version -eq '7.0') {' --admin-only'} else {' --start-mode=admin-only'} }
         if ($DebugMode) {
             # O parser Java aceita somente a porta numerica apos --debug.
             # O launcher usa DEBUG_PORT como endereco JDWP, sem repassa-lo ao parser.
@@ -159,14 +161,18 @@ function Start-JbossProcess {
 }
 
 function Start-HarnessJboss {
-    param($Server, [string]$Run, [switch]$DebugMode)
+    param($Server, [string]$Run, [switch]$DebugMode, [switch]$AdminOnly)
+    if ($AdminOnly -and $DebugMode) { throw 'Escolha administracao ou debug.' }
+    $expectedMode=if ($AdminOnly) {'ADMIN_ONLY'} else {'NORMAL'}
     $current=Get-HarnessJbossStatus $Server
     if ($current.State -eq 'RUNNING') {
+        if ($current.RunningMode -ne $expectedMode) { throw 'Servidor ja esta ativo em outro modo. Use restart explicitamente para iniciar as aplicacoes.' }
         if ($DebugMode -and -not $current.Debug) { throw 'Servidor ja esta iniciado sem debug na porta configurada. Use stop e start debug explicitamente.' }
         return $current
     }
     if ($current.State -ne 'STOPPED') { throw 'Servidor existente ainda nao esta pronto; confira o log antes de novo start.' }
-    $ports=@($Server.ManagementPort,$Server.HttpPort)
+    $ports=@($Server.ManagementPort)
+    if (-not $AdminOnly) { $ports+=@($Server.HttpPort) }
     if ($DebugMode) { $ports+=$Server.Settings.debugPort }
     foreach ($port in $ports) { if (@(Get-JbossListener $port).Count) { throw "Porta $port ocupada; nenhum processo iniciado." } }
     $java=Invoke-JbossJava $Server @('-version')
@@ -176,7 +182,7 @@ function Start-HarnessJboss {
         try { Remove-Item -LiteralPath $Run -Recurse -Force } catch { throw "Logs do start anterior em uso; confira se o launcher ainda esta ativo: $Run" }
     }
     $null=[IO.Directory]::CreateDirectory($Run)
-    $launcher=Start-JbossProcess $Server $Run -DebugMode:$DebugMode
+    $launcher=Start-JbossProcess $Server $Run -DebugMode:$DebugMode -AdminOnly:$AdminOnly
     Write-HarnessJson (Join-Path $Run 'process.json') @{ProcessId=$launcher.Id; StartedAtUtc=$launcher.StartTime.ToUniversalTime().ToString('o')}
     $timer=[Diagnostics.Stopwatch]::StartNew(); $lastError=''
     do {
@@ -184,6 +190,7 @@ function Start-HarnessJboss {
         try {
             $current=Get-HarnessJbossStatus $Server
             if ($current.State -eq 'RUNNING') {
+                if ($current.RunningMode -ne $expectedMode) { throw "Servidor iniciou em modo diferente de $expectedMode." }
                 if ($DebugMode -and -not $current.Debug) { throw 'Servidor iniciou mas debug local nao foi confirmado.' }
                 return $current
             }
