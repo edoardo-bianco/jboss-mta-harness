@@ -86,6 +86,11 @@ ser substituidos. Nao peca IDs de execucao ou hashes para localizar trabalho.
 
 ### Operacoes de preparo e ferramentas
 
+Para consultar as funcionalidades disponiveis, use o
+[catalogo de Run Tasks](../../../doc/guias/cheat-sheet-run-tasks.md) e o guia
+vinculado a tarefa. Confira o nome em .vscode/tasks.json quando houver duvida;
+propostas/backlog nao sao operacoes disponiveis. Os menus concentram variantes.
+
 Para primeiro uso/colegas, siga o [roteiro por maquina](../../../doc/guias/tools/workspace.md#preparar-as-maquinas-dos-colegas).
 Cite a secao usada e indique o resultado a conferir; nao reconstrua um guia paralelo.
 Para criar/atualizar fork do harness na conta GitHub da empresa, consulte
@@ -111,10 +116,21 @@ sem presumir continuidade, exame ou aceite no estado novo.
 Para configuracao/migracao JBoss, ha [guia EAP 7.4](../../../doc/guias/tools/migracao-configuracao-jboss.md)
 e [operacao JBoss](../../../doc/guias/tools/jboss.md). Start/deploy nao comprovam
 que a configuracao foi migrada; automacoes de inventario/transformacao do backlog nao estao disponiveis.
+Para consultar/remover deployments ou administrar sem carregar as aplicacoes,
+indique **Servidor: administrar deployments JBoss**, conforme o
+[procedimento](../../../doc/guias/tools/jboss.md#administrar-deployments-sem-iniciar-as-aplicacoes).
+A tarefa escolhe um EAP, mostra deployment-info e oferece undeploy de todos os
+listados, um escolhido ou sair. Se parado, oferece inicio admin-only; se ativo,
+preserva o modo. Mostra a URL da console; sair mantem o servidor como esta.
+Voltar ao modo normal usa a tarefa de reinicio. Nao exigir projeto/MTA para essa
+operacao, nem iniciar/remover aplicacoes pelo helper. Oriente a escolha humana
+e a conferencia do resultado; ADMIN_ONLY nao comprova aplicacoes em execucao.
+Para restart e logs, use **Servidor: reiniciar JBoss** e
+**Servidor: acompanhar logs**, no mesmo guia, sem improvisar outra tarefa.
 Para preparar um template ja adequado ao EAP 7.4, use o
 [roteiro reutilizavel](../../../doc/estrategia-migracao-ambientes-jboss-eap-7.4/jboss-eap7.4-configuracao/README.md).
 Ele concentra scripts versionados, entradas privadas, modulos Maven/locais,
-JVM compartilhada, log Hibernate e patches. Oriente o desenvolvedor a executar;
+JVM global ou associada ao XML/perfil, log Hibernate e patches. Oriente o desenvolvedor a executar;
 nao exija aplicacao/MTA nem exponha valores reais para esse preparo de servidor.
 
 Para Sonar, use o [guia](../../../doc/guias/tools/sonar.md). A tarefa

@@ -116,6 +116,8 @@ opcoes e caminhos de retomada; voce pode entrar na etapa em que esta.
 | Quero navegar nas evidencias | Abra `.harness/indices/projetos.md` e o indice do projeto; [roteiro de navegacao](doc/guias/tools/workspace.md#navegar-pelas-evidencias-do-projeto). |
 | Quero baixar o Sonar da pipeline | Use **Aplicacao: analisar SonarQube > 3 Baixar ultima analise concluida**; [origem e limites](doc/guias/tools/sonar.md#baixar-a-ultima-analise-concluida). |
 | Quero migrar/configurar o JBoss EAP 7.4 | Consulte o [guia de migracao da configuracao](doc/guias/tools/migracao-configuracao-jboss.md) e o [guia de operacao](doc/guias/tools/jboss.md). |
+| Quero administrar o JBoss sem carregar as aplicacoes ou fazer undeploy | Use **Servidor: administrar deployments JBoss**; oferece inicio admin-only se parado, URL da console e remocao de todos/um ou sair. [Procedimento](doc/guias/tools/jboss.md#administrar-deployments-sem-iniciar-as-aplicacoes). |
+| Quero consultar todas as Run Tasks disponiveis | Abra o [cheat sheet](doc/guias/cheat-sheet-run-tasks.md), com as tarefas e os guias correspondentes. |
 | Quero ajuda para retomar | Use `$orientar-migracao` no Codex ou `migracao_helper` no Copilot, conforme o [guia de orientacao](doc/guias/orientacao-migracao.md). |
 
 **O agente de orientacao e opcional e permanece leitor.** Ele confere os arquivos

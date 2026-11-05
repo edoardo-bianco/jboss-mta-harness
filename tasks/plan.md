@@ -34,6 +34,16 @@ Mutacao da condicao de confirmacao foi detectada em copia temporaria separada.
 Diff conferido; nenhum servidor instalado foi acionado. Validacao funcional na
 instalacao do desenvolvedor ainda nao realizada, sem alegar teste real de boot.
 
+Complemento solicitado: alinhar a skill orientar-migracao e os papeis comuns
+dos helpers com a administracao JBoss, preservando orientacao sem execucao.
+Conferir catalogos Markdown/HTML contra tasks.json. A auditoria encontrou tres
+entradas faltantes (restart, logs e criar/revisar issue), alem da contagem antiga.
+Completar as 28 tarefas, atualizar data/README e validar links/adaptadores dos
+tres clientes. Perfis continuam apontando para a mesma skill, sem regras duplicadas.
+Concluido: catalogos com exatamente os 28 nomes de tasks.json e cinco colunas
+por linha HTML; 147 destinos locais validos; Test-ClaudeAdapter PASS em copia
+temporaria; diff sem erros. Complemento somente documental, sem mudanca de runtime.
+
 
 ## Perfis de preparo EAP 7.4 — 03/11/2026
 

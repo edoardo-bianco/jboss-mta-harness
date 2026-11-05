@@ -16,6 +16,15 @@ Test-JbossVersions, Test-JbossAddUser e Test-JbossLogs.
 Runner: tests/Invoke-HarnessTests.ps1; fixtures temporarias removidas. CLI/JBoss
 simulados; nenhum servidor real iniciado e nenhuma aplicacao real removida.
 
+- [x] Auditar skill/helpers e catalogo: nova tarefa ja listada; faltavam restart, logs e criar/revisar issue.
+- [x] Alinhar orientacao comum, papeis de preparo/implementacao e entrada no README.
+- [x] Completar Markdown/HTML com as 28 tarefas e conferir links/adaptadores.
+
+Conferencia PASS: catalogos com os mesmos 28 nomes de tasks.json, sem faltas,
+extras ou duplicacoes; cinco colunas por linha HTML; 147 destinos de links locais;
+Test-ClaudeAdapter pelo runner isolado; git diff --check. Nenhum runtime alterado
+neste complemento documental.
+
 
 ## Perfis de preparo EAP 7.4 — 03/11/2026
 

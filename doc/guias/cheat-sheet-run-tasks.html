@@ -27,10 +27,10 @@
       <div class="crossnote markdown-preview  ">
 
 <h1 id="cheat-sheet-run-tasks-do-harness">Cheat sheet — Run Tasks do harness</h1>
-<p><strong>Data:</strong> 15/10/2026. <strong>Escopo:</strong> operações do harness de migração JBoss.
+<p><strong>Atualizado em:</strong> 05/11/2026. <strong>Escopo:</strong> operações do harness de migração JBoss.
 <strong>Referência operacional:</strong> estado corrente por projeto da <a href="../adr/0009-estado-corrente-por-projeto.md">ADR-0009</a>. Validação técnica registrada no <a href="../../tasks/historico/plan-ate-2026-10-17.md">plano</a>; aceite integrado humano separado.</p>
 <h2 id="consulta-rapida">Consulta rápida</h2>
-<p>A jornada operacional parte da configuração do ambiente, passa pelo diagnóstico e planejamento e chega à implementação, verificação e operação da aplicação. As <strong>25 entradas</strong> de <a href="../../.vscode/tasks.json"><code>.vscode/tasks.json</code></a> oferecem essas ações. A matriz mantém seus nomes operacionais e propõe a organização por domínio/subdomínio. <strong>D</strong> executa uma operação determinística; <strong>P</strong> prepara material para acionamento explícito posterior do agente. Uma tarefa pode combinar P e D em ações diferentes. O acionamento do agente de codificação permanece uma ação explícita do desenvolvedor.</p>
+<p>A jornada operacional parte da configuração do ambiente, passa pelo diagnóstico e planejamento e chega à implementação, verificação e operação da aplicação. As <strong>28 entradas</strong> de <a href="../../.vscode/tasks.json"><code>.vscode/tasks.json</code></a> oferecem essas ações. A matriz mantém seus nomes operacionais e propõe a organização por domínio/subdomínio. <strong>D</strong> executa uma operação determinística; <strong>P</strong> prepara material para acionamento explícito posterior do agente. Uma tarefa pode combinar P e D em ações diferentes. O acionamento do agente de codificação permanece uma ação explícita do desenvolvedor.</p>
 <table>
 <thead>
 <tr>
@@ -73,7 +73,7 @@
 <tr>
 <td><code>Workspace: limpar execucoes</code></td>
 <td>Evidências / retenção</td>
-<td>Limpar resíduos temporários e backups selecionados; preservar trabalho corrente, evidências e origens externas. Descarte legado tem procedimento separado.</td>
+<td>Limpar resíduos temporários e backups selecionados; preservar trabalho corrente, evidências e origens externas.</td>
 <td>D</td>
 <td><a href="../../scripts/limpar-execucoes.ps1">limpar-execucoes.ps1</a></td>
 </tr>
@@ -125,6 +125,13 @@
 <td>Selecionar categoria, projetos e fatia; recriar/progredir/retomar o conjunto corrente; preparar ranking cumulativo e fichas.</td>
 <td>P: <code>priorizar-issues</code></td>
 <td><a href="../../scripts/preparar-priorizacao.ps1">preparar-priorizacao.ps1</a>, <a href="tools/priorizacao-issues.md">guia</a></td>
+</tr>
+<tr>
+<td><code>Planejamento: criar ou revisar issue</code></td>
+<td>Trabalho / investigação</td>
+<td>Selecionar projeto e abrir prompt para investigar/criar/revisar issue com evidências da conversa; preparar não cadastra issue nem executa corretiva.</td>
+<td>P: <code>criar-revisar-issue</code></td>
+<td><a href="../../scripts/preparar-issue.ps1">preparar-issue.ps1</a>, <a href="../../.github/prompts/criar-revisar-issue.prompt.md">contrato</a></td>
 </tr>
 <tr>
 <td><code>Planejamento: planejar</code></td>
@@ -188,6 +195,20 @@
 <td>Escolher inicialização normal ou debug e instalação configurada.</td>
 <td>D</td>
 <td><a href="../../scripts/gerenciar-jboss.ps1">gerenciar-jboss.ps1</a></td>
+</tr>
+<tr>
+<td><code>Servidor: reiniciar JBoss</code></td>
+<td>Plataforma / ciclo do runtime</td>
+<td>Escolher modo normal/debug e EAP ou Todos; confirmar parada antes de iniciar novamente.</td>
+<td>D</td>
+<td><a href="../../scripts/gerenciar-jboss.ps1">gerenciar-jboss.ps1</a>, <a href="tools/jboss.md">JBoss</a></td>
+</tr>
+<tr>
+<td><code>Servidor: acompanhar logs</code></td>
+<td>Plataforma / diagnóstico</td>
+<td>Acompanhar server.log do EAP escolhido ou de ambos; Ctrl+C encerra somente a leitura.</td>
+<td>D</td>
+<td><a href="../../scripts/acompanhar-log-jboss.ps1">acompanhar-log-jboss.ps1</a>, <a href="tools/jboss.md">JBoss</a></td>
 </tr>
 <tr>
 <td><code>Servidor: parar JBoss</code></td>
